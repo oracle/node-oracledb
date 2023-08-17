@@ -103,14 +103,14 @@ describe('282. aq7.js', function() {
       },
     });
 
-    await conn.commit ();
+    await conn.commit();
 
-    const queue2 = await conn.getQueue (objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
-    const msg = await queue2.deqOne ();
-    await conn.commit ();
-    assert.equal (msg.payload.empName, "employee name");
-    assert.equal (msg.payload.empCity, "City");
+    const options = { payloadType: oracledb.DB_TYPE_JSON };
+    const queue2 = await conn.getQueue(objQueueName, options);
+    const msg = await queue2.deqOne();
+    await conn.commit();
+    assert.strictEqual(msg.payload.empName, "employee name");
+    assert.strictEqual(msg.payload.empCity, "City");
   });
 
   it('282.2 JSON type in enqMany/deqMany', async () => {
@@ -127,7 +127,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue4 = await conn.getQueue(objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
+      {payloadType: oracledb.DB_TYPE_JSON});
     Object.assign(queue4.deqOptions,
       {
         //  consumerName: "sub1",
@@ -164,7 +164,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue2 = await conn.getQueue (objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
+      {payloadType: oracledb.DB_TYPE_JSON});
     const msg = await queue2.deqOne ();
     await conn.commit ();
     assert.equal (msg.payload.empName, "employee name");
@@ -188,7 +188,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue2 = await conn.getQueue (objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
+      {payloadType: oracledb.DB_TYPE_JSON});
     const msg = await queue2.deqOne ();
     await conn.commit ();
     assert.equal (msg.payload.empName, null);
@@ -207,7 +207,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue2 = await conn.getQueue (objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
+      {payloadType: oracledb.DB_TYPE_JSON});
     const msg = await queue2.deqOne ();
     await conn.commit ();
     assert.deepEqual (msg.payload.employees, [ "Employee1", "Employee2", "Employee3" ]);
@@ -227,7 +227,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue4 = await conn.getQueue(objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
+      {payloadType: oracledb.DB_TYPE_JSON});
     Object.assign(queue4.deqOptions,
       {
         navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
@@ -254,7 +254,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue2 = await conn.getQueue (objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
+      {payloadType: oracledb.DB_TYPE_JSON});
     const msg = await queue2.deqOne ();
     await conn.commit ();
     assert.deepEqual (msg.payload.employee, { "name":"Employee1", "age":30, "city":"New City" });
@@ -274,7 +274,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue4 = await conn.getQueue(objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON});
+      {payloadType: oracledb.DB_TYPE_JSON});
     Object.assign(queue4.deqOptions,
       {
         navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
@@ -307,7 +307,7 @@ describe('282. aq7.js', function() {
     await conn.commit ();
 
     const queue2 = await conn.getQueue (objQueueName,
-        {payloadType: oracledb.DB_TYPE_JSON });
+      {payloadType: oracledb.DB_TYPE_JSON });
     const msg = await queue2.deqOne ();
     await conn.commit ();
 
