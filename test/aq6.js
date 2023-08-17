@@ -171,7 +171,7 @@ describe('281. aq6.js', function() {
     it('281.2.1 enqOne and deqOne Json val as array type', async function() {
       let msg;
       const queue = await conn.getQueue (objQueueName,
-        { payloadType: "JSON" }
+        { payloadType: oracledb.DB_TYPE_JSON }
       );
 
       msg = await queue.enqOne ({
@@ -181,7 +181,8 @@ describe('281. aq6.js', function() {
       await conn.commit ();
 
       /*Dequeue*/
-      const queue2 = await conn.getQueue (objQueueName, {payloadType: "JSON" });
+      const queue2 = await conn.getQueue (objQueueName,
+          {payloadType: oracledb.DB_TYPE_JSON});
       msg = await queue2.deqOne ();
       assert(msg);
       assert(msg.msgId.length > 0);
@@ -191,7 +192,7 @@ describe('281. aq6.js', function() {
 
     it('281.2.2 JSON type in enqMany/deqMany', async () => {
       const queue3 = await conn.getQueue (objQueueName,
-        { payloadType: "JSON" });
+        { payloadType: oracledb.DB_TYPE_JSON });
 
       const empList = [
         {payload: { empName: "Employee #1", empId: 101 }},
@@ -202,7 +203,8 @@ describe('281. aq6.js', function() {
       await queue3.enqMany (empList);
       await conn.commit ();
 
-      const queue4 = await conn.getQueue(objQueueName, {payloadType: "JSON"});
+      const queue4 = await conn.getQueue(objQueueName,
+          {payloadType: oracledb.DB_TYPE_JSON});
       Object.assign(queue4.deqOptions,
         {
           navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
