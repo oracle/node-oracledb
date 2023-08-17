@@ -47,6 +47,8 @@ static NJS_ASYNC_METHOD(njsAqQueue_enqOneAsync);
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsAqQueue_deqManyPostAsync);
 static NJS_ASYNC_POST_METHOD(njsAqQueue_deqOnePostAsync);
+static NJS_ASYNC_POST_METHOD(njsAqQueue_enqManyPostAsync);
+static NJS_ASYNC_POST_METHOD(njsAqQueue_enqOnePostAsync);
 
 // finalize
 static NJS_NAPI_FINALIZE(njsAqQueue_finalize);
@@ -465,7 +467,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_enqMany, 1, NULL)
             return false;
     }
     return njsBaton_queueWork(baton, env, "EnqMany", njsAqQueue_enqManyAsync,
-            NULL, returnValue);
+            njsAqQueue_enqManyPostAsync, returnValue);
 }
 
 
@@ -486,6 +488,31 @@ static bool njsAqQueue_enqManyAsync(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
+// njsAqQueue_enqManyPostAsync()
+//   returns the value to JS.
+//
+//-----------------------------------------------------------------------------
+static bool njsAqQueue_enqManyPostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    njsAqQueue *queue = (njsAqQueue*) baton->callingInstance;
+    napi_value temp;
+    uint32_t i;
+
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env, baton->numMsgProps,
+            result))
+    for (i = 0; i < baton->numMsgProps; i++) {
+        if (!njsAqMessage_createFromHandle(baton, baton->msgProps[i], env,
+                queue, &temp))
+            return false;
+        baton->msgProps[i] = NULL;
+        NJS_CHECK_NAPI(env, napi_set_element(env, *result, i, temp))
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsAqQueue_enqOne()
 //   Enqueue a message into an AQ queue.
 //
@@ -500,7 +527,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_enqOne, 1, NULL)
             &baton->dpiMsgPropsHandle))
         return false;
     return njsBaton_queueWork(baton, env, "EnqOne", njsAqQueue_enqOneAsync,
-            NULL, returnValue);
+            njsAqQueue_enqOnePostAsync, returnValue);
 }
 
 
@@ -518,6 +545,22 @@ static bool njsAqQueue_enqOneAsync(njsBaton *baton)
     return true;
 }
 
+
+
+//-----------------------------------------------------------------------------
+// njsAqQueue_enqOnePostAsync()
+//   Defines the value returned to JS.
+//-----------------------------------------------------------------------------
+static bool njsAqQueue_enqOnePostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    njsAqQueue *queue = (njsAqQueue*)baton->callingInstance;
+    if (!njsAqMessage_createFromHandle(baton, baton->dpiMsgPropsHandle,
+             env, queue, result))
+        return false;
+    baton->dpiMsgPropsHandle = NULL;
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 // njsAqQueue_finalize()
