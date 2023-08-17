@@ -5284,8 +5284,204 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         268.3.6 executing a stored function with only one args
     268.4 calling functions without any arguments
         268.4.1 executing a stored function without any argument
- 269. Pool Timeout
-     269.1 poolTimeout as 0, no idle connection removals
-     269.2 poolTimeout as 1sec, idle connection will get removed
-     269.3 poolTimeout as 1sec and min connection defined, idle connection will be removed
-     269.4 check default poolTimeout as 60sec
+269. Pool Timeout
+    269.1 poolTimeout as 0, no idle connection removals
+    269.2 poolTimeout as 1sec, idle connection will get removed
+    269.3 poolTimeout as 1sec and min connection defined, idle connection will be removed
+    269.4 check default poolTimeout as 60sec
+
+270. binding_buffer_string.js
+    270.1 BLOB, PLSQL, BIND_IN
+        270.1.1 works with buffer
+
+271. fetchTypeHandler.js
+    271.1 Property value check
+    271.2 invalid syntax for "type" should result in error
+    271.3 value attribute "type" must be a valid database type
+    271.4 attribute "converter" must be a function
+    271.5 FetchTypeHandler return value attribute "converter" must be a function
+    271.6 fetchTypeHandler return value must be an object
+    271.7 Not supported database type conversion
+    271.8 Fetch number as string
+    271.9 Fetch DATE column values as STRING by Column name
+    271.10 fetchTypeHandler will take precedence over fetchInfo
+    271.11 fetchInfo will take precedence over fetchTypeHandler when "undefined" returned
+    271.12 Fetch DATE, NUMBER column values STRING by Column name
+    271.13 Fetch DATE, NUMBER column as STRING by type and override at execute time
+    271.14 Fetch DATE, NUMBER column as STRING by type with converter
+    271.15 Negative cases
+    271.16 Padding numeric values with leading zeroes
+    271.17 converting dates to use the requested locale specific format
+    271.18 getting JSON data
+    271.19 large numbers with fetchTypeHandler
+    271.20 setting a private property in the metadata
+    271.21 fetchTypeHandler for nulls with converter function
+    271.22 converter function to convert column val to string
+    271.23 converter function with multiple columns
+
+272. jsonDualityView1.js
+    272.1 JSON Relational Duality View
+        272.1.1 fetch results
+        272.1.2 update query
+        272.1.3 insert query
+        272.1.4 delete query
+        272.1.5 dept view
+        272.1.6 insert query
+        272.1.7 update query
+        272.1.8 delete query
+        272.1.9 Insert query
+        272.1.10 Update query
+    272.2 run with DV using GraphQL
+        272.2.1 insert query
+        272.2.2 update query
+        272.2.3 insert query
+        272.2.4 delete query
+        272.2.5 Primary key to FOREIGN key
+        272.2.6 Insert query
+        272.2.7 Update query
+        272.2.8 Delete query
+    272.3 DDL tests with GRAPHQL for JSON Duality Views 
+        272.3.1 Insert query
+        272.3.2 View Name as graphql
+        272.3.3 Create view with @ directive
+        272.3.4 Create view using @unnest case 1
+        272.3.5 Create view using @unnest case 2
+        272.3.6 Create view Primary key to Foreign key
+        272.3.7 Create view Foreign key to Primary key
+        272.3.8 Create view with View Name as Mixed Case and Special Case
+            272.3.8.1 single quotes for key names are not supported 
+            272.3.8.2 single quotes for key names are not supported 
+            272.3.8.3 Create view with View Name as Special Case 
+            272.3.8.3 case 3 
+            272.3.8.4 single quotes for key names are not supported 
+        272.3.9 View Name with Maximum possible string and maximum possible string +1 (128bytes)
+            272.3.9.1 case 1
+            272.3.9.2 case 2 
+        272.3.10 View creation inside a PLSQL Block 
+            272.3.10.1 Query with DBMS_SQL
+            272.3.10.2 Query with EXECUTE IMMEDIATE
+        272.3.11 Create view without privilege 
+            272.3.11.1 Query with test1 user
+            272.3.11.2 Query with test2 user
+
+273. jsonDualityView2.js
+    273.1 without base table being available (use force option at view creation)
+    273.2 Base table name with various sizes (128)
+    273.3 Perform dbms_metadata.get_ddl() and verify tags were properly added to columns and tables
+    273.4 Base table name maxSize+1
+    273.5 Create a column name as NOINSERT and add NOINSERT tag to that column
+    273.6 Specify DELETE, NODELETE both, BUG number : 34657745
+    273.7 Repetitive tags
+    273.3 Verify view creation on different types of tables
+        273.3.1 View with Heap
+        273.3.2 View with IOT
+        273.3.3 View with Partitioned
+        273.3.4 View with cluster
+        273.3.5 View with GTT
+    273.4 Table and Views
+        273.4.1 Base table in one schema and View in another schema
+        273.4.2 Base table as schema_name__table_name
+        273.4.3 Base table with Unique Index on it
+        273.4.4 Base table with COMPOSITE Index on it
+        273.4.5 Base table with Function based index on it
+        273.4.6 Base table with bitmap index index on it
+    273.5 With Redaction on base tables
+        273.5.1 redaction enabled on a base table
+
+274 jsonDualityView3.js
+    274.1 Define Columns of View with WITH READ WRITE or WITH READ ONLY annotations
+    274.2 Create View on Virtual columns, UNUSED columns
+    274.3 Have columns of all scalar types, including FLOAT, TIMESTAMP, TIMESTAMP WITH TIME ZONE
+    274.4 Create a view with column as schema_name.table_name.column_name
+    274.5 Select over Invisible columns
+    274.6 Add is (Ex: "deptno" IS d.department_id)
+    274.7 Add VISIBLE | INVISIBLE options to define columns in view
+    274.8 Create view on NULL columns empty columns
+
+275. jsonDualityView4.js
+    275.1 Test create table, Column defaults
+    275.2 Test with Table and column constraints
+    275.3 Test with Virtual columns
+    275.4 Test with Column storage clause
+    275.5 Test with data dictonary
+    275.6 Test with dictionary views
+    275.7 Json Duality view with GraphQL
+        275.7.1 Create View using GraphQL
+    275.8 Test with different datatypes
+        275.8.1 Abstract datatype
+        275.8.2 XML datatype
+        275.8.3 JSON datatype
+        275.8.4 varray
+    275.9 Test with different types of indexes
+        275.9.1 Bitmap join index
+        275.9.2 Partitioned index
+    275.10 Tests with Attributes like COMPRESS, NOCOMPRESS, PARALLEL
+        275.10.1 COMPRESS
+        275.10.2 NOCOMPRESS
+        275.10.3 PARALLEL
+    275.11 Tests with Views
+        275.11.1 Object view
+
+276. jsonDualityView5.js
+    276.1 Insert data in table and views
+    276.2 test with Tags in column level
+
+277. jsonDualityView6.js
+    277.1 With tables and without constraints relationship
+        277.1.1 Insert data in table and views
+        277.1.2 Sanity DMLs
+        277.1.3 With Invalid tags
+    277.1.2 Queries(SNT,SNT+where clause)
+        277.1.2.1 With SNT
+        277.1.2.2 SNT+where clause)
+    277.2 PK PK FK
+        277.2.1 Insert data in table and views
+        277.2.2 Sanity DMLs
+        277.2.3 with different keywords
+
+278. Pool expansion
+    278.1 pool expansion when new connection created and within pool max limit
+    278.2 pool expansion when new connection created and exceeding pool max limit
+    278.3 pool expansion not done on creating minimum connection
+    278.4 no pool expansion while acquiring connection already present in pool
+
+279. Pool Shrinkage
+    279.1 pool shrinkage during connection acquire always maintain min connection in pool
+    279.2 pool shrinkage during connection acquire when poolTimeout greater than 0
+    279.3 pool shrinkage during connection release when poolTimeout greater than 0
+    279.4 pool shrinkage during connection release will wait for pool timeout time before emitting events
+    279.5 pool shrinkage during connection release will wait for pool timeout time before emitting events while maintaining min connection
+    279.6 pool shrinkage during connection release will not happen when poolTimeout equals to 0
+    279.7 pool shrinkage will not happen when poolTimeout is 0
+
+280. pipelinedTables.js
+    280.1 Creating and Invoking Pipelined Table Function
+    280.2 Invoking Pipelined Table Function with invalid syntax
+    280.3 Invoking normal Table followed by Pipelined table
+    280.4 Pipelined Table Functions with types
+    280.5 Parallel Enabled Pipelined Table Functions
+
+281. aq6.js
+    281.1 msgId in QUEUE_PAYLOAD_TYPE as ‘RAW’
+        281.1.1 msgId in enqOne/deqOne
+        281.1.2 msgId in enqMany/deqMany
+    281.2 msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’
+        281.2.1 enqOne and deqOne Json val as array type
+        281.2.2 JSON type in enqMany/deqMany
+    281.3 msgId as Oracle Database Object AQ Messages
+        281.3.1 msgId in enqOne/deqOne
+        281.3.2 msgId in deqMany() with DB object array
+
+282. aq7.js
+    282.1 JSON type in enqOne/deqOne
+    282.2 JSON type in enqMany/deqMany
+    282.3 Map javascript object directly into JSON
+    282.4 Boolean and null value
+    282.5 enqOne and deqOne Json val as array type
+    282.6 enqMany() with Json val as array type
+    282.7 enqOne and deqOne Json val as object type
+    282.8 enqMany() with Json val as object type
+    282.9 enqOne and deqOne CLOB value into a JSON key
+
+283.aq5.js
+    283.1 subscribe dequeue messages
