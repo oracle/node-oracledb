@@ -52,8 +52,8 @@ function generateRandomPassword(length) {
 describe('160. editionTest.js', function() {
 
   let dbaConn;
-  let nodbSchemaEditionPassword = generateRandomPassword(6);
-  let editionList = [];
+  const nodbSchemaEditionPassword = generateRandomPassword(6);
+  const editionList = [];
 
   const getEdition = async function(connection) {
     const sql = "begin nodb_proc_edition(:out); end;";
@@ -66,7 +66,7 @@ describe('160. editionTest.js', function() {
 
     let isRunnable = Boolean(!oracledb.thin && dbConfig.test.DBA_PRIVILEGE);
     if (isRunnable) {
-      let connection = await oracledb.getConnection(dbConfig);
+      const connection = await oracledb.getConnection(dbConfig);
       if (connection.oracleServerVersion < 1202000100) {
         isRunnable = false;
       }
@@ -119,7 +119,7 @@ describe('160. editionTest.js', function() {
     await dbaConn.execute(sql);
 
     sql = `SELECT EDITION_NAME, PARENT_EDITION_NAME FROM ALL_EDITIONS`;
-    let result = await dbaConn.execute(sql);
+    const result = await dbaConn.execute(sql);
     if (result && result.rows) {
       let parentEdition = "ORA$BASE";
       for (let i = 1; i < result.rows.length; i++) {

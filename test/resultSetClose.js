@@ -40,8 +40,8 @@ describe('53. resultSetClose.js', function() {
 
   let connection = null;
   let resultSet  = null;
-  let tableName  = "nodb_number";
-  let numbers    = assist.data.numbers;
+  const tableName  = "nodb_number";
+  const numbers    = assist.data.numbers;
 
   before(async function() {
 
@@ -49,7 +49,7 @@ describe('53. resultSetClose.js', function() {
 
     await assist.setUp(connection, tableName, numbers);
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       `SELECT * FROM ` + tableName + ` ORDER BY num`,
       [],
       { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -57,7 +57,7 @@ describe('53. resultSetClose.js', function() {
     resultSet = result.resultSet;
 
     assert(resultSet.metaData);
-    let t = resultSet.metaData;
+    const t = resultSet.metaData;
     assert.strictEqual(t[0].name, 'NUM');
     assert.strictEqual(t[1].name, 'CONTENT');
 
@@ -94,7 +94,7 @@ describe('53. resultSetClose.js', function() {
   }); // 53.3
 
   it('53.4 can not call getRows()', async function() {
-    let numRows = 3;
+    const numRows = 3;
     await assert.rejects(
       async () => {
         await resultSet.getRows(numRows);
@@ -115,21 +115,21 @@ describe('53. resultSetClose.js', function() {
   it('53.6 can call getRow() again in the callback of getRow()', async function() {
 
     let rs2   = null;
-    let tab   = "nodb_float";
+    const tab   = "nodb_float";
 
     await assist.setUp(connection, tab, numbers);
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       `SELECT * FROM ` + tab + ` ORDER BY num`,
       [],
       { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
 
     rs2 = result.resultSet;
 
-    let row = await rs2.getRow();
+    const row = await rs2.getRow();
     assert(row);
 
-    let row2 = await rs2.getRow();
+    const row2 = await rs2.getRow();
     assert(row2);
 
     await rs2.close();

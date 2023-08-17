@@ -59,7 +59,7 @@ describe('218. aq2.js', function() {
     } else {
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
 
-      let credential = {
+      const credential = {
         user:          AQ_USER,
         password:      AQ_USER_PWD,
         connectString: dbConfig.connectString
@@ -278,7 +278,7 @@ describe('218. aq2.js', function() {
       objQueueName,
       { payloadType: objType }
     );
-    let msgArray = [];
+    const msgArray = [];
     for (let i = 0; i < addrArray.length; i++) {
       msgArray[i] = new queue1.payloadTypeClass(addrArray[i]);
     }
@@ -305,9 +305,9 @@ describe('218. aq2.js', function() {
       objQueueName,
       { payloadType: objType }
     );
-    let msgArray = [];
+    const msgArray = [];
     for (let i = 0; i < addrArray.length; i++) {
-      let msg = new queue1.payloadTypeClass(addrArray[i]);
+      const msg = new queue1.payloadTypeClass(addrArray[i]);
       msgArray[i] = { payload: msg };
     }
     await queue1.enqMany(msgArray);
@@ -333,9 +333,9 @@ describe('218. aq2.js', function() {
       objQueueName,
       { payloadType: objType }
     );
-    let msgArray = [];
+    const msgArray = [];
     for (let i = 0; i < addrArray.length; i++) {
-      let msg = addrArray[i];
+      const msg = addrArray[i];
       msgArray[i] = { payload: msg };
     }
     await queue1.enqMany(msgArray);

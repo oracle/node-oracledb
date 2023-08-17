@@ -42,13 +42,13 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 
-let inFileName = 'test/fuzzydinosaur.jpg';  // contains the image to be inserted
-let outFileName = 'test/blobstreamout.jpg';
+const inFileName = 'test/fuzzydinosaur.jpg';  // contains the image to be inserted
+const outFileName = 'test/blobstreamout.jpg';
 
 describe('41. dataTypeBlob.js', function() {
 
   let connection = null;
-  let tableName = "nodb_myblobs";
+  const tableName = "nodb_myblobs";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -77,7 +77,7 @@ describe('41. dataTypeBlob.js', function() {
       assert.strictEqual(result.rowsAffected, 1);
       assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-      let inStream = await fs.createReadStream(inFileName);
+      const inStream = await fs.createReadStream(inFileName);
 
       let lob = result.outBinds.lobbv[0];
       await new Promise((resolve, reject) => {
@@ -125,7 +125,7 @@ describe('41. dataTypeBlob.js', function() {
       assert.strictEqual(result.rowsAffected, 1);
       assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-      let inStream = fs.createReadStream(inFileName);
+      const inStream = fs.createReadStream(inFileName);
       let lob = result.outBinds.lobbv[0];
 
       await new Promise((resolve, reject) => {

@@ -86,8 +86,8 @@ describe('181. dataTypeXML.js', function() {
     const conn = await oracledb.getConnection(dbConfig);
 
     sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
-    let bindValues = { id: testRowID, bv: testXMLData };
-    let result = await conn.execute(sql, bindValues);
+    const bindValues = { id: testRowID, bv: testXMLData };
+    const result = await conn.execute(sql, bindValues);
     assert.strictEqual(result.rowsAffected, 1);
 
     await conn.commit();
@@ -97,7 +97,7 @@ describe('181. dataTypeXML.js', function() {
 
   after('drop table', async () => {
     const connection = await oracledb.getConnection(dbConfig);
-    let sql = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName + "'; " +
+    const sql = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName + "'; " +
               "EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;";
     await connection.execute(sql);
     await connection.commit();
@@ -106,10 +106,10 @@ describe('181. dataTypeXML.js', function() {
 
   it('181.1 basic case, insert XML data and query back', async () => {
     const conn = await oracledb.getConnection(dbConfig);
-    let sql = "select content from " + tableName + " where num = :id";
-    let bindVar = { id: testRowID };
-    let options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
-    let result = await conn.execute(sql, bindVar, options);
+    const sql = "select content from " + tableName + " where num = :id";
+    const bindVar = { id: testRowID };
+    const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const result = await conn.execute(sql, bindVar, options);
     assert.strictEqual(result.rows[0].CONTENT, testXMLData);
     await conn.close();
   }); // 181.1
@@ -117,13 +117,13 @@ describe('181. dataTypeXML.js', function() {
   it('181.2 query XML data as CLOB', async () => {
     const conn = await oracledb.getConnection(dbConfig);
 
-    let sql = "select xmltype.getclobval(content) as mycontent from " + tableName + " where num = :id";
-    let bindVar = { id: testRowID };
-    let options = {
+    const sql = "select xmltype.getclobval(content) as mycontent from " + tableName + " where num = :id";
+    const bindVar = { id: testRowID };
+    const options = {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: { "MYCONTENT": { type: oracledb.STRING } }
     };
-    let result = await conn.execute(sql, bindVar, options);
+    const result = await conn.execute(sql, bindVar, options);
     assert.strictEqual(result.rows[0].MYCONTENT, testXMLData);
 
     await conn.close();
@@ -136,25 +136,25 @@ describe('181. dataTypeXML.js', function() {
       this.skip();
     }
 
-    let sql = "select extract(content, '/').getclobval() as mycontent " +
+    const sql = "select extract(content, '/').getclobval() as mycontent " +
               "from " + tableName + " where num = :id";
-    let bindVar = { id: testRowID };
-    let options = {
+    const bindVar = { id: testRowID };
+    const options = {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: { "MYCONTENT": { type: oracledb.STRING } }
     };
-    let result = await conn.execute(sql, bindVar, options);
+    const result = await conn.execute(sql, bindVar, options);
     assert.strictEqual(result.rows[0].MYCONTENT, testXMLData);
     await conn.close();
   }); // 181.3
 
   it('181.4 Negative - try to insert Null', async () => {
-    let ID = 20;
-    let XML = '';
+    const ID = 20;
+    const XML = '';
     const conn = await oracledb.getConnection(dbConfig);
 
-    let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
-    let bindValues = { id: ID, bv: XML };
+    const sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
+    const bindValues = { id: ID, bv: XML };
 
     if (conn.oracleServerVersion < 1200000000) {
       await assert.rejects(
@@ -177,21 +177,21 @@ describe('181. dataTypeXML.js', function() {
   // ORA-19011: Character string buffer too small
   it.skip('181.5 inserts data that larger than 4K', async () => {
 
-    let ID = 50;
-    let str = 'a'.repeat(31 * 1024);
-    let head = '<data>', tail = '</data>\n';
-    let xml = head.concat(str).concat(tail);
+    const ID = 50;
+    const str = 'a'.repeat(31 * 1024);
+    const head = '<data>', tail = '</data>\n';
+    const xml = head.concat(str).concat(tail);
 
     const conn = await oracledb.getConnection(dbConfig);
 
     let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
-    let bindValues = { id: ID, bv: xml };
+    const bindValues = { id: ID, bv: xml };
     let result = await conn.execute(sql, bindValues);
     assert.strictEqual(result.rowsAffected, 1);
 
     sql = "select content from " + tableName + " where num = :id";
-    let bindVar = { id: ID };
-    let options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const bindVar = { id: ID };
+    const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
     result = await conn.execute(sql, bindVar, options);
     assert.strictEqual(result.rows[0].CONTENT, xml);
     await conn.commit();

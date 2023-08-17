@@ -41,7 +41,7 @@ describe('167. soda3.js', () => {
 
   let isRunnable;
   let conn, sd, t_collections;
-  let t_collectionNames = [
+  const t_collectionNames = [
     "chris_1", "chris_2", "chris_3", "chris_4",
     "changjie_1", "changjie_2", "Changjie_3", "Changjie_4",
     "venkat_1", "venkat_2", "venkat_3", "venkat_4"
@@ -106,7 +106,7 @@ describe('167. soda3.js', () => {
   });
 
   it('167.5 getCollectionNames() - limit is null', async () => {
-    let options = { limit: null };
+    const options = { limit: null };
     await assert.rejects(
       async () => await sd.getCollectionNames(options),
       /NJS-007: invalid value for "limit" in parameter 1/

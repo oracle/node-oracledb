@@ -103,7 +103,7 @@ describe("149. fetchArraySize2.js", function() {
     const basicFetch = async function(fetchArraySizeVal, maxRowsVal, affectedID) {
       oracledb.fetchArraySize = fetchArraySizeVal;
       oracledb.maxRows = maxRowsVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT * FROM " + tableName + " WHERE id > " + affectedID + " ORDER BY id"
       );
       let resultLenExpected = maxRowsVal > (tableSize - affectedID) ? (tableSize - affectedID) : maxRowsVal;
@@ -113,7 +113,7 @@ describe("149. fetchArraySize2.js", function() {
     };
 
     const verifyResult = function(result, affectedID) {
-      for (let element of result) {
+      for (const element of result) {
         const index = result.indexOf(element) + 1 + affectedID;
         assert.strictEqual(element[1], String(index));
         assert.strictEqual(element[0], index);
@@ -247,7 +247,7 @@ describe("149. fetchArraySize2.js", function() {
       await connection.execute(create_ref);
 
       oracledb.fetchArraySize = fetchArraySizeVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         exec_ref,
         [
           { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -261,7 +261,7 @@ describe("149. fetchArraySize2.js", function() {
     };
 
     async function fetchRowsFromRS(rs, numRowsVal, rowCount) {
-      let rows = await rs.getRows(numRowsVal);
+      const rows = await rs.getRows(numRowsVal);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
           assert(rows.length <= numRowsVal);

@@ -736,7 +736,7 @@ async function dropTable() {
         connectString : dbConfig.connectString,
         privilege     : oracledb.SYSDBA,
       };
-      let conn = await oracledb.getConnection(connectionDetails);
+      const conn = await oracledb.getConnection(connectionDetails);
       await conn.execute(sql);
       await conn.close();
     }
@@ -808,7 +808,7 @@ async function dropTable() {
       });
       let conn = await pool.getConnection({tag: tag1});
       const sql = `select unique 'alter system kill session '''||sid||','||serial#||'''' from v$session_connect_info where sid = sys_context('USERENV', 'SID')`;
-      let res = await conn.execute(sql);
+      const res = await conn.execute(sql);
       await conn.close();
       await dropUserSession(res.rows[0][0]);
       resetTag();

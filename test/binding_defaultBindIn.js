@@ -72,15 +72,15 @@ describe('100.binding_defaultBindIn.js', function() {
   };
 
   const inBind1 = async function(table_name, proc_name, dbColType, bindVar) {
-    let createTable = await sql.createTable(table_name, dbColType);
-    let drop_table = "DROP TABLE " + table_name + " PURGE";
-    let proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (inValue IN " + dbColType + ")\n" +
+    const createTable = await sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (inValue IN " + dbColType + ")\n" +
                "AS \n" +
                "BEGIN \n" +
                "    insert into " + table_name + " ( content ) values (inValue); \n" +
                "END " + proc_name + "; ";
-    let sqlRun = "BEGIN " + proc_name + " (:c); END;";
-    let proc_drop = "DROP PROCEDURE " + proc_name;
+    const sqlRun = "BEGIN " + proc_name + " (:c); END;";
+    const proc_drop = "DROP PROCEDURE " + proc_name;
     await connection.execute(createTable);
     await connection.execute(proc);
 
@@ -97,9 +97,9 @@ describe('100.binding_defaultBindIn.js', function() {
   };
 
   const inBind2 = async function(table_name, fun_name, dbColType, bindVar) {
-    let createTable = await sql.createTable(table_name, dbColType);
-    let drop_table = "DROP TABLE " + table_name + " PURGE";
-    let proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN " + dbColType + ") RETURN NUMBER\n" +
+    const createTable = await sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN " + dbColType + ") RETURN NUMBER\n" +
                "IS \n" +
                "    tmpvar NUMBER; \n" +
                "BEGIN \n" +
@@ -107,8 +107,8 @@ describe('100.binding_defaultBindIn.js', function() {
                "    select id into tmpvar from " + table_name + " where id = ID; \n" +
                "    RETURN tmpvar; \n" +
                "END ; ";
-    let sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
-    let proc_drop = "DROP FUNCTION " + fun_name;
+    const sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
+    const proc_drop = "DROP FUNCTION " + fun_name;
 
     await connection.execute(createTable);
     await connection.execute(proc);
@@ -125,7 +125,7 @@ describe('100.binding_defaultBindIn.js', function() {
     await connection.execute(drop_table);
   };
 
-  let compareErrMsg = function(element, err) {
+  const compareErrMsg = function(element, err) {
     if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_12'

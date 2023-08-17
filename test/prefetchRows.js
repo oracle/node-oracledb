@@ -355,7 +355,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      let result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 0 });
+      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 0 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -369,7 +369,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      let result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 12 });
+      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 12 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -383,7 +383,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      let result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 13 });
+      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 13 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -397,7 +397,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      let result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 2 });
+      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 2 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -411,7 +411,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      let result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 2 });
+      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 2 });
       await result.resultSet.getRows(12);
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
@@ -426,7 +426,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      let result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 100 });
+      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 100 });
       await result.resultSet.getRows(13);
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -440,7 +440,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      let result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 100 });
+      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 100 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 

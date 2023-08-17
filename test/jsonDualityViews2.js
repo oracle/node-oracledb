@@ -93,7 +93,7 @@ describe('273. jsonDualityView2.js', function() {
 
     // commit the transaction
     await connection.execute(`COMMIT`);
-    let result = await connection.execute(`select * from student order by 1`);
+    const result = await connection.execute(`select * from student order by 1`);
 
     assert.strictEqual(result.rows.length, 3);
     await connection.execute(`drop table student PURGE`);
@@ -166,7 +166,7 @@ describe('273. jsonDualityView2.js', function() {
                               AS
                               student @noupdate
                             {stuid, NOINSERT }`);
-    let result = await connection.execute(`select * from student order by 1`);
+    const result = await connection.execute(`select * from student order by 1`);
     assert.strictEqual(result.rows.length, 3);
     await connection.execute(`drop table student PURGE`);
   });

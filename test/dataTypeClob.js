@@ -44,13 +44,13 @@ const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 const testsUtil = require('./testsUtil.js');
 
-let inFileName = 'test/clobexample.txt';  // the file with text to be inserted into the database
-let outFileName = 'test/clobstreamout.txt'; // output file with the stream out data
+const inFileName = 'test/clobexample.txt';  // the file with text to be inserted into the database
+const outFileName = 'test/clobstreamout.txt'; // output file with the stream out data
 
 describe('40. dataTypeClob.js', function() {
 
   let connection = null;
-  let tableName = "nodb_myclobs";
+  const tableName = "nodb_myclobs";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -79,7 +79,7 @@ describe('40. dataTypeClob.js', function() {
       assert.strictEqual(result.rowsAffected, 1);
       assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-      let inStream = await fs.createReadStream(inFileName);
+      const inStream = await fs.createReadStream(inFileName);
       let lob = result.outBinds.lobbv[0];
 
       await new Promise((resolve, reject) => {
@@ -121,7 +121,7 @@ describe('40. dataTypeClob.js', function() {
         { n: 1 },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-      let row = result.rows[0];
+      const row = result.rows[0];
       lob = row['CONTENT'];
       clob = await lob.getData();
       assert.strictEqual(data, clob);
@@ -141,7 +141,7 @@ describe('40. dataTypeClob.js', function() {
       assert.strictEqual(result.rowsAffected, 1);
       assert.strictEqual(result.outBinds.lobbv.length, 1);
 
-      let inStream = await fs.createReadStream(inFileName);
+      const inStream = await fs.createReadStream(inFileName);
       let lob = result.outBinds.lobbv[0];
 
       await new Promise((resolve, reject) => {

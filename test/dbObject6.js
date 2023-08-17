@@ -48,7 +48,7 @@ describe('205. dbObject6.js', () => {
       this.skip();
     }
 
-    let sql =
+    const sql =
       `CREATE TABLE ${TABLE} (
         id NUMBER(9) NOT NULL,
         geometry MDSYS.SDO_GEOMETRY NOT NULL
@@ -90,7 +90,7 @@ describe('205. dbObject6.js', () => {
 
     // Insert Method 1: pass a JavaScript object to the constructor.
     let sql = `INSERT INTO ${TABLE} (id, geometry) VALUES (:id, :g)`;
-    let binds = [];
+    const binds = [];
     binds[0] = {id: ++initialID, g: geometry1};
     await conn.execute(sql, binds[0]);
 
@@ -140,7 +140,7 @@ describe('205. dbObject6.js', () => {
 
     // Fetch the objects back
     sql = `SELECT id, geometry FROM ${TABLE}`;
-    let result = await conn.execute(sql);
+    const result = await conn.execute(sql);
 
     for (let i = 0; i < result.rows.length; i++) {
       assert.strictEqual(result.rows[i][0], (i + 1));

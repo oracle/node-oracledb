@@ -39,7 +39,7 @@ const testsUtil = require('./testsUtil.js');
 describe('281. optimisticLock.js', function() {
 
   let isRunnable = false;
-  let TABLE = 'my_table';
+  const TABLE = 'my_table';
 
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
@@ -57,7 +57,7 @@ describe('281. optimisticLock.js', function() {
 
     before(async function() {
       connection = await oracledb.getConnection(dbConfig);
-      let sql = `CREATE TABLE ${TABLE} (
+      const sql = `CREATE TABLE ${TABLE} (
         id NUMBER(10) PRIMARY KEY,
         value VARCHAR2(100),
         version NUMBER(10)
@@ -367,7 +367,7 @@ describe('281. optimisticLock.js', function() {
         const queryUpdate = `update emp_ov set data = '{"EMPLOYEE_ID":100,"FIRST_NAME":"Lex","LAST_NAME":"De Haan",
         "VERSION": ` + workerId + `,"department_info":{"DEPARTMENT_ID":10,"departmentname":"newdept"}}'
                       where json_value(data,'$.EMPLOYEE_ID') = 100`;
-        let result = await connection.execute(queryUpdate);
+        const result = await connection.execute(queryUpdate);
         assert.strictEqual(result.rowsAffected, 1);
       }
 
@@ -383,7 +383,7 @@ describe('281. optimisticLock.js', function() {
 
       // Verify that the final value of the row is the expected value
       const query = `select * from emp_ov order by 1`;
-      let result = await connection.execute(query);
+      const result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].VERSION, workerCount);
     });
 
@@ -416,7 +416,7 @@ describe('281. optimisticLock.js', function() {
         const queryInsert = `insert into emp_ov values ('{"EMPLOYEE_ID":` + 100 + workerId + `,"FIRST_NAME":"Lex",
         "LAST_NAME":"De Haan","VERSION": ` + workerId + `,"department_info":{"DEPARTMENT_ID":10,"departmentname":"Administration"}}')`;
 
-        let result = await connection.execute(queryInsert, {}, { autoCommit: false });
+        const result = await connection.execute(queryInsert, {}, { autoCommit: false });
         assert.strictEqual(result.rowsAffected, 1);
       }
 
@@ -425,7 +425,7 @@ describe('281. optimisticLock.js', function() {
         const queryUpdate = `update emp_ov set data = '{"EMPLOYEE_ID":100,"FIRST_NAME":"Harry","LAST_NAME":"Potter",
         "VERSION": ` + workerId + `,"department_info":{"DEPARTMENT_ID":10,"departmentname":"Wizardry"}}'
                       where json_value(data,'$.EMPLOYEE_ID') = 100`;
-        let result = await connection.execute(queryUpdate);
+        const result = await connection.execute(queryUpdate);
         assert.strictEqual(result.rowsAffected, 1);
         await connection.commit();
       }
@@ -440,7 +440,7 @@ describe('281. optimisticLock.js', function() {
 
       // Verify that the final value of the row is the expected value
       const query = `select * from emp_ov order by 1`;
-      let result = await connection.execute(query);
+      const result = await connection.execute(query);
 
       assert.strictEqual(result.rows.length, 2);
       assert.strictEqual(result.rows[0][0].VERSION, 2);

@@ -43,14 +43,14 @@ describe('229. dbType03.js', () => {
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
 
-    let sql = `create table ${TABLE} (id number,
+    const sql = `create table ${TABLE} (id number,
       bf binary_float, bd binary_double)`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
     await conn.execute(plsql);
   });
 
   after(async () => {
-    let sql = `drop table ${TABLE} purge`;
+    const sql = `drop table ${TABLE} purge`;
     await conn.execute(sql);
     await conn.close();
   });
@@ -63,7 +63,7 @@ describe('229. dbType03.js', () => {
   it('229.1 IN binds binary_float and binary_double', async () => {
     const NUM = 1;
     let sql = `insert into ${TABLE} values (:1, :2, :3)`;
-    let binds = [
+    const binds = [
       NUM,
       { val: 1.23, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { val: 3.45678, type: oracledb.DB_TYPE_BINARY_DOUBLE }
@@ -87,16 +87,16 @@ describe('229. dbType03.js', () => {
     const NUM = 2;
     const num1 = 2.345;
     const num2 = 9876.54321;
-    let sql = `insert into ${TABLE} values (:1, :2, :3)
+    const sql = `insert into ${TABLE} values (:1, :2, :3)
     returning bf, bd into :4, :5`;
-    let binds = [
+    const binds = [
       NUM,
       { val: num1, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { val: num2, type: oracledb.DB_TYPE_BINARY_DOUBLE },
       { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
     ];
-    let result = await conn.execute(sql, binds);
+    const result = await conn.execute(sql, binds);
     assert.strictEqual(1, result.rowsAffected);
 
     let nearlyEqual = false;
@@ -110,7 +110,7 @@ describe('229. dbType03.js', () => {
   it('229.3 IN bind Infinity number', async () => {
     const NUM = 3;
     let sql = `insert into ${TABLE} values (:1, :2, :3)`;
-    let binds = [
+    const binds = [
       NUM,
       { val: Infinity, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { val: -Infinity, type: oracledb.DB_TYPE_BINARY_DOUBLE }
@@ -128,16 +128,16 @@ describe('229. dbType03.js', () => {
   it('229.4 OUT bind Infinity number', async () => {
     const NUM = 4;
 
-    let sql = `insert into ${TABLE} values (:1, :2, :3)
+    const sql = `insert into ${TABLE} values (:1, :2, :3)
     returning bf, bd into :4, :5`;
-    let binds = [
+    const binds = [
       NUM,
       { val: -Infinity, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { val: Infinity, type: oracledb.DB_TYPE_BINARY_DOUBLE },
       { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
     ];
-    let result = await conn.execute(sql, binds);
+    const result = await conn.execute(sql, binds);
     assert.strictEqual(1, result.rowsAffected);
 
     assert.strictEqual(-Infinity, result.outBinds[0][0]);
@@ -147,7 +147,7 @@ describe('229. dbType03.js', () => {
   it('229.5 IN bind NaN', async () => {
     const NUM = 5;
     let sql = `insert into ${TABLE} values (:1, :2, :3)`;
-    let binds = [
+    const binds = [
       NUM,
       { val: NaN, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { val: NaN, type: oracledb.DB_TYPE_BINARY_DOUBLE }
@@ -165,16 +165,16 @@ describe('229. dbType03.js', () => {
   it('229.6 OUT bind NaN', async () => {
     const NUM = 6;
 
-    let sql = `insert into ${TABLE} values (:1, :2, :3)
+    const sql = `insert into ${TABLE} values (:1, :2, :3)
     returning bf, bd into :4, :5`;
-    let binds = [
+    const binds = [
       NUM,
       { val: NaN, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { val: NaN, type: oracledb.DB_TYPE_BINARY_DOUBLE },
       { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_FLOAT },
       { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BINARY_DOUBLE }
     ];
-    let result = await conn.execute(sql, binds);
+    const result = await conn.execute(sql, binds);
     assert.strictEqual(1, result.rowsAffected);
     assert.strictEqual(result.outBinds[0][0], NaN);
     assert.strictEqual(result.outBinds[1][0], NaN);

@@ -53,7 +53,7 @@ describe('4. binding.js', function() {
     });
 
     it('4.1.1 VARCHAR2 binding, Object & Array formats', async function() {
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc1 (p_out OUT VARCHAR2) \
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc1 (p_out OUT VARCHAR2) \
                       AS \
                       BEGIN \
                         p_out := 'abcdef'; \
@@ -80,7 +80,7 @@ describe('4. binding.js', function() {
     });
 
     it('4.1.2 NUMBER binding, Object & Array formats', async function() {
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc2 (p_out OUT NUMBER) \
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc2 (p_out OUT NUMBER) \
                       AS \
                       BEGIN \
                         p_out := 10010; \
@@ -105,7 +105,7 @@ describe('4. binding.js', function() {
 
     it('4.1.3 Multiple binding values, Object & Array formats', async function() {
 
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc3 (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc3 (p_in IN VARCHAR2, p_inout IN OUT VARCHAR2, p_out OUT NUMBER) \
                         AS \
                       BEGIN \
                         p_inout := p_in || ' ' || p_inout; \
@@ -136,7 +136,7 @@ describe('4. binding.js', function() {
 
     it('4.1.4 Multiple binding values, Change binding order', async function() {
 
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc4 (p_inout IN OUT VARCHAR2, p_out OUT NUMBER, p_in IN VARCHAR2) \
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc4 (p_inout IN OUT VARCHAR2, p_out OUT NUMBER, p_in IN VARCHAR2) \
                         AS \
                       BEGIN \
                         p_inout := p_in || ' ' || p_inout; \
@@ -167,8 +167,8 @@ describe('4. binding.js', function() {
     it('4.1.5 default bind type - STRING', async function() {
       const sql = "begin :n := 1001; end;";
       const bindVar = { n : { dir: oracledb.BIND_OUT } };
-      let options = { };
-      let result = await connection.execute(sql, bindVar, options);
+      const options = { };
+      const result = await connection.execute(sql, bindVar, options);
       assert.strictEqual(typeof (result.outBinds.n), "string");
       assert.strictEqual(result.outBinds.n, '1001');
     });
@@ -177,7 +177,7 @@ describe('4. binding.js', function() {
 
   describe('4.2 mixing named with positional binding', function() {
     let connection = null;
-    let createTable =
+    const createTable =
       "BEGIN \
           DECLARE \
               e_table_missing EXCEPTION; \
@@ -195,10 +195,10 @@ describe('4. binding.js', function() {
               ) \
           '); \
       END; ";
-    let insert = 'insert into nodb_binding1 (id, name) values (:0, :1) returning id into :2';
-    let param1 = [ 1, 'changjie', { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
-    let param2 = [ 2, 'changjie', { ignored_name: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } } ];
-    let options = { autoCommit: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const insert = 'insert into nodb_binding1 (id, name) values (:0, :1) returning id into :2';
+    const param1 = [ 1, 'changjie', { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
+    const param2 = [ 2, 'changjie', { ignored_name: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } } ];
+    const options = { autoCommit: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
 
     beforeEach(async function() {
       connection = await oracledb.getConnection(dbConfig);
@@ -229,7 +229,7 @@ describe('4. binding.js', function() {
         /NJS-044:/
       );
 
-      let res = await connection.execute("SELECT * FROM nodb_binding1 ORDER BY id", [], options);
+      const res = await connection.execute("SELECT * FROM nodb_binding1 ORDER BY id", [], options);
       assert.deepStrictEqual(res.rows, []);
 
     });
@@ -279,7 +279,7 @@ describe('4. binding.js', function() {
         {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)returning ( id * 2 )into :3', rowsAffected: 1, resultVal:[[2]]}
       ];
       for (const sqlObj of sqlStrings) {
-        let result = await connection.execute(sqlObj.sql, bindsOutNumber);
+        const result = await connection.execute(sqlObj.sql, bindsOutNumber);
         assert.strictEqual(result.rowsAffected, sqlObj.rowsAffected);
         for (let i = 0; i < sqlObj.resultVal.length; i++) {
           assert.deepStrictEqual(result.outBinds[i], sqlObj.resultVal[i]);
@@ -410,24 +410,24 @@ describe('4. binding.js', function() {
       await connection.close();
     });
 
-    let insert1 = 'insert into nodb_binding2 (num, str, dt) values (:0, :1, :2)';
-    let insert2 = 'insert into nodb_binding2 (num, str, dt) values (:0, :1, :2) returning num into :3';
-    let param1 = { 0: 123, 1: 'str', 2: new Date() };
-    let param2 = { 0: 123, 1: 'str', 2: new Date(), 3: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } };
-    let param3 = [ 123, 'str', new Date() ];
-    let param4 = [ 123, 'str', new Date(), { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
+    const insert1 = 'insert into nodb_binding2 (num, str, dt) values (:0, :1, :2)';
+    const insert2 = 'insert into nodb_binding2 (num, str, dt) values (:0, :1, :2) returning num into :3';
+    const param1 = { 0: 123, 1: 'str', 2: new Date() };
+    const param2 = { 0: 123, 1: 'str', 2: new Date(), 3: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } };
+    const param3 = [ 123, 'str', new Date() ];
+    const param4 = [ 123, 'str', new Date(), { type: oracledb.NUMBER, dir: oracledb.BIND_OUT } ];
 
-    let options = { autoCommit: true };
+    const options = { autoCommit: true };
 
     it('4.3.1 passes in object syntax without returning into', async function() {
-      let result = await connection.execute(insert1, param1, options);
+      const result = await connection.execute(insert1, param1, options);
       assert.strictEqual(result.rowsAffected, 1);
       await connection.execute("SELECT * FROM nodb_binding2 ORDER BY num", [], options);
     });
 
     it('4.3.2 passes in object syntax with returning into', async function() {
 
-      let result = await connection.execute(insert2, param2, options);
+      const result = await connection.execute(insert2, param2, options);
       assert.strictEqual(result.rowsAffected, 1);
       //console.log(result);
       assert.deepStrictEqual(result.outBinds, { '3': [123] });
@@ -436,14 +436,14 @@ describe('4. binding.js', function() {
     });
 
     it('4.3.3 passes in array syntax without returning into', async function() {
-      let result = await connection.execute(insert1, param3, options);
+      const result = await connection.execute(insert1, param3, options);
       assert.strictEqual(result.rowsAffected, 1);
       await connection.execute("SELECT * FROM nodb_binding2 ORDER BY num", [], options);
 
     });
 
     it('4.3.4 should pass but fail in array syntax with returning into', async function() {
-      let result = await connection.execute(insert2, param4, options);
+      const result = await connection.execute(insert2, param4, options);
       assert.strictEqual(result.rowsAffected, 1);
       // console.log(result);
       assert.deepStrictEqual(result.outBinds[0], [123]);
@@ -465,7 +465,7 @@ describe('4. binding.js', function() {
 
     it('4.4.1 outBind & maxSize restriction', async function() {
 
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc4 (p_out OUT VARCHAR2) \
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_bindproc4 (p_out OUT VARCHAR2) \
                       AS \
                       BEGIN \
                         p_out := 'ABCDEF GHIJK LMNOP QRSTU'; \
@@ -485,7 +485,7 @@ describe('4. binding.js', function() {
     });
 
     it('4.4.2 default value is 200', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         "BEGIN :o := lpad('A', 200, 'x'); END;",
         { o: { type: oracledb.STRING, dir: oracledb.BIND_OUT } },
       );
@@ -522,7 +522,7 @@ describe('4. binding.js', function() {
 
   describe('4.5 The default direction for binding is BIND_IN', function() {
     let connection = null;
-    let tableName = "nodb_raw";
+    const tableName = "nodb_raw";
 
     before(async function() {
       connection = await oracledb.getConnection(dbConfig);
@@ -654,7 +654,7 @@ describe('4. binding.js', function() {
 
     it('4.8.1 binding out in Object & Array formats', async function() {
 
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_binddate1 ( \n" +
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_binddate1 ( \n" +
                      "    p_out1 OUT DATE, \n" +
                      "    p_out2 OUT DATE \n" +
                      ") \n" +
@@ -693,7 +693,7 @@ describe('4. binding.js', function() {
 
     it('4.8.2 BIND_IN', async function() {
 
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_binddate2 ( \n" +
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_binddate2 ( \n" +
                      "    p_in IN DATE, \n" +
                      "    p_out OUT DATE \n" +
                      ") \n" +
@@ -717,7 +717,7 @@ describe('4. binding.js', function() {
 
     it('4.8.3 BIND_INOUT', async function() {
 
-      let proc = "CREATE OR REPLACE PROCEDURE nodb_binddate3 ( \n" +
+      const proc = "CREATE OR REPLACE PROCEDURE nodb_binddate3 ( \n" +
                      "    p_inout IN OUT DATE \n" +
                      ") \n" +
                      "AS \n" +
@@ -804,7 +804,7 @@ describe('4. binding.js', function() {
   describe('4.11 PL/SQL block with null Binds', function() {
 
     let connection = null;
-    let createTable =
+    const createTable =
       "BEGIN \n"
          + "DECLARE \n"
          +    " e_table_missing EXCEPTION; \n"
@@ -879,7 +879,7 @@ describe('4. binding.js', function() {
     const TABLE = 'testTable';
     before(async function() {
       connection = await oracledb.getConnection(dbConfig);
-      let sql = `CREATE TABLE ${TABLE} ( \
+      const sql = `CREATE TABLE ${TABLE} ( \
             id NUMBER(4),  \
             name VARCHAR2(400) \
           )`;
@@ -1018,7 +1018,7 @@ describe('4. binding.js', function() {
         bindDefs: binds
       };
 
-      let bulkValues = [];
+      const bulkValues = [];
       for (let i = 0; i < rowCnt; i++) {
         bulkValues.push(params);
       }
@@ -1038,7 +1038,7 @@ describe('4. binding.js', function() {
       let bindstring = ':1';
       let retClause = 'returning F1';
       let intoClause = ` INTO :${colCnt + 1}`;
-      let bindDefsIn = [bindsInNumber];
+      const bindDefsIn = [bindsInNumber];
       const bindDefsOut = [bindsOutNumber];
       const lastOutBindNum = 2 * colCnt;
 
@@ -1057,11 +1057,11 @@ describe('4. binding.js', function() {
       const options = {
         bindDefs: binds
       };
-      let bulkValues = [];
+      const bulkValues = [];
       for (let i = 0; i < rowCnt; i++) {
         bulkValues.push(values);
       }
-      let insertSql = ` insert into ${tableNameBinds} values(` + bindstring + `) ` + retClause;
+      const insertSql = ` insert into ${tableNameBinds} values(` + bindstring + `) ` + retClause;
       const result = await connection.executeMany(insertSql, bulkValues, options);
 
       const outBinds = result.outBinds;
@@ -1100,11 +1100,11 @@ describe('4. binding.js', function() {
       const options = {
         bindDefs: binds
       };
-      let bulkValues = [];
+      const bulkValues = [];
       for (let i = 0; i < rowCnt; i++) {
         bulkValues.push(values);
       }
-      let insertSql = ` insert into ${tableNameBinds} values(` + bindstring + `) ` + retClause;
+      const insertSql = ` insert into ${tableNameBinds} values(` + bindstring + `) ` + retClause;
       const result = await connection.executeMany(insertSql, bulkValues, options);
 
       const outBinds = result.outBinds;

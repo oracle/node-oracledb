@@ -54,7 +54,7 @@ async function testConnection(description, additionalOptions = {}) {
  */
 async function cmanTdmCheck() {
   const connection = await oracledb.getConnection(dbConfig);
-  let result = await connection.execute(`select sys_context('USERENV','PROXY_USER') from dual`);
+  const result = await connection.execute(`select sys_context('USERENV','PROXY_USER') from dual`);
   if (!process.env.NODE_ORACLEDB_PROXY_SESSION_USER && result.rows[0][0] != null) {
     dbConfig.test.isCmanTdm = true;
   }
@@ -65,7 +65,7 @@ async function cloudServiceCheck() {
   const connection = await oracledb.getConnection(dbConfig);
   // 'userenv' parameter is only available from Oracle DB 18c & later versions
   if (connection.oracleServerVersion >= 1800000000) {
-    let result = await connection.execute("select \
+    const result = await connection.execute("select \
      sys_context('userenv', 'cloud_service') from dual");
     if (result.rows[0][0]) {
       dbConfig.test.isCloudService = true;

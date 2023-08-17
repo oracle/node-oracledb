@@ -37,7 +37,7 @@ const dbConfig = require('./dbconfig.js');
 
 describe('247. dupColNames2.js', function() {
   let connection = null;
-  let outFormatBak = oracledb.outFormat;
+  const outFormatBak = oracledb.outFormat;
   const tableNameDept = "nodb_dupDepartment";
   const tableNameEmp = "nodb_dupEmployee";
   const create_table_sql = `

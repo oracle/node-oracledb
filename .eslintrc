@@ -13,6 +13,7 @@
             }
         ],
         no-trailing-spaces: "error",
+        "prefer-const": "error",
         "space-before-function-paren": [
             "error", {
                 "anonymous": "never",

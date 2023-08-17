@@ -98,7 +98,7 @@ describe('85. fetchClobAsString2.js', function() {
   };
 
   const updateClobTable1 = async function(id, content) {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "UPDATE nodb_clob1 set C = :C where ID = :ID",
       { ID: id, C: content }
     );
@@ -107,8 +107,8 @@ describe('85. fetchClobAsString2.js', function() {
 
   // compare fetch result (two strings)
   const compareStrings = function(resultVal, specialStr, content, contentLength) {
-    let specialStrLen = specialStr.length;
-    let resultLen = resultVal.length;
+    const specialStrLen = specialStr.length;
+    const resultLen = resultVal.length;
     assert.strictEqual(resultLen, contentLength);
     assert.strictEqual(resultVal.substring(0, specialStrLen), specialStr);
     assert.strictEqual(resultVal.substring(resultLen - specialStrLen, resultLen), specialStr);
@@ -128,14 +128,14 @@ describe('85. fetchClobAsString2.js', function() {
     const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0][1];
+      const resultVal = result.rows[0][1];
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -144,96 +144,96 @@ describe('85. fetchClobAsString2.js', function() {
     };
 
     it('85.1.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content, null);
     }); // 85.1.1
 
     it('85.1.2 works with empty String', async function() {
-      let id = insertID++;
-      let content = "";
+      const id = insertID++;
+      const content = "";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.1.2
 
     it('85.1.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.3';
-      let contentLength = 20;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.3';
+      const contentLength = 20;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.1.3
 
     it('85.1.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.4';
-      let contentLength = 65535;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.4';
+      const contentLength = 65535;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.1.4
 
     it('85.1.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.5';
-      let contentLength = 65537;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.5';
+      const contentLength = 65537;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.1.5
 
     it('85.1.6 works with (1MB + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.6';
-      let contentLength = 1048577; // 1MB + 1
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.6';
+      const contentLength = 1048577; // 1MB + 1
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.1.6
 
     it('85.1.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
           fetchInfo : { C1 : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0][0];
+      const resultVal = result.rows[0][0];
       compareStrings(resultVal, specialStr, content, specialStrLength);
     }); // 85.1.7
 
     it('85.1.8 works with EMPTY_CLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_CLOB";
+      const id = insertID++;
+      const content = "EMPTY_CLOB";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.1.8
 
     it('85.1.9 fetch multiple CLOB rows as String', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.1.9_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.1.9_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id_1 = insertID++;
+      const specialStr_1 = '85.1.9_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.1.9_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -247,14 +247,14 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.1.9
 
     it('85.1.10 fetch the same CLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.10';
-      let contentLength = 200;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.10';
+      const contentLength = 200;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -270,44 +270,44 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.1.10
 
     it('85.1.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '85.1.11_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let specialStr_2 = '85.1.11_2';
-      let contentLength_2 = 208;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id = insertID++;
+      const specialStr_1 = '85.1.11_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const specialStr_2 = '85.1.11_2';
+      const contentLength_2 = 208;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
       await updateClobTable1(id, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
         { },
         {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0][1];
+      const resultVal = result.rows[0][1];
       compareStrings(resultVal, specialStr_2, content_2, contentLength_2);
     }); // 85.1.11
 
     it('85.1.12 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.1.12_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.1.12_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.1.12_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.1.12_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -315,27 +315,27 @@ describe('85. fetchClobAsString2.js', function() {
         }
       );
       assert.strictEqual(result.rows.length, 1);
-      let resultVal = result.rows[0][1];
+      const resultVal = result.rows[0][1];
       compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
       oracledb.maxRows = maxRowsBak;
     }); // 85.1.12
 
     it('85.1.13 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.1.13_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.1.13_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.1.13_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.1.13_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -351,15 +351,15 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.1.13
 
     it('85.1.14 works with connection.queryStream()', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.14';
-      let contentLength = 200;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.14';
+      const contentLength = 200;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
-      let sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
-      let stream = connection.queryStream(sql, {}, { fetchInfo : { C : { type : oracledb.STRING } } });
+      const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
+      const stream = connection.queryStream(sql, {}, { fetchInfo : { C : { type : oracledb.STRING } } });
       let counter = 0;
       await new Promise((resolve, reject) => {
         stream.on('error', reject);
@@ -376,15 +376,15 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.1.14
 
     it('85.1.15 works with connection.queryStream() and oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.1.15_1';
-      let contentLength_1 = 26;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.1.15_2';
-      let contentLength_2 = 30;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.1.15_1';
+      const contentLength_1 = 26;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.1.15_2';
+      const contentLength_2 = 30;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 20;
 
       await insertIntoClobTable1(id_1, content_1);
@@ -412,15 +412,15 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.1.15
 
     it('85.1.16 works with connection.queryStream() and oracledb.maxRows = actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.1.16_1';
-      let contentLength_1 = 26;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.1.16_2';
-      let contentLength_2 = 30;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.1.16_1';
+      const contentLength_1 = 26;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.1.16_2';
+      const contentLength_2 = 30;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 2;
 
       await insertIntoClobTable1(id_1, content_1);
@@ -449,15 +449,15 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.1.16
 
     it('85.1.17 works with connection.queryStream() and oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.1.17_1';
-      let contentLength_1 = 26;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.1.17_2';
-      let contentLength_2 = 30;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.1.17_1';
+      const contentLength_1 = 26;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.1.17_2';
+      const contentLength_2 = 30;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoClobTable1(id_1, content_1);
@@ -485,10 +485,10 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.1.17
 
     it('85.1.18 works with REF CURSOR', async function() {
-      let id = insertID++;
-      let specialStr = '85.1.18';
-      let contentLength = 26;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.1.18';
+      const contentLength = 26;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
@@ -499,17 +499,17 @@ describe('85. fetchClobAsString2.js', function() {
                          "        SELECT C from nodb_clob1 WHERE ID = " + id + "; \n" +
                          "END;";
       await connection.execute(ref_proc);
-      let sql = "BEGIN nodb_ref(:c); END;";
-      let bindVar = {
+      const sql = "BEGIN nodb_ref(:c); END;";
+      const bindVar = {
         c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      let result = await connection.execute(
+      const result = await connection.execute(
         sql,
         bindVar,
         { fetchInfo : { C : { type : oracledb.STRING } } }
       );
-      let rows = await result.outBinds.c.getRows(3);
-      let resultVal = rows[0][0];
+      const rows = await result.outBinds.c.getRows(3);
+      const resultVal = rows[0][0];
       assert.strictEqual(typeof resultVal, 'string');
       compareStrings(resultVal, specialStr, content, contentLength);
       await result.outBinds.c.close();
@@ -531,9 +531,9 @@ describe('85. fetchClobAsString2.js', function() {
     }); // after
 
     insertID = 0;
-    let insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
+    const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
@@ -541,7 +541,7 @@ describe('85. fetchClobAsString2.js', function() {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0].C;
+      const resultVal = result.rows[0].C;
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -550,65 +550,65 @@ describe('85. fetchClobAsString2.js', function() {
     };
 
     it('85.2.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content, null);
     }); // 85.2.1
 
     it('85.2.2 works with empty buffer', async function() {
-      let id = insertID++;
-      let content = "";
+      const id = insertID++;
+      const content = "";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.2.2
 
     it('85.2.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '85.2.3';
-      let contentLength = 20;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.2.3';
+      const contentLength = 20;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.2.3
 
     it('85.2.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.2.4';
-      let contentLength = 65535;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.2.4';
+      const contentLength = 65535;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.2.4
 
     it('85.2.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.2.5';
-      let contentLength = 65537;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.2.5';
+      const contentLength = 65537;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.2.5
 
     it('85.2.6 works with (1MB + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.2.6';
-      let contentLength = 1048577; // 1MB + 1
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.2.6';
+      const contentLength = 1048577; // 1MB + 1
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.2.6
 
     it('85.2.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '85.2.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.2.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
@@ -616,31 +616,31 @@ describe('85. fetchClobAsString2.js', function() {
           fetchInfo : { C1 : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0].C1;
+      const resultVal = result.rows[0].C1;
       compareStrings(resultVal, specialStr, specialStr, specialStrLength);
     }); // 85.2.7
 
     it('85.2.8 works with EMPTY_CLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_CLOB";
+      const id = insertID++;
+      const content = "EMPTY_CLOB";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.2.8
 
     it('85.2.9 fetch multiple CLOB rows as String', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.2.9_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.2.9_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id_1 = insertID++;
+      const specialStr_1 = '85.2.9_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.2.9_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -655,14 +655,14 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.2.9
 
     it('85.2.10 fetch the same CLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '85.2.10';
-      let contentLength = 200;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.2.10';
+      const contentLength = 200;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -679,18 +679,18 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.2.10
 
     it('85.2.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '85.2.11_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let specialStr_2 = '85.2.11_2';
-      let contentLength_2 = 202;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id = insertID++;
+      const specialStr_1 = '85.2.11_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const specialStr_2 = '85.2.11_2';
+      const contentLength_2 = 202;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
       await updateClobTable1(id, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -698,26 +698,26 @@ describe('85. fetchClobAsString2.js', function() {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0].C;
+      const resultVal = result.rows[0].C;
       compareStrings(resultVal, specialStr_2, content_2, contentLength_2);
     }); // 85.2.11
 
     it('85.2.12 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.2.12_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.2.12_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.2.12_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.2.12_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -726,27 +726,27 @@ describe('85. fetchClobAsString2.js', function() {
         }
       );
       assert.strictEqual(result.rows.length, 1);
-      let resultVal = result.rows[0].C;
+      const resultVal = result.rows[0].C;
       compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
       oracledb.maxRows = maxRowsBak;
     }); // 85.2.12
 
     it('85.2.13 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.2.13_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.2.13_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.2.13_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.2.13_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -763,13 +763,13 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.2.13
 
     it('85.2.14 works with REF CURSOR', async function() {
-      let id = insertID++;
-      let specialStr = '85.2.14';
-      let contentLength = 26;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.2.14';
+      const contentLength = 26;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
-      let ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
+      const ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
                       "AS \n" +
                       "BEGIN \n" +
                       "    OPEN clob_cursor FOR \n" +
@@ -777,11 +777,11 @@ describe('85. fetchClobAsString2.js', function() {
                       "END;";
       await connection.execute(ref_proc);
 
-      let sql = "BEGIN nodb_ref(:c); END;";
-      let bindVar = {
+      const sql = "BEGIN nodb_ref(:c); END;";
+      const bindVar = {
         c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      let result = await connection.execute(
+      const result = await connection.execute(
         sql,
         bindVar,
         {
@@ -789,8 +789,8 @@ describe('85. fetchClobAsString2.js', function() {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let rows = await result.outBinds.c.getRows(3);
-      let resultVal = rows[0].C;
+      const rows = await result.outBinds.c.getRows(3);
+      const resultVal = rows[0].C;
       assert.strictEqual(typeof resultVal, 'string');
       compareStrings(resultVal, specialStr, content, contentLength);
       await result.outBinds.c.close();
@@ -809,9 +809,9 @@ describe('85. fetchClobAsString2.js', function() {
     }); // after
 
     insertID = 0;
-    let insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
+    const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
@@ -820,8 +820,8 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
-      let resultVal = row.C;
+      const row = await result.resultSet.getRow();
+      const resultVal = row.C;
 
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
@@ -832,64 +832,64 @@ describe('85. fetchClobAsString2.js', function() {
     };
 
     it('85.3.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content, null);
     }); // 85.3.1
 
     it('85.3.2 works with empty buffer', async function() {
-      let id = insertID++;
-      let content = "";
+      const id = insertID++;
+      const content = "";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.3.2
 
     it('85.3.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '85.3.3';
-      let contentLength = 20;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.3.3';
+      const contentLength = 20;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.3.3
 
     it('85.3.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.3.4';
-      let contentLength = 65535;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.3.4';
+      const contentLength = 65535;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.3.4
 
     it('85.3.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.3.4';
-      let contentLength = 65537;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.3.4';
+      const contentLength = 65537;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.3.5
 
     it('85.3.6 works with (1MB + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.3.6';
-      let contentLength = 1048577; // 1MB + 1
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.3.6';
+      const contentLength = 1048577; // 1MB + 1
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.3.6
 
     it('85.3.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '85.3.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.3.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
@@ -898,33 +898,33 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
-      let resultVal = row.C1;
+      const row = await result.resultSet.getRow();
+      const resultVal = row.C1;
       compareStrings(resultVal, specialStr, specialStr, specialStrLength);
       await result.resultSet.close();
     }); // 85.3.7
 
     it('85.3.8 works with EMPTY_CLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_CLOB";
+      const id = insertID++;
+      const content = "EMPTY_CLOB";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.3.8
 
     it('85.3.9 fetch multiple CLOB rows as String', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.3.9_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.3.9_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id_1 = insertID++;
+      const specialStr_1 = '85.3.9_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.3.9_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -934,8 +934,8 @@ describe('85. fetchClobAsString2.js', function() {
         }
       );
 
-      let rowNumFetched = 2;
-      let row = await result.resultSet.getRows(rowNumFetched);
+      const rowNumFetched = 2;
+      const row = await result.resultSet.getRows(rowNumFetched);
       let resultVal = row[0].C;
       compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
       resultVal = row[1].C;
@@ -944,14 +944,14 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.3.9
 
     it('85.3.10 fetch the same CLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '85.3.10';
-      let contentLength = 200;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.3.10';
+      const contentLength = 200;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -962,7 +962,7 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
+      const row = await result.resultSet.getRow();
       let resultVal = row.C1;
       compareStrings(resultVal, specialStr, content, contentLength);
       resultVal = row.C2;
@@ -971,18 +971,18 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.3.10
 
     it('85.3.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '85.3.11_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let specialStr_2 = '85.3.11_2';
-      let contentLength_2 = 202;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id = insertID++;
+      const specialStr_1 = '85.3.11_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const specialStr_2 = '85.3.11_2';
+      const contentLength_2 = 202;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
       await updateClobTable1(id, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -991,28 +991,28 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
-      let resultVal = row.C;
+      const row = await result.resultSet.getRow();
+      const resultVal = row.C;
       compareStrings(resultVal, specialStr_2, content_2, contentLength_2);
       await result.resultSet.close();
     }); // 85.3.11
 
     it('85.3.12 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.3.12_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.3.12_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.3.12_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.3.12_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1021,8 +1021,8 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let rowNumFetched = 2;
-      let row = await result.resultSet.getRows(rowNumFetched);
+      const rowNumFetched = 2;
+      const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
       let resultVal = row[0].C;
       compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
@@ -1033,20 +1033,20 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.3.12
 
     it('85.3.13 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.3.13_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.3.13_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.3.13_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.3.13_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1056,8 +1056,8 @@ describe('85. fetchClobAsString2.js', function() {
         }
       );
 
-      let rowNumFetched = 2;
-      let row = await result.resultSet.getRows(rowNumFetched);
+      const rowNumFetched = 2;
+      const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
       let resultVal = row[0].C;
       compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
@@ -1080,9 +1080,9 @@ describe('85. fetchClobAsString2.js', function() {
     }); // after
 
     insertID = 0;
-    let insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
+    const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
@@ -1090,7 +1090,7 @@ describe('85. fetchClobAsString2.js', function() {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0][1];
+      const resultVal = result.rows[0][1];
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -1099,95 +1099,95 @@ describe('85. fetchClobAsString2.js', function() {
     };
 
     it('85.4.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content, null);
     }); // 85.4.1
 
     it('85.4.2 works with empty String', async function() {
-      let id = insertID++;
-      let content = "";
+      const id = insertID++;
+      const content = "";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.4.2
 
     it('85.4.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '85.4.3';
-      let contentLength = 20;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.4.3';
+      const contentLength = 20;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.4.3
 
     it('85.4.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.4.4';
-      let contentLength = 65535;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.4.4';
+      const contentLength = 65535;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.4.4
 
     it('85.4.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.4.5';
-      let contentLength = 65537;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.4.5';
+      const contentLength = 65537;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.4.5
 
     it('85.4.6 works with (1MB + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.4.6';
-      let contentLength = 1048577; // 1MB + 1
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.4.6';
+      const contentLength = 1048577; // 1MB + 1
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.4.6
 
     it('85.4.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '85.4.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.4.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
           fetchInfo : { C1 : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0][0];
+      const resultVal = result.rows[0][0];
       compareStrings(resultVal, specialStr, specialStr, specialStrLength);
     }); // 85.4.7
 
     it('85.4.8 works with EMPTY_CLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_CLOB";
+      const id = insertID++;
+      const content = "EMPTY_CLOB";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.4.8
 
     it('85.4.9 fetch multiple CLOB rows as String', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.4.9_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.4.9_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id_1 = insertID++;
+      const specialStr_1 = '85.4.9_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.4.9_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1202,13 +1202,13 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.4.9
 
     it('85.4.10 fetch the same CLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '85.4.10';
-      let contentLength = 200;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.4.10';
+      const contentLength = 200;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
-      let result = await  connection.execute(
+      const result = await  connection.execute(
         "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -1224,18 +1224,18 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.4.10
 
     it('85.4.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '85.4.11_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let specialStr_2 = '85.4.11_2';
-      let contentLength_2 = 208;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id = insertID++;
+      const specialStr_1 = '85.4.11_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const specialStr_2 = '85.4.11_2';
+      const contentLength_2 = 208;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
       await updateClobTable1(id, content_2);
 
-      let result =  await connection.execute(
+      const result =  await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -1243,25 +1243,25 @@ describe('85. fetchClobAsString2.js', function() {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let resultVal = result.rows[0][1];
+      const resultVal = result.rows[0][1];
       compareStrings(resultVal, specialStr_2, content_2, contentLength_2);
     }); // 85.4.11
 
     it('85.4.12 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.4.12_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.4.12_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.4.12_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.4.12_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1270,26 +1270,26 @@ describe('85. fetchClobAsString2.js', function() {
         }
       );
       assert.strictEqual(result.rows.length, 1);
-      let resultVal = result.rows[0][1];
+      const resultVal = result.rows[0][1];
       compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
       oracledb.maxRows = maxRowsBak;
     }); // 85.4.12
 
     it('85.4.13 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.4.13_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.4.13_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.4.13_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.4.13_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1306,10 +1306,10 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.4.13
 
     it('85.4.14 works with REF CURSOR', async function() {
-      let id = insertID++;
-      let specialStr = '85.4.14';
-      let contentLength = 100;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.4.14';
+      const contentLength = 100;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
       const ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(clob_cursor OUT SYS_REFCURSOR)\n" +
@@ -1320,11 +1320,11 @@ describe('85. fetchClobAsString2.js', function() {
       "END;";
       await connection.execute(ref_proc);
 
-      let sql = "BEGIN nodb_ref(:c); END;";
-      let bindVar = {
+      const sql = "BEGIN nodb_ref(:c); END;";
+      const bindVar = {
         c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      let result = await connection.execute(
+      const result = await connection.execute(
         sql,
         bindVar,
         {
@@ -1332,12 +1332,12 @@ describe('85. fetchClobAsString2.js', function() {
           fetchInfo : { C : { type : oracledb.STRING } }
         }
       );
-      let rows = await result.outBinds.c.getRows(3);
-      let resultVal = rows[0][0];
+      const rows = await result.outBinds.c.getRows(3);
+      const resultVal = rows[0][0];
       compareStrings(resultVal, specialStr, content, contentLength);
       await result.outBinds.c.close();
 
-      let ref_proc_drop = "DROP PROCEDURE nodb_ref";
+      const ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
     }); //  85.4.14
 
@@ -1357,7 +1357,7 @@ describe('85. fetchClobAsString2.js', function() {
     const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
@@ -1366,9 +1366,9 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
+      const row = await result.resultSet.getRow();
 
-      let resultVal = row[1];
+      const resultVal = row[1];
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -1378,64 +1378,64 @@ describe('85. fetchClobAsString2.js', function() {
     };
 
     it('85.5.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content, null);
     }); // 85.5.1
 
     it('85.5.2 works with empty String', async function() {
-      let id = insertID++;
-      let content = "";
+      const id = insertID++;
+      const content = "";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.5.2
 
     it('85.5.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '85.5.3';
-      let contentLength = 20;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.5.3';
+      const contentLength = 20;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.5.3
 
     it('85.5.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.5.4';
-      let contentLength = 65535;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.5.4';
+      const contentLength = 65535;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.5.4
 
     it('85.5.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.5.5';
-      let contentLength = 65537;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.5.5';
+      const contentLength = 65537;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.5.5
 
     it('85.5.6 works with (1MB + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '85.5.6';
-      let contentLength = 1048577; // 1MB + 1
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.5.6';
+      const contentLength = 1048577; // 1MB + 1
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertAndFetch(id, specialStr, content, contentLength);
     }); // 85.5.6
 
     it('85.5.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '85.5.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.5.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id",
         { id : id },
         {
@@ -1444,33 +1444,33 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
-      let resultVal = row[0];
+      const row = await result.resultSet.getRow();
+      const resultVal = row[0];
       compareStrings(resultVal, specialStr, specialStr, specialStrLength);
       await result.resultSet.close();
     }); // 85.5.7
 
     it('85.5.8 works with EMPTY_CLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_CLOB";
+      const id = insertID++;
+      const content = "EMPTY_CLOB";
 
       await insertAndFetch(id, null, content, null);
     }); // 85.5.8
 
     it('85.5.9 fetch multiple CLOB rows as String', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.5.9_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.5.9_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id_1 = insertID++;
+      const specialStr_1 = '85.5.9_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.5.9_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1480,8 +1480,8 @@ describe('85. fetchClobAsString2.js', function() {
         }
       );
 
-      let rowNumFetched = 2;
-      let row = await result.resultSet.getRows(rowNumFetched);
+      const rowNumFetched = 2;
+      const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
       let resultVal = row[0][1];
       compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
@@ -1491,14 +1491,14 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.5.9
 
     it('85.5.10 fetch the same CLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '85.5.10';
-      let contentLength = 200;
-      let content = random.getRandomString(contentLength, specialStr);
+      const id = insertID++;
+      const specialStr = '85.5.10';
+      const contentLength = 200;
+      const content = random.getRandomString(contentLength, specialStr);
 
       await insertIntoClobTable1(id, content);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -1509,7 +1509,7 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
+      const row = await result.resultSet.getRow();
       let resultVal = row[1];
       compareStrings(resultVal, specialStr, content, contentLength);
       resultVal = row[2];
@@ -1519,18 +1519,18 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.5.10
 
     it('85.5.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '85.5.11_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let specialStr_2 = '85.5.11_2';
-      let contentLength_2 = 208;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const id = insertID++;
+      const specialStr_1 = '85.5.11_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const specialStr_2 = '85.5.11_2';
+      const contentLength_2 = 208;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertAndFetch(id, specialStr_1, content_1, contentLength_1);
       await updateClobTable1(id, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE ID = " + id,
         { },
         {
@@ -1539,29 +1539,29 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let row = await result.resultSet.getRow();
-      let resultVal = row[1];
+      const row = await result.resultSet.getRow();
+      const resultVal = row[1];
       compareStrings(resultVal, specialStr_2, content_2, contentLength_2);
 
       await result.resultSet.close();
     }); // 85.5.11
 
     it('85.5.12 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.5.12_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.5.12_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.5.12_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.5.12_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1570,8 +1570,8 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let rowNumFetched = 2;
-      let row = await result.resultSet.getRows(rowNumFetched);
+      const rowNumFetched = 2;
+      const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
 
       let resultVal = row[0][1];
@@ -1582,21 +1582,21 @@ describe('85. fetchClobAsString2.js', function() {
     }); // 85.5.12
 
     it('85.5.13 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '85.5.13_1';
-      let contentLength_1 = 200;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let id_2 = insertID++;
-      let specialStr_2 = '85.5.13_2';
-      let contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '85.5.13_1';
+      const contentLength_1 = 200;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id_2 = insertID++;
+      const specialStr_2 = '85.5.13_2';
+      const contentLength_2 = 100;
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoClobTable1(id_1, content_1);
       await insertIntoClobTable1(id_2, content_2);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1605,8 +1605,8 @@ describe('85. fetchClobAsString2.js', function() {
           resultSet : true
         }
       );
-      let rowNumFetched = 2;
-      let row = await result.resultSet.getRows(rowNumFetched);
+      const rowNumFetched = 2;
+      const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
 
       let resultVal = row[0][1];

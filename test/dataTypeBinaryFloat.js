@@ -39,7 +39,7 @@ const dbConfig = require('./dbconfig.js');
 describe('30. dataTypeBinaryFloat.js', function() {
 
   let connection = null;
-  let tableName = "nodb_binary_float";
+  const tableName = "nodb_binary_float";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -51,7 +51,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
 
   describe('30.1 testing BINARY_FLOAT data', function() {
 
-    let numbers = assist.data.numbersForBinaryFloat;
+    const numbers = assist.data.numbersForBinaryFloat;
 
     before('create table, insert data', async function() {
       await assist.setUp(connection, tableName, numbers);
@@ -92,7 +92,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
   });
 
   describe('30.3 testing floating-point numbers which cannot be precisely represent', function() {
-    let nums =
+    const nums =
       [
         2345.67,
         9876.54321,
@@ -109,7 +109,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
     });
 
     it('30.3.1 rounding numbers', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `SELECT * FROM ` + tableName,
         [],
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -121,7 +121,7 @@ describe('30. dataTypeBinaryFloat.js', function() {
     });
 
     function approxeq(v1, v2) {
-      let precision = 0.001;
+      const precision = 0.001;
       return Math.abs(v1 - v2) < precision;
     }
   }); // 30.3

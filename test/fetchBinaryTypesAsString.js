@@ -72,7 +72,7 @@ describe('190. fetchBinaryTypesAsString.js', function() {
   describe("190.1 Fetch binary double", function() {
 
     before(async function() {
-      let sql = `BEGIN \n` +
+      const sql = `BEGIN \n` +
       `  DECLARE \n` +
       `    e_table_missing EXCEPTION; \n` +
       `    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
@@ -102,13 +102,13 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
 
-      let fetchedNumber = res.rows[0][0];
+      const fetchedNumber = res.rows[0][0];
       assert.strictEqual(typeof fetchedNumber, "number");
-      let contentPreciseDelta = Math.abs(fetchedNumber - content);
+      const contentPreciseDelta = Math.abs(fetchedNumber - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
@@ -117,13 +117,13 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
 
-      let fetchedString = res.rows[0][0];
+      const fetchedString = res.rows[0][0];
       assert.strictEqual(typeof fetchedString, "string");
-      let contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
+      const contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
@@ -132,16 +132,16 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(
+      const res = await conn.execute(
         `select content from ${tableName}`, [],
         { fetchInfo: {'CONTENT': {type: oracledb.STRING}} },
       );
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
 
-      let fetchedString = res.rows[0][0];
+      const fetchedString = res.rows[0][0];
       assert.strictEqual(typeof fetchedString, "string");
-      let contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
+      const contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
@@ -150,30 +150,30 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
 
-      let fetchedNumber = res.rows[0][0];
+      const fetchedNumber = res.rows[0][0];
       assert.strictEqual(typeof fetchedNumber, "number");
-      let contentPreciseDelta = Math.abs(fetchedNumber - content);
+      const contentPreciseDelta = Math.abs(fetchedNumber - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
     it('190.1.5 Fetch binary double in multiple rows', async function() {
       oracledb.fetchAsString = [oracledb.NUMBER];
-      let contents = [];
+      const contents = [];
       for (let i = 0; i < 5; i++) {
         contents.push(Math.random());
         await insertContent(contents[i]);
       }
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 5);
       for (let i = 0; i < 5; i++) {
-        let fetchedString = res.rows[i][0];
+        const fetchedString = res.rows[i][0];
         assert.strictEqual(typeof fetchedString, "string");
-        let contentPreciseDelta = Math.abs(parseFloat(fetchedString) - contents[i]);
+        const contentPreciseDelta = Math.abs(parseFloat(fetchedString) - contents[i]);
         assert(contentPreciseDelta < floatPreciseThreshold);
       }
     });
@@ -183,7 +183,7 @@ describe('190. fetchBinaryTypesAsString.js', function() {
   describe("190.2 Fetch binary float", function() {
 
     before(async function() {
-      let sql = `BEGIN \n` +
+      const sql = `BEGIN \n` +
       `  DECLARE \n` +
       `    e_table_missing EXCEPTION; \n` +
       `    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
@@ -213,12 +213,12 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
-      let fetchedNumber = res.rows[0][0];
+      const fetchedNumber = res.rows[0][0];
       assert.strictEqual(typeof fetchedNumber, "number");
-      let contentPreciseDelta = Math.abs(fetchedNumber - content);
+      const contentPreciseDelta = Math.abs(fetchedNumber - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
@@ -227,13 +227,13 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
 
-      let fetchedString = res.rows[0][0];
+      const fetchedString = res.rows[0][0];
       assert.strictEqual(typeof fetchedString, "string");
-      let contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
+      const contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
@@ -242,16 +242,16 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(
+      const res = await conn.execute(
         `select content from ${tableName}`, [],
         { fetchInfo: {'CONTENT': {type: oracledb.STRING}} },
       );
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
 
-      let fetchedString = res.rows[0][0];
+      const fetchedString = res.rows[0][0];
       assert.strictEqual(typeof fetchedString, "string");
-      let contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
+      const contentPreciseDelta = Math.abs(parseFloat(fetchedString) - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
@@ -260,30 +260,30 @@ describe('190. fetchBinaryTypesAsString.js', function() {
       const content = Math.random();
       await insertContent(content);
 
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 1);
 
-      let fetchedNumber = res.rows[0][0];
+      const fetchedNumber = res.rows[0][0];
       assert.strictEqual(typeof fetchedNumber, "number");
-      let contentPreciseDelta = Math.abs(fetchedNumber - content);
+      const contentPreciseDelta = Math.abs(fetchedNumber - content);
       assert(contentPreciseDelta < floatPreciseThreshold);
     });
 
     it('190.2.5 Fetch binary float in multiple rows', async function() {
       oracledb.fetchAsString = [oracledb.NUMBER];
-      let contents = [];
+      const contents = [];
       for (let i = 0; i < 5; i++) {
         contents.push(Math.random());
         await insertContent(contents[i]);
       }
-      let res = await conn.execute(`select content from ${tableName}`);
+      const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 5);
       for (let i = 0; i < 5; i++) {
-        let fetchedString = res.rows[i][0];
+        const fetchedString = res.rows[i][0];
         assert.strictEqual(typeof fetchedString, "string");
-        let contentPreciseDelta = Math.abs(parseFloat(fetchedString) - contents[i]);
+        const contentPreciseDelta = Math.abs(parseFloat(fetchedString) - contents[i]);
         assert(contentPreciseDelta < floatPreciseThreshold);
       }
     });

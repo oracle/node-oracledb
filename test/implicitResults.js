@@ -174,7 +174,7 @@ describe('192. implicitResults.js', function() {
 
   it('192.3 multiple options, outFormat is OUT_FORMAT_OBJECT', async () => {
     const conn = await oracledb.getConnection(dbConfig);
-    let opts = { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const opts = { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT };
     const results = await conn.execute(queryImpres, [], opts);
 
     let rs = await results.implicitResults[0].getRows(100);

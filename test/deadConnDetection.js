@@ -103,9 +103,8 @@ describe('276. deadConnDetection.js', function() {
       poolIncrement: 2
     };
 
-    let pool;
-    let connection = await oracledb.getConnection(dbConfig);
-    let serverVersion = connection.oracleServerVersion;
+    const connection = await oracledb.getConnection(dbConfig);
+    const serverVersion = connection.oracleServerVersion;
     /*
        Minimum pool connection in case of Dead Connection Detection (DCD)
        is not backported in 21C database
@@ -113,7 +112,7 @@ describe('276. deadConnDetection.js', function() {
     if (serverVersion >= 2100000000 && serverVersion <= 2190000000) return;
     await connection.close();
 
-    pool = await oracledb.createPool(config);
+    const pool = await oracledb.createPool(config);
     const conn1 = await pool.getConnection();
     const conn2 = await pool.getConnection();
     assert.strictEqual(pool.connectionsInUse, 2);

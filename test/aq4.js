@@ -51,7 +51,7 @@ describe('267. aq4.js', function() {
     ADDRESS: "The kennel"
   };
 
-  let addrDataArr = [
+  const addrDataArr = [
     {
       NAME: "scott",
       ADDRESS: "The kennel"
@@ -283,14 +283,14 @@ describe('267. aq4.js', function() {
 
 
   it('267.8 empty recipient list with enqMany', async () => {
-    let msgList = [];
+    const msgList = [];
 
     await assert.rejects(
       async () => {
       // Enqueue
         const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
         for (let i = 0; i < addrDataArr.length; i++) {
-          let msg = new queue1.payloadTypeClass(addrDataArr[i]);
+          const msg = new queue1.payloadTypeClass(addrDataArr[i]);
           msgList[i] = { payload: msg, recipients: [] };
         }
         await queue1.enqMany(msgList);
@@ -300,12 +300,12 @@ describe('267. aq4.js', function() {
   });
 
   it('267.9 recipient list with enqMany', async () => {
-    let msgList = [];
+    const msgList = [];
 
     // Enqueue
     const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
     for (let i = 0; i < addrDataArr.length; i++) {
-      let msg = new queue1.payloadTypeClass(addrDataArr[i]);
+      const msg = new queue1.payloadTypeClass(addrDataArr[i]);
       msgList[i] = { payload: msg, recipients: ["sub1", "sub2", "sub3"] };
     }
     await queue1.enqMany(msgList);
@@ -320,18 +320,18 @@ describe('267. aq4.js', function() {
         wait: oracledb.AQ_DEQ_NO_WAIT
       }
     );
-    let msgs = await queue2.deqMany(5);
+    const msgs = await queue2.deqMany(5);
     assert.strictEqual(msgs.length, 4);
   });
 
 
   it('267.10 recipient list with enqMany non-existent in dequeue', async () => {
-    let msgList = [];
+    const msgList = [];
 
     // Enqueue
     const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
     for (let i = 0; i < addrDataArr.length; i++) {
-      let msg = new queue1.payloadTypeClass(addrDataArr[i]);
+      const msg = new queue1.payloadTypeClass(addrDataArr[i]);
       msgList[i] = { payload: msg, recipients: ["sub1", "sub2", "sub3"] };
     }
     await queue1.enqMany(msgList);
@@ -346,19 +346,19 @@ describe('267. aq4.js', function() {
         wait: oracledb.AQ_DEQ_NO_WAIT
       }
     );
-    let msgs = await queue2.deqMany(5);
+    const msgs = await queue2.deqMany(5);
     assert.strictEqual(msgs.length, 0);
   });
 
   it('267.11 recipient list with enqMany invalid datatype in dequeue', async () => {
-    let msgList = [];
+    const msgList = [];
 
     await assert.rejects(
       async () => {
       // Enqueue
         const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
         for (let i = 0; i < addrDataArr.length; i++) {
-          let msg = new queue1.payloadTypeClass(addrDataArr[i]);
+          const msg = new queue1.payloadTypeClass(addrDataArr[i]);
           msgList[i] = { payload: msg,
             recipients: [101, "sub2", new Date(2022, 5, 22)] };
         }

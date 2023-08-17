@@ -40,7 +40,7 @@ const random   = require('./random.js');
 describe('124. nclobDMLBindAsString.js', function() {
 
   let connection = null;
-  let tableName = "nodb_nclob";
+  const tableName = "nodb_nclob";
   let insertID = 0;
 
   before('get one connection', async function() {
@@ -65,8 +65,8 @@ describe('124. nclobDMLBindAsString.js', function() {
     });
 
     it('124.1.1 bind in via INSERT', async function() {
-      let insertLength = 100;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 100;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await bindIn(tableName, insertStr);
 
@@ -74,8 +74,8 @@ describe('124. nclobDMLBindAsString.js', function() {
     });
 
     it('124.1.2 bind out via RETURNING INTO', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -83,9 +83,9 @@ describe('124. nclobDMLBindAsString.js', function() {
     });
 
     it('124.1.3 bind in via UPDATE', async function() {
-      let insertLength = 100;
-      let insertStr = random.getRandomLengthString(insertLength);
-      let updateStr = random.getRandomLengthString(200);
+      const insertLength = 100;
+      const insertStr = random.getRandomLengthString(insertLength);
+      const updateStr = random.getRandomLengthString(200);
 
       await insertData(tableName, insertStr);
 
@@ -95,8 +95,8 @@ describe('124. nclobDMLBindAsString.js', function() {
     });
 
     it('124.1.3 bind in via WHERE', async function() {
-      let insertLength = 500;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 500;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -105,21 +105,21 @@ describe('124. nclobDMLBindAsString.js', function() {
   });
 
 
-  let insertData = async function(tableName, insertStr) {
-    let sql = "INSERT INTO " + tableName + "(num, content) VALUES(" + insertID + ", TO_NCLOB('" + insertStr + "'))";
+  const insertData = async function(tableName, insertStr) {
+    const sql = "INSERT INTO " + tableName + "(num, content) VALUES(" + insertID + ", TO_NCLOB('" + insertStr + "'))";
     await connection.execute(sql);
   };
 
-  let bindIn = async function(tableName, insertStr) {
-    let sql = "INSERT INTO " + tableName + "(num, content) VALUES(:i, TO_NCLOB(:c))";
-    let bindVar = {
+  const bindIn = async function(tableName, insertStr) {
+    const sql = "INSERT INTO " + tableName + "(num, content) VALUES(:i, TO_NCLOB(:c))";
+    const bindVar = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN},
       c: { val: insertStr, type: oracledb.STRING, dir: oracledb.BIND_IN},
     };
     await connection.execute(sql, bindVar);
   };
 
-  let bindOut = async function(tableName, insertStr) {
+  const bindOut = async function(tableName, insertStr) {
     insertID++;
     let result = null;
     result = await connection.execute(
@@ -129,23 +129,23 @@ describe('124. nclobDMLBindAsString.js', function() {
         c: { val: insertStr, type: oracledb.STRING, dir: oracledb.BIND_IN },
         lobbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: insertStr.length }
       });
-    let resultStr = result.outBinds.lobbv[0];
+    const resultStr = result.outBinds.lobbv[0];
     assert.strictEqual(resultStr.length, insertStr.length);
     assert.strictEqual(resultStr, insertStr);
   };
 
-  let bind_update = async function(tableName, insertStr) {
-    let sql = "update " + tableName + " set content = TO_NCLOB(:c) where num = :i";
-    let bindVar = {
+  const bind_update = async function(tableName, insertStr) {
+    const sql = "update " + tableName + " set content = TO_NCLOB(:c) where num = :i";
+    const bindVar = {
       i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN},
       c: { val: insertStr, type: oracledb.STRING, dir: oracledb.BIND_IN}
     };
     await connection.execute(sql, bindVar);
   };
 
-  let bind_where = async function(tableName, insertStr) {
-    let sql = "select * from " + tableName + " where dbms_lob.compare(content, TO_NCLOB(:c)) = 0";
-    let bindVar = {
+  const bind_where = async function(tableName, insertStr) {
+    const sql = "select * from " + tableName + " where dbms_lob.compare(content, TO_NCLOB(:c)) = 0";
+    const bindVar = {
       c: { val: insertStr, type: oracledb.STRING, dir: oracledb.BIND_IN}
     };
     let result = null;
@@ -159,13 +159,13 @@ describe('124. nclobDMLBindAsString.js', function() {
     assert.strictEqual(result.rows[0][1], insertStr);
   };
 
-  let streamLob = async function(tableName, originalStr) {
+  const streamLob = async function(tableName, originalStr) {
     let result = null;
     result = await connection.execute(
       "SELECT TO_CLOB(content) FROM " + tableName + " where num = " + insertID);
     await new Promise((resolve, reject) => {
       let clob = '';
-      let lob = result.rows[0][0];
+      const lob = result.rows[0][0];
 
       assert(lob);
       lob.setEncoding('utf8'); // set the encoding so we get a 'string' not a 'buffer'

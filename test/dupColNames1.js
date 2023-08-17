@@ -101,7 +101,7 @@ describe('246. dupColNames1.js', function() {
       if (!row) {
         break;
       }
-      for (let i in row) {
+      for (const i in row) {
         if (row[i] instanceof oracledb.ResultSet) {
           row[i] = await traverse_results(row[i]);
         }

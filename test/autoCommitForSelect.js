@@ -40,7 +40,7 @@ describe('8. autoCommitForSelect.js', function() {
   let connection = null;
   let anotherConnection = null;
 
-  let script =
+  const script =
       "BEGIN \
           DECLARE \
               e_table_missing EXCEPTION; \

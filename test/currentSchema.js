@@ -54,7 +54,7 @@ describe('191. currentSchema.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       assert.strictEqual(conn.currentSchema, '');
 
-      let schema = dbConfig.user;
+      const schema = dbConfig.user;
       conn.currentSchema = schema;
       assert.strictEqual(conn.currentSchema, schema);
 
@@ -70,8 +70,8 @@ describe('191. currentSchema.js', function() {
     try {
       const conn = await oracledb.getConnection(dbConfig);
 
-      let schema = dbConfig.user.toUpperCase();
-      let query = "ALTER SESSION SET CURRENT_SCHEMA = " + schema;
+      const schema = dbConfig.user.toUpperCase();
+      const query = "ALTER SESSION SET CURRENT_SCHEMA = " + schema;
       await conn.execute(query);
       assert.strictEqual(conn.currentSchema, schema);
 
@@ -87,7 +87,7 @@ describe('191. currentSchema.js', function() {
     async function setInvalidSchema() {
       const conn = await oracledb.getConnection(dbConfig);
 
-      let schema = "foo";
+      const schema = "foo";
       conn.currentSchema = schema;
 
       await conn.close();

@@ -404,7 +404,7 @@ describe('277. jsonDualityView6.js', function() {
               Class : class  {ClassId: clsid, Name: name}}}
       `);
 
-      let result = await connection.execute(`select * from student_ov`);
+      const result = await connection.execute(`select * from student_ov`);
       assert.strictEqual(result.rows.length, 3);
       assert.deepEqual(result.rows[0][0]._id, {"STUID":1});
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");

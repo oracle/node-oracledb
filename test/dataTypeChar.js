@@ -39,10 +39,10 @@ const dbConfig = require('./dbconfig.js');
 describe('22. dataTypeChar.js', function() {
 
   let connection = null;
-  let tableName = "nodb_char";
+  const tableName = "nodb_char";
 
-  let strLen = [100, 1000, 2000];  // char string length
-  let strs =
+  const strLen = [100, 1000, 2000];  // char string length
+  const strs =
     [
       assist.createCharString(strLen[0]),
       assist.createCharString(strLen[1]),
@@ -96,7 +96,7 @@ describe('22. dataTypeChar.js', function() {
 
     it('22.3.1 PL/SQL binding scalar values IN', async function() {
 
-      let proc = "CREATE OR REPLACE\n" +
+      const proc = "CREATE OR REPLACE\n" +
                  "FUNCTION testchar(stringValue IN CHAR) RETURN CHAR\n" +
                  "IS\n" +
                  "BEGIN\n" +
@@ -104,7 +104,7 @@ describe('22. dataTypeChar.js', function() {
                  "END testchar;";
       assert(connection);
       await connection.execute(proc);
-      let bindvars = {
+      const bindvars = {
         result:      {type: oracledb.STRING, dir: oracledb.BIND_OUT},
         stringValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: 'Node.js'}
       };
@@ -116,14 +116,14 @@ describe('22. dataTypeChar.js', function() {
 
     it('22.3.2 bind scalar values INOUT', async function() {
 
-      let proc = "CREATE OR REPLACE\n" +
+      const proc = "CREATE OR REPLACE\n" +
                  "PROCEDURE nodb_testproc(stringValue IN OUT NOCOPY CHAR)\n" +
                  "IS\n" +
                  "BEGIN\n" +
                  "  stringValue := '(' || stringValue || ')';\n" +
                  "END nodb_testproc;\n";
       await connection.execute(proc);
-      let bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Node.js'} };
+      const bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Node.js'} };
       await assert.rejects(
         async () => await connection.execute(
           "BEGIN nodb_testproc(:stringValue); END;",
@@ -138,14 +138,14 @@ describe('22. dataTypeChar.js', function() {
 
     it('22.3.3 bind scalar values OUT', async function() {
       let result = null;
-      let proc = "CREATE OR REPLACE\n" +
+      const proc = "CREATE OR REPLACE\n" +
                      "PROCEDURE nodb_testproc(stringValue OUT NOCOPY CHAR)\n" +
                      "IS\n" +
                      "BEGIN\n" +
                      "  stringValue := 'Hello Node.js World!';\n" +
                      "END nodb_testproc;\n";
       await connection.execute(proc);
-      let bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:200} };
+      const bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:200} };
       result = await connection.execute(
         "BEGIN nodb_testproc(:stringValue); END;",
         bindvars);
@@ -184,7 +184,7 @@ describe('22. dataTypeChar.js', function() {
                  "  END;\n" +
                  "END;";
       await connection.execute(proc);
-      let bindvars = {
+      const bindvars = {
         result:  {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
         strings: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']}
       };

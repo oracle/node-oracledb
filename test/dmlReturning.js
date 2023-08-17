@@ -323,7 +323,7 @@ describe('6. dmlReturning.js', function() {
     it('6.1.15 INSERT statement parse non ascii returning bind', async function() {
 
       const sql = "UPDATE nodb_dmlreturn SET id = :i RETURNING id, name INTO :rid, :méil";
-      let info = await connection.getStatementInfo(sql);
+      const info = await connection.getStatementInfo(sql);
       assert.deepStrictEqual(info.bindNames, ["I", "RID", "MÉIL"]);
     });
 

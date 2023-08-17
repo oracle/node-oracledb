@@ -556,7 +556,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id : id },
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
-      let resultVal = result.rows[0].B;
+      const resultVal = result.rows[0].B;
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -565,66 +565,66 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     };
 
     it('87.2.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content);
     }); // 87.2.1
 
     it('87.2.2 works with empty Buffer', async function() {
-      let id = insertID++;
-      let content = Buffer.from("", "utf-8");
+      const id = insertID++;
+      const content = Buffer.from("", "utf-8");
 
       await insertAndFetch(id, null, content);
     }); // 87.2.2
 
     it('87.2.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.3';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.3';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.2.3
 
     it('87.2.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.4';
-      let contentLength = 65535;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.4';
+      const contentLength = 65535;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.2.4
 
     it('87.2.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.5';
-      let contentLength = 65537;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.5';
+      const contentLength = 65537;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.2.5
 
     it('87.2.6 works with (1MB + 1) data', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.6';
-      let contentLength = 1048577; // 1MB + 1
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.6';
+      const contentLength = 1048577; // 1MB + 1
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.2.6
 
     it('87.2.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id, content);
@@ -634,29 +634,29 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { id : id },
         { outFormat : oracledb.OUT_FORMAT_OBJECT });
 
-      let resultVal = result.rows[0].B1;
-      let buffer2Compare = Buffer.from(specialStr, "utf-8");
+      const resultVal = result.rows[0].B1;
+      const buffer2Compare = Buffer.from(specialStr, "utf-8");
       assert.deepStrictEqual(resultVal, buffer2Compare);
     }); // 87.2.7
 
     it('87.2.8 works with EMPTY_BLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_BLOB";
+      const id = insertID++;
+      const content = "EMPTY_BLOB";
 
       await insertAndFetch(id, null, content);
     }); // 87.2.8
 
     it('87.2.9 fetch multiple BLOB rows as Buffer', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.2.9_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.2.9_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id_1 = insertID++;
+      const specialStr_1 = '87.2.9_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.2.9_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
       let result = null;
       await insertIntoBlobTable1(id_1, content_1);
       await insertIntoBlobTable1(id_2, content_2);
@@ -669,11 +669,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.2.9
 
     it('87.2.10 fetch the same BLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.10';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.10';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id, content);
@@ -688,15 +688,15 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.2.10
 
     it('87.2.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '87.2.11_1';
-      let contentLength_1 = 201;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let specialStr_2 = '87.2.11_2';
-      let contentLength_2 = 208;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id = insertID++;
+      const specialStr_1 = '87.2.11_1';
+      const contentLength_1 = 201;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const specialStr_2 = '87.2.11_2';
+      const contentLength_2 = 208;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
       let result = null;
 
       await insertAndFetch(id, specialStr_1, content_1);
@@ -711,13 +711,13 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.2.11
 
     it('87.2.12 works with REF CURSOR', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.12';
-      let contentLength = 100;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.12';
+      const contentLength = 100;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       await insertIntoBlobTable1(id, content);
-      let ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
+      const ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
                          "AS \n" +
                          "BEGIN \n" +
                          "    OPEN blob_cursor FOR \n" +
@@ -725,8 +725,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                          "END;";
       await connection.execute(ref_proc);
 
-      let sql = "BEGIN nodb_ref(:b); END;";
-      let bindVar = {
+      const sql = "BEGIN nodb_ref(:b); END;";
+      const bindVar = {
         b: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
       const result = await connection.execute(sql, bindVar);
@@ -738,18 +738,18 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.2.12
 
     it('87.2.13 fetch BLOB with stream', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.13';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.13';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id, content);
       oracledb.fetchAsBuffer = [];
       result = await connection.execute("SELECT B from nodb_blob1 WHERE ID = " + id);
 
-      let lob = result.rows[0][0];
+      const lob = result.rows[0][0];
       let blobData = Buffer.alloc(0);
       await new Promise((resolve, reject) => {
         lob.on('error', reject);
@@ -763,17 +763,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.2.13
 
     it('87.2.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.2.14_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.2.14_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.2.14_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.2.14_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
       let result = null;
 
@@ -792,17 +792,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.2.14
 
     it('87.2.15 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.2.15_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.2.15_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.2.15_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.2.15_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
       let result = null;
 
@@ -820,11 +820,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.2.15
 
     it('87.2.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', async function() {
-      let id = insertID++;
-      let specialStr = '87.2.16';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.2.16';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertIntoBlobTable1(id, content);
 
@@ -871,9 +871,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           outFormat : oracledb.OUT_FORMAT_OBJECT,
           resultSet : true
         });
-      let row = await result.resultSet.getRow();
-      let resultVal;
-      resultVal = row.B;
+      const row = await result.resultSet.getRow();
+      const resultVal = row.B;
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -883,66 +882,66 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     };
 
     it('87.3.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content);
     }); // 87.3.1
 
     it('87.3.2 works with empty Buffer', async function() {
-      let id = insertID++;
-      let content = Buffer.from("", "utf-8");
+      const id = insertID++;
+      const content = Buffer.from("", "utf-8");
 
       await insertAndFetch(id, null, content);
     }); // 87.3.2
 
     it('87.3.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.3';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.3';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.3.3
 
     it('87.3.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.4';
-      let contentLength = 65535;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.4';
+      const contentLength = 65535;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.3.4
 
     it('87.3.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.5';
-      let contentLength = 65537;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.5';
+      const contentLength = 65537;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.3.5
 
     it('87.3.6 works with (1MB + 1) data', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.6';
-      let contentLength = 1048577; // 1MB + 1
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.6';
+      const contentLength = 1048577; // 1MB + 1
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.3.6
 
     it('87.3.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertIntoBlobTable1(id, content);
 
@@ -960,30 +959,30 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.3.7
 
     it('87.3.8 works with EMPTY_BLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_BLOB";
+      const id = insertID++;
+      const content = "EMPTY_BLOB";
 
       await insertAndFetch(id, null, content);
     }); // 87.3.8
 
     it('87.3.9 fetch multiple BLOB rows as Buffer', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.3.9_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.3.9_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id_1 = insertID++;
+      const specialStr_1 = '87.3.9_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.3.9_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
-      let rowNumFetched = 2;
+      const rowNumFetched = 2;
       result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
@@ -992,7 +991,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRows(
+      const row = await result.resultSet.getRows(
         rowNumFetched);
       assert.deepStrictEqual(row[0].B, content_1);
       assert.deepStrictEqual(row[1].B, content_2);
@@ -1000,11 +999,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.3.9
 
     it('87.3.10 fetch the same BLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.10';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.10';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       let result = null;
       await insertIntoBlobTable1(id, content);
@@ -1024,15 +1023,15 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.3.10
 
     it('87.3.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '87.3.11_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let specialStr_2 = '87.3.11_2';
-      let contentLength_2 = 208;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id = insertID++;
+      const specialStr_1 = '87.3.11_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const specialStr_2 = '87.3.11_2';
+      const contentLength_2 = 208;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
 
       await insertAndFetch(id, specialStr_1, content_1);
 
@@ -1050,15 +1049,15 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.3.11
 
     it('87.3.12 works with REF CURSOR', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.12';
-      let contentLength = 100;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.12';
+      const contentLength = 100;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertIntoBlobTable1(id, content);
 
-      let ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
+      const ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
                          "AS \n" +
                          "BEGIN \n" +
                          "    OPEN blob_cursor FOR \n" +
@@ -1075,16 +1074,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
       assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
-      let ref_proc_drop = "DROP PROCEDURE nodb_ref";
+      const ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
     }); // 87.3.12
 
     it('87.3.13 fetch BLOB with stream', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.13';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.13';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertIntoBlobTable1(id, content);
       oracledb.fetchAsBuffer = [];
@@ -1105,24 +1104,24 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.3.13
 
     it('87.3.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.3.14_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.3.14_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.3.14_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.3.14_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoBlobTable1(id_1, content_1);
 
       await insertIntoBlobTable1(id_2, content_2);
 
-      let rowNumFetched = 2;
+      const rowNumFetched = 2;
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
@@ -1140,17 +1139,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.3.14
 
     it('87.3.15 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.3.15_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.3.15_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.3.15_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.3.15_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoBlobTable1(id_1, content_1);
@@ -1172,11 +1171,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.3.15
 
     it('87.3.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', async function() {
-      let id = insertID++;
-      let specialStr = '87.3.16';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.3.16';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id, content);
@@ -1217,7 +1216,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
 
     }); // afterEach
 
-    let insertAndFetch = async function(id, specialStr, insertContent) {
+    const insertAndFetch = async function(id, specialStr, insertContent) {
       let result = null;
       await insertIntoBlobTable1(id, insertContent);
 
@@ -1226,7 +1225,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         { id : id },
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
 
-      let resultVal = result.rows[0][1];
+      const resultVal = result.rows[0][1];
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -1235,66 +1234,66 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     };
 
     it('87.4.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content);
     }); // 87.4.1
 
     it('87.4.2 works with empty Buffer', async function() {
-      let id = insertID++;
-      let content = Buffer.from("", "utf-8");
+      const id = insertID++;
+      const content = Buffer.from("", "utf-8");
 
       await insertAndFetch(id, null, content);
     }); // 87.4.2
 
     it('87.4.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.3';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.3';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.4.3
 
     it('87.4.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.4';
-      let contentLength = 65535;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.4';
+      const contentLength = 65535;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.4.4
 
     it('87.4.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.5';
-      let contentLength = 65537;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.5';
+      const contentLength = 65537;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.4.5
 
     it('87.4.6 works with (1MB + 1) data', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.6';
-      let contentLength = 1048577; // 1MB + 1
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.6';
+      const contentLength = 1048577; // 1MB + 1
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.4.6
 
     it('87.4.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id, content);
@@ -1302,29 +1301,29 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) from nodb_blob1 WHERE ID = :id",
         { id : id },
         { outFormat : oracledb.OUT_FORMAT_ARRAY });
-      let resultVal = result.rows[0][0];
-      let buffer2Compare = Buffer.from(specialStr, "utf-8");
+      const resultVal = result.rows[0][0];
+      const buffer2Compare = Buffer.from(specialStr, "utf-8");
       assert.deepStrictEqual(resultVal, buffer2Compare);
     }); // 87.4.7
 
     it('87.4.8 works with EMPTY_BLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_BLOB";
+      const id = insertID++;
+      const content = "EMPTY_BLOB";
 
       await insertAndFetch(id, null, content);
     }); // 87.4.8
 
     it('87.4.9 fetch multiple BLOB rows as Buffer', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.4.9_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.4.9_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id_1 = insertID++;
+      const specialStr_1 = '87.4.9_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.4.9_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
 
       let result = null;
       await insertIntoBlobTable1(id_1, content_1);
@@ -1341,11 +1340,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.4.9
 
     it('87.4.10 fetch the same BLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.10';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.10';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
       await insertIntoBlobTable1(id, content);
 
@@ -1358,15 +1357,15 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.4.10
 
     it('87.4.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '87.4.11_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let specialStr_2 = '87.4.11_2';
-      let contentLength_2 = 208;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id = insertID++;
+      const specialStr_1 = '87.4.11_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const specialStr_2 = '87.4.11_2';
+      const contentLength_2 = 208;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
 
       await insertAndFetch(id, specialStr_1, content_1);
 
@@ -1381,14 +1380,14 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.4.11
 
     it('87.4.12 works with REF CURSOR', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.12';
-      let contentLength = 100;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.12';
+      const contentLength = 100;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       await insertIntoBlobTable1(id, content);
 
-      let ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
+      const ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
                      "AS \n" +
                      "BEGIN \n" +
                      "    OPEN blob_cursor FOR \n" +
@@ -1396,8 +1395,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
                      "END;";
       await connection.execute(ref_proc);
 
-      let sql = "BEGIN nodb_ref(:b); END;";
-      let bindVar = {
+      const sql = "BEGIN nodb_ref(:b); END;";
+      const bindVar = {
         b: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
 
@@ -1406,16 +1405,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const rows = await result.outBinds.b.getRows(3);
       assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
-      let ref_proc_drop = "DROP PROCEDURE nodb_ref";
+      const ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
     }); // 87.4.12
 
     it('87.4.13 fetch BLOB with stream', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.13';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.13';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
       await insertIntoBlobTable1(id, content);
 
@@ -1437,17 +1436,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.4.13
 
     it('87.4.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.4.14_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.4.14_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.4.14_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.4.14_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoBlobTable1(id_1, content_1);
@@ -1465,17 +1464,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.4.14
 
     it('87.4.15 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.4.15_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.4.15_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.4.15_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.4.15_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoBlobTable1(id_1, content_1);
@@ -1494,11 +1493,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.4.15
 
     it('87.4.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', async function() {
-      let id = insertID++;
-      let specialStr = '87.4.16';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.4.16';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id, content);
@@ -1550,9 +1549,8 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           resultSet : true
         });
 
-      let row = await result.resultSet.getRow();
-      let resultVal;
-      resultVal = row[1];
+      const row = await result.resultSet.getRow();
+      const resultVal = row[1];
       if (specialStr === null) {
         assert.strictEqual(resultVal, null);
       } else {
@@ -1562,66 +1560,66 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     };
 
     it('87.5.1 works with NULL value', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertAndFetch(id, null, content);
     }); // 87.5.1
 
     it('87.5.2 works with empty Buffer', async function() {
-      let id = insertID++;
-      let content = Buffer.from("", "utf-8");
+      const id = insertID++;
+      const content = Buffer.from("", "utf-8");
 
       await insertAndFetch(id, null, content);
     }); // 87.5.2
 
     it('87.5.3 works with small value', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.3';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.3';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.5.3
 
     it('87.5.4 works with (64K - 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.4';
-      let contentLength = 65535;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.4';
+      const contentLength = 65535;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.5.4
 
     it('87.5.5 works with (64K + 1) value', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.5';
-      let contentLength = 65537;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.5';
+      const contentLength = 65537;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.5.5
 
     it('87.5.6 works with (1MB + 1) data', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.6';
-      let contentLength = 1048577; // 1MB + 1
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.6';
+      const contentLength = 1048577; // 1MB + 1
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertAndFetch(id, specialStr, content);
     }); // 87.5.6
 
     it('87.5.7 works with dbms_lob.substr()', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.7';
-      let contentLength = 200;
-      let specialStrLength = specialStr.length;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.7';
+      const contentLength = 200;
+      const specialStrLength = specialStr.length;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       let result = null;
 
       await insertIntoBlobTable1(id, content);
@@ -1632,31 +1630,31 @@ describe('87. fetchBlobAsBuffer1.js', function() {
           outFormat : oracledb.OUT_FORMAT_ARRAY,
           resultSet : true
         });
-      let row = await result.resultSet.getRow();
-      let resultVal = row[0];
-      let buffer2Compare = Buffer.from(specialStr, "utf-8");
+      const row = await result.resultSet.getRow();
+      const resultVal = row[0];
+      const buffer2Compare = Buffer.from(specialStr, "utf-8");
       assert.deepStrictEqual(resultVal, buffer2Compare);
       await result.resultSet.close();
     }); // 87.5.7
 
     it('87.5.8 works with EMPTY_BLOB()', async function() {
-      let id = insertID++;
-      let content = "EMPTY_BLOB";
+      const id = insertID++;
+      const content = "EMPTY_BLOB";
 
       await insertAndFetch(id, null, content);
     }); // 87.5.8
 
     it('87.5.9 fetch multiple BLOB rows as Buffer', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.5.9_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.5.9_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id_1 = insertID++;
+      const specialStr_1 = '87.5.9_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.5.9_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
 
       await insertIntoBlobTable1(id_1, content_1);
 
@@ -1677,11 +1675,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.5.9
 
     it('87.5.10 fetch the same BLOB column multiple times', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.10';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.10';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertIntoBlobTable1(id, content);
 
@@ -1700,15 +1698,15 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.5.10
 
     it('87.5.11 works with update statement', async function() {
-      let id = insertID++;
-      let specialStr_1 = '87.5.11_1';
-      let contentLength_1 = 208;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let specialStr_2 = '87.5.11_2';
-      let contentLength_2 = 208;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
+      const id = insertID++;
+      const specialStr_1 = '87.5.11_1';
+      const contentLength_1 = 208;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const specialStr_2 = '87.5.11_2';
+      const contentLength_2 = 208;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
 
       await insertAndFetch(id, specialStr_1, content_1);
 
@@ -1729,24 +1727,24 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.5.11
 
     it('87.5.12 works with REF CURSOR', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.12';
-      let contentLength = 100;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.12';
+      const contentLength = 100;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       let result = null;
       await insertIntoBlobTable1(id, content);
 
-      let ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
+      const ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
                          "AS \n" +
                          "BEGIN \n" +
                          "    OPEN blob_cursor FOR \n" +
                          "        SELECT B from nodb_blob1 WHERE ID = " + id + "; \n" +
                          "END;";
       await connection.execute(ref_proc);
-      let sql = "BEGIN nodb_ref(:b); END;";
-      let bindVar = {
+      const sql = "BEGIN nodb_ref(:b); END;";
+      const bindVar = {
         b: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
       result = await connection.execute(
@@ -1756,16 +1754,16 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
 
-      let ref_proc_drop = "DROP PROCEDURE nodb_ref";
+      const ref_proc_drop = "DROP PROCEDURE nodb_ref";
       await connection.execute(ref_proc_drop);
     }); // 87.5.12
 
     it('87.5.13 fetch BLOB with stream', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.13';
-      let contentLength = 200;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.13';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await insertIntoBlobTable1(id, content);
 
@@ -1780,17 +1778,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.5.13
 
     it('87.5.14 works with setting oracledb.maxRows < actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.5.14_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.5.14_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.5.14_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.5.14_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
 
       await insertIntoBlobTable1(id_1, content_1);
@@ -1814,17 +1812,17 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.5.14
 
     it('87.5.15 works with setting oracledb.maxRows > actual number of rows in the table', async function() {
-      let id_1 = insertID++;
-      let specialStr_1 = '87.5.15_1';
-      let contentLength_1 = 200;
-      let strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(strBuf_1, "utf-8");
-      let id_2 = insertID++;
-      let specialStr_2 = '87.5.15_2';
-      let contentLength_2 = 100;
-      let strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(strBuf_2, "utf-8");
-      let maxRowsBak = oracledb.maxRows;
+      const id_1 = insertID++;
+      const specialStr_1 = '87.5.15_1';
+      const contentLength_1 = 200;
+      const strBuf_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(strBuf_1, "utf-8");
+      const id_2 = insertID++;
+      const specialStr_2 = '87.5.15_2';
+      const contentLength_2 = 100;
+      const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(strBuf_2, "utf-8");
+      const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
 
       await insertIntoBlobTable1(id_1, content_1);
@@ -1848,11 +1846,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.5.15
 
     it('87.5.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT', async function() {
-      let id = insertID++;
-      let specialStr = '87.5.16';
-      let contentLength = 20;
-      let strBuf = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const id = insertID++;
+      const specialStr = '87.5.16';
+      const contentLength = 20;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
       await insertIntoBlobTable1(id, content);
 
       const result = await connection.execute(

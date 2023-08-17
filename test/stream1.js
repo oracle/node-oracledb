@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 describe('13. stream1.js', function() {
 
   let connection = null;
-  let rowsAmount = 217;
+  const rowsAmount = 217;
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -233,7 +233,7 @@ describe('13. stream1.js', function() {
       await new Promise((resolve, reject) => {
         stream.on('error', reject);
         stream.on('data', async function(data) {
-          let rowIndex = counter;
+          const rowIndex = counter;
           const lob = await new Promise((resolve) => {
             assert.strictEqual(data.EMPLOYEE_NAME, 'staff ' + (rowIndex + 1));
             assert.strictEqual(data.EMPLOYEE_HISTORY.constructor.name, 'Lob');
@@ -296,7 +296,7 @@ describe('13. stream1.js', function() {
 
     it('13.1.11 should emit events in the correct order', async function() {
       const stream = connection.queryStream('SELECT employee_name FROM nodb_stream1 WHERE rownum = 1');
-      let events = [];
+      const events = [];
       await new Promise((resolve, reject) => {
         stream.on('error', reject);
         stream.on('open', () => events.push('open'));

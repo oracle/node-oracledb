@@ -37,7 +37,7 @@ const testsUtil = require('./testsUtil.js');
 
 describe('254. jsonBind2.js', function() {
   let conn = null;
-  let outFormatBak = oracledb.outFormat;
+  const outFormatBak = oracledb.outFormat;
 
   before (async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;

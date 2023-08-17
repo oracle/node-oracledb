@@ -62,16 +62,16 @@ describe('94.binding_procedureBindInout.js', function() {
   };
 
   const inBind = async function(table_name, proc_name, dbColType, bindVar, bindType, nullBind) {
-    let createTable = await sql.createTable(table_name, dbColType);
-    let drop_table = "DROP TABLE " + table_name + " PURGE";
-    let proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ")\n" +
+    const createTable = await sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ")\n" +
                "AS \n" +
                "BEGIN \n" +
                "    insert into " + table_name + " ( id, content ) values (ID, inValue); \n" +
                "    select content into inValue from " + table_name + " where id = ID; \n" +
                "END " + proc_name + "; ";
-    let sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
-    let proc_drop = "DROP PROCEDURE " + proc_name;
+    const sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
+    const proc_drop = "DROP PROCEDURE " + proc_name;
 
     // console.log(proc);
     await connection.execute(createTable);
@@ -93,7 +93,7 @@ describe('94.binding_procedureBindInout.js', function() {
     await connection.execute(drop_table);
   };
 
-  let compareErrMsgForString = function(nullBind, element, err) {
+  const compareErrMsgForString = function(nullBind, element, err) {
     if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
@@ -126,7 +126,7 @@ describe('94.binding_procedureBindInout.js', function() {
     }
   };
 
-  let compareErrMsgForRAW = function(nullBind, element, err) {
+  const compareErrMsgForRAW = function(nullBind, element, err) {
     if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'

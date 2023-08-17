@@ -59,7 +59,7 @@ describe.skip('185. runCQN.js', function() {
     } else {
 
 
-      let credential = {
+      const credential = {
         user:          dbConfig.test.DBA_user,
         password:      dbConfig.test.DBA_password,
         connectString: dbConfig.connectString,
@@ -67,7 +67,7 @@ describe.skip('185. runCQN.js', function() {
       };
       connAsDBA = await oracledb.getConnection(credential);
 
-      let sql = `GRANT CHANGE NOTIFICATION TO ${dbConfig.user}`;
+      const sql = `GRANT CHANGE NOTIFICATION TO ${dbConfig.user}`;
       await connAsDBA.execute(sql);
 
       conn = await oracledb.getConnection({
@@ -83,7 +83,7 @@ describe.skip('185. runCQN.js', function() {
       return;
     } else {
 
-      let sql = `REVOKE CHANGE NOTIFICATION FROM ${dbConfig.user}`;
+      const sql = `REVOKE CHANGE NOTIFICATION FROM ${dbConfig.user}`;
       await connAsDBA.execute(sql);
 
       await conn.close();
@@ -146,7 +146,7 @@ describe.skip('185. runCQN.js', function() {
       const table = message.queries[0].tables[0];
       const tableName = dbConfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
       assert.strictEqual(table.name, tableName);
-      let expect = oracledb.CQN_OPCODE_INSERT |
+      const expect = oracledb.CQN_OPCODE_INSERT |
                      oracledb.CQN_OPCODE_DELETE |
                      oracledb.CQN_OPCODE_ALL_ROWS;
       assert.strictEqual(expect, table.operation);
@@ -191,7 +191,7 @@ describe.skip('185. runCQN.js', function() {
       const table = message.queries[0].tables[0];
       const tableName = dbConfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
       assert.strictEqual(table.name, tableName);
-      let expect = oracledb.CQN_OPCODE_INSERT | oracledb.CQN_OPCODE_ALL_ROWS;
+      const expect = oracledb.CQN_OPCODE_INSERT | oracledb.CQN_OPCODE_ALL_ROWS;
       assert.strictEqual(table.operation, expect);
     };
 
@@ -273,7 +273,7 @@ describe.skip('185. runCQN.js', function() {
     await conn.subscribe('sub5', options);
 
     sql = `INSERT INTO ${TABLE} VALUES (:1)`;
-    let bindArr = [ [1], [2], [3], [4], [5], [6], [7] ];
+    const bindArr = [ [1], [2], [3], [4], [5], [6], [7] ];
     for (let i = 0; i < bindArr.length; i++) {
       await conn.execute(sql, bindArr[i], { autoCommit: true });
     }

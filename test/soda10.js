@@ -75,7 +75,7 @@ describe('178. soda10.js', function() {
     const COLL = "soda_test_178_1";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = [];
+    const inDocuments = [];
     for (let i = 0; i < inContents.length; i++) {
       inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
     }
@@ -83,8 +83,8 @@ describe('178. soda10.js', function() {
     await collection.insertMany(inDocuments);
 
     // Fetch back
-    let outDocuments = await collection.find().getDocuments();
-    let outContents = [];
+    const outDocuments = await collection.find().getDocuments();
+    const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
@@ -93,7 +93,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.1
 
@@ -104,8 +104,8 @@ describe('178. soda10.js', function() {
     await collection.insertMany(inContents);
 
     // Fetch back
-    let outDocuments = await collection.find().getDocuments();
-    let outContents = [];
+    const outDocuments = await collection.find().getDocuments();
+    const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
@@ -114,7 +114,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.2
 
@@ -122,13 +122,13 @@ describe('178. soda10.js', function() {
     const COLL = "soda_test_178_3";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = [];
+    const inDocuments = [];
     for (let i = 0; i < inContents.length; i++) {
       inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
     }
 
-    let middleDocuments = await collection.insertManyAndGet(inDocuments);
-    let middleContents = [];
+    const middleDocuments = await collection.insertManyAndGet(inDocuments);
+    const middleContents = [];
     for (let i = 0; i < middleDocuments.length; i++) {
       middleContents[i] = middleDocuments[i].getContent();
       assert(middleDocuments[i].key);
@@ -136,8 +136,8 @@ describe('178. soda10.js', function() {
     assert.deepStrictEqual(middleContents, [null, null, null, null]);
 
     // Fetch back
-    let outDocuments = await collection.find().getDocuments();
-    let outContents = [];
+    const outDocuments = await collection.find().getDocuments();
+    const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
@@ -146,7 +146,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.3
 
@@ -154,8 +154,8 @@ describe('178. soda10.js', function() {
     const COLL = "soda_test_178_4";
     const collection = await soda.createCollection(COLL);
 
-    let middleDocuments = await collection.insertManyAndGet(inContents);
-    let middleContents = [];
+    const middleDocuments = await collection.insertManyAndGet(inContents);
+    const middleContents = [];
     for (let i = 0; i < middleDocuments.length; i++) {
       middleContents[i] = middleDocuments[i].getContent();
       assert(middleDocuments[i].key);
@@ -163,8 +163,8 @@ describe('178. soda10.js', function() {
     assert.deepStrictEqual(middleContents, [null, null, null, null]);
 
     // Fetch back
-    let outDocuments = await collection.find().getDocuments();
-    let outContents = [];
+    const outDocuments = await collection.find().getDocuments();
+    const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
@@ -173,7 +173,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.4
 
@@ -190,7 +190,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.5
 
@@ -207,7 +207,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.6
 
@@ -223,14 +223,14 @@ describe('178. soda10.js', function() {
     const COLL = "soda_test_178_7";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = [];
+    const inDocuments = [];
     for (let i = 0; i < inContents.length; i++) {
       inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
     }
 
-    let options = {hint: "MONITOR"};
-    let middleDocuments = await collection.insertManyAndGet(inDocuments, options);
-    let middleContents = [];
+    const options = {hint: "MONITOR"};
+    const middleDocuments = await collection.insertManyAndGet(inDocuments, options);
+    const middleContents = [];
     for (let i = 0; i < middleDocuments.length; i++) {
       middleContents[i] = middleDocuments[i].getContent();
       assert(middleDocuments[i].key);
@@ -238,8 +238,8 @@ describe('178. soda10.js', function() {
     assert.deepStrictEqual(middleContents, [null, null, null, null]);
 
     // Fetch back
-    let outDocuments = await collection.find().hint("MONITOR").getDocuments();
-    let outContents = [];
+    const outDocuments = await collection.find().hint("MONITOR").getDocuments();
+    const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
       outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
     }
@@ -248,7 +248,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.7
 
@@ -256,12 +256,12 @@ describe('178. soda10.js', function() {
     const COLL = "soda_test_178_8";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = [];
+    const inDocuments = [];
     for (let i = 0; i < inContents.length; i++) {
       inDocuments[i] = soda.createDocument(inContents[i]); // n.b. synchronous method
     }
 
-    let options = 3;
+    const options = 3;
     await assert.rejects(
       async function() {
         await collection.insertManyAndGet(inDocuments, options);
@@ -271,7 +271,7 @@ describe('178. soda10.js', function() {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 178.8
 

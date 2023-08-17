@@ -66,7 +66,7 @@ describe('39. dataTypeRowid.js', function() {
     });
 
     it('39.1.1 query rowid', async function() {
-      let result = await connection.execute(`SELECT * FROM ` + tableName);
+      const result = await connection.execute(`SELECT * FROM ` + tableName);
 
       for (let i = 0; i < array.length; i++) {
         const resultVal = result.rows[i][1];
@@ -75,7 +75,7 @@ describe('39. dataTypeRowid.js', function() {
     });
 
     it('39.1.2 works well with result set', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT * FROM " + tableName,
         [],
         { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -98,7 +98,7 @@ describe('39. dataTypeRowid.js', function() {
     });
 
     it('39.1.4 can get data object number correctly', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `select dbms_rowid.rowid_object(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
@@ -106,7 +106,7 @@ describe('39. dataTypeRowid.js', function() {
     });
 
     it('39.1.5 can get datafile number correctly', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `select dbms_rowid.rowid_relative_fno(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
@@ -114,7 +114,7 @@ describe('39. dataTypeRowid.js', function() {
     });
 
     it('39.1.6 can get data block number correctly', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `select dbms_rowid.ROWID_BLOCK_NUMBER(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
@@ -122,7 +122,7 @@ describe('39. dataTypeRowid.js', function() {
     });
 
     it('39.1.7 can get row number correctly', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `select dbms_rowid.rowid_row_number(ROWID) AS C from ` + tableName + ` WHERE ROWNUM <=1`);
 
       const resultVal = result.rows[0][0];
@@ -193,7 +193,7 @@ describe('39. dataTypeRowid.js', function() {
 
     await connection.execute(createProc);
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       "BEGIN testproc(:o); END;",
       [
         { type: await oracledb.CURSOR, dir: await oracledb.BIND_OUT }
@@ -232,7 +232,7 @@ describe('39. dataTypeRowid.js', function() {
   }
 
   const fetchRowsFromRS = async function(rs) {
-    let rows = await rs.getRows();
+    const rows = await rs.getRows();
     if (rows.length > 0) {
       for (let i = 0; i < rows.length; i++) {
         rows[i].CONTENT;

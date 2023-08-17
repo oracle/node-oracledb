@@ -337,11 +337,11 @@ describe('244.dataTypeJson.js', function() {
         keyH: [ 9, 10, 11 ],
         keyI: new Date()
       };
-      let binds = {
+      const binds = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_INOUT, maxSize: 2000 }
       };
-      let result = await connection.execute(sqlRun, binds);
+      const result = await connection.execute(sqlRun, binds);
       assert.deepStrictEqual(result.outBinds.c, jsonVal);
     }); // 244.5.1
 

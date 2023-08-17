@@ -49,8 +49,8 @@ describe('105. streamErrorEvent.js', function() {
   }); // after
 
   it('105.1 triggers stream error event', async function() {
-    let rofile = "./test-read-only.txt";
-    let tableName = "nodb_tab_stream_err";
+    const rofile = "./test-read-only.txt";
+    const tableName = "nodb_tab_stream_err";
     fs.writeFileSync(rofile, "This is a read-only file.");
     fs.chmodSync(rofile, '0444');
     let sql = "BEGIN \n" +
@@ -72,11 +72,11 @@ describe('105. streamErrorEvent.js', function() {
                   "END; ";
     await connection.execute(sql);
     sql = "insert into " + tableName + " values (:i, :c)";
-    let bindVar = {
+    const bindVar = {
       i: { val: 89, type: oracledb.NUMBER },
       c: { val: "Changjie tries to trigger Stream error events.", type: oracledb.STRING }
     };
-    let option = { autoCommit: true };
+    const option = { autoCommit: true };
     await connection.execute(
       sql,
       bindVar,
@@ -85,13 +85,13 @@ describe('105. streamErrorEvent.js', function() {
     let result = null;
     result = await connection.execute(sql);
     await new Promise((resolve, reject) => {
-      let lob = result.rows[0][0];
+      const lob = result.rows[0][0];
 
       lob.on('error', reject);
 
       lob.on('close', resolve); // Here it returns.
 
-      let outStream = fs.createWriteStream(rofile);
+      const outStream = fs.createWriteStream(rofile);
       outStream.on('error', function(err) {
         assert(err);
         assert.strictEqual(err.syscall, 'open');

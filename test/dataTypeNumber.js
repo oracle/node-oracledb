@@ -39,8 +39,8 @@ const dbConfig = require('./dbconfig.js');
 describe('26. dataTypeNumber.js', function() {
 
   let connection = null;
-  let tableName = "nodb_number";
-  let numbers = assist.data.numbers;
+  const tableName = "nodb_number";
+  const numbers = assist.data.numbers;
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -96,9 +96,9 @@ describe('26. dataTypeNumber.js', function() {
 
     it('26.3.1 original case', async function() {
 
-      let num = 999999999999;
+      const num = 999999999999;
 
-      let proc = `BEGIN \n` +
+      const proc = `BEGIN \n` +
                      `    DECLARE \n` +
                      `        e_table_missing EXCEPTION; \n` +
                      `        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n` +
@@ -122,7 +122,7 @@ describe('26. dataTypeNumber.js', function() {
         sql,
         { n: num });
       sql = `select content from nodb_tab_bignum where id = 1`;
-      let result = await connection.execute(sql);
+      const result = await connection.execute(sql);
 
       assert.strictEqual(
         result.rows[0][0],
@@ -142,9 +142,9 @@ describe('26. dataTypeNumber.js', function() {
 
     it('26.4.1 maximum safe integer, (2^53 - 1)', async function() {
 
-      let num = 9007199254740992;
-      let sql = `select ` + num + ` from dual`;
-      let result = await connection.execute(sql);
+      const num = 9007199254740992;
+      const sql = `select ` + num + ` from dual`;
+      const result = await connection.execute(sql);
       assert.strictEqual(
         result.rows[0][0],
         num
@@ -153,20 +153,20 @@ describe('26. dataTypeNumber.js', function() {
 
     it('26.4.2 Negative - maximum safe integer + 1', async function() {
 
-      let actual = '9007199254740993';
-      let expected = 9007199254740992;
+      const actual = '9007199254740993';
+      const expected = 9007199254740992;
 
-      let sql = `SELECT TO_NUMBER( ` + actual + ` ) FROM DUAL`;
-      let result = await connection.execute(sql);
-      let outNum = result.rows[0][0];
+      const sql = `SELECT TO_NUMBER( ` + actual + ` ) FROM DUAL`;
+      const result = await connection.execute(sql);
+      const outNum = result.rows[0][0];
       assert.strictEqual(outNum, expected);
     });
 
     it('26.4.3 minimum safe integer', async function() {
 
-      let num = -9007199254740992;
-      let sql = `select ` + num + ` from dual`;
-      let result = await connection.execute(sql);
+      const num = -9007199254740992;
+      const sql = `select ` + num + ` from dual`;
+      const result = await connection.execute(sql);
 
       assert.strictEqual(
         result.rows[0][0],
@@ -175,13 +175,13 @@ describe('26. dataTypeNumber.js', function() {
     });
 
     it('26.4.4 Negative - minimum safe integer - 1', async function() {
-      let actual = '-9007199254740993';
-      let expected = -9007199254740992;
+      const actual = '-9007199254740993';
+      const expected = -9007199254740992;
 
-      let sql = `SELECT TO_NUMBER( ` + actual + ` ) FROM DUAL`;
-      let result = await connection.execute(sql);
+      const sql = `SELECT TO_NUMBER( ` + actual + ` ) FROM DUAL`;
+      const result = await connection.execute(sql);
 
-      let outNum = result.rows[0][0];
+      const outNum = result.rows[0][0];
       assert.strictEqual(outNum, expected);
     });
 

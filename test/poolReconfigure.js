@@ -38,10 +38,10 @@ const testsUtil = require('./testsUtil.js');
 
 describe('255. poolReconfigure.js', function() {
 
-  let poolMinOriginalVal = 2;
-  let poolMaxOriginalVal = 10;
-  let poolIncrementOriginalVal = 2;
-  let enableStatisticsOriginalVal = false;
+  const poolMinOriginalVal = 2;
+  const poolMaxOriginalVal = 10;
+  const poolIncrementOriginalVal = 2;
+  const enableStatisticsOriginalVal = false;
 
   let poolConfig = {
     ...dbConfig,
@@ -86,8 +86,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.1 Change poolMin - increase', async function() {
-      let conn1 = await testsUtil.getPoolConnection(pool);
-      let conn2 = await testsUtil.getPoolConnection(pool);
+      const conn1 = await testsUtil.getPoolConnection(pool);
+      const conn2 = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, 2);
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 2);
@@ -95,8 +95,8 @@ describe('255. poolReconfigure.js', function() {
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
-      let poolMin = pool.poolMin * 2;
-      let config = {
+      const poolMin = pool.poolMin * 2;
+      const config = {
         poolMin : poolMin
       };
       await pool.reconfigure(config);
@@ -108,7 +108,7 @@ describe('255. poolReconfigure.js', function() {
       await conn1.close();
       await conn2.close();
 
-      let conn3 = await testsUtil.getPoolConnection(pool);
+      const conn3 = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn3.close();
     });
@@ -116,7 +116,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.1.2 Change poolMin - decrease', async function() {
       if (dbConfig.test.drcp) this.skip();
 
-      let conn = await testsUtil.getPoolConnection(pool);
+      const conn = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, 1);
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 1);
@@ -124,8 +124,8 @@ describe('255. poolReconfigure.js', function() {
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
-      let poolMin = Math.floor(pool.poolMin / 2);
-      let config = {
+      const poolMin = Math.floor(pool.poolMin / 2);
+      const config = {
         poolMin : poolMin
       };
 
@@ -141,18 +141,18 @@ describe('255. poolReconfigure.js', function() {
     it('255.1.3 Change poolMax - increase', async function() {
       if (dbConfig.test.drcp) this.skip();
 
-      let conns = new Array();
+      const conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
 
       assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
       assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
-      let poolMax = pool.poolMax * 2;
-      let config = {
+      const poolMax = pool.poolMax * 2;
+      const config = {
         poolMax : poolMax
       };
 
@@ -161,7 +161,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolMin, poolMinOriginalVal);
       assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
 
-      let connNew = await testsUtil.getPoolConnection(pool);
+      const connNew = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal + 1);
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal + 1);
@@ -170,7 +170,7 @@ describe('255. poolReconfigure.js', function() {
       }
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       await connNew.close();
@@ -181,7 +181,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.1.4 Change poolMax - decrease', async function() {
       if (dbConfig.test.drcp) this.skip();
 
-      let conn = await testsUtil.getPoolConnection(pool);
+      const conn = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, 1);
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 1);
@@ -189,8 +189,8 @@ describe('255. poolReconfigure.js', function() {
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
-      let poolMax = Math.floor (pool.poolMax / 2);
-      let config = {
+      const poolMax = Math.floor (pool.poolMax / 2);
+      const config = {
         poolMax : poolMax
       };
 
@@ -211,17 +211,17 @@ describe('255. poolReconfigure.js', function() {
     it('255.1.5 Change poolIncrement - increase', async function() {
       if (dbConfig.test.drcp) this.skip();
 
-      let conns = new Array();
+      const conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMinOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal);
       assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
 
-      let poolIncrement = pool.poolIncrement * 2;
-      let config = {
+      const poolIncrement = pool.poolIncrement * 2;
+      const config = {
         poolIncrement : poolIncrement
       };
 
@@ -230,7 +230,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolMin, poolMinOriginalVal);
       assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
 
-      let connNew = await testsUtil.getPoolConnection(pool);
+      const connNew = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal + 1);
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
@@ -239,7 +239,7 @@ describe('255. poolReconfigure.js', function() {
       }
 
       for (conIndex = 0; conIndex < poolMinOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       await connNew.close();
@@ -247,17 +247,17 @@ describe('255. poolReconfigure.js', function() {
 
 
     it('255.1.6 Change poolIncrement - decrease', async function() {
-      let conns = new Array();
+      const conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMinOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal);
       assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
 
-      let poolIncrement = Math.floor(pool.poolIncrement / 2);
-      let config = {
+      const poolIncrement = Math.floor(pool.poolIncrement / 2);
+      const config = {
         poolIncrement : poolIncrement
       };
       await pool.reconfigure(config);
@@ -265,7 +265,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolMin, poolMinOriginalVal);
       assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
 
-      let connNew = await testsUtil.getPoolConnection(pool);
+      const connNew = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal + 1);
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
@@ -274,7 +274,7 @@ describe('255. poolReconfigure.js', function() {
       }
 
       for (conIndex = 0; conIndex < poolMinOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
 
@@ -282,9 +282,9 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.7 increase poolMin & poolMax', async function() {
-      let poolMin = 2 * pool.poolMin;
-      let poolMax = 2 * pool.poolMax;
-      let config =  {
+      const poolMin = 2 * pool.poolMin;
+      const poolMax = 2 * pool.poolMax;
+      const config =  {
         poolMin : poolMin,
         poolMax : poolMax
       };
@@ -296,9 +296,9 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.8 increase poolMin & poolIncrement', async function() {
-      let poolMin = 2 * pool.poolMin;
-      let poolIncrement = 2 * pool.poolIncrement;
-      let config =  {
+      const poolMin = 2 * pool.poolMin;
+      const poolIncrement = 2 * pool.poolIncrement;
+      const config =  {
         poolMin       : poolMin,
         poolIncrement : poolIncrement
       };
@@ -310,9 +310,9 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.9 increase poolMax & poolIncrement', async function() {
-      let poolMax = 2 * pool.poolMax;
-      let poolIncrement = 2 * pool.poolIncrement;
-      let config =  {
+      const poolMax = 2 * pool.poolMax;
+      const poolIncrement = 2 * pool.poolIncrement;
+      const config =  {
         poolMax       : poolMax,
         poolIncrement : poolIncrement
       };
@@ -325,10 +325,10 @@ describe('255. poolReconfigure.js', function() {
 
 
     it('255.1.10 increase poolMin/poolMax/poolIncrement', async function() {
-      let poolMin = 2 * pool.poolMin;
-      let poolMax = 2 * pool.poolMax;
-      let poolIncrement = 2 * pool.poolIncrement;
-      let config =  {
+      const poolMin = 2 * pool.poolMin;
+      const poolMax = 2 * pool.poolMax;
+      const poolIncrement = 2 * pool.poolIncrement;
+      const config =  {
         poolMin       : poolMin,
         poolMax       : poolMax,
         poolIncrement : poolIncrement
@@ -341,7 +341,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.11 Change enableStatistics to true', async function() {
-      let config = {
+      const config = {
         enableStatistics  : true
       };
 
@@ -353,7 +353,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.12 Change enableStatistics to false', async function() {
-      let config = {
+      const config = {
         enableStatistics  : false
       };
 
@@ -365,18 +365,18 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.13 Decreasing poolMax when all connection are in use', async function() {
-      let conns = new Array();
+      const conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
 
       assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
       assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
-      let poolMax = Math.floor (pool.poolMax / 2);
-      let config = {
+      const poolMax = Math.floor (pool.poolMax / 2);
+      const config = {
         poolMax : poolMax
       };
 
@@ -388,16 +388,16 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
     });
 
     it('255.1.14 reconfigure poolMin/poolMax/poolIncrement multiple times', async function() {
-      let poolMin = 2 * pool.poolMin;
-      let poolMax = 2 * pool.poolMax;
-      let poolIncrement = 2 * pool.poolIncrement;
-      let config =  {
+      const poolMin = 2 * pool.poolMin;
+      const poolMax = 2 * pool.poolMax;
+      const poolIncrement = 2 * pool.poolIncrement;
+      const config =  {
         poolMin       : poolMin,
         poolMax       : poolMax,
         poolIncrement : poolIncrement
@@ -457,15 +457,15 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.16 Connection queuing after decreasing poolMax', async function() {
-      let conns = new Array();
+      const conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
 
-      let poolMax = poolMaxOriginalVal - 2;
-      let config = {
+      const poolMax = poolMaxOriginalVal - 2;
+      const config = {
         poolMax : poolMax
       };
 
@@ -515,10 +515,10 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.1.17 Connection queuing after increasing poolMax', async function() {
-      let conns = new Array();
+      const conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
 
@@ -531,8 +531,8 @@ describe('255. poolReconfigure.js', function() {
       );
       // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
-      let poolMax = pool.poolMax + 10;
-      let config = {
+      const poolMax = pool.poolMax + 10;
+      const config = {
         poolMax : poolMax
       };
 
@@ -542,7 +542,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
 
       for (conIndex = poolMaxOriginalVal; conIndex < poolMax; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
 
@@ -602,8 +602,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.2.1 change poolPingInterval', async function() {
-      let poolPingInterval = 2 * pool.poolPingInterval;
-      let config = {
+      const poolPingInterval = 2 * pool.poolPingInterval;
+      const config = {
         poolPingInterval : poolPingInterval
       };
 
@@ -613,8 +613,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.2.2 change poolTimeout', async function() {
-      let poolTimeout = 2 * pool.poolTimeout;
-      let config = {
+      const poolTimeout = 2 * pool.poolTimeout;
+      const config = {
         poolTimeout : poolTimeout
       };
 
@@ -624,8 +624,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.2.3 change maxPerShard', async function() {
-      let poolMaxPerShard = 2 * pool.poolMaxPerShard;
-      let config = {
+      const poolMaxPerShard = 2 * pool.poolMaxPerShard;
+      const config = {
         poolMaxPerShard : poolMaxPerShard
       };
 
@@ -635,8 +635,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.2.4 change stmtCacheSize', async function() {
-      let stmtCacheSize = 2 * pool.stmtCacheSize;
-      let config = {
+      const stmtCacheSize = 2 * pool.stmtCacheSize;
+      const config = {
         stmtCacheSize : stmtCacheSize
       };
 
@@ -649,7 +649,7 @@ describe('255. poolReconfigure.js', function() {
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -658,12 +658,12 @@ describe('255. poolReconfigure.js', function() {
       );
       // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
 
-      let totalConnectionRequestsOriginalVal = pool._totalConnectionRequests;
-      let totalRequestsDequeuedOriginalVal = pool._totalConnectionRequests;
-      let totalRequestsEnqueuedOriginalVal = pool._totalRequestsEnqueued;
-      let totalFailedRequestsOriginalVal = pool._totalFailedRequests;
-      let totalRequestsRejectedOriginalVal = pool._totalRequestsRejected;
-      let timeOfLastResetOriginalVal = pool._timeOfReset;
+      const totalConnectionRequestsOriginalVal = pool._totalConnectionRequests;
+      const totalRequestsDequeuedOriginalVal = pool._totalConnectionRequests;
+      const totalRequestsEnqueuedOriginalVal = pool._totalRequestsEnqueued;
+      const totalFailedRequestsOriginalVal = pool._totalFailedRequests;
+      const totalRequestsRejectedOriginalVal = pool._totalRequestsRejected;
+      const timeOfLastResetOriginalVal = pool._timeOfReset;
       assert.strictEqual(totalConnectionRequestsOriginalVal, 0);
       assert.strictEqual(totalRequestsDequeuedOriginalVal, 0);
       assert.strictEqual(totalRequestsEnqueuedOriginalVal, 0);
@@ -671,11 +671,11 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(totalRequestsRejectedOriginalVal, 0);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
 
-      let config = {
+      const config = {
         resetStatistics : true,
         enableStatistics : true
       };
@@ -683,7 +683,7 @@ describe('255. poolReconfigure.js', function() {
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -700,14 +700,14 @@ describe('255. poolReconfigure.js', function() {
       assert(pool._timeOfReset > timeOfLastResetOriginalVal);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
 
     });
 
     it('255.2.6 change resetStatistics', async function() {
-      let config = {
+      const config = {
         resetStatistics : true
       };
       await pool.reconfigure(config);
@@ -731,7 +731,7 @@ describe('255. poolReconfigure.js', function() {
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -742,14 +742,14 @@ describe('255. poolReconfigure.js', function() {
 
       let poolStatistics = pool.getStatistics();
       assert.strictEqual(poolStatistics, null);
-      let timeOfLastResetOriginalVal = pool._timeOfReset;
+      const timeOfLastResetOriginalVal = pool._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
 
-      let config = {
+      const config = {
         resetStatistics : true,
         enableStatistics : true
       };
@@ -757,7 +757,7 @@ describe('255. poolReconfigure.js', function() {
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -801,7 +801,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
 
@@ -825,7 +825,7 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics: true
       });
 
-      let poolStatistics = pool.getStatistics();
+      const poolStatistics = pool.getStatistics();
       assert(poolStatistics instanceof oracledb.PoolStatistics);
 
       assert.strictEqual(poolStatistics.user, dbConfig.user);
@@ -858,8 +858,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.3.1 change queueMax', async function() {
-      let queueMax = pool.queueMax + 10;
-      let config = {
+      const queueMax = pool.queueMax + 10;
+      const config = {
         queueMax : queueMax
       };
 
@@ -869,8 +869,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.3.2 change queueTimeout', async function() {
-      let queueTimeout = pool.queueTimeout + 10;
-      let config = {
+      const queueTimeout = pool.queueTimeout + 10;
+      const config = {
         queueTimeout : queueTimeout
       };
 
@@ -886,8 +886,8 @@ describe('255. poolReconfigure.js', function() {
         this.skip();
       }
 
-      let maxPerShard = 10;
-      let config = {
+      const maxPerShard = 10;
+      const config = {
         poolMaxPerShard : maxPerShard
       };
 
@@ -897,7 +897,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.3.4 sodaMetaDataCache set to true', async function() {
-      let config = {
+      const config = {
         sodaMetaDataCache : true
       };
       // The SODA metadata cache is available with Oracle Client 21.3 and
@@ -913,7 +913,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.3.5 sodaMetaDataCache set to false', async function() {
-      let config = {
+      const config = {
         sodaMetaDataCache : false
       };
       // The SODA metadata cache is available with Oracle Client 21.3 and
@@ -948,7 +948,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.4.1 connectionsInUse', async function() {
-      let conn = await testsUtil.getPoolConnection(pool);
+      const conn = await testsUtil.getPoolConnection(pool);
       await pool.reconfigure({connectionsInUse: 3});
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
@@ -987,25 +987,25 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.4.5 edition', async function() {
-      let editionBak = oracledb.edition;
+      const editionBak = oracledb.edition;
       await pool.reconfigure({edition: 'e2'});
       assert.strictEqual(oracledb.edition, editionBak);
     });
 
     it('255.4.6 events', async function() {
-      let eventsBak = oracledb.events;
+      const eventsBak = oracledb.events;
       await pool.reconfigure({events: true});
       assert.strictEqual(oracledb.events, eventsBak);
     });
 
     it('255.4.7 homogeneous', async function() {
-      let homogeneousBak = pool.homogeneous;
+      const homogeneousBak = pool.homogeneous;
       await pool.reconfigure ({homogeneous: false});
       assert.strictEqual(pool.homogeneous, homogeneousBak);
     });
 
     it('255.4.8 externalAuth', async function() {
-      let externalAuthBak = oracledb.externalAuth;
+      const externalAuthBak = oracledb.externalAuth;
       await pool.reconfigure({externalAuth: true});
       assert.strictEqual(oracledb.externalAuth, externalAuthBak);
     });
@@ -1016,13 +1016,13 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.4.10 poolAlias', async function() {
-      let poolAliasBak = pool.poolAlias;
+      const poolAliasBak = pool.poolAlias;
       await pool.reconfigure({poolAlias: 'poolalias1'});
       assert.strictEqual(pool.poolAlias, poolAliasBak);
     });
 
     it('255.4.11 status', async function() {
-      let statusBak = pool.status;
+      const statusBak = pool.status;
       await pool.reconfigure({status: oracledb.POOL_STATUS_DRAINING});
       assert.strictEqual(pool.status, statusBak);
     });
@@ -1042,31 +1042,31 @@ describe('255. poolReconfigure.js', function() {
 
       pool = await oracledb.createPool(dbConfig);
 
-      let config1 = {
+      const config1 = {
         resetStatistics : true,
         _enableStats    : true
       };
       await pool.reconfigure(config1);
-      let poolStatistics1 = pool.getStatistics();
+      const poolStatistics1 = pool.getStatistics();
       assert.strictEqual(pool._enableStats, false);
       assert.strictEqual(pool.enableStatistics, false);
       assert.strictEqual(poolStatistics1, null);
 
-      let config2 = {
+      const config2 = {
         _enableStats : true
       };
       await pool.reconfigure(config2);
-      let poolStatistics2 = pool.getStatistics();
+      const poolStatistics2 = pool.getStatistics();
       assert.strictEqual(pool._enableStats, false);
       assert.strictEqual(pool.enableStatistics, false);
       assert.strictEqual(poolStatistics2, null);
 
-      let config3 = {
+      const config3 = {
         resetStatistics : false,
         _enableStats    : true
       };
       await pool.reconfigure(config3);
-      let poolStatistics3 = pool.getStatistics();
+      const poolStatistics3 = pool.getStatistics();
       assert.strictEqual(pool._enableStats, false);
       assert.strictEqual(pool.enableStatistics, false);
       assert.strictEqual(poolStatistics3, null);
@@ -1119,7 +1119,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.1 passing empty config to pool.reconfigure', async function() {
-      let config = {};
+      const config = {};
 
       await pool.reconfigure(config);
       checkOriginalPoolConfig(pool);
@@ -1351,7 +1351,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.12 calling pool.reconfigure multiple times with empty config', async function() {
-      let config = {};
+      const config = {};
       await pool.reconfigure(config);
       await pool.reconfigure(config);
       await pool.reconfigure(config);
@@ -1432,7 +1432,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.5.14 reconfigure closed pool', async function() {
       await pool.close(0);
-      let config =  {
+      const config =  {
         poolMin           : poolMin,
         poolMax           : poolMax,
         poolIncrement     : poolIncrement,
@@ -1460,7 +1460,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.5.15 get statistics of a closed pool', async function() {
-      let config = {
+      const config = {
         resetStatistics : true,
         enableStatistics : true
       };
@@ -1505,7 +1505,7 @@ describe('255. poolReconfigure.js', function() {
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -1515,10 +1515,10 @@ describe('255. poolReconfigure.js', function() {
 
       let poolStatistics = pool.getStatistics();
       assert.strictEqual(poolStatistics, null);
-      let timeOfLastResetOriginalVal = pool._timeOfReset;
+      const timeOfLastResetOriginalVal = pool._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
 
@@ -1539,7 +1539,7 @@ describe('255. poolReconfigure.js', function() {
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -1581,7 +1581,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       await pool.close(0);
@@ -1684,7 +1684,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.6.3 set enableStatistics to true, _enableStats will be ignored', async function() {
-      let poolConfig = {
+      const poolConfig = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1694,15 +1694,15 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : true
       };
 
-      let pool1 = await oracledb.createPool(poolConfig);
+      const pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = pool1.getStatistics();
+      const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, true);
       assert.strictEqual(pool1.enableStatistics, true);
       assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
 
-      let poolConfig2 = {
+      const poolConfig2 = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1712,8 +1712,8 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : true
       };
 
-      let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = pool2.getStatistics();
+      const pool2 = await oracledb.createPool(poolConfig2);
+      const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, true);
       assert.strictEqual(pool2.enableStatistics, true);
       assert(poolStatistics2.gatheredDate > 0);
@@ -1722,7 +1722,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.6.4 set enableStatistics to false, _enableStats will be used', async function() {
-      let poolConfig = {
+      const poolConfig = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1732,15 +1732,15 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : false
       };
 
-      let pool1 = await oracledb.createPool(poolConfig);
+      const pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = pool1.getStatistics();
+      const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, false);
       assert.strictEqual(pool1.enableStatistics, false);
       assert.strictEqual(poolStatistics1, null);
       await pool1.close(0);
 
-      let poolConfig2 = {
+      const poolConfig2 = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1750,8 +1750,8 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : true
       };
 
-      let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = pool2.getStatistics();
+      const pool2 = await oracledb.createPool(poolConfig2);
+      const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, true);
       assert.strictEqual(pool2.enableStatistics, true);
       assert(poolStatistics2.gatheredDate > 0);
@@ -1760,7 +1760,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.6.5 set multiple enableStatistics', async function() {
-      let poolConfig = {
+      const poolConfig = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1770,15 +1770,15 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : true //eslint-disable-line
       };
 
-      let pool1 = await oracledb.createPool(poolConfig);
+      const pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = pool1.getStatistics();
+      const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, true);
       assert.strictEqual(pool1.enableStatistics, true);
       assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
 
-      let poolConfig2 = {
+      const poolConfig2 = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1788,14 +1788,14 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = pool2.getStatistics();
+      const pool2 = await oracledb.createPool(poolConfig2);
+      const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, false);
       assert.strictEqual(pool2.enableStatistics, false);
       assert.strictEqual(poolStatistics2, null);
       await pool2.close(0);
 
-      let poolConfig3 = {
+      const poolConfig3 = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1806,8 +1806,8 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      let pool3 = await oracledb.createPool(poolConfig3);
-      let poolStatistics3 = pool3.getStatistics();
+      const pool3 = await oracledb.createPool(poolConfig3);
+      const poolStatistics3 = pool3.getStatistics();
       assert.strictEqual(pool3._enableStats, false);
       assert.strictEqual(pool3.enableStatistics, false);
       assert.strictEqual(poolStatistics3, null);
@@ -1816,7 +1816,7 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.6.6 set multiple _enableStats', async function() {
-      let poolConfig = {
+      const poolConfig = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1826,15 +1826,15 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : true //eslint-disable-line
       };
 
-      let pool1 = await oracledb.createPool(poolConfig);
+      const pool1 = await oracledb.createPool(poolConfig);
 
-      let poolStatistics1 = pool1.getStatistics();
+      const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, true);
       assert.strictEqual(pool1.enableStatistics, true);
       assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
 
-      let poolConfig2 = {
+      const poolConfig2 = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1844,14 +1844,14 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : false //eslint-disable-line
       };
 
-      let pool2 = await oracledb.createPool(poolConfig2);
-      let poolStatistics2 = pool2.getStatistics();
+      const pool2 = await oracledb.createPool(poolConfig2);
+      const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, false);
       assert.strictEqual(pool2.enableStatistics, false);
       assert.strictEqual(poolStatistics2, null);
       await pool2.close(0);
 
-      let poolConfig3 = {
+      const poolConfig3 = {
         ...dbConfig,
         poolMin          : poolMinOriginalVal,
         poolMax          : poolMaxOriginalVal,
@@ -1862,8 +1862,8 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      let pool3 = await oracledb.createPool(poolConfig3);
-      let poolStatistics3 = pool3.getStatistics();
+      const pool3 = await oracledb.createPool(poolConfig3);
+      const poolStatistics3 = pool3.getStatistics();
       assert.strictEqual(pool3._enableStats, false);
       assert.strictEqual(pool3.enableStatistics, false);
       assert.strictEqual(poolStatistics3, null);
@@ -1887,7 +1887,7 @@ describe('255. poolReconfigure.js', function() {
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -1897,10 +1897,10 @@ describe('255. poolReconfigure.js', function() {
 
       let poolStatistics = pool.getStatistics();
       assert.strictEqual(poolStatistics, null);
-      let timeOfLastResetOriginalVal = pool._timeOfReset;
+      const timeOfLastResetOriginalVal = pool._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
 
@@ -1921,7 +1921,7 @@ describe('255. poolReconfigure.js', function() {
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool);
+        const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
       await assert.rejects(
@@ -1963,7 +1963,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       await pool.close(0);
@@ -1979,13 +1979,13 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout     : 5,
         enableStatistics : false
       };
-      let pool1 = await oracledb.createPool(poolConfig);
+      const pool1 = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool1.poolAlias, "255.6.8.1");
 
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool1);
+        const conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
       await assert.rejects(
@@ -1995,10 +1995,10 @@ describe('255. poolReconfigure.js', function() {
 
       let poolStatistics = pool1.getStatistics();
       assert.strictEqual(poolStatistics, null);
-      let timeOfLastResetOriginalVal = pool1._timeOfReset;
+      const timeOfLastResetOriginalVal = pool1._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       // NOT close the existing pool
@@ -2013,11 +2013,11 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : true
       };
 
-      let pool2 = await oracledb.createPool(poolConfig);
+      const pool2 = await oracledb.createPool(poolConfig);
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool2);
+        const conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
       await assert.rejects(
@@ -2061,7 +2061,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       await pool1.close(0);
@@ -2078,11 +2078,11 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout     : 5,
         enableStatistics : false
       };
-      let pool1 = await oracledb.createPool(poolConfig);
+      const pool1 = await oracledb.createPool(poolConfig);
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool1);
+        const conn = await testsUtil.getPoolConnection(pool1);
         conns.push(conn);
       }
       await assert.rejects(
@@ -2092,10 +2092,10 @@ describe('255. poolReconfigure.js', function() {
 
       let poolStatistics = pool1.getStatistics();
       assert.strictEqual(poolStatistics, null);
-      let timeOfLastResetOriginalVal = pool1._timeOfReset;
+      const timeOfLastResetOriginalVal = pool1._timeOfReset;
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       // NOT close the existing pool
@@ -2110,11 +2110,11 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : true
       };
 
-      let pool2 = await oracledb.createPool(poolConfig);
+      const pool2 = await oracledb.createPool(poolConfig);
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = await testsUtil.getPoolConnection(pool2);
+        const conn = await testsUtil.getPoolConnection(pool2);
         conns.push(conn);
       }
       await assert.rejects(
@@ -2157,7 +2157,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
-        let conn = conns[conIndex];
+        const conn = conns[conIndex];
         await conn.close();
       }
       await pool1.close(0);

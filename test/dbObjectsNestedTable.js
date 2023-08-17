@@ -167,7 +167,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
 
       let index = obj.getLastIndex ();
       while (index != null) {
-        let v = obj.getElement (index);
+        const v = obj.getElement (index);
         switch (index) {
           case 0:
             assert.strictEqual (v, "Shipping");

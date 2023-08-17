@@ -42,7 +42,7 @@ const dbConfig = require('./dbconfig.js');
 describe('38. dataTypeTimestamp6.js', function() {
 
   let connection = null;
-  let tableName = "nodb_timestamp6";
+  const tableName = "nodb_timestamp6";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -53,7 +53,7 @@ describe('38. dataTypeTimestamp6.js', function() {
   });
 
   describe('38.1 Testing JavaScript Date with database TIMESTAMP(9) WITH LOCAL TIME ZONE', function() {
-    let dates = assist.data.dates;
+    const dates = assist.data.dates;
 
     before('create table, insert data', async function() {
       await assist.setUp(connection, tableName, dates);
@@ -93,7 +93,7 @@ describe('38. dataTypeTimestamp6.js', function() {
   });
 
   describe('38.3 testing TIMESTAMP WITH LOCAL TIME ZONE', function() {
-    let timestamps = assist.TIMESTAMP_TZ_STRINGS_2;
+    const timestamps = assist.TIMESTAMP_TZ_STRINGS_2;
 
     before(async function() {
       await assist.setUp4sql(connection, tableName, timestamps);
@@ -108,12 +108,12 @@ describe('38. dataTypeTimestamp6.js', function() {
     });
 
     it('38.3.2 SELECT query - formatted data for comparison', async function() {
-      let sql = `SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM `
+      const sql = `SELECT num, TO_CHAR(content AT TIME ZONE '-8:00', 'DD-MM-YYYY HH24:MI:SS.FF TZR') AS TS_DATA FROM `
                  + tableName + ` WHERE num = :no`;
 
       await Promise.all(timestamps.map(async function(timestamp) {
-        let bv = timestamps.indexOf(timestamp);
-        let result = await connection.execute(
+        const bv = timestamps.indexOf(timestamp);
+        const result = await connection.execute(
           sql,
           { no: bv },
           {

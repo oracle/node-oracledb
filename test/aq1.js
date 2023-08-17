@@ -56,14 +56,14 @@ describe('217. aq1.js', function() {
       this.skip();
     } else {
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
-      let credential = {
+      const credential = {
         user:          AQ_USER,
         password:      AQ_USER_PWD,
         connectString: dbConfig.connectString
       };
       conn = await oracledb.getConnection(credential);
 
-      let plsql = `
+      const plsql = `
           BEGIN
             DBMS_AQADM.CREATE_QUEUE_TABLE(
               QUEUE_TABLE        =>  '${AQ_USER}.${RAW_TABLE}',
@@ -112,7 +112,7 @@ describe('217. aq1.js', function() {
 
   it('217.2 examples/aqoptions.js', async () => {
     /* Enqueue */
-    let queue1 = await conn.getQueue(rawQueueName);
+    const queue1 = await conn.getQueue(rawQueueName);
 
     // Send a message immediately without requiring a commit
     queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
@@ -125,7 +125,7 @@ describe('217. aq1.js', function() {
     await queue1.enqOne(message);
 
     /* Dequeue */
-    let queue2 = await conn.getQueue(rawQueueName);
+    const queue2 = await conn.getQueue(rawQueueName);
     Object.assign(
       queue2.deqOptions,
       {
@@ -143,7 +143,7 @@ describe('217. aq1.js', function() {
   it('217.3 examples/aqmulti.js', async () => {
 
     /* Enqueue */
-    let queue1 = await conn.getQueue(rawQueueName);
+    const queue1 = await conn.getQueue(rawQueueName);
     queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
     const messages1 = [

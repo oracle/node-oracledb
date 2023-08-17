@@ -386,7 +386,7 @@ describe('44. plsqlBindIndexedTable2.js', function() {
                      "END;";
     await connection.execute(proc);
 
-    let result = await connection.execute("BEGIN oracledb_testpack.test(:0); END;",
+    const result = await connection.execute("BEGIN oracledb_testpack.test(:0); END;",
       [
         {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxArraySize: 1}
       ]

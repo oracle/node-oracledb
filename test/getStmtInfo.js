@@ -285,8 +285,8 @@ describe('162. getStmtInfo.js', function() {
 
     const in_values = ["percent%", "q?marks", "percent%(ens)yah", "per % cent", "per cent", "par(ens)", "more/slashes", "%percent", "/slashes/", "1col:on", "col:ons", "more :: %colons%", "more/slashes", "spaces % more spaces"];
     await Promise.all(in_values.map(async function(element) {
-      let sql = "select :\"" + element + "\" from dual";
-      let info = await conn.getStatementInfo(sql);
+      const sql = "select :\"" + element + "\" from dual";
+      const info = await conn.getStatementInfo(sql);
       assert.deepStrictEqual(info.bindNames, [element]);
     }));
   }); // 162.27

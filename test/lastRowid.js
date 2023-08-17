@@ -110,8 +110,8 @@ describe('228. lastRowid.js', function() {
     const rowID = result1.lastRowid;
 
     // check it out
-    let sql = `select * from ${TABLE} where rowid = :1`;
-    let result2 = await conn.execute(sql, [ rowID ]);
+    const sql = `select * from ${TABLE} where rowid = :1`;
+    const result2 = await conn.execute(sql, [ rowID ]);
     assert.deepStrictEqual(result2.rows[0], row1);
   }); // 228.2
 
@@ -142,8 +142,8 @@ describe('228. lastRowid.js', function() {
     assert(result1.lastRowid === undefined);
     assert.strictEqual(result1.rowsAffected, 2);
 
-    let sql = `select * from ${TABLE} where id >= :1`;
-    let result2 = await conn.execute(
+    const sql = `select * from ${TABLE} where id >= :1`;
+    const result2 = await conn.execute(
       sql,
       [ rows[0].id ],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }
@@ -168,7 +168,7 @@ describe('228. lastRowid.js', function() {
     assert(result.lastRowid === undefined);
     assert.strictEqual(result.rowsAffected, 3);
 
-    let sql = `select * from ${TABLE} where id >= 100 order by id asc`;
+    const sql = `select * from ${TABLE} where id >= 100 order by id asc`;
     result = await conn.execute(sql);
 
     assert.strictEqual(result.rows[0][1], rows[0]);

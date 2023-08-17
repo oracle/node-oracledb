@@ -78,7 +78,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
     await connection.execute(sql);
 
     // PL/SQL procedure for the ref cursor
-    let proc = "CREATE OR REPLACE PROCEDURE nodb_proc_fetchcursor (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \n" +
+    const proc = "CREATE OR REPLACE PROCEDURE nodb_proc_fetchcursor (p_in IN NUMBER, p_out OUT SYS_REFCURSOR) \n" +
                 "AS \n" +
                 "BEGIN \n" +
                 "    OPEN p_out FOR \n" +
@@ -99,7 +99,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
   });
 
   it('139.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "begin nodb_proc_fetchcursor(:in, :out); end;",
       {
         in: 290,
@@ -133,7 +133,7 @@ describe('139. fetchAsStringWithRefCursor.js', function() {
   it('139.2 fetchAsString takes effect as well', async function() {
 
     oracledb.fetchAsString = [ oracledb.DATE ];
-    let result = await connection.execute(
+    const result = await connection.execute(
       "begin nodb_proc_fetchcursor(:in, :out); end;",
       {
         in: 295,

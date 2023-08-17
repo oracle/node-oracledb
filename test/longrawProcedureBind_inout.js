@@ -172,11 +172,11 @@ describe('133. longrawProcedureBind_inout.js', function() {
       insertBuf = Buffer.from(insertContent);
       expectedBuf = insertBuf;
     }
-    let bind_in_var  = {
+    const bind_in_var  = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: insertBuf, dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, maxSize: 32768  }
     };
-    let result = await connection.execute(proc_bindinout_exec, bind_in_var);
+    const result = await connection.execute(proc_bindinout_exec, bind_in_var);
     assert(result);
     if (expectedBuf == null) {
       assert.strictEqual(result.outBinds.c, expectedBuf);
@@ -195,7 +195,7 @@ describe('133. longrawProcedureBind_inout.js', function() {
       insertBuf = Buffer.from(insertContent);
       expectedBuf = insertBuf;
     }
-    let bind_in_var  = {
+    const bind_in_var  = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: insertBuf, dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, maxSize: maxsize }
     };

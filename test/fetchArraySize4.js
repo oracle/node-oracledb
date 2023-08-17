@@ -42,10 +42,10 @@ const dbConfig = require('./dbconfig.js');
 describe("151. fetchArraySize4.js", function() {
 
   let connection = null;
-  let default_fetcArraySize = oracledb.fetchArraySize;
-  let default_maxRows = oracledb.maxRows;
+  const default_fetcArraySize = oracledb.fetchArraySize;
+  const default_maxRows = oracledb.maxRows;
   const tableName = "nodb_fetchArraySize_151";
-  let tableSize = 1000;
+  const tableSize = 1000;
 
   const create_table = "BEGIN \n" +
                        "    DECLARE \n" +
@@ -71,7 +71,7 @@ describe("151. fetchArraySize4.js", function() {
                        "    commit; \n" +
                        "END; ";
 
-  let drop_table = "DROP TABLE " + tableName + " PURGE";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -101,17 +101,17 @@ describe("151. fetchArraySize4.js", function() {
 
     const testGetRow = async function(fetchArraySizeVal, numRowsVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select * from " + tableName + " order by id",
         [],
         { resultSet: true }
       );
-      let rowCount = 0;
+      const rowCount = 0;
       fetchRowsFromRS(result.resultSet, numRowsVal, rowCount);
     };
 
     async function fetchRowsFromRS(rs, numRowsVal, rowCount) {
-      let rows = await rs.getRows(numRowsVal);
+      const rows = await rs.getRows(numRowsVal);
       assert(rows.length <= numRowsVal);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
@@ -127,74 +127,74 @@ describe("151. fetchArraySize4.js", function() {
     }
 
     it("151.1.1 numRows > table size > oracledb.fetchArraySize", async function() {
-      let fetchArraySizeVal = tableSize - 1;
-      let numRowsVal = tableSize + 1;
+      const fetchArraySizeVal = tableSize - 1;
+      const numRowsVal = tableSize + 1;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.2 numRows > oracledb.fetchArraySize > table size", async function() {
-      let fetchArraySizeVal = tableSize + 1200;
-      let numRowsVal = tableSize + 10000;
+      const fetchArraySizeVal = tableSize + 1200;
+      const numRowsVal = tableSize + 10000;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.3 table size > numRows > oracledb.fetchArraySize", async function() {
-      let fetchArraySizeVal = tableSize - 11;
-      let numRowsVal = tableSize - 2;
+      const fetchArraySizeVal = tableSize - 11;
+      const numRowsVal = tableSize - 2;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.4 table size > oracledb.fetchArraySize > maxRow", async function() {
-      let fetchArraySizeVal = tableSize - 90;
-      let numRowsVal = tableSize - 150;
+      const fetchArraySizeVal = tableSize - 90;
+      const numRowsVal = tableSize - 150;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.5 numRows = oracledb.fetchArraySize < table size", async function() {
-      let fetchArraySizeVal = tableSize - 110;
-      let numRowsVal = tableSize - 110;
+      const fetchArraySizeVal = tableSize - 110;
+      const numRowsVal = tableSize - 110;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.6 numRows = oracledb.fetchArraySize = table size", async function() {
-      let fetchArraySizeVal = tableSize;
-      let numRowsVal = tableSize;
+      const fetchArraySizeVal = tableSize;
+      const numRowsVal = tableSize;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.7 numRows = oracledb.fetchArraySize > table size", async function() {
-      let fetchArraySizeVal = tableSize + 9999;
-      let numRowsVal = tableSize + 9999;
+      const fetchArraySizeVal = tableSize + 9999;
+      const numRowsVal = tableSize + 9999;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.8 numRows = oracledb.fetchArraySize/10", async function() {
-      let fetchArraySizeVal = tableSize / 10 + 1;
-      let numRowsVal = tableSize / 10;
+      const fetchArraySizeVal = tableSize / 10 + 1;
+      const numRowsVal = tableSize / 10;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.9 numRows = 10 * oracledb.fetchArraySize", async function() {
-      let fetchArraySizeVal = 90;
-      let numRowsVal = 900;
+      const fetchArraySizeVal = 90;
+      const numRowsVal = 900;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.10 numRows > fetchArraySize, fetchArraySize = (table size)/10", async function() {
-      let fetchArraySizeVal = tableSize / 10;
-      let numRowsVal = tableSize / 10 + 1;
+      const fetchArraySizeVal = tableSize / 10;
+      const numRowsVal = tableSize / 10 + 1;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.11 numRows = (table size - 1), fetchArraySize = table size", async function() {
-      let fetchArraySizeVal = tableSize;
-      let numRowsVal = tableSize - 1;
+      const fetchArraySizeVal = tableSize;
+      const numRowsVal = tableSize - 1;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("151.1.12 fetchArraySize = (table size - 1), numRows = table size", async function() {
-      let fetchArraySizeVal = tableSize - 1;
-      let numRowsVal = tableSize;
+      const fetchArraySizeVal = tableSize - 1;
+      const numRowsVal = tableSize;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
@@ -217,17 +217,17 @@ describe("151. fetchArraySize4.js", function() {
 
     const testGetRows = async function(fetchArraySize) {
       oracledb.fetchArraySize = fetchArraySize;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select * from " + tableName + " order by id",
         [],
         { resultSet: true }
       );
-      let rowCount = 0;
+      const rowCount = 0;
       await fetchRowFromRS(result.resultSet, rowCount);
     };
 
     async function fetchRowFromRS(rs, rowCount) {
-      let row = await rs.getRow();
+      const row = await rs.getRow();
       if (row) {
         rowCount++;
         assert.strictEqual(row[0], rowCount);
@@ -287,17 +287,17 @@ describe("151. fetchArraySize4.js", function() {
 
     const testRS = async function(fetchArraySizeVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select * from " + tableName + " order by id",
         [],
         { resultSet: true }
       );
-      let rowCount = 0;
+      const rowCount = 0;
       await fetchRowFromRS(result.resultSet, rowCount);
     };
 
     async function fetchRowFromRS(rs, rowCount) {
-      let row = await rs.getRow();
+      const row = await rs.getRow();
       if (row) {
         rowCount = rowCount + 1;
         assert.strictEqual(row[0], rowCount);
@@ -310,7 +310,7 @@ describe("151. fetchArraySize4.js", function() {
     }
 
     async function fetchRowsFromRS_1(rs, rowCount) {
-      let rows = await rs.getRows(numRowsVal_1);
+      const rows = await rs.getRows(numRowsVal_1);
       assert(rows.length <= numRowsVal_1);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
@@ -326,7 +326,7 @@ describe("151. fetchArraySize4.js", function() {
     }
 
     async function fetchRowsFromRS_2(rs, rowCount) {
-      let rows = await rs.getRows(numRowsVal_2);
+      const rows = await rs.getRows(numRowsVal_2);
       assert(rows.length <= numRowsVal_2);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
@@ -342,49 +342,49 @@ describe("151. fetchArraySize4.js", function() {
     }
 
     it("151.3.1 oracledb.fetchArraySize = 1", async function() {
-      let fetchArraySizeVal = 1;
+      const fetchArraySizeVal = 1;
       numRowsVal_1 = 2;
       numRowsVal_2 = 10;
       await testRS(fetchArraySizeVal);
     });
 
     it("151.3.2 oracledb.fetchArraySize = tableSize/50", async function() {
-      let fetchArraySizeVal = tableSize / 50;
+      const fetchArraySizeVal = tableSize / 50;
       numRowsVal_1 = 5;
       numRowsVal_2 = 88;
       await testRS(fetchArraySizeVal);
     });
 
     it("151.3.3 oracledb.fetchArraySize = tableSize/20", async function() {
-      let fetchArraySizeVal = tableSize / 20;
+      const fetchArraySizeVal = tableSize / 20;
       numRowsVal_1 = 50;
       numRowsVal_2 = 100;
       await testRS(fetchArraySizeVal);
     });
 
     it("151.3.4 oracledb.fetchArraySize = tableSize/10", async function() {
-      let fetchArraySizeVal = tableSize / 10;
+      const fetchArraySizeVal = tableSize / 10;
       numRowsVal_1 = 30;
       numRowsVal_2 = 99;
       await testRS(fetchArraySizeVal);
     });
 
     it("151.3.5 oracledb.fetchArraySize = tableSize/5", async function() {
-      let fetchArraySizeVal = tableSize / 5;
+      const fetchArraySizeVal = tableSize / 5;
       numRowsVal_1 = 5;
       numRowsVal_2 = 88;
       await testRS(fetchArraySizeVal);
     });
 
     it("151.3.6 oracledb.fetchArraySize = tableSize", async function() {
-      let fetchArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize;
       numRowsVal_1 = 15;
       numRowsVal_2 = tableSize;
       await testRS(fetchArraySizeVal);
     });
 
     it("151.3.6 oracledb.fetchArraySize = (tableSize - 1)", async function() {
-      let fetchArraySizeVal = tableSize - 1;
+      const fetchArraySizeVal = tableSize - 1;
       numRowsVal_1 = tableSize - 1;
       numRowsVal_2 = tableSize;
       await testRS(fetchArraySizeVal);

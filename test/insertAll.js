@@ -50,7 +50,7 @@ describe('158. insertAll.js', function() {
 
   it('158.1 original case from the issue', async function() {
 
-    let dataLength = 35000;
+    const dataLength = 35000;
     //Create the table
     const proc = "BEGIN \n" +
                  "    DECLARE \n" +
@@ -85,7 +85,7 @@ describe('158. insertAll.js', function() {
     // Run a select query to get the inserted LOB's length
     sql = "select dbms_lob.getlength(val) from nodb_tab_insertall";
     result = await conn.execute(sql);
-    let buf = result.rows[0][0];
+    const buf = result.rows[0][0];
     assert.strictEqual(buf, dataLength);
 
     // Drop the table

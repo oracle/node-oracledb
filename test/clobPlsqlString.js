@@ -65,7 +65,7 @@ describe('60. clobPlsqlString.js', function() {
     }); // before
 
     it('60.1.1 PL/SQL OUT CLOB parameters can also be bound as STRING',  async function() {
-      let result =  await connection.execute(`BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;`,
+      const result =  await connection.execute(`BEGIN SELECT content INTO :cbv FROM nodb_myclobs WHERE num = :id; END;`,
         {
           id: 1,
           cbv: { type: oracledb.STRING, dir: oracledb.BIND_OUT}
@@ -104,7 +104,7 @@ describe('60. clobPlsqlString.js', function() {
 
         lob.on("error", reject);
 
-        let inStream = new stream.Readable();
+        const inStream = new stream.Readable();
         inStream._read = function noop() {};
         inStream.push(rawData);
         inStream.push(null);

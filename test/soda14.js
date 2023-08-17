@@ -47,7 +47,7 @@ describe('238. soda14.js', () => {
   const DocSize = numBatches * numRowsInBatch;
 
   before(async function() {
-    let isSodaRunnable = await testsUtil.isSodaRunnable();
+    const isSodaRunnable = await testsUtil.isSodaRunnable();
 
     const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
@@ -82,7 +82,7 @@ describe('238. soda14.js', () => {
 
   after(async () => {
     if (conn) {
-      let result = await coll.drop();
+      const result = await coll.drop();
       assert.strictEqual(result.dropped, true);
 
       await conn.close();

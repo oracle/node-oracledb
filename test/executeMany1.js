@@ -78,7 +78,7 @@ describe('163. executeMany1.js', function() {
       { a: 5, b: "Test 5 (Five)" }
     ];
     let sql = "INSERT INTO nodb_tab_xmany VALUES (:a, :b)";
-    let options = {
+    const options = {
       autoCommit: true,
       bindDefs: {
         a: { type: oracledb.NUMBER },
@@ -483,7 +483,7 @@ describe('163. executeMany1.js', function() {
       { a: 7, b: "Test 7 (Seven)" },
       { a: 8, b: 8 }
     ];
-    let sql = "INSERT INTO nodb_tab_xmany VALUES (:a, :b)";
+    const sql = "INSERT INTO nodb_tab_xmany VALUES (:a, :b)";
 
     await assert.rejects(
       async () => await conn.executeMany(sql, binds, { dmlRowCounts: true }),

@@ -95,7 +95,7 @@ describe('207. dbObject8.js', () => {
     );
 
     // Insert Method 1: pass a JavaScript object to the constructor
-    let crops = [];
+    const crops = [];
     crops[0] = ['Apples', 'Pears', 'Peaches'];
     const farm1 = new FarmType(
       {
@@ -167,7 +167,7 @@ describe('207. dbObject8.js', () => {
 
     // Querying
 
-    let result = await conn.execute(
+    const result = await conn.execute(
       `SELECT id, farm FROM ${TABLE}`,
       [],
       { outFormat: oracledb.OUT_FORMAT_OBJECT }

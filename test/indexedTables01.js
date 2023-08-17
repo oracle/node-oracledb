@@ -38,7 +38,7 @@ const dbConfig  = require('./dbconfig.js');
 describe('237. indexedTables01.js', () => {
 
   let conn;
-  let pkgName = 'nodb_pkg_indexed_tables';
+  const pkgName = 'nodb_pkg_indexed_tables';
 
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);

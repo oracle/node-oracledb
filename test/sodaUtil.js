@@ -34,7 +34,7 @@
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 
-let sodaUtil = exports;
+const sodaUtil = exports;
 module.exports = sodaUtil;
 
 let isSodaRoleGranted = false;
@@ -42,12 +42,12 @@ let isSodaRoleGranted = false;
 sodaUtil.cleanup = async function() {
   const conn = await oracledb.getConnection(dbConfig);
   try {
-    let sd = conn.getSodaDatabase();
+    const sd = conn.getSodaDatabase();
 
-    let cNames = await sd.getCollectionNames();
+    const cNames = await sd.getCollectionNames();
     if (cNames.length > 0) {
       for (let i = 0; i < cNames.length; i++) {
-        let coll = await sd.openCollection(cNames[i]);
+        const coll = await sd.openCollection(cNames[i]);
         await coll.drop();
       }
     }
@@ -59,9 +59,9 @@ sodaUtil.cleanup = async function() {
 
 sodaUtil.isSodaRoleGranted = async function() {
   if (isSodaRoleGranted == false) {
-    let conn = await oracledb.getConnection(dbConfig);
-    let sql = `select count(*) from user_role_privs where GRANTED_ROLE='SODA_APP'`;
-    let result = await conn.execute(sql);
+    const conn = await oracledb.getConnection(dbConfig);
+    const sql = `select count(*) from user_role_privs where GRANTED_ROLE='SODA_APP'`;
+    const result = await conn.execute(sql);
     if (result.rows[0][0] == 1) {
       isSodaRoleGranted = true;
     }

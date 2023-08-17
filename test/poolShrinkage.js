@@ -44,8 +44,7 @@ const dbConfig = require('./dbconfig.js');
   }
 
   it('279.1 pool shrinkage during connection acquire always maintain min connection in pool', async () => {
-    let pool, conn;
-    pool = await oracledb.createPool({
+    const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 4,
       poolMax           : 10,
@@ -54,7 +53,7 @@ const dbConfig = require('./dbconfig.js');
     });
     assert.ok(pool);
     await sleep(1100);
-    conn = await pool.getConnection();
+    const conn = await pool.getConnection();
     await conn.execute('SELECT 1 FROM DUAL');
     assert.deepStrictEqual(pool.connectionsOpen, 4);
     assert.deepStrictEqual(pool.connectionsInUse, 1);
@@ -63,8 +62,7 @@ const dbConfig = require('./dbconfig.js');
   });
 
   it('279.2 pool shrinkage during connection acquire when poolTimeout greater than 0', async () => {
-    let pool, conn1;
-    pool = await oracledb.createPool({
+    const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
       poolMax           : 10,
@@ -73,7 +71,7 @@ const dbConfig = require('./dbconfig.js');
       homogeneous       : true
     });
     assert.ok(pool);
-    conn1 = await pool.getConnection();
+    const conn1 = await pool.getConnection();
     assert.deepStrictEqual(pool.connectionsOpen, 1);
     assert.deepStrictEqual(pool.connectionsInUse, 1);
     await conn1.close();
@@ -84,8 +82,7 @@ const dbConfig = require('./dbconfig.js');
   });
 
   it('279.3 pool shrinkage during connection release when poolTimeout greater than 0', async () => {
-    let pool, conn;
-    pool = await oracledb.createPool({
+    const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
       poolMax           : 10,
@@ -94,7 +91,7 @@ const dbConfig = require('./dbconfig.js');
       homogeneous       : true
     });
     assert.ok(pool);
-    conn = await pool.getConnection();
+    const conn = await pool.getConnection();
     assert.deepStrictEqual(pool.connectionsOpen, 3);
     assert.deepStrictEqual(pool.connectionsInUse, 1);
     await conn.close();
@@ -105,8 +102,7 @@ const dbConfig = require('./dbconfig.js');
   });
 
   it('279.4 pool shrinkage during connection release will wait for pool timeout time before emitting events', async () => {
-    let pool, conn, conn1, conn2;
-    pool = await oracledb.createPool({
+    const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
       poolMax           : 10,
@@ -115,9 +111,9 @@ const dbConfig = require('./dbconfig.js');
       homogeneous       : true
     });
     assert.ok(pool);
-    conn = await pool.getConnection();
-    conn1 = await pool.getConnection();
-    conn2 = await pool.getConnection();
+    const conn = await pool.getConnection();
+    const conn1 = await pool.getConnection();
+    const conn2 = await pool.getConnection();
     assert.deepStrictEqual(pool.connectionsOpen, 3);
     assert.deepStrictEqual(pool.connectionsInUse, 3);
     await conn.close();
@@ -132,8 +128,7 @@ const dbConfig = require('./dbconfig.js');
   });
 
   it('279.5 pool shrinkage during connection release will wait for pool timeout time before emitting events while maintaining min connection', async () => {
-    let pool, conn, conn1, conn2;
-    pool = await oracledb.createPool({
+    const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 1,
       poolMax           : 10,
@@ -142,9 +137,9 @@ const dbConfig = require('./dbconfig.js');
       homogeneous       : true
     });
     assert.ok(pool);
-    conn = await pool.getConnection();
-    conn1 = await pool.getConnection();
-    conn2 = await pool.getConnection();
+    const conn = await pool.getConnection();
+    const conn1 = await pool.getConnection();
+    const conn2 = await pool.getConnection();
     assert.deepStrictEqual(pool.connectionsOpen, 3);
     assert.deepStrictEqual(pool.connectionsInUse, 3);
     await conn.close();
@@ -159,8 +154,7 @@ const dbConfig = require('./dbconfig.js');
   });
 
   it('279.6 pool shrinkage during connection release will not happen when poolTimeout equals to 0', async () => {
-    let pool, conn;
-    pool = await oracledb.createPool({
+    const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
       poolMax           : 10,
@@ -169,7 +163,7 @@ const dbConfig = require('./dbconfig.js');
       homogeneous       : true
     });
     assert.ok(pool);
-    conn = await pool.getConnection();
+    const conn = await pool.getConnection();
     assert.deepStrictEqual(pool.connectionsOpen, 3);
     assert.deepStrictEqual(pool.connectionsInUse, 1);
     await conn.close();
@@ -180,8 +174,7 @@ const dbConfig = require('./dbconfig.js');
   });
 
   it('279.7 pool shrinkage will not happen when poolTimeout is 0', async () => {
-    let pool, conn;
-    pool = await oracledb.createPool({
+    const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
       poolMax           : 10,
@@ -190,7 +183,7 @@ const dbConfig = require('./dbconfig.js');
       homogeneous       : true
     });
     assert.ok(pool);
-    conn = await pool.getConnection();
+    const conn = await pool.getConnection();
     assert.deepStrictEqual(pool.connectionsOpen, 3);
     assert.deepStrictEqual(pool.connectionsInUse, 1);
     await sleep(1100);

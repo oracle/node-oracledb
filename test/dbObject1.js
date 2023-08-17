@@ -42,7 +42,7 @@ describe('200. dbObject1.js', () => {
   const TYPE = 'NODB_TYP_OBJ_1';
   const TABLE  = 'NODB_TAB_OBJ1';
 
-  let proc1 =
+  const proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is
       begin
         open p_cur for
@@ -52,7 +52,7 @@ describe('200. dbObject1.js', () => {
         WHERE num >= 108;
       end; `;
 
-  let proc2 =
+  const proc2 =
     `create or replace procedure nodb_getDataCursor2(p_cur out sys_refcursor) is
        begin
          open p_cur for
@@ -62,7 +62,7 @@ describe('200. dbObject1.js', () => {
          WHERE num >= 300;
        end; `;
 
-  let proc3 =
+  const proc3 =
       `create or replace procedure nodb_getDataCursor3(
           p_cur1 out sys_refcursor,
           p_cur2 out sys_refcursor
@@ -87,7 +87,7 @@ describe('200. dbObject1.js', () => {
         num NUMBER,
         person ${TYPE}
       )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
     await conn.execute(plsql);
   }); // before()
 
@@ -258,7 +258,8 @@ describe('200. dbObject1.js', () => {
 
   it('200.8 insert multiple rows using executeMany() with inferred data type', async () => {
     const objClass = await conn.getDbObjectClass(TYPE);
-    let initialID = 208, initialSeq = 108;
+    let initialID = 208;
+    const initialSeq = 108;
 
     const objDataArray = [
       {
@@ -274,7 +275,7 @@ describe('200. dbObject1.js', () => {
         NAME: 'Anthony Tuininga'
       }
     ];
-    let bindArray = [];
+    const bindArray = [];
     let seq, objDataObj;
     for (let i = 0; i < objDataArray.length; i++) {
       seq = initialSeq + i;
@@ -300,7 +301,8 @@ describe('200. dbObject1.js', () => {
 
   it('200.9 insert multiple rows using executeMany() with explicit data type', async () => {
     const objClass = await conn.getDbObjectClass(TYPE);
-    let initialID = 3000, initialSeq = 300;
+    let initialID = 3000;
+    const initialSeq = 300;
 
     const objDataArray = [
       {
@@ -316,7 +318,7 @@ describe('200. dbObject1.js', () => {
         NAME: 'Anthony Tuininga'
       }
     ];
-    let bindArray = [];
+    const bindArray = [];
     let seq, objDataObj;
     for (let i = 0; i < objDataArray.length; i++) {
       seq = initialSeq + i;
@@ -348,7 +350,7 @@ describe('200. dbObject1.js', () => {
     await conn.execute(proc2);
     await conn.execute(proc3);
 
-    let result = await conn.execute(
+    const result = await conn.execute(
       `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
           p_cur2 => :p_cur2); end;`,
       {

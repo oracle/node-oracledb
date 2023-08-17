@@ -37,7 +37,7 @@ const dbConfig  = require('./dbconfig.js');
 
 describe('262. dbObjectOutBind.js', function() {
   let conn = null;
-  let proc1 =
+  const proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is
       begin
         open p_cur for
@@ -47,7 +47,7 @@ describe('262. dbObjectOutBind.js', function() {
             dual
         connect by level < 10;
       end; `;
-  let proc2 =
+  const proc2 =
     `create or replace procedure nodb_getDataCursor2(p_cur out sys_refcursor) is
       begin
         open p_cur for
@@ -64,7 +64,7 @@ describe('262. dbObjectOutBind.js', function() {
         )
         group by  group_by;
       end;`;
-  let proc3 =
+  const proc3 =
     `create or replace procedure nodb_getDataCursor3(p_cur out sys_refcursor) is
       begin
         open p_cur for
@@ -75,7 +75,7 @@ describe('262. dbObjectOutBind.js', function() {
           dual
         connect by level <= 10;
       end;`;
-  let proc4 =
+  const proc4 =
     `create or replace procedure nodb_getDataCursor4(p_cur out sys_refcursor) is
       begin
         open p_cur for
@@ -85,7 +85,7 @@ describe('262. dbObjectOutBind.js', function() {
           dual
         connect by level <= 8;
       end;`;
-  let proc5 =
+  const proc5 =
       `create or replace procedure nodb_getDataCursor5(
           p_cur1 out sys_refcursor,
           p_cur2 out sys_refcursor
@@ -94,7 +94,7 @@ describe('262. dbObjectOutBind.js', function() {
          nodb_getDataCursor1(p_cur1);
          nodb_getDataCursor2(p_cur2);
        end;`;
-  let proc6 =
+  const proc6 =
       `create or replace procedure nodb_getDataCursor6(
           p_cur1 out sys_refcursor,
           p_cur2 out sys_refcursor,
@@ -129,7 +129,7 @@ describe('262. dbObjectOutBind.js', function() {
   });
 
   it('262.1 call procedure with 2 OUT binds of DbObject', async function() {
-    let result = await conn.execute(
+    const result = await conn.execute(
       `BEGIN nodb_getDataCursor5(p_cur1 => :p_cur1,
           p_cur2 => :p_cur2); end;`,
       {
@@ -142,7 +142,7 @@ describe('262. dbObjectOutBind.js', function() {
   });
 
   it('262.2 call procedure with multiple OUT binds of DbObject', async function() {
-    let result = await conn.execute(
+    const result = await conn.execute(
       `BEGIN nodb_getDataCursor6(p_cur1 => :p_cur1,
           p_cur2 => :p_cur2, p_cur3 => :p_cur3, p_cur4 => :p_cur4); end;`,
       {

@@ -37,8 +37,8 @@ const dbConfig = require('./dbconfig.js');
 
 describe('249. rsGetAllRows1.js', function() {
   let conn = null;
-  let tableName = "nodb_rsgetRows";
-  let outFormatBak = oracledb.outFormat;
+  const tableName = "nodb_rsgetRows";
+  const outFormatBak = oracledb.outFormat;
   const create_table_sql =
     `BEGIN
       DECLARE
@@ -94,8 +94,8 @@ describe('249. rsGetAllRows1.js', function() {
   describe('249.1 ResultSet & getRows()', function() {
     it('249.1.1 ResultSet + getRows()', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true});
-      let rows = await result.resultSet.getRows();
+      const result = await conn.execute(rsSelect, {}, {resultSet : true});
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
       assert.equal(rows[1].OBJ_ID, 2);
@@ -106,8 +106,8 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.1.2 ResultSet + getRows(0)', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true});
-      let rows = await result.resultSet.getRows(0);
+      const result = await conn.execute(rsSelect, {}, {resultSet : true});
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
       assert.equal(rows[1].OBJ_ID, 2);
@@ -119,9 +119,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.1.3 ResultSet + getRows(125) + getRows()', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY });
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY });
       await result.resultSet.getRows(125);
-      let rows = await result.resultSet.getRows();
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 25);
       assert.equal(rows[0][0], 126);
       assert.equal(rows[24][0], 150);
@@ -131,9 +131,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.1.4 ResultSet + getRows(125) + getRows(0)', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true});
+      const result = await conn.execute(rsSelect, {}, {resultSet : true});
       await result.resultSet.getRows(125);
-      let rows = await result.resultSet.getRows(0);
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
       assert.equal(rows[24].OBJ_ID, 150);
@@ -143,9 +143,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.1.5 ResultSet + getRow() + getRows()', async function() {
 
-      let result = await conn.execute(rsSelect, {}, { resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY });
+      const result = await conn.execute(rsSelect, {}, { resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY });
       await result.resultSet.getRow();
-      let rows = await result.resultSet.getRows();
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 149);
       assert.equal(rows[0][0], 2);
       assert.equal(rows[148][0], 150);
@@ -155,9 +155,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.1.6 ResultSet + getRow() + getRows(0)', async function() {
 
-      let result = await conn.execute(rsSelect, {}, { resultSet : true });
+      const result = await conn.execute(rsSelect, {}, { resultSet : true });
       await result.resultSet.getRow();
-      let rows = await result.resultSet.getRows(0);
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
       assert.equal(rows[148].OBJ_ID, 150);
@@ -171,9 +171,9 @@ describe('249. rsGetAllRows1.js', function() {
 
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds);
-      let rs = results.outBinds.out;
-      let rows = await rs.getRows();
+      const results = await conn.execute(sql, binds);
+      const rs = results.outBinds.out;
+      const rows = await rs.getRows();
 
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
@@ -187,9 +187,9 @@ describe('249. rsGetAllRows1.js', function() {
 
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds);
-      let rs = results.outBinds.out;
-      let rows = await rs.getRows(0);
+      const results = await conn.execute(sql, binds);
+      const rs = results.outBinds.out;
+      const rows = await rs.getRows(0);
 
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
@@ -203,10 +203,10 @@ describe('249. rsGetAllRows1.js', function() {
 
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds);
-      let rs = results.outBinds.out;
+      const results = await conn.execute(sql, binds);
+      const rs = results.outBinds.out;
       await rs.getRows(125);
-      let rows = await rs.getRows();
+      const rows = await rs.getRows();
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
       assert.equal(rows[24].OBJ_ID, 150);
@@ -216,12 +216,12 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.2.4 RefCursor + getRows(125) & getRows(0)',  async function() {
 
-      let results = await conn.execute(
+      const results = await conn.execute(
         "BEGIN nodb_rsgetRowsOut ( :out ); END;",
         { out: {type : oracledb.CURSOR, dir : oracledb.BIND_OUT} });
-      let rs = results.outBinds.out;
+      const rs = results.outBinds.out;
       await rs.getRows(125);
-      let rows = await rs.getRows(0);
+      const rows = await rs.getRows(0);
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
       assert.equal(rows[24].OBJ_ID, 150);
@@ -231,12 +231,12 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.2.5 RefCursor + getRow() & getRows()',  async function() {
 
-      let results = await conn.execute(
+      const results = await conn.execute(
         "BEGIN nodb_rsgetRowsOut ( :out ); END;",
         { out: {type : oracledb.CURSOR, dir : oracledb.BIND_OUT} });
-      let rs = results.outBinds.out;
+      const rs = results.outBinds.out;
       await rs.getRow();
-      let rows = await rs.getRows();
+      const rows = await rs.getRows();
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
       assert.equal(rows[148].OBJ_ID, 150);
@@ -246,12 +246,12 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.2.6 RefCursor + getRow() & getRows(0)',  async function() {
 
-      let results = await conn.execute(
+      const results = await conn.execute(
         "BEGIN nodb_rsgetRowsOut ( :out ); END;",
         { out: {type : oracledb.CURSOR, dir : oracledb.BIND_OUT} });
-      let rs = results.outBinds.out;
+      const rs = results.outBinds.out;
       await rs.getRow();
-      let rows = await rs.getRows(0);
+      const rows = await rs.getRows(0);
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
       assert.equal(rows[148].OBJ_ID, 150);
@@ -263,9 +263,9 @@ describe('249. rsGetAllRows1.js', function() {
   describe('249.3 ResultSet & getRows() with fetchArraySize', function() {
     it('249.3.1 ResultSet + getRows() with fetchArraySize = total rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 150 });
-      let rows1 = await result.resultSet.getRows();
-      let rows2 = await result.resultSet.getRows();
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 150 });
+      const rows1 = await result.resultSet.getRows();
+      const rows2 = await result.resultSet.getRows();
       assert.equal(rows1.length, 150);
       assert.equal(rows2.length, 0);
       assert.equal(rows1[0].OBJ_ID, 1);
@@ -276,9 +276,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.2 ResultSet + getRows(0) with fetchArraySize = total rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 150 });
-      let rows1 = await result.resultSet.getRows(0);
-      let rows2 = await result.resultSet.getRows(0);
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 150 });
+      const rows1 = await result.resultSet.getRows(0);
+      const rows2 = await result.resultSet.getRows(0);
       assert.equal(rows1.length, 150);
       assert.equal(rows2.length, 0);
       assert.equal(rows1[0].OBJ_ID, 1);
@@ -289,9 +289,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.3 ResultSet + getRows() with fetchArraySize > total rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 200 });
-      let rows1 = await result.resultSet.getRows();
-      let rows2 = await result.resultSet.getRows();
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 200 });
+      const rows1 = await result.resultSet.getRows();
+      const rows2 = await result.resultSet.getRows();
       assert.equal(rows1.length, 150);
       assert.equal(rows2.length, 0);
       assert.equal(rows1[0].OBJ_ID, 1);
@@ -302,9 +302,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.4 ResultSet + getRows(0) with fetchArraySize > total rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 200 });
-      let rows1 = await result.resultSet.getRows(0);
-      let rows2 = await result.resultSet.getRows(0);
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 200 });
+      const rows1 = await result.resultSet.getRows(0);
+      const rows2 = await result.resultSet.getRows(0);
       assert.equal(rows1.length, 150);
       assert.equal(rows2.length, 0);
       assert.equal(rows1[0].OBJ_ID, 1);
@@ -315,8 +315,8 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.5 ResultSet + getRows() with fetchArraySize < total rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 100 });
-      let rows = await result.resultSet.getRows();
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 100 });
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
       assert.equal(rows[1].OBJ_ID, 2);
@@ -326,8 +326,8 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.6 ResultSet + getRows(0) with fetchArraySize < total rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 100 });
-      let rows = await result.resultSet.getRows(0);
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 100 });
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
       assert.equal(rows[1].OBJ_ID, 2);
@@ -338,9 +338,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.7 ResultSet + getRows(125) + getRows() with fetchArraySize > remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 30 });
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 30 });
       await result.resultSet.getRows(125);
-      let rows = await result.resultSet.getRows();
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
       assert.equal(rows[24].OBJ_ID, 150);
@@ -350,9 +350,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.8 ResultSet + getRows(125) + getRows(0) with fetchArraySize > remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 30 });
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 30 });
       await result.resultSet.getRows(125);
-      let rows = await result.resultSet.getRows(0);
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
       assert.equal(rows[24].OBJ_ID, 150);
@@ -362,9 +362,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.9 ResultSet + getRows(125) + getRows() with fetchArraySize < remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 20 });
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 20 });
       await result.resultSet.getRows(125);
-      let rows = await result.resultSet.getRows();
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
       assert.equal(rows[24].OBJ_ID, 150);
@@ -374,9 +374,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.10 ResultSet + getRows(125) + getRows(0) with fetchArraySize < remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 20 });
+      const result = await conn.execute(rsSelect, {}, {resultSet : true, fetchArraySize : 20 });
       await result.resultSet.getRows(125);
-      let rows = await result.resultSet.getRows(0);
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
       assert.equal(rows[24].OBJ_ID, 150);
@@ -386,9 +386,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.11 ResultSet + getRow() + getRows() with fetchArraySize > remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 200 });
+      const result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 200 });
       await result.resultSet.getRow();
-      let rows = await result.resultSet.getRows();
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
       assert.equal(rows[148].OBJ_ID, 150);
@@ -397,9 +397,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.12 ResultSet + getRow() + getRows(0) with fetchArraySize > remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 200 });
+      const result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 200 });
       await result.resultSet.getRow();
-      let rows = await result.resultSet.getRows(0);
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
       assert.equal(rows[148].OBJ_ID, 150);
@@ -409,9 +409,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.13 ResultSet + getRow() + getRows() with fetchArraySize < remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 100 });
+      const result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 100 });
       await result.resultSet.getRow();
-      let rows = await result.resultSet.getRows();
+      const rows = await result.resultSet.getRows();
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
       assert.equal(rows[148].OBJ_ID, 150);
@@ -421,9 +421,9 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.3.14 ResultSet + getRow() + getRows(0) with fetchArraySize < remaining rows', async function() {
 
-      let result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 100 });
+      const result = await conn.execute(rsSelect, {}, { resultSet : true, fetchArraySize : 100 });
       await result.resultSet.getRow();
-      let rows = await result.resultSet.getRows(0);
+      const rows = await result.resultSet.getRows(0);
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
       assert.equal(rows[148].OBJ_ID, 150);
@@ -437,9 +437,9 @@ describe('249. rsGetAllRows1.js', function() {
 
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds, { fetchArraySize : 200 });
-      let rs = results.outBinds.out;
-      let rows = await rs.getRows();
+      const results = await conn.execute(sql, binds, { fetchArraySize : 200 });
+      const rs = results.outBinds.out;
+      const rows = await rs.getRows();
 
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
@@ -453,9 +453,9 @@ describe('249. rsGetAllRows1.js', function() {
 
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds, { fetchArraySize : 200 });
-      let rs = results.outBinds.out;
-      let rows = await rs.getRows(0);
+      const results = await conn.execute(sql, binds, { fetchArraySize : 200 });
+      const rs = results.outBinds.out;
+      const rows = await rs.getRows(0);
 
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
@@ -467,9 +467,9 @@ describe('249. rsGetAllRows1.js', function() {
     it('249.4.3 RefCursor getRows() with fetchArraySize < total rows', async function() {
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds, { fetchArraySize : 100 });
-      let rs = results.outBinds.out;
-      let rows = await rs.getRows();
+      const results = await conn.execute(sql, binds, { fetchArraySize : 100 });
+      const rs = results.outBinds.out;
+      const rows = await rs.getRows();
 
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
@@ -481,9 +481,9 @@ describe('249. rsGetAllRows1.js', function() {
 
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds, { fetchArraySize : 100 });
-      let rs = results.outBinds.out;
-      let rows = await rs.getRows(0);
+      const results = await conn.execute(sql, binds, { fetchArraySize : 100 });
+      const rs = results.outBinds.out;
+      const rows = await rs.getRows(0);
 
       assert.equal(rows.length, 150);
       assert.equal(rows[0].OBJ_ID, 1);
@@ -494,10 +494,10 @@ describe('249. rsGetAllRows1.js', function() {
     it('249.4.5 RefCursor + getRows(125) & getRows() with fetchArraySize < remaining rows', async function() {
       const sql = "BEGIN nodb_rsgetRowsOut ( :out ); END;";
       const binds = {out: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}};
-      let results = await conn.execute(sql, binds, { fetchArraySize : 20 });
-      let rs = results.outBinds.out;
+      const results = await conn.execute(sql, binds, { fetchArraySize : 20 });
+      const rs = results.outBinds.out;
       await rs.getRows(125);
-      let rows = await rs.getRows();
+      const rows = await rs.getRows();
 
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
@@ -506,12 +506,12 @@ describe('249. rsGetAllRows1.js', function() {
     });
 
     it('249.4.6 RefCursor + getRows(125) & getRows(0) with fetchArraySize < remaining rows',  async function() {
-      let results = await conn.execute(
+      const results = await conn.execute(
         "BEGIN nodb_rsgetRowsOut ( :out ); END;",
         { out: {type : oracledb.CURSOR, dir : oracledb.BIND_OUT} }, { fetchArraySize : 20 });
-      let rs = results.outBinds.out;
+      const rs = results.outBinds.out;
       await rs.getRows(125);
-      let rows = await rs.getRows(0);
+      const rows = await rs.getRows(0);
 
       assert.equal(rows.length, 25);
       assert.equal(rows[0].OBJ_ID, 126);
@@ -521,12 +521,12 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.4.7 RefCursor + getRow() & getRows() with fetchArraySize < remaining rows',  async function() {
 
-      let results = await conn.execute(
+      const results = await conn.execute(
         "BEGIN nodb_rsgetRowsOut ( :out ); END;",
         { out: {type : oracledb.CURSOR, dir : oracledb.BIND_OUT} }, { fetchArraySize : 100 });
-      let rs = results.outBinds.out;
+      const rs = results.outBinds.out;
       await rs.getRow();
-      let rows = await rs.getRows();
+      const rows = await rs.getRows();
 
       assert.equal(rows.length, 149);
       assert.equal(rows[0].OBJ_ID, 2);
@@ -537,12 +537,12 @@ describe('249. rsGetAllRows1.js', function() {
 
     it('249.4.8 RefCursor + getRow() & getRows(0) with fetchArraySize < remaining rows',  async function() {
 
-      let results = await conn.execute(
+      const results = await conn.execute(
         "BEGIN nodb_rsgetRowsOut ( :out ); END;",
         { out: {type : oracledb.CURSOR, dir : oracledb.BIND_OUT} }, { fetchArraySize : 100, outFormat : oracledb.OUT_FORMAT_ARRAY });
-      let rs = results.outBinds.out;
+      const rs = results.outBinds.out;
       await rs.getRow();
-      let rows = await rs.getRows(0);
+      const rows = await rs.getRows(0);
 
       assert.equal(rows.length, 149);
       assert.equal(rows[0][0], 2);

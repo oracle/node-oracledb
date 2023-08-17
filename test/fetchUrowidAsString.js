@@ -42,8 +42,8 @@ describe('116. fetchUrowidAsString.js', function() {
 
   let connection = null;
   const tableName = "nodb_rowid";
-  let dataArray = random.getRandomNumArray(30);
-  let numRows = dataArray.length;  // number of rows to return from each call to getRows()
+  const dataArray = random.getRandomNumArray(30);
+  const numRows = dataArray.length;  // number of rows to return from each call to getRows()
 
   const proc_create_table = "BEGIN \n" +
                             "    DECLARE \n" +
@@ -73,22 +73,22 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   const insertData = async function(connection, tableName) {
-    for (let element in dataArray) {
+    for (const element in dataArray) {
       const sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
       await connection.execute(sql);
     }
   };
 
   const updateData = async function(connection, tableName) {
-    for (let element in dataArray) {
+    for (const element in dataArray) {
       const sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
       await connection.execute(sql);
     }
   };
 
   describe('116.1 works with fetchInfo option', function() {
-    let maxRowBak = oracledb.maxRows;
-    let option = { fetchInfo: { "CONTENT": { type: oracledb.STRING } } };
+    const maxRowBak = oracledb.maxRows;
+    const option = { fetchInfo: { "CONTENT": { type: oracledb.STRING } } };
     before(async function() {
       await connection.execute(proc_create_table);
       await insertData(connection, tableName);
@@ -135,7 +135,7 @@ describe('116. fetchUrowidAsString.js', function() {
     });
 
     it('116.1.8 fetchInfo, resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
       };
@@ -145,8 +145,8 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   describe('116.2 works with fetchInfo and outFormat = OBJECT', function() {
-    let maxRowBak = oracledb.maxRows;
-    let option = {
+    const maxRowBak = oracledb.maxRows;
+    const option = {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
@@ -166,7 +166,7 @@ describe('116. fetchUrowidAsString.js', function() {
     });
 
     it('116.2.2 fetchInfo, outFormat = OBJECT, and resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
@@ -206,8 +206,8 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   describe('116.3 works with fetchInfo and outFormat = ARRAY', function() {
-    let maxRowBak = oracledb.maxRows;
-    let option = {
+    const maxRowBak = oracledb.maxRows;
+    const option = {
       outFormat: oracledb.OUT_FORMAT_ARRAY,
       fetchInfo: { "CONTENT": { type: oracledb.STRING } }
     };
@@ -257,7 +257,7 @@ describe('116. fetchUrowidAsString.js', function() {
     });
 
     it('116.3.8 fetchInfo, resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_ARRAY,
         fetchInfo: { "CONTENT": { type: oracledb.STRING } }
@@ -267,8 +267,8 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   describe('116.4 fetch as string by default', function() {
-    let maxRowBak = oracledb.maxRows;
-    let option = {};
+    const maxRowBak = oracledb.maxRows;
+    const option = {};
     before(async function() {
       await connection.execute(proc_create_table);
       await insertData(connection, tableName);
@@ -316,7 +316,7 @@ describe('116. fetchUrowidAsString.js', function() {
     });
 
     it('116.4.8 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
       };
       await test2(option_rs, false);
@@ -325,8 +325,8 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   describe('116.5 fetch as string by default with outFormat = OBJECT', function() {
-    let maxRowBak = oracledb.maxRows;
-    let option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const maxRowBak = oracledb.maxRows;
+    const option = { outFormat: oracledb.OUT_FORMAT_OBJECT };
     before(async function() {
       await connection.execute(proc_create_table);
       await insertData(connection, tableName);
@@ -374,7 +374,7 @@ describe('116. fetchUrowidAsString.js', function() {
     });
 
     it('116.5.8 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_OBJECT
       };
@@ -384,8 +384,8 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   describe('116.6 fetch as string by default with outFormat = ARRAY', function() {
-    let maxRowBak = oracledb.maxRows;
-    let option = { outFormat: oracledb.OUT_FORMAT_ARRAY };
+    const maxRowBak = oracledb.maxRows;
+    const option = { outFormat: oracledb.OUT_FORMAT_ARRAY };
     before(async function() {
       await connection.execute(proc_create_table);
       await insertData(connection, tableName);
@@ -432,7 +432,7 @@ describe('116. fetchUrowidAsString.js', function() {
     });
 
     it('116.6.8 resultSet = true', async function() {
-      let option_rs = {
+      const option_rs = {
         resultSet: true,
         outFormat: oracledb.OUT_FORMAT_ARRAY,
       };
@@ -442,9 +442,9 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   async function test1(option, object) {
-    for (let element in dataArray) {
+    for (const element in dataArray) {
       const sql = "select content,rowid from " + tableName + " where num = " + element;
-      let result = await connection.execute(sql, [], option);
+      const result = await connection.execute(sql, [], option);
       let resultVal_1 = result.rows[0][0];
       let resultVal_2 = result.rows[0][1];
       if (object === true) {
@@ -458,10 +458,10 @@ describe('116. fetchUrowidAsString.js', function() {
   }
 
   async function test2(option, object) {
-    for (let element in dataArray) {
+    for (const element in dataArray) {
       const sql = "select content,rowid from " + tableName + " where num = " + element;
-      let result = await connection.execute(sql, [], option);
-      let row = await result.resultSet.getRow();
+      const result = await connection.execute(sql, [], option);
+      const row = await result.resultSet.getRow();
       let resultVal_1 = row[0];
       let resultVal_2 = row[1];
 
@@ -477,9 +477,9 @@ describe('116. fetchUrowidAsString.js', function() {
   }
 
   async function testMaxRow(option) {
-    let sql = "select CONTENT from " + tableName;
-    let result = await connection.execute(sql, [], option);
-    let rowExpected = (oracledb.maxRows >= numRows) ? numRows : oracledb.maxRows;
+    const sql = "select CONTENT from " + tableName;
+    const result = await connection.execute(sql, [], option);
+    const rowExpected = (oracledb.maxRows >= numRows) ? numRows : oracledb.maxRows;
     assert.strictEqual(result.rows.length, rowExpected);
   }
 
@@ -487,7 +487,7 @@ describe('116. fetchUrowidAsString.js', function() {
     const sql = "select CONTENT from " + tableName;
     const stream = await connection.queryStream(sql, [], option);
 
-    let result = [];
+    const result = [];
     await new Promise((resolve, reject) => {
       stream.on('error', reject);
       stream.on('end', function() {

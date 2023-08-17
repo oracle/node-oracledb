@@ -61,7 +61,7 @@ describe('86. fetchClobAsString3.js', function() {
                              "    '); \n" +
                              "END; ";
   const drop_table2 = "DROP TABLE nodb_clob2 PURGE";
-  let defaultStmtCache = oracledb.stmtCacheSize;
+  const defaultStmtCache = oracledb.stmtCacheSize;
 
   before('get one connection', async function() {
     oracledb.stmtCacheSize = 0;
@@ -74,7 +74,7 @@ describe('86. fetchClobAsString3.js', function() {
   });  // after
 
   const insertIntoClobTable2 = async function(id, content1, content2) {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "INSERT INTO nodb_clob2 VALUES (:ID, :C1, :C2)",
       [ id, content1, content2 ]
     );
@@ -100,38 +100,38 @@ describe('86. fetchClobAsString3.js', function() {
     }); // afterEach
 
     it('86.1.1 fetch multiple CLOB columns as String', async function() {
-      let id = insertID++;
-      let specialStr_1 = '86.1.1_1';
+      const id = insertID++;
+      const specialStr_1 = '86.1.1_1';
       const contentLength_1 = 26;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let specialStr_2 = '86.1.1_2';
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const specialStr_2 = '86.1.1_2';
       const contentLength_2 = 100;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertIntoClobTable2(id, content_1, content_2);
 
-      let result = await connection.execute("SELECT ID, C1, C2 from nodb_clob2");
-      let specialStrLen_1 = specialStr_1.length;
-      let resultLen_1 = result.rows[0][1].length;
+      const result = await connection.execute("SELECT ID, C1, C2 from nodb_clob2");
+      const specialStrLen_1 = specialStr_1.length;
+      const resultLen_1 = result.rows[0][1].length;
       assert.strictEqual(result.rows[0][1].length, contentLength_1);
       assert.strictEqual(result.rows[0][1].substring(0, specialStrLen_1), specialStr_1);
       assert.strictEqual(result.rows[0][1].substring(resultLen_1 - specialStrLen_1, resultLen_1), specialStr_1);
 
-      let specialStrLen_2 = specialStr_2.length;
-      let resultLen_2 = result.rows[0][2].length;
+      const specialStrLen_2 = specialStr_2.length;
+      const resultLen_2 = result.rows[0][2].length;
       assert.strictEqual(result.rows[0][2].length, contentLength_2);
       assert.strictEqual(result.rows[0][2].substring(0, specialStrLen_2), specialStr_2);
       assert.strictEqual(result.rows[0][2].substring(resultLen_2 - specialStrLen_2, resultLen_2), specialStr_2);
     }); // 86.1.1
 
     it('86.1.2 fetch two CLOB columns, one as string, another streamed', async function() {
-      let id = insertID++;
+      const id = insertID++;
       const specialStr_1 = '86.1.2_1';
       const contentLength_1 = 30;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
       const specialStr_2 = '86.1.2_2';
       const contentLength_2 = 50;
-      let content_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = random.getRandomString(contentLength_2, specialStr_2);
 
       await insertIntoClobTable2(id, content_1, content_2);
 
@@ -139,8 +139,8 @@ describe('86. fetchClobAsString3.js', function() {
         "SELECT ID, C1 from nodb_clob2 where ID = :id",
         { id: id }
       );
-      let specialStrLen_1 = specialStr_1.length;
-      let resultLen_1 = result.rows[0][1].length;
+      const specialStrLen_1 = specialStr_1.length;
+      const resultLen_1 = result.rows[0][1].length;
       assert.strictEqual(result.rows[0][1].length, contentLength_1);
       assert.strictEqual(result.rows[0][1].substring(0, specialStrLen_1), specialStr_1);
       assert.strictEqual(result.rows[0][1].substring(resultLen_1 - specialStrLen_1, resultLen_1), specialStr_1);
@@ -152,35 +152,35 @@ describe('86. fetchClobAsString3.js', function() {
       );
       assert.notStrictEqual(result.rows.length, 0);
 
-      let lob = result.rows[0][0];
+      const lob = result.rows[0][0];
       assert(lob);
       // set the encoding so we get a 'string' not a 'String'
       lob.setEncoding('utf8');
-      let clobData = await lob.getData();
-      let specialStrLen_2 = specialStr_2.length;
-      let resultLen_2 = clobData.length;
+      const clobData = await lob.getData();
+      const specialStrLen_2 = specialStr_2.length;
+      const resultLen_2 = clobData.length;
       assert.strictEqual(clobData.length, contentLength_2);
       assert.strictEqual(clobData.substring(0, specialStrLen_2), specialStr_2);
       assert.strictEqual(clobData.substring(resultLen_2 - specialStrLen_2, resultLen_2), specialStr_2);
     }); // 86.1.2
 
     it('86.1.3 works with Restult Set', async function() {
-      let id = insertID++;
-      let specialStr_1 = '86.1.3';
-      let contentLength_1 = 387;
-      let content_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const id = insertID++;
+      const specialStr_1 = '86.1.3';
+      const contentLength_1 = 387;
+      const content_1 = random.getRandomString(contentLength_1, specialStr_1);
 
-      let doClose = async function(rs) {
+      const doClose = async function(rs) {
         await rs.close();
       };
 
-      let fetchOneRowFromRS = async function(rs) {
-        let row = await rs.getRow();
+      const fetchOneRowFromRS = async function(rs) {
+        const row = await rs.getRow();
         if (!row) {
           await doClose(rs);
         } else {
-          let specialStrLen_1 = specialStr_1.length;
-          let resultLen_1 = row[0].length;
+          const specialStrLen_1 = specialStr_1.length;
+          const resultLen_1 = row[0].length;
           assert.strictEqual(row[0].length, contentLength_1);
           assert.strictEqual(
             row[0].substring(0, specialStrLen_1),
@@ -194,7 +194,7 @@ describe('86. fetchClobAsString3.js', function() {
         }
       };
 
-      let sql = "insert into nodb_clob2(id, c1) values (:i, :c)";
+      const sql = "insert into nodb_clob2(id, c1) values (:i, :c)";
       await connection.execute(
         sql,
         {
@@ -203,7 +203,7 @@ describe('86. fetchClobAsString3.js', function() {
         }
       );
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select c1 from nodb_clob2 where id = :1",
         [id],
         { resultSet: true }

@@ -42,7 +42,7 @@ describe('189. sodaOverwrite.js', function() {
 
   before(async function() {
 
-    let isSodaRunnable = await testsUtil.isSodaRunnable();
+    const isSodaRunnable = await testsUtil.isSodaRunnable();
 
     const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
@@ -80,10 +80,10 @@ describe('189. sodaOverwrite.js', function() {
   });
 
   it('189.1 Allows overwriting of public methods on SodaDatabase instance', function() {
-    let keys = Object.keys(sodaDB);
+    const keys = Object.keys(sodaDB);
     for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof sodaDB[keys[keysIdx]] === 'function') {
-        let originalFunction = sodaDB[keys[keysIdx]];
+        const originalFunction = sodaDB[keys[keysIdx]];
         sodaDB[keys[keysIdx]] = function() {};
         sodaDB[keys[keysIdx]] = originalFunction;
       }
@@ -91,10 +91,10 @@ describe('189. sodaOverwrite.js', function() {
   });
 
   it('189.2 Allows overwriting of public methods on SodaDocument instance', function() {
-    let keys = Object.keys(sodaDocument);
+    const keys = Object.keys(sodaDocument);
     for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof sodaDocument[keys[keysIdx]] === 'function') {
-        let originalFunction = sodaDocument[keys[keysIdx]];
+        const originalFunction = sodaDocument[keys[keysIdx]];
         sodaDocument[keys[keysIdx]] = function() {};
         sodaDocument[keys[keysIdx]] = originalFunction;
       }
@@ -102,10 +102,10 @@ describe('189. sodaOverwrite.js', function() {
   });
 
   it('189.3 Allows overwriting of public methods on SodaCollection instance', function() {
-    let keys = Object.keys(sodaCollection);
+    const keys = Object.keys(sodaCollection);
     for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof sodaCollection[keys[keysIdx]] === 'function') {
-        let originalFunction = sodaCollection[keys[keysIdx]];
+        const originalFunction = sodaCollection[keys[keysIdx]];
         sodaCollection[keys[keysIdx]] = function() {};
         sodaCollection[keys[keysIdx]] = originalFunction;
       }
@@ -113,10 +113,10 @@ describe('189. sodaOverwrite.js', function() {
   });
 
   it('189.4 Allows overwriting of public methods on SodaOperation instance', function() {
-    let keys = Object.keys(sodaOperation);
+    const keys = Object.keys(sodaOperation);
     for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof sodaOperation[keys[keysIdx]] === 'function') {
-        let originalFunction = sodaOperation[keys[keysIdx]];
+        const originalFunction = sodaOperation[keys[keysIdx]];
         sodaOperation[keys[keysIdx]] = function() {};
         sodaOperation[keys[keysIdx]] = originalFunction;
       }
@@ -124,10 +124,10 @@ describe('189. sodaOverwrite.js', function() {
   });
 
   it('189.5 Allows overwriting of public methods on SodaDocCursor instance', function() {
-    let keys = Object.keys(sodaCursor);
+    const keys = Object.keys(sodaCursor);
     for (let keysIdx = 0; keysIdx < keys.length; keysIdx += 1) {
       if (typeof sodaCursor[keys[keysIdx]] === 'function') {
-        let originalFunction = sodaCursor[keys[keysIdx]];
+        const originalFunction = sodaCursor[keys[keysIdx]];
         sodaCursor[keys[keysIdx]] = function() {};
         sodaCursor[keys[keysIdx]] = originalFunction;
       }

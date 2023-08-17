@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 describe('14. stream2.js', function() {
 
   let connection = null;
-  let rowsAmount = 217;
+  const rowsAmount = 217;
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -83,8 +83,8 @@ describe('14. stream2.js', function() {
   }); // after
 
   it('14.1 Bind by position and return an array', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
-    let stream = connection.queryStream(sql, [40]);
+    const sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
+    const stream = connection.queryStream(sql, [40]);
     await new Promise((resolve, reject) => {
       stream.on('data', function(data) {
         assert(data);
@@ -97,8 +97,8 @@ describe('14. stream2.js', function() {
   }); // 14.1
 
   it('14.2 Bind by name and return an array', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    let stream = connection.queryStream(sql, {id: 40});
+    const sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    const stream = connection.queryStream(sql, {id: 40});
     await new Promise((resolve, reject) => {
       stream.on('data', function(data) {
         assert(data);
@@ -111,8 +111,8 @@ describe('14. stream2.js', function() {
   }); // 14.2
 
   it('14.3 Bind by position and return an object', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
-    let stream = connection.queryStream(sql, [40], {outFormat: oracledb.OUT_FORMAT_OBJECT});
+    const sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
+    const stream = connection.queryStream(sql, [40], {outFormat: oracledb.OUT_FORMAT_OBJECT});
     await new Promise((resolve, reject) => {
       stream.on('data', function(data) {
         assert(data);
@@ -125,8 +125,8 @@ describe('14. stream2.js', function() {
   }); // 14.3
 
   it('14.4 Bind by name and return an object', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    let stream = connection.queryStream(sql, {id: 40}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
+    const sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    const stream = connection.queryStream(sql, {id: 40}, {outFormat: oracledb.OUT_FORMAT_OBJECT});
     await new Promise((resolve, reject) => {
       stream.on('data', function(data) {
         assert(data);
@@ -139,8 +139,8 @@ describe('14. stream2.js', function() {
   }); // 14.4
 
   it('14.5 explicitly setting resultSet option to be false takes no effect', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
-    let stream = connection.queryStream(sql, [40], {resultSet: false});
+    const sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :1';
+    const stream = connection.queryStream(sql, [40], {resultSet: false});
     await new Promise((resolve, reject) => {
       stream.on('data', function(data) {
         assert(data);
@@ -153,8 +153,8 @@ describe('14. stream2.js', function() {
   }); // 14.5
 
   it('14.6 maxRows option is ignored as expect', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 ORDER BY employee_name';
-    let stream = connection.queryStream(sql, [], {maxRows: 40});
+    const sql = 'SELECT employee_name FROM nodb_stream2 ORDER BY employee_name';
+    const stream = connection.queryStream(sql, [], {maxRows: 40});
     let rowCount = 0;
     await new Promise((resolve, reject) => {
       stream.on('data', function(data) {
@@ -180,8 +180,8 @@ describe('14. stream2.js', function() {
   }); //14.7
 
   it('14.8 metadata event - single column', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    let stream = connection.queryStream(sql, { id: 40 });
+    const sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    const stream = connection.queryStream(sql, { id: 40 });
 
     let metaDataRead = false;
     await new Promise((resolve, reject) => {
@@ -200,8 +200,8 @@ describe('14. stream2.js', function() {
   }); // 14.8
 
   it('14.9 metadata event - multiple columns', async function() {
-    let sql = 'SELECT employee_name, employee_history FROM nodb_stream2 WHERE employee_id = :id';
-    let stream = connection.queryStream(sql, { id: 40 });
+    const sql = 'SELECT employee_name, employee_history FROM nodb_stream2 WHERE employee_id = :id';
+    const stream = connection.queryStream(sql, { id: 40 });
 
     let metaDataRead = false;
     await new Promise((resolve, reject) => {
@@ -222,8 +222,8 @@ describe('14. stream2.js', function() {
   }); // 14.9
 
   it('14.10 metadata event - all column names occurring', async function() {
-    let sql = 'SELECT * FROM nodb_stream2 WHERE employee_id = :id';
-    let stream = connection.queryStream(sql, { id: 40 });
+    const sql = 'SELECT * FROM nodb_stream2 WHERE employee_id = :id';
+    const stream = connection.queryStream(sql, { id: 40 });
 
     let metaDataRead = false;
     await new Promise((resolve, reject) => {
@@ -245,8 +245,8 @@ describe('14. stream2.js', function() {
   }); // 14.10
 
   it('14.11 metadata event - no return rows', async function() {
-    let sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
-    let stream = connection.queryStream(sql, { id: 400 });
+    const sql = 'SELECT employee_name FROM nodb_stream2 WHERE employee_id = :id';
+    const stream = connection.queryStream(sql, { id: 400 });
 
     let metaDataRead = false;
     await new Promise((resolve, reject) => {
@@ -293,9 +293,9 @@ describe('14. stream2.js', function() {
                  "END; ";
     await connection.execute(proc);
 
-    let sql = 'SELECT "nAmE" FROM nodb_streamcases ORDER BY id';
-    let stream = connection.queryStream(sql);
-    let resultArray = new Array();
+    const sql = 'SELECT "nAmE" FROM nodb_streamcases ORDER BY id';
+    const stream = connection.queryStream(sql);
+    const resultArray = new Array();
 
     let metaDataRead = false;
     await new Promise((resolve, reject) => {
@@ -324,22 +324,22 @@ describe('14. stream2.js', function() {
 
   it('14.13 metadata event - large number of columns', async function() {
 
-    let column_size = 10;
-    let columns_string = genColumns(column_size);
+    const column_size = 10;
+    const columns_string = genColumns(column_size);
 
     function genColumns(size) {
-      let buffer = [];
+      const buffer = [];
       for (let i = 0; i < size; i++) {
         buffer[i] = " column_" + i + " NUMBER";
       }
       return buffer.join();
     }
 
-    let table_name = "nodb_streamstess";
-    let sqlSelect = "SELECT * FROM " + table_name;
-    let sqlDrop = "DROP TABLE " + table_name + " PURGE";
+    const table_name = "nodb_streamstess";
+    const sqlSelect = "SELECT * FROM " + table_name;
+    const sqlDrop = "DROP TABLE " + table_name + " PURGE";
 
-    let proc = "BEGIN \n" +
+    const proc = "BEGIN \n" +
                "    DECLARE \n" +
                "        e_table_missing EXCEPTION; \n" +
                "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
@@ -357,7 +357,7 @@ describe('14. stream2.js', function() {
                "END; ";
     await connection.execute(proc);
 
-    let stream = connection.queryStream(sqlSelect);
+    const stream = connection.queryStream(sqlSelect);
 
     let metaDataRead = false;
 
@@ -382,8 +382,8 @@ describe('14. stream2.js', function() {
 
   it('14.14 metadata event - single character column', async function() {
 
-    let tableName = "nodb_streamsinglechar";
-    let sqlCreate =
+    const tableName = "nodb_streamsinglechar";
+    const sqlCreate =
         "BEGIN \n" +
         "   DECLARE \n" +
         "       e_table_missing EXCEPTION; \n" +
@@ -401,12 +401,12 @@ describe('14. stream2.js', function() {
         "       ) \n" +
         "   '); \n" +
         "END; \n";
-    let sqlSelect = "SELECT * FROM " + tableName;
-    let sqlDrop = "DROP TABLE " + tableName + " PURGE";
+    const sqlSelect = "SELECT * FROM " + tableName;
+    const sqlDrop = "DROP TABLE " + tableName + " PURGE";
 
     await connection.execute(sqlCreate);
 
-    let stream = connection.queryStream(sqlSelect);
+    const stream = connection.queryStream(sqlSelect);
 
     let metaDataRead = false;
 
@@ -429,7 +429,7 @@ describe('14. stream2.js', function() {
 
   it('14.15 metadata event - duplicate column alias', async function() {
 
-    let stream = connection.queryStream("SELECT 1 a, 'abc' a FROM dual");
+    const stream = connection.queryStream("SELECT 1 a, 'abc' a FROM dual");
 
     let metaDataRead = false;
     await new Promise((resolve, reject) => {

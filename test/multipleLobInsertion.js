@@ -99,7 +99,7 @@ describe('68. multipleLobInsertion.js', function() {
 
   const lobInsert = async function(sql, bindv, inFileName) {
     const result = await connection.execute(sql, bindv, { autoCommit: false });
-    for (let item in result.outBinds) {
+    for (const item in result.outBinds) {
       const lob = result.outBinds[item][0];
       const inStream = fs.createReadStream(inFileName);
       await new Promise((resolve, reject) => {

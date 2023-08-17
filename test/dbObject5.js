@@ -41,7 +41,7 @@ describe('204. dbObject5.js', () => {
   const TYPE = 'NODB_TYP_OBJ_4';
   const TABLE  = 'NODB_TAB_OBJ4';
 
-  let proc1 =
+  const proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is      begin
         open p_cur for
           SELECT
@@ -50,7 +50,7 @@ describe('204. dbObject5.js', () => {
         WHERE num >= 100;
       end; `;
 
-  let proc2 =
+  const proc2 =
     `create or replace procedure nodb_getDataCursor2(p_cur out sys_refcursor) is
        begin
          open p_cur for
@@ -60,7 +60,7 @@ describe('204. dbObject5.js', () => {
          WHERE num >= 101;
        end; `;
 
-  let proc3 =
+  const proc3 =
       `create or replace procedure nodb_getDataCursor3(
           p_cur1 out sys_refcursor,
           p_cur2 out sys_refcursor
@@ -202,7 +202,7 @@ describe('204. dbObject5.js', () => {
 
   it('204.5 call procedure with 2 OUT binds of DbObject', async function() {
 
-    let result = await conn.execute(
+    const result = await conn.execute(
       `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
           p_cur2 => :p_cur2); end;`,
       {

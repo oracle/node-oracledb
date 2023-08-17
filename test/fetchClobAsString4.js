@@ -72,13 +72,13 @@ describe('90. fetchClobAsString4.js', function() {
   }); // after
 
   const insertTable = async function(insertSql, bindVar) {
-    let result = await connection.execute(insertSql, bindVar);
+    const result = await connection.execute(insertSql, bindVar);
     assert.strictEqual(result.rowsAffected, 1);
   };
 
-  let verifyResult = function(resultVal, specialStr, originalStr) {
-    let resultLength = resultVal.length;
-    let specStrLength = specialStr.length;
+  const verifyResult = function(resultVal, specialStr, originalStr) {
+    const resultLength = resultVal.length;
+    const specStrLength = specialStr.length;
     assert.strictEqual(resultLength, originalStr.length);
     assert.strictEqual(resultVal.substring(0, specStrLength), specialStr);
     assert.strictEqual(resultVal.substring(resultLength - specStrLength, resultLength), specialStr);
@@ -113,12 +113,12 @@ describe('90. fetchClobAsString4.js', function() {
 
     it('90.1.1 bind by position - 1', async function() {
       const len = 400;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.1.1";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -126,29 +126,29 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, clobStr]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.1.1
 
     it('90.1.2 bind by name - 1', async function() {
       const len = 400;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.1.2";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
         c2: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len }
       };
       await insertTable(sql, bindVar);
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -157,18 +157,18 @@ describe('90. fetchClobAsString4.js', function() {
           output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.1.2
 
     it('90.1.3 bind by position - 2', async function() {
       const len = 400;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.1.2";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -176,22 +176,22 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.1.3
 
     it('90.1.4 bind by name - 2', async function() {
       const len = 400;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.1.4";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -199,7 +199,7 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -208,7 +208,7 @@ describe('90. fetchClobAsString4.js', function() {
           output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.1.4
 
@@ -241,12 +241,12 @@ describe('90. fetchClobAsString4.js', function() {
 
     it('90.2.1 bind by position - 1', async function() {
       const len = 500;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.2.1";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -254,22 +254,22 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ sequence, null, { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN }, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len } ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.2.1
 
     it('90.2.2 bind by name - 1', async function() {
       const len = 400;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.2.2";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -277,7 +277,7 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -286,18 +286,18 @@ describe('90. fetchClobAsString4.js', function() {
           c2: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.c2;
+      const resultVal = result.outBinds.c2;
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.2.2
 
     it('90.2.3 bind by position - 2', async function() {
       const len = 500;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.2.3";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -305,22 +305,22 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ sequence, sequence, null, { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len } ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.2.3
 
     it('90.2.4 bind by name - 2', async function() {
       const len = 400;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.2.4";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -328,7 +328,7 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -337,7 +337,7 @@ describe('90. fetchClobAsString4.js', function() {
           c2: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.c2;
+      const resultVal = result.outBinds.c2;
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.2.4
 
@@ -372,12 +372,12 @@ describe('90. fetchClobAsString4.js', function() {
 
     it('90.3.1 bind by name - 1', async function() {
       const len = 1000;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.3.1";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -385,7 +385,7 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -394,18 +394,18 @@ describe('90. fetchClobAsString4.js', function() {
           output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.3.1
 
     it('90.3.2 bind by position - 1', async function() {
       const len = 1000;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.3.1";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -413,22 +413,22 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, clobStr ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.3.2
 
     it('90.3.3 bind by name - 2', async function() {
       const len = 1000;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.3.3";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -436,7 +436,7 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -445,18 +445,18 @@ describe('90. fetchClobAsString4.js', function() {
           output: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.3.3
 
     it('90.3.4 bind by position - 2', async function() {
       const len = 1000;
-      let sequence = insertID++;
+      const sequence = insertID++;
       const specialStr = "90.3.4";
-      let clobStr = random.getRandomString(len, specialStr);
+      const clobStr = random.getRandomString(len, specialStr);
 
-      let sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const sql = "INSERT INTO nodb_clob_1 (num_1, num_2, content, clob) VALUES (:i1, :i2, :c1, :c2)";
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: clobStr, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len },
@@ -464,11 +464,11 @@ describe('90. fetchClobAsString4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       verifyResult(resultVal, specialStr, clobStr);
     }); // 90.3.4
 

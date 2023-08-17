@@ -52,7 +52,7 @@ describe('175. soda7.js', () => {
 
   it('175.1 count(), basic case', async () => {
     const conn = await oracledb.getConnection(dbConfig);
-    let soda = conn.getSodaDatabase();
+    const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_1");
 
     await Promise.all(

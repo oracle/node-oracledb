@@ -65,8 +65,8 @@ describe('97.binding_functionBindOut.js', function() {
     await inBind(table_name, proc_name, sequence, dbColType, bindVar, bindType, nullBind);
   };
 
-  let getInsertVal = function(element, nullBind) {
-    let insertValue = [];
+  const getInsertVal = function(element, nullBind) {
+    const insertValue = [];
     if (element.indexOf("CHAR") > -1 || element === "CLOB") {
       insertValue[0] = (nullBind === true) ? null : "abcsca";
       insertValue[1] = oracledb.STRING;
@@ -87,21 +87,21 @@ describe('97.binding_functionBindOut.js', function() {
   };
 
   const inBind = async function(table_name, fun_name, sequence, dbColType, bindVar, bindType, nullBind) {
-    let createTable = await sql.createTable(table_name, dbColType);
-    let drop_table = "DROP TABLE " + table_name + " PURGE";
-    let proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue OUT " + dbColType + ") RETURN NUMBER\n" +
+    const createTable = await sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue OUT " + dbColType + ") RETURN NUMBER\n" +
                "IS \n" +
                "    tmpvar NUMBER; \n" +
                "BEGIN \n" +
                "    select id, content into tmpvar, inValue from " + table_name + " where id = ID; \n" +
                "    RETURN tmpvar; \n" +
                "END ; ";
-    let sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
-    let proc_drop = "DROP FUNCTION " + fun_name;
-    let inserted = getInsertVal(dbColType, nullBind);
-    let insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
+    const sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
+    const proc_drop = "DROP FUNCTION " + fun_name;
+    const inserted = getInsertVal(dbColType, nullBind);
+    const insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
     await executeSql(createTable);
-    let bind = {
+    const bind = {
       c1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c2: { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN }
     };

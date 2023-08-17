@@ -47,7 +47,7 @@ describe('159. end2endTracing.js', function() {
   });
 
   const verify = async function(sql, expect) {
-    let result = await conn.execute(sql);
+    const result = await conn.execute(sql);
     assert.strictEqual(result.rows[0][0], expect);
   };
 

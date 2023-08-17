@@ -39,7 +39,7 @@ describe('10. nullColumnValues.js', function() {
 
   let connection = null;
   beforeEach('get connection & create table', async function() {
-    let makeTable =
+    const makeTable =
       "BEGIN \
             DECLARE \
                 e_table_missing EXCEPTION; \
@@ -120,7 +120,7 @@ describe('10. nullColumnValues.js', function() {
   it('10.3 out-bind for null column value', async function() {
     assert(connection);
     let result = null;
-    let proc = "CREATE OR REPLACE PROCEDURE nodb_testproc (p_out OUT VARCHAR2) \
+    const proc = "CREATE OR REPLACE PROCEDURE nodb_testproc (p_out OUT VARCHAR2) \
                 AS \
                 BEGIN \
                   p_out := ''; \
@@ -182,7 +182,7 @@ describe('10. nullColumnValues.js', function() {
     async function fetchRowFromRS(rs) {
       let accessCount = 0;
       while (true) { // eslint-disable-line
-        let row = await rs.getRow();
+        const row = await rs.getRow();
         if (!row)
           break;
         accessCount++;

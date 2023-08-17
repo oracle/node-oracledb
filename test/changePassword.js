@@ -451,8 +451,8 @@ describe('161. changePassword.js', function() {
       if (!isRunnable) return;
 
       if (dbConfig.test.DBA_PRIVILEGE) {
-        let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
-        let dbaConn = await oracledb.getConnection(DBA_config);
+        const sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
+        const dbaConn = await oracledb.getConnection(DBA_config);
 
         await dbaConn.execute(sql);
         await dbaConn.close();
@@ -460,7 +460,6 @@ describe('161. changePassword.js', function() {
     }); // after
 
     it('161.12.1 basic case with password length 1024 Bytes', async function() {
-      let dbaConn, conn;
       let result = null;
       let sql = "BEGIN \n" +
                       "    DECLARE \n" +
@@ -476,19 +475,19 @@ describe('161. changePassword.js', function() {
                       "        CREATE USER " + myUser + " IDENTIFIED BY " + longPwd + "\n" +
                       "    '); \n" +
                       "END; ";
-      dbaConn = await oracledb.getConnection(DBA_config);
+      const dbaConn = await oracledb.getConnection(DBA_config);
       await dbaConn.execute(sql);
 
       sql = "GRANT CREATE SESSION to " + myUser;
       await dbaConn.execute(sql);
       await dbaConn.close();
       // login with the same username and long password
-      let credential = {
+      const credential = {
         user:             myUser,
         password:         longPwd,
         connectionString: dbConfig.connectString
       };
-      conn = await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
       assert(conn);
 
       result = await conn.execute("select sysdate as ts_date from dual");
@@ -498,9 +497,9 @@ describe('161. changePassword.js', function() {
 
     it('161.12.2 pooled connection', async function() {
       let pool;
-      let dbaConn, conn;
+      let conn;
 
-      dbaConn = await oracledb.getConnection(DBA_config);
+      const dbaConn = await oracledb.getConnection(DBA_config);
 
       let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
       await dbaConn.execute(sql);
@@ -558,10 +557,9 @@ describe('161. changePassword.js', function() {
     }); // 161.12.2
 
     it('161.12.3 DBA changes longer password', async function() {
-      let dbaConn, conn;
       const newlongPwd = "b".repeat(1024);
 
-      dbaConn = await oracledb.getConnection(DBA_config);
+      const dbaConn = await oracledb.getConnection(DBA_config);
 
       let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
       await dbaConn.execute(sql);
@@ -592,7 +590,7 @@ describe('161. changePassword.js', function() {
         password:         newlongPwd,
         connectionString: dbConfig.connectString
       };
-      conn = await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
       assert(conn);
       await conn.close();
 
@@ -602,9 +600,8 @@ describe('161. changePassword.js', function() {
     }); // 161.12.3
 
     it('161.12.4 connects with an expired password', async function() {
-      let dbaConn, conn;
       const newlongPwd = "b".repeat(1024);
-      dbaConn = await oracledb.getConnection(DBA_config);
+      const dbaConn = await oracledb.getConnection(DBA_config);
 
       let sql = "DROP USER IF EXISTS " + myUser + " CASCADE";
       await dbaConn.execute(sql);
@@ -637,7 +634,7 @@ describe('161. changePassword.js', function() {
         connectionString: dbConfig.connectString
       };
 
-      conn = await oracledb.getConnection(credential);
+      let conn = await oracledb.getConnection(credential);
       await conn.close();
 
       // restore password
@@ -655,10 +652,9 @@ describe('161. changePassword.js', function() {
     }); // 161.12.4
 
     it('161.12.5 for DBA, the original password is ignored', async function() {
-      let dbaConn, conn;
       const newlongPwd = "b".repeat(1024);
 
-      dbaConn = await oracledb.getConnection(DBA_config);
+      const dbaConn = await oracledb.getConnection(DBA_config);
       await dbaConn.changePassword(myUser, 'foobar', newlongPwd);
 
       let credential = {
@@ -680,7 +676,7 @@ describe('161. changePassword.js', function() {
         connectionString: dbConfig.connectString
       };
 
-      conn = await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
       assert(conn);
       await conn.close();
       await dbaConn.changePassword(myUser, '', longPwd);
@@ -721,7 +717,6 @@ describe('161. changePassword.js', function() {
     }); // 161.12.6
 
     it('161.12.7 Negative: basic case. invalid parameter', async function() {
-      let conn;
       const lpass = 123;
       const credential = {
         user:             myUser,
@@ -729,7 +724,7 @@ describe('161. changePassword.js', function() {
         connectionString: dbConfig.connectString
       };
 
-      conn = await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
 
       await assert.rejects(
         async () => await conn.changePassword(myUser, longPwd, lpass),
@@ -740,7 +735,6 @@ describe('161. changePassword.js', function() {
     }); // 161.12.7
 
     it('161.12.8 Negative: basic case. invalid parameter with 1025 bytes', async function() {
-      let conn;
       const newlongPwd = "a".repeat(1025);
       const credential = {
         user:             myUser,
@@ -748,7 +742,7 @@ describe('161. changePassword.js', function() {
         connectionString: dbConfig.connectString
       };
 
-      conn = await oracledb.getConnection(credential);
+      const conn = await oracledb.getConnection(credential);
 
       await assert.rejects(
         async () => await conn.changePassword(myUser, longPwd, newlongPwd),
@@ -762,10 +756,9 @@ describe('161. changePassword.js', function() {
     it('161.12.9 Negative: non-DBA tries to change the password', async function() {
       try {
         const tUser = dbConfig.user + "_st";
-        let dbaConn, tConn;
         const newlongPwd = "b".repeat(1024);
 
-        dbaConn = await oracledb.getConnection(DBA_config);
+        const dbaConn = await oracledb.getConnection(DBA_config);
         assert(dbaConn);
         let sql = "CREATE USER " + tUser + " IDENTIFIED BY " + longPwd;
         await dbaConn.execute(sql);
@@ -778,7 +771,7 @@ describe('161. changePassword.js', function() {
           connectionString: dbConfig.connectString
         };
 
-        tConn = await oracledb.getConnection(credential);
+        const tConn = await oracledb.getConnection(credential);
 
         await assert.rejects(
           async () => await tConn.changePassword(myUser, longPwd, newlongPwd),
@@ -823,7 +816,7 @@ describe('161. changePassword.js', function() {
 
     it('161.12.11 sets "newPassword" to be an empty string. longer password unchanged', async function() {
       const dbaConn = await oracledb.getConnection(DBA_config);
-      let sql = "alter user " + myUser + " password expire";
+      const sql = "alter user " + myUser + " password expire";
       await dbaConn.execute(sql);
 
       let credential = {

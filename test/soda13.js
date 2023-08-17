@@ -40,7 +40,7 @@ const testsUtil = require('./testsUtil.js');
 describe('231. soda13.js', () => {
 
   before(async function() {
-    let isSodaRunnable = await testsUtil.isSodaRunnable();
+    const isSodaRunnable = await testsUtil.isSodaRunnable();
 
     const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
@@ -77,7 +77,7 @@ describe('231. soda13.js', () => {
     assert.strictEqual(docs2.length, 0);
 
     await conn.commit();
-    let res = await coll.drop();
+    const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
 
@@ -104,7 +104,7 @@ describe('231. soda13.js', () => {
     assert.strictEqual(docs2.length, 3);
 
     await conn.commit();
-    let res = await coll.drop();
+    const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
 
@@ -128,7 +128,7 @@ describe('231. soda13.js', () => {
     );
 
     await conn.commit();
-    let res = await coll.drop();
+    const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
   }); // 231.3

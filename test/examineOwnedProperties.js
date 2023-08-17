@@ -44,7 +44,7 @@ describe('220. examineOwnedProperties.js', () => {
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
 
-    let sql = `
+    const sql = `
       CREATE TABLE ${TABLE} (
           "RATE_TIME" VARCHAR2(32),
           "RATE_USER" VARCHAR2(128),
@@ -52,12 +52,12 @@ describe('220. examineOwnedProperties.js', () => {
           "RATING" VARCHAR2(4000)
       )
     `;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
     await conn.execute(plsql);
   }); // before()
 
   after(async () => {
-    let sql = `DROP TABLE ${TABLE} PURGE`;
+    const sql = `DROP TABLE ${TABLE} PURGE`;
     await conn.execute(sql);
     await conn.close();
   }); // after()

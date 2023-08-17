@@ -39,8 +39,8 @@ const dbConfig = require('./dbconfig.js');
 describe('27. dataTypeNumber2.js', function() {
 
   let connection = null;
-  let tableName = "nodb_number2";
-  let numbers = assist.data.numbers;
+  const tableName = "nodb_number2";
+  const numbers = assist.data.numbers;
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -61,7 +61,7 @@ describe('27. dataTypeNumber2.js', function() {
     });
 
     it('27.1.1 SELECT query', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `SELECT * FROM ` + tableName,
         [],
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -75,8 +75,8 @@ describe('27. dataTypeNumber2.js', function() {
     }); // 27.1.1
 
     it('27.1.2 resultSet stores NUMBER(p, s) data correctly', async function() {
-      let numRows = 3; // number of rows to return from each call to getRows()
-      let result = await connection.execute(
+      const numRows = 3; // number of rows to return from each call to getRows()
+      const result = await connection.execute(
         `SELECT * FROM ` + tableName,
         [],
         { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -85,7 +85,7 @@ describe('27. dataTypeNumber2.js', function() {
       await fetchRowsFromRS(result.resultSet);
 
       async function fetchRowsFromRS(rs) {
-        let rows = await rs.getRows(numRows);
+        const rows = await rs.getRows(numRows);
         if (rows.length > 0) {
           for (let i = 0; i < rows.length; i++) {
             if (Math.abs(numbers[rows[i].NUM]) == 0.00000123)
@@ -97,7 +97,7 @@ describe('27. dataTypeNumber2.js', function() {
         } else if (rows.length == 0) {
           await rs.close();
         } else {
-          let lengthLessThanZero = true;
+          const lengthLessThanZero = true;
           assert.ifError(lengthLessThanZero);
         }
       }

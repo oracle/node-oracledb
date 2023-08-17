@@ -42,10 +42,10 @@ const dbConfig = require('./dbconfig.js');
 describe("150. fetchArraySize3.js", function() {
 
   let connection = null;
-  let default_fetcArraySize = oracledb.fetchArraySize;
-  let default_maxRows = oracledb.maxRows;
-  let tableName = "nodb_fetchArraySize_150";
-  let tableSize = 1000;
+  const default_fetcArraySize = oracledb.fetchArraySize;
+  const default_maxRows = oracledb.maxRows;
+  const tableName = "nodb_fetchArraySize_150";
+  const tableSize = 1000;
 
   const create_table = "BEGIN \n" +
                      "    DECLARE \n" +
@@ -117,14 +117,14 @@ describe("150. fetchArraySize3.js", function() {
       verifyResult(result.rows, affectedRowId);
     };
 
-    let verifyResult = function(result, affectedRowId) {
-      for (let element of result) {
-        let index = result.indexOf(element);
+    const verifyResult = function(result, affectedRowId) {
+      for (const element of result) {
+        const index = result.indexOf(element);
         verifyEachRow(index + 1 + affectedRowId, element);
       }
     };
 
-    let verifyEachRow = function(index, element) {
+    const verifyEachRow = function(index, element) {
       assert.strictEqual(element[0], index);
       assert.strictEqual(element[1], "something");
     };
@@ -191,7 +191,7 @@ describe("150. fetchArraySize3.js", function() {
 
     const proc_query_inout = async function(updateFromId, maxArraySizeVal, fetchArraySizeVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "BEGIN nodb_ref_pkg.array_inout(:id_in, :c); END;",
         {
           id_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val: updateFromId },
@@ -201,7 +201,7 @@ describe("150. fetchArraySize3.js", function() {
       const rowsAffected = tableSize - updateFromId;
       const outVal = result.outBinds.c;
       assert.strictEqual(outVal.length, rowsAffected);
-      for (let element of outVal) {
+      for (const element of outVal) {
         const index = outVal.indexOf(element) + updateFromId + 1;
         assert.strictEqual(element, "something new " + index);
       }
@@ -217,74 +217,74 @@ describe("150. fetchArraySize3.js", function() {
       );
       const outVal = result.outBinds.c;
       assert.strictEqual(outVal.length, tableSize);
-      for (let element of outVal) {
+      for (const element of outVal) {
         const index = outVal.indexOf(element);
         assert.strictEqual(element, index + 1);
       }
     };
 
     it("150.2.1 Bind OUT with oracledb.fetchArraySize = 1", async function() {
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = 1;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = 1;
       await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", async function() {
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize / 20;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize / 20;
       await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", async function() {
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize / 10;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize / 10;
       await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.4 Bind OUT with oracledb.fetchArraySize = tableSize", async function() {
-      let maxArraySizeVal = tableSize + 1;
-      let fetchArraySizeVal = tableSize;
+      const maxArraySizeVal = tableSize + 1;
+      const fetchArraySizeVal = tableSize;
       await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize - 1;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize - 1;
       await proc_query_out(maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.6 Bind IN OUT with oracledb.fetchArraySize = 1", async function() {
-      let updateFromId = 20;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = 1;
+      const updateFromId = 20;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = 1;
       await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize / 20;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize / 20;
       await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize / 10;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize / 10;
       await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.9 Bind IN OUT with oracledb.fetchArraySize = tableSize", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize + 10;
-      let fetchArraySizeVal = tableSize;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize + 10;
+      const fetchArraySizeVal = tableSize;
       await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.2.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize - 1;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize - 1;
       await proc_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
@@ -299,7 +299,7 @@ describe("150. fetchArraySize3.js", function() {
                          "    FUNCTION array_inout(id_in IN NUMBER, contents IN OUT stringType) RETURN idType; \n" +
                          "END;";
 
-    let proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_ref_fun_pkg AS \n" +
+    const proc_package_body = "CREATE OR REPLACE PACKAGE BODY nodb_ref_fun_pkg AS \n" +
                             "    FUNCTION array_out(id_in IN NUMBER) RETURN idType AS \n" +
                             "        tmp_id1 idType; \n" +
                             "    BEGIN \n" +
@@ -335,7 +335,7 @@ describe("150. fetchArraySize3.js", function() {
 
     const fun_query_inout = async function(updateFromId, maxArraySizeVal, fetchArraySizeVal) {
       oracledb.fetchArraySize = fetchArraySizeVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "BEGIN :output := nodb_ref_fun_pkg.array_inout(:id_in, :c_inout); END;",
         {
           id_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val: updateFromId },
@@ -348,9 +348,9 @@ describe("150. fetchArraySize3.js", function() {
     };
 
     const fun_verifyResult_inout = function(result, updateFromId) {
-      let rowsAffected = tableSize - updateFromId;
+      const rowsAffected = tableSize - updateFromId;
       assert.strictEqual(result.length, rowsAffected);
-      for (let element of result) {
+      for (const element of result) {
         const index = result.indexOf(element) + updateFromId + 1;
         if (typeof element === "string") {
           assert.strictEqual(element, "something new " + index);
@@ -371,79 +371,79 @@ describe("150. fetchArraySize3.js", function() {
       );
       const outVal = result.outBinds.output;
       assert.strictEqual(outVal.length, tableSize - affectFromId);
-      for (let element of outVal) {
+      for (const element of outVal) {
         const index = outVal.indexOf(element) + affectFromId + 1;
         assert.strictEqual(element, index);
       }
     };
 
     it("150.3.1 Bind OUT with oracledb.fetchArraySize = 1", async function() {
-      let affectFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = 1;
+      const affectFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = 1;
       await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.2 Bind OUT with oracledb.fetchArraySize = tableSize/20", async function() {
-      let affectFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize / 20;
+      const affectFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize / 20;
       await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.3 Bind OUT with oracledb.fetchArraySize = tableSize/10", async function() {
-      let affectFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize / 10;
+      const affectFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize / 10;
       await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.4 Bind OUT with oracledb.fetchArraySize = tableSize", async function() {
-      let affectFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize;
+      const affectFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize;
       await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.5 Bind OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
-      let affectFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize - 1;
+      const affectFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize - 1;
       await fun_query_out(affectFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.6 Bind IN OUT with oracledb.fetchArraySize = 1", async function() {
-      let updateFromId = 20;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = 1;
+      const updateFromId = 20;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = 1;
       await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.7 Bind IN OUT with oracledb.fetchArraySize = tableSize/20", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize / 20;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize / 20;
       await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.8 Bind IN OUT with oracledb.fetchArraySize = tableSize/10", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize * 2;
-      let fetchArraySizeVal = tableSize / 10;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize * 2;
+      const fetchArraySizeVal = tableSize / 10;
       await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.9 Bind IN OUT with oracledb.fetchArraySize = tableSize", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize * 2;
-      let fetchArraySizeVal = tableSize;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize * 2;
+      const fetchArraySizeVal = tableSize;
       await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 
     it("150.3.10 Bind IN OUT with oracledb.fetchArraySize = (table size - 1)", async function() {
-      let updateFromId = 0;
-      let maxArraySizeVal = tableSize;
-      let fetchArraySizeVal = tableSize - 1;
+      const updateFromId = 0;
+      const maxArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize - 1;
       await fun_query_inout(updateFromId, maxArraySizeVal, fetchArraySizeVal);
     });
 

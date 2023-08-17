@@ -70,7 +70,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.2 Fetch DATE column values as STRING - by-Column name', async function() {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT TO_DATE('2005-01-06', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
       [],
       {
@@ -82,7 +82,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.3 Fetch DATE, NUMBER column values STRING - by Column-name', async function() {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
@@ -102,7 +102,7 @@ describe('56. fetchAs.js', function() {
   it('56.4 Fetch DATE, NUMBER as STRING by-time configuration and by-name', async function() {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
@@ -122,7 +122,7 @@ describe('56. fetchAs.js', function() {
   it('56.5 Fetch DATE, NUMBER column as STRING by-type and override at execute time', async function() {
     oracledb.fetchAsString = [ oracledb.DATE, oracledb.NUMBER ];
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
@@ -140,7 +140,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.6 Fetch ROWID column values STRING - non-ResultSet', async function() {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT ROWID from DUAL",
       [],
       {
@@ -155,7 +155,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.7 Fetch ROWID column values STRING - ResultSet', async function() {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT ROWID from DUAL",
       [],
       {
@@ -167,7 +167,7 @@ describe('56. fetchAs.js', function() {
         }
       }
     );
-    let row = await result.resultSet.getRow();
+    const row = await result.resultSet.getRow();
     assert.strictEqual(typeof row.ROWID, "string");
     await result.resultSet.close();
   });
@@ -178,7 +178,7 @@ describe('56. fetchAs.js', function() {
   * Numbers out of above range will be rounded.
   * The last element is out of Oracle database standard Number range. It will be rounded by database.
   */
-  let numStrs =
+  const numStrs =
     [
       '17249138680355831',
       '-17249138680355831',
@@ -187,7 +187,7 @@ describe('56. fetchAs.js', function() {
       '0.1724913868035583123456789123456789123456'
     ];
 
-  let numResults =
+  const numResults =
     [
       '17249138680355831',
       '-17249138680355831',
@@ -197,8 +197,8 @@ describe('56. fetchAs.js', function() {
     ];
 
   it('56.8 large numbers with fetchInfo', async function() {
-    for (let element of numStrs) {
-      let result = await connection.execute(
+    for (const element of numStrs) {
+      const result = await connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
         {
@@ -217,8 +217,8 @@ describe('56. fetchAs.js', function() {
   it('56.9 large numbers with setting fetchAsString property', async function() {
     oracledb.fetchAsString = [ oracledb.NUMBER ];
 
-    for (let element of numStrs) {
-      let result = await connection.execute(
+    for (const element of numStrs) {
+      const result = await connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
         { outFormat : oracledb.OUT_FORMAT_OBJECT }
@@ -319,7 +319,7 @@ describe('56. fetchAs.js', function() {
   });
 
   it('56.19 Negative - passing empty JSON to fetchInfo', async function() {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "select sysdate as ts_date from dual",
       { },
       {
@@ -349,7 +349,7 @@ describe('56. fetchAs.js', function() {
   it('56.21 Negative - invalid type of value, Date', function() {
     assert.throws(
       function() {
-        let dt = new Date ();
+        const dt = new Date ();
         oracledb.fetchAsString = dt;
       },
       /NJS-004:/
@@ -359,7 +359,7 @@ describe('56. fetchAs.js', function() {
   it('56.22 Negative - invalid type of value, Buffer', function() {
     assert.throws(
       function() {
-        let buf = assist.createBuffer (10) ;  // arbitary sized buffer
+        const buf = assist.createBuffer (10) ;  // arbitary sized buffer
         oracledb.fetchAsString = buf;
       },
       /NJS-004:/

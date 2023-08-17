@@ -560,22 +560,22 @@ describe('117. fetchUrowidAsString_indexed.js', function() {
 
     let sqlQuery = "select ROWID from " + tableName_indexed + " where c1 = " + id_1;
     result = await connection.execute(sqlQuery);
-    let resultVal = result.rows[0][0];
+    const resultVal = result.rows[0][0];
     assert.strictEqual(typeof resultVal, "string");
     assert.strictEqual(resultVal, rowid_1);
 
     if (rowExpected === 2) {
       sqlQuery = "select ROWID from " + tableName_indexed + " where c1 = " + id_2;
       result = await connection.execute(sqlQuery);
-      let resultVal = result.rows[0][0];
+      const resultVal = result.rows[0][0];
       assert.strictEqual(typeof resultVal, "string");
       assert.strictEqual(resultVal, rowid_2);
     }
   }
 
   async function testQueryStream(option, object) {
-    let id_1 = insertID++;
-    let id_2 = insertID++;
+    const id_1 = insertID++;
+    const id_2 = insertID++;
     let rowid_1, rowid_2;
 
     let strLength = 200;

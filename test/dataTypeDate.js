@@ -39,7 +39,7 @@ const dbConfig = require('./dbconfig.js');
 describe('32. dataTypeDate.js', function() {
 
   let connection = null;
-  let tableName = "nodb_date";
+  const tableName = "nodb_date";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -50,7 +50,7 @@ describe('32. dataTypeDate.js', function() {
   });
 
   describe('32.1 Testing JavaScript Date data', function() {
-    let dates = assist.data.dates;
+    const dates = assist.data.dates;
 
     before('create table, insert data', async function() {
       await assist.setUp(connection, tableName, dates);
@@ -65,7 +65,7 @@ describe('32. dataTypeDate.js', function() {
     });
 
     it('32.1.1 works well with SELECT query', async function() {
-      let arrayLength = dates.length;
+      const arrayLength = dates.length;
       for (let i = 0; i < arrayLength; i++) {
         if (dates[i].getMilliseconds() > 0)
           dates[i].setMilliseconds(0);
@@ -117,7 +117,7 @@ describe('32. dataTypeDate.js', function() {
   });
 
   describe('32.3 insert SQL Date data', function() {
-    let dates = assist.DATE_STRINGS;
+    const dates = assist.DATE_STRINGS;
 
     before(async function() {
       await assist.setUp4sql(connection, tableName, dates);
@@ -133,8 +133,8 @@ describe('32. dataTypeDate.js', function() {
 
     it('32.3.2 SELECT query - formatted data for comparison', async function() {
       await Promise.all(dates.map(async function(date) {
-        let bv = dates.indexOf(date);
-        let result = await connection.execute(
+        const bv = dates.indexOf(date);
+        const result = await connection.execute(
           `SELECT num, TO_CHAR(content, 'DD-MM-YYYY') AS TS_DATA FROM ` + tableName + ` WHERE num = :no`,
           { no: bv },
           { outFormat: oracledb.OUT_FORMAT_OBJECT });

@@ -107,7 +107,7 @@ describe('54. lobClose.js', function() {
 
   it('54.5 temp LOBs should be freed in next rpc', async function() {
     const conn2 = await oracledb.getConnection(dbConfig);
-    let tempLOBArray = [];
+    const tempLOBArray = [];
     const numLOBs = 20;
     const query = "select cache_lobs+nocache_lobs from v$temporary_lobs where sid = sys_context('USERENV','SID')";
 

@@ -74,7 +74,7 @@ describe('208. dbObject9.js', function() {
       await conn.execute(plsql);
 
       const PersonType = await conn.getDbObjectClass(TYPE);
-      let bindArr = [];
+      const bindArr = [];
       for (let i = 0, num, p; i < PEOPLE.length; i++) {
         num = i + 1;
         p = new PersonType(PEOPLE[i]);
@@ -249,7 +249,7 @@ describe('208. dbObject9.js', function() {
     ];
     const staffNo = [201, 202, 203];
 
-    let bindArr = [];
+    const bindArr = [];
     for (let i = 0, num, p; i < staffs.length; i++) {
       num = staffNo[i];
       p = new PersonType(staffs[i]);

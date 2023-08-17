@@ -144,7 +144,7 @@ describe('280. pipelinedTables.js', function() {
           RETURN;
         END;`);
 
-    let result = await connection.execute(`SELECT *
+    const result = await connection.execute(`SELECT *
         FROM   TABLE(get_tab_ptf(10))
         ORDER BY id DESC`);
 
@@ -183,7 +183,7 @@ describe('280. pipelinedTables.js', function() {
         CONNECT BY level <= 100000`);
 
     await connection.commit();
-    let result = await connection.execute(`SELECT country_code, count(*) FROM parallel_test GROUP BY country_code ORDER BY country_code ASC`);
+    const result = await connection.execute(`SELECT country_code, count(*) FROM parallel_test GROUP BY country_code ORDER BY country_code ASC`);
     assert.deepEqual(result.rows, [["IN", 25000], ["UK", 25000], ["US", 50000]]);
     await connection.execute(`drop table parallel_test PURGE`);
   });

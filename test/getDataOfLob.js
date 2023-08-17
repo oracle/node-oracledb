@@ -75,7 +75,7 @@ describe('196. getDataOfLob.js', () => {
   }); // after()
 
   it('196.1 getData() works on CLOB ', async () => {
-    let content = 'A short string value';
+    const content = 'A short string value';
     let sql = `insert into ${tab1} values (1, '${content}')`;
     await conn.execute(sql);
 
@@ -94,8 +94,8 @@ describe('196. getDataOfLob.js', () => {
     const num = 2;
     let sql = `insert into ${tab1} values (:i, empty_clob())
       returning value into :lobbv`;
-    let binds = { i: num, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } };
-    let opt = { autoCommit: false };
+    const binds = { i: num, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } };
+    const opt = { autoCommit: false };
 
     // Insertion with Stream
     const result = await conn.execute(sql, binds, opt);
@@ -103,7 +103,7 @@ describe('196. getDataOfLob.js', () => {
     const clob = result.outBinds.lobbv[0];
     inStream.pipe(clob);
 
-    let insertionComplete = new Promise((resolve, reject) => {
+    const insertionComplete = new Promise((resolve, reject) => {
       inStream.on('error', reject);
       clob.on('error', reject);
       clob.on('finish', () => resolve(conn.commit()));
@@ -144,8 +144,8 @@ describe('196. getDataOfLob.js', () => {
     const num = 2;
     let sql = `insert into ${tab2} values (:i, empty_blob())
       returning value into :lobbv`;
-    let binds = { i: num, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
-    let opt = { autoCommit: false };
+    const binds = { i: num, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
+    const opt = { autoCommit: false };
 
     // Insertion with Stream
     const result = await conn.execute(sql, binds, opt);
@@ -153,7 +153,7 @@ describe('196. getDataOfLob.js', () => {
     const blob = result.outBinds.lobbv[0];
     inStream.pipe(blob);
 
-    let insertionComplete = new Promise((resolve, reject) => {
+    const insertionComplete = new Promise((resolve, reject) => {
       inStream.on('error', reject);
       blob.on('error', reject);
       blob.on('finish', () => resolve(conn.commit()));
@@ -189,7 +189,7 @@ describe('196. getDataOfLob.js', () => {
 
     inStream.pipe(tempLob);
 
-    let insertionComplete = new Promise((resolve, reject) => {
+    const insertionComplete = new Promise((resolve, reject) => {
       inStream.on('error', reject);
       tempLob.on('error', reject);
       tempLob.on('finish', resolve);

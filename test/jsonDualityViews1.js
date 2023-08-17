@@ -176,7 +176,7 @@ describe('272. jsonDualityView1.js', function() {
     it('272.1.5 dept view', async function() {
 
       const query = `select * from dept_ov order by data`;
-      let result = await connection.execute(query);
+      const result = await connection.execute(query);
 
       assert.strictEqual(result.rows[0][0].department_id, 10);
       assert.strictEqual(result.rows[0][0].EMP_INFO[0].employee_id, 100);
@@ -798,7 +798,7 @@ describe('272. jsonDualityView1.js', function() {
         await conn.execute(`insert into student values (2, 'LMN')`);
         await conn.execute(`insert into student values (3, 'XYZ')`);
         const query = `select * from student`;
-        let result = await conn.execute(query);
+        const result = await conn.execute(query);
 
         assert(result.rows.length, 3);
 

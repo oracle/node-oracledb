@@ -91,7 +91,7 @@ describe('233. nestedCursor02.js', () => {
       return fetchedRows;
     } // traverse_results()
 
-    let conn = await oracledb.getConnection(dbConfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
     const rowsSimple = [
       [ 1, 'Nested Row 1' ], [ 2, 'Nested Row 2' ], [ 3, 'Nested Row 3' ]

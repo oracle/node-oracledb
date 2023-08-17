@@ -66,9 +66,9 @@ describe('99.binding_functionBindIn.js', function() {
   };
 
   const inBind = async function(table_name, fun_name, dbColType, bindVar, bindType, nullBind) {
-    let createTable = await sql.createTable(table_name, dbColType);
-    let drop_table = "DROP TABLE " + table_name + " PURGE";
-    let proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN " + dbColType + ") RETURN NUMBER\n" +
+    const createTable = await sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN " + dbColType + ") RETURN NUMBER\n" +
                "IS \n" +
                "    tmpvar NUMBER; \n" +
                "BEGIN \n" +
@@ -77,8 +77,8 @@ describe('99.binding_functionBindIn.js', function() {
                "    RETURN tmpvar; \n" +
                "END ; ";
 
-    let sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
-    let proc_drop = "DROP FUNCTION " + fun_name;
+    const sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
+    const proc_drop = "DROP FUNCTION " + fun_name;
 
     // console.log(proc);
     await executeSql(createTable);
@@ -100,7 +100,7 @@ describe('99.binding_functionBindIn.js', function() {
     await executeSql(drop_table);
   };
 
-  let compareErrMsgForString = function(nullBind, element, err) {
+  const compareErrMsgForString = function(nullBind, element, err) {
     if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_12'
@@ -133,7 +133,7 @@ describe('99.binding_functionBindIn.js', function() {
     }
   };
 
-  let compareErrMsgForRAW = function(element, err) {
+  const compareErrMsgForRAW = function(element, err) {
     if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'

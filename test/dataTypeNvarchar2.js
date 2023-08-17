@@ -38,10 +38,10 @@ const dbConfig = require('./dbconfig.js');
 describe('25. dataTypeNvarchar2.js', function() {
 
   let connection = null;
-  let tableName = "nodb_nvarchar2";
+  const tableName = "nodb_nvarchar2";
 
-  let strLen = [10, 100, 1000, 2000]; // char string length
-  let strs = [];
+  const strLen = [10, 100, 1000, 2000]; // char string length
+  const strs = [];
   for (let i = 0; i < strLen.length; i++)
     strs[i] = assist.createCharString(strLen[i]);
 

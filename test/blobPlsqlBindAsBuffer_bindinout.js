@@ -92,26 +92,26 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
   }); // after
 
-  let setupAllTable = async function() {
+  const setupAllTable = async function() {
 
     await connection.execute(proc_blob_in_tab);
     await connection.execute(proc_lobs_in_tab);
   };
 
-  let dropAllTable = async function() {
+  const dropAllTable = async function() {
 
     await connection.execute("DROP TABLE nodb_tab_blob_in PURGE");
     await connection.execute("DROP TABLE nodb_tab_lobs_in PURGE");
   };
 
-  let executeSQL = async function(sql) {
+  const executeSQL = async function(sql) {
     await connection.execute(sql);
   };
 
-  let jpgFileName = './test/fuzzydinosaur.jpg';
+  const jpgFileName = './test/fuzzydinosaur.jpg';
 
-  let prepareTableWithBlob = async function(sql, id) {
-    let bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
+  const prepareTableWithBlob = async function(sql, id) {
+    const bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
     let result = null;
 
     result = await connection.execute(
@@ -134,10 +134,10 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
   };
 
   // compare the result buffer with the original inserted buffer
-  let compareResultBufAndOriginal = function(resultVal, originalBuffer, specialStr) {
+  const compareResultBufAndOriginal = function(resultVal, originalBuffer, specialStr) {
     if (originalBuffer.length > 0) {
-      let resultLength = resultVal.length;
-      let specStrLength = specialStr.length;
+      const resultLength = resultVal.length;
+      const specStrLength = specialStr.length;
       assert.strictEqual(resultLength, originalBuffer.length);
       assert.strictEqual(resultVal.toString('utf8', 0, specStrLength), specialStr);
       assert.strictEqual(resultVal.toString('utf8', (resultLength - specStrLength), resultLength), specialStr);
@@ -146,14 +146,14 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
   };
 
   // execute plsql bind in out procedure, and verify the plsql bind out buffer
-  let plsqlBindInOut = async function(sqlRun, bindVar, originalBuf, specialStr) {
+  const plsqlBindInOut = async function(sqlRun, bindVar, originalBuf, specialStr) {
     let result = null;
 
     result = await connection.execute(
       sqlRun,
       bindVar);
 
-    let resultVal = result.outBinds.io;
+    const resultVal = result.outBinds.io;
     if (originalBuf == 'EMPTY_BLOB' || originalBuf == null || originalBuf == undefined || originalBuf == "") {
       assert.strictEqual(resultVal, null);
     } else {
@@ -162,22 +162,22 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
   };
 
   describe('79.1 BLOB, PLSQL, BIND_INOUT', function() {
-    let blob_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_791 (lob_id IN NUMBER, lob_in_out IN OUT BLOB) \n" +
+    const blob_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_791 (lob_id IN NUMBER, lob_in_out IN OUT BLOB) \n" +
                           "AS \n" +
                           "BEGIN \n" +
                           "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, lob_in_out); \n" +
                           "    select blob_1 into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                           "END nodb_blob_in_out_791;";
-    let sqlRun = "begin nodb_blob_in_out_791(:i, :io); end;";
-    let proc_drop = "DROP PROCEDURE nodb_blob_in_out_791";
-    let blob_proc_inout_7911 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_7911 (lob_id IN NUMBER, lob_in_out IN OUT BLOB) \n" +
+    const sqlRun = "begin nodb_blob_in_out_791(:i, :io); end;";
+    const proc_drop = "DROP PROCEDURE nodb_blob_in_out_791";
+    const blob_proc_inout_7911 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_7911 (lob_id IN NUMBER, lob_in_out IN OUT BLOB) \n" +
                                "AS \n" +
                                "BEGIN \n" +
                                "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, EMPTY_BLOB()); \n" +
                                "    select blob_1 into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                                "END nodb_blob_in_out_7911;";
-    let sqlRun_7911 = "begin nodb_blob_in_out_7911(:i, :io); end;";
-    let proc_drop_7911 = "DROP PROCEDURE nodb_blob_in_out_7911";
+    const sqlRun_7911 = "begin nodb_blob_in_out_7911(:i, :io); end;";
+    const proc_drop_7911 = "DROP PROCEDURE nodb_blob_in_out_7911";
 
     before(async function() {
       await executeSQL(blob_proc_inout);
@@ -188,8 +188,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // after
 
     it('79.1.1 works with EMPTY_BLOB', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -202,8 +202,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.1
 
     it('79.1.2 works with EMPTY_BLOB and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -216,8 +216,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.2
 
     it('79.1.3 works with EMPTY_BLOB and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -230,8 +230,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.3
 
     it('79.1.4 works with null', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -240,8 +240,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.4
 
     it('79.1.5 works with null and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -250,8 +250,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.5
 
     it('79.1.6 works with null and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -260,9 +260,9 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.6
 
     it('79.1.7 works with empty buffer', async function() {
-      let sequence = insertID++;
-      let bufferStr = Buffer.from('', "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const bufferStr = Buffer.from('', "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -271,9 +271,9 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.7
 
     it('79.1.8 works with empty buffer and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bufferStr = Buffer.from('', "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const bufferStr = Buffer.from('', "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -282,9 +282,9 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.8
 
     it('79.1.9 works with empty buffer and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bufferStr = Buffer.from('', "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const bufferStr = Buffer.from('', "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -293,8 +293,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.9
 
     it('79.1.10 works with undefined', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -303,8 +303,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.7
 
     it('79.1.11 works with undefined and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -313,8 +313,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.11
 
     it('79.1.12 works with undefined and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -323,8 +323,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.12
 
     it('79.1.13 works with NaN', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: NaN, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -341,8 +341,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.13
 
     it('79.1.14 works with 0', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: 0, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -359,12 +359,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.14
 
     it('79.1.15 works with buffer size 32K', async function() {
-      let sequence = insertID++;
-      let size = 32768;
-      let specialStr = "79.1.15";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 32768;
+      const specialStr = "79.1.15";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
@@ -373,12 +373,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.15
 
     it('79.1.16 works with buffer size (64K - 1)', async function() {
-      let sequence = insertID++;
-      let size = 65535;
-      let specialStr = "79.1.16";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 65535;
+      const specialStr = "79.1.16";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
@@ -387,12 +387,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.16
 
     it('79.1.17 works with buffer size (64K + 1)', async function() {
-      let sequence = insertID++;
-      let size = 65537;
-      let specialStr = "79.1.16";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 65537;
+      const specialStr = "79.1.16";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
@@ -401,12 +401,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.17
 
     it('79.1.18 works with buffer size (1MB + 1)', async function() {
-      let sequence = insertID++;
-      let size = 1048577; // 1 * 1024 * 1024 + 1
-      let specialStr = "79.1.18";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 1048577; // 1 * 1024 * 1024 + 1
+      const specialStr = "79.1.18";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
@@ -415,8 +415,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.18
 
     it('79.1.19 works with bind value and type mismatch', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: 200, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -433,23 +433,23 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.19
 
     it('79.1.20 mixing named with positional binding', async function() {
-      let sequence = insertID++;
-      let size = 50000;
-      let specialStr = "79.1.20";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size } ];
+      const sequence = insertID++;
+      const size = 50000;
+      const specialStr = "79.1.20";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size } ];
       let result = null;
       result = await connection.execute(
         sqlRun,
         bindVar);
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       compareResultBufAndOriginal(resultVal, bufferStr, specialStr);
     }); // 79.1.20
 
     it('79.1.21 works with invalid BLOB', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: {}, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 50000 }
       };
@@ -466,52 +466,52 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.21
 
     it('79.1.22 works with substr', async function() {
-      let specialStr = "79.1.22";
-      let proc_79125 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79125 (lob_id IN NUMBER, lob_in_out IN OUT BLOB) \n" +
+      const specialStr = "79.1.22";
+      const proc_79125 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79125 (lob_id IN NUMBER, lob_in_out IN OUT BLOB) \n" +
                        "AS \n" +
                        "BEGIN \n" +
                        "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, lob_in_out); \n" +
                        "    select dbms_lob.substr(blob_1, " + specialStr.length + ", 1) into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                        "END nodb_blob_in_out_79125;";
-      let sqlRun_79125 = "begin nodb_blob_in_out_79125(:i, :io); end;";
-      let proc_drop_79125 = "DROP PROCEDURE nodb_blob_in_out_79125";
-      let sequence = insertID++;
-      let size = 50000;
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sqlRun_79125 = "begin nodb_blob_in_out_79125(:i, :io); end;";
+      const proc_drop_79125 = "DROP PROCEDURE nodb_blob_in_out_79125";
+      const sequence = insertID++;
+      const size = 50000;
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
       await executeSQL(proc_79125);
 
-      let comparedBuf = Buffer.from(specialStr, "utf-8");
+      const comparedBuf = Buffer.from(specialStr, "utf-8");
       await plsqlBindInOut(sqlRun_79125, bindVar, comparedBuf, specialStr);
 
       await executeSQL(proc_drop_79125);
     }); // 79.1.22
 
     it('79.1.23 works with UPDATE', async function() {
-      let proc_79125 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79125 (lob_id IN NUMBER, lob_in IN BLOB, lob_in_out IN OUT BLOB) \n" +
+      const proc_79125 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79125 (lob_id IN NUMBER, lob_in IN BLOB, lob_in_out IN OUT BLOB) \n" +
                        "AS \n" +
                        "BEGIN \n" +
                        "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, lob_in_out); \n" +
                        "    update nodb_tab_blob_in set blob_1 = lob_in where id = lob_id; \n" +
                        "    select blob_1 into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                        "END nodb_blob_in_out_79125;";
-      let sqlRun_79125 = "begin nodb_blob_in_out_79125(:i, :in, :io); end;";
-      let proc_drop_79125 = "DROP PROCEDURE nodb_blob_in_out_79125";
-      let sequence = insertID++;
-      let size_1 = 40000;
-      let specialStr_1 = "79.1.23_1";
-      let bigStr_1 = random.getRandomString(size_1, specialStr_1);
-      let bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
-      let size_2 = 50000;
-      let specialStr_2 = "79.1.23_2";
-      let bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      let bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
-      let bindVar = {
+      const sqlRun_79125 = "begin nodb_blob_in_out_79125(:i, :in, :io); end;";
+      const proc_drop_79125 = "DROP PROCEDURE nodb_blob_in_out_79125";
+      const sequence = insertID++;
+      const size_1 = 40000;
+      const specialStr_1 = "79.1.23_1";
+      const bigStr_1 = random.getRandomString(size_1, specialStr_1);
+      const bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
+      const size_2 = 50000;
+      const specialStr_2 = "79.1.23_2";
+      const bigStr_2 = random.getRandomString(size_2, specialStr_2);
+      const bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         in: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_1 },
         io: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
@@ -525,12 +525,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.23
 
     it.skip('79.1.24 named binding: maxSize smaller than buffer size ( < 32K )', async function() {
-      let sequence = insertID++;
-      let size = 5000;
-      let specialStr = "79.1.24";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 5000;
+      const specialStr = "79.1.24";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
@@ -547,12 +547,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.24
 
     it('79.1.25 named binding: maxSize smaller than buffer size ( > 32K )', async function() {
-      let sequence = insertID++;
-      let size = 50000;
-      let specialStr = "79.1.25";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 50000;
+      const specialStr = "79.1.25";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
@@ -568,12 +568,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.25
 
     it('79.1.26 named binding: maxSize smaller than buffer size ( > 64K )', async function() {
-      let sequence = insertID++;
-      let size = 65539;
-      let specialStr = "79.1.26";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 65539;
+      const specialStr = "79.1.26";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
@@ -589,12 +589,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.26
 
     it.skip('79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )', async function() {
-      let sequence = insertID++;
-      let size = 500;
-      let specialStr = "79.1.27";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
+      const sequence = insertID++;
+      const size = 500;
+      const specialStr = "79.1.27";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
 
       await assert.rejects(
         async () => {
@@ -608,12 +608,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.27
 
     it('79.1.28 positional binding: maxSize smaller than buffer size ( > 32K )', async function() {
-      let sequence = insertID++;
-      let size = 50000;
-      let specialStr = "79.1.28";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
+      const sequence = insertID++;
+      const size = 50000;
+      const specialStr = "79.1.28";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
 
       await assert.rejects(
         async () => {
@@ -626,12 +626,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.28
 
     it('79.1.29 positional binding: maxSize smaller than buffer size ( > 64K )', async function() {
-      let sequence = insertID++;
-      let size = 65539;
-      let specialStr = "79.1.29";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
+      const sequence = insertID++;
+      const size = 65539;
+      const specialStr = "79.1.29";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 } ];
 
       await assert.rejects(
         async () => {
@@ -644,12 +644,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.1.29
 
     it('79.1.30 bind without maxSize', async function() {
-      let sequence = insertID++;
-      let size = 50000;
-      let specialStr = "79.1.30";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 50000;
+      const specialStr = "79.1.30";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -660,22 +660,22 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
   }); // 79.1
 
   describe('79.2 BLOB, PLSQL, BIND_INOUT to RAW', function() {
-    let blob_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_792 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
+    const blob_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_792 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
                                "AS \n" +
                                "BEGIN \n" +
                                "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, lob_in_out); \n" +
                                "    select blob_1 into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                                "END nodb_blob_in_out_792;";
-    let sqlRun = "begin nodb_blob_in_out_792(:i, :io); end;";
-    let proc_drop = "DROP PROCEDURE nodb_blob_in_out_792";
-    let blob_proc_inout_7921 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_7921 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
+    const sqlRun = "begin nodb_blob_in_out_792(:i, :io); end;";
+    const proc_drop = "DROP PROCEDURE nodb_blob_in_out_792";
+    const blob_proc_inout_7921 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_7921 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
                                "AS \n" +
                                "BEGIN \n" +
                                "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, EMPTY_BLOB()); \n" +
                                "    select blob_1 into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                                "END nodb_blob_in_out_7921;";
-    let sqlRun_7921 = "begin nodb_blob_in_out_7921(:i, :io); end;";
-    let proc_drop_7921 = "DROP PROCEDURE nodb_blob_in_out_7921";
+    const sqlRun_7921 = "begin nodb_blob_in_out_7921(:i, :io); end;";
+    const proc_drop_7921 = "DROP PROCEDURE nodb_blob_in_out_7921";
 
     before(async function() {
       await executeSQL(blob_proc_inout);
@@ -686,8 +686,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // after
 
     it('79.2.1 works with EMPTY_BLOB', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -700,8 +700,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.1
 
     it('79.2.2 works with EMPTY_BLOB and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -714,8 +714,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.2
 
     it('79.2.3 works with EMPTY_BLOB and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -728,8 +728,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.3
 
     it('79.2.4 works with null', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -738,8 +738,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.4
 
     it('79.2.5 works with null and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -748,8 +748,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.5
 
     it('79.2.6 works with null and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -758,9 +758,9 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.6
 
     it('79.2.7 works with empty buffer', async function() {
-      let sequence = insertID++;
-      let bufferStr = Buffer.from('', "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const bufferStr = Buffer.from('', "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -769,9 +769,9 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.7
 
     it('79.2.8 works with empty buffer and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bufferStr = Buffer.from('', "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const bufferStr = Buffer.from('', "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -780,9 +780,9 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.8
 
     it('79.2.9 works with empty buffer and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bufferStr = Buffer.from('', "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const bufferStr = Buffer.from('', "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -791,8 +791,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.9
 
     it('79.2.10 works with undefined', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -801,8 +801,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.7
 
     it('79.2.11 works with undefined and maxSize set to 1', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -811,8 +811,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.11
 
     it('79.2.12 works with undefined and maxSize set to (64K - 1)', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: undefined, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
       };
@@ -821,8 +821,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.12
 
     it('79.2.13 works with NaN', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: NaN, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -839,8 +839,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.13
 
     it('79.2.14 works with 0', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: 0, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 1 }
       };
@@ -857,12 +857,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.14
 
     it('79.2.15 works with buffer size (32K - 1)', async function() {
-      let sequence = insertID++;
-      let size = 32767;
-      let specialStr = "79.2.15";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 32767;
+      const specialStr = "79.2.15";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
@@ -871,12 +871,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.15
 
     it('79.2.16 works with buffer size 32K', async function() {
-      let sequence = insertID++;
-      let size = 32768;
-      let specialStr = "79.2.16";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 32768;
+      const specialStr = "79.2.16";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
@@ -893,12 +893,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.16
 
     it('79.2.17 works with buffer size > maxSize', async function() {
-      let sequence = insertID++;
-      let size = 300;
-      let specialStr = "79.2.17";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 300;
+      const specialStr = "79.2.17";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size - 1 }
       };
@@ -914,8 +914,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.17
 
     it('79.2.18 works with invalid BLOB', async function() {
-      let sequence = insertID++;
-      let bindVar = {
+      const sequence = insertID++;
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: {}, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 50000 }
       };
@@ -932,52 +932,52 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.18
 
     it('79.2.19 works with substr', async function() {
-      let specialStr = "79.2.19";
-      let proc_79219 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79219 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
+      const specialStr = "79.2.19";
+      const proc_79219 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79219 (lob_id IN NUMBER, lob_in_out IN OUT RAW) \n" +
                        "AS \n" +
                        "BEGIN \n" +
                        "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, lob_in_out); \n" +
                        "    select dbms_lob.substr(blob_1, " + specialStr.length + ", 1) into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                        "END nodb_blob_in_out_79219;";
-      let sqlRun_79219 = "begin nodb_blob_in_out_79219(:i, :io); end;";
-      let proc_drop_79219 = "DROP PROCEDURE nodb_blob_in_out_79219";
-      let sequence = insertID++;
-      let size = 3000;
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sqlRun_79219 = "begin nodb_blob_in_out_79219(:i, :io); end;";
+      const proc_drop_79219 = "DROP PROCEDURE nodb_blob_in_out_79219";
+      const sequence = insertID++;
+      const size = 3000;
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size }
       };
 
       await executeSQL(proc_79219);
 
-      let comparedBuf = Buffer.from(specialStr, "utf-8");
+      const comparedBuf = Buffer.from(specialStr, "utf-8");
       await plsqlBindInOut(sqlRun_79219, bindVar, comparedBuf, specialStr);
 
       await executeSQL(proc_drop_79219);
     }); // 79.2.19
 
     it('79.2.20 works with UPDATE', async function() {
-      let proc_79220 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79220 (lob_id IN NUMBER, lob_in IN RAW, lob_in_out IN OUT RAW) \n" +
+      const proc_79220 = "CREATE OR REPLACE PROCEDURE nodb_blob_in_out_79220 (lob_id IN NUMBER, lob_in IN RAW, lob_in_out IN OUT RAW) \n" +
                        "AS \n" +
                        "BEGIN \n" +
                        "    insert into nodb_tab_blob_in (id, blob_1) values (lob_id, lob_in_out); \n" +
                        "    update nodb_tab_blob_in set blob_1 = lob_in where id = lob_id; \n" +
                        "    select blob_1 into lob_in_out from nodb_tab_blob_in where id = lob_id; \n" +
                        "END nodb_blob_in_out_79220;";
-      let sqlRun_79220 = "begin nodb_blob_in_out_79220(:i, :in, :io); end;";
-      let proc_drop_79220 = "DROP PROCEDURE nodb_blob_in_out_79220";
-      let sequence = insertID++;
-      let size_1 = 2000;
-      let specialStr_1 = "79.2.10_1";
-      let bigStr_1 = random.getRandomString(size_1, specialStr_1);
-      let bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
-      let size_2 = 500;
-      let specialStr_2 = "79.2.10_2";
-      let bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      let bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
-      let bindVar = {
+      const sqlRun_79220 = "begin nodb_blob_in_out_79220(:i, :in, :io); end;";
+      const proc_drop_79220 = "DROP PROCEDURE nodb_blob_in_out_79220";
+      const sequence = insertID++;
+      const size_1 = 2000;
+      const specialStr_1 = "79.2.10_1";
+      const bigStr_1 = random.getRandomString(size_1, specialStr_1);
+      const bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
+      const size_2 = 500;
+      const specialStr_2 = "79.2.10_2";
+      const bigStr_2 = random.getRandomString(size_2, specialStr_2);
+      const bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         in: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_1 },
         io: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: 65535 }
@@ -991,12 +991,12 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.2.20
 
     it('79.2.21 works without maxSize', async function() {
-      let sequence = insertID++;
-      let size = 500;
-      let specialStr = "79.2.21";
-      let bigStr = random.getRandomString(size, specialStr);
-      let bufferStr = Buffer.from(bigStr, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size = 500;
+      const specialStr = "79.2.21";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
@@ -1009,14 +1009,14 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
   }); // 79.2
 
   describe('79.3 Multiple BLOBs, BIND_INOUT', function() {
-    let lobs_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_lobs_in_out_793 (lob_id IN NUMBER, blob_1 IN OUT BLOB, blob_2 IN OUT BLOB) \n" +
+    const lobs_proc_inout = "CREATE OR REPLACE PROCEDURE nodb_lobs_in_out_793 (lob_id IN NUMBER, blob_1 IN OUT BLOB, blob_2 IN OUT BLOB) \n" +
                           "AS \n" +
                           "BEGIN \n" +
                           "    insert into nodb_tab_blob_in (id, blob_1, blob_2) values (lob_id, blob_1, blob_2); \n" +
                           "    select blob_1, blob_2 into blob_1, blob_2 from nodb_tab_blob_in where id = lob_id; \n" +
                           "END nodb_lobs_in_out_793;";
-    let sqlRun = "begin nodb_lobs_in_out_793(:i, :lob_1, :lob_2); end;";
-    let proc_drop = "DROP PROCEDURE nodb_lobs_in_out_793";
+    const sqlRun = "begin nodb_lobs_in_out_793(:i, :lob_1, :lob_2); end;";
+    const proc_drop = "DROP PROCEDURE nodb_lobs_in_out_793";
 
     before(async function() {
       await executeSQL(lobs_proc_inout);
@@ -1038,22 +1038,22 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     };
 
     it('79.3.1 bind a JPG and a 32K buffer', async function() {
-      let preparedCLOBID = 500;
-      let sequence = insertID++;
-      let size_1 = 32768;
-      let specialStr = "79.3.1";
-      let bigStr_1 = random.getRandomString(size_1, specialStr);
-      let bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
+      const preparedCLOBID = 500;
+      const sequence = insertID++;
+      const size_1 = 32768;
+      const specialStr = "79.3.1";
+      const bigStr_1 = random.getRandomString(size_1, specialStr);
+      const bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
       let result = null;
 
-      let sql = "INSERT INTO nodb_tab_lobs_in (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
+      const sql = "INSERT INTO nodb_tab_lobs_in (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       await prepareTableWithBlob(sql, preparedCLOBID);
 
       result = await connection.execute(
         "select blob from nodb_tab_lobs_in where id = :id",
         { id: preparedCLOBID });
       assert.notEqual(result.rows.length, 0);
-      let blob = result.rows[0][0];
+      const blob = result.rows[0][0];
       result = await connection.execute(
         sqlRun,
         {
@@ -1063,7 +1063,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         },
         { autoCommit: true });
 
-      let resultVal = result.outBinds.lob_1;
+      const resultVal = result.outBinds.lob_1;
       compareResultBufAndOriginal(resultVal, bufferStr_1, specialStr);
       const lob = result.outBinds.lob_2;
       const blobData = await lob.getData();
@@ -1074,16 +1074,16 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.3.1
 
     it('79.3.2 bind two buffers', async function() {
-      let sequence = insertID++;
-      let size_1 = 30000;
-      let specialStr_1 = "79.3.2_1";
-      let bigStr_1 = random.getRandomString(size_1, specialStr_1);
-      let bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
-      let size_2 = 40000;
-      let specialStr_2 = "79.3.2_2";
-      let bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      let bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size_1 = 30000;
+      const specialStr_1 = "79.3.2_1";
+      const bigStr_1 = random.getRandomString(size_1, specialStr_1);
+      const bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
+      const size_2 = 40000;
+      const specialStr_2 = "79.3.2_2";
+      const bigStr_2 = random.getRandomString(size_2, specialStr_2);
+      const bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         lob_1: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size_1 },
         lob_2: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size_2 }
@@ -1093,16 +1093,16 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
     }); // 79.3.2
 
     it('79.3.3 bind two buffers, one > (64K - 1)', async function() {
-      let sequence = insertID++;
-      let size_1 = 30000;
-      let specialStr_1 = "79.3.2_1";
-      let bigStr_1 = random.getRandomString(size_1, specialStr_1);
-      let bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
-      let size_2 = 65537;
-      let specialStr_2 = "79.3.2_2";
-      let bigStr_2 = random.getRandomString(size_2, specialStr_2);
-      let bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
-      let bindVar = {
+      const sequence = insertID++;
+      const size_1 = 30000;
+      const specialStr_1 = "79.3.2_1";
+      const bigStr_1 = random.getRandomString(size_1, specialStr_1);
+      const bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
+      const size_2 = 65537;
+      const specialStr_2 = "79.3.2_2";
+      const bigStr_2 = random.getRandomString(size_2, specialStr_2);
+      const bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
+      const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         lob_1: { val: bufferStr_1, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size_1 },
         lob_2: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size_2 }

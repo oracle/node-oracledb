@@ -77,18 +77,18 @@ describe('257. sodahint.js', () => {
     const COLL = "soda_test_257_1";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = soda.createDocument(inContent); // n.b. synchronous method
+    const inDocuments = soda.createDocument(inContent); // n.b. synchronous method
 
-    let options = {hint: "MONITOR"};
+    const options = {hint: "MONITOR"};
     await collection.insertOneAndGet(inDocuments, options);
 
     // Fetch back
-    let outDocuments = await collection.find().hint("MONITOR").getDocuments();
-    let outContent = outDocuments[0].getContent();
+    const outDocuments = await collection.find().hint("MONITOR").getDocuments();
+    const outContent = outDocuments[0].getContent();
     assert.deepStrictEqual(outContent, inContent);
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 257.1
 
@@ -96,9 +96,9 @@ describe('257. sodahint.js', () => {
     const COLL = "soda_test_257_2";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = soda.createDocument(inContent); // n.b. synchronous method
+    const inDocuments = soda.createDocument(inContent); // n.b. synchronous method
 
-    let options = 3;
+    const options = 3;
     await assert.rejects(
       async () => {
         await collection.insertOneAndGet(inDocuments, options);
@@ -108,7 +108,7 @@ describe('257. sodahint.js', () => {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 257.2
 
@@ -116,19 +116,19 @@ describe('257. sodahint.js', () => {
     const COLL = "soda_test_257_3";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = soda.createDocument(inContent); // n.b. synchronous method
+    const inDocuments = soda.createDocument(inContent); // n.b. synchronous method
 
-    let options = {hint: "MONITOR"};
+    const options = {hint: "MONITOR"};
     await collection.saveAndGet(inDocuments, options);
 
     // Fetch back
-    let outDocuments = await collection.find().hint("MONITOR").getDocuments();
-    let outContent = outDocuments[0].getContent();
+    const outDocuments = await collection.find().hint("MONITOR").getDocuments();
+    const outContent = outDocuments[0].getContent();
     assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 257.3
 
@@ -136,9 +136,9 @@ describe('257. sodahint.js', () => {
     const COLL = "soda_test_257_4";
     const collection = await soda.createCollection(COLL);
 
-    let inDocuments = soda.createDocument(inContent); // n.b. synchronous method
+    const inDocuments = soda.createDocument(inContent); // n.b. synchronous method
 
-    let options = 3;
+    const options = 3;
     await assert.rejects(
       async () => {
         await collection.saveAndGet(inDocuments, options);
@@ -148,7 +148,7 @@ describe('257. sodahint.js', () => {
 
     await conn.commit();
 
-    let res = await collection.drop();
+    const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
   }); // 257.4
 

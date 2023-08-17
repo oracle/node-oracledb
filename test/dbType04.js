@@ -325,14 +325,14 @@ describe('241. dbType04.js', function() {
     // database objects not supported in thin mode yet
     if (oracledb.thin) this.skip();
 
-    let sql =
+    const sql =
       `CREATE OR REPLACE TYPE NODE_OBJ AS OBJECT (
         id NUMBER,
         name VARCHAR2(30)
       );`;
     await conn.execute(sql);
 
-    let objData = {
+    const objData = {
       ID: 300,
       NAME: 'Christopher Jones'
     };

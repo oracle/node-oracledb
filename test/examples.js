@@ -159,7 +159,7 @@ describe('3. examples.js', function() {
         + "ORDER BY city");
       //Check if a row in the array is [2300, 'Singapore']
       let containsRow = false;
-      for (let row of result.rows) {
+      for (const row of result.rows) {
         if (row[0] === 2300 && row[1] === 'Singapore') {
           containsRow = true;
           break;
@@ -182,7 +182,7 @@ describe('3. examples.js', function() {
       // Check if one of the row objects match
       // {LOCATION_ID: 1500, CITY: 'South San Francisco'}
       containsRow = false;
-      for (let row of result.rows) {
+      for (const row of result.rows) {
         if (row.LOCATION_ID === 1500 && row.CITY === 'South San Francisco') {
           containsRow = true;
           break;

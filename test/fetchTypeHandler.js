@@ -149,7 +149,7 @@ describe('271. fetchTypeHandler.js', function() {
       return {type: oracledb.STRING};
     };
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT TO_DATE('2005-01-06', 'YYYY-DD-MM') AS TS_DATE FROM DUAL",
       [],
       {
@@ -211,7 +211,7 @@ describe('271. fetchTypeHandler.js', function() {
     oracledb.fetchTypeHandler = function() {
       return {type: oracledb.STRING};
     };
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_TIMESTAMP('1999-12-01 11:10:01.00123', 'YYYY-MM-DD HH:MI:SS.FF') AS TS_DATE FROM DUAL",
       [],
       {
@@ -236,7 +236,7 @@ describe('271. fetchTypeHandler.js', function() {
     };
 
     const options = {fetchTypeHandler: myFetchTypeHandler};
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_DATE('1999-12-01', 'YYYY-MM-DD') AS TS_DATE FROM DUAL",
       [],
       options
@@ -260,7 +260,7 @@ describe('271. fetchTypeHandler.js', function() {
       return {type: oracledb.NUMBER};
     };
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       "SELECT 1234567 AS TS_NUM, TO_DATE('1999-12-01', 'YYYY-MM-DD') AS TS_DATE FROM DUAL"
     );
     assert.strictEqual(result.rows[0][0], 1234567);
@@ -350,7 +350,7 @@ describe('271. fetchTypeHandler.js', function() {
   * Numbers out of above range will be rounded.
   * The last element is out of Oracle database standard Number range. It will be rounded by database.
   */
-  let numStrs =
+  const numStrs =
     [
       '17249138680355831',
       '-17249138680355831',
@@ -359,7 +359,7 @@ describe('271. fetchTypeHandler.js', function() {
       '0.1724913868035583123456789123456789123456'
     ];
 
-  let numResults =
+  const numResults =
     [
       '17249138680355831',
       '-17249138680355831',
@@ -373,8 +373,8 @@ describe('271. fetchTypeHandler.js', function() {
       return {type: oracledb.STRING};
     };
 
-    for (let element of numStrs) {
-      let result = await connection.execute(
+    for (const element of numStrs) {
+      const result = await connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
         {

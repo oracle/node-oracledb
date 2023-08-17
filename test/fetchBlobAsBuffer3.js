@@ -75,7 +75,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
   });  // after
 
   const insertIntoBlobTable2 = async function(id, content1, content2) {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "INSERT INTO nodb_blob2 VALUES (:ID, :B1, :B2)",
       [ id, content1, content2 ]
     );
@@ -286,7 +286,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     it('89.2.13 negative date value for fetchAsBuffer', function() {
       assert.throws(
         function() {
-          let dt = new Date ();
+          const dt = new Date ();
           oracledb.fetchAsBuffer = dt;
         },
         /NJS-004:/
@@ -297,7 +297,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
     it('89.2.14 negative arbitary buffer value for fetchAsBuffer', function() {
       assert.throws(
         function() {
-          let buf = assist.createBuffer(10) ;
+          const buf = assist.createBuffer(10) ;
           oracledb.fetchAsBuffer = buf;
         },
         /NJS-004:/

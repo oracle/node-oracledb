@@ -42,7 +42,7 @@ const assist   = require('./dataTypeAssist.js');
 describe('35. dataTypeTimestamp3.js', function() {
 
   let connection = null;
-  let tableName = "nodb_timestamp3";
+  const tableName = "nodb_timestamp3";
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
   });
@@ -52,7 +52,7 @@ describe('35. dataTypeTimestamp3.js', function() {
   });
 
   describe('35.1 Testing JavaScript Date with database TIMESTAMP WITH TIME ZONE', function() {
-    let dates = assist.data.dates;
+    const dates = assist.data.dates;
 
     before('create table, insert data', async function() {
       await assist.setUp(connection, tableName, dates);
@@ -93,7 +93,7 @@ describe('35. dataTypeTimestamp3.js', function() {
   });
 
   describe('35.3 testing TIMESTAMP WITH TIME ZONE', function() {
-    let timestamps = assist.TIMESTAMP_TZ_STRINGS_1;
+    const timestamps = assist.TIMESTAMP_TZ_STRINGS_1;
 
     before(async function() {
       await assist.setUp4sql(connection, tableName, timestamps);
@@ -109,8 +109,8 @@ describe('35. dataTypeTimestamp3.js', function() {
 
     it('35.3.2 SELECT query - formatted data for comparison', async function() {
       await Promise.all(timestamps.map(async function(timestamp) {
-        let bv = timestamps.indexOf(timestamp);
-        let result = await connection.execute(
+        const bv = timestamps.indexOf(timestamp);
+        const result = await connection.execute(
           `SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF TZH:TZM') AS TS_DATA FROM ` + tableName + ` WHERE num = :no`,
           { no: bv },
           { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -119,11 +119,11 @@ describe('35. dataTypeTimestamp3.js', function() {
     });
 
     it('35.3.3 returns scalar types from PL/SQL block', async function() {
-      let sql = "BEGIN SELECT systimestamp into :bv from dual; END;";
-      let binds = { bv: { dir: oracledb.BIND_OUT, type: oracledb.STRING } };
-      let options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+      const sql = "BEGIN SELECT systimestamp into :bv from dual; END;";
+      const binds = { bv: { dir: oracledb.BIND_OUT, type: oracledb.STRING } };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sql,
         binds,
         options);

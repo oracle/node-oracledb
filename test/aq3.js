@@ -56,14 +56,14 @@ describe('219. aq3.js', function() {
     } else {
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
 
-      let credential = {
+      const credential = {
         user:          AQ_USER,
         password:      AQ_USER_PWD,
         connectString: dbConfig.connectString
       };
       conn = await oracledb.getConnection(credential);
 
-      let plsql = `
+      const plsql = `
         BEGIN
           DBMS_AQADM.CREATE_QUEUE_TABLE(
             QUEUE_TABLE        =>  '${AQ_USER}.${RAW_TABLE}',
@@ -164,7 +164,7 @@ describe('219. aq3.js', function() {
 
   it('219.7 enqMany() mixes enqueuing string and buffer', async () => {
     /* Enqueue */
-    let queue1 = await conn.getQueue(rawQueueName);
+    const queue1 = await conn.getQueue(rawQueueName);
 
     const messages1 = [
       "Message 1",

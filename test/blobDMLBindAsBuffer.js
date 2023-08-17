@@ -68,11 +68,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     await connection.close();
   }); // after
 
-  let executeSQL = async function(sql) {
+  const executeSQL = async function(sql) {
     await connection.execute(sql);
   };
 
-  let insertIntoBlobTable1 = async function(id, content) {
+  const insertIntoBlobTable1 = async function(id, content) {
     let result = null;
     if (content === "EMPTY_BLOB") {
       result = await connection.execute(
@@ -90,7 +90,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }
   };
 
-  let updateBlobTable1 = async function(id, content) {
+  const updateBlobTable1 = async function(id, content) {
     let result = null;
     if (content === "EMPTY_BLOB") {
       result = await connection.execute(
@@ -106,7 +106,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   };
 
   // compare the inserted blob with orginal content
-  let verifyBlobValueWithBuffer = async function(selectSql, originalBuffer) {
+  const verifyBlobValueWithBuffer = async function(selectSql, originalBuffer) {
     const result = await connection.execute(selectSql);
     const lob = result.rows[0][0];
     if (originalBuffer == '' || originalBuffer == undefined) {
@@ -121,8 +121,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }
   };
 
-  let checkInsertResult = async function(id, content) {
-    let sql = "select blob from nodb_dml_blob_1 where id = " + id;
+  const checkInsertResult = async function(id, content) {
+    const sql = "select blob from nodb_dml_blob_1 where id = " + id;
     await verifyBlobValueWithBuffer(sql, content);
   };
 
@@ -136,8 +136,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // after
 
     it('82.1.1 works with EMPTY_BLOB', async function() {
-      let id = insertID++;
-      let content = "EMPTY_BLOB";
+      const id = insertID++;
+      const content = "EMPTY_BLOB";
 
       await insertIntoBlobTable1(id, content);
 
@@ -146,9 +146,9 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.1
 
     it('82.1.2 works with empty buffer', async function() {
-      let id = insertID++;
-      let bigStr = '';
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const bigStr = '';
+      const content = Buffer.from(bigStr, "utf-8");
 
       await insertIntoBlobTable1(id, content);
 
@@ -156,9 +156,9 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.2
 
     it('82.1.3 works with empty buffer and bind in maxSize set to 32767', async function() {
-      let id = insertID++;
-      let bigStr = '';
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const bigStr = '';
+      const content = Buffer.from(bigStr, "utf-8");
       let result = null;
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
@@ -171,9 +171,9 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.3
 
     it('82.1.4 works with empty buffer and bind in maxSize set to 50000', async function() {
-      let id = insertID++;
-      let bigStr = '';
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const bigStr = '';
+      const content = Buffer.from(bigStr, "utf-8");
       let result = null;
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
@@ -187,8 +187,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.4
 
     it('82.1.5 works with undefined', async function() {
-      let id = insertID++;
-      let content = undefined;
+      const id = insertID++;
+      const content = undefined;
 
       await insertIntoBlobTable1(id, content);
 
@@ -196,8 +196,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.5
 
     it('82.1.6 works with null', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
 
       await insertIntoBlobTable1(id, content);
 
@@ -205,8 +205,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.6
 
     it('82.1.7 works with null and bind in maxSize set to 32767', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
       let result = null;
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
@@ -219,8 +219,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.7
 
     it('82.1.8 works with null and bind in maxSize set to 50000', async function() {
-      let id = insertID++;
-      let content = null;
+      const id = insertID++;
+      const content = null;
       let result = null;
 
       result = await connection.execute(
@@ -234,8 +234,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.8
 
     it('82.1.9 works with NaN', async function() {
-      let id = insertID++;
-      let content = NaN;
+      const id = insertID++;
+      const content = NaN;
       await assert.rejects(
         async () => {
           await connection.execute(
@@ -251,8 +251,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.9
 
     it('82.1.10 works with 0', async function() {
-      let id = insertID++;
-      let content = 0;
+      const id = insertID++;
+      const content = 0;
       await assert.rejects(
         async () => {
           await connection.execute(
@@ -268,52 +268,52 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.10
 
     it('82.1.11 works with Buffer length 32K', async function() {
-      let id = insertID++;
-      let contentLength = 32768;
-      let specialStr = "82.1.11";
-      let bigStr = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const contentLength = 32768;
+      const specialStr = "82.1.11";
+      const bigStr = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(bigStr, "utf-8");
       await insertIntoBlobTable1(id, content);
 
       await checkInsertResult(id, content);
     }); // 82.1.11
 
     it('82.1.12 works with Buffer length (64K - 1)', async function() {
-      let id = insertID++;
-      let contentLength = 65535;
-      let specialStr = "82.1.12";
-      let bigStr = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const contentLength = 65535;
+      const specialStr = "82.1.12";
+      const bigStr = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(bigStr, "utf-8");
 
       await insertIntoBlobTable1(id, content);
       await checkInsertResult(id, content);
     }); // 82.1.12
 
     it('82.1.13 works with Buffer length (64K + 1)', async function() {
-      let id = insertID++;
-      let contentLength = 65537;
-      let specialStr = "82.1.13";
-      let bigStr = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const contentLength = 65537;
+      const specialStr = "82.1.13";
+      const bigStr = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(bigStr, "utf-8");
 
       await insertIntoBlobTable1(id, content);
       await checkInsertResult(id, content);
     }); // 82.1.13
 
     it('82.1.14 works with Buffer length (1MB + 1)', async function() {
-      let id = insertID++;
-      let contentLength = 1048577; // 1 * 1024 * 1024 + 1;
-      let specialStr = "82.1.14";
-      let bigStr = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const contentLength = 1048577; // 1 * 1024 * 1024 + 1;
+      const specialStr = "82.1.14";
+      const bigStr = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(bigStr, "utf-8");
 
       await insertIntoBlobTable1(id, content);
       await checkInsertResult(id, content);
     }); // 82.1.14
 
     it('82.1.15 bind value and type mismatch', async function() {
-      let id = insertID++;
-      let content = 100;
+      const id = insertID++;
+      const content = 100;
       await assert.rejects(
         async () => {
           await connection.execute(
@@ -329,11 +329,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.15
 
     it('82.1.16 mixing named with positional binding', async function() {
-      let id = insertID++;
-      let contentLength = 40000;
-      let specialStr = "82.1.16";
-      let bigStr = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const contentLength = 40000;
+      const specialStr = "82.1.16";
+      const bigStr = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(bigStr, "utf-8");
       let result = null;
 
       result = await connection.execute(
@@ -346,7 +346,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.16
 
     it('82.1.17 bind with invalid BLOB', async function() {
-      let id = insertID++;
+      const id = insertID++;
       await assert.rejects(
         async () => {
           await connection.execute(
@@ -361,12 +361,12 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.17
 
     it('82.1.18 RETURNING INTO with bind type BUFFER', async function() {
-      let id = insertID++;
-      let contentLength = 400;
-      let specialStr = "82.1.18";
-      let bigStr = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(bigStr, "utf-8");
-      let sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
+      const id = insertID++;
+      const contentLength = 400;
+      const specialStr = "82.1.18";
+      const bigStr = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(bigStr, "utf-8");
+      const sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
       let result = null;
 
       result = await connection.execute(sql,
@@ -381,11 +381,11 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.1.18
 
     it('82.1.19 works with bind in maxSize smaller than buffer size', async function() {
-      let id = insertID++;
-      let contentLength = 32768;
-      let specialStr = "82.1.20";
-      let bigStr = random.getRandomString(contentLength, specialStr);
-      let content = Buffer.from(bigStr, "utf-8");
+      const id = insertID++;
+      const contentLength = 32768;
+      const specialStr = "82.1.20";
+      const bigStr = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(bigStr, "utf-8");
       let result = null;
 
       result = await connection.execute(
@@ -413,12 +413,12 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // after
 
     it('82.2.1 update EMPTY_BLOB column', async function() {
-      let id = insertID++;
-      let content_1 = "EMPTY_BLOB";
-      let contentLength_2 = 32768;
-      let specialStr_2 = "82.2.1";
-      let bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(bigStr_2, "utf-8");
+      const id = insertID++;
+      const content_1 = "EMPTY_BLOB";
+      const contentLength_2 = 32768;
+      const specialStr_2 = "82.2.1";
+      const bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(bigStr_2, "utf-8");
 
       await insertIntoBlobTable1(id, content_1);
 
@@ -430,12 +430,12 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.2.1
 
     it('82.2.2 update a cloumn with EMPTY_BLOB', async function() {
-      let id = insertID++;
-      let contentLength_1 = 50000;
-      let specialStr_1 = "82.2.2";
-      let bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(bigStr_1, "utf-8");
-      let content_2 = "EMPTY_BLOB";
+      const id = insertID++;
+      const contentLength_1 = 50000;
+      const specialStr_1 = "82.2.2";
+      const bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(bigStr_1, "utf-8");
+      const content_2 = "EMPTY_BLOB";
 
       await insertIntoBlobTable1(id, content_1);
 
@@ -447,9 +447,9 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.2.2
 
     it('82.2.3 update EMPTY_BLOB column with empty buffer', async function() {
-      let id = insertID++;
-      let content_1 = "EMPTY_BLOB";
-      let content_2 = "";
+      const id = insertID++;
+      const content_1 = "EMPTY_BLOB";
+      const content_2 = "";
 
       await insertIntoBlobTable1(id, content_1);
 
@@ -461,13 +461,13 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.2.3
 
     it('82.2.4 update empty buffer column', async function() {
-      let id = insertID++;
-      let bigStr_1 = "";
-      let content_1 = Buffer.from(bigStr_1, "utf-8");
-      let contentLength_2 = 54321;
-      let specialStr_2 = "82.2.4";
-      let bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
-      let content_2 = Buffer.from(bigStr_2, "utf-8");
+      const id = insertID++;
+      const bigStr_1 = "";
+      const content_1 = Buffer.from(bigStr_1, "utf-8");
+      const contentLength_2 = 54321;
+      const specialStr_2 = "82.2.4";
+      const bigStr_2 = random.getRandomString(contentLength_2, specialStr_2);
+      const content_2 = Buffer.from(bigStr_2, "utf-8");
 
       await insertIntoBlobTable1(id, content_1);
 
@@ -479,12 +479,12 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     }); // 82.2.4
 
     it('82.2.5 update a column with empty buffer', async function() {
-      let id = insertID++;
-      let contentLength_1 = 50000;
-      let specialStr_1 = "82.2.2";
-      let bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
-      let content_1 = Buffer.from(bigStr_1, "utf-8");
-      let content_2 = "";
+      const id = insertID++;
+      const contentLength_1 = 50000;
+      const specialStr_1 = "82.2.2";
+      const bigStr_1 = random.getRandomString(contentLength_1, specialStr_1);
+      const content_1 = Buffer.from(bigStr_1, "utf-8");
+      const content_2 = "";
 
       await insertIntoBlobTable1(id, content_1);
 

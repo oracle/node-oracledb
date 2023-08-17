@@ -56,8 +56,8 @@ describe('268. tests for calling stored procedures and functions', function() {
     });
 
     it('268.1.1 executing a stored procedure', async function() {
-      let outValue = { type: oracledb.NUMBER, dir: oracledb.BIND_OUT };
-      let result = await connection.execute(
+      const outValue = { type: oracledb.NUMBER, dir: oracledb.BIND_OUT };
+      const result = await connection.execute(
         `BEGIN proc_Test(:a_InValue, :a_InOutValue, :a_OutValue); END;`,
         {
           a_InValue: "hi",
@@ -70,16 +70,16 @@ describe('268. tests for calling stored procedures and functions', function() {
     });
 
     it('268.1.2 executing a stored procedure with all args keyword args', async function() {
-      let inout_value = {
+      const inout_value = {
         dir: oracledb.BIND_INOUT,
         type: oracledb.NUMBER,
         val: 5
       };
-      let out_value = {
+      const out_value = {
         dir: oracledb.BIND_OUT,
         type: oracledb.NUMBER
       };
-      let results = await connection.execute(
+      const results = await connection.execute(
         `BEGIN proc_Test(:a_InValue, :a_InOutValue, :a_OutValue); END;`,
         {
           a_InValue: 'hi',
@@ -93,8 +93,8 @@ describe('268. tests for calling stored procedures and functions', function() {
 
     it('268.1.3 executing a stored procedure with last arg as keyword arg', async function() {
 
-      let outValue = { type: oracledb.NUMBER, dir: oracledb.BIND_OUT };
-      let result = await connection.execute(`BEGIN proc_Test(:a_InValue, :a_InOutValue, :a_OutValue); END;`,
+      const outValue = { type: oracledb.NUMBER, dir: oracledb.BIND_OUT };
+      const result = await connection.execute(`BEGIN proc_Test(:a_InValue, :a_InOutValue, :a_OutValue); END;`,
         { a_InValue: "hi", a_InOutValue: 5, a_OutValue: outValue });
 
       assert.strictEqual(result.outBinds.a_OutValue, 2.0);
@@ -147,7 +147,7 @@ describe('268. tests for calling stored procedures and functions', function() {
 
     it('268.3.1 executing a stored function', async function() {
 
-      let result = await connection.execute(`SELECT function_Test('hi', 5) as result FROM DUAL`, [], { outFormat: oracledb.OBJECT });
+      const result = await connection.execute(`SELECT function_Test('hi', 5) as result FROM DUAL`, [], { outFormat: oracledb.OBJECT });
       assert.deepStrictEqual(result.rows[0], {"RESULT":7});
     });
 
@@ -211,7 +211,7 @@ describe('268. tests for calling stored procedures and functions', function() {
 
     it('268.4.1 executing a stored function without any arguments', async function() {
 
-      let result = await connection.execute(`SELECT function_TestNoArgs() as result FROM DUAL`, [], { outFormat: oracledb.OBJECT });
+      const result = await connection.execute(`SELECT function_TestNoArgs() as result FROM DUAL`, [], { outFormat: oracledb.OBJECT });
       assert.deepStrictEqual(result.rows[0], {"RESULT": 123});
     });
   });

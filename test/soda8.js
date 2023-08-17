@@ -227,8 +227,8 @@ describe('176. soda8.js', () => {
 
     const myKeys = [];
     for (let i = 0; i < t_contents.length; i++) {
-      let content = t_contents[i];
-      let doc = await collection.insertOneAndGet(content);
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
       myKeys[i] = doc.key;
     }
 

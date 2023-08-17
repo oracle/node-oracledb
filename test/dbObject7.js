@@ -43,7 +43,7 @@ describe('206. dbObject7.js', () => {
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
 
-    let sql =
+    const sql =
       `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
         id NUMBER,
         name VARCHAR2(30)

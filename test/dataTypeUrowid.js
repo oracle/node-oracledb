@@ -39,9 +39,9 @@ const dbConfig = require('./dbconfig.js');
 describe('113. dataTypeUrowid.js', function() {
 
   let connection = null;
-  let tableName = "nodb_urowid";
-  let array = assist.data.numbersForBinaryFloat;
-  let numRows = array.length;  // number of rows to return from each call to getRows()
+  const tableName = "nodb_urowid";
+  const array = assist.data.numbersForBinaryFloat;
+  const numRows = array.length;  // number of rows to return from each call to getRows()
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -65,18 +65,18 @@ describe('113. dataTypeUrowid.js', function() {
     });
 
     it('113.1.1 query rowid', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `SELECT * FROM ` + tableName);
 
       for (let i = 0; i < array.length; i++) {
-        let resultVal = result.rows[i][1];
+        const resultVal = result.rows[i][1];
         assert.strictEqual(typeof resultVal, "string");
         assert(resultVal);
       }
     });
 
     it('113.1.2 works well with result set', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         `SELECT * FROM ` + tableName,
         [],
         { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -101,22 +101,22 @@ describe('113. dataTypeUrowid.js', function() {
     });
   });
 
-  let insertData = async function(connection, tableName) {
+  const insertData = async function(connection, tableName) {
     await Promise.all(array.map(async function(element) {
-      let sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
+      const sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
       await connection.execute(sql);
     }));
   };
 
-  let updateDate = async function(connection, tableName) {
+  const updateDate = async function(connection, tableName) {
     await Promise.all(array.map(async function(element) {
-      let sql = `UPDATE ` + tableName + ` T SET content = T.ROWID where num = ` + element;
+      const sql = `UPDATE ` + tableName + ` T SET content = T.ROWID where num = ` + element;
       await connection.execute(sql);
     }));
   };
 
-  let verifyRefCursor = async function(connection, tableName) {
-    let createProc =
+  const verifyRefCursor = async function(connection, tableName) {
+    const createProc =
           `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
           `AS ` +
           `BEGIN ` +
@@ -126,7 +126,7 @@ describe('113. dataTypeUrowid.js', function() {
 
     await connection.execute(createProc);
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       "BEGIN testproc(:o); END;",
       [
         { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -136,11 +136,11 @@ describe('113. dataTypeUrowid.js', function() {
 
     await connection.execute("DROP PROCEDURE testproc");
   };
-  let fetchRowsFromRS = async function(rs) {
-    let rows = await rs.getRows(numRows);
+  const fetchRowsFromRS = async function(rs) {
+    const rows = await rs.getRows(numRows);
     if (rows.length > 0) {
       for (let i = 0; i < rows.length; i++) {
-        let resultVal = rows[i].CONTENT;
+        const resultVal = rows[i].CONTENT;
         assert(resultVal);
       }
       return fetchRowsFromRS(rs);
@@ -149,8 +149,8 @@ describe('113. dataTypeUrowid.js', function() {
     }
   };
 
-  let verifyRefCursorWithFetchInfo = async function(connection, tableName) {
-    let createProc =
+  const verifyRefCursorWithFetchInfo = async function(connection, tableName) {
+    const createProc =
           `CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) ` +
           `AS ` +
           `BEGIN ` +
@@ -159,7 +159,7 @@ describe('113. dataTypeUrowid.js', function() {
           `END; `;
 
     await connection.execute(createProc);
-    let result = await connection.execute(
+    const result = await connection.execute(
       `BEGIN testproc(:o); END;`,
       [
         { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -176,11 +176,11 @@ describe('113. dataTypeUrowid.js', function() {
     await connection.execute(`DROP PROCEDURE testproc`);
   };
 
-  let fetchRowsFromRS_fetchas = async function(rs) {
-    let rsrows = await rs.getRows(numRows);
+  const fetchRowsFromRS_fetchas = async function(rs) {
+    const rsrows = await rs.getRows(numRows);
     if (rsrows.length > 0) {
       for (let i = 0; i < rsrows.length; i++) {
-        let resultVal = rsrows[i].CONTENT;
+        const resultVal = rsrows[i].CONTENT;
         assert(resultVal);
         assert(typeof resultVal, "string");
         await verifyFetchValues(connection, rsrows[i].NUM, rsrows[i].CONTENT, tableName);
@@ -192,7 +192,7 @@ describe('113. dataTypeUrowid.js', function() {
   };
 
   async function verifyFetchValues(connection, num, content, tableName) {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "select ROWID from " + tableName + " where num = " + num);
 
     assert.strictEqual(content, result.rows[0][0]);

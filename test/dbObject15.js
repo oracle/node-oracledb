@@ -112,7 +112,7 @@ describe('214. dbObject15.js', () => {
   it('214.4 Negative - collection.deleteElement()', function() {
     assert.throws(
       function() {
-        let firstIndex = FrisbeeTeam.getFirstIndex();
+        const firstIndex = FrisbeeTeam.getFirstIndex();
         FrisbeeTeam.deleteElement(firstIndex);
       },
       /NJS-133:/

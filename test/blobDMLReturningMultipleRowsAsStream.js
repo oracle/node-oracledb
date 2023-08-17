@@ -118,7 +118,7 @@ describe('138. blobDMLReturningMultipleRowsAsStream.js', function() {
     const lob = result.outBinds.lobou[n];
     const id = result.outBinds.num[n];
     const blobData = await lob.getData();
-    let expected = Buffer.from(String(id - 10));
+    const expected = Buffer.from(String(id - 10));
     assert.deepStrictEqual(blobData, expected);
   };
 

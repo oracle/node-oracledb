@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
   let connection = null;
-  let tableName = "nodb_dml_blob_137";
+  const tableName = "nodb_dml_blob_137";
 
   const blob_table_create = "BEGIN \n" +
                           "    DECLARE \n" +
@@ -69,7 +69,7 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
   describe('137.1 BLOB DML returning multiple rows as buffer', function() {
 
-    let tabsize = 10;
+    const tabsize = 10;
 
     before(async function() {
       await connection.execute(blob_table_create);
@@ -86,9 +86,9 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
 
   });
 
-  let insertData = async function(tableSize) {
+  const insertData = async function(tableSize) {
     let result = null;
-    let insert_data = "DECLARE \n" +
+    const insert_data = "DECLARE \n" +
                       "    tmpchar VARCHAR2(2000); \n" +
                       "    tmplob BLOB; \n" +
                       "BEGIN \n" +
@@ -105,8 +105,8 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
     assert.strictEqual(result.rows.length, tableSize);
   };
 
-  let updateReturning_buffer = async function(tabsize) {
-    let sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
+  const updateReturning_buffer = async function(tabsize) {
+    const sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
     let result = null;
     result = await connection.execute(
       sql_update,
@@ -115,8 +115,8 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
         lobou: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT }
       });
     for (let i = 0; i < tabsize; i++) {
-      let outnum = result.outBinds.num[i];
-      let outbuf = Number(result.outBinds.lobou[i]);
+      const outnum = result.outBinds.num[i];
+      const outbuf = Number(result.outBinds.lobou[i]);
       assert.strictEqual(outbuf, i + 1);
       assert.strictEqual(outnum, i + 11);
     }

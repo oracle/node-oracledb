@@ -39,7 +39,7 @@ const dbConfig = require('./dbconfig.js');
 describe('34. dataTypeTimestamp2.js', function() {
 
   let connection = null;
-  let tableName = "nodb_timestamp2";
+  const tableName = "nodb_timestamp2";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -51,7 +51,7 @@ describe('34. dataTypeTimestamp2.js', function() {
   });
 
   describe('34.1 Testing JavaScript Date with database TIMESTAMP(p)', function() {
-    let dates = assist.data.dates;
+    const dates = assist.data.dates;
 
     before('create table, insert data', async function() {
       await assist.setUp(connection, tableName, dates);
@@ -92,7 +92,7 @@ describe('34. dataTypeTimestamp2.js', function() {
   });
 
   describe('34.3 testing database TIMESTAMP(p)', function() {
-    let timestamps = assist.TIMESTAMP_STRINGS;
+    const timestamps = assist.TIMESTAMP_STRINGS;
 
     before(async function() {
       await assist.setUp4sql(connection, tableName, timestamps);
@@ -108,8 +108,8 @@ describe('34. dataTypeTimestamp2.js', function() {
 
     it('34.3.2 SELECT query - formatted data for comparison', async function() {
       await Promise.all(timestamps.map(async function(timestamp) {
-        let bv = timestamps.indexOf(timestamp);
-        let result = await connection.execute(
+        const bv = timestamps.indexOf(timestamp);
+        const result = await connection.execute(
           "SELECT num, TO_CHAR(content, 'DD-MM-YYYY HH24:MI:SS.FF') AS TS_DATA FROM " + tableName + " WHERE num = :no",
           { no: bv },
           { outFormat: oracledb.OUT_FORMAT_OBJECT });

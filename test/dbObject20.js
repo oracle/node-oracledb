@@ -39,9 +39,9 @@ const assist   = require('./dataTypeAssist.js');
 
 describe('281. dbObject20.js', () => {
   let conn;
-  let TABLE = 'NODB_TAB_OBJ';
+  const TABLE = 'NODB_TAB_OBJ';
 
-  let proc1 =
+  const proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is
       begin
         open p_cur for
@@ -51,7 +51,7 @@ describe('281. dbObject20.js', () => {
         WHERE num >= 108;
       end; `;
 
-  let proc2 =
+  const proc2 =
     `create or replace procedure nodb_getDataCursor2(p_cur out sys_refcursor) is
        begin
          open p_cur for
@@ -61,7 +61,7 @@ describe('281. dbObject20.js', () => {
          WHERE num >= 300;
        end; `;
 
-  let proc3 =
+  const proc3 =
       `create or replace procedure nodb_getDataCursor3(
           p_cur1 out sys_refcursor,
           p_cur2 out sys_refcursor
@@ -215,7 +215,8 @@ describe('281. dbObject20.js', () => {
 
     it('281.1.6 insert multiple rows using executeMany() with inferred data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
-      let initialID = 208, initialSeq = 108;
+      let initialID = 208;
+      const initialSeq = 108;
 
       const objDataArray = [
         {
@@ -231,7 +232,7 @@ describe('281. dbObject20.js', () => {
           NAME: 'XYZ'
         }
       ];
-      let bindArray = [];
+      const bindArray = [];
       let seq, objDataObj;
       for (let i = 0; i < objDataArray.length; i++) {
         seq = initialSeq + i;
@@ -257,7 +258,8 @@ describe('281. dbObject20.js', () => {
 
     it('281.1.7 insert multiple rows using executeMany() with explicit data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
-      let initialID = 3000, initialSeq = 300;
+      let initialID = 3000;
+      const initialSeq = 300;
 
       const objDataArray = [
         {
@@ -273,7 +275,7 @@ describe('281. dbObject20.js', () => {
           NAME: 'XYZ'
         }
       ];
-      let bindArray = [];
+      const bindArray = [];
       let seq, objDataObj;
       for (let i = 0; i < objDataArray.length; i++) {
         seq = initialSeq + i;
@@ -302,7 +304,7 @@ describe('281. dbObject20.js', () => {
 
     it('281.1.8 call procedure with 2 OUT binds of DbObject', async function() {
 
-      let result = await conn.execute(
+      const result = await conn.execute(
         `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
             p_cur2 => :p_cur2); end;`,
         {
@@ -465,7 +467,8 @@ describe('281. dbObject20.js', () => {
 
     it('281.2.6 insert multiple rows using executeMany() with inferred data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
-      let initialID = 208, initialSeq = 108;
+      let initialID = 208;
+      const initialSeq = 108;
 
       const objDataArray = [
         {
@@ -481,7 +484,7 @@ describe('281. dbObject20.js', () => {
           NAME: 'XYZ'
         }
       ];
-      let bindArray = [];
+      const bindArray = [];
       let seq, objDataObj;
       for (let i = 0; i < objDataArray.length; i++) {
         seq = initialSeq + i;
@@ -507,7 +510,8 @@ describe('281. dbObject20.js', () => {
 
     it('281.2.7 insert multiple rows using executeMany() with explicit data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
-      let initialID = 3000, initialSeq = 300;
+      let initialID = 3000;
+      const initialSeq = 300;
 
       const objDataArray = [
         {
@@ -523,7 +527,7 @@ describe('281. dbObject20.js', () => {
           NAME: 'XYZ'
         }
       ];
-      let bindArray = [];
+      const bindArray = [];
       let seq, objDataObj;
       for (let i = 0; i < objDataArray.length; i++) {
         seq = initialSeq + i;
@@ -552,7 +556,7 @@ describe('281. dbObject20.js', () => {
 
     it('281.2.8 call procedure with 2 OUT binds of DbObject', async function() {
 
-      let result = await conn.execute(
+      const result = await conn.execute(
         `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
             p_cur2 => :p_cur2); end;`,
         {
@@ -716,7 +720,8 @@ describe('281. dbObject20.js', () => {
 
     it('281.3.6 insert multiple rows using executeMany() with inferred data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
-      let initialID = 208, initialSeq = 108;
+      let initialID = 208;
+      const initialSeq = 108;
 
       const objDataArray = [
         {
@@ -732,7 +737,7 @@ describe('281. dbObject20.js', () => {
           NAME: Buffer.from('XYZ')
         }
       ];
-      let bindArray = [];
+      const bindArray = [];
       let seq, objDataObj;
       for (let i = 0; i < objDataArray.length; i++) {
         seq = initialSeq + i;
@@ -758,7 +763,8 @@ describe('281. dbObject20.js', () => {
 
     it('281.3.7 insert multiple rows using executeMany() with explicit data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
-      let initialID = 3000, initialSeq = 300;
+      let initialID = 3000;
+      const initialSeq = 300;
 
       const objDataArray = [
         {
@@ -774,7 +780,7 @@ describe('281. dbObject20.js', () => {
           NAME: Buffer.from('XYZ')
         }
       ];
-      let bindArray = [];
+      const bindArray = [];
       let seq, objDataObj;
       for (let i = 0; i < objDataArray.length; i++) {
         seq = initialSeq + i;
@@ -803,7 +809,7 @@ describe('281. dbObject20.js', () => {
 
     it('281.3.8 call procedure with 2 OUT binds of DbObject', async function() {
 
-      let result = await conn.execute(
+      const result = await conn.execute(
         `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
           p_cur2 => :p_cur2); end;`,
         {
@@ -844,7 +850,7 @@ describe('281. dbObject20.js', () => {
     }); // 281.3.9
 
     it('281.3.10 insert an object with buffer value with size 100', async () => {
-      let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+      const sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 211,
         NAME: assist.createBuffer(100)

@@ -60,7 +60,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
 
-    let sql = `
+    const sql = `
       create table ${tableName} (
           id number(9) not null,
           strval varchar2(100)
@@ -132,9 +132,9 @@ describe('239. plsqlBindCursorsIN.js', () => {
       resultSet: true,
       prefetchRows: 0
     };
-    let result = await conn.execute(sqlRefCursor, [], refCursorOptions);
+    const result = await conn.execute(sqlRefCursor, [], refCursorOptions);
 
-    let plsql = `begin ${procName1}(:bv); end;`;
+    const plsql = `begin ${procName1}(:bv); end;`;
     await conn.execute(
       plsql,
       {
@@ -152,9 +152,9 @@ describe('239. plsqlBindCursorsIN.js', () => {
     const refCursorOptions = {
       resultSet: true
     };
-    let result = await conn.execute(sqlRefCursor, [], refCursorOptions);
+    const result = await conn.execute(sqlRefCursor, [], refCursorOptions);
 
-    let plsql = `begin ${procName1}(:bv); end;`;
+    const plsql = `begin ${procName1}(:bv); end;`;
     await conn.execute(
       plsql,
       {
@@ -169,7 +169,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
   }); // 239.2
 
   it('239.3 cursor bind OUT then bind IN', async () => {
-    let result = await conn.execute(
+    const result = await conn.execute(
       `begin ${procName2}(:bv); end;`,
       {
         bv: {dir: oracledb.BIND_OUT, type: oracledb.CURSOR }
@@ -193,7 +193,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
   }); // 239.3
 
   it('239.4 implicit binding type', async () => {
-    let result = await conn.execute(
+    const result = await conn.execute(
       `begin ${procName2}(:bv); end;`,
       {
         bv: {dir: oracledb.BIND_OUT, type: oracledb.CURSOR }
@@ -221,7 +221,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
     }
     const sid = await testsUtil.getSid(conn);
     let rt = await testsUtil.getRoundTripCount(sid);
-    let result = await conn.execute(
+    const result = await conn.execute(
       `begin ${procName2}(:bv); end;`,
       {
         bv: {dir: oracledb.BIND_OUT, type: oracledb.CURSOR }
@@ -246,7 +246,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
     const sid = await testsUtil.getSid(conn);
     let rt = await testsUtil.getRoundTripCount(sid);
 
-    let result = await conn.execute(
+    const result = await conn.execute(
       `begin ${procName2}(:bv); end;`,
       {
         bv: {dir: oracledb.BIND_OUT, type: oracledb.CURSOR }

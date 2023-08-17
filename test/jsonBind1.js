@@ -37,8 +37,8 @@ const testsUtil = require('./testsUtil.js');
 
 describe('253. jsonBind1.js', function() {
   let conn = null;
-  let tableName = "jsonBind_tab";
-  let outFormatBak = oracledb.outFormat;
+  const tableName = "jsonBind_tab";
+  const outFormatBak = oracledb.outFormat;
   const create_table_sql =
     `BEGIN
       DECLARE

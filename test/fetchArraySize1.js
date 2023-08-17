@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 describe("148. fetchArraySize1.js", function() {
 
   let connection = null;
-  let defaultVal = oracledb.fetchArraySize;
+  const defaultVal = oracledb.fetchArraySize;
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -132,7 +132,7 @@ describe("148. fetchArraySize1.js", function() {
       }
     );
 
-    let result = await connection.execute(
+    const result = await connection.execute(
       "select 'oracledb.fetchArraySize' from dual"
     );
     assert.strictEqual(result.rows[0][0], "oracledb.fetchArraySize");
@@ -149,7 +149,7 @@ describe("148. fetchArraySize1.js", function() {
   };
 
   const checkExecOptionValue = async function(values) {
-    let result = await connection.execute(
+    const result = await connection.execute(
       "select 'fetchArraySize' from dual",
       [],
       { fetchArraySize: values }

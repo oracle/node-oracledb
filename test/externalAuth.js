@@ -228,7 +228,7 @@ const dbConfig = require('./dbconfig.js');
     it("5.2.3 gets multiple connections from oracledb", async function() {
 
       const getConns = async function(id) {
-        let connection = await oracledb.getConnection(
+        const connection = await oracledb.getConnection(
           {
             externalAuth:  true,
             connectString: dbConfig.connectString
@@ -238,10 +238,10 @@ const dbConfig = require('./dbconfig.js');
       };
 
       const closeConns = async function(conns) {
-        for (let item of conns) {
+        for (const item of conns) {
           // console.log("-- close conn " + item.num);
-          let connection = item.inst;
-          let result = await connection.execute("select (5+7) from dual");
+          const connection = item.inst;
+          const result = await connection.execute("select (5+7) from dual");
           assert.strictEqual(result.rows[0][0], 12);
 
           await connection.close();
@@ -249,7 +249,7 @@ const dbConfig = require('./dbconfig.js');
       };
 
       // Main function of this case
-      let connArr = []; // Initialize array of connections with IDs from 1 to 9
+      const connArr = []; // Initialize array of connections with IDs from 1 to 9
       for (let id = 1; id <= 9; id++) {
         connArr[id] = await getConns(id);
       }
@@ -261,7 +261,7 @@ const dbConfig = require('./dbconfig.js');
     it("5.2.4 gets multiple pools from oracledb", async function() {
 
       const getPools = async function(id) {
-        let pool = await oracledb.createPool(
+        const pool = await oracledb.createPool(
           {
             externalAuth:  true,
             connectString: dbConfig.connectString
@@ -271,11 +271,11 @@ const dbConfig = require('./dbconfig.js');
       };
 
       const closePools = async function(pools) {
-        for (let item of pools) {
+        for (const item of pools) {
           // console.log("-- close pool " + item.num);
-          let pool = item.inst;
-          let connection = await pool.getConnection();
-          let result = await connection.execute("select (8+9) from dual");
+          const pool = item.inst;
+          const connection = await pool.getConnection();
+          const result = await connection.execute("select (8+9) from dual");
           assert.strictEqual(result.rows[0][0], 17);
 
           await connection.close();
@@ -284,7 +284,7 @@ const dbConfig = require('./dbconfig.js');
       };
 
       // Main function of this case
-      let poolArr = []; // Initialize array of pools with IDs from 1 to 9
+      const poolArr = []; // Initialize array of pools with IDs from 1 to 9
       for (let id = 1; id <= 9; id++) {
         poolArr[id] = await getPools(id);
       }

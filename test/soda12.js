@@ -40,7 +40,7 @@ const testsUtil = require('./testsUtil.js');
 describe('230. soda12.js', () => {
 
   before(async function() {
-    let isSodaRunnable = await testsUtil.isSodaRunnable();
+    const isSodaRunnable = await testsUtil.isSodaRunnable();
 
     const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
@@ -146,7 +146,7 @@ describe('230. soda12.js', () => {
     assert.deepStrictEqual(docs4[1].getContent(), content4);
 
     await conn.commit();
-    let res = await coll.drop();
+    const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
 
@@ -184,7 +184,7 @@ describe('230. soda12.js', () => {
     assert.deepStrictEqual(docs[1].getContent(), content2);
 
     await conn.commit();
-    let res = await coll.drop();
+    const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
 
@@ -209,7 +209,7 @@ describe('230. soda12.js', () => {
       /ORA-40661/
     );
 
-    let doc = soda.createDocument(content);
+    const doc = soda.createDocument(content);
     await assert.rejects(
       async () => {
         await coll.save(doc);
@@ -218,7 +218,7 @@ describe('230. soda12.js', () => {
     );
     await conn.commit();
 
-    let res = await coll.drop();
+    const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
 
@@ -250,7 +250,7 @@ describe('230. soda12.js', () => {
 
 
     await conn.commit();
-    let res = await coll.drop();
+    const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
 

@@ -54,10 +54,10 @@ describe('179. soda11.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
+      const sd = conn.getSodaDatabase();
 
-      let t_tablename = "myTableName";
-      let t_metadata = {
+      const t_tablename = "myTableName";
+      const t_metadata = {
         "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : t_tablename,
         "keyColumn" :
@@ -92,8 +92,8 @@ describe('179. soda11.js', () => {
         "readOnly" : true
       };
 
-      let t_collname = "soda_test_179_1";
-      let options = { metaData: t_metadata };
+      const t_collname = "soda_test_179_1";
+      const options = { metaData: t_metadata };
       collection = await sd.createCollection(t_collname, options);
 
       await conn.commit();
@@ -107,7 +107,7 @@ describe('179. soda11.js', () => {
       await conn.commit();
 
       if (collection) {
-        let res = await collection.drop();
+        const res = await collection.drop();
         assert.strictEqual(res.dropped, true);
       }
 
@@ -119,9 +119,9 @@ describe('179. soda11.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
+      const sd = conn.getSodaDatabase();
 
-      let t_metadata = {
+      const t_metadata = {
         "schemaName" : "nonexistent",
         "tableName" : "bar",
         "keyColumn" :
@@ -156,8 +156,8 @@ describe('179. soda11.js', () => {
         "readOnly" : false
       };
 
-      let t_collname = "soda_test_179_2";
-      let options = { metaData: t_metadata };
+      const t_collname = "soda_test_179_2";
+      const options = { metaData: t_metadata };
       await assert.rejects(
         async () => await sd.createCollection(t_collname, options),
         /ORA-01918:/
@@ -168,7 +168,7 @@ describe('179. soda11.js', () => {
       await conn.commit();
 
       if (collection) {
-        let res = await collection.drop();
+        const res = await collection.drop();
         assert.strictEqual(res.dropped, true);
       }
 
@@ -181,9 +181,9 @@ describe('179. soda11.js', () => {
     let collection1;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
+      const sd = conn.getSodaDatabase();
 
-      let t_metadata1 = {
+      const t_metadata1 = {
         "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : "nodb_tab_179_3",
         "keyColumn" :
@@ -218,11 +218,11 @@ describe('179. soda11.js', () => {
                        },
         "readOnly": false
       };
-      let t_collname = "soda_test_179_3";
-      let options = { metaData: t_metadata1 };
+      const t_collname = "soda_test_179_3";
+      const options = { metaData: t_metadata1 };
       collection1 = await sd.createCollection(t_collname, options);
 
-      let t_metadata2 = {
+      const t_metadata2 = {
         "schemaName" : "foo",
         "tableName" : "bar",
         "keyColumn" :
@@ -258,7 +258,7 @@ describe('179. soda11.js', () => {
         "readOnly": true
       };
 
-      let options2 = { metaData: t_metadata2 };
+      const options2 = { metaData: t_metadata2 };
 
       await assert.rejects(
         async () => await sd.createCollection(t_collname, options2),
@@ -280,9 +280,9 @@ describe('179. soda11.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_179_4';
-      let testMetaData = {
+      const sd = conn.getSodaDatabase();
+      const collectionName = 'soda_test_179_4';
+      const testMetaData = {
         "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
@@ -317,23 +317,23 @@ describe('179. soda11.js', () => {
         "readOnly": false
       };
 
-      let coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+      const coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
-      let testContent = {
+      const testContent = {
         name:    "Shelly",
         address: {city: "Shenzhen", country: "China"}
       };
 
       /* The key must always be a string and is always returned a string as
          well -- even if the "type" in the database is numeric. */
-      let testKey = '86755';
-      let testDoc = sd.createDocument(testContent, { key: testKey });
+      const testKey = '86755';
+      const testDoc = sd.createDocument(testContent, { key: testKey });
       assert.strictEqual(testDoc.key, testKey);
       await coll.insertOne(testDoc);
 
       // Fetch it back
-      let docGot = await coll.find().key(testKey).getOne();
-      let contentGot = docGot.getContent();
+      const docGot = await coll.find().key(testKey).getOne();
+      const contentGot = docGot.getContent();
       assert.strictEqual(contentGot.name, testContent.name);
       assert.strictEqual(
         contentGot.address.country,
@@ -341,7 +341,7 @@ describe('179. soda11.js', () => {
       );
 
       await conn.commit();
-      let res = await coll.drop();
+      const res = await coll.drop();
       assert.strictEqual(res.dropped, true);
 
     } finally {
@@ -356,9 +356,9 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_179_5';
-      let testMetaData = {
+      const sd = conn.getSodaDatabase();
+      const collectionName = 'soda_test_179_5';
+      const testMetaData = {
         "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
@@ -395,14 +395,14 @@ describe('179. soda11.js', () => {
 
       coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
-      let testContent = {
+      const testContent = {
         name:    "Shelly",
         address: {city: "Shenzhen", country: "China"}
       };
 
       /* The key must always be a string and is always returned a string as
          well -- even if the "type" in the database is numeric. */
-      let testKey = 86755;
+      const testKey = 86755;
       await assert.rejects(
         async () => await sd.createDocument(testContent, { key: testKey }),
         /NJS-007: invalid value for "key" in parameter 2/
@@ -410,7 +410,7 @@ describe('179. soda11.js', () => {
 
     } finally {
       if (coll) {
-        let res = await coll.drop();
+        const res = await coll.drop();
         assert.strictEqual(res.dropped, true);
       }
 
@@ -424,9 +424,9 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_179_6';
-      let testMetaData = {
+      const sd = conn.getSodaDatabase();
+      const collectionName = 'soda_test_179_6';
+      const testMetaData = {
         "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
@@ -468,28 +468,28 @@ describe('179. soda11.js', () => {
       coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
       // Insert a new document
-      let testContent = {};
-      let testMediaType = 'image/png';
-      let testKey = '86755';
-      let testDoc = sd.createDocument(
+      const testContent = {};
+      const testMediaType = 'image/png';
+      const testKey = '86755';
+      const testDoc = sd.createDocument(
         testContent,
         { mediaType: testMediaType, key: testKey }
       );
       assert.strictEqual(testDoc.mediaType, testMediaType);
 
-      let myKey = testDoc.key;
+      const myKey = testDoc.key;
 
       await coll.insertOne(testDoc);
 
       // Fetch the document back
-      let myDoc = await coll.find().key(myKey).getOne();
+      const myDoc = await coll.find().key(myKey).getOne();
 
       assert.strictEqual(myDoc.mediaType, testMediaType);
 
     } finally {
       await conn.commit();
       if (coll) {
-        let res = await coll.drop();
+        const res = await coll.drop();
         assert.strictEqual(res.dropped, true);
       }
 
@@ -503,9 +503,9 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_179_7';
-      let testMetaData = {
+      const sd = conn.getSodaDatabase();
+      const collectionName = 'soda_test_179_7';
+      const testMetaData = {
         "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
@@ -547,11 +547,11 @@ describe('179. soda11.js', () => {
       coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
       // Insert a new document
-      let testContent = {};
+      const testContent = {};
 
       /* Negative value */
-      let testMediaType = 65432;
-      let testKey = '86755';
+      const testMediaType = 65432;
+      const testKey = '86755';
       await assert.rejects(
         async () => await sd.createDocument(
           testContent,
@@ -563,7 +563,7 @@ describe('179. soda11.js', () => {
     } finally {
       await conn.commit();
       if (coll) {
-        let res = await coll.drop();
+        const res = await coll.drop();
         assert.strictEqual(res.dropped, true);
       }
 
@@ -577,9 +577,9 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
-      let sd = conn.getSodaDatabase();
-      let collectionName = 'soda_test_179_8';
-      let testMetaData = {
+      const sd = conn.getSodaDatabase();
+      const collectionName = 'soda_test_179_8';
+      const testMetaData = {
         "schemaName" : dbConfig.user.toUpperCase(),
         "tableName" : collectionName,
         "keyColumn" :
@@ -620,17 +620,17 @@ describe('179. soda11.js', () => {
 
       coll = await sd.createCollection(collectionName, { metaData: testMetaData });
 
-      let testContent = {};
-      let testKey = '86755';
-      let testDoc = sd.createDocument(testContent, { key: testKey });
+      const testContent = {};
+      const testKey = '86755';
+      const testDoc = sd.createDocument(testContent, { key: testKey });
 
-      let outDocument = await coll.insertOneAndGet(testDoc);
+      const outDocument = await coll.insertOneAndGet(testDoc);
       assert(outDocument);
 
     } finally {
       await conn.commit();
       if (coll) {
-        let res = await coll.drop();
+        const res = await coll.drop();
         assert.strictEqual(res.dropped, true);
       }
 

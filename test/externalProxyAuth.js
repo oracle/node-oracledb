@@ -37,7 +37,7 @@ const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 async function ShowUserInfo(conn) {
-  let result = await conn.execute(`
+  const result = await conn.execute(`
     select
       sys_context('USERENV', 'PROXY_USER'),
       sys_context('USERENV', 'SESSION_USER')
@@ -48,7 +48,7 @@ async function ShowUserInfo(conn) {
 describe('180. externalProxyAuth.js', function() {
 
   before('Check version greater than 1202000000', async function() {
-    let preReqSucc = await testsUtil.checkPrerequisites(1202000000, 1202000000);
+    const preReqSucc = await testsUtil.checkPrerequisites(1202000000, 1202000000);
     if (!preReqSucc) {
       console.log("    Version less than 1202000000, Aborting.");
       this.skip();

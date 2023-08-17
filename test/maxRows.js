@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 describe('157. maxRows.js', function() {
 
   let connection = null;
-  let totalAmount = 107;
+  const totalAmount = 107;
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -81,18 +81,18 @@ describe('157. maxRows.js', function() {
 
   // restore oracledb.maxRows to its default value
   afterEach(function() {
-    let defaultValue = 0;
+    const defaultValue = 0;
     oracledb.maxRows = defaultValue;
   });
 
-  let verifyRows = function(rows, amount) {
+  const verifyRows = function(rows, amount) {
     for (let i = 0; i < amount; i++) {
       assert.strictEqual(rows[i][0], (i + 1));
       assert.strictEqual(rows[i][1], ("staff " + String(i + 1)));
     }
   };
 
-  let sqlQuery = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
+  const sqlQuery = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
 
   it('157.1 Default maxRows == 0, which means unlimited', async function() {
     assert.strictEqual(oracledb.maxRows, 0);
@@ -104,7 +104,7 @@ describe('157. maxRows.js', function() {
   });
 
   it("157.2 specify the value at execution", async function() {
-    let fetchAmount = 25;
+    const fetchAmount = 25;
     const result = await connection.execute(
       sqlQuery,
       {},
@@ -144,8 +144,8 @@ describe('157. maxRows.js', function() {
 
   it('157.6 shows 12c new way to limit the number of records fetched by queries', async function() {
 
-    let myoffset     = 2;  // number of rows to skip
-    let mymaxnumrows = 6;  // number of rows to fetch
+    const myoffset     = 2;  // number of rows to skip
+    const mymaxnumrows = 6;  // number of rows to fetch
     let sql = "SELECT * FROM nodb_tab_conn_emp2 ORDER BY id";
 
     if (connection.oracleServerVersion >= 1201000000) {
@@ -168,18 +168,18 @@ describe('157. maxRows.js', function() {
 
   it('157.7 oracledb.maxRows > 0 && oracledb.maxRows < totalAmount', async function() {
 
-    let testValue = 100;
+    const testValue = 100;
     oracledb.maxRows = testValue;
-    let result = await connection.execute(sqlQuery);
-    let expectedAmount = testValue;
+    const result = await connection.execute(sqlQuery);
+    const expectedAmount = testValue;
     verifyRows(result.rows, expectedAmount);
   }); // 157.7
 
   it('157.8 oracledb.maxRows > 0, execute() with maxRows=0', async function() {
 
     oracledb.maxRows = 100;
-    let result = await connection.execute(sqlQuery, {}, { maxRows: 0 });
-    let expectedAmount = totalAmount;
+    const result = await connection.execute(sqlQuery, {}, { maxRows: 0 });
+    const expectedAmount = totalAmount;
     verifyRows(result.rows, expectedAmount);
   }); // 157.8
 

@@ -39,8 +39,8 @@ const dbConfig = require('./dbconfig.js');
 describe("156. fetchArraySize9.js", function() {
 
   let connection = null;
-  let default_fetcArraySize = oracledb.fetchArraySize;
-  let default_maxRows = oracledb.maxRows;
+  const default_fetcArraySize = oracledb.fetchArraySize;
+  const default_maxRows = oracledb.maxRows;
   const tableName = "nodb_fetchArraySize_156";
 
   const create_table = "BEGIN \n" +
@@ -85,7 +85,7 @@ describe("156. fetchArraySize9.js", function() {
       await insertData(tableSize);
       oracledb.fetchArraySize = fetchArraySizeVal;
       oracledb.maxRows = maxRowsVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select * from " + tableName + " where id > " + affectedID + " order by id"
       );
       let resultLenExpected = maxRowsVal > (tableSize - affectedID) ? (tableSize - affectedID) : maxRowsVal;
@@ -97,106 +97,106 @@ describe("156. fetchArraySize9.js", function() {
     };
 
     it("156.1.1 maxRows > table size > oracledb.fetchArraySize", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = tableSize - 50;
-      let maxRowsVal = tableSize + 200;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = tableSize - 50;
+      const maxRowsVal = tableSize + 200;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.2 maxRows > oracledb.fetchArraySize > table size", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize + 30;
-      let maxRowsVal = tableSize + 50;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize + 30;
+      const maxRowsVal = tableSize + 50;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.3 table size > maxRows > oracledb.fetchArraySize", async function() {
-      let tableSize = 199;
-      let fetchArraySizeVal = tableSize - 130;
-      let maxRowsVal = tableSize - 50;
-      let affectedID = 0;
+      const tableSize = 199;
+      const fetchArraySizeVal = tableSize - 130;
+      const maxRowsVal = tableSize - 50;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.4 table size > oracledb.fetchArraySize > maxRow", async function() {
-      let tableSize = 290;
-      let fetchArraySizeVal = tableSize - 90;
-      let maxRowsVal = tableSize - 150;
-      let affectedID = 0;
+      const tableSize = 290;
+      const fetchArraySizeVal = tableSize - 90;
+      const maxRowsVal = tableSize - 150;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.5 maxRows = oracledb.fetchArraySize < table size", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize - 3;
-      let maxRowsVal = fetchArraySizeVal;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize - 3;
+      const maxRowsVal = fetchArraySizeVal;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.6 maxRows = oracledb.fetchArraySize = table size", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize;
-      let maxRowsVal = tableSize;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize;
+      const maxRowsVal = tableSize;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.7 maxRows = oracledb.fetchArraySize > table size", async function() {
-      let tableSize = 10;
-      let fetchArraySizeVal = tableSize + 30;
-      let maxRowsVal = fetchArraySizeVal;
-      let affectedID = 0;
+      const tableSize = 10;
+      const fetchArraySizeVal = tableSize + 30;
+      const maxRowsVal = fetchArraySizeVal;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.8 maxRows = oracledb.fetchArraySize/10", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = 30;
-      let maxRowsVal = fetchArraySizeVal / 10;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = 30;
+      const maxRowsVal = fetchArraySizeVal / 10;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.9 maxRows = 10 * oracledb.fetchArraySize", async function() {
-      let tableSize = 2;
-      let fetchArraySizeVal = 30;
-      let maxRowsVal = fetchArraySizeVal * 10;
-      let affectedID = 0;
+      const tableSize = 2;
+      const fetchArraySizeVal = 30;
+      const maxRowsVal = fetchArraySizeVal * 10;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", async function() {
-      let tableSize = 200;
-      let fetchArraySizeVal = tableSize / 10;
-      let maxRowsVal = fetchArraySizeVal + 50;
-      let affectedID = 0;
+      const tableSize = 200;
+      const fetchArraySizeVal = tableSize / 10;
+      const maxRowsVal = fetchArraySizeVal + 50;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.11 maxRows = 0, fetchArraySize = table size ", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize;
-      let maxRowsVal = 0;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize;
+      const maxRowsVal = 0;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.12 maxRows = (table size - 1), fetchArraySize = table size ", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = tableSize;
-      let maxRowsVal = tableSize - 1;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = tableSize;
+      const maxRowsVal = tableSize - 1;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.1.13 fetchArraySize = (table size - 1), maxRows = table size ", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = tableSize - 1;
-      let maxRowsVal = tableSize;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = tableSize - 1;
+      const maxRowsVal = tableSize;
+      const affectedID = 0;
       await basicFetchWithGlobalOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
   });
@@ -207,12 +207,12 @@ describe("156. fetchArraySize9.js", function() {
       oracledb.maxRows = default_maxRows;
     });
 
-    let basicFetchWithExecOption = async function(tableSize, fetchArraySizeVal, maxRowsVal, affectedID) {
+    const basicFetchWithExecOption = async function(tableSize, fetchArraySizeVal, maxRowsVal, affectedID) {
       await connection.execute(create_table);
       await insertData(tableSize);
 
       oracledb.maxRows = maxRowsVal;
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select * from " + tableName + " where id > " + affectedID + " order by id",
         [],
         {
@@ -228,106 +228,106 @@ describe("156. fetchArraySize9.js", function() {
     };
 
     it("156.2.1 maxRows > table size > oracledb.fetchArraySize", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = tableSize - 50;
-      let maxRowsVal = tableSize + 200;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = tableSize - 50;
+      const maxRowsVal = tableSize + 200;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.2 maxRows > oracledb.fetchArraySize > table size", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize + 30;
-      let maxRowsVal = tableSize + 50;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize + 30;
+      const maxRowsVal = tableSize + 50;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.3 table size > maxRows > oracledb.fetchArraySize", async function() {
-      let tableSize = 199;
-      let fetchArraySizeVal = tableSize - 30;
-      let maxRowsVal = tableSize - 10;
-      let affectedID = 0;
+      const tableSize = 199;
+      const fetchArraySizeVal = tableSize - 30;
+      const maxRowsVal = tableSize - 10;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.4 table size > oracledb.fetchArraySize > maxRow", async function() {
-      let tableSize = 290;
-      let fetchArraySizeVal = tableSize - 90;
-      let maxRowsVal = tableSize - 150;
-      let affectedID = 0;
+      const tableSize = 290;
+      const fetchArraySizeVal = tableSize - 90;
+      const maxRowsVal = tableSize - 150;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.5 maxRows = oracledb.fetchArraySize < table size", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize - 3;
-      let maxRowsVal = fetchArraySizeVal;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize - 3;
+      const maxRowsVal = fetchArraySizeVal;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.6 maxRows = oracledb.fetchArraySize = table size", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize;
-      let maxRowsVal = tableSize;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize;
+      const maxRowsVal = tableSize;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.7 maxRows = oracledb.fetchArraySize > table size", async function() {
-      let tableSize = 10;
-      let fetchArraySizeVal = tableSize + 30;
-      let maxRowsVal = fetchArraySizeVal;
-      let affectedID = 0;
+      const tableSize = 10;
+      const fetchArraySizeVal = tableSize + 30;
+      const maxRowsVal = fetchArraySizeVal;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.8 maxRows = oracledb.fetchArraySize/10", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = 30;
-      let maxRowsVal = fetchArraySizeVal / 10;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = 30;
+      const maxRowsVal = fetchArraySizeVal / 10;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.9 maxRows = 10 * oracledb.fetchArraySize", async function() {
-      let tableSize = 2;
-      let fetchArraySizeVal = 30;
-      let maxRowsVal = fetchArraySizeVal * 10;
-      let affectedID = 0;
+      const tableSize = 2;
+      const fetchArraySizeVal = 30;
+      const maxRowsVal = fetchArraySizeVal * 10;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.10 maxRows > fetchArraySize, fetchArraySize = (table size)/10", async function() {
-      let tableSize = 200;
-      let fetchArraySizeVal = tableSize / 10;
-      let maxRowsVal = tableSize / 10 + 50;
-      let affectedID = 0;
+      const tableSize = 200;
+      const fetchArraySizeVal = tableSize / 10;
+      const maxRowsVal = tableSize / 10 + 50;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.11 maxRows = 0, fetchArraySize = table size ", async function() {
-      let tableSize = 20;
-      let fetchArraySizeVal = tableSize;
-      let maxRowsVal = 0;
-      let affectedID = 0;
+      const tableSize = 20;
+      const fetchArraySizeVal = tableSize;
+      const maxRowsVal = 0;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.12 maxRows = (table size - 1), fetchArraySize = table size ", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = tableSize;
-      let maxRowsVal = tableSize - 1;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = tableSize;
+      const maxRowsVal = tableSize - 1;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
 
     it("156.2.13 fetchArraySize = (table size - 1), maxRows = table size ", async function() {
-      let tableSize = 100;
-      let fetchArraySizeVal = tableSize - 1;
-      let maxRowsVal = tableSize;
-      let affectedID = 0;
+      const tableSize = 100;
+      const fetchArraySizeVal = tableSize - 1;
+      const maxRowsVal = tableSize;
+      const affectedID = 0;
       await basicFetchWithExecOption(tableSize, fetchArraySizeVal, maxRowsVal, affectedID);
     });
   });
@@ -352,7 +352,7 @@ describe("156. fetchArraySize9.js", function() {
   };
 
   const verifyResult = async function(rows) {
-    for (let row of rows) {
+    for (const row of rows) {
       await verifyEachRow(row);
     }
   };

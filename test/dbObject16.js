@@ -61,7 +61,7 @@ describe('215. dbObject16.js', () => {
     `;
     await conn.execute(plsql);
 
-    let sql = `
+    const sql = `
       CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
     `;
     plsql = testsUtil.sqlCreateTable(TABLE, sql);

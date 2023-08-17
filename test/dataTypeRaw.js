@@ -40,12 +40,12 @@ const random   = require('./random.js');
 describe('42. dataTypeRaw.js', function() {
 
   let connection = null;
-  let tableName = "nodb_raw";
+  const tableName = "nodb_raw";
   let insertID = 1;
   const bufferToHexString = (v) => (v === null) ? null : v.toString('hex').toUpperCase();
 
-  let bufLen = [10, 100, 1000, 2000]; // buffer length
-  let bufs = [];
+  const bufLen = [10, 100, 1000, 2000]; // buffer length
+  const bufs = [];
   for (let i = 0; i < bufLen.length; i++)
     bufs[i] = assist.createBuffer(bufLen[i]);
 
@@ -81,8 +81,8 @@ describe('42. dataTypeRaw.js', function() {
 
     it('42.1.4 result set getRow() function works well with RAW', async function() {
 
-      let sql1 = "select dummy, HEXTORAW('0123456789ABCDEF0123456789ABCDEF') from dual";
-      let result = await connection.execute(
+      const sql1 = "select dummy, HEXTORAW('0123456789ABCDEF0123456789ABCDEF') from dual";
+      const result = await connection.execute(
         sql1,
         [],
         { resultSet: true });
@@ -90,7 +90,7 @@ describe('42. dataTypeRaw.js', function() {
       await fetchOneRowFromRS(result.resultSet);
 
       async function fetchOneRowFromRS(rs) {
-        let row = await rs.getRow();
+        const row = await rs.getRow();
 
         if (row) {
           await fetchOneRowFromRS(rs);
@@ -128,11 +128,11 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.3.1 INSERT statement with Object binding', async function() {
-      let seq = 1;
-      let size = 10;
-      let bindValue = assist.createBuffer(size);
+      const seq = 1;
+      const size = 10;
+      const bindValue = assist.createBuffer(size);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         {
           n   : seq,
@@ -147,11 +147,11 @@ describe('42. dataTypeRaw.js', function() {
     });  // 42.3.1
 
     it('42.3.2 INSERT statement with ARRAY binding', async function() {
-      let seq = 2;
-      let size = 10;
-      let bindValue = assist.createBuffer(size);
+      const seq = 2;
+      const size = 10;
+      const bindValue = assist.createBuffer(size);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         [
           seq,
@@ -165,11 +165,11 @@ describe('42. dataTypeRaw.js', function() {
     }); // 42.3.2
 
     it('42.3.3 INSERT statement with exact maxSize restriction', async function() {
-      let seq = 3;
-      let size = 100;
-      let bindValue = assist.createBuffer(size);
+      const seq = 3;
+      const size = 100;
+      const bindValue = assist.createBuffer(size);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         {
           n   : seq,
@@ -183,11 +183,11 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.3.4 UPDATE statement', async function() {
-      let seq = 2;
-      let size = 10;
-      let bindValue = assist.createBuffer(size);
+      const seq = 2;
+      const size = 10;
+      const bindValue = assist.createBuffer(size);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rid, :rc",
         {
           n   : seq,
@@ -201,9 +201,9 @@ describe('42. dataTypeRaw.js', function() {
     }); // 42.3.4
 
     it('42.3.5 DELETE statement with single row matching', async function() {
-      let seq = 1;
+      const seq = 1;
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "DELETE FROM " + tableName + " WHERE num = :1 RETURNING num, content INTO :2, :3",
         [
           seq,
@@ -215,9 +215,9 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.3.6 DELETE statement with multiple rows matching', async function() {
-      let seq = 1;
+      const seq = 1;
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "DELETE FROM " + tableName + " WHERE num > :n RETURNING num, content INTO :rid, :rc",
         {
           n   : seq,
@@ -232,7 +232,7 @@ describe('42. dataTypeRaw.js', function() {
 
   describe('42.4 in PL/SQL, the maximum size is 32767', function() {
 
-    let proc =
+    const proc =
       "CREATE OR REPLACE PROCEDURE nodb_testraw (p_in IN RAW, p_out OUT RAW) " +
       "AS " +
       "BEGIN " +
@@ -248,10 +248,10 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.4.1 works well when the length of data is less than maxSize', async function() {
-      let size = 5;
-      let buf = assist.createBuffer(size);
+      const size = 5;
+      const buf = assist.createBuffer(size);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
@@ -263,10 +263,10 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.4.2 works well when the length of data is exactly 32767', async function() {
-      let size = 32767;
-      let buf = assist.createBuffer(size);
+      const size = 32767;
+      const buf = assist.createBuffer(size);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         "BEGIN nodb_testraw(:i, :o); END;",
         {
           i: { type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: buf },
@@ -278,8 +278,8 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.4.3 throws error when the length of data is greater than maxSize', async function() {
-      let size = 32700;
-      let buf = assist.createBuffer(size);
+      const size = 32700;
+      const buf = assist.createBuffer(size);
 
       await assert.rejects(
         async () => await connection.execute(
@@ -294,8 +294,8 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.4.4 throws error when both data and maxSize are greater than 32767', async function() {
-      let size = 32800;
-      let buf = assist.createBuffer(size);
+      const size = 32800;
+      const buf = assist.createBuffer(size);
       await assert.rejects(
         async () => await connection.execute(
           "BEGIN nodb_testraw(:i, :o); END;",
@@ -325,32 +325,32 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.5.1 works with data size 100', async function() {
-      let insertedStr = random.getRandomLengthString(100);
-      let insertedBuf = Buffer.from(insertedStr);
+      const insertedStr = random.getRandomLengthString(100);
+      const insertedBuf = Buffer.from(insertedStr);
       await test1(insertedBuf);
     });
 
     it('42.5.2 works with data size 2000', async function() {
-      let insertedStr = random.getRandomLengthString(2000);
-      let insertedBuf = Buffer.from(insertedStr);
+      const insertedStr = random.getRandomLengthString(2000);
+      const insertedBuf = Buffer.from(insertedStr);
       await test1(insertedBuf);
     });
 
     it('42.5.3 works with default type/dir', async function() {
-      let insertedStr = random.getRandomLengthString(2000);
-      let insertedBuf = Buffer.from(insertedStr);
+      const insertedStr = random.getRandomLengthString(2000);
+      const insertedBuf = Buffer.from(insertedStr);
       await test1_default(insertedBuf);
     });
 
     it('42.5.4 works with default type/dir and fetch as string', async function() {
-      let insertedStr = random.getRandomLengthString(2000);
-      let insertedBuf = Buffer.from(insertedStr);
+      const insertedStr = random.getRandomLengthString(2000);
+      const insertedBuf = Buffer.from(insertedStr);
       await test1_default_string(insertedBuf);
     });
 
     it('42.5.5 works with data size 2000 and fetch as string', async function() {
-      let insertedStr = random.getRandomLengthString(2000);
-      let insertedBuf = Buffer.from(insertedStr);
+      const insertedStr = random.getRandomLengthString(2000);
+      const insertedBuf = Buffer.from(insertedStr);
       await test1_string(insertedBuf);
     });
 
@@ -370,56 +370,56 @@ describe('42. dataTypeRaw.js', function() {
     });
 
     it('42.6.1 works with data size 100', async function() {
-      let insertedStr = random.getRandomLengthString(20);
-      let updateStr = random.getRandomLengthString(100);
-      let insertedBuf = Buffer.from(insertedStr);
-      let updateBuf = Buffer.from(updateStr);
+      const insertedStr = random.getRandomLengthString(20);
+      const updateStr = random.getRandomLengthString(100);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
       await test2(insertedBuf, updateBuf);
     });
 
     it('42.6.2 works with data size 2000', async function() {
-      let insertedStr = random.getRandomLengthString(30);
-      let updateStr = random.getRandomLengthString(2000);
-      let insertedBuf = Buffer.from(insertedStr);
-      let updateBuf = Buffer.from(updateStr);
+      const insertedStr = random.getRandomLengthString(30);
+      const updateStr = random.getRandomLengthString(2000);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
       await test2(insertedBuf, updateBuf);
     });
 
     it('42.6.3 works with default type/dir', async function() {
-      let insertedStr = random.getRandomLengthString(30);
-      let updateStr = random.getRandomLengthString(2000);
-      let insertedBuf = Buffer.from(insertedStr);
-      let updateBuf = Buffer.from(updateStr);
+      const insertedStr = random.getRandomLengthString(30);
+      const updateStr = random.getRandomLengthString(2000);
+      const insertedBuf = Buffer.from(insertedStr);
+      const updateBuf = Buffer.from(updateStr);
       await test2_default(insertedBuf, updateBuf);
     });
 
   }); // 42.6
 
-  let test1 = async function(content) {
+  const test1 = async function(content) {
 
     await insert(content);
 
     await fetch(content);
   };
 
-  let test1_string = async function(content) {
-    await insert(content);
-    await fetchString(bufferToHexString(content));
-  };
-
-  let test1_default = async function(content) {
+  const test1_default = async function(content) {
 
     await insert_default(content);
 
     await fetch(content);
   };
 
-  let test1_default_string = async function(content) {
+  const test1_string = async function(content) {
+    await insert(content);
+    await fetchString(bufferToHexString(content));
+  };
+
+  const test1_default_string = async function(content) {
     await insert_default(content);
     await fetchString(bufferToHexString(content));
   };
 
-  let test2 = async function(insertedStr, updateStr) {
+  const test2 = async function(insertedStr, updateStr) {
 
     await insert(insertedStr);
 
@@ -428,7 +428,7 @@ describe('42. dataTypeRaw.js', function() {
     await fetch(updateStr);
   };
 
-  let test2_default = async function(insertedStr, updateStr) {
+  const test2_default = async function(insertedStr, updateStr) {
 
     await insert(insertedStr);
 
@@ -437,64 +437,64 @@ describe('42. dataTypeRaw.js', function() {
     await fetch(updateStr);
   };
 
-  let insert = async function(content) {
-    let sql = "insert into " + tableName + " (num, content) values (:i, :c)";
-    let bindVar = {
+  const insert = async function(content) {
+    const sql = "insert into " + tableName + " (num, content) values (:i, :c)";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
     };
-    let result = await connection.execute(
+    const result = await connection.execute(
       sql,
       bindVar);
     assert.strictEqual(result.rowsAffected, 1);
   };
 
-  let insert_default = async function(content) {
-    let sql = "insert into " + tableName + " (num, content) values (:i, :c)";
-    let bindVar = {
+  const insert_default = async function(content) {
+    const sql = "insert into " + tableName + " (num, content) values (:i, :c)";
+    const bindVar = {
       i: insertID,
       c: content
     };
-    let result = await connection.execute(
+    const result = await connection.execute(
       sql,
       bindVar);
     assert.strictEqual(result.rowsAffected, 1);
   };
 
-  let update = async function(content) {
-    let sql = "update " + tableName + " set content = :c where num = :i";
-    let bindVar = {
+  const update = async function(content) {
+    const sql = "update " + tableName + " set content = :c where num = :i";
+    const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
     };
-    let result = await connection.execute(
+    const result = await connection.execute(
       sql,
       bindVar);
     assert.strictEqual(result.rowsAffected, 1);
   };
 
-  let update_default = async function(content) {
-    let sql = "update " + tableName + " set content = :c where num = :i";
-    let bindVar = {
+  const update_default = async function(content) {
+    const sql = "update " + tableName + " set content = :c where num = :i";
+    const bindVar = {
       i: insertID,
       c: content
     };
-    let result = await connection.execute(
+    const result = await connection.execute(
       sql,
       bindVar);
     assert.strictEqual(result.rowsAffected, 1);
   };
 
-  let fetch = async function(expected) {
-    let sql = "select content from " + tableName + " where num = " + insertID;
-    let result = await connection.execute(sql);
+  const fetch = async function(expected) {
+    const sql = "select content from " + tableName + " where num = " + insertID;
+    const result = await connection.execute(sql);
     assert.deepStrictEqual(result.rows[0][0], expected);
   };
 
-  let fetchString = async function(expected) {
+  const fetchString = async function(expected) {
     oracledb.fetchAsString = [oracledb.DB_TYPE_RAW];
-    let sql = "select content from " + tableName + " where num = " + insertID;
-    let result = await connection.execute(sql);
+    const sql = "select content from " + tableName + " where num = " + insertID;
+    const result = await connection.execute(sql);
     assert.deepStrictEqual(result.rows[0][0], expected);
   };
 });

@@ -42,7 +42,7 @@ const dbConfig = require('./dbconfig.js');
 describe("154. fetchArraySize7.js", function() {
 
   let connection = null;
-  let default_maxRows = oracledb.maxRows;
+  const default_maxRows = oracledb.maxRows;
   const tableName = "nodb_fetchArraySize_154";
   const tableSize = 1000;
 
@@ -106,12 +106,12 @@ describe("154. fetchArraySize7.js", function() {
           fetchArraySize: fetchArraySizeVal
         }
       );
-      let rowCount = 0;
+      const rowCount = 0;
       fetchRowsFromRS(result.resultSet, numRowsVal, rowCount);
     };
 
     async function fetchRowsFromRS(rs, numRowsVal, rowCount) {
-      let rows = await rs.getRows(numRowsVal);
+      const rows = await rs.getRows(numRowsVal);
       assert(rows.length <= numRowsVal);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
@@ -127,74 +127,74 @@ describe("154. fetchArraySize7.js", function() {
     }
 
     it("154.1.1 numRows > table size > fetchArraySize", async function() {
-      let fetchArraySizeVal = tableSize - 50;
-      let numRowsVal = tableSize + 10000;
+      const fetchArraySizeVal = tableSize - 50;
+      const numRowsVal = tableSize + 10000;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.2 numRows > fetchArraySize > table size", async function() {
-      let fetchArraySizeVal = tableSize + 1200;
-      let numRowsVal = tableSize + 10000;
+      const fetchArraySizeVal = tableSize + 1200;
+      const numRowsVal = tableSize + 10000;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.3 table size > numRows > fetchArraySize", async function() {
-      let fetchArraySizeVal = tableSize - 91;
-      let numRowsVal = tableSize - 2;
+      const fetchArraySizeVal = tableSize - 91;
+      const numRowsVal = tableSize - 2;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.4 table size > fetchArraySize > maxRow", async function() {
-      let fetchArraySizeVal = tableSize - 90;
-      let numRowsVal = tableSize - 150;
+      const fetchArraySizeVal = tableSize - 90;
+      const numRowsVal = tableSize - 150;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.5 numRows = fetchArraySize < table size", async function() {
-      let fetchArraySizeVal = tableSize - 110;
-      let numRowsVal = tableSize - 110;
+      const fetchArraySizeVal = tableSize - 110;
+      const numRowsVal = tableSize - 110;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.6 numRows = fetchArraySize = table size", async function() {
-      let fetchArraySizeVal = tableSize;
-      let numRowsVal = tableSize;
+      const fetchArraySizeVal = tableSize;
+      const numRowsVal = tableSize;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.7 numRows = fetchArraySize > table size", async function() {
-      let fetchArraySizeVal = tableSize + 9999;
-      let numRowsVal = tableSize + 9999;
+      const fetchArraySizeVal = tableSize + 9999;
+      const numRowsVal = tableSize + 9999;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.8 numRows = fetchArraySize/10", async function() {
-      let fetchArraySizeVal = tableSize / 10 + 1;
-      let numRowsVal = tableSize / 10;
+      const fetchArraySizeVal = tableSize / 10 + 1;
+      const numRowsVal = tableSize / 10;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.9 numRows = 10 * fetchArraySize", async function() {
-      let fetchArraySizeVal = 90;
-      let numRowsVal = 900;
+      const fetchArraySizeVal = 90;
+      const numRowsVal = 900;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.10 numRows > fetchArraySize, fetchArraySize = (table size)/10", async function() {
-      let fetchArraySizeVal = tableSize / 10;
-      let numRowsVal = tableSize / 10 + 1;
+      const fetchArraySizeVal = tableSize / 10;
+      const numRowsVal = tableSize / 10 + 1;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.11 numRows = (table size - 1), fetchArraySize = table size", async function() {
-      let fetchArraySizeVal = tableSize;
-      let numRowsVal = tableSize - 1;
+      const fetchArraySizeVal = tableSize;
+      const numRowsVal = tableSize - 1;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
     it("154.1.12 fetchArraySize = (table size - 1), numRows = table size", async function() {
-      let fetchArraySizeVal = tableSize - 1;
-      let numRowsVal = tableSize;
+      const fetchArraySizeVal = tableSize - 1;
+      const numRowsVal = tableSize;
       await testGetRow(fetchArraySizeVal, numRowsVal);
     });
 
@@ -215,7 +215,7 @@ describe("154. fetchArraySize7.js", function() {
     });
 
     const testGetRows = async function(fetchArraySizeVal) {
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select * from " + tableName + " order by id",
         [],
         {
@@ -223,13 +223,13 @@ describe("154. fetchArraySize7.js", function() {
           fetchArraySize: fetchArraySizeVal
         }
       );
-      let rowCount = 0;
+      const rowCount = 0;
       // assert.strictEqual(result.rows.length, default_maxRows);
       await fetchRowFromRS(result.resultSet, rowCount);
     };
 
     async function fetchRowFromRS(rs, rowCount) {
-      let row = await rs.getRow();
+      const row = await rs.getRow();
       if (row) {
         rowCount = rowCount + 1;
         // console.log(rows[i][0]);
@@ -288,7 +288,7 @@ describe("154. fetchArraySize7.js", function() {
     });
 
     const testRS = async function(fetchArraySizeVal) {
-      let result = await connection.execute(
+      const result = await connection.execute(
         "select * from " + tableName + " order by id",
         [],
         {
@@ -296,12 +296,12 @@ describe("154. fetchArraySize7.js", function() {
           fetchArraySize: fetchArraySizeVal
         }
       );
-      let rowCount = 0;
+      const rowCount = 0;
       fetchRowFromRS(result.resultSet, rowCount);
     };
 
     async function fetchRowFromRS(rs, rowCount) {
-      let row = await rs.getRow();
+      const row = await rs.getRow();
       if (row) {
         rowCount = rowCount + 1;
         assert.strictEqual(row[0], rowCount);
@@ -314,7 +314,7 @@ describe("154. fetchArraySize7.js", function() {
     }
 
     async function fetchRowsFromRS_1(rs, rowCount, cb) {
-      let rows = await rs.getRows(numRowsVal_1);
+      const rows = await rs.getRows(numRowsVal_1);
       assert(rows.length <= numRowsVal_1);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
@@ -330,7 +330,7 @@ describe("154. fetchArraySize7.js", function() {
     }
 
     async function fetchRowsFromRS_2(rs, rowCount, cb) {
-      let rows = await rs.getRows(numRowsVal_2);
+      const rows = await rs.getRows(numRowsVal_2);
       assert(rows.length <= numRowsVal_2);
       if (rows.length > 0) {
         for (let i = 0; i < rows.length; i++) {
@@ -346,49 +346,49 @@ describe("154. fetchArraySize7.js", function() {
     }
 
     it("154.3.1 fetchArraySize = 1", async function() {
-      let fetchArraySizeVal = 1;
+      const fetchArraySizeVal = 1;
       numRowsVal_1 = 2;
       numRowsVal_2 = 10;
       await testRS(fetchArraySizeVal);
     });
 
     it("154.3.2 fetchArraySize = tableSize/50", async function() {
-      let fetchArraySizeVal = tableSize / 50;
+      const fetchArraySizeVal = tableSize / 50;
       numRowsVal_1 = 5;
       numRowsVal_2 = 88;
       await testRS(fetchArraySizeVal);
     });
 
     it("154.3.3 fetchArraySize = tableSize/20", async function() {
-      let fetchArraySizeVal = tableSize / 20;
+      const fetchArraySizeVal = tableSize / 20;
       numRowsVal_1 = 50;
       numRowsVal_2 = 100;
       await testRS(fetchArraySizeVal);
     });
 
     it("154.3.4 fetchArraySize = tableSize/10", async function() {
-      let fetchArraySizeVal = tableSize / 10;
+      const fetchArraySizeVal = tableSize / 10;
       numRowsVal_1 = 30;
       numRowsVal_2 = 99;
       await testRS(fetchArraySizeVal);
     });
 
     it("154.3.5 fetchArraySize = tableSize/5", async function() {
-      let fetchArraySizeVal = tableSize / 5;
+      const fetchArraySizeVal = tableSize / 5;
       numRowsVal_1 = 5;
       numRowsVal_2 = 88;
       await testRS(fetchArraySizeVal);
     });
 
     it("154.3.6 fetchArraySize = tableSize", async function() {
-      let fetchArraySizeVal = tableSize;
+      const fetchArraySizeVal = tableSize;
       numRowsVal_1 = 15;
       numRowsVal_2 = tableSize;
       await testRS(fetchArraySizeVal);
     });
 
     it("154.3.7 fetchArraySize = (tableSize - 1)", async function() {
-      let fetchArraySizeVal = tableSize - 1;
+      const fetchArraySizeVal = tableSize - 1;
       numRowsVal_1 = tableSize - 1;
       numRowsVal_2 = tableSize;
       await testRS(fetchArraySizeVal);

@@ -37,7 +37,7 @@ const testsUtil = require('./testsUtil.js');
 
 describe("256. executeQueue.js", function() {
   let connection;
-  let errorOnConcurrentExecuteBak = oracledb.errorOnConcurrentExecute;
+  const errorOnConcurrentExecuteBak = oracledb.errorOnConcurrentExecute;
 
   const content = [];
   content[0] = { name: "Venkat", address: {city: "Bengaluru"} };
@@ -88,7 +88,7 @@ describe("256. executeQueue.js", function() {
       for (let i = 0 ; i < loopCount; i++) {
         promises[i] = doQuery(connection);
       }
-      let values = await Promise.allSettled(promises);
+      const values = await Promise.allSettled(promises);
       for (let i = 0; i < loopCount; i++) {
         assert.strictEqual(values[i].status, 'fulfilled');
         assert.strictEqual(values[i].value, 'X');
@@ -140,7 +140,7 @@ describe("256. executeQueue.js", function() {
       for (let i = 0 ; i < loopCount; i++) {
         promises[i] = doCreateCollection(sd, collName + i);
       }
-      let values = await Promise.allSettled(promises);
+      const values = await Promise.allSettled(promises);
       collName = "soda_collection";
       for (let i = 0 ; i < loopCount; i++) {
         assert.strictEqual(values[i].status, 'fulfilled');
@@ -226,7 +226,7 @@ describe("256. executeQueue.js", function() {
       for (let i = 0 ; i < loopCount; i++) {
         promises[i] = doCount(collection);
       }
-      let values = await Promise.allSettled(promises);
+      const values = await Promise.allSettled(promises);
       for (let i = 0 ; i < loopCount; i++) {
         assert.strictEqual(values[i].status, 'fulfilled');
         assert.strictEqual(values[i].value.count, 2);
@@ -275,7 +275,7 @@ describe("256. executeQueue.js", function() {
       for (let i = 0 ; i < loopCount; i++) {
         promises[i] = doGetNext(docCursor);
       }
-      let values = await Promise.allSettled(promises);
+      const values = await Promise.allSettled(promises);
       for (let i = 0 ; i < loopCount; i++) {
         assert.strictEqual(values[i].status, 'fulfilled');
         assert.equal(values[i].value.getContent().toString(), content[i]);
@@ -315,7 +315,7 @@ describe("256. executeQueue.js", function() {
       for (let i = 0 ; i < 4; i++) {
         promises[i] = doQuery(connection);
       }
-      let values = await Promise.allSettled(promises);
+      const values = await Promise.allSettled(promises);
       assert.strictEqual(values[0].status, 'fulfilled');
       assert.strictEqual(values[0].value, 0);   // It will execute first, 0 in the queue
       assert.strictEqual(values[1].status, 'fulfilled');
@@ -386,7 +386,7 @@ describe("256. executeQueue.js", function() {
       for (let i = 0 ; i < loopCount; i++) {
         promises[i] = doGetData(clob[i]);
       }
-      let values = await Promise.allSettled(promises);
+      const values = await Promise.allSettled(promises);
       for (let i = 0 ; i < loopCount; i++) {
         assert.strictEqual(values[i].status, 'fulfilled');
         assert.equal(values[0].value, content);

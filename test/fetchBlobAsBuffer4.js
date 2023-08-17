@@ -97,16 +97,16 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       const sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :i3); end;";
       const proc_drop = "DROP FUNCTION nodb_blobs_out_94";
 
-      let len = 400;
-      let sequence = insertID++;
-      let specialStr = "91.1.1";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 400;
+      const sequence = insertID++;
+      const specialStr = "91.1.1";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -114,11 +114,11 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, content ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       assert.deepStrictEqual(content, resultVal);
 
       await connection.execute(proc_drop);
@@ -135,16 +135,16 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       const sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :c); end;";
       const proc_drop = "DROP FUNCTION nodb_blobs_out_94";
 
-      let len = 400;
-      let sequence = insertID++;
-      let specialStr = "91.1.2";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 400;
+      const sequence = insertID++;
+      const specialStr = "91.1.2";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -152,7 +152,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -161,7 +161,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       assert.deepStrictEqual(resultVal, content);
 
       await connection.execute(proc_drop);
@@ -178,16 +178,16 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       const sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :c); end;";
       const proc_drop = "DROP FUNCTION nodb_blobs_out_94";
 
-      let len = 400;
-      let sequence = insertID++;
-      let specialStr = "91.1.3";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 400;
+      const sequence = insertID++;
+      const specialStr = "91.1.3";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -195,11 +195,11 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       assert.deepStrictEqual(resultVal, content);
 
       await connection.execute(proc_drop);
@@ -216,16 +216,16 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       const sqlRun = "begin :output := nodb_blobs_out_94 (:i1, :i2, :c); end;";
       const proc_drop = "DROP FUNCTION nodb_blobs_out_94";
 
-      let len = 400;
-      let sequence = insertID++;
-      let specialStr = "91.1.4";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 400;
+      const sequence = insertID++;
+      const specialStr = "91.1.4";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -233,7 +233,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -242,7 +242,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       assert.deepStrictEqual(resultVal, content);
 
       await connection.execute(proc_drop);
@@ -268,15 +268,15 @@ describe('91. fetchBlobAsBuffer4.js', function() {
     }); // afterEach
 
     it('91.2.1 bind by position - 1', async function() {
-      let len = 500;
-      let sequence = insertID++;
-      let specialStr = "91.2.1";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 500;
+      const sequence = insertID++;
+      const specialStr = "91.2.1";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -284,27 +284,27 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ sequence, null, content, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len } ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       assert.deepStrictEqual(resultVal, content);
 
       await connection.execute(proc_drop);
     }); // 91.2.1
 
     it('91.2.2 bind by name - 1', async function() {
-      let len = 400;
-      let sequence = insertID++;
-      let specialStr = "91.2.2";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 400;
+      const sequence = insertID++;
+      const specialStr = "91.2.2";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -312,7 +312,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -321,23 +321,23 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           c2: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.c2;
+      const resultVal = result.outBinds.c2;
       assert.deepStrictEqual(resultVal, content);
 
       await connection.execute(proc_drop);
     }); // 91.2.2
 
     it('91.2.3 bind by position - 2', async function() {
-      let len = 500;
-      let sequence = insertID++;
-      let specialStr = "91.2.3";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 500;
+      const sequence = insertID++;
+      const specialStr = "91.2.3";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -345,27 +345,27 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [ sequence, sequence, null, { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len } ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       assert.deepStrictEqual(resultVal, content);
 
       await connection.execute(proc_drop);
     }); // 91.2.3
 
     it('91.2.4 bind by name - 2', async function() {
-      let len = 400;
-      let sequence = insertID++;
-      let specialStr = "91.2.4";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 400;
+      const sequence = insertID++;
+      const specialStr = "91.2.4";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       await connection.execute(proc);
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -373,7 +373,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -382,7 +382,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           c2: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.c2;
+      const resultVal = result.outBinds.c2;
       assert.deepStrictEqual(resultVal, content);
 
       await connection.execute(proc_drop);
@@ -418,14 +418,14 @@ describe('91. fetchBlobAsBuffer4.js', function() {
     }); // afterEach
 
     it('91.3.1 bind by name - 1', async function() {
-      let len = 1000;
-      let sequence = insertID++;
-      let specialStr = "91.3.1";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 1000;
+      const sequence = insertID++;
+      const specialStr = "91.3.1";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -433,7 +433,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -442,19 +442,19 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       assert.deepStrictEqual(resultVal, content);
     }); // 91.3.1
 
     it('91.3.2 bind by position - 1', async function() {
-      let len = 1000;
-      let sequence = insertID++;
-      let specialStr = "91.3.2";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 1000;
+      const sequence = insertID++;
+      const specialStr = "91.3.2";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -462,25 +462,25 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [
           { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, null, content
         ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       assert.deepStrictEqual(resultVal, content);
     }); // 91.3.2
 
     it('91.3.3 bind by name - 2', async function() {
-      let len = 1000;
-      let sequence = insertID++;
-      let specialStr = "91.3.3";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 1000;
+      const sequence = insertID++;
+      const specialStr = "91.3.3";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -488,7 +488,7 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         {
           i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -497,19 +497,19 @@ describe('91. fetchBlobAsBuffer4.js', function() {
           output: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }
         }
       );
-      let resultVal = result.outBinds.output;
+      const resultVal = result.outBinds.output;
       assert.deepStrictEqual(resultVal, content);
     }); // 91.3.3
 
     it('91.3.4 bind by position - 2', async function() {
-      let len = 1000;
-      let sequence = insertID++;
-      let specialStr = "91.3.4";
-      let strBuf = random.getRandomString(len, specialStr);
-      let content = Buffer.from(strBuf, "utf-8");
+      const len = 1000;
+      const sequence = insertID++;
+      const specialStr = "91.3.4";
+      const strBuf = random.getRandomString(len, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
 
       const sql = "INSERT INTO nodb_blob_1 (num_1, num_2, content, blob) VALUES (:i1, :i2, :c1, :c2)";
-      let bindVar = {
+      const bindVar = {
         i1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         i2: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         c1: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: len },
@@ -517,13 +517,13 @@ describe('91. fetchBlobAsBuffer4.js', function() {
       };
       await insertTable(sql, bindVar);
 
-      let result = await connection.execute(
+      const result = await connection.execute(
         sqlRun,
         [
           { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: len }, sequence, sequence, null
         ]
       );
-      let resultVal = result.outBinds[0];
+      const resultVal = result.outBinds[0];
       assert.deepStrictEqual(resultVal, content);
     }); // 91.3.4
 

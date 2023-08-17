@@ -39,7 +39,7 @@ const dbConfig = require('./dbconfig.js');
 describe('31. dataTypeBinaryDouble.js', function() {
 
   let connection = null;
-  let tableName = "nodb_double";
+  const tableName = "nodb_double";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -51,7 +51,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
 
   describe('31.1 testing BINARY_DOUBLE data', function() {
 
-    let numbers = assist.data.numbersForBinaryFloat.concat(assist.data.numbersForBinaryDouble);
+    const numbers = assist.data.numbersForBinaryFloat.concat(assist.data.numbersForBinaryDouble);
 
     before('create table, insert data', async function() {
 
@@ -99,7 +99,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
   });
 
   describe('31.3 testing floating-point numbers which can be precisely represent', function() {
-    let nums =
+    const nums =
       [
         0.0000000000000000000123,
         98.7654321
@@ -115,7 +115,7 @@ describe('31. dataTypeBinaryDouble.js', function() {
     });
 
     it('31.3.1 testing floating-point numbers', async function() {
-      let result = await connection.execute(
+      const result = await connection.execute(
         "SELECT * FROM " + tableName,
         [],
         { outFormat: oracledb.OUT_FORMAT_OBJECT });

@@ -66,8 +66,8 @@ describe('96.binding_procedureBindOut.js', function() {
     await inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind);
   };
 
-  let getInsertVal = function(element, nullBind) {
-    let insertValue = [];
+  const getInsertVal = function(element, nullBind) {
+    const insertValue = [];
     if (element.indexOf("CHAR") > -1 || element === "CLOB") {
       insertValue[0] = (nullBind === true) ? null : "abcsca";
       insertValue[1] = oracledb.STRING;
@@ -88,19 +88,19 @@ describe('96.binding_procedureBindOut.js', function() {
   };
 
   const inBind = async function(table_name, proc_name, sequence, dbColType, bindVar, bindType, nullBind) {
-    let createTable = await sql.createTable(table_name, dbColType);
-    let drop_table = "DROP TABLE " + table_name + " PURGE";
-    let proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue OUT " + dbColType + ")\n" +
+    const createTable = await sql.createTable(table_name, dbColType);
+    const drop_table = "DROP TABLE " + table_name + " PURGE";
+    const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue OUT " + dbColType + ")\n" +
                "AS \n" +
                "BEGIN \n" +
                "    select content into inValue from " + table_name + " where id = ID; \n" +
                "END " + proc_name + "; ";
-    let sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
-    let proc_drop = "DROP PROCEDURE " + proc_name;
-    let inserted = getInsertVal(dbColType, nullBind);
-    let insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
+    const sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
+    const proc_drop = "DROP PROCEDURE " + proc_name;
+    const inserted = getInsertVal(dbColType, nullBind);
+    const insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
     await executeSql(createTable);
-    let bind = {
+    const bind = {
       c1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c2: { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN }
     };
@@ -124,7 +124,7 @@ describe('96.binding_procedureBindOut.js', function() {
     await executeSql(drop_table);
   };
 
-  let compareErrMsgForString = function(element, err) {
+  const compareErrMsgForString = function(element, err) {
     if (element === "BLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
@@ -136,7 +136,7 @@ describe('96.binding_procedureBindOut.js', function() {
     }
   };
 
-  let compareErrMsgForRAW = function(nullBind, element, err) {
+  const compareErrMsgForRAW = function(nullBind, element, err) {
     if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
       // ORA-06550: line 1, column 7:
       // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'

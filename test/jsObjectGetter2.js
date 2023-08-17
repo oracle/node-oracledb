@@ -38,7 +38,7 @@ const dbConfig = require('./dbconfig.js');
 describe('171. jsObjectGetter2.js', () => {
 
   it.skip('171.1 oracledb.fetchAsBuffer', () => {
-    let foo = [ oracledb.BLOB ];
+    const foo = [ oracledb.BLOB ];
     Object.defineProperty(foo, '0', {
       get: function() {
         throw 'Nope';
@@ -55,7 +55,7 @@ describe('171. jsObjectGetter2.js', () => {
   }); // 171.1
 
   it.skip('171.2 oracledb.fetchAsString', () => {
-    let foo = [ oracledb.CLOB ];
+    const foo = [ oracledb.CLOB ];
     Object.defineProperty(foo, '0', {
       get: function() {
         throw 'Nope';
@@ -94,8 +94,8 @@ describe('171. jsObjectGetter2.js', () => {
                "END; ";
     await conn.execute(proc);
 
-    let sqlInsert = "INSERT INTO " + tableName + " VALUES (:id, :nm)";
-    let bindVar = [2, 'Alison'];
+    const sqlInsert = "INSERT INTO " + tableName + " VALUES (:id, :nm)";
+    const bindVar = [2, 'Alison'];
     Object.defineProperty(bindVar, '0', {
       get: function() {
         throw 'Nope';
@@ -103,7 +103,7 @@ describe('171. jsObjectGetter2.js', () => {
     });
     await conn.execute(sqlInsert, bindVar);
 
-    let sqlDrop = "DROP TABLE " + tableName + " PURGE";
+    const sqlDrop = "DROP TABLE " + tableName + " PURGE";
     await conn.execute(sqlDrop);
     await conn.close();
   }); // 171.3

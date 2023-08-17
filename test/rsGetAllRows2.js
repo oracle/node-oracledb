@@ -37,7 +37,7 @@ const dbConfig = require('./dbconfig.js');
 
 describe('250. rsGetAllRows2.js', function() {
   let conn = null;
-  let outFormatBak = oracledb.outFormat;
+  const outFormatBak = oracledb.outFormat;
   const create_table_dept_sql =
     `BEGIN
        DECLARE
@@ -103,7 +103,7 @@ describe('250. rsGetAllRows2.js', function() {
   });
 
   it('250.1 Nested Cursor + getRows() OBJECT outformat', async function() {
-    let result = await conn.execute(
+    const result = await conn.execute(
       `SELECT
         DEPARTMENT_NAME,
         CURSOR (
@@ -120,7 +120,7 @@ describe('250. rsGetAllRows2.js', function() {
       {}, { resultSet : true }
     );
 
-    let rows = await result.resultSet.getRows();
+    const rows = await result.resultSet.getRows();
 
     // Top level
     assert.equal(rows.length, 3);
@@ -151,7 +151,7 @@ describe('250. rsGetAllRows2.js', function() {
   });
 
   it('250.2 Nested Cursor + getRows(0) rows ARRAY outformat', async function() {
-    let result = await conn.execute(
+    const result = await conn.execute(
       `SELECT
         DEPARTMENT_NAME,
         CURSOR (
@@ -168,7 +168,7 @@ describe('250. rsGetAllRows2.js', function() {
       {}, { resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY }
     );
 
-    let rows = await result.resultSet.getRows(0);
+    const rows = await result.resultSet.getRows(0);
 
     // Top level
     assert.equal(rows.length, 3);
@@ -200,7 +200,7 @@ describe('250. rsGetAllRows2.js', function() {
   });
   it('250.3 Nested Cursor + getRows(n) + getRows() OBJECT outformat', async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-    let result = await conn.execute(
+    const result = await conn.execute(
       `SELECT
         DEPARTMENT_NAME,
         CURSOR (
@@ -217,8 +217,8 @@ describe('250. rsGetAllRows2.js', function() {
       {}, { resultSet : true }
     );
 
-    let rows1 = await result.resultSet.getRows(1);
-    let rows2 = await result.resultSet.getRows();
+    const rows1 = await result.resultSet.getRows(1);
+    const rows2 = await result.resultSet.getRows();
     // Top level
     assert.equal(rows1.length, 1);
     assert.equal(rows2.length, 2);
@@ -228,19 +228,19 @@ describe('250. rsGetAllRows2.js', function() {
 
     // nested level
     let rs = rows1[0].NC;
-    let rows1_NC = await rs.getRows();
+    const rows1_NC = await rs.getRows();
     assert.equal(rows1_NC.length, 1);
     assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
     assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
     // Sales Dept - no employees.
     rs = rows2[0].NC;
-    let rows2_NC = await rs.getRows();
+    const rows2_NC = await rs.getRows();
     assert.equal(rows2_NC.length, 0);
 
     rs = rows2[1].NC;
-    let rows2_NC1 = await rs.getRows(1);
-    let rows2_NC2 = await rs.getRows();
+    const rows2_NC1 = await rs.getRows(1);
+    const rows2_NC2 = await rs.getRows();
     assert.equal(rows2_NC1.length, 1);
     assert.equal(rows2_NC2.length, 126);
     assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
@@ -252,7 +252,7 @@ describe('250. rsGetAllRows2.js', function() {
 
   it('250.4 Nested Cursor + getRow() + getRows(0) rows ARRAY outformat', async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_ARRAY;
-    let result = await conn.execute(
+    const result = await conn.execute(
       `SELECT
         DEPARTMENT_NAME,
         CURSOR (
@@ -269,8 +269,8 @@ describe('250. rsGetAllRows2.js', function() {
       {}, { resultSet : true }
     );
 
-    let rows1 = await result.resultSet.getRow();
-    let rows2 = await result.resultSet.getRows(0);
+    const rows1 = await result.resultSet.getRow();
+    const rows2 = await result.resultSet.getRows(0);
 
     // Top level
     assert.equal(rows2.length, 2);
@@ -280,19 +280,19 @@ describe('250. rsGetAllRows2.js', function() {
 
     // nested level
     let rs = rows1[1];
-    let rows1_NC = await rs.getRows(0);
+    const rows1_NC = await rs.getRows(0);
     assert.equal(rows1_NC.length, 1);
     assert.equal(rows1_NC[0][0], "R&D 1");
     assert.equal(rows1_NC[0][1], 1001);
 
     // Sales Dept - no employees.
     rs = rows2[0][1];
-    let rows2_NC = await rs.getRows(0);
+    const rows2_NC = await rs.getRows(0);
     assert.equal(rows2_NC.length, 0);
 
     rs = rows2[1][1];
-    let rows2_NC1 = await rs.getRow();
-    let rows2_NC2 = await rs.getRows(0);
+    const rows2_NC1 = await rs.getRow();
+    const rows2_NC2 = await rs.getRows(0);
     assert.equal(rows2_NC2.length, 126);
     assert.equal(rows2_NC1[0], "Marketing 0");
     assert.equal(rows2_NC2[0][0], "Marketing 1");
@@ -304,7 +304,7 @@ describe('250. rsGetAllRows2.js', function() {
 
   it('250.5 Nested Cursor + getRows(n) + getRows(0) with fetchArraySize < remaining rows inside nested cursor', async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
-    let result = await conn.execute(
+    const result = await conn.execute(
       `SELECT
         DEPARTMENT_NAME,
         CURSOR (
@@ -321,8 +321,8 @@ describe('250. rsGetAllRows2.js', function() {
       {}, { resultSet : true, fetchArraySize : 100 }
     );
 
-    let rows1 = await result.resultSet.getRows(1);
-    let rows2 = await result.resultSet.getRows(0);
+    const rows1 = await result.resultSet.getRows(1);
+    const rows2 = await result.resultSet.getRows(0);
     // Top level
     assert.equal(rows1.length, 1);
     assert.equal(rows2.length, 2);
@@ -332,19 +332,19 @@ describe('250. rsGetAllRows2.js', function() {
 
     // nested level
     let rs = rows1[0].NC;
-    let rows1_NC = await rs.getRows(0);
+    const rows1_NC = await rs.getRows(0);
     assert.equal(rows1_NC.length, 1);
     assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
     assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
     // Sales Dept - no employees.
     rs = rows2[0].NC;
-    let rows2_NC = await rs.getRows(0);
+    const rows2_NC = await rs.getRows(0);
     assert.equal(rows2_NC.length, 0);
 
     rs = rows2[1].NC;
-    let rows2_NC1 = await rs.getRows(1);
-    let rows2_NC2 = await rs.getRows(0);
+    const rows2_NC1 = await rs.getRows(1);
+    const rows2_NC2 = await rs.getRows(0);
     assert.equal(rows2_NC1.length, 1);
     assert.equal(rows2_NC2.length, 126);
     assert.equal(rows2_NC1[0].EMPLOYEE_NAME, "Marketing 0");
@@ -354,7 +354,7 @@ describe('250. rsGetAllRows2.js', function() {
   });
 
   it('250.6 Nested Cursor + getRows(n) + getRow() + getRows() with fetchArraySize = 1', async function() {
-    let result = await conn.execute(
+    const result = await conn.execute(
       `SELECT
         DEPARTMENT_NAME,
         CURSOR (
@@ -371,8 +371,8 @@ describe('250. rsGetAllRows2.js', function() {
       {}, { resultSet : true, fetchArraySize : 1 }
     );
 
-    let rows1 = await result.resultSet.getRows(1);
-    let rows2 = await result.resultSet.getRows();
+    const rows1 = await result.resultSet.getRows(1);
+    const rows2 = await result.resultSet.getRows();
     // Top level
     assert.equal(rows1.length, 1);
     assert.equal(rows2.length, 2);
@@ -382,19 +382,19 @@ describe('250. rsGetAllRows2.js', function() {
 
     // nested level
     let rs = rows1[0].NC;
-    let rows1_NC = await rs.getRows();
+    const rows1_NC = await rs.getRows();
     assert.equal(rows1_NC.length, 1);
     assert.equal(rows1_NC[0].EMPLOYEE_NAME, "R&D 1");
     assert.equal(rows1_NC[0].EMPLOYEE_ID, 1001);
 
     // Sales Dept - no employees.
     rs = rows2[0].NC;
-    let rows2_NC = await rs.getRows();
+    const rows2_NC = await rs.getRows();
     assert.equal(rows2_NC.length, 0);
 
     rs = rows2[1].NC;
-    let rows2_NC1 = await rs.getRow();
-    let rows2_NC2 = await rs.getRows();
+    const rows2_NC1 = await rs.getRow();
+    const rows2_NC2 = await rs.getRows();
     assert.equal(rows2_NC2.length, 126);
     assert.equal(rows2_NC1.EMPLOYEE_NAME, "Marketing 0");
     assert.equal(rows2_NC2[125].EMPLOYEE_NAME, "Marketing 126");

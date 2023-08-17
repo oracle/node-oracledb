@@ -41,7 +41,7 @@ describe('7. autoCommit.js', function() {
   let connection  = null;
 
   before('create pool, get one connection, create table', async function() {
-    let script =
+    const script =
         "BEGIN \
             DECLARE \
                 e_table_missing EXCEPTION; \

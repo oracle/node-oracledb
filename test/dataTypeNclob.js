@@ -40,7 +40,7 @@ const random   = require('./random.js');
 describe('123. dataTypeNclob.js', function() {
 
   let connection = null;
-  let tableName = "nodb_nclob";
+  const tableName = "nodb_nclob";
   let insertID = 0;
 
   before('get one connection', async function() {
@@ -65,8 +65,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.1.1 works with data size 100', async function() {
-      let insertLength = 100;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 100;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -74,8 +74,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.1.2 works with data size 3000', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -95,8 +95,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.2.1 works with data size 100', async function() {
-      let insertLength = 100;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 100;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -104,8 +104,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.2.2 works with data size 3000', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -113,8 +113,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.2.3 works with resultSet', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -141,8 +141,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.3.1 works with data size 100', async function() {
-      let insertLength = 100;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 100;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -150,8 +150,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.3.2 works with data size 3000', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -159,8 +159,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.3.2 works with resultSet', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -181,8 +181,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.4.1 columns fetched from REF CURSORS can be mapped by fetchInfo settings', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
 
       await insertData(tableName, insertStr);
 
@@ -190,8 +190,8 @@ describe('123. dataTypeNclob.js', function() {
     });
 
     it('123.4.2 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString', async function() {
-      let insertLength = 3000;
-      let insertStr = random.getRandomLengthString(insertLength);
+      const insertLength = 3000;
+      const insertStr = random.getRandomLengthString(insertLength);
       oracledb.fetchAsString = [ oracledb.CLOB ];
 
       await insertData(tableName, insertStr);
@@ -207,17 +207,17 @@ describe('123. dataTypeNclob.js', function() {
   });
 
 
-  let insertData = async function(tableName, insertStr) {
-    let sql = "INSERT INTO " + tableName + "(num, content) VALUES(" + insertID + ", TO_NCLOB('" + insertStr + "'))";
+  const insertData = async function(tableName, insertStr) {
+    const sql = "INSERT INTO " + tableName + "(num, content) VALUES(" + insertID + ", TO_NCLOB('" + insertStr + "'))";
     await connection.execute(sql);
   };
 
-  let streamLob = async function(tableName, originalStr) {
+  const streamLob = async function(tableName, originalStr) {
     let result = null;
     result = await connection.execute("SELECT TO_CLOB(content) FROM " + tableName + " where num = " + insertID);
     await new Promise((resolve, reject) => {
       let clob = '';
-      let lob = result.rows[0][0];
+      const lob = result.rows[0][0];
 
       assert(lob);
       lob.setEncoding('utf8'); // set the encoding so we get a 'string' not a 'buffer'
@@ -236,7 +236,7 @@ describe('123. dataTypeNclob.js', function() {
     });
   };
 
-  let fetchLob_fetchInfo = async function(tableName, originalStr) {
+  const fetchLob_fetchInfo = async function(tableName, originalStr) {
     let result = null;
     result = await connection.execute(
       "SELECT content AS C FROM " + tableName + " where num = " + insertID,
@@ -245,12 +245,12 @@ describe('123. dataTypeNclob.js', function() {
         fetchInfo : { C : { type : oracledb.STRING } }
       });
 
-    let resultStr = result.rows[0][0];
+    const resultStr = result.rows[0][0];
     assert.strictEqual(resultStr.length, originalStr.length);
     assert.strictEqual(resultStr, originalStr);
   };
 
-  let fetchLob_fetchInfo_rs = async function(tableName, originalStr) {
+  const fetchLob_fetchInfo_rs = async function(tableName, originalStr) {
     let result = null;
     result = await connection.execute(
       "SELECT content FROM " + tableName + " where num = " + insertID,
@@ -263,15 +263,15 @@ describe('123. dataTypeNclob.js', function() {
     fetchRowFromRS(result.resultSet, originalStr);
   };
 
-  let fetchLob_fetchas = async function(tableName, originalStr) {
+  const fetchLob_fetchas = async function(tableName, originalStr) {
     let result = null;
     result = await connection.execute("SELECT content AS C FROM " + tableName + " where num = " + insertID);
-    let resultStr = result.rows[0][0];
+    const resultStr = result.rows[0][0];
     assert.strictEqual(resultStr.length, originalStr.length);
     assert.strictEqual(resultStr, originalStr);
   };
 
-  let fetchLob_fetchas_rs = async function(tableName, originalStr) {
+  const fetchLob_fetchas_rs = async function(tableName, originalStr) {
     let result = null;
     result = await connection.execute(
       "SELECT content FROM " + tableName + " where num = " + insertID,
@@ -286,11 +286,11 @@ describe('123. dataTypeNclob.js', function() {
   const fetchRowFromRS = async function(rs, originalStr) {
     let accessCount = 0;
      while (true) { // eslint-disable-line
-      let row = await rs.getRow();
+      const row = await rs.getRow();
       if (!row)
         break;
       accessCount++;
-      let resultVal = row[0];
+      const resultVal = row[0];
       assert.strictEqual(resultVal.length, originalStr.length);
       assert.strictEqual(resultVal, originalStr);
     }
@@ -298,8 +298,8 @@ describe('123. dataTypeNclob.js', function() {
     assert.strictEqual(accessCount, 1);
   };
 
-  let verifyRefCursor_fetchInfo = async function(tableName, originalStr) {
-    let createProc =
+  const verifyRefCursor_fetchInfo = async function(tableName, originalStr) {
+    const createProc =
           "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
           "AS " +
           "BEGIN " +
@@ -318,8 +318,8 @@ describe('123. dataTypeNclob.js', function() {
     await connection.execute("DROP PROCEDURE testproc");
   };
 
-  let verifyRefCursor_fetchas = async function(tableName, originalStr) {
-    let createProc =
+  const verifyRefCursor_fetchas = async function(tableName, originalStr) {
+    const createProc =
           "CREATE OR REPLACE PROCEDURE testproc (p_out OUT SYS_REFCURSOR) " +
           "AS " +
           "BEGIN " +

@@ -40,7 +40,7 @@ const testsUtil = require('./testsUtil.js');
 describe('186. sodaInstanceof.js', function() {
 
   before(async function() {
-    let isSodaRunnable = await testsUtil.isSodaRunnable();
+    const isSodaRunnable = await testsUtil.isSodaRunnable();
 
     const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
@@ -59,23 +59,22 @@ describe('186. sodaInstanceof.js', function() {
   });
 
   it('186.1 instanceof checks for SODA classes', async function() {
-    let conn, coll, cursor;
 
-    conn = await oracledb.getConnection(dbConfig);
+    const conn = await oracledb.getConnection(dbConfig);
 
-    let sodaDB = conn.getSodaDatabase();
+    const sodaDB = conn.getSodaDatabase();
     assert(sodaDB instanceof oracledb.SodaDatabase);
 
-    let doc = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
+    const doc = sodaDB.createDocument({name: "Chris", city: "Melbourne"});
     assert(doc instanceof oracledb.SodaDocument);
 
-    coll = await sodaDB.createCollection("node_test_186_1");
+    const coll = await sodaDB.createCollection("node_test_186_1");
     assert(coll instanceof oracledb.SodaCollection);
 
-    let operation = coll.find();
+    const operation = coll.find();
     assert(operation instanceof oracledb.SodaOperation);
 
-    cursor = await operation.getCursor();
+    const cursor = await operation.getCursor();
     assert(cursor instanceof oracledb.SodaDocCursor);
 
     if (cursor) {

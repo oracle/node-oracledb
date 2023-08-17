@@ -39,8 +39,8 @@ const random   = require('./random.js');
 describe('245. fetchLobAsStrBuf.js', function() {
   let connection = null;
   let insertID = 1;
-  let tableName = "fetchLobAsStrBuf_table";
-  let fun_create_table = "BEGIN \n" +
+  const tableName = "fetchLobAsStrBuf_table";
+  const fun_create_table = "BEGIN \n" +
                           "    DECLARE \n" +
                           "        e_table_missing EXCEPTION; \n" +
                           "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n" +
@@ -58,7 +58,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
                           "        ) \n" +
                           "    '); \n" +
                           "END;  ";
-  let drop_table = "DROP TABLE " + tableName + " PURGE";
+  const drop_table = "DROP TABLE " + tableName + " PURGE";
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -68,19 +68,19 @@ describe('245. fetchLobAsStrBuf.js', function() {
     await connection.close();
   });
 
-  let executeSQL = async function(sql) {
+  const executeSQL = async function(sql) {
     await connection.execute(sql);
   };
 
-  let insertIntoTable = async function(id, contentClob, contentBlob) {
+  const insertIntoTable = async function(id, contentClob, contentBlob) {
     let result = null;
     if (contentClob == "EMPTY_CLOB" && contentBlob == "EMPTY_BLOB") {
       result = await connection.execute("insert INTO fetchLobAsStrBuf_table values(:id, EMPTY_CLOB(), EMPTY_BLOB())",
         [ id ]);
       assert.strictEqual(result.rowsAffected, 1);
     } else {
-      let sql = "insert into fetchLobAsStrBuf_table (id, clob_col, blob_col) values(:id, :str, :buf)";
-      let bindings = {
+      const sql = "insert into fetchLobAsStrBuf_table (id, clob_col, blob_col) values(:id, :str, :buf)";
+      const bindings = {
         id : { val : id },
         str : {val:contentClob, type:oracledb.STRING, dir:oracledb.BIND_IN},
         buf : {val:contentBlob, type:oracledb.BUFFER,  dir:oracledb.BIND_IN}
@@ -90,7 +90,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
     }
   };
 
-  let checkInsertResult = async function(id, contentClob, specialStr, contentBlob) {
+  const checkInsertResult = async function(id, contentClob, specialStr, contentBlob) {
 
     let sql = "select clob_col from fetchLobAsStrBuf_table where id = " + id;
     await verifyClobValueWithString(sql, contentClob, specialStr);
@@ -99,11 +99,11 @@ describe('245. fetchLobAsStrBuf.js', function() {
     await verifyBlobValueWithBuffer(sql, contentBlob, specialStr);
   };
 
-  let verifyClobValueWithString = async function(selectSql, originalString, specialStr) {
+  const verifyClobValueWithString = async function(selectSql, originalString, specialStr) {
     let result = null;
     result = await connection.execute(selectSql);
 
-    let lob = result.rows[0][0];
+    const lob = result.rows[0][0];
     if (originalString == '' || originalString == undefined || originalString == null) {
       assert.ifError(lob);
     } else {
@@ -126,8 +126,8 @@ describe('245. fetchLobAsStrBuf.js', function() {
           if (originalString == "EMPTY_CLOB") {
             assert.strictEqual(clobData, "");
           } else {
-            let resultLength = clobData.length;
-            let specStrLength = specialStr.length;
+            const resultLength = clobData.length;
+            const specStrLength = specialStr.length;
             assert.strictEqual(resultLength, originalString.length);
             assert.strictEqual(clobData.substring(0, specStrLength), specialStr);
             assert.strictEqual(clobData.substring(resultLength - specStrLength, resultLength), specialStr);
@@ -138,10 +138,10 @@ describe('245. fetchLobAsStrBuf.js', function() {
     }
   };
 
-  let verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
+  const verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
     let result = null;
     result = await connection.execute(selectSql);
-    let lob = result.rows[0][0];
+    const lob = result.rows[0][0];
     if (originalBuffer == '' || originalBuffer == undefined) {
       assert.ifError(lob);
     } else {
@@ -161,11 +161,11 @@ describe('245. fetchLobAsStrBuf.js', function() {
 
         lob.on('end', function() {
           if (originalBuffer == "EMPTY_BLOB") {
-            let nullBuffer = Buffer.from('', "utf-8");
+            const nullBuffer = Buffer.from('', "utf-8");
             assert.deepStrictEqual(blobData, nullBuffer);
           } else {
             assert.strictEqual(totalLength, originalBuffer.length);
-            let specStrLength = specialStr.length;
+            const specStrLength = specialStr.length;
             assert.strictEqual(blobData.toString('utf8', 0, specStrLength), specialStr);
             assert.strictEqual(blobData.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
             assert.deepStrictEqual(blobData, originalBuffer);
@@ -187,9 +187,9 @@ describe('245. fetchLobAsStrBuf.js', function() {
     });
 
     it('245.1.1 Insert and fetch CLOB,BLOB with EMPTY_CLOB and EMPTY_BLOB', async function() {
-      let id = insertID++;
-      let contentClob = "EMPTY_CLOB";
-      let contentBlob = "EMPTY_BLOB";
+      const id = insertID++;
+      const contentClob = "EMPTY_CLOB";
+      const contentBlob = "EMPTY_BLOB";
 
       await insertIntoTable(id, contentClob, contentBlob);
 
@@ -197,11 +197,11 @@ describe('245. fetchLobAsStrBuf.js', function() {
     });
 
     it('245.1.2 Insert and fetch CLOB,BLOB with String and Buffer of length 32K', async function() {
-      let id = insertID++;
-      let contentLength = 32768;
-      let specialStr = "245.1.2";
-      let contentClob = random.getRandomString(contentLength, specialStr);
-      let contentBlob = Buffer.from(contentClob, "utf-8");
+      const id = insertID++;
+      const contentLength = 32768;
+      const specialStr = "245.1.2";
+      const contentClob = random.getRandomString(contentLength, specialStr);
+      const contentBlob = Buffer.from(contentClob, "utf-8");
 
       await insertIntoTable(id, contentClob, contentBlob);
 
@@ -209,11 +209,11 @@ describe('245. fetchLobAsStrBuf.js', function() {
     });
 
     it('245.1.3 Insert and fetch CLOB,BLOB with String and Buffer of length (1MB + 1)', async function() {
-      let id = insertID++;
-      let contentLength = 1048577;
-      let specialStr = "245.1.2";
-      let contentClob = random.getRandomString(contentLength, specialStr);
-      let contentBlob = Buffer.from(contentClob, "utf-8");
+      const id = insertID++;
+      const contentLength = 1048577;
+      const specialStr = "245.1.2";
+      const contentClob = random.getRandomString(contentLength, specialStr);
+      const contentBlob = Buffer.from(contentClob, "utf-8");
 
       await insertIntoTable(id, contentClob, contentBlob);
 

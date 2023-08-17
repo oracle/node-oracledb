@@ -42,7 +42,7 @@ describe('201. dbObject2.js', () => {
   const TYPE = 'NODB_TYP_OBJ_2';
   const TABLE  = 'NODB_TAB_OBJ2';
 
-  let proc1 =
+  const proc1 =
     `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is
       begin
         open p_cur for
@@ -52,7 +52,7 @@ describe('201. dbObject2.js', () => {
         WHERE num >= 100;
       end; `;
 
-  let proc2 =
+  const proc2 =
     `create or replace procedure nodb_getDataCursor2(p_cur out sys_refcursor) is
        begin
          open p_cur for
@@ -62,7 +62,7 @@ describe('201. dbObject2.js', () => {
          WHERE num >= 101;
        end; `;
 
-  let proc3 =
+  const proc3 =
       `create or replace procedure nodb_getDataCursor3(
           p_cur1 out sys_refcursor,
           p_cur2 out sys_refcursor
@@ -87,7 +87,7 @@ describe('201. dbObject2.js', () => {
         num NUMBER,
         person ${TYPE}
       )`;
-    let plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
     await conn.execute(plsql);
   }); // before()
 
@@ -133,7 +133,7 @@ describe('201. dbObject2.js', () => {
   }); // 201.1
 
   it.skip('directly insert timestamp data', async () => {
-    let tabName = 'nodb_tmp';
+    const tabName = 'nodb_tmp';
     let sql =
     `CREATE TABLE ${tabName} (
       num NUMBER,
@@ -143,7 +143,7 @@ describe('201. dbObject2.js', () => {
     await conn.execute(plsql);
 
     sql = `INSERT INTO ${tabName} VALUES (:1, :2)`;
-    let date1 = new Date (1986, 8, 18, 12, 14, 27, 0);
+    const date1 = new Date (1986, 8, 18, 12, 14, 27, 0);
     let result = await conn.execute(sql, [111, date1]);
     assert.strictEqual(result.rowsAffected, 1);
 
@@ -224,7 +224,7 @@ describe('201. dbObject2.js', () => {
     await conn.execute(proc2);
     await conn.execute(proc3);
 
-    let result = await conn.execute(
+    const result = await conn.execute(
       `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
           p_cur2 => :p_cur2); end;`,
       {
