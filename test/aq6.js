@@ -47,7 +47,8 @@ describe('281. aq6.js', function() {
   const RAW_TABLE = 'NODB_RAW_QUEUE_TAB';
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    const prerequisites = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin || !prerequisites) {
       isRunnable = false;
     }
 
