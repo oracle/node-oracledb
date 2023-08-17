@@ -31,6 +31,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Add support to improve Connection Establishment Latency for DB
+    versions 23.3 onwards.
+
 #)  Fixed bug in handling server to client piggybacks which are sometimes
     received during Authentcation phase.
     `Issue #1589 <https://github.com/oracle/node-oracledb/issues/1589>`__.
