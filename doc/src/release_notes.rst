@@ -26,6 +26,15 @@ Thin Mode Changes
     ``oracledb.fetchAsString = [oracledb.DB_TYPE_RAW];``
     `Issue #1586 <https://github.com/oracle/node-oracledb/issues/1586>`__.
 
+#) Support for SSL_WEAK_DN_MATCH(default false). If set enables
+   SSL_SERVER_DN_MATCH to check the database server certificate
+   (but not the listener) and enable the service name to be used for partial
+   DN matching. The search order on the client side is as follows:
+   first, the host name, then the subject alternative name (SAN),
+   and then the service name.
+
+#) Fixed bug in DN matching when remote and local listener use the same certificate.
+
 node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...v6.0.3>`__ (12 Jul 2023)
 --------------------------------------------------------------------------------------------------------
 
