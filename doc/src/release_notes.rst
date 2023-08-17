@@ -48,6 +48,9 @@ Thin Mode Changes
 
 #) Fixed bug in DN matching when remote and local listener use the same certificate.
 
+#) Fixed bug in getting oracleClientVersion() and oracleClientVersionString().
+   `Issue #1582 <https://github.com/oracle/node-oracledb/issues/1582>`__.
+
 node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...v6.0.3>`__ (12 Jul 2023)
 --------------------------------------------------------------------------------------------------------
 
