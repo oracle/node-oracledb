@@ -5,6 +5,16 @@
 node-oracledb Release Notes
 =============================
 
+node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (TBD)
+------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+#)  Added new property :attr:`connection.instanceName` which provides the
+    Oracle Database instance name associated with the connection. This returns the
+    same value as the SQL expression ``sys_context('userenv', 'instance_name')``.
+
 node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...v6.0.3>`__ (12 Jul 2023)
 --------------------------------------------------------------------------------------------------------
 

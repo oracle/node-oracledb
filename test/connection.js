@@ -551,4 +551,15 @@ describe('1. connection.js', function() {
       );
     });
   }); //1.16
+
+  describe('1.17 Oracle Database instance name associated with the connection', function() {
+    it('1.17.1 connection parameter instanceName comparision with query result', async function() {
+      const connection = await oracledb.getConnection(dbConfig);
+      const query = "select upper(sys_context('userenv', 'instance_name')) from dual";
+      const result = await connection.execute(query);
+      assert(result);
+      assert.deepStrictEqual(result.rows[0][0], connection.instanceName.toUpperCase());
+      connection.close();
+    });
+  }); //1.17
 });

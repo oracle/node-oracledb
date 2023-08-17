@@ -44,6 +44,7 @@ NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getCallTimeout);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getCurrentSchema);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getDbObjectClass);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getExternalName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInstanceName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersion);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersionString);
@@ -139,6 +140,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "getDbObjectClass", NULL, njsConnection_getDbObjectClass, NULL, NULL,
             NULL, napi_default, NULL },
     { "getExternalName", NULL, njsConnection_getExternalName, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getInstanceName", NULL, njsConnection_getInstanceName, NULL, NULL, NULL,
             napi_default, NULL },
     { "getInternalName", NULL, njsConnection_getInternalName, NULL, NULL, NULL,
             napi_default, NULL },
@@ -1070,6 +1073,26 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getExternalName, 0, NULL)
     return true;
 }
 
+
+//-----------------------------------------------------------------------------
+// njsConnection_getInstanceName()
+//   Get accessor for "instanceName" property
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getInstanceName, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (conn->handle) {
+        if (dpiConn_getInstanceName(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
+    }
+
+    return true;
+}
 
 
 //-----------------------------------------------------------------------------

@@ -132,6 +132,14 @@ The properties of a *Connection* object are listed below.
         This property can only be used in the node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
+.. attribute:: connection.instanceName
+
+    .. versionadded:: 6.1
+
+    This read-only attribute specifies the Oracle Database instance name
+    associated with the connection. It returns the same value as the SQL expression
+    ``sys_context('userenv', 'instance_name')``.
+
 .. attribute:: connection.module
 
     This write-only property is a string and it is the `module
