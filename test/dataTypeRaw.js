@@ -42,6 +42,7 @@ describe('42. dataTypeRaw.js', function() {
   let connection = null;
   let tableName = "nodb_raw";
   let insertID = 1;
+  const bufferToHexString = (v) => (v === null) ? null : v.toString('hex').toUpperCase();
 
   let bufLen = [10, 100, 1000, 2000]; // buffer length
   let bufs = [];
@@ -316,6 +317,7 @@ describe('42. dataTypeRaw.js', function() {
     after(async function() {
       await connection.execute(
         "DROP table " + tableName + " PURGE");
+      oracledb.fetchAsString = [];
     });
 
     beforeEach(function() {
@@ -338,6 +340,18 @@ describe('42. dataTypeRaw.js', function() {
       let insertedStr = random.getRandomLengthString(2000);
       let insertedBuf = Buffer.from(insertedStr);
       await test1_default(insertedBuf);
+    });
+
+    it('42.5.4 works with default type/dir and fetch as string', async function() {
+      let insertedStr = random.getRandomLengthString(2000);
+      let insertedBuf = Buffer.from(insertedStr);
+      await test1_default_string(insertedBuf);
+    });
+
+    it('42.5.5 works with data size 2000 and fetch as string', async function() {
+      let insertedStr = random.getRandomLengthString(2000);
+      let insertedBuf = Buffer.from(insertedStr);
+      await test1_string(insertedBuf);
     });
 
   }); // 42.5
@@ -388,11 +402,21 @@ describe('42. dataTypeRaw.js', function() {
     await fetch(content);
   };
 
+  let test1_string = async function(content) {
+    await insert(content);
+    await fetchString(bufferToHexString(content));
+  };
+
   let test1_default = async function(content) {
 
     await insert_default(content);
 
     await fetch(content);
+  };
+
+  let test1_default_string = async function(content) {
+    await insert_default(content);
+    await fetchString(bufferToHexString(content));
   };
 
   let test2 = async function(insertedStr, updateStr) {
@@ -462,6 +486,13 @@ describe('42. dataTypeRaw.js', function() {
   };
 
   let fetch = async function(expected) {
+    let sql = "select content from " + tableName + " where num = " + insertID;
+    let result = await connection.execute(sql);
+    assert.deepStrictEqual(result.rows[0][0], expected);
+  };
+
+  let fetchString = async function(expected) {
+    oracledb.fetchAsString = [oracledb.DB_TYPE_RAW];
     let sql = "select content from " + tableName + " where num = " + insertID;
     let result = await connection.execute(sql);
     assert.deepStrictEqual(result.rows[0][0], expected);

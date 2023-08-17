@@ -19,6 +19,13 @@ Common Changes
     Oracle Database instance name associated with the connection. This returns the
     same value as the SQL expression ``sys_context('userenv', 'instance_name')``.
 
+Thin Mode Changes
++++++++++++++++++
+
+#)  Add support to fetch RAW types as string using
+    ``oracledb.fetchAsString = [oracledb.DB_TYPE_RAW];``
+    `Issue #1586 <https://github.com/oracle/node-oracledb/issues/1586>`__.
+
 node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...v6.0.3>`__ (12 Jul 2023)
 --------------------------------------------------------------------------------------------------------
 
