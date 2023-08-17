@@ -332,7 +332,7 @@ struct njsBaton {
     const char **bindNames;
     uint32_t *bindNameLengths;
     dpiSodaOperOptions *sodaOperOptions;
-    dpiSodaCollNames *sodaCollNames;
+    dpiStringList *sodaCollNames;
     njsLobBuffer *lob;
 
     // ODPI-C handles (requires release)

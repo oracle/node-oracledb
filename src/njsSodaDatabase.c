@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2018, 2023, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -216,7 +216,7 @@ static void njsSodaDatabase_finalize(napi_env env, void *finalizeData,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaDatabase_getCollectionNames, 1, NULL)
 {
-    baton->sodaCollNames = calloc(1, sizeof(dpiSodaCollNames));
+    baton->sodaCollNames = calloc(1, sizeof(dpiStringList));
     if (!baton->sodaCollNames)
         return njsUtils_throwInsufficientMemory(env);
     if (!njsUtils_getNamedPropertyString(env, args[0], "startsWith",
@@ -241,9 +241,7 @@ static bool njsSodaDatabase_getCollectionNamesAsync(njsBaton *baton)
     if (dpiSodaDb_getCollectionNames(db->handle, baton->startsWith,
             (uint32_t) baton->startsWithLength, (uint32_t) baton->limit,
             DPI_SODA_FLAGS_DEFAULT, baton->sodaCollNames) < 0) {
-        njsBaton_setErrorDPI(baton);
-        dpiSodaDb_freeCollectionNames(db->handle, baton->sodaCollNames);
-        return false;
+        return njsBaton_setErrorDPI(baton);
     }
     return true;
 }
@@ -256,34 +254,20 @@ static bool njsSodaDatabase_getCollectionNamesAsync(njsBaton *baton)
 static bool njsSodaDatabase_getCollectionNamesPostAsync(njsBaton *baton,
         napi_env env, napi_value *result)
 {
-    njsSodaDatabase *db = (njsSodaDatabase*) baton->callingInstance;
     napi_value value;
-    bool ok = true;
     uint32_t i;
 
     // create array for the collection names
-    if (napi_create_array_with_length(env, baton->sodaCollNames->numNames,
-            result) != napi_ok)
-        ok = false;
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env,
+            baton->sodaCollNames->numStrings, result))
 
     // populate it with the collection names
-    for (i = 0; ok && i < baton->sodaCollNames->numNames; i++) {
-
-        // create string for collection name at that index
-        if (napi_create_string_utf8(env, baton->sodaCollNames->names[i],
-                baton->sodaCollNames->nameLengths[i], &value) != napi_ok) {
-            ok = false;
-            break;
-        }
-
-        // add it to the array
-        if (napi_set_element(env, *result, i, value) != napi_ok)
-            ok = false;
-
+    for (i = 0; i < baton->sodaCollNames->numStrings; i++) {
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+                baton->sodaCollNames->strings[i],
+                baton->sodaCollNames->stringLengths[i], &value))
+        NJS_CHECK_NAPI(env, napi_set_element(env, *result, i, value))
     }
-    dpiSodaDb_freeCollectionNames(db->handle, baton->sodaCollNames);
-    if (!ok)
-        return false;
 
     return true;
 }

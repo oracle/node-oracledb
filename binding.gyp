@@ -53,6 +53,7 @@
              "odpi/src/dpiSodaDoc.c",
              "odpi/src/dpiSodaDocCursor.c",
              "odpi/src/dpiStmt.c",
+             "odpi/src/dpiStringList.c",
              "odpi/src/dpiSubscr.c",
              "odpi/src/dpiUtils.c",
              "odpi/src/dpiVar.c"
