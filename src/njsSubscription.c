@@ -136,6 +136,14 @@ static bool njsSubscription_createMessage(napi_env env,
                 "queries", array))
     }
 
+    // msgId
+    if (message->aqMsgId && message->aqMsgIdLength > 0) {
+        NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
+                message->aqMsgIdLength, message->aqMsgId, NULL, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *messageObj, "msgId",
+                temp))
+    }
+
     return true;
 }
 

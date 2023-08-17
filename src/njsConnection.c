@@ -2198,6 +2198,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_subscribe, 2, NULL)
             return false;
         NJS_CHECK_NAPI(env, napi_create_reference(env, callback, 1,
                 &baton->subscription->jsCallback))
+        if (!njsUtils_getNamedPropertyString(env, args[1], "name",
+                &baton->name, &baton->nameLength))
+            return false;
     }
 
     // get options that are used for registering queries

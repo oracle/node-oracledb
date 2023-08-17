@@ -69,6 +69,12 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Added msgID (message Id) attribute in the message object passed onto the
+    callback registered during AQ subscription. The msgID attribute passed
+    with the callback functions can be compared with the msgID attribute
+    returned by the deq* functions for proper validation of the returned
+    message objects during message dequeue.
+
 #)  Added support to return a message object from the :meth:`queue.enqOne()
     <aqQueue.enqOne()>` and :meth:`queue.enqMany() <aqQueue.enqMany()>`
     functions.  This message object contains a ``msgId`` attribute identifying
