@@ -58,6 +58,8 @@ describe('177. soda9.js', () => {
     // fetch back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
+    testsUtil.removeID(outContent);
+    testsUtil.removeID(inContent);
     assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
@@ -77,6 +79,8 @@ describe('177. soda9.js', () => {
     // fetch back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
+    testsUtil.removeID(outContent);
+    testsUtil.removeID(inContent);
     assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
@@ -99,6 +103,9 @@ describe('177. soda9.js', () => {
     // Fetch it back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
+
+    testsUtil.removeID(outContent);
+    testsUtil.removeID(inContent);
     assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
@@ -122,6 +129,9 @@ describe('177. soda9.js', () => {
     // Fetch it back
     const outDocuments = await collection.find().getDocuments();
     const outContent = outDocuments[0].getContent();
+
+    testsUtil.removeID(outContent);
+    testsUtil.removeID(inContent);
     assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();

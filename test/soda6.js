@@ -141,6 +141,8 @@ describe('174. soda6.js', function() {
     // Fetch it back
     const doc2 = await collection.find().key(key1).getOne();
     const content2 = doc2.getContent();
+    testsUtil.removeID(content1);
+    testsUtil.removeID(content2);
     assert.deepStrictEqual(content2, content1);
 
 

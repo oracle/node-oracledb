@@ -72,8 +72,12 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < outDocuments.length; i++) {
       contents[i] = outDocuments[i].getContent();
       if (i == 1) {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(inContent);
         assert.deepStrictEqual(contents[i], inContent);
       } else {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(t_contents);
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
     }
@@ -108,8 +112,12 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < documents.length; i++) {
       contents[i] = documents[i].getContent();
       if (i == 1) {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(inContent);
         assert.deepStrictEqual(contents[i], inContent);
       } else {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(t_contents);
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
     }
@@ -143,6 +151,8 @@ describe('176. soda8.js', () => {
     const contents = [];
     for (let i = 0; i < outDocuments.length; i++) {
       contents[i] = outDocuments[i].getContent();
+      testsUtil.removeID(contents[i]);
+      testsUtil.removeID(t_contents);
       testsUtil.assertOneOf(t_contents, contents[i]);
     }
 
@@ -177,6 +187,8 @@ describe('176. soda8.js', () => {
     const contents = [];
     for (let i = 0; i < outDocuments.length; i++) {
       contents[i] = outDocuments[i].getContent();
+      testsUtil.removeID(contents[i]);
+      testsUtil.removeID(t_contents);
       testsUtil.assertOneOf(t_contents, contents[i]);
     }
 
@@ -208,8 +220,12 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < outDocuments.length; i++) {
       contents[i] = outDocuments[i].getContent();
       if (i == 1) {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(inContent);
         assert.deepStrictEqual(contents[i], inContent);
       } else {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(t_contents);
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
     }
@@ -244,8 +260,13 @@ describe('176. soda8.js', () => {
     for (let i = 0; i < documents.length; i++) {
       contents[i] = documents[i].getContent();
       if (i == 1) {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(inContent);
         assert.deepStrictEqual(contents[i], inContent);
       } else {
+
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(t_contents);
         testsUtil.assertOneOf(t_contents, contents[i]);
       }
     }

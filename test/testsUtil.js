@@ -37,8 +37,18 @@ const sodaUtil = require('./sodaUtil.js');
 const assert   = require('assert');
 const os       = require('os');
 
-let testsUtil = exports;
+const testsUtil = exports;
 module.exports = testsUtil;
+
+testsUtil.removeID = function(content) {
+  if (typeof content == "string") {
+    const data = JSON.parse(content);
+    delete data._id;
+    return JSON.stringify(data);
+  }
+  delete content._id;
+  return content;
+};
 
 testsUtil.sqlCreateTable = function(tableName, sql) {
   // The NOCOMPRESS option for CREATE TABLE ensures Hybrid Columnar Compression (HCC)
@@ -156,7 +166,7 @@ testsUtil.isSodaRunnable = async function() {
 
   if ((clientVersion >= 1909000000) && (serverVersion < 1909000000)) return false;
 
-  let sodaRole = await sodaUtil.isSodaRoleGranted();
+  const sodaRole = await sodaUtil.isSodaRoleGranted();
   if (!sodaRole) return false;
 
   return true;
@@ -180,8 +190,8 @@ testsUtil.getDBCompatibleVersion = async function() {
       connectString : dbConfig.connectString,
       privilege     : oracledb.SYSDBA,
     };
-    let conn = await oracledb.getConnection(connectionDetails);
-    let res = await conn.execute("select name, value from v$parameter where name = 'compatible'");
+    const conn = await oracledb.getConnection(connectionDetails);
+    const res = await conn.execute("select name, value from v$parameter where name = 'compatible'");
     if (res.rows.length > 0) {
       compatibleVersion = res.rows[0][1];
     }
@@ -197,9 +207,9 @@ testsUtil.getDBCompatibleVersion = async function() {
 // * undefined if eigher version1 or version2 is not string
 testsUtil.versionStringCompare = function(version1, version2) {
   if (typeof version1 === 'string' && typeof version2 === 'string') {
-    let tokens1 = version1.split('.');
-    let tokens2 = version2.split('.');
-    let len = Math.min(tokens1.length, tokens2.length);
+    const tokens1 = version1.split('.');
+    const tokens2 = version2.split('.');
+    const len = Math.min(tokens1.length, tokens2.length);
     for (let i = 0; i < len; i++) {
       const t1 = parseInt(tokens1[i]), t2 = parseInt(tokens2[i]);
       if (t1 > t2) return 1;
@@ -214,7 +224,7 @@ testsUtil.versionStringCompare = function(version1, version2) {
 
 testsUtil.getLocalIPAddress = function() {
   const ifaces = os.networkInterfaces();
-  let result = [];
+  const result = [];
   Object.keys(ifaces).forEach(function(ifname) {
     var alias = 0;
     ifaces[ifname].forEach(function(iface) {
@@ -250,7 +260,7 @@ testsUtil.getRoundTripCount = async function(sid) {
     msg += "Without DBA privilege the test cannot get the current round trip count!";
     throw new Error(msg);
   } else {
-    let dbaCredential = {
+    const dbaCredential = {
       user:          dbConfig.test.DBA_user,
       password:      dbConfig.test.DBA_password,
       connectString: dbConfig.connectString,
@@ -290,14 +300,14 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
     msg += "Without DBA privilege, the test cannot create the schema!";
     throw new Error(msg);
   } else {
-    let dbaCredential = {
+    const dbaCredential = {
       user:          dbConfig.test.DBA_user,
       password:      dbConfig.test.DBA_password,
       connectString: dbConfig.connectString,
       privilege:     oracledb.SYSDBA
     };
 
-    let plsql = `
+    const plsql = `
       BEGIN
         DECLARE
           e_user_missing EXCEPTION;
@@ -336,7 +346,7 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
     msg += "Without DBA privilege, the test cannot drop the schema!\n";
     throw new Error(msg);
   } else {
-    let dbaCredential = {
+    const dbaCredential = {
       user:          dbConfig.test.DBA_user,
       password:      dbConfig.test.DBA_password,
       connectString: dbConfig.connectString,
@@ -344,7 +354,7 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
     };
 
     const connAsDBA = await oracledb.getConnection(dbaCredential);
-    let sql = `DROP USER ${AQ_USER} CASCADE`;
+    const sql = `DROP USER ${AQ_USER} CASCADE`;
     await connAsDBA.execute(sql);
   }
 };
@@ -373,8 +383,8 @@ testsUtil.isLongUserNameRunnable = async function() {
   if (!dbConfig.test.DBA_PRIVILEGE) {
     return false;
   } else {
-    let checkVersions = await testsUtil.checkPrerequisites(1800000000, 1800000000);
-    let checkCompatible = await testsUtil.versionStringCompare(await testsUtil.getDBCompatibleVersion(), '12.2.0.0.0');
+    const checkVersions = await testsUtil.checkPrerequisites(1800000000, 1800000000);
+    const checkCompatible = await testsUtil.versionStringCompare(await testsUtil.getDBCompatibleVersion(), '12.2.0.0.0');
     if (checkVersions && (checkCompatible >= 0)) {
       return true;
     } else {
@@ -431,7 +441,7 @@ testsUtil.isDeepEqual = function(x, y) {
     return false;
 
   // each key must have the same value
-  for (let key in x) {
+  for (const key in x) {
     if (!testsUtil.isDeepEqual(x[key], y[key]))
       return false;
   }

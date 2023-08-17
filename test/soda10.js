@@ -86,7 +86,7 @@ describe('178. soda10.js', function() {
     const outDocuments = await collection.find().getDocuments();
     const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
-      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      outContents[i] = testsUtil.removeID(outDocuments[i].getContent()); // n.b. synchronous method
     }
 
     assert.deepStrictEqual(outContents, inContents);
@@ -107,7 +107,7 @@ describe('178. soda10.js', function() {
     const outDocuments = await collection.find().getDocuments();
     const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
-      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      outContents[i] = testsUtil.removeID(outDocuments[i].getContent()); // n.b. synchronous method
     }
 
     assert.deepStrictEqual(outContents, inContents);
@@ -139,7 +139,7 @@ describe('178. soda10.js', function() {
     const outDocuments = await collection.find().getDocuments();
     const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
-      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      outContents[i] = testsUtil.removeID(outDocuments[i].getContent()); // n.b. synchronous method
     }
 
     assert.deepStrictEqual(outContents, inContents);
@@ -166,7 +166,7 @@ describe('178. soda10.js', function() {
     const outDocuments = await collection.find().getDocuments();
     const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
-      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      outContents[i] = testsUtil.removeID(outDocuments[i].getContent()); // n.b. synchronous method
     }
 
     assert.deepStrictEqual(outContents, inContents);
@@ -241,7 +241,7 @@ describe('178. soda10.js', function() {
     const outDocuments = await collection.find().hint("MONITOR").getDocuments();
     const outContents = [];
     for (let i = 0; i < outDocuments.length; i++) {
-      outContents[i] = outDocuments[i].getContent(); // n.b. synchronous method
+      outContents[i] = testsUtil.removeID(outDocuments[i].getContent()); // n.b. synchronous method
     }
 
     assert.deepStrictEqual(outContents, inContents);

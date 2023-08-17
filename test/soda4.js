@@ -105,6 +105,8 @@ describe('168. soda4.js', () => {
     // Fetch it back
     const doc2 = await coll.find().key(myKey).getOne();
     const content2 = doc2.getContent();
+    testsUtil.removeID(testContent);
+    testsUtil.removeID(content2);
     assert.deepStrictEqual(content2, testContent);
 
     await conn.commit();

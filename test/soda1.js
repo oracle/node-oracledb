@@ -241,10 +241,12 @@ describe('164. soda1.js', () => {
     // Fetch the document back
     const doc2 = await collection.find().key(myKey).getOne();
     const content2 = doc2.getContent(); // A JavaScript object
+    testsUtil.removeID(content1);
+    testsUtil.removeID(content2);
     assert.deepStrictEqual(content2, content1);
 
-    const content3 = doc2.getContentAsString(); // A JSON string
-    assert.strictEqual(typeof (content3), "string");
+    const content3 = testsUtil.removeID(doc2.getContentAsString()); // A JSON string
+
     assert.strictEqual(JSON.stringify(content2), content3);
 
     // Replace document contents

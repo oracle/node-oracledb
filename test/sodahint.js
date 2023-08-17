@@ -85,6 +85,9 @@ describe('257. sodahint.js', () => {
     // Fetch back
     const outDocuments = await collection.find().hint("MONITOR").getDocuments();
     const outContent = outDocuments[0].getContent();
+
+    testsUtil.removeID(outContent);
+    testsUtil.removeID(inContent);
     assert.deepStrictEqual(outContent, inContent);
     await conn.commit();
 
@@ -112,7 +115,8 @@ describe('257. sodahint.js', () => {
     assert.strictEqual(res.dropped, true);
   }); // 257.2
 
-  it('257.3 saveAndGet() with hint option', async () => {
+  it('257.3 saveAndGet() with hint option', async function() {
+    if (oracledb.oracleClientVersion >= 2300000000) this.skip();
     const COLL = "soda_test_257_3";
     const collection = await soda.createCollection(COLL);
 
