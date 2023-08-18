@@ -42,11 +42,11 @@ Thin Mode Changes
     matching. The search order is: the host name, then the subject alternative
     name (SAN), and then the service name.
 
-#) Connection Optimization(Internal): 
-   When connecting to a host, if the host is found to be unreachable, 
-   add that host to a cache(mark it as down). Subsequent requests to get
-   a connection will reorder the list of hosts to attempt making a connection
-   to so that the hosts which are marked as down are at the end of the list.
+#)  Connection Optimization(Internal):
+    When connecting to a host, if the host is found to be unreachable,
+    add that host to a cache(mark it as down). Subsequent requests to get
+    a connection will reorder the list of hosts to attempt making a connection
+    to so that the hosts which are marked as down are at the end of the list.
 
 #)  Fixed bug when ``sslServerDNMatch`` is set and the connect string is in Easy
     Connect format but a value for ``SSL_SERVER_DN_MATCH`` is not set in that

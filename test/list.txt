@@ -5340,7 +5340,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         272.2.6 Insert query
         272.2.7 Update query
         272.2.8 Delete query
-    272.3 DDL tests with GRAPHQL for JSON Duality Views 
+    272.3 DDL tests with GRAPHQL for JSON Duality Views
         272.3.1 Insert query
         272.3.2 View Name as graphql
         272.3.3 Create view with @ directive
@@ -5349,18 +5349,18 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         272.3.6 Create view Primary key to Foreign key
         272.3.7 Create view Foreign key to Primary key
         272.3.8 Create view with View Name as Mixed Case and Special Case
-            272.3.8.1 single quotes for key names are not supported 
-            272.3.8.2 single quotes for key names are not supported 
-            272.3.8.3 Create view with View Name as Special Case 
-            272.3.8.3 case 3 
-            272.3.8.4 single quotes for key names are not supported 
+            272.3.8.1 single quotes for key names are not supported
+            272.3.8.2 single quotes for key names are not supported
+            272.3.8.3 Create view with View Name as Special Case
+            272.3.8.3 case 3
+            272.3.8.4 single quotes for key names are not supported
         272.3.9 View Name with Maximum possible string and maximum possible string +1 (128bytes)
             272.3.9.1 case 1
-            272.3.9.2 case 2 
-        272.3.10 View creation inside a PLSQL Block 
+            272.3.9.2 case 2
+        272.3.10 View creation inside a PLSQL Block
             272.3.10.1 Query with DBMS_SQL
             272.3.10.2 Query with EXECUTE IMMEDIATE
-        272.3.11 Create view without privilege 
+        272.3.11 Create view without privilege
             272.3.11.1 Query with test1 user
             272.3.11.2 Query with test2 user
 
