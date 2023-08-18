@@ -5485,3 +5485,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 283.aq5.js
     283.1 subscribe dequeue messages
+
+284. errorUrl.js
+    284.1 checks for error URL in ORA error message

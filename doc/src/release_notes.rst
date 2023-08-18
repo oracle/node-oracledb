@@ -66,6 +66,10 @@ Thin Mode Changes
     in Thin mode instead of throwing an error. `Issue #1582
     <https://github.com/oracle/node-oracledb/issues/1582>`__.
 
+#) Added support to expose database error cause/action URL in error messages.
+   For ORA errors etc., the ERROR cause/action URL for that error code will
+   be provided along with error message.
+
 Thick Mode Changes
 ++++++++++++++++++
 

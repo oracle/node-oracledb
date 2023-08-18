@@ -265,3 +265,5 @@ spec:
   - test/pipelinedTables.js
   - test/aq6.js
   - test/aq7.js
+  - test/aq5.js
+  - test/errorUrl.js
