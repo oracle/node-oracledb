@@ -23,6 +23,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug in handling unexpected pool growth which is crossing pool max limit
+    due to improper handling of parallel connection request.
+    `Issue #1591 <https://github.com/oracle/node-oracledb/issues/1591>`__.
+
 #)  Fixed Bug to return proper error when invalid service name is
     configured in listener.
 

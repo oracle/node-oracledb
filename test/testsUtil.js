@@ -469,3 +469,16 @@ testsUtil.checkUrowidLength = function(urowidLen, expectedLength) {
   assert(urowidLen >= expectedLength,
     `${urowidLen} should be >= ${expectedLength}`);
 };
+
+// function to wait till connections creation completed by background job
+// in a given time interval
+testsUtil.checkAndWait = async function(intervalWait, numIntervals, func) {
+  for (let i = 0; i < numIntervals; i++) {
+    await new Promise((resolve) => setTimeout(resolve, intervalWait));
+    if (func())
+      return true;
+  }
+  const err = new Error("Ran out of time!");
+  err.totalTimeWaited = (intervalWait * numIntervals) / 1000;
+  throw err;
+};

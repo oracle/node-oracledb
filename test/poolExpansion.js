@@ -35,71 +35,107 @@
 const oracledb = require('oracledb');
 const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testUtil = require('../test/testsUtil.js');
 
 describe('278. Pool expansion', function() {
 
+  function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
+
   it('278.1 pool expansion when new connection created and within pool max limit', async function() {
-    if (dbConfig.test.drcp) this.skip();
+    if (!oracledb.thin || dbConfig.test.drcp) this.skip();
+    // thick driver is creating total connections exceeding poolMax
 
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin           : 0,
-      poolMax           : 10,
+      poolMax           : 2,
       poolIncrement     : 4,
       homogeneous       : true
     });
     const conn = await pool.getConnection();
-    assert.deepStrictEqual(pool.connectionsOpen, 4);
-    assert.deepStrictEqual(pool.connectionsInUse, 1);
+    assert.strictEqual(pool.connectionsInUse, 1);
+
+    await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
+    // total connections created won't exceed pool max limit.
+    assert.strictEqual(pool.connectionsOpen, 2);
+    assert.strictEqual(pool.connectionsInUse, 1);
     await conn.close();
     await pool.close(0);
   });
 
-  (oracledb.thin ? it : it.skip)('278.2 pool expansion when new connection created and exceeding pool max limit', async function() {
-    const pool = await oracledb.createPool({
-      ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 4,
-      poolIncrement     : 7,
-      homogeneous       : true
-    });
-    const conn = await pool.getConnection();
-    assert.deepStrictEqual(pool.connectionsOpen, 4);
-    assert.deepStrictEqual(pool.connectionsInUse, 1);
-    await conn.close();
-    await pool.close(0);
-  });
-
-  it('278.3 pool expansion not done on creating minimum connection', async function() {
+  it('278.2 pool expansion not done on creating minimum connection', async function() {
     if (dbConfig.test.drcp) this.skip();
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 5,
+      poolMin           : 2,
       poolMax           : 10,
-      poolIncrement     : 2,
+      poolIncrement     : 4,
       homogeneous       : true
     });
-    assert.deepStrictEqual(pool.connectionsOpen, 5);
-    assert.deepStrictEqual(pool.connectionsInUse, 0);
+
+    await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
+    assert.strictEqual(pool.connectionsOpen, 2);
+    assert.strictEqual(pool.connectionsInUse, 0);
+    await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
+    await sleep(1000);
+    assert.strictEqual(pool.connectionsOpen, 2);
+    assert.strictEqual(pool.connectionsInUse, 0);
     await pool.close(0);
   });
 
-  it('278.4 no pool expansion while acquiring connection already present in pool', async function() {
+  it('278.3 no pool expansion while acquiring connection already present in pool', async function() {
     if (dbConfig.test.drcp) this.skip();
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 3,
+      poolMin           : 2,
       poolMax           : 10,
       poolIncrement     : 3,
       homogeneous       : true
     });
     const conn = await pool.getConnection();
-    assert.deepStrictEqual(pool.connectionsOpen, 3);
-    assert.deepStrictEqual(pool.connectionsInUse, 1);
+    assert.strictEqual(pool.connectionsInUse, 1);
+    await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
+    await sleep(1000);
+    assert.strictEqual(pool.connectionsOpen, 2);
+    assert.strictEqual(pool.connectionsInUse, 1);
     await conn.close();
     await pool.close(0);
   });
 
+  it('278.4 pool connection count not crossing pool max limit on parallel execution', async function() {
+    if (dbConfig.test.drcp) this.skip();
+
+    const pool = await oracledb.createPool({
+      ...dbConfig,
+      poolMin           : 2,
+      poolMax           : 10,
+      poolIncrement     : 2,
+      homogeneous       : true
+    });
+    let conn1, conn2, conn3;
+    const routine1 = async function() {
+      conn1 =  await pool.getConnection();
+    };
+
+    const routine3 = async function() {
+      conn3 =  await pool.getConnection();
+    };
+
+    const routine2 = async function() {
+      conn2 =  await pool.getConnection();
+    };
+    await Promise.all([routine1(), routine2(), routine3()]);
+    assert.strictEqual(pool.connectionsInUse, 3);
+    await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 4);
+    await conn1.close();
+    await conn3.close();
+    await conn2.close();
+    await pool.close(0);
+  });
 });
