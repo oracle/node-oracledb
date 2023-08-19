@@ -178,34 +178,99 @@ describe('40. dataTypeClob.js', function() {
     const sqlCreateQuery = `
         CREATE TABLE ${tableNameCLOB} (
             num        NUMBER,
+            value      varchar2(255),
             content    CLOB
         )`;
     const sqlDrop = testsUtil.sqlDropTable(tableNameCLOB);
     const sqlCreate = testsUtil.sqlCreateTable(tableNameCLOB, sqlCreateQuery);
-    const insertSql = `INSERT INTO ${tableNameCLOB} (num, content) ` +
-      `VALUES (:n, 'CLOB')`;
-    const selectSql = `SELECT content FROM ${tableNameCLOB} WHERE num = 1`;
+    const insertSql = `INSERT INTO ${tableNameCLOB} (num, value, content) ` +
+      `VALUES (:n, :val, 'CLOB')`;
+    const selectSqlCharBind = `SELECT * FROM ${tableNameCLOB} WHERE value  = :val`;
+    const binds = [
+      { n: 1, val: 'GEN_COL' },
+      { n: 2, val: 'GEN_COL_NEW' }
+    ];
 
-    before(async function() {
-      oracledb.fetchAsString = [oracledb.CLOB];
+    async function setupConnAndTable() {
       connection = await oracledb.getConnection(dbConfig);
       await connection.execute(sqlCreate);
-      await connection.execute(insertSql, { n: 1 }, { autoCommit: false });
+      await connection.executeMany(insertSql, binds);
+    }
+
+    async function doFirstSelect() {
+      await connection.execute(selectSqlCharBind, {val:'GEN_COL'}, { keepInStmtCache: true });
+      await connection.execute(sqlDrop);
+      await connection.execute(sqlCreate);
+      await connection.executeMany(insertSql, binds);
+    }
+
+    afterEach(async function() {
+      if (connection) {
+        await connection.execute(sqlDrop);
+        await connection.close();
+        connection = null;
+      }
     });
 
     after(async function() {
       oracledb.fetchAsString = [];
-      await connection.execute(sqlDrop);
-      await connection.close();
+      if (connection) {
+        await connection.execute(sqlDrop);
+        await connection.close();
+      }
     });
 
-    it('40.3.1 Recreate table after CLOB column is read and statement is in statement cache',
+    it('40.3.1 Recreate table after CLOB column as CLOB is read and statement is in statement cache',
       async function() {
-        await connection.execute(selectSql, {}, { keepInStmtCache: true });
+        oracledb.fetchAsString = [];
+        await setupConnAndTable();
+        await doFirstSelect();
+        await connection.execute(selectSqlCharBind, {val:'GEN_COL'});
+      });
+
+    it('40.3.2 Recreate table after CLOB column as String is read and statement is in statement cache',
+      async function() {
+        oracledb.fetchAsString = [oracledb.CLOB];
+        await setupConnAndTable();
+        await doFirstSelect();
+        await connection.execute(selectSqlCharBind, {val:'GEN_COL'});
+      });
+
+    it('40.3.3 select with large bindvalue than previous select bindvalue after Recreate table ',
+      async function() {
+        oracledb.fetchAsString = [oracledb.CLOB];
+        await setupConnAndTable();
+        await doFirstSelect();
+        // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
+        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
+      });
+
+    it('40.3.4 select using fetchAsCLOB with large bindvalue than previous select bindvalue after Recreate table ',
+      async function() {
+        oracledb.fetchAsString = [];
+        await setupConnAndTable();
+        await doFirstSelect();
+        // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
+        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
+      });
+
+    it('40.3.5 select using fetchAsCLOB with large bindvalue than previous select bindvalue after Recreate table twice',
+      async function() {
+        oracledb.fetchAsString = [oracledb.CLOB];
+        await setupConnAndTable();
+        await doFirstSelect();
+        // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
+        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
+
+        // cleanup the connection
         await connection.execute(sqlDrop);
-        await connection.execute(sqlCreate);
-        await connection.execute(insertSql, { n: 1 }, { autoCommit: false });
-        await connection.execute(selectSql);
+        await connection.close();
+        connection = null;
+
+        await setupConnAndTable();
+        await doFirstSelect();
+        // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
+        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
       });
 
   });

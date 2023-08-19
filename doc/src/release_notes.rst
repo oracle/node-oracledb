@@ -23,6 +23,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug giving 'ORA-01002 and NJS-112 errors' during LOB columns
+    fetch after table recreation.
+    `Issue #1589 <https://github.com/oracle/node-oracledb/issues/1565>`__.
+
 #)  Fixed bug in handling unexpected pool growth which is crossing pool max limit
     due to improper handling of parallel connection request.
     `Issue #1591 <https://github.com/oracle/node-oracledb/issues/1591>`__.
