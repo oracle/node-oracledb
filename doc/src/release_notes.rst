@@ -94,6 +94,8 @@ Thick Mode Changes
     functions.  This message object contains a ``msgId`` attribute identifying
     each message.
 
+#)  Added support to enqueue and dequeue AQ messages as
+    :ref:`JSON <aqjsonexample>`.
 
 node-oracledb `v6.0.3 <https://github.com/oracle/node-oracledb/compare/v6.0.2...v6.0.3>`__ (12 Jul 2023)
 --------------------------------------------------------------------------------------------------------
