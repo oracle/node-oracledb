@@ -26,7 +26,7 @@
  *   284. errorUrl.js
  *
  * DESCRIPTION
- *   This test verifies enhancement to expose error portal URL in error message
+ *   This test verifies usage of the error URL in ORA-based error messages
  *
  *****************************************************************************/
 'use strict';

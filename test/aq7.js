@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -27,7 +27,7 @@
  *
  * DESCRIPTION
  *   Test Oracle Advanced Queueing (AQ).
- *   Test cases for JSON payload type
+ *   Test cases for JSON payload type with AQ.
  *
  *****************************************************************************/
 'use strict';

@@ -5262,12 +5262,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     267.10 recipient list with enqMany non-existent in dequeue
     267.11 recipient list with enqMany invalid datatype in dequeue
 
-268.  poolTimeout.js
-    268.1 poolTimeout as 0, no idle connection removals
-    268.2 poolTimeout as 1sec, idle connection will get removed
-    268.3 poolTimeout as 1sec and min connection defined, idle connection will be removed
-    268.4 check default poolTimeout as 60sec
-
 268. procAndFuncs.js
     268.1 calling stored procedures
         268.1.1 executing a stored procedure
@@ -5284,7 +5278,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         268.3.6 executing a stored function with only one args
     268.4 calling functions without any arguments
         268.4.1 executing a stored function without any argument
-269. Pool Timeout
+
+269. PoolTimeout.js
     269.1 poolTimeout as 0, no idle connection removals
     269.2 poolTimeout as 1sec, idle connection will get removed
     269.3 poolTimeout as 1sec and min connection defined, idle connection will be removed
@@ -5388,7 +5383,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     273.5 With Redaction on base tables
         273.5.1 redaction enabled on a base table
 
-274 jsonDualityView3.js
+274. jsonDualityView3.js
     274.1 Define Columns of View with WITH READ WRITE or WITH READ ONLY annotations
     274.2 Create View on Virtual columns, UNUSED columns
     274.3 Have columns of all scalar types, including FLOAT, TIMESTAMP, TIMESTAMP WITH TIME ZONE

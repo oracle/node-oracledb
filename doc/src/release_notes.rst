@@ -15,24 +15,16 @@ Common Changes
     :ref:`iamtokenbasedauthentication`.
 
 #)  Added new property :attr:`connection.instanceName` which provides the
-    Oracle Database instance name associated with the connection. This returns the
-    same value as the SQL expression ``sys_context('userenv', 'instance_name')``.
+    Oracle Database instance name associated with a connection. This returns
+    the same value as the SQL
+    expression ``sys_context('userenv', 'instance_name')``.
 
 #)  Minor code refactoring.
 
+#)  Test case and Documentation updates and improvements.
+
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Fixed bug giving 'ORA-01002 and NJS-112 errors' during LOB columns
-    fetch after table recreation.
-    `Issue #1589 <https://github.com/oracle/node-oracledb/issues/1565>`__.
-
-#)  Fixed bug in handling unexpected pool growth which is crossing pool max limit
-    due to improper handling of parallel connection request.
-    `Issue #1591 <https://github.com/oracle/node-oracledb/issues/1591>`__.
-
-#)  Fixed Bug to return proper error when invalid service name is
-    configured in listener.
 
 #)  Added support for an Oracle Database 23c feature that can improve the
     performance of connection creation by reducing the number of round trips
@@ -43,49 +35,59 @@ Thin Mode Changes
     ``oracledb.fetchAsString = [ oracledb.DB_TYPE_RAW ]``.
     `Issue #1586 <https://github.com/oracle/node-oracledb/issues/1586>`__.
 
-#)  Added ``sslAllowWeakDNMatch`` connection attribute and support for
-    ``SSL_WEAK_DN_MATCH``.  If set this enables ``sslServerDNMatch`` /
-    ``SSL_SERVER_DN_MATCH`` to check the database server certificate (but not
-    the listener) and enable the service name to be used for partial DN
-    matching. The search order is: the host name, then the subject alternative
-    name (SAN), and then the service name.
+#)  Added new ``sslAllowWeakDNMatch`` connection attribute and support for
+    ``SSL_WEAK_DN_MATCH`` (An Oracle Database 23c feature). If set, this
+    enables ``sslServerDNMatch`` / ``SSL_SERVER_DN_MATCH`` to check the
+    database server certificate (but not the listener) and enable the service
+    name to be used for partial DN matching. The search order is: the host
+    name, then the subject alternative name (SAN), and then the service name.
 
-#)  Connection Optimization(Internal):
-    When connecting to a host, if the host is found to be unreachable,
-    add that host to a cache(mark it as down). Subsequent requests to get
-    a connection will reorder the list of hosts to attempt making a connection
-    to so that the hosts which are marked as down are at the end of the list.
+#)  Added support to include database error cause/action URLs (introduced from
+    Oracle Database 23c onwards) for ORA error messages.    
 
-#)  Fixed bug when ``sslServerDNMatch`` is set and the connect string is in Easy
-    Connect format but a value for ``SSL_SERVER_DN_MATCH`` is not set in that
-    connect string.
+#)  Added network connection optimization for multiple database hosts.
+    If a host is found to be unreachable during connection, the host is added
+    to a cache (marked as 'down'). Subsequent requests to get a connection
+    will reorder the list of available hosts so that the hosts marked as down
+    are at the end of the list.
 
-#)  Fixed bug in DN matching when a remote and local listener use the same
-    certificate.
+#)  Fixed bug that throws unexpected 'ORA-01002' and 'NJS-112' errors
+    when LOB columns are fetched after table recreation.
+    `Issue #1565 <https://github.com/oracle/node-oracledb/issues/1565>`__.
 
-#)  Fixed bug with duplicate data for queries that exceed 2016 columns (only
-    possible with Oracle Database 23c).
+#)  Fixed bug with :attr:`oracledb.oracleClientVersion` and
+    :attr:`connection.oracleServerVersionString`. These attributes
+    now return 'undefined' in Thin mode instead of throwing an error.
+    `Issue #1582 <https://github.com/oracle/node-oracledb/issues/1582>`__.
 
 #)  Fixed bug giving 'Unexpected message type' during connection authentication.
     `Issue #1589 <https://github.com/oracle/node-oracledb/issues/1589>`__.
 
-#)  Fixed bug with :attr:`oracledb.oracleClientVersion` and
-    :attr:`connection.oracleServerVersionString`.  These now return 'undefined'
-    in Thin mode instead of throwing an error. `Issue #1582
-    <https://github.com/oracle/node-oracledb/issues/1582>`__.
+#)  Fixed bug in handling unexpected pool growth that exceeds pool max limit
+    due to improper handling of parallel connection requests.
+    `Issue #1591 <https://github.com/oracle/node-oracledb/issues/1591>`__.
 
-#) Added support to expose database error cause/action URL in error messages.
-   For ORA errors etc., the ERROR cause/action URL for that error code will
-   be provided along with error message.
+#)  Fixed bug to return proper error when an invalid database service name is
+    configured in the database listener.
+
+#)  Fixed bug when ``sslServerDNMatch`` is set and the connect string is in
+    Easy Connect syntax, but a value for ``SSL_SERVER_DN_MATCH`` is not set in
+    that connect string.
+
+#)  Fixed bug in DN matching when both a remote and a local listener use the
+    same certificate.
+
+#)  Fixed bug with duplicate data for queries that exceed 2016 columns (only
+    possible with Oracle Database 23c).
 
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Added msgID (message Id) attribute in the message object passed onto the
-    callback registered during AQ subscription. The msgID attribute passed
-    with the callback functions can be compared with the msgID attribute
-    returned by the deq* functions for proper validation of the returned
-    message objects during message dequeue.
+#)  Added ``msgID`` attribute in the message object passed onto the
+    callback function registered during AQ subscription. The msgID attribute
+    passed with the callback functions can be compared with the msgID 
+    attribute returned by the dequeue functions for proper validation of the
+    returned message objects with message dequeue.
 
 #)  Added support to return a message object from the :meth:`queue.enqOne()
     <aqQueue.enqOne()>` and :meth:`queue.enqMany() <aqQueue.enqMany()>`

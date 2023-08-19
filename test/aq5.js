@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,8 +38,6 @@ const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 const assert    = require('assert');
 
-oracledb.events = true;
-
 // callback for subscribe
 function cbSubscribe(message) {
   assert(message.msgId.length > 0);
@@ -51,6 +49,7 @@ describe('283.aq5.js', function() {
 
   let isRunnable = true;
   let conn;
+  let origEvents;
 
   const AQ_USER = 'NODB_SCHEMA_AQTEST5';
   const AQ_USER_PWD = testsUtil.generateRandomPassword();
@@ -66,6 +65,8 @@ describe('283.aq5.js', function() {
     if (!isRunnable) {
       this.skip();
     } else {
+      origEvents = oracledb.events;
+      oracledb.events = true;
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
 
       const credential = {
@@ -99,6 +100,7 @@ describe('283.aq5.js', function() {
     if (!isRunnable) {
       return;
     } else {
+      oracledb.events = origEvents;
       await conn.close();
       await testsUtil.dropAQtestUser(AQ_USER);
     }
