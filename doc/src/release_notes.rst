@@ -7,8 +7,8 @@ node-oracledb Release Notes
 
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
-node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (TBD)
-------------------------------------------------------------------------------------------------
+node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (30 Aug 2023)
+--------------------------------------------------------------------------------------------------------
 
 Common Changes
 ++++++++++++++
