@@ -4,6 +4,26 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev60v61:
+
+Upgrading from node-oracledb 6.0 to 6.1
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- With the new :ref:`Advanced Queuing (AQ) <aq>` features in node-oracledb
+  Thick mode:
+
+  - You can now enqueue and dequeue AQ messages as :ref:`JSON <aqjsonexample>`.
+
+  - The :meth:`queue.enqOne() <aqQueue.enqOne()>` and
+    :meth:`queue.enqMany() <aqQueue.enqMany()>` methods now return a
+    :ref:`message object <aqmessageclass>` with which you can view the unique
+    identifier of each message.
+
+- With the new :attr:`connection.instanceName` property, you can identify the
+  Oracle Database instance name associated with a connection.
+
 .. _upgradev55v60:
 
 Upgrading from node-oracledb 5.5 to 6.0
@@ -144,6 +164,20 @@ Upgrading from node-oracledb 5.4 to 5.5
 
 - Review the :ref:`releasenotes` and take advantage of new features.
 
+- With the new Oracle Advanced Queuing (AQ) :ref:`Recipient Lists
+  <aqrecipientlists>`, you can now specify a list of recipients when enqueuing
+  a message.
+
+- Take advantage of the new :ref:`Open Authorization (OAuth 2.0)
+  <oauthtokenbasedauthentication>` token-based authentication which allows
+  users to authenticate to Oracle Database using Microsoft Azure Active
+  Directory OAuth 2.0 tokens.
+
+- The connection pool creation attribute ``accessTokenCallback`` is
+  deprecated. Use :ref:`accessToken <createpoolpoolattrsaccesstoken>` instead.
+
+- The ``pool.setAccessToken()`` method is deprecated.
+
 .. _upgradev53v54:
 
 Upgrading from node-oracledb 5.3 to 5.4
@@ -151,12 +185,38 @@ Upgrading from node-oracledb 5.3 to 5.4
 
 - Review the :ref:`releasenotes` and take advantage of new features.
 
+- With the :meth:`connection.isHealthy()` function, you can perform a local
+  connection health check.
+
+- Take advantage of :ref:`token-based authentication
+  <iamtokenbasedauthentication>` when establishing pool based connections and
+  standalone connections.
+
+- The new :attr:`~error.stack` property in Error object aids in diagnosis of
+  errors.
+
 .. _upgradev52v53:
 
 Upgrading from node-oracledb 5.2 to 5.3
 =======================================
 
 - Review the :ref:`releasenotes` and take advantage of new features.
+
+- Using the ``keepInStmtCache`` option in :ref:`execute()
+  <propexeckeepinstmtcache>`, :ref:`executeMany()
+  <executemanyoptkeepinstmtcache>`, and :ref:`queryStream()
+  <propexeckeepinstmtcache>`, you can control whether executed statements
+  should be retained in the Statement Cache.
+
+- The connection pool statistics is encapsulated in a
+  :ref:`PoolStatistics Class <poolstatisticsclass>`. The
+  :meth:`poolstatistics.logStatistics()` function is added which is
+  equivalent to the existing :meth:`pool.logStatistics()` function. The
+  exposed pool properties are ``user``, ``connectString``, ``edition``,
+  ``events``, ``externalAuth``, and ``homogeneous`` on the Pool and
+  PoolStatistics classes.
+
+- Take advantage of the :ref:`Two-Phase Commit <twopc>` feature.
 
 .. _migratev51v52:
 

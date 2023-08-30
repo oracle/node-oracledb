@@ -2009,7 +2009,7 @@ Oracledb Methods
 
             The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``walletLocation``
@@ -2019,7 +2019,7 @@ Oracledb Methods
 
             The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``edition``
@@ -2114,7 +2114,7 @@ Oracledb Methods
 
             The directory in which the :ref:`tnsadmin` are found.
 
-            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>`.
+            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>` instead.
 
             .. versionadded:: 6.0
         * - ``sourceRoute``
@@ -2126,7 +2126,7 @@ Oracledb Methods
 
             The default value is *ON*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``sslServerCertDN``
@@ -2134,11 +2134,11 @@ Oracledb Methods
           - Thin
           - .. _createpoolpoolattrssslcert:
 
-            The distinguished name (DN) that should be matched with the server. If specified, this value is used for any verification. Otherwise, the ``hostname`` will be used.
+            The distinguished name (DN) that should be matched with the certificate DN. If not specified, a partial match is performed instead. A partial match matches the hostname that the client connected to against the common name (CN) of the certificate DN or the Subject Alternate Names (SAN) of the certificate.
 
             This value is ignored if the ``sslServerDNMatch`` property is not set to the value *True*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``sslServerDNMatch``
@@ -2148,13 +2148,29 @@ Oracledb Methods
 
             Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
 
-            If the ``sslServerCertDN`` parameter is not provided, host name matching is performed instead.
+            If the ``sslServerCertDN`` property is not provided, a partial DN match is performed instead. A partial match matches the hostname that the client connected to against the CN of the certificate DN or the SAN of the certificate.
 
             The default value is *True*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``sslAllowWeakDNMatch``
+          - Boolean
+          - Thin
+          - .. _createpoolpoolattrssslallowweak:
+
+            Enables the connection to use either a weaker or more secure DN matching behavior when the ``sslServerDNMatch`` property is set.
+
+            If the value is *True*, then the ``sslServerDNMatch`` property uses a weaker DN matching behavior which only checks the server certificate (and not the listener certificate), and allows the service name to be used for partial DN matching. The DN matching for a partial match first matches the host name that the client connected to against the CN of the database server certificate DN or the SAN of the database server certificate. If this fails, then the service name is matched against the CN of the database server certificate DN.
+
+            If the value is *False*, then the ``sslServerDNMatch`` property uses a more secure DN matching behavior which checks both the listener and server certificates, and does not allow a service name check for partial DN matching. The DN matching for a partial match matches the host name that the client connected to against the CN of the certificate DN or the SAN of the certificate. The service name is not checked in this case.
+
+            The default value is *False*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.1
         * - ``httpsProxy``
           - String
           - Thin
@@ -2162,7 +2178,7 @@ Oracledb Methods
 
             The name or IP address of a proxy host to use for tunneling secure connections.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``httpsProxyPort``
@@ -2174,7 +2190,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``retryCount``
@@ -2186,7 +2202,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``retryDelay``
@@ -2198,7 +2214,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``connectTimeout``
@@ -2210,7 +2226,7 @@ Oracledb Methods
 
             There is no timeout by default.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``transportConnectTimeout``
@@ -2222,7 +2238,7 @@ Oracledb Methods
 
             The default value is *60.0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``expireTime``
@@ -2234,7 +2250,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``sdu``
@@ -2244,7 +2260,7 @@ Oracledb Methods
 
             The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``connectionIdPrefix``
@@ -2661,7 +2677,7 @@ Oracledb Methods
 
             The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``walletLocation``
@@ -2671,7 +2687,7 @@ Oracledb Methods
 
             The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``edition``
@@ -2745,7 +2761,7 @@ Oracledb Methods
 
             The directory in which the :ref:`tnsadmin` are found.
 
-            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>`.
+            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>` instead.
 
             .. versionadded:: 6.0
         * - ``sourceRoute``
@@ -2757,7 +2773,7 @@ Oracledb Methods
 
             The default value is *ON*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``sslServerCertDN``
@@ -2765,11 +2781,11 @@ Oracledb Methods
           - Thin
           - .. _getconnectiondbattrssslcert:
 
-            The distinguished name (DN) that should be matched with the server. If specified, this value is used for any verification. Otherwise, the ``hostname`` will be used.
+            The distinguished name (DN) that should be matched with the certificate DN. If not specified, a partial match is performed instead. A partial match matches the hostname that the client connected to against the common name (CN) of the certificate DN or the Subject Alternate Names (SAN) of the certificate.
 
             This value is ignored if the ``sslServerDNMatch`` property is not set to the value *True*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``sslServerDNMatch``
@@ -2779,13 +2795,29 @@ Oracledb Methods
 
             Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
 
-            If the ``sslServerCertDN`` parameter is not provided, host name matching is performed instead.
+            If the ``sslServerCertDN`` property is not provided, a partial DN match is performed instead. A partial match matches the hostname that the client connected to against the CN of the certificate DN or the SAN of the certificate.
 
             The default value is *True*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``sslAllowWeakDNMatch``
+          - Boolean
+          - Thin
+          - .. _getconnectiondbattrssslallowweak:
+
+            Enables the connection to use either a weaker or more secure DN matching behavior when the ``sslServerDNMatch`` property is set.
+
+            If the value is *True*, then the ``sslServerDNMatch`` property uses a weaker DN matching behavior which only checks the server certificate (and not the listener certificate), and allows the service name to be used for partial DN matching. The DN matching for a partial match first matches the host name that the client connected to against the common name (CN) of the database server certificate DN or the Subject Alternate Names (SAN) of the database server certificate. If this fails, then the service name is matched against the CN of the database server certificate DN.
+
+            If the value is *False*, then the ``sslServerDNMatch`` property uses a more secure DN matching behavior which checks both the listener and server certificates, and does not allow a service name check for partial DN matching. The DN matching for a partial match matches the host name that the client connected to against the CN of the certificate DN or the SAN of the certificate. The service name is not checked in this case.
+
+            The default value is *False*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.1
         * - ``httpsProxy``
           - String
           - Thin
@@ -2793,7 +2825,7 @@ Oracledb Methods
 
             The name or IP address of a proxy host to use for tunneling secure connections.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``httpsProxyPort``
@@ -2805,7 +2837,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``debugJdwp``
@@ -2817,7 +2849,7 @@ Oracledb Methods
 
             The default value is the value of environment variable ``ORA_DEBUG_JDWP``.
 
-            For node-oracledb Thick mode, set the ``ORA_DEBUG_JDWP`` environment variable with the same syntax. See :ref:`applntracing`.
+            For node-oracledb Thick mode, set the ``ORA_DEBUG_JDWP`` environment variable with the same syntax instead. See :ref:`applntracing`.
 
             .. versionadded:: 6.0
         * - ``retryCount``
@@ -2829,7 +2861,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``retryDelay``
@@ -2841,7 +2873,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``connectTimeout``
@@ -2853,7 +2885,7 @@ Oracledb Methods
 
             There is no timeout by default.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``transportConnectTimeout``
@@ -2865,7 +2897,7 @@ Oracledb Methods
 
             The default value is *60.0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``expireTime``
@@ -2877,7 +2909,7 @@ Oracledb Methods
 
             The default value is *0*.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``sdu``
@@ -2887,7 +2919,7 @@ Oracledb Methods
 
             The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
 
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`.
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
         * - ``connectionIdPrefix``

@@ -119,9 +119,14 @@ AqQueue Properties
 
 .. attribute:: aqQueue.payloadType
 
-    This read-only property is a number and is one of the
+    This read-only property is one of the
     :ref:`oracledb.DB_TYPE_RAW <oracledbconstantsdbtype>` or
-    :ref:`oracledb.DB_TYPE_OBJECT <oracledbconstantsdbtype>` constants.
+    :ref:`oracledb.DB_TYPE_OBJECT <oracledbconstantsdbtype>`, or
+    :ref:`oracledb.DB_TYPE_JSON <oracledbconstantsdbtype>` constants.
+
+    .. versionchanged:: 6.1
+
+        Added ``oracledb.DB_TYPE_JSON`` constant.
 
 .. attribute:: aqQueue.payloadTypeClass
 
@@ -231,8 +236,7 @@ AqQueue Methods
         * - AqMessage ``message``
           - The message that is dequeued. See :ref:`AqMessage Class <aqmessageclass>`.
 
-    Dequeued messages are returned as AqMessage objects. Note AqMessage
-    objects are not used for enqueuing.
+    Dequeued messages are returned as AqMessage objects.
 
     .. _aqmessageclass:
 
@@ -283,11 +287,11 @@ AqQueue Methods
 
     .. warning::
 
-      Calling ``enqMany()`` in parallel on different connections
-      acquired from the same pool may fail due to Oracle bug 29928074. Ensure
-      that ``enqMany()`` is not run in parallel, use :ref:`standalone
-      connections <connectionhandling>`, or make multiple calls to
-      ``enqOne()``. The ``deqMany()`` method is not affected.
+      Calling ``enqMany()`` in parallel on different connections acquired from
+      the same pool may cause a problem with older versions of Oracle (see
+      Oracle bug 29928074). Ensure that ``enqMany()`` is not run in parallel.
+      Instead, use :ref:`standalone connections <connectionhandling>` or make
+      multiple calls to ``enqOne()``. The ``deqMany()`` method is not affected.
 
     **Callback**:
 
@@ -329,6 +333,13 @@ AqQueue Methods
           - Description
         * - Error ``error``
           - If ``enqMany()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+
+    The ``queue.enqMany()`` method returns an array of :ref:`AqMessage objects <aqmessageclass>`.
+
+    .. versionchanged:: 6.1
+
+        Previously, ``aqQueue.enqMany()`` did not return any value. Now, this
+        method returns an array of :ref:`AqMessage objects <aqmessageclass>`.
 
 .. method:: aqQueue.enqOne()
 
@@ -401,7 +412,7 @@ AqQueue Methods
           - Number
           - The number of seconds the message is available to be dequeued before it expires.
         * - ``payload``
-          - String, Buffer, :ref:`DbObject <dbobjectclass>`
+          - String, Buffer, :ref:`DbObject <dbobjectclass>`, Object
           - The actual message to be queued. This property must be specified.
         * - ``priority``
           - Integer
@@ -430,3 +441,10 @@ AqQueue Methods
           - Description
         * - Error ``error``
           - If ``enqOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+
+    Enqueued messages are returned as :ref:`AqMessage objects <aqmessageclass>`.
+
+    .. versionchanged:: 6.1
+
+        Previously, ``aqQueue.enqOne()`` did not return any value. Now, this
+        method returns an :ref:`AqMessage object <aqmessageclass>`.

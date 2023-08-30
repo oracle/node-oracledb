@@ -3,7 +3,9 @@
 .. _releasenotes:
 
 node-oracledb Release Notes
-=============================
+===========================
+
+For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
 node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (TBD)
 ------------------------------------------------------------------------------------------------
@@ -35,15 +37,17 @@ Thin Mode Changes
     ``oracledb.fetchAsString = [ oracledb.DB_TYPE_RAW ]``.
     `Issue #1586 <https://github.com/oracle/node-oracledb/issues/1586>`__.
 
-#)  Added new ``sslAllowWeakDNMatch`` connection attribute and support for
-    ``SSL_WEAK_DN_MATCH`` (An Oracle Database 23c feature). If set, this
+#)  Added new ``sslAllowWeakDNMatch`` connection attribute in :ref:`createPool()
+    <createpoolpoolattrssslallowweak>` and :ref:`getConnection()
+    <getconnectiondbattrssslallowweak>` methods and support for
+    ``SSL_WEAK_DN_MATCH`` (an Oracle Database 23c feature). If set, this
     enables ``sslServerDNMatch`` / ``SSL_SERVER_DN_MATCH`` to check the
-    database server certificate (but not the listener) and enable the service
+    database server certificate (but not the listener) and enables the service
     name to be used for partial DN matching. The search order is: the host
     name, then the subject alternative name (SAN), and then the service name.
 
 #)  Added support to include database error cause/action URLs (introduced from
-    Oracle Database 23c onwards) for ORA error messages.    
+    Oracle Database 23c onwards) for ORA error messages.
 
 #)  Added network connection optimization for multiple database hosts.
     If a host is found to be unreachable during connection, the host is added
@@ -83,11 +87,12 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Added ``msgID`` attribute in the message object passed onto the
-    callback function registered during AQ subscription. The msgID attribute
-    passed with the callback functions can be compared with the msgID 
-    attribute returned by the dequeue functions for proper validation of the
-    returned message objects with message dequeue.
+#)  Added ``msgId`` attribute in the message object passed onto the
+    callback function registered during :ref:`AQ subscription
+    <aqnotifications>`. The ``msgId`` attribute passed with the callback
+    function can be compared with the ``msgId`` attribute returned by the
+    dequeue function for proper validation of the returned message objects
+    with message dequeue.
 
 #)  Added support to return a message object from the :meth:`queue.enqOne()
     <aqQueue.enqOne()>` and :meth:`queue.enqMany() <aqQueue.enqMany()>`

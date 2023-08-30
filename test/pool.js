@@ -450,6 +450,8 @@ describe('2. pool.js', function() {
         await new Promise((resolve) => {
           setTimeout(resolve, 100);
         });
+        // wait for a connection to wait in a connection queue
+        await testsUtil.checkAndWait(100, 50, () => pool._connRequestQueue.length === 1);
         await assert.rejects(
           async () => await pool.getConnection(),
           /NJS-076:/

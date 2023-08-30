@@ -1411,16 +1411,32 @@ Connection Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 10 30
+        :widths: 10 30
         :summary: The first column displays the attribute name. The second
          column displays the description of the attribute.
 
         * - Attribute Name
-          - Data Type
           - Description
         * - ``payloadType``
-          - String
-          - Contains the name of an Oracle Database object type, or a :ref:`DbObject Class <dbobjectclass>` earlier acquired from :meth:`connection.getDbObjectClass()`. If the name of an object type is used, it is recommended that a fully qualified name be used.
+          - - For :ref:`simple string or stream of bytes (RAW) messages <aqrawexample>`, it is not necessary to explicitly specify this attribute. This is the default setting for the payload type. For example::
+
+                connection.getQueue(queueName)
+
+              will have RAW messages as the default ``payloadType`` setting.
+
+              Or you can also explicitly set this attribute to ``oracledb.DB_TYPE_RAW``. For example::
+
+                connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_RAW })
+            - For :ref:`JSON messages <aqjsonexample>`, set this attribute to ``oracledb.DB_TYPE_JSON``. For example::
+
+                connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_JSON })
+            - For :ref:`Database object messages <aqobjexample>`, set this attribute to the name of an Oracle Database object type, or a :ref:`DbObject Class <dbobjectclass>` earlier acquired from :meth:`connection.getDbObjectClass()`. If the name of an object type is used, it is recommended that a fully qualified name be used. For example, if the Oracle Database object type name is ``DEMOQUEUE.USER_ADDRESS_TYPE``::
+
+                connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
+
+            .. versionchanged:: 6.1
+
+                Previously, the default value was RAW and you did not have to set this attribute for RAW messages. Also, only the name of an Oracle Database object type, or a :ref:`DbObject Class <dbobjectclass>` could be specified in the this attribute. Now, you can also explicitly specify ``oracledb.DB_TYPE_RAW`` for RAW messages and ``oracledb.DB_TYPE_JSON`` for JSON messages in this attribute.
 
     **Callback**:
 
@@ -2607,7 +2623,8 @@ Connection Methods
 
         promise = unsubscribe(String name);
 
-    Unregisters a :ref:`Continuous Query Notification (CQN) <cqn>` subscription
+    Unregisters a :ref:`Continuous Query Notification (CQN) <cqn>` and
+    :ref:`Advanced Queuing Notification <aqnotifications>` subscription
     previously created with :meth:`connection.subscribe()`.
     No further notifications will be sent. The notification callback does
     not receive a notification of the deregistration event.

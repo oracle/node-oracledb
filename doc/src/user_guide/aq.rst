@@ -55,8 +55,12 @@ When you have finished testing, remove the DEMOQUEUE schema.
 Sending Simple AQ Messages
 ==========================
 
-To create a queue for simple messaging, use SQL*Plus to connect as the
-new DEMOQUEUE user and run:
+You can use AQ to send RAW payloads by using a String or Buffer as the
+message.
+
+Before enqueuing and dequeuing messages, you need to create and start queues
+in Oracle Database. For example, to create a queue for simple messaging, use
+SQL*Plus to connect as the new DEMOQUEUE user and run:
 
 .. code-block:: sql
 
@@ -75,17 +79,35 @@ new DEMOQUEUE user and run:
     END;
     /
 
+The default payload type is RAW and it is not necessary to explicitly
+specify the :ref:`payloadType <getqueueoptions>` attribute in
+:meth:`connection.getQueue()`. To get a queue of RAW payload type using this
+default setting::
+
+    connection.getQueue(queueName);
+
+You can also explicitly set the :ref:`payloadType <getqueueoptions>`
+attribute to ``oracledb.DB_TYPE_RAW`` in :meth:`connection.getQueue()`::
+
+    connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_RAW });
+
 To enqueue a single, simple message, run:
 
 .. code-block:: javascript
 
     const queueName = "DEMO_RAW_QUEUE";
+    // Getting a queue of RAW payload type
     const queue = await connection.getQueue(queueName);
-    await queue.enqOne("This is my message");
+    const msg = await queue.enqOne("This is my message");
     await connection.commit();
 
+The variable ``msg`` will be an :ref:`AqMessage object <aqmessageclass>`. It
+contains information about the message that was sent such as payload,
+correlation, delay, deliveryMode, msgId, priority, and
+:ref:`other metadata <aqmessageclass>`.
+
 Messages can be passed directly to ``enqOne()`` as shown above.
-Alternatively they can be the ``payload`` property of a JavaScript
+Alternatively, they can be the ``payload`` property of a JavaScript
 object passed to ``enqOne()``, as shown in :ref:`Changing AQ
 options <aqoptions>`.
 
@@ -101,13 +123,159 @@ To dequeue a message, run:
 
 By default, ``deqOne()`` will wait until a message is available.
 
-The variable ``msg`` is returned as an :ref:`AqMessage
-object <aqmessageclass>` which contains the message payload and other
-metadata. String messages are encoded as UTF-8 Buffers. This example
-displays ``This is my message``.
+The variable ``msg`` will be an :ref:`AqMessage object <aqmessageclass>`. It
+contains information about the dequeued message such as payload, correlation,
+delay, deliveryMode, msgId, priority, and
+:ref:`other metadata <aqmessageclass>`. String messages are encoded as UTF-8
+Buffers. This example displays ``This is my message``.
 
 See `examples/aqraw.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/aqraw.js>`__ for a runnable example.
+
+Each enqueued message sent using :meth:`queue.enqOne() <aqQueue.enqOne()>`
+or retrieved using :meth:`queue.deqOne() <aqQueue.deqOne()>` is uniquely
+identified by an internally generated
+:ref:`message identifier <aqmessageclass>` (``msgId``). The ``msgId``
+attribute is of type Buffer. For example, to view the ``msgId`` of an enqueued
+message:
+
+.. code-block:: javascript
+
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    const msg = await queue.enqOne("This is my message");
+    console.log(msg.msgId.toString("hex"));
+    await connection.commit();
+
+This will print an identifier like::
+
+    01ecb9cb8737a12de063ba60466437c7
+
+Similarly, you can view the ``msgId`` of a dequeued message, for example:
+
+.. code-block:: javascript
+
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    const msg = await queue.deqOne();
+    await connection.commit();
+    console.log(msg.msgId.toString("hex"));
+
+This will print an identifier like::
+
+    01ecb9cb8737a12de063ba60466437b6
+
+.. _aqjsonexample:
+
+Sending Oracle Database JSON AQ Messages
+========================================
+
+Starting from Oracle Database 21c, Advanced Queuing supports the JSON
+payloads. To use this payload type, the Oracle Client libraries must also be
+version 21 or later.
+
+You can use AQ to send JSON payloads by using a JavaScript object as the
+message.
+
+Before enqueuing and dequeuing messages, you need to create and start queues
+in Oracle Database. For example, to create a queue suitable for sending JSON
+messages, use SQL*Plus to connect as the new ``DEMOQUEUE`` user and run:
+
+.. code-block:: sql
+
+    -- Create and start a queue
+    BEGIN
+        DBMS_AQADM.CREATE_QUEUE_TABLE(
+            QUEUE_TABLE        =>  'DEMOQUEUE.DEMO_JSON_QUEUE_TAB',
+            QUEUE_PAYLOAD_TYPE =>  'JSON');
+
+        DBMS_AQADM.CREATE_QUEUE(
+            QUEUE_NAME         =>  'DEMOQUEUE.DEMO_JSON_QUEUE',
+            QUEUE_TABLE        =>  'DEMOQUEUE.DEMO_JSON_QUEUE_TAB');
+
+        DBMS_AQADM.START_QUEUE(
+            QUEUE_NAME         => 'DEMOQUEUE.DEMO_JSON_QUEUE');
+    END;
+    /
+
+Using :meth:`connection.getQueue()`, you can get the queue by setting the
+:ref:`payloadType <getqueueoptions>` attribute to ``oracledb.DB_TYPE_JSON`` as
+shown below.
+
+To enqueue a single JSON AQ message, run:
+
+.. code-block:: javascript
+
+    const queueName = "DEMO_JSON_QUEUE";
+    // Getting a queue of JSON payload type
+    const queue = await connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_JSON });
+    const myData = {
+        empName: "Scott",
+        empCity: "Redwood"
+    };
+    const msg = await queue.enqOne({
+        payload: myData
+    });
+    await connection.commit();
+
+The variable ``msg`` will be an :ref:`AqMessage object <aqmessageclass>`. It
+contains information about the message that was sent such as payload,
+correlation, delay, deliveryMode, msgId, priority, and
+:ref:`other metadata <aqmessageclass>`.
+
+To dequeue a JSON AQ message, run:
+
+.. code-block:: javascript
+
+    const queueName = "DEMO_JSON_QUEUE";
+    const queue = await connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_JSON });
+    const msg = await queue.deqOne();
+    await connection.commit();
+    console.log("empName ", msg.payload.empName);
+    console.log("empCity ", msg.payload.empCity);
+
+By default, ``deqOne()`` will wait until a message is available.
+
+This prints::
+
+    empName Scott
+    empCity Redwood
+
+Each enqueued message sent using :meth:`queue.enqOne() <aqQueue.enqOne()>`
+or retrieved using :meth:`queue.deqOne() <aqQueue.deqOne()>` is uniquely
+identified by an internally generated
+:ref:`message identifier <aqmessageclass>` (``msgId``). The ``msgId``
+attribute is of type Buffer. For example, to view the ``msgId`` of an enqueued
+message:
+
+.. code-block:: javascript
+
+    const queue = await connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_JSON });
+    const myData = {
+        empName: "Scott",
+        empCity: "Redwood"
+    };
+    const msg = await queue.enqOne({
+        payload: myData
+    });
+    console.log(msg.msgId.toString("hex"));
+    await connection.commit();
+
+This will print an identifier like::
+
+    01fbb9cb8737a12de063ba60466437c7
+
+Similarly, you can view the ``msgId`` of a dequeued message, for example:
+
+.. code-block:: javascript
+
+    const queue = await connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_JSON });
+    const msg = await queue.deqOne();
+    console.log(msg.msgId.toString("hex");)
+
+This will print an identifier like::
+
+    01dfb9cb8737a12de063ba60466437b6
 
 .. _aqobjexample:
 
@@ -117,9 +285,9 @@ Sending Oracle Database Object AQ Messages
 You can use AQ to send Database Object payloads by using :ref:`DbObject
 Class <dbobjectclass>` objects as the message.
 
-The message in this example is an object containing a name and address.
-To create a payload type and to start a queue, connect as the new
-``demoqueue`` user and run:
+Before enqueuing and dequeuing messages, you need to create database object
+types, and create and start queues in Oracle Database. For example, connect
+as the new ``demoqueue`` user and run:
 
 .. code-block:: sql
 
@@ -146,15 +314,22 @@ To create a payload type and to start a queue, connect as the new
     END;
     /
 
-In the :ref:`previous section <aqrawexample>` the ``QUEUE_PAYLOAD_TYPE``
-was ‘RAW’ but here the Oracle Database object type name
-``DEMOQUEUE.USER_ADDRESS_TYPE`` is used.
+In the :ref:`RAW <aqrawexample>` and :ref:`JSON <aqjsonexample>` examples, the
+``QUEUE_PAYLOAD_TYPE`` was ‘RAW’ and ‘JSON’ respectively. Here, the Oracle
+Database object type name ``DEMOQUEUE.USER_ADDRESS_TYPE`` is used.
 
-In node-oracledb, a queue is initialized for that type:
+Using :meth:`connection.getQueue()`, you can get the queue of object payloads
+by setting the :ref:`payloadType <getqueueoptions>` attribute to the name
+of an Oracle Database object type as shown below, or a
+:ref:`DbObject Class <dbobjectclass>` earlier acquired from
+:meth:`connection.getDbObjectClass()`.
+
+In node-oracledb, a queue is initialized for an Oracle Database object type:
 
 .. code-block:: javascript
 
     const queueName = "ADDR_QUEUE";
+    // Getting a queue of Oracle Database object type
     const queue = await connection.getQueue(queueName, {payloadType: "DEMOQUEUE.USER_ADDRESS_TYPE"});
 
 For efficiency, it is recommended to use a fully qualified name for the
@@ -170,8 +345,13 @@ A :ref:`DbObject <dbobjectclass>` for the message is created and queued:
             ADDRESS: "The Kennel"
         }
     );
-    await queue.enqOne(message);
+    const msg = await queue.enqOne(message);
     await connection.commit();
+
+The variable ``msg`` will be an :ref:`AqMessage object <aqmessageclass>`. It
+contains information about the message that was sent such as payload,
+correlation, delay, deliveryMode, msgId, priority, and
+:ref:`other metadata <aqmessageclass>`.
 
 Dequeuing objects is done with:
 
@@ -192,6 +372,33 @@ The message can be printed:
 
 See `examples/aqobject.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/aqobject.js>`__ for a runnable example.
+
+Each enqueued message sent using :meth:`queue.enqOne() <aqQueue.enqOne()>`
+or retrieved using :meth:`queue.deqOne() <aqQueue.deqOne()>` is uniquely
+identified by an internally generated
+:ref:`message identifier <aqmessageclass>` (``msgId``). The ``msgId``
+attribute is of type Buffer. For example, to view the ``msgId`` of an enqueued
+message:
+
+.. code-block:: javascript
+
+    const msg = await queue.enqOne(message);
+    console.log(msg.msgId.toString("hex"));
+
+This will print an identifier like::
+
+    01ecb9cb8737a12de063ba60466437c7
+
+Similarly, you can view the ``msgId`` of a dequeued message, for example:
+
+.. code-block:: javascript
+
+    const msg = await queue.deqOne();
+    console.log(msg.msgId.toString("hex"));
+
+This will print an identifier like::
+
+    01ecb9cb8737a12de063ba60466437b6
 
 .. _aqoptions:
 
@@ -219,11 +426,13 @@ a message after five seconds if it has not been dequeued:
 
     const queueName = "DEMO_RAW_QUEUE";
     const queue = await connection.getQueue(queueName);
-    await queue.enqOne(message);
+    const msg = await queue.enqOne(message);
     await connection.commit();
 
-For RAW queues the ``payload`` value can be a String or Buffer. For
-object queues ``payload`` can be a :ref:`DbObject <dbobjectclass>` object.
+For RAW queues, the ``payload`` value can be a String or Buffer. For JSON
+queues, the ``payload`` value should be a JavaScript object. For object
+queues, the ``payload`` value should be a :ref:`DbObject <dbobjectclass>`
+object.
 
 To change the enqueue behavior of a queue, alter the
 :attr:`aqQueue.enqOptions` attributes. For example to make a
@@ -282,7 +491,17 @@ Enqueuing multiple messages in one operation is similar to the basic
 examples. However, instead of passing a single message to
 :meth:`queue.enqOne() <aqQueue.enqOne()>`, the
 :meth:`queue.enqMany() <aqQueue.enqMany()>` method is passed an
-array of messages:
+array of messages.
+
+Multiple messages can be dequeued in one call with
+:meth:`queue.deqMany() <aqQueue.deqMany()>`. This method takes a
+``maxMessages`` parameter indicating the maximum number of messages that
+should be dequeued in one call. Depending on the queue options, zero or
+more messages up to the limit will be dequeued.
+
+**Using RAW Payloads**
+
+To enqueue multiple messages, run:
 
 .. code-block:: javascript
 
@@ -294,16 +513,26 @@ array of messages:
         "Message 3",
         "Message 4"
     ];
-    await queue.enqMany(messages);
+    const msgs = await queue.enqMany(messages);
     await connection.commit();
 
-Warning: see the advisory note in :meth:`~aqQueue.enqMany()` documentation.
+The variable ``msgs`` will be an array of
+:ref:`AqMessage objects <aqmessageclass>`. It contains information about the
+messages that were sent such as payload, correlation, delay, deliveryMode,
+msgId, priority, and :ref:`other metadata <aqmessageclass>`.
 
-Multiple messages can be dequeued in one call with
-:meth:`queue.deqMany() <aqQueue.deqMany()>`. This method takes a
-``maxMessages`` parameter indicating the maximum number of messages that
-should be dequeued in one call. Depending on the queue options, zero or
-more messages up to the limit will be dequeued:
+.. _advnote:
+
+.. warning::
+
+    Calling ``enqMany()`` in parallel on different connections acquired
+    from the same pool may cause a problem with older versions of Oracle
+    (see Oracle bug 29928074). Ensure that ``enqMany()`` is not run in
+    parallel. Instead, use :ref:`standalone connections <connectionhandling>`
+    or make multiple calls to ``enqOne()``. The ``deqMany()`` method is not
+    affected.
+
+To dequeue multiple messages, run:
 
 .. code-block:: javascript
 
@@ -324,6 +553,103 @@ object <aqmessageclass>`, the same as returned by
 See `examples/aqmulti.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/aqmulti.js>`__ for a runnable example.
 
+Each enqueued message sent using :meth:`queue.enqMany() <aqQueue.enqMany()>`
+or dequeued message retrieved using :meth:`queue.deqMany() <aqQueue.deqMany()>`
+is uniquely identified by an internally generated message identifier
+(``msgId``). The ``msgId`` is of type Buffer. For example, to view the message
+identifier of a multiple enqueued message:
+
+.. code-block:: javascript
+
+    const queueName = "DEMO_RAW_QUEUE";
+    const queue = await connection.getQueue(queueName);
+    const messages = [
+        "Message 1",
+        "Message 2",
+        "Message 3",
+        "Message 4"
+    ];
+    const msgs = await queue.enqMany(messages);
+    for (let i = 0; i < msgs.length; i++) {
+        console.log (i, "msgId: ", msgs[i].msgId.toString("hex"));
+    }
+    await connection.commit();
+
+This will print identifiers such as::
+
+    0  msgId:  01ecb9cb8738a12de063ba60466437c7
+    1  msgId:  01ecb9cb8739a12de063ba60466437c7
+    2  msgId:  01ecb9cb873aa12de063ba60466437c7
+    3  msgId:  01ecb9cb873ba12de063ba60466437c7
+
+Similarly, you can view the ``msgId`` of a multiple dequeued message, for
+example:
+
+.. code-block:: javascript
+
+    const queue = await connection.getQueue(queueName);
+    const msgs = await queue.deqMany(5);
+    for (let i = 0; i < msgs.length; i++) {
+        console.log (i, "msgId: ", msgs[i].msgId.toString("hex"));
+    }
+    await connection.commit();
+
+This will print identifiers such as::
+
+    0  msgId:  01ecb9cb8738a12de063ba60466437e9
+    1  msgId:  01ecb9cb8739a12de063ba60466437e9
+    2  msgId:  01ecb9cb873aa12de063ba60466437e9
+    3  msgId:  01ecb9cb873ba12de063ba60466437e9
+
+**Using JSON Payloads**
+
+To enqueue multiple JSON messages, run:
+
+.. code-block:: javascript
+
+    const queueName = "DEMO_JSON_QUEUE";
+    const queue = await connection.getQueue (queueName, { payloadType: oracledb.DB_TYPE_JSON });
+    const empList = [
+        {payload: { empName: "Employee #1", empId: 101 }},
+        {payload: { empName: "Employee #2", empId: 102 }},
+        {payload: { empName: "Employee #3", empId: 103 }}
+    ];
+    await queue.enqMany (empList);
+    await connection.commit();
+
+See the :ref:`advisory note <advnote>` about using :meth:`~aqQueue.enqMany()`.
+
+To dequeue multiple JSON messages, run:
+
+.. code-block:: javascript
+
+    const queue = await connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_JSON });
+    Object.assign(queue.deqOptions,
+      {
+        navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+        wait: oracledb.AQ_DEQ_NO_WAIT
+      }
+    );
+
+    const msgs = await queue.deqMany(5); // get at most 5 messages
+    console.log ( "msgs received : " + msgs.length );
+    for ( let i = 0; i < msgs.length; i ++ ) {
+        console.log ( i + ". empName : " + msgs[i].payload.empName);
+        console.log ( i + ". empId : " + msgs[i].payload.empId);
+    }
+
+By default, ``deqMany()`` will wait until a message is available.
+
+This prints::
+
+    msgs received : 3
+    1. empName : Employee #1
+    2. empId : 101
+    3. empName : Employee #2
+    4. empId : 102
+    5. empName : Employee #3
+    6. empId : 103
+
 .. _aqnotifications:
 
 Advanced Queuing Notifications
@@ -343,20 +669,24 @@ For example:
 
     const subscrOptions = {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
-        callback: ProcessAqMessages
+        callback: ProcessAqMessage
     };
 
-    async function ProcessAqMessages() {
+    async function ProcessAqMessage(message) {
         const connection = await oracledb.getConnection();  // get connection from a pool
         const queue = await connection.getQueue(queueName);
         const msg = await queue.deqOne();
-        console.log(msg.payload.toString()
+        console.log(msg.payload.toString());
+        console.log(message.msgId.toString("hex")); // prints the msgId of the message
+        console.log(msg.msgId.toString("hex")); // prints the same msgId as above
         await connection.close();
     }
 
     const connection = await oracledb.getConnection();  // get connection from a pool
     await connection.subscribe(queueName, subscrOptions);
     await connection.close();
+
+    await connection.unsubscribe(queueName); // unsubscribes from a queue
 
 See :ref:`Continuous Query Notification (CQN) <cqn>` for more information
 about subscriptions and notifications.

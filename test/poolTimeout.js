@@ -34,6 +34,7 @@
 const oracledb = require('oracledb');
 const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testUtil = require('../test/testsUtil.js');
 
 describe('269. Pool Timeout', function() {
 
@@ -187,7 +188,7 @@ describe('269. Pool Timeout', function() {
         await conn2.close();
       await sleep(70000);
       conn3 = await pool.getConnection();
-      assert.deepStrictEqual(pool.connectionsOpen, 1);
+      await testUtil.checkAndWait(100, 700, () => pool.connectionsOpen === 1);
       assert.deepStrictEqual(pool.connectionsInUse, 1);
       if (conn3)
         await conn3.close();
