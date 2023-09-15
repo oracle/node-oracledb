@@ -8,6 +8,9 @@ for Node.js powers high performance Oracle Database applications.
 <license>`. Changes in the node-oracledb releases can be found in the
 :ref:`release notes <releasenotes>`.
 
+This module is currently tested with Node.js 16, 18, and 20 against Oracle
+Database 23c, 21c, 19c, 12c, and 11gR2.
+
 You can use assistive technology products, such as screen readers, while you
 work with the node-oracledb documentation. You can also use the keyboard
 instead of the mouse.
