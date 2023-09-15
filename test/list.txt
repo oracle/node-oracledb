@@ -5483,3 +5483,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 284. errorUrl.js
     284.1 checks for error URL in ORA error message
+
+
+287. sodaOperationsLock.js
+    287.1 lock on sodaOperations

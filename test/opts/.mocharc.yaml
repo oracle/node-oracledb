@@ -267,3 +267,4 @@ spec:
   - test/aq7.js
   - test/aq5.js
   - test/errorUrl.js
+  - test/sodaOpLock.js

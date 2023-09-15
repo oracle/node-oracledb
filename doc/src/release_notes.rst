@@ -21,6 +21,9 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Added lock() method on sodaOperation object.  An explicit commit/rollback
+    is required to unlock.
+
 #)  Fixed bug that throws an 'ORA-21525' error with dbObjects having one or
     more 'Number' attributes with precision less than or equal to 18 and scale
     as 0.
