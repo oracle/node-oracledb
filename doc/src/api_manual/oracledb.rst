@@ -3161,6 +3161,12 @@ Oracledb Methods
 
         * - Attribute
           - Description
+        * - ``binaryDir``
+          - This specifies the directory that contains the node-oracledb Thick mode binary module.
+
+            If ``binaryDir`` is not specified, then :meth:`~oracledb.initOracleClient()` looks for the Thick mode binary in either the ``build/Release`` or ``build/Debug`` sub directories under the node-oracledb home directory.
+
+            .. versionadded:: 6.2
         * - ``configDir``
           - This specifies the directory in which the :ref:`Optional Oracle Net Configuration <tnsadmin>` and :ref:`Optional Oracle Client Configuration <oraaccess>` files reside.
 
