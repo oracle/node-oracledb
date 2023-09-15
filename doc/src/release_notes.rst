@@ -13,7 +13,7 @@ node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...
 Thin Mode Changes
 ++++++++++++++++++
 
-#)  Ensure that the database port is passed as a number to the  network connection. 
+#)  Ensure that the database port is passed as a number to the  network connection.
     See `Issue #1600 <https://github.com/oracle/node-oracledb/issues/1600>`__
     and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__.
     (Daniel Rodrigues)
@@ -21,17 +21,19 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Added lock() method on sodaOperation object.  An explicit commit/rollback
-    is required to unlock.
+#)  Added lock() method on sodaOperation object to disable modification on any
+    SODA document. An explicit commit/rollback is required to unlock and
+    modify any corresponding SODA document.
 
 #)  Fixed bug that throws an 'ORA-21525' error with dbObjects having one or
-    more 'Number' attributes with precision less than or equal to 18 and scale
+    more 'Number' attributes of precision less than or equal to 18 and scale
     as 0.
     `Issue #1594 <https://github.com/oracle/node-oracledb/issues/1594>`__.
 
-#)  Add new property ``binaryLocation`` to the options passed to
+#)  Added new property ``binaryDir`` to the options passed to
     :meth:`~oracledb.initOracleClient()` which indicates the name of the
     directory that contains the node-oracledb Thick mode binary module.
+    `PR #1602 <https://github.com/oracle/node-oracledb/pull/1602>`__. (Leman)
 
 node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (30 Aug 2023)
 --------------------------------------------------------------------------------------------------------
