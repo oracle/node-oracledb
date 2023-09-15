@@ -13,9 +13,14 @@ node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Fixed bug that throws 'ORA-21525' with dbObjects having property
-    with Number type Precision less than or equal to 18 and scale as 0.
+#)  Fixed bug that throws an 'ORA-21525' error with dbObjects having one or
+    more 'Number' attributes with precision less than or equal to 18 and scale
+    as 0.
     `Issue #1594 <https://github.com/oracle/node-oracledb/issues/1594>`__.
+
+#)  Add new property ``binaryLocation`` to the options passed to
+    :meth:`~oracledb.initOracleClient()` which indicates the name of the
+    directory that contains the node-oracledb Thick mode binary module.
 
 node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (30 Aug 2023)
 --------------------------------------------------------------------------------------------------------
@@ -74,7 +79,8 @@ Thin Mode Changes
     now return 'undefined' in Thin mode instead of throwing an error.
     `Issue #1582 <https://github.com/oracle/node-oracledb/issues/1582>`__.
 
-#)  Fixed bug giving 'Unexpected message type' during connection authentication.
+#)  Fixed bug giving 'Unexpected message type' during connection
+    authentication.
     `Issue #1589 <https://github.com/oracle/node-oracledb/issues/1589>`__.
 
 #)  Fixed bug in handling unexpected pool growth that exceeds pool max limit
