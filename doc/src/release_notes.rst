@@ -7,6 +7,16 @@ node-oracledb Release Notes
 
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
+node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...v6.2.0>`__ (TBD)
+------------------------------------------------------------------------------------------------
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Fixed bug that throws 'ORA-21525' with dbObjects having property
+    with Number type Precision less than or equal to 18 and scale as 0.
+    `Issue #1594 <https://github.com/oracle/node-oracledb/issues/1594>`__.
+
 node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (30 Aug 2023)
 --------------------------------------------------------------------------------------------------------
 

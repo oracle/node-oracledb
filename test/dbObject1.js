@@ -369,3 +369,58 @@ describe('200. dbObject1.js', () => {
   }); // 200.10;
 
 });
+
+describe('200.2 Number property with Precision', function() {
+  let conn;
+  const TYPE_SMALL_PRECISION = 'NODB_TYP_OBJ_1_SPREC';
+  const TYPE_LARGE_PRECISION = 'NODB_TYP_OBJ_1_LPREC';
+  const typ1 =
+    `create or replace type ${TYPE_SMALL_PRECISION} as object (TESTNUMBER number (12, 0))`;
+  const typ2 =
+    `create or replace type ${TYPE_LARGE_PRECISION} as object (TESTNUMBER number (22, 0))`;
+
+  before(async () => {
+    conn = await oracledb.getConnection(dbConfig);
+    await conn.execute(typ1);
+    await conn.execute(typ2);
+  }); // before()
+
+  after(async () => {
+    let sql = `DROP TYPE ${TYPE_SMALL_PRECISION}`;
+    await conn.execute(sql);
+    sql = `DROP TYPE ${TYPE_LARGE_PRECISION}`;
+    await conn.execute(sql);
+    await conn.close();
+  }); // after()
+
+  async function runPlSQL(sql, typ) {
+    const inpVal = 260;
+    const result = await conn.execute(sql, {
+      arg: {
+        dir: oracledb.BIND_INOUT,
+        type: typ,
+        val: {'TESTNUMBER': inpVal}
+      }
+    }, {outFormat: oracledb.OUT_FORMAT_OBJECT});
+    return result;
+  }
+
+  it('200.2.1 using small Precision', async () => {
+    const retVal = 560;
+    const sql = `declare myType ${TYPE_SMALL_PRECISION} := :arg; begin myType.TESTNUMBER := ${retVal};
+      :arg := myType; end;`;
+
+    const result = await runPlSQL(sql, TYPE_SMALL_PRECISION);
+    assert.strictEqual(result.outBinds.arg.TESTNUMBER, retVal);
+  });
+
+  it('200.2.2 using Large Precision', async () => {
+    const retVal = 560;
+    const sql = `declare myType ${TYPE_LARGE_PRECISION} := :arg; begin myType.TESTNUMBER := ${retVal};
+      :arg := myType; end;`;
+
+    const result = await runPlSQL(sql, TYPE_LARGE_PRECISION);
+    assert.strictEqual(result.outBinds.arg.TESTNUMBER, retVal);
+  });
+
+});

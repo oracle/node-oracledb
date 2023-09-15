@@ -49,6 +49,9 @@ describe('213. dbObject14.js', () => {
     let plsql = `
       CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
         shirtnumber NUMBER,
+        zipcode     NUMBER(12,0),
+        rating      NUMBER(22,0),
+        joindate    DATE,
         name        VARCHAR2(20)
       );
     `;
@@ -82,11 +85,16 @@ describe('213. dbObject14.js', () => {
   it('213.1 examples/selectvarray.js', async () => {
 
     const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
-
+    const date = new Date(1989, 3, 4);
+    const nextDay = function() {
+      date.setDate(date.getDate() + 1);
+      const tempDate = new Date(date.getTime());
+      return tempDate;
+    };
     // Insert with explicit constructor
     const hockeyPlayers = [
-      {SHIRTNUMBER: 11, NAME: 'Elizabeth'},
-      {SHIRTNUMBER: 22, NAME: 'Frank'},
+      {SHIRTNUMBER: 11, ZIPCODE: 94016, RATING: 3, JOINDATE: nextDay(), NAME: 'Elizabeth'},
+      {SHIRTNUMBER: 22, ZIPCODE: 94017, RATING: 4, JOINDATE: nextDay(), NAME: 'Frank'},
     ];
     const hockeyTeam = new TeamTypeClass(hockeyPlayers);
 
@@ -97,10 +105,13 @@ describe('213. dbObject14.js', () => {
 
     // Insert with direct binding
     const badmintonPlayers = [
-      { SHIRTNUMBER: 10, NAME: 'Alison' },
-      { SHIRTNUMBER: 20, NAME: 'Bob' },
-      { SHIRTNUMBER: 30, NAME: 'Charlie' },
-      { SHIRTNUMBER: 40, NAME: 'Doug' }
+      { SHIRTNUMBER: 10, ZIPCODE: 94016, RATING: 3, JOINDATE: nextDay(), NAME: 'Alison' },
+      { SHIRTNUMBER: 20, ZIPCODE: 94017, RATING: 4, JOINDATE: nextDay(),
+        NAME: 'Bob' },
+      { SHIRTNUMBER: 30, ZIPCODE: 94018, RATING: 6, JOINDATE: nextDay(),
+        NAME: 'Charlie' },
+      { SHIRTNUMBER: 40, ZIPCODE: 94019, RATING: 5, JOINDATE: nextDay(),
+        NAME: 'Doug' }
     ];
     binds = { sn: "Badminton", t: { type: TeamTypeClass, val: badmintonPlayers } };
     const result2 = await conn.execute(sql, binds);
@@ -111,14 +122,19 @@ describe('213. dbObject14.js', () => {
     const result3 = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
     assert.strictEqual(result3.rows[0].SPORTNAME, 'Hockey');
     assert.strictEqual(result3.rows[1].SPORTNAME, 'Badminton');
-
-    for (let i = 0; i < result3.rows[0].TEAM.length; i++) {
+    for (let i = 0; i < hockeyPlayers.length; i++) {
       assert.strictEqual(result3.rows[0].TEAM[i].SHIRTNUMBER, hockeyPlayers[i].SHIRTNUMBER);
+      assert.strictEqual(result3.rows[0].TEAM[i].ZIPCODE, hockeyPlayers[i].ZIPCODE);
+      assert.strictEqual(result3.rows[0].TEAM[i].RATING, hockeyPlayers[i].RATING);
+      assert.deepStrictEqual(result3.rows[0].TEAM[i].JOINDATE, hockeyPlayers[i].JOINDATE);
       assert.strictEqual(result3.rows[0].TEAM[i].NAME, hockeyPlayers[i].NAME);
     }
 
-    for (let i = 0; i < result3.rows[1].TEAM.length; i++) {
+    for (let i = 0; i < badmintonPlayers.length; i++) {
       assert.strictEqual(result3.rows[1].TEAM[i].SHIRTNUMBER, badmintonPlayers[i].SHIRTNUMBER);
+      assert.strictEqual(result3.rows[1].TEAM[i].ZIPCODE, badmintonPlayers[i].ZIPCODE);
+      assert.strictEqual(result3.rows[1].TEAM[i].RATING, badmintonPlayers[i].RATING);
+      assert.deepStrictEqual(result3.rows[1].TEAM[i].JOINDATE, badmintonPlayers[i].JOINDATE);
       assert.strictEqual(result3.rows[1].TEAM[i].NAME, badmintonPlayers[i].NAME);
     }
   }); // 213.1
