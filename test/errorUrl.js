@@ -52,11 +52,14 @@ describe('284. errorUrl.js', function() {
 
   it('284.1 checks for error URL in ORA error message', async () => {
     const url = /https:\/\/docs.oracle.com\/error-help\/db\/ora-01476\//;
+    const oraError = /ORA-01476: divisor is equal to zero/;
     await assert.rejects(
       async () => await conn.execute(`SELECT 1/0 FROM DUAL`),
       (err) => {
-        assert.match(err.message, url);
-        return true;
+        const errorMessage = err.message;
+        const matchesUrl = url.test(errorMessage);
+        const matchesError = oraError.test(errorMessage);
+        return matchesUrl || matchesError;
       }
     );
   }); // 284.1

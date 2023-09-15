@@ -326,7 +326,8 @@ describe('4. binding.js', function() {
       await assert.rejects(
         async () => await connection.execute(sql, bindsOutNumberChar),
         // ORA-00933 - SQL command not properly ended
-        /ORA-00933:/
+        // ORA-03048: SQL reserved word 'INTO' is not syntactically valid following
+        /ORA-00933:|ORA-03048:/
       );
 
       sql = "insert into nodb_binding1 (id, name) values (:1, :2) returning (id()into :3";

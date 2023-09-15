@@ -438,13 +438,13 @@ describe('2. pool.js', function() {
         queueMax          : 1
       };
       const pool = await oracledb.createPool(config);
+      let conn1;
       const routine1 = async function() {
-        const conn1 = await pool.getConnection();
+        conn1 = await pool.getConnection();
         await assert.rejects(
           async () => await pool.getConnection(),
-          /NJS-040:/
+          /NJS-040:/ //connection request timeout. Request exceeded "queueTimeout" of 2000
         );
-        await conn1.close();
       };
       const routine2 = async function() {
         await new Promise((resolve) => {
@@ -458,6 +458,8 @@ describe('2. pool.js', function() {
         );
       };
       await Promise.all([routine1(), routine2()]);
+
+      await conn1.close();
       await pool.close(0);
     });
 
