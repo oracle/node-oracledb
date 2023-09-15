@@ -10,6 +10,14 @@ For deprecated and desupported features, see :ref:`Deprecations and desupported 
 node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...v6.2.0>`__ (TBD)
 ------------------------------------------------------------------------------------------------
 
+Thin Mode Changes
+++++++++++++++++++
+
+#)  Ensure that the database port is passed as a number to the  network connection. 
+    See `Issue #1600 <https://github.com/oracle/node-oracledb/issues/1600>`__
+    and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__.
+    (Daniel Rodrigues)
+
 Thick Mode Changes
 ++++++++++++++++++
 
