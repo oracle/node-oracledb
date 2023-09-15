@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   281. aq6.js
+ *   282. aq6.js
  *
  * DESCRIPTION
  *   Test Oracle Advanced Queueing (AQ).
@@ -37,7 +37,7 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
-describe('281. aq6.js', function() {
+describe('282. aq6.js', function() {
 
   let isRunnable = true;
   let conn;
@@ -71,7 +71,7 @@ describe('281. aq6.js', function() {
 
   }); // after()
 
-  describe('281.1 msgId in QUEUE_PAYLOAD_TYPE as ‘RAW’', function() {
+  describe('282.1 msgId in QUEUE_PAYLOAD_TYPE as ‘RAW’', function() {
     const rawQueueName = "NODB_RAW_QUEUE";
 
     before(async function() {
@@ -93,7 +93,7 @@ describe('281. aq6.js', function() {
       await conn.execute(plsql);
     });
 
-    it('281.1.1 msgId in enqOne/deqOne', async () => {
+    it('282.1.1 msgId in enqOne/deqOne', async () => {
       let msg;
 
       // Enqueue
@@ -112,9 +112,9 @@ describe('281. aq6.js', function() {
       assert(msg.msgId.length > 0);
       assert(msg.msgId instanceof Buffer);
       await conn.commit();
-    }); // 281.1.1
+    }); // 282.1.1
 
-    it('281.1.2 msgId in enqMany/deqMany', async () => {
+    it('282.1.2 msgId in enqMany/deqMany', async () => {
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -141,10 +141,10 @@ describe('281. aq6.js', function() {
           assert(msgs[i].msgId instanceof Buffer);
         }
       }
-    }); // 281.1.2
+    }); // 282.1.2
   });
 
-  describe('281.2 msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’', function() {
+  describe('282.2 msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’', function() {
     const objQueueName = "NODB_ADDR_QUEUE7";
     const objType      = "JSON";
     const objTable     = "NODB_TAB_JSON";
@@ -169,7 +169,7 @@ describe('281. aq6.js', function() {
       await conn.execute(plsql);
     });
 
-    it('281.2.1 enqOne and deqOne Json val as array type', async function() {
+    it('282.2.1 enqOne and deqOne Json val as array type', async function() {
       let msg;
       const queue = await conn.getQueue (objQueueName,
         { payloadType: oracledb.DB_TYPE_JSON }
@@ -189,9 +189,9 @@ describe('281. aq6.js', function() {
       assert(msg.msgId.length > 0);
       assert(msg.msgId instanceof Buffer);
       await conn.commit ();
-    }); //281.2.1
+    }); //282.2.1
 
-    it('281.2.2 JSON type in enqMany/deqMany', async () => {
+    it('282.2.2 JSON type in enqMany/deqMany', async () => {
       const queue3 = await conn.getQueue (objQueueName,
         { payloadType: oracledb.DB_TYPE_JSON });
 
@@ -220,10 +220,10 @@ describe('281. aq6.js', function() {
           assert(msgs[i].msgId instanceof Buffer);
         }
       }
-    }); //281.2.2
+    }); //282.2.2
   });
 
-  describe('281.3 msgId as Oracle Database Object AQ Messages', function() {
+  describe('282.3 msgId as Oracle Database Object AQ Messages', function() {
     const objQueueName = "NODB_ADDR_QUEUE";
     const objType = "NODB_ADDR_TYP";
     const objTable = "NODB_TAB_ADDR";
@@ -257,7 +257,7 @@ describe('281. aq6.js', function() {
       await conn.execute(plsql);
     });
 
-    it('281.3.1 msgId in enqOne/deqOne', async () => {
+    it('282.3.1 msgId in enqOne/deqOne', async () => {
       let msg;
       const addrData = {
         NAME: "scott",
@@ -286,7 +286,7 @@ describe('281. aq6.js', function() {
       assert(msg.msgId.length > 0);
       assert(msg.msgId instanceof Buffer);
       await conn.commit();
-    }); // 281.3.1
+    }); // 282.3.1
 
     const addrArray = [
       {
@@ -307,7 +307,7 @@ describe('281. aq6.js', function() {
       }
     ];
 
-    it('281.3.2 msgId in deqMany() with DB object array', async () => {
+    it('282.3.2 msgId in deqMany() with DB object array', async () => {
     // Enqueue
       const queue1 = await conn.getQueue(
         objQueueName,
@@ -331,6 +331,6 @@ describe('281. aq6.js', function() {
           assert(msgs[i].msgId instanceof Buffer);
         }
       }
-    }); // 281.3.2
+    }); // 282.3.2
   });
 });

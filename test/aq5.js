@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   283. aq5.js
+ *   281. aq5.js
  *
  * DESCRIPTION
  *   Test Oracle Advanced Queueing (AQ).
@@ -45,7 +45,7 @@ function cbSubscribe(message) {
 }
 
 
-describe('283.aq5.js', function() {
+describe('281.aq5.js', function() {
 
   let isRunnable = true;
   let conn;
@@ -106,7 +106,7 @@ describe('283.aq5.js', function() {
     }
   });
 
-  it('283.1 subscribe dequeue messages', async () => {
+  it('281.1 subscribe dequeue messages', async () => {
     const options = {
       namespace: oracledb.SUBSCR_NAMESPACE_AQ,
       callback: cbSubscribe,

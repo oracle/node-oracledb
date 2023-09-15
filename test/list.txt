@@ -5456,34 +5456,71 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     280.4 Pipelined Table Functions with types
     280.5 Parallel Enabled Pipelined Table Functions
 
-281. aq6.js
-    281.1 msgId in QUEUE_PAYLOAD_TYPE as ‘RAW’
-        281.1.1 msgId in enqOne/deqOne
-        281.1.2 msgId in enqMany/deqMany
-    281.2 msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’
-        281.2.1 enqOne and deqOne Json val as array type
-        281.2.2 JSON type in enqMany/deqMany
-    281.3 msgId as Oracle Database Object AQ Messages
-        281.3.1 msgId in enqOne/deqOne
-        281.3.2 msgId in deqMany() with DB object array
+281. aq5.js
+    281.1 subscribe dequeue messages
 
-282. aq7.js
-    282.1 JSON type in enqOne/deqOne
-    282.2 JSON type in enqMany/deqMany
-    282.3 Map javascript object directly into JSON
-    282.4 Boolean and null value
-    282.5 enqOne and deqOne Json val as array type
-    282.6 enqMany() with Json val as array type
-    282.7 enqOne and deqOne Json val as object type
-    282.8 enqMany() with Json val as object type
-    282.9 enqOne and deqOne CLOB value into a JSON key
+282. aq6.js
+    282.1 msgId in QUEUE_PAYLOAD_TYPE as ‘RAW’
+        282.1.1 msgId in enqOne/deqOne
+        282.1.2 msgId in enqMany/deqMany
+    282.2 msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’
+        282.2.1 enqOne and deqOne Json val as array type
+        282.2.2 JSON type in enqMany/deqMany
+    282.3 msgId as Oracle Database Object AQ Messages
+        282.3.1 msgId in enqOne/deqOne
+        282.3.2 msgId in deqMany() with DB object array
 
-283.aq5.js
-    283.1 subscribe dequeue messages
+283. aq7.js
+    283.1 JSON type in enqOne/deqOne
+    283.2 JSON type in enqMany/deqMany
+    283.3 Map javascript object directly into JSON
+    283.4 Boolean and null value
+    283.5 enqOne and deqOne Json val as array type
+    283.6 enqMany() with Json val as array type
+    283.7 enqOne and deqOne Json val as object type
+    283.8 enqMany() with Json val as object type
+    283.9 enqOne and deqOne CLOB value into a JSON key
 
 284. errorUrl.js
     284.1 checks for error URL in ORA error message
 
+285. aq8.js
+    285.1 query by messages, payload as RAW Type
+        285.1.1 enqOne and deqOne by msgId as string in reverse order
+        285.1.2 query by msgId in enqMany and deqOne in reverse order
+        285.1.3 enqOne and deqOne by msgId as string in non-sequential order
+        285.1.4 query by msgId in enqMany and deqOne in non-sequential order
+        285.1.5 Negative - Invalid msgId in deqOptions
+    285.2 query by msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’
+        285.2.1 enqOne and deqOne Json val as array type in reverse order
+        285.2.2 enqOne and deqOne Json val as array type in non-sequential order
+        285.2.3 enqMany and deqOne Json val as array type in reverse order
+        285.2.4 enqMany and deqOne Json val as array type in non-sequential order
+    285.3 query by msgId as Oracle Database Object AQ Messages
+        285.3.1 msgId in enqOne/deqOne in reverse order
+        285.3.2 msgId in enqOne/deqOne in non-sequential order
+        285.3.3 msgId in enqOne/deqOne in reverse order
+        285.3.4 msgId in enqOne/deqOne in non-sequential order
 
 287. sodaOperationsLock.js
     287.1 lock on sodaOperations
+
+286. embedded_oid.js
+    286.1 Test embedded oid normal operations
+        286.1.1 create collection with No key present in the input doc
+        286.1.2 Embedded varchar key already present doc
+        286.1.3 Embedded number key already present in the doc
+        286.1.4 test replaceOne, for each replace op, use previously retrieved key
+        286.1.5 test replaceOne, A new string ID is present in the target document
+        286.1.6 test replaceOne, A new integer ID is present in the target document
+        286.1.7 test replaceOneAndGet, for each replace op, use previously retrieved key
+        286.1.8 test replaceOneAndGet, A new string ID is present in the target document
+        286.1.9 test replaceOneAndGet, A new integer ID is present in the target document
+        286.1.10 Negative test for save()
+        286.1.11 Negative test for saveAndGet()
+    286.2 Test QBEs - filter, skip and limit
+        286.2.1 filter()
+        286.2.2 skip() first doc
+        286.2.3 limit() operation to 1 doc
+        286.2.4 remove() previously retrieved key
+        286.2.5 remove() with filter, No key present in the input doc

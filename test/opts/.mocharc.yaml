@@ -263,8 +263,10 @@ spec:
   - test/poolExpansion.js
   - test/poolShrinkage.js
   - test/pipelinedTables.js
+  - test/aq5.js
   - test/aq6.js
   - test/aq7.js
-  - test/aq5.js
   - test/errorUrl.js
+  - test/aq8.js
   - test/sodaOpLock.js
+  - test/embedded_oid.js

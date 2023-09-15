@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   282. aq7.js
+ *   283. aq7.js
  *
  * DESCRIPTION
  *   Test Oracle Advanced Queueing (AQ).
@@ -38,7 +38,7 @@ const testsUtil = require('./testsUtil.js');
 const assert    = require('assert');
 const fs       = require('fs');
 
-describe('282. aq7.js', function() {
+describe('283. aq7.js', function() {
   let conn = null;
   let isRunnable = false;
 
@@ -91,7 +91,7 @@ describe('282. aq7.js', function() {
     await testsUtil.dropAQtestUser(AQ_USER);
   }); // after
 
-  it('282.1 JSON type in enqOne/deqOne', async () => {
+  it('283.1 JSON type in enqOne/deqOne', async () => {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -113,7 +113,7 @@ describe('282. aq7.js', function() {
     assert.strictEqual(msg.payload.empCity, "City");
   });
 
-  it('282.2 JSON type in enqMany/deqMany', async () => {
+  it('283.2 JSON type in enqMany/deqMany', async () => {
     const queue3 = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON });
 
@@ -147,7 +147,7 @@ describe('282. aq7.js', function() {
     assert.equal(msgs[2].payload.empId, 103);
   });
 
-  it('282.3 Map javascript object directly into JSON', async () => {
+  it('283.3 Map javascript object directly into JSON', async () => {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -171,7 +171,7 @@ describe('282. aq7.js', function() {
     assert.equal (msg.payload.empCity, "City");
   });
 
-  it('282.4 Boolean and null value', async function() {
+  it('283.4 Boolean and null value', async function() {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -195,7 +195,7 @@ describe('282. aq7.js', function() {
     assert.equal (msg.payload.empCity, true);
   });
 
-  it('282.5 enqOne and deqOne Json val as array type', async function() {
+  it('283.5 enqOne and deqOne Json val as array type', async function() {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -213,7 +213,7 @@ describe('282. aq7.js', function() {
     assert.deepEqual (msg.payload.employees, [ "Employee1", "Employee2", "Employee3" ]);
   });
 
-  it('282.6 enqMany() with Json val as array type', async function() {
+  it('283.6 enqMany() with Json val as array type', async function() {
     const queue3 = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON });
 
@@ -242,7 +242,7 @@ describe('282. aq7.js', function() {
     assert.deepEqual(msgs[2].payload.empName3, ["Employee #3", 103]);
   });
 
-  it('282.7 enqOne and deqOne Json val as object type', async function() {
+  it('283.7 enqOne and deqOne Json val as object type', async function() {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -260,7 +260,7 @@ describe('282. aq7.js', function() {
     assert.deepEqual (msg.payload.employee, { "name":"Employee1", "age":30, "city":"New City" });
   });
 
-  it('282.8 enqMany() with Json val as object type', async function() {
+  it('283.8 enqMany() with Json val as object type', async function() {
     const queue3 = await conn.getQueue (objQueueName,
       {payloadType: oracledb.DB_TYPE_JSON});
 
@@ -289,7 +289,7 @@ describe('282. aq7.js', function() {
     assert.deepEqual(msgs[2].payload.empDetails3, { "name":"Employee3", "age":28, "city":"New Land" });
   });
 
-  it('282.9 enqOne and deqOne CLOB value into a JSON key ', async function() {
+  it('283.9 enqOne and deqOne CLOB value into a JSON key ', async function() {
     const inFileName = './test/clobexample.txt';
     const jsonDoc = {
       employees: [ "Employee1", "Employee2", "Employee3" ],
