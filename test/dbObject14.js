@@ -46,7 +46,7 @@ describe('213. dbObject14.js', () => {
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
 
-    let plsql = `
+    let sql = `
       CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
         shirtnumber NUMBER,
         zipcode     NUMBER(12,0),
@@ -55,29 +55,23 @@ describe('213. dbObject14.js', () => {
         name        VARCHAR2(20)
       );
     `;
-    await conn.execute(plsql);
+    await testsUtil.createType(conn, PLAYER_T, sql);
 
-    plsql = `
+    sql = `
       CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
     `;
-    await conn.execute(plsql);
+    await testsUtil.createType(conn, TEAM_T, sql);
 
-    const sql = `
+    sql = `
       CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
     `;
-    plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
   }); // before()
 
   after(async () => {
-    let sql = `DROP TABLE ${TABLE} PURGE`;
-    await conn.execute(sql);
-
-    sql = `DROP TYPE ${TEAM_T} FORCE`;
-    await conn.execute(sql);
-
-    sql = `DROP TYPE ${PLAYER_T} FORCE`;
-    await conn.execute(sql);
+    await testsUtil.dropTable(conn, TABLE);
+    await testsUtil.dropType(conn, TEAM_T);
+    await testsUtil.dropType(conn, PLAYER_T);
 
     await conn.close();
   }); // after()
@@ -91,10 +85,24 @@ describe('213. dbObject14.js', () => {
       const tempDate = new Date(date.getTime());
       return tempDate;
     };
-    // Insert with explicit constructor
-    const hockeyPlayers = [
+
+    // Insert with explicit constructor and wrong value 1 for a type VARCHAR2(20)
+    let hockeyPlayers = [
+      { SHIRTNUMBER: 11, ZIPCODE: 94016, RATING: 3, JOINDATE: nextDay(), NAME: 1 },
+    ];
+    assert.rejects(
+      () => {
+        new TeamTypeClass(hockeyPlayers);
+      },
+      // NJS-134:/
+    );
+
+    // Insert with explicit constructor with
+    // valid values and a null
+    hockeyPlayers = [
       {SHIRTNUMBER: 11, ZIPCODE: 94016, RATING: 3, JOINDATE: nextDay(), NAME: 'Elizabeth'},
       {SHIRTNUMBER: 22, ZIPCODE: 94017, RATING: 4, JOINDATE: nextDay(), NAME: 'Frank'},
+      {SHIRTNUMBER: null, ZIPCODE: null, RATING: null, JOINDATE: null, NAME: null},
     ];
     const hockeyTeam = new TeamTypeClass(hockeyPlayers);
 
@@ -138,4 +146,87 @@ describe('213. dbObject14.js', () => {
       assert.strictEqual(result3.rows[1].TEAM[i].NAME, badmintonPlayers[i].NAME);
     }
   }); // 213.1
+});
+
+describe('213.2 Object Collection with BLOB fields', () => {
+  let conn;
+  const TABLE = 'NODB_TAB_BUF_COLLECTION_14_1';
+  const BUF_TYPE = 'NODB_TYP_BUFFER_14_1';
+  const BUF_TYPE_COLLECTION = 'NODB_TYP_BUFFER_COLLECTION_14_1';
+  const TEST_PROC = 'NODB_PROC_14_1';
+
+  before(async function() {
+    if (oracledb.thin) {
+      return this.skip();
+    }
+    conn = await oracledb.getConnection(dbConfig);
+
+    let sql = `
+      CREATE OR REPLACE TYPE ${BUF_TYPE} AS OBJECT (
+        ID BLOB
+      );
+    `;
+    await testsUtil.createType(conn, BUF_TYPE, sql);
+
+    sql = `
+      CREATE OR REPLACE TYPE ${BUF_TYPE_COLLECTION} AS TABLE OF ${BUF_TYPE}`;
+    await testsUtil.createType(conn, BUF_TYPE_COLLECTION, sql);
+
+    sql = `
+      CREATE TABLE ${TABLE} (buff_col ${BUF_TYPE_COLLECTION})
+        NESTED TABLE buff_col STORE AS ${TABLE}_col
+    `;
+    await testsUtil.createTable(conn, TABLE, sql);
+
+    const plsql = `CREATE OR REPLACE PROCEDURE ${TEST_PROC} (buff_coll IN
+        ${BUF_TYPE_COLLECTION})
+        AS
+        BEGIN
+            INSERT INTO ${TABLE} values (buff_coll);
+        END;`;
+    await conn.execute(plsql);
+  }); // before()
+
+  after(async function() {
+    if (conn) {
+      const sql = `DROP PROCEDURE ${TEST_PROC}`;
+      await conn.execute(sql);
+
+      await testsUtil.dropTable(conn, TABLE);
+      await testsUtil.dropType(conn, BUF_TYPE);
+      await testsUtil.dropType(conn, BUF_TYPE_COLLECTION);
+
+      await conn.close();
+    }
+  }); // after()
+
+  it('213.2.1 insert and verify the collection data', async () => {
+    const bufTypeCollectionClass = await conn.getDbObjectClass(BUF_TYPE_COLLECTION);
+    const bufArray = [
+      { ID: Buffer.from('A'.repeat(50000)) },
+      { ID: Buffer.from('B'.repeat(50000)) },
+      { ID: null }
+    ];
+    const bufTypeCollection = new bufTypeCollectionClass(bufArray);
+
+    // insert data into table
+    let sql = `BEGIN ${TEST_PROC}(:buff_collection); END;`;
+    const binds = { buff_collection: bufTypeCollection };
+    let result = await conn.execute(sql, binds);
+
+    // read from the table and verify
+    let lob;
+    let lobData;
+    sql = `select * from ${TABLE}`;
+    result = await conn.execute(sql);
+    for (let i = 0; i < bufArray.length; i++) {
+      lob = result.rows[0][0][i].ID;
+      if (!lob) {
+        lobData = null;
+      } else {
+        lobData = await lob.getData();
+      }
+      assert.deepStrictEqual(bufArray[i].ID, lobData);
+    }
+  });
 });

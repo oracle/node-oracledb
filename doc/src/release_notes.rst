@@ -21,6 +21,9 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Fixed segfault while populating object Collection having BLOB property.
+    `https://node-oracledb.slack.com/archives/CCM8AMSF7/p1694544451676639`--.
+
 #)  Added lock() method on sodaOperation object to disable modification on any
     SODA document. An explicit commit/rollback is required to unlock and
     modify any corresponding SODA document.
