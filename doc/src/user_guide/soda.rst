@@ -223,8 +223,8 @@ Collections can be created like:
     }
 
 This example creates a collection that, by default, allows JSON
-documents to be stored. A non-unique B-tree index is created on the
-``address.city`` path to improve search performance.
+documents to be stored. A non-unique :ref:`B-tree index <sodaindexes>` is
+created on the ``address.city`` path to improve search performance.
 
 If the collection name passed to
 :meth:`sodaDatabase.createCollection()` already exists, it
@@ -244,7 +244,7 @@ metadata.
 
 .. _accessingsodadocuments:
 
-Creating and Accessing SODA documents
+Creating and Accessing SODA Documents
 =====================================
 
 To insert a document into an opened collection, a JavaScript object that
@@ -557,6 +557,137 @@ Some QBE examples are:
 
   See `Overview of QBE Spatial Operators <https://www.oracle.com/pls/topic/
   lookup?ctx=dblatest&id=GUID-12994E27-DA98-40C7-8D4F-84341106F8D9>`__.
+
+.. _sodaindexes:
+
+Creating and Dropping SODA Indexes
+==================================
+
+Indexing can improve the performance of SODA query-by-examples (QBE) or enable
+text searches. An index is defined by a specification, which is a JSON object
+that specifies how particular QBE patterns are to be indexed for quicker
+matching.
+
+Note that a commit should be performed before attempting to create an
+index.
+
+Each index specification is uniquely identified by the ``name`` field. The
+different index types that you can specify are:
+
+- B-tree: Used to speed up query-by-example (QBE)
+  :meth:`sodaOperation.filter()` searches. For this index type, you must
+  specify the ``fields`` field in the index specification.
+
+- GeoSpatial: Used for speeding up QBEs that do GeoJSON queries. For this
+  index type, you must specify the ``spatial`` field in the index
+  specification.
+
+- JSON search: Required for text searches using the ``$contains``
+  operator in QBEs. Also, improves QBE filter operation performance. For this
+  index type, you must not specify the ``fields`` and ``spatial`` fields in
+  the index specification. Note that a B-tree index will perform better for
+  non-text searches.
+
+See `Overview of SODA Indexing <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB>`__.
+
+As an example, if a collection has these documents::
+
+    {"name": "Chris"}
+    {"name": "Venkat"}
+    {"name": "Srinath"}
+
+You must first specify the type of index that you want by creating a SODA
+index specification. For example, to create a B-tree index specification, you
+need to specify the ``fields`` field:
+
+.. code-block:: javascript
+
+    indexSpec = {name: "myIndex", fields: [{path: "name"}]};
+
+Then use that index specification to create the B-tree index using
+:meth:`sodaCollection.createIndex()`:
+
+.. code-block:: javascript
+
+    await collection.createIndex(indexSpec);
+
+This index would improve the performance of QBEs like:
+
+.. code-block:: javascript
+
+    d = await collection.find().filter({name: "Venkat"}).getOne();
+
+To drop a specific index on a SODA collection, use
+:meth:`sodaCollection.dropIndex()`:
+
+.. code-block:: javascript
+
+    await collection.dropIndex("myIndex");
+
+.. _listindexes:
+
+Retrieving All Index Specifications in a Collection
+---------------------------------------------------
+
+You can retrieve all the index specifications defined for the documents in a
+collection using :meth:`sodaCollection.listIndexes()`. For example:
+
+.. code-block:: javascript
+
+    // Create a new SODA collection
+    const collection = await soda.createCollection("mycollection");
+
+    // Create new index specifications
+    const indexArr = [
+      {
+        "name": "HOME_IDX",
+        "fields": [
+          {
+            "path": "home",
+            "datatype": "string",
+            "order": "asc"
+          }
+        ]
+      },
+      {
+        "name": "OFFICE_IDX",
+        "fields": [
+          {
+            "path": "office",
+            "datatype": "string",
+            "order": "asc"
+          }
+        ]
+      }
+    ];
+
+To create new indexes for each of the index specifications in ``IndexArr``:
+
+.. code-block:: javascript
+
+    await collection.createIndex(indexArr[0]);
+    await collection.createIndex(indexArr[1]);
+
+To retrieve all the index specifications in the collection:
+
+.. code-block:: javascript
+
+    // Retrieve list of indexes in a collection
+    const fetchedIndexArr  = await collection.listIndexes();
+
+    //  Sort the index specification names in alphabetical order
+    fetchedIndexArr.sort(function(a, b) {
+      return a.name.localeCompare(b.name);
+    });
+
+    console.log ("fetchIndexArr-0 " + JSON.stringify(fetchedIndexArr[0]));
+    console.log ("fetchIndexArr-1 " + JSON.stringify(fetchedIndexArr[1]));
+
+This prints an output such as::
+
+    fetchIndexArr-0 {"name":"HOME_IDX","schema":"SCOTT","tableName":"MYCOLLECTION","tableSchemaName":"SCOTT","indexNulls":false,"unique":false,"lax":false,"scalarRequired":false,"fields":[{"path":"home","dataType":"VARCHAR2","maxLength":2000,"order":"ASC"}]}
+    fetchIndexArr-1 {"name":"OFFICE_IDX","schema":"SCOTT","tableName":"MYCOLLECTION","tableSchemaName":"SCOTT","indexNulls":false,"unique":false,"lax":false,"scalarRequired":false,"fields":[{"path":"office","dataType":"VARCHAR2","maxLength":2000,"order":"ASC"}]}
 
 .. _sodatextsearches:
 

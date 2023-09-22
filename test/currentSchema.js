@@ -83,14 +83,13 @@ describe('191. currentSchema.js', function() {
   }); // 191.2
 
   it('191.3 Negative - can not set non-existent schema', async () => {
-
+    let conn;
     async function setInvalidSchema() {
-      const conn = await oracledb.getConnection(dbConfig);
+      conn = await oracledb.getConnection(dbConfig);
 
       const schema = "foo";
       conn.currentSchema = schema;
-
-      await conn.close();
+      await conn.execute('SELECT 1 FROM DUAL');
     }
 
     await assert.rejects(
@@ -100,6 +99,7 @@ describe('191. currentSchema.js', function() {
     // ORA-01435: user does not exist
     // ORA-28726: set current schema operation failed
 
+    await conn.close();
   }); // 191.3
 
 });

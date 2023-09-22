@@ -94,6 +94,14 @@ The properties of a DbObject object are listed below.
     This read-only property is a string which identifies the name of the
     Oracle Database object or collection.
 
+.. attribute:: dbObject.packageName
+
+    .. versionadded:: 6.2
+
+    This read-only property is a string which identifies the name of the
+    package, if the type refers to a PL/SQL type. Otherwise, it returns
+    *undefined*.
+
 .. attribute:: dbObject.schema
 
     This read-only property is a string which identifies the schema owning

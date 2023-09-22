@@ -10,6 +10,12 @@ For deprecated and desupported features, see :ref:`Deprecations and desupported 
 node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...v6.2.0>`__ (TBD)
 ------------------------------------------------------------------------------------------------
 
+Common Changes
+++++++++++++++
+
+#)  Added :attr:`~dbObject.packageName` property to
+    :ref:`DbObject Class<dbobjectclass>`.
+
 Thin Mode Changes
 ++++++++++++++++++
 
@@ -34,8 +40,6 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Added ``packageName`` attribute to :ref:`DbObject Class<dbobjectclass>`.
-
 #)  Added new property :ref:`binaryDir <odbinitoracleclientattrsopts>` to the
     options passed to :meth:`~oracledb.initOracleClient()` which indicates the
     name of the directory that contains the node-oracledb :ref:`Thick mode
@@ -46,8 +50,8 @@ Thick Mode Changes
     property. See `node-oracledb public Slack channel
     <https://node-oracledb.slack.com/ archives/CCM8AMSF7/p1694544451676639>`__.
 
-#)  Added ``listIndexes()`` method to fetch all the current indexes from
-    a SODA collection.
+#)  Added :meth:`sodaCollection.listIndexes()` method to fetch all the current
+    indexes from a SODA collection.
 
 #)  Added :meth:`sodaOperation.lock()` method to disable modification of SODA
     documents by other connections.

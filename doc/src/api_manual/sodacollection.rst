@@ -52,50 +52,17 @@ SodaCollection Methods
 
         promise = createIndex(Object indexSpec);
 
-    Creates an index on a SODA collection, to improve the performance of
-    SODA query-by-examples (QBE) or enable text searches. An index is
-    defined by a specification, which is a JSON object that specifies how
-    particular QBE patterns are to be indexed for quicker matching.
+    Creates an index on a SODA collection, to improve the performance of SODA
+    query-by-examples (QBE) or enable text searches. See :ref:`sodaindexes`
+    for information on indexing.
 
     Note that a commit should be performed before attempting to create an
     index.
-
-    Different index types can be used:
-
-    - B-tree: used to speed up query-by-example (QBE)
-      :meth:`sodaOperation.filter()` searches.
-    - JSON search: required for text searches using the ``$contains``
-      operator in QBEs. Also improves QBE filter operation performance.
-      Note a B-tree index will perform better for non-text searches.
-    - GeoSpatial: for speeding up QBEs that do GeoJSON queries.
 
     If :attr:`oracledb.autoCommit` is *true*, and ``createIndex()`` succeeds,
     then any open user transaction is committed.
     Note SODA DDL operations do not commit an open transaction the way that
     SQL always does for DDL statements.
-
-    See `Overview of SODA
-    Indexing <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
-    4848E6A0-58A7-44FD-8D6D-A033D0CCF9CB>`__.
-
-    As an example, if a collection has these documents::
-
-        {"name": "Chris"}
-        {"name": "Venkat"}
-        {"name": "Srinath"}
-
-    Then a B-tree index could be created with:
-
-    .. code-block:: javascript
-
-        indexSpec = {name: "myIndex", fields: [{path: "name"}]};
-        await collection.createIndex(indexSpec);
-
-    This index would improve the performance of QBEs like:
-
-    .. code-block:: javascript
-
-        d = await collection.find().filter({name: "Venkat"}).getOne();
 
     The parameters of the ``sodaCollection.createIndex()`` method are:
 
@@ -139,6 +106,8 @@ SodaCollection Methods
           - Description
         * - Error ``error``
           - If ``createIndex()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
+
+    See :ref:`sodaindexes` for more information.
 
 .. method:: sodaCollection.drop()
 
@@ -276,6 +245,8 @@ SodaCollection Methods
         * - Object ``result``
           - If dropping the index succeeded, ``dropped`` will be *true*. If no index was found, ``dropped`` will be *false*.
 
+    See :ref:`sodaindexes` for an example.
+
 .. method:: sodaCollection.find()
 
     .. versionadded:: 3.0
@@ -301,6 +272,46 @@ SodaCollection Methods
 
     See :ref:`Simple Oracle Document Access (SODA) <sodaoverview>` for more
     examples.
+
+.. method:: sodaCollection.listIndexes()
+
+    .. versionadded:: 6.2
+
+    **Promise:**::
+
+        promise = listIndexes();
+
+    Retrieves all the indexes from a SODA collection. This method returns an
+    array of objects that contains the index specifications.
+
+    This method requires Oracle Client 21.3 or later (or Oracle Client 19 from
+    19.13).
+
+    **Callback:**
+
+    If you are using the callback programming style::
+
+        listIndexes(function(Error error, Array listIndexes){});
+
+    The parameters of the callback function
+    ``function(Error error, Array listIndexes)`` are:
+
+    .. list-table-with-summary::
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 15 30
+        :summary: The first column displays the callback function parameter.
+          The second column displays the description of the parameter.
+
+        * - Callback Function Parameter
+          - Description
+        * - Error ``error``
+          - If ``listIndexes()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
+        * - Array ``listIndexes``
+          - An array of objects, each containing the index specifications of the SODA collection.
+
+    See :ref:`Retrieving All Index Specifications <listindexes>` for an example.
 
 .. _sodaoperationclass:
 
@@ -481,8 +492,8 @@ with the key “c” is matched.
     If this method is specified in conjunction with a write operation, then
     this method is ignored.
 
-    This method is only supported in Oracle Client 21.3 and Oracle Client
-    19.11 (or later).
+    This method requires Oracle Client 21.3 or later (or Oracle Client 19 from
+    19.11).
 
 .. method:: sodaOperation.skip()
 
