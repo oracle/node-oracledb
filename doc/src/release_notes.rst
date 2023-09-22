@@ -21,12 +21,15 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Fixed segfault while populating object Collection having BLOB property.
-    `https://node-oracledb.slack.com/archives/CCM8AMSF7/p1694544451676639`--.
+#)  Fixed bug where a segmentation fault (segfault) occurred while populating
+    object Collection having BLOB property. See
+    `node-oracledb public Slack channel <https://node-oracledb.slack.com/
+    archives/CCM8AMSF7/p1694544451676639>`__.
 
-#)  Added lock() method on sodaOperation object to disable modification on any
-    SODA document. An explicit commit/rollback is required to unlock and
-    modify any corresponding SODA document.
+#)  Added :meth:`sodaOperation.lock()` method on
+    :ref:`SodaOperation <sodaoperationclass>` object to disable modification
+    on any SODA document. An explicit commit or rollback is required to unlock
+    and modify any corresponding SODA document.
 
 #)  Fixed bug that throws an 'ORA-21525' error with dbObjects having one or
     more 'Number' attributes of precision less than or equal to 18 and scale

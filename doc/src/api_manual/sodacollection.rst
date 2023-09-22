@@ -451,6 +451,39 @@ with the key “c” is matched.
     The ``limit()`` method cannot be used in conjunction with
     :meth:`~sodaOperation.count()`.
 
+.. method:: sodaOperation.lock()
+
+    .. versionadded:: 6.2
+
+    .. code-block:: javascript
+
+        lock()
+
+    Locks the documents fetched from the collection.
+
+    Using ``lock()`` allows for pessimistic locking, that is, only the current
+    user that performed the lock can modify the documents in the collection.
+    Other users can only perform operations on these documents once they are
+    unlocked. The functionality of this method is equivalent to the
+    ``SELECT FOR UPDATE`` clause.
+
+    The documents can be unlocked with an explicit call to
+    :meth:`~connection.commit()` or :meth:`~connection.rollback()` on the
+    connection. Ensure that the :attr:`oracledb.autoCommit` is
+    set to *false* for the connection. Otherwise, the documents will be
+    unlocked immediately after the operation is complete.
+
+    This method should only be used with read operations (other than
+    :meth:`~sodaOperation.count()`), and should not be used in conjunction
+    with non-terminal methods :meth:`~sodaOperation.skip()` and
+    :meth:`~sodaOperation.limit()`.
+
+    If this method is specified in conjunction with a write operation, then
+    this method is ignored.
+
+    This method is only supported in Oracle Client 21.3 and Oracle Client
+    19.11 (or later).
+
 .. method:: sodaOperation.skip()
 
     .. versionadded:: 3.0

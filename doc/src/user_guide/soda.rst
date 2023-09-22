@@ -119,6 +119,7 @@ Note:
 - When :attr:`oracledb.autoCommit` is *true*,
   most SODA methods will issue a commit before successful return.
 - SODA provides optimistic locking, see :meth:`sodaOperation.version()`.
+- SODA provides pessimistic locking, see :meth:`sodaOperation.lock()`.
 - When mixing SODA and relational access, any commit or rollback on the
   connection will affect all work.
 
@@ -396,6 +397,21 @@ Other examples of chained read and write operations include:
   .. code-block:: javascript
 
     const n = collection.find().count();
+
+- To lock the documents in a collection:
+
+  .. code-block:: javascript
+
+    collection.find().lock();
+
+  Using :meth:`~sodaOperation.lock()` allows pessimistic locking, so that the
+  :meth:`~sodaCollection.find()` terminal method does not allow anyone else to
+  modify the documents in the collection other than the current user.
+
+  After all the documents have been modified, explicitly call
+  :meth:`~connection.commit()` in your application to unlock the documents.
+  Also, an explicit call to :meth:`~connection.rollback()` will unlock the
+  documents in the collection.
 
 - When using :meth:`~sodaOperation.getCursor()` and
   :meth:`~sodaOperation.getDocuments()` to return a
