@@ -268,6 +268,7 @@ spec:
   - test/aq7.js
   - test/errorUrl.js
   - test/aq8.js
-  - test/embedded_oid.js
+  - test/listIndexes.js
   - test/sodaOpLock.js
+  - test/embedded_oid.js
   - test/sqlParser.js

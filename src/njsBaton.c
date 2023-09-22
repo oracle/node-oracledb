@@ -228,6 +228,11 @@ void njsBaton_free(njsBaton *baton, napi_env env)
                 baton->sodaCollNames);
         NJS_FREE_AND_CLEAR(baton->sodaCollNames);
     }
+    if (baton->indexList) {
+        dpiContext_freeStringList(baton->globals->context, baton->indexList);
+        NJS_FREE_AND_CLEAR(baton->indexList);
+    }
+
     if (!baton->jsBufferRef) {
         NJS_FREE_AND_CLEAR(baton->bufferPtr);
     }

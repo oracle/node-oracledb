@@ -5502,6 +5502,14 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         285.3.3 msgId in enqOne/deqOne in reverse order
         285.3.4 msgId in enqOne/deqOne in non-sequential order
 
+286. listIndexes.js
+    286.1 listIndexes before creating any indexes
+    286.2 listIndexes after 1-createIndex
+    286.3 listIndexes after 2-createIndex
+    286.4 listIndexes after 2-createIndex 1-drop index
+    286.5 listIndexes after 2-createIndex 2-drop index
+    286.6 listIndexes after 3-createIndex
+
 287. sodaOperationsLock.js
     287.1 lock on sodaOperations
 

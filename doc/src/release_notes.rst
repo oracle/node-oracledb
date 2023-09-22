@@ -28,6 +28,9 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Implemented enhancement to support listIndexes() method to fetch all the
+    current indexes from the SODA collection.
+
 #)  Fixed bug where a segmentation fault (segfault) occurred while populating
     object Collection having BLOB property. See
     `node-oracledb public Slack channel <https://node-oracledb.slack.com/
@@ -37,6 +40,7 @@ Thick Mode Changes
     :ref:`SodaOperation <sodaoperationclass>` object to disable modification
     on any SODA document. An explicit commit or rollback is required to unlock
     and modify any corresponding SODA document.
+
 
 #)  Fixed bug that throws an 'ORA-21525' error with dbObjects having one or
     more 'Number' attributes of precision less than or equal to 18 and scale

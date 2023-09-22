@@ -44,6 +44,7 @@ NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_insertMany);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_insertManyAndGet);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_insertOne);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_insertOneAndGet);
+NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_listIndexes);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_save);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_saveAndGet);
 NJS_NAPI_METHOD_DECL_ASYNC(njsSodaCollection_truncate);
@@ -57,6 +58,7 @@ static NJS_ASYNC_METHOD(njsSodaCollection_insertManyAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_insertManyAndGetAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_insertOneAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_insertOneAndGetAsync);
+static NJS_ASYNC_METHOD(njsSodaCollection_listIndexesAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_saveAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_saveAndGetAsync);
 static NJS_ASYNC_METHOD(njsSodaCollection_truncateAsync);
@@ -67,6 +69,7 @@ static NJS_ASYNC_POST_METHOD(njsSodaCollection_dropIndexPostAsync);
 static NJS_ASYNC_POST_METHOD(njsSodaCollection_getDataGuidePostAsync);
 static NJS_ASYNC_POST_METHOD(njsSodaCollection_insertManyAndGetPostAsync);
 static NJS_ASYNC_POST_METHOD(njsSodaCollection_insertOneAndGetPostAsync);
+static NJS_ASYNC_POST_METHOD(njsSodaCollection_listIndexesPostAsync);
 static NJS_ASYNC_POST_METHOD(njsSodaCollection_saveAndGetPostAsync);
 
 // processing arguments methods
@@ -98,6 +101,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "getMetaData", NULL, njsSodaCollection_getMetaData, NULL, NULL, NULL,
             napi_default, NULL },
     { "getName", NULL, njsSodaCollection_getName, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "listIndexes", NULL, njsSodaCollection_listIndexes, NULL, NULL, NULL,
             napi_default, NULL },
     { "save", NULL, njsSodaCollection_save, NULL, NULL, NULL, napi_default,
             NULL },
@@ -631,6 +636,64 @@ static bool njsSodaCollection_insertOneAndGetPostAsync(njsBaton *baton,
     baton->dpiSodaDocHandle = NULL;
     return true;
 }
+
+
+
+//-----------------------------------------------------------------------------
+// njsSodaCollection_listIndexes()
+//   Obtains a list of indexes from the collection and returns.  Each index
+//   is an object
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_ASYNC(njsSodaCollection_listIndexes, 0, NULL)
+{
+    return njsBaton_queueWork(baton, env, "listIndexes",
+            njsSodaCollection_listIndexesAsync,
+            njsSodaCollection_listIndexesPostAsync, returnValue);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsSodaCollection_listIndexesAsync()
+//   Worker function for njsSodaCollection_listIndexes().
+//-----------------------------------------------------------------------------
+static bool njsSodaCollection_listIndexesAsync(njsBaton *baton)
+{
+    njsSodaCollection *coll = (njsSodaCollection*) baton->callingInstance;
+
+    baton->indexList = calloc(1, sizeof(dpiStringList));
+    if (!baton->indexList)
+        return njsBaton_setErrorInsufficientMemory(baton);
+    if (dpiSodaColl_listIndexes(coll->handle, DPI_SODA_FLAGS_DEFAULT,
+            baton->indexList) < 0)  {
+        return njsBaton_setErrorDPI(baton);
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsSodaCollection_listIndexesPostAsync()
+//  Defines the value returned to JS
+//-----------------------------------------------------------------------------
+static bool njsSodaCollection_listIndexesPostAsync(njsBaton *baton,
+        napi_env env, napi_value *result)
+{
+    napi_value temp;
+    uint32_t   i;
+
+    NJS_CHECK_NAPI(env, napi_create_array_with_length(env,
+            baton->indexList->numStrings, result))
+    for (i = 0; i < baton->indexList->numStrings; i++) {
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+            baton->indexList->strings[i],
+            baton->indexList->stringLengths[i], &temp))
+        NJS_CHECK_NAPI(env, napi_set_element(env, *result, i, temp))
+    }
+
+    return true;
+}
+
+
 
 
 //-----------------------------------------------------------------------------
