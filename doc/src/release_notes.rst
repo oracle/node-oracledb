@@ -30,9 +30,10 @@ Thick Mode Changes
     as 0.
     `Issue #1594 <https://github.com/oracle/node-oracledb/issues/1594>`__.
 
-#)  Added new property ``binaryDir`` to the options passed to
-    :meth:`~oracledb.initOracleClient()` which indicates the name of the
-    directory that contains the node-oracledb Thick mode binary module.
+#)  Added new property :ref:`binaryDir <odbinitoracleclientattrsopts>` to the
+    options passed to :meth:`~oracledb.initOracleClient()` which indicates the
+    name of the directory that contains the node-oracledb Thick mode binary
+    module.
     `PR #1602 <https://github.com/oracle/node-oracledb/pull/1602>`__. (Leman)
 
 node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (30 Aug 2023)
