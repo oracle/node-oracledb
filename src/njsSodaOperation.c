@@ -391,6 +391,7 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
         napi_value options)
 {
     dpiVersionInfo versionInfo;
+    bool lock;
 
     // allocate memory for ODPI-C operations structure
     baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));
@@ -433,6 +434,8 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
     if (!njsUtils_getNamedPropertyString(env, options, "hint",
             &baton->hint, &baton->hintLength))
         return false;
+    if (!njsUtils_getNamedPropertyBool(env, options, "lock", &lock))
+        return false;
 
     // populate SODDA operations options structure
     baton->sodaOperOptions->filter = baton->filter;
@@ -446,6 +449,7 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
     baton->sodaOperOptions->keyLengths = baton->keysLengths;
     baton->sodaOperOptions->hint = baton->hint;
     baton->sodaOperOptions->hintLength = (uint32_t) baton->hintLength;
+    baton->sodaOperOptions->lock = (int) lock;
 
     return true;
 }
