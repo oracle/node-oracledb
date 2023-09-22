@@ -18,6 +18,13 @@ Thin Mode Changes
     and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__.
     (Daniel Rodrigues)
 
+#) Improved statement bind variable placeholder parser performance, handle
+    statements which use the `Alternative Quoting Mechanism
+    <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1824CBAA-6E16-4921-B2A6-112FB02248DA>`__
+    ('Q' strings), and fix some issues identifying bind variable placeholders
+    in embedded quotes and in JSON syntax.
+    See `Issue #1605 <https://github.com/oracle/node-oracledb/issues/1605>`__.
+
 Thick Mode Changes
 ++++++++++++++++++
 

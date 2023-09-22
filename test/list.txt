@@ -5524,3 +5524,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         286.2.3 limit() operation to 1 doc
         286.2.4 remove() previously retrieved key
         286.2.5 remove() with filter, No key present in the input doc
+
+288. sqlParser.js
+    288.1 parse SQL containing json_object()
+    288.2 bind variables between quoted string
+    288.3 single line comment
+    288.4 constant string
+    288.5 multiple division operation
+    288.6 SQL statement starting with parentheses
+    288.7 statement containing simple strings
+    288.8 binds between comments
+    288.9 non-ascii character in the bind name
+    288.10 apostrophe in single line comment
