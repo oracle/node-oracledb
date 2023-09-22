@@ -702,7 +702,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov s
     `);
 
-      assert.strictEqual(result.rows[0][0].A1, 1);
+      assert.strictEqual(result.rows[0][0].a1, 1);
       await connection.execute('DROP TABLE a PURGE');
     });
   });

@@ -32,7 +32,6 @@
 'use strict';
 
 const oracledb  = require('oracledb');
-const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
@@ -74,9 +73,8 @@ describe('287. sodaOperationsLock.js', () => {
     }
   });
 
-  it('287.1 lock on sodaOperations', async() => {
-       coll.find().lock();
+  it('287.1 lock on sodaOperations', () => {
+    coll.find().lock();
   });
-  
 
 });

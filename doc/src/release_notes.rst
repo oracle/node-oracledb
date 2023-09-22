@@ -13,45 +13,41 @@ node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...
 Thin Mode Changes
 ++++++++++++++++++
 
-#)  Ensure that the database port is passed as a number to the  network connection.
+#)  Ensure that the database port is passed as a number to the network connection.
     See `Issue #1600 <https://github.com/oracle/node-oracledb/issues/1600>`__
-    and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__.
-    (Daniel Rodrigues)
+    and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__
+    (Daniel Rodrigues).
 
-#) Improved statement bind variable placeholder parser performance, handle
+#)  Improved statement bind variable placeholder parser performance, handle
     statements which use the `Alternative Quoting Mechanism
     <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1824CBAA-6E16-4921-B2A6-112FB02248DA>`__
     ('Q' strings), and fix some issues identifying bind variable placeholders
     in embedded quotes and in JSON syntax.
-    See `Issue #1605 <https://github.com/oracle/node-oracledb/issues/1605>`__.
+    `Issue #1605 <https://github.com/oracle/node-oracledb/issues/1605>`__.
 
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Implemented enhancement to support listIndexes() method to fetch all the
-    current indexes from the SODA collection.
-
-#)  Fixed bug where a segmentation fault (segfault) occurred while populating
-    object Collection having BLOB property. See
-    `node-oracledb public Slack channel <https://node-oracledb.slack.com/
-    archives/CCM8AMSF7/p1694544451676639>`__.
-
-#)  Added :meth:`sodaOperation.lock()` method on
-    :ref:`SodaOperation <sodaoperationclass>` object to disable modification
-    on any SODA document. An explicit commit or rollback is required to unlock
-    and modify any corresponding SODA document.
-
-
-#)  Fixed bug that throws an 'ORA-21525' error with dbObjects having one or
-    more 'Number' attributes of precision less than or equal to 18 and scale
-    as 0.
-    `Issue #1594 <https://github.com/oracle/node-oracledb/issues/1594>`__.
-
 #)  Added new property :ref:`binaryDir <odbinitoracleclientattrsopts>` to the
     options passed to :meth:`~oracledb.initOracleClient()` which indicates the
-    name of the directory that contains the node-oracledb Thick mode binary
-    module.
-    `PR #1602 <https://github.com/oracle/node-oracledb/pull/1602>`__. (Leman)
+    name of the directory that contains the node-oracledb :ref:`Thick mode
+    <enablingthick>` binary module.  `PR #1602
+    <https://github.com/oracle/node-oracledb/pull/1602>`__ (Kwok Chun Man).
+
+#)  Fixed a segfault while populating a collection with a BLOB
+    property. See `node-oracledb public Slack channel
+    <https://node-oracledb.slack.com/ archives/CCM8AMSF7/p1694544451676639>`__.
+
+#)  Added ``listIndexes()`` method to fetch all the current indexes from
+    a SODA collection.
+
+#)  Added :meth:`sodaOperation.lock()` method to disable modification of SODA
+    documents by other connections.
+
+#)  Fixed bug causing an 'ORA-21525' error with :ref:`DbObject Class
+    <dbobjectclass>` objects that have a NUMBER attribute with a scale of 0
+    and precision less than, or equal, to 18.  `Issue #1594
+    <https://github.com/oracle/node-oracledb/issues/1594>`__.
 
 node-oracledb `v6.1.0 <https://github.com/oracle/node-oracledb/compare/v6.0.3...v6.1.0>`__ (30 Aug 2023)
 --------------------------------------------------------------------------------------------------------

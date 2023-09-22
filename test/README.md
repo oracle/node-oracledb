@@ -114,6 +114,10 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_DRCP` provides an option for skipping test run when DRCP is enabled. Setting this environment variable to `true` will skip certain test case run due to DRCP restrictions.
 
+* `NODE_ORACLEDB_WALLET_LOCATION` provides the local directory name for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases optionally. The wallet location can also be provided as a part of the database connect string.
+
+* `NODE_ORACLEDB_WALLET_PASSWORD` provides the password for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases.
+
 Note: the test suite requires the schema to have these privileges: CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER, and CREATE TYPE.
 

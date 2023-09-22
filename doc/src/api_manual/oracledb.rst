@@ -3162,9 +3162,9 @@ Oracledb Methods
         * - Attribute
           - Description
         * - ``binaryDir``
-          - This specifies the directory that contains the node-oracledb Thick mode binary module.
+          - This directory is added to the start of the default search path used by :meth:`~oracledb.initOracleClient()` to load the node-oracledb Thick mode binary module.
 
-            If ``binaryDir`` is not specified, then :meth:`~oracledb.initOracleClient()` looks for the Thick mode binary in either the ``build/Release`` or ``build/Debug`` sub directories under the node-oracledb home directory.
+            The default search path includes ``node_modules/oracledb/build/Release`` and ``node_modules/oracledb/build/Debug``.
 
             .. versionadded:: 6.2
         * - ``configDir``
