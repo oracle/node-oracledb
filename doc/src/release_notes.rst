@@ -31,6 +31,8 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Added ``packageName`` attribute to :ref:`DbObject Class<dbobjectclass>`.
+
 #)  Added new property :ref:`binaryDir <odbinitoracleclientattrsopts>` to the
     options passed to :meth:`~oracledb.initOracleClient()` which indicates the
     name of the directory that contains the node-oracledb :ref:`Thick mode

@@ -89,12 +89,16 @@ describe('211. dbObject12.js', function() {
 
     // Using the constructor to create an object
     const obj1 = new RecTypeClass({ NAME: 'Ship', POS: 12 });
+    assert.strictEqual(obj1.packageName, PKG);
+
     let binds = {
       inbv: obj1,
       outbv: { type: RecTypeClass, dir: oracledb.BIND_OUT }
     };
     const result1 = await conn.execute(CALL, binds);
     let out = result1.outBinds.outbv;
+    const expect = `[object ${dbConfig.user.toUpperCase()}.${PKG}.${TYPE}]`;
+    assert.strictEqual(out.toString(), expect);
     assert.strictEqual(out.NAME, obj1.NAME);
     assert.strictEqual(out.POS, (obj1.POS * 2));
 

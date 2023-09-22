@@ -393,7 +393,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getPrevIndex, 1, &njsClassDefDbObject)
 bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
         napi_env env, napi_value *cls, njsDbObjectType **objectType)
 {
-    napi_value fn, args[2], callingObj;
+    napi_value fn, args[3], callingObj;
     njsDbObjectType *tempObjectType;
     dpiObjectTypeInfo info;
 
@@ -406,11 +406,13 @@ bool njsDbObject_getSubClass(njsBaton *baton, dpiObjectType *objectTypeHandle,
             info.schemaLength, &args[0]))
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, info.name,
             info.nameLength, &args[1]))
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, info.packageName,
+            info.packageNameLength, &args[2]))
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &callingObj))
     NJS_CHECK_NAPI(env, napi_get_named_property(env, callingObj,
             "_getDbObjectType", &fn))
-    NJS_CHECK_NAPI(env, napi_call_function(env, callingObj, fn, 2, args, cls))
+    NJS_CHECK_NAPI(env, napi_call_function(env, callingObj, fn, 3, args, cls))
 
     // if it has already been wrapped, it has been fully populated and there is
     // no need to do anything further
