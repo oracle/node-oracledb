@@ -147,7 +147,7 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[2].payload.empId, 103);
   });
 
-  it('283.3 Map javascript object directly into JSON', async () => {
+  it('283.3 Map Javascript object directly into JSON', async () => {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -171,7 +171,7 @@ describe('283. aq7.js', function() {
     assert.equal (msg.payload.empCity, "City");
   });
 
-  it('283.4 Boolean and null value', async function() {
+  it('283.4 Null and Boolean value in JSON', async function() {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -195,7 +195,7 @@ describe('283. aq7.js', function() {
     assert.equal (msg.payload.empCity, true);
   });
 
-  it('283.5 enqOne and deqOne Json val as array type', async function() {
+  it('283.5 enqOne and deqOne JSON val as array type', async function() {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -210,10 +210,10 @@ describe('283. aq7.js', function() {
       {payloadType: oracledb.DB_TYPE_JSON});
     const msg = await queue2.deqOne ();
     await conn.commit ();
-    assert.deepEqual (msg.payload.employees, [ "Employee1", "Employee2", "Employee3" ]);
+    assert.deepStrictEqual (msg.payload.employees, [ "Employee1", "Employee2", "Employee3" ]);
   });
 
-  it('283.6 enqMany() with Json val as array type', async function() {
+  it('283.6 enqMany and deqMany with JSON val as array type', async function() {
     const queue3 = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON });
 
@@ -237,12 +237,12 @@ describe('283. aq7.js', function() {
 
     const msgs = await queue4.deqMany(3); // get at most 3 messages
 
-    assert.deepEqual(msgs[0].payload.empName1, ["Employee #1", 101]);
-    assert.deepEqual(msgs[1].payload.empName2, ["Employee #2", 102]);
-    assert.deepEqual(msgs[2].payload.empName3, ["Employee #3", 103]);
+    assert.deepStrictEqual(msgs[0].payload.empName1, ["Employee #1", 101]);
+    assert.deepStrictEqual(msgs[1].payload.empName2, ["Employee #2", 102]);
+    assert.deepStrictEqual(msgs[2].payload.empName3, ["Employee #3", 103]);
   });
 
-  it('283.7 enqOne and deqOne Json val as object type', async function() {
+  it('283.7 enqOne and deqOne JSON val as object type', async function() {
     const queue = await conn.getQueue (objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -257,10 +257,10 @@ describe('283. aq7.js', function() {
       {payloadType: oracledb.DB_TYPE_JSON});
     const msg = await queue2.deqOne ();
     await conn.commit ();
-    assert.deepEqual (msg.payload.employee, { "name":"Employee1", "age":30, "city":"New City" });
+    assert.deepStrictEqual (msg.payload.employee, { "name":"Employee1", "age":30, "city":"New City" });
   });
 
-  it('283.8 enqMany() with Json val as object type', async function() {
+  it('283.8 enqMany and deqMany with JSON val as object type', async function() {
     const queue3 = await conn.getQueue (objQueueName,
       {payloadType: oracledb.DB_TYPE_JSON});
 
@@ -284,9 +284,9 @@ describe('283. aq7.js', function() {
 
     const msgs = await queue4.deqMany(3); // get at most 3 messages
 
-    assert.deepEqual(msgs[0].payload.empDetails1, { "name":"Employee1", "age":24, "city":"New City" });
-    assert.deepEqual(msgs[1].payload.empDetails2, { "name":"Employee2", "age":30, "city":"New York" });
-    assert.deepEqual(msgs[2].payload.empDetails3, { "name":"Employee3", "age":28, "city":"New Land" });
+    assert.deepStrictEqual(msgs[0].payload.empDetails1, { "name":"Employee1", "age":24, "city":"New City" });
+    assert.deepStrictEqual(msgs[1].payload.empDetails2, { "name":"Employee2", "age":30, "city":"New York" });
+    assert.deepStrictEqual(msgs[2].payload.empDetails3, { "name":"Employee3", "age":28, "city":"New Land" });
   });
 
   it('283.9 enqOne and deqOne CLOB value into a JSON key ', async function() {
@@ -311,6 +311,6 @@ describe('283. aq7.js', function() {
     const msg = await queue2.deqOne ();
     await conn.commit ();
 
-    assert.deepEqual (msg.payload, jsonDoc);
+    assert.deepStrictEqual (msg.payload, jsonDoc);
   });
 });

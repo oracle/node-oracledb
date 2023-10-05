@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   281. dbObject20.js
+ *   290. dbObject20.js
  *
  * DESCRIPTION
  *   Test the Oracle data type Object on NCHAR, NVARCHAR and RAW.
@@ -37,7 +37,7 @@ const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 const assist   = require('./dataTypeAssist.js');
 
-describe('281. dbObject20.js', () => {
+describe('290. dbObject20.js', () => {
   let conn;
   const TABLE = 'NODB_TAB_OBJ';
 
@@ -71,7 +71,7 @@ describe('281. dbObject20.js', () => {
          nodb_getDataCursor2(p_cur2);
        end;`;
 
-  describe('281.1 db Object tests with NCHAR datatype', () => {
+  describe('290.1 db Object tests with NCHAR datatype', () => {
     const TYPE = 'NODB_TYP_OBJ_1';
     before(async () => {
       conn = await oracledb.getConnection(dbConfig);
@@ -106,7 +106,7 @@ describe('281. dbObject20.js', () => {
       await conn.close();
     }); // after()
 
-    it('281.1.1 insert an object with numeric/string values in NCHAR datatype', async () => {
+    it('290.1.1 insert an object with numeric/string values in NCHAR datatype', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 201,
@@ -126,9 +126,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'].trim(), objData.NAME);
-    }); // 281.1.1
+    }); // 290.1.1
 
-    it('281.1.2 insert an object with null string values', async () => {
+    it('290.1.2 insert an object with null string values', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 203,
@@ -148,9 +148,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'], null);
-    }); // 281.1.2
+    }); // 290.1.2
 
-    it('281.1.3 insert an object with undefined string values', async () => {
+    it('290.1.3 insert an object with undefined string values', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 205,
@@ -170,9 +170,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'], null);
-    }); // 281.1.3
+    }); // 290.1.3
 
-    it('281.1.4 insert an empty object - no attributes', async () => {
+    it('290.1.4 insert an empty object - no attributes', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = { };
       const objClass = await conn.getDbObjectClass(TYPE);
@@ -189,9 +189,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.ifError(result.rows[0][1]['ID']);
       assert.ifError(result.rows[0][1]['NAME']);
-    }); // 281.1.4
+    }); // 290.1.4
 
-    it('281.1.5 insert data via binding by object', async () => {
+    it('290.1.5 insert data via binding by object', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:a, :b)`;
       const objData = {
         ID: 207,
@@ -211,9 +211,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0].NUM, seq);
       assert.strictEqual(result.rows[0].PERSON['ID'], objData.ID);
       assert.strictEqual(result.rows[0].PERSON.NAME.trim(), objData.NAME);
-    }); // 281.1.5
+    }); // 290.1.5
 
-    it('281.1.6 insert multiple rows using executeMany() with inferred data type', async () => {
+    it('290.1.6 insert multiple rows using executeMany() with inferred data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 208;
       const initialSeq = 108;
@@ -254,9 +254,9 @@ describe('281. dbObject20.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.strictEqual(result.rows[j][1].NAME.trim(), objDataArray[j].NAME);
       }
-    }); // 281.1.6
+    }); // 290.1.6
 
-    it('281.1.7 insert multiple rows using executeMany() with explicit data type', async () => {
+    it('290.1.7 insert multiple rows using executeMany() with explicit data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 3000;
       const initialSeq = 300;
@@ -300,9 +300,9 @@ describe('281. dbObject20.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.strictEqual(result.rows[j][1].NAME.trim(), objDataArray[j].NAME);
       }
-    }); // 281.1.7
+    }); // 290.1.7
 
-    it('281.1.8 call procedure with 2 OUT binds of DbObject', async function() {
+    it('290.1.8 call procedure with 2 OUT binds of DbObject', async function() {
 
       const result = await conn.execute(
         `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
@@ -320,10 +320,10 @@ describe('281. dbObject20.js', () => {
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
       result.outBinds.p_cur2.close();
-    }); // 281.1.8
+    }); // 290.1.8
   });
 
-  describe('281.2 db Object tests with NVARCHAR2 datatype', () => {
+  describe('290.2 db Object tests with NVARCHAR2 datatype', () => {
     const TYPE = 'NODB_TYP_OBJ_2';
     before(async () => {
 
@@ -358,7 +358,7 @@ describe('281. dbObject20.js', () => {
       await conn.close();
     }); // after()
 
-    it('281.2.1 insert an object with numeric/string values in NVARCHAR2 datatype', async () => {
+    it('290.2.1 insert an object with numeric/string values in NVARCHAR2 datatype', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 201,
@@ -378,9 +378,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'], objData.NAME);
-    }); // 281.2.1
+    }); // 290.2.1
 
-    it('281.2.2 insert an object with null string values', async () => {
+    it('290.2.2 insert an object with null string values', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 203,
@@ -400,9 +400,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'], null);
-    }); // 281.2.2
+    }); // 290.2.2
 
-    it('281.2.3 insert an object with undefined string values', async () => {
+    it('290.2.3 insert an object with undefined string values', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 205,
@@ -422,9 +422,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'], null);
-    }); // 281.2.3
+    }); // 290.2.3
 
-    it('281.2.4 insert an empty object - no attributes', async () => {
+    it('290.2.4 insert an empty object - no attributes', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = { };
       const objClass = await conn.getDbObjectClass(TYPE);
@@ -441,9 +441,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.ifError(result.rows[0][1]['ID']);
       assert.ifError(result.rows[0][1]['NAME']);
-    }); // 281.2.4
+    }); // 290.2.4
 
-    it('281.2.5 insert data via binding by object', async () => {
+    it('290.2.5 insert data via binding by object', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:a, :b)`;
       const objData = {
         ID: 207,
@@ -463,9 +463,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0].NUM, seq);
       assert.strictEqual(result.rows[0].PERSON['ID'], objData.ID);
       assert.strictEqual(result.rows[0].PERSON.NAME, objData.NAME);
-    }); // 281.2.5
+    }); // 290.2.5
 
-    it('281.2.6 insert multiple rows using executeMany() with inferred data type', async () => {
+    it('290.2.6 insert multiple rows using executeMany() with inferred data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 208;
       const initialSeq = 108;
@@ -506,9 +506,9 @@ describe('281. dbObject20.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.strictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
-    }); // 281.2.6
+    }); // 290.2.6
 
-    it('281.2.7 insert multiple rows using executeMany() with explicit data type', async () => {
+    it('290.2.7 insert multiple rows using executeMany() with explicit data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 3000;
       const initialSeq = 300;
@@ -552,9 +552,9 @@ describe('281. dbObject20.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.strictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
-    }); // 281.2.7
+    }); // 290.2.7
 
-    it('281.2.8 call procedure with 2 OUT binds of DbObject', async function() {
+    it('290.2.8 call procedure with 2 OUT binds of DbObject', async function() {
 
       const result = await conn.execute(
         `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
@@ -572,10 +572,10 @@ describe('281. dbObject20.js', () => {
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
       result.outBinds.p_cur2.close();
-    }); // 281.2.8
+    }); // 290.2.8
   });
 
-  describe('281.3 db Object tests with RAW datatype', () => {
+  describe('290.3 db Object tests with RAW datatype', () => {
     const TYPE = 'NODB_TYP_OBJ_3';
     before(async () => {
 
@@ -611,7 +611,7 @@ describe('281. dbObject20.js', () => {
       await conn.close();
     }); // after()
 
-    it('281.3.1 insert an object with numeric/string values in RAW datatype', async () => {
+    it('290.3.1 insert an object with numeric/string values in RAW datatype', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 201,
@@ -631,9 +631,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.deepEqual(result.rows[0][1]['NAME'], objData.NAME);
-    }); // 281.3.1
+    }); // 290.3.1
 
-    it('281.3.2 insert an object with null string values', async () => {
+    it('290.3.2 insert an object with null string values', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 203,
@@ -653,9 +653,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'], null);
-    }); // 281.3.2
+    }); // 290.3.2
 
-    it('281.3.3 insert an object with undefined string values', async () => {
+    it('290.3.3 insert an object with undefined string values', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 205,
@@ -675,9 +675,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.strictEqual(result.rows[0][1]['NAME'], null);
-    }); // 281.3.3
+    }); // 290.3.3
 
-    it('281.3.4 insert an empty object - no attributes', async () => {
+    it('290.3.4 insert an empty object - no attributes', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = { };
       const objClass = await conn.getDbObjectClass(TYPE);
@@ -694,9 +694,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.ifError(result.rows[0][1]['ID']);
       assert.ifError(result.rows[0][1]['NAME']);
-    }); // 281.3.4
+    }); // 290.3.4
 
-    it('281.3.5 insert data via binding by object', async () => {
+    it('290.3.5 insert data via binding by object', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:a, :b)`;
       const objData = {
         ID: 207,
@@ -716,9 +716,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0].NUM, seq);
       assert.strictEqual(result.rows[0].PERSON['ID'], objData.ID);
       assert.deepEqual(result.rows[0].PERSON.NAME, objData.NAME);
-    }); // 281.3.5
+    }); // 290.3.5
 
-    it('281.3.6 insert multiple rows using executeMany() with inferred data type', async () => {
+    it('290.3.6 insert multiple rows using executeMany() with inferred data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 208;
       const initialSeq = 108;
@@ -759,9 +759,9 @@ describe('281. dbObject20.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.deepEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
-    }); // 281.3.6
+    }); // 290.3.6
 
-    it('281.3.7 insert multiple rows using executeMany() with explicit data type', async () => {
+    it('290.3.7 insert multiple rows using executeMany() with explicit data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 3000;
       const initialSeq = 300;
@@ -805,9 +805,9 @@ describe('281. dbObject20.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.deepEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
-    }); // 281.3.7
+    }); // 290.3.7
 
-    it('281.3.8 call procedure with 2 OUT binds of DbObject', async function() {
+    it('290.3.8 call procedure with 2 OUT binds of DbObject', async function() {
 
       const result = await conn.execute(
         `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
@@ -825,9 +825,9 @@ describe('281. dbObject20.js', () => {
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
       result.outBinds.p_cur2.close();
-    }); // 281.3.8
+    }); // 290.3.8
 
-    it('281.3.9 insert an object with buffer value with size 10', async () => {
+    it('290.3.9 insert an object with buffer value with size 10', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 210,
@@ -847,9 +847,9 @@ describe('281. dbObject20.js', () => {
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
       assert.deepEqual(result.rows[0][1]['NAME'], objData.NAME);
-    }); // 281.3.9
+    }); // 290.3.9
 
-    it('281.3.10 insert an object with buffer value with size 100', async () => {
+    it('290.3.10 insert an object with buffer value with size 100', async () => {
       const sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 211,
@@ -863,6 +863,6 @@ describe('281. dbObject20.js', () => {
         async () => await conn.execute(sql, [seq, testObj]),
         /ORA-21525:|ORA-00910:/ //ORA-21525: attribute number or (collection element at index) %s violated its constraints
       );
-    }); // 281.3.10
+    }); // 290.3.10
   });
 });
