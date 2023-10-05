@@ -272,3 +272,4 @@ spec:
   - test/sodaOpLock.js
   - test/embedded_oid.js
   - test/sqlParser.js
+  - test/dbObject20.js

@@ -30,7 +30,7 @@
  *   to the database.  Production applications should consider using
  *   External Authentication to avoid hard coded credentials.
  *
- *   To create a database user see
+ *   To create a database user, see
  *   https://blogs.oracle.com/sql/post/how-to-create-users-grant-them-privileges-and-remove-them-in-oracle-database
  *
  *   Applications can set the connectString value to an Easy Connect
@@ -46,8 +46,8 @@
  *   Commonly just the host_name and service_name are needed
  *   e.g. "localhost/orclpdb1" or "example.com/XEPDB1"
  *
- *   The Easy Connect syntax was enhanced in Oracle Database 19c to
- *   allow more options, refer to the documentation:
+ *   The Easy Connect syntax supports lots of options. To know more, please
+ *   refer to the latest Oracle documentation on Easy Connect syntax:
  *   https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-B0437826-43C1-49EC-A94D-B650B6A4A6EE
  *
  *   If using a tnsnames.ora file, the file can be in a default
@@ -66,17 +66,10 @@
  *   creating a pool should not be set when externalAuth is true.
  *
  * TROUBLESHOOTING
- *   Errors like:
- *     ORA-12541: TNS:no listener
- *   or
- *     ORA-12154: TNS:could not resolve the connect identifier specified
- *   indicate connectString is invalid.
- *
- *   The error:
- *     ORA-12514: TNS:listener does not currently know of requested in connect descriptor
- *   indicates connectString is invalid.  You are reaching a computer
- *   with Oracle installed but the service name isn't known.
- *   Use 'lsnrctl services' on the database server to find available services
+ *   Refer to the Error Handling section in node-oracledb documentation
+ *   to understand the different types of errors in both the Thin and Thick
+ *   modes of node-oracledb:
+ *   https://node-oracledb.readthedocs.io/en/latest/user_guide/exception_handling.html#errors-in-thin-and-thick-modes
  *
  *****************************************************************************/
 

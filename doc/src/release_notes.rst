@@ -19,6 +19,8 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Internal performance optimizations for network buffer and packet handling
+
 #)  Ensure that the database port is passed as a number to the network connection.
     See `Issue #1600 <https://github.com/oracle/node-oracledb/issues/1600>`__
     and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__

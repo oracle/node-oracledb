@@ -5510,8 +5510,22 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     286.5 listIndexes after 2-createIndex 2-drop index
     286.6 listIndexes after 3-createIndex
 
-287. sodaOperationsLock.js
-    287.1 lock on sodaOperations
+287. sodaOpLock.js
+    287.1 lock on document with multiple connections
+    287.2 lock on fetching a single document
+    287.3 lock on fetching multiple documents
+    287.4 lock on insertOneAndGet()
+    287.5 lock on filter()
+    287.6 lock on key()
+    287.7 lock on hint()
+    287.8 lock on count()
+    287.9 lock on keys().count()
+    287.10 lock on getCursor()
+    287.11 lock on skip().getCursor()
+    287.12 lock on getDocuments()
+    287.13 lock on getOne()
+    287.14 lock on remove()
+    287.15 lock on limit()
 
 288. embedded_oid.js
     288.1 Test embedded oid normal operations
@@ -5544,3 +5558,34 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     289.8 binds between comments
     289.9 non-ascii character in the bind name
     289.10 apostrophe in single line comment
+
+290. dbObject20.js
+    290.1 db Object tests with NCHAR datatype
+        290.1.1 insert an object with numeric/string values in NCHAR datatype
+        290.1.2 insert an object with null string values
+        290.1.3 insert an object with undefined string values
+        290.1.4 insert an empty object - no attributes
+        290.1.5 insert data via binding by object
+        290.1.6 insert multiple rows using executeMany() with inferred data type
+        290.1.7 insert multiple rows using executeMany() with explicit data type
+        290.1.8 call procedure with 2 OUT binds of DbObject
+    290.2 db Object tests with NVARCHAR2 datatype
+        290.2.1 insert an object with numeric/string values in NVARCHAR2 datatype
+        290.2.2 insert an object with null string values
+        290.2.3 insert an object with undefined string values
+        290.2.4 insert an empty object - no attributes
+        290.2.5 insert data via binding by object
+        290.2.6 insert multiple rows using executeMany() with inferred data type
+        290.2.7 insert multiple rows using executeMany() with explicit data type
+        290.2.8 call procedure with 2 OUT binds of DbObject
+    290.3 db Object tests with RAW datatype
+        290.3.1 insert an object with numeric/string values in RAW datatype
+        290.3.2 insert an object with null string values
+        290.3.3 insert an object with undefined string values
+        290.3.4 insert an empty object - no attributes
+        290.3.5 insert data via binding by object
+        290.3.6 insert multiple rows using executeMany() with inferred data type
+        290.3.7 insert multiple rows using executeMany() with explicit data type
+        290.3.8 call procedure with 2 OUT binds of DbObject
+        290.3.9 insert an object with buffer value with size 10
+        290.3.10 insert an object with buffer value with size 100
