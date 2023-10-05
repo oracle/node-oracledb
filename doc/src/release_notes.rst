@@ -19,19 +19,6 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
-#) Internal code refactoring to improve connection performance when using
-   input easy connection Strings.
-
-#)  Fixed bug that throws an 'ORA-01000' error when a query is executed multiple
-    times even though query returned errors like 'NJS-119', 'NJS-016'.
-
-#)  Internal performance optimizations for network buffer and packet handling
-
-#)  Ensure that the database port is passed as a number to the network connection.
-    See `Issue #1600 <https://github.com/oracle/node-oracledb/issues/1600>`__
-    and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__
-    (Daniel Rodrigues).
-
 #)  Improved statement bind variable placeholder parser performance, handle
     statements which use the `Alternative Quoting Mechanism
     <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1824CBAA-6E16-4921-B2A6-112FB02248DA>`__
@@ -47,6 +34,19 @@ Thin Mode Changes
 
 #)  Fixed bug that prevented getting the value of a RAW attribute on a DbObject
     which is null.
+
+#)  Fixed bug which caused a cursor leak while repeatedly executing a SQL
+    statement that fails with an NJS- prefixed error.
+
+#)  Ensure that the database port is passed as a number to the network connection.
+    See `Issue #1600 <https://github.com/oracle/node-oracledb/issues/1600>`__
+    and `PR #1601 <https://github.com/oracle/node-oracledb/pull/1601>`__
+    (Daniel Rodrigues).
+
+#)  Internal code refactoring to improve connection performance when using
+    Easy Connect strings.
+
+#)  Internal performance optimizations for network buffer and packet handling.
 
 Thick Mode Changes
 ++++++++++++++++++

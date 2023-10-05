@@ -348,8 +348,8 @@ describe('285. aq8.js', function() {
         {payload: { empName: "Employee #3", empId: 103 }}
       ];
 
-      const messages = await queue.enqMany (empList);
-      await conn.commit ();
+      const messages = await queue.enqMany(empList);
+      await conn.commit();
 
       const options = { payloadType: oracledb.DB_TYPE_JSON };
       const queue2 = await conn.getQueue(objQueueName, options);
@@ -368,7 +368,7 @@ describe('285. aq8.js', function() {
 
     it('285.2.4 enqMany and deqOne Json val as array type in random order', async function() {
       let msgDeq;
-      const queue = await conn.getQueue (objQueueName,
+      const queue = await conn.getQueue(objQueueName,
         { payloadType: oracledb.DB_TYPE_JSON });
 
       const empList = [
@@ -377,8 +377,8 @@ describe('285. aq8.js', function() {
         {payload: { empName: "Employee #3", empId: 103 }}
       ];
 
-      const messages = await queue.enqMany (empList);
-      await conn.commit ();
+      const messages = await queue.enqMany(empList);
+      await conn.commit();
 
       const options = { payloadType: oracledb.DB_TYPE_JSON };
       const queue2 = await conn.getQueue(objQueueName, options);

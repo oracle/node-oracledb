@@ -171,7 +171,7 @@ describe('282. aq6.js', function() {
 
     it('282.2.1 enqOne and deqOne Json val as array type', async function() {
       let msg;
-      const queue = await conn.getQueue (objQueueName,
+      const queue = await conn.getQueue(objQueueName,
         { payloadType: oracledb.DB_TYPE_JSON }
       );
 
@@ -179,16 +179,16 @@ describe('282. aq6.js', function() {
         payload: { "employees":[ "Employee1", "Employee2", "Employee3" ] },
       });
 
-      await conn.commit ();
+      await conn.commit();
 
       /*Dequeue*/
       const options = { payloadType: oracledb.DB_TYPE_JSON };
       const queue2 = await conn.getQueue(objQueueName, options);
-      msg = await queue2.deqOne ();
+      msg = await queue2.deqOne();
       assert(msg);
       assert(msg.msgId.length > 0);
       assert(msg.msgId instanceof Buffer);
-      await conn.commit ();
+      await conn.commit();
     }); //282.2.1
 
     it('282.2.2 JSON type in enqMany/deqMany', async () => {
@@ -201,8 +201,8 @@ describe('282. aq6.js', function() {
         {payload: { empName: "Employee #3", empId: 103 }}
       ];
 
-      await queue3.enqMany (empList);
-      await conn.commit ();
+      await queue3.enqMany(empList);
+      await conn.commit();
 
       const options = { payloadType: oracledb.DB_TYPE_JSON };
       const queue4 = await conn.getQueue(objQueueName, options);
@@ -302,7 +302,7 @@ describe('282. aq6.js', function() {
         ADDRESS: "300 Oracle Parkway Redwood City, CA US 94065"
       },
       {
-        NAME: "Lawrance",
+        NAME: "Lawrence",
         ADDRESS: "400 Oracle Parkway Redwood City, CA US 94065"
       }
     ];

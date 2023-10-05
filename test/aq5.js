@@ -92,7 +92,7 @@ describe('281.aq5.js', function() {
       `;
 
       await conn.execute(plsql);
-      await conn.commit ();
+      await conn.commit();
     }
   });    //before
 
@@ -119,13 +119,13 @@ describe('281.aq5.js', function() {
     const queue1 = await conn.getQueue(objQueueName);
     const messageString = 'This is my message';
     await queue1.enqOne(messageString);
-    await conn.commit ();
+    await conn.commit();
 
 
     // Dequeue
     const queue2 = await conn.getQueue(objQueueName);
-    const msg = await queue2.deqOne ();
-    await conn.commit ();
+    const msg = await queue2.deqOne();
+    await conn.commit();
     assert(msg);
 
     await conn.unsubscribe(objQueueName);

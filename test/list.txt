@@ -5473,13 +5473,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 283. aq7.js
     283.1 JSON type in enqOne/deqOne
     283.2 JSON type in enqMany/deqMany
-    283.3 Map Javascript object directly into JSON
-    283.4 Null and Boolean value in JSON
-    283.5 enqOne and deqOne JSON val as array type
-    283.6 enqMany and deqMany with JSON val as array type
-    283.7 enqOne and deqOne JSON val as object type
-    283.8 enqMany and deqMany with JSON val as object type
-    283.9 enqOne and deqOne CLOB value into a JSON key
+    283.3 Map JS object directly into JSON - enqOne/deqOne
+    283.4 Map JS object directly into JSON - enqMany/deqMany
+    283.5 enqOne and deqOne Null & Boolean in JSON
+    283.6 enqMany and deqMany Null & Boolean in JSON
+    283.7 enqOne and deqOne with JSON val as array type
+    283.8 enqMany and deqMany with JSON val as array type
+    283.9 enqOne and deqOne JSON val as object type
+    283.10 enqMany and deqMany with JSON val as object type
+    283.11 enqOne and deqOne CLOB value into a JSON key
 
 284. errorUrl.js
     284.1 checks for error URL in ORA error message
