@@ -280,6 +280,22 @@ testsUtil.getRoundTripCount = async function(sid) {
   }
 };
 
+testsUtil.getMaxCursorsConfigured = async function(conn) {
+  const sql = `SELECT value FROM v$parameter WHERE name = 'open_cursors'`;
+  const result = await conn.execute(sql);
+  return Number(result.rows[0][0]);// Max Cursors config
+};
+
+testsUtil.getOpenCursorCount = async function(systemconn, sid) {
+  const sql = `
+     select ss.value
+     from v$sesstat ss, v$statname sn
+     where ss.sid = :sid
+       and ss.statistic# = sn.statistic#
+       and sn.name = 'opened cursors current'`;
+  const result = await systemconn.execute(sql, [sid]);
+  return result.rows[0][0];  // open cursor count so far in the session
+};
 
 testsUtil.getParseCount = async function(systemconn, sid) {
   const sql = `

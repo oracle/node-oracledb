@@ -36,6 +36,7 @@ const assert   = require('assert');
 const fs       = require('fs');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
@@ -162,6 +163,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
                "END nodb_clobs_out_741; ";
     const sqlRun = "BEGIN nodb_clobs_out_741 (:i, :c); END;";
     const proc_drop = "DROP PROCEDURE nodb_clobs_out_741";
+    let sysDBAConn;
 
     before(async function() {
       await connection.execute(proc);
@@ -169,6 +171,9 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
     after(async function() {
       await connection.execute(proc_drop);
+      if (sysDBAConn) {
+        await sysDBAConn.close();
+      }
     });
 
     it('75.1.1 works with EMPTY_LOB', async function() {
@@ -545,6 +550,51 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         /NJS-016:/
       );
     }); // 75.1.28
+
+    it('75.1.29 Verify Cursor leak is not there for Bind Error', async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE) {
+        this.skip();
+      }
+      const len = 32769;
+      const sequence = insertID++;
+      const specialStr = "75.1.24.1";
+      const clobStr = random.getRandomString(len, specialStr);
+      const bindVar = {
+        i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        c: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len - 1 }
+      };
+      await insertClobWithString(sequence, clobStr);
+
+      // Remove the sqlRun statement from cache before checking leak.
+      // It will also let server open any internal cursors for this statement
+      // and hence the actual cursor count for this statement can be verified
+      // after running in loop below.
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar, { keepInStmtCache: false}),
+        /NJS-016:/
+      );
+
+      const sid = await testsUtil.getSid(connection);
+      const dbaConfig = {
+        user : dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectionString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA
+      };
+      sysDBAConn = await oracledb.getConnection(dbaConfig);
+      const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+
+      // Running in loop should not result in opening more than 1 cursor
+      // additionally on server.
+      for (let i = 0; i < 15; i++) {
+        await assert.rejects(
+          async () => await connection.execute(sqlRun, bindVar),
+          /NJS-016:/
+        );
+      }
+      const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+      assert.strictEqual(newOpenCount - openCount, 1);
+    }); // 75.1.29
 
   }); // 75.1
 

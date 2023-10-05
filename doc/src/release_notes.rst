@@ -19,6 +19,9 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Fixed bug that throws an 'ORA-01000' error when a query is executed multiple
+    times even though query returned errors like 'NJS-119', 'NJS-016'.
+
 #)  Internal performance optimizations for network buffer and packet handling
 
 #)  Ensure that the database port is passed as a number to the network connection.
