@@ -19,6 +19,9 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#) Internal code refactoring to improve connection performance when using
+   input easy connection Strings.
+
 #)  Fixed bug that throws an 'ORA-01000' error when a query is executed multiple
     times even though query returned errors like 'NJS-119', 'NJS-016'.
 
