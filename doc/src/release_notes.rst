@@ -31,11 +31,14 @@ Thin Mode Changes
     in embedded quotes and in JSON syntax.
     `Issue #1605 <https://github.com/oracle/node-oracledb/issues/1605>`__.
 
-#)  Corrected bug that caused cursors to be leaked when calling
-    Connection.getStatementInfo().
+#)  Fixed bug that caused cursors to be leaked when calling
+    :meth:`connection.getStatementInfo()`.
 
 #)  Fixed bug that caused an exception to be thrown unnecessarily when a connection was closed.
     `Issue #1604 <https://github.com/oracle/node-oracledb/issues/1604>`__.
+
+#)  Fixed bug that prevented getting the value of a RAW attribute on a DbObject
+    which is null.
 
 Thick Mode Changes
 ++++++++++++++++++
