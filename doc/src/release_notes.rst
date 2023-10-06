@@ -36,7 +36,7 @@ Thin Mode Changes
     which is null.
 
 #)  Fixed bug which caused a cursor leak while repeatedly executing a SQL
-    statement that fails with an NJS- prefixed error.
+    statement that fails with an NJS-prefixed error.
 
 #)  Ensure that the database port is passed as a number to the network connection.
     See `Issue #1600 <https://github.com/oracle/node-oracledb/issues/1600>`__

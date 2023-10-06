@@ -4,6 +4,32 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev61v62:
+
+Upgrading from node-oracledb 6.1 to 6.2
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- With the new :ref:`SODA <sodaoverview>` features in node-oracledb Thick
+  mode:
+
+  - You can now fetch all the current indexes from a SODA collection using the
+    new :meth:`sodaCollection.listIndexes()` method.
+
+  - You can disable modification of SODA documents by other connections using
+    the new :meth:`sodaOperation.lock()` method.
+
+- Using the new :ref:`binaryDir <odbinitoracleclientattrsopts>` property in
+  node-oracledb Thick mode, you can now specify the directory that is added to
+  the start of the default search path used by
+  :meth:`~oracledb.initOracleClient()` to load the
+  :ref:`Thick mode <enablingthick>` binary module.
+
+- Using the new :attr:`~dbObject.packageName` property in
+  :ref:`DbObject class <dbobjectclass>`, you can identify the name of the
+  package if the type refers to a PL/SQL type.
+
 .. _upgradev60v61:
 
 Upgrading from node-oracledb 6.0 to 6.1
