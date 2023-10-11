@@ -2502,17 +2502,32 @@ settings or PL/SQL package state), and where the application gets a
 database connection, works on it for a relatively short duration, and
 then releases it.
 
+The `Oracle DRCP documentation <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-015CA8C1-2386-4626-855D-CC546DDC1086>`__
+has more details, including when to use, and when not to use DRCP.
+
 To use DRCP in node-oracledb:
 
 1. The DRCP pool must be started in the database, for example:
    ``SQL> EXECUTE DBMS_CONNECTION_POOL.START_POOL();``
 
-2. The :attr:`oracledb.connectionClass` should be set by the
+2. The :attr:`oracledb.connectionClass` property should be set by the
    node-oracledb application. If it is set, then the connection class
-   specified in this property is used in standalone connections and
-   pooled connections.
+   specified in this property is used in both standalone and pooled
+   connections.
 
-   If :attr:`oracledb.connectionClass` is not set, then:
+   You can also :ref:`specify the connection class in a connection string
+   <cclasspurity>` by setting the ``POOL_CONNECTION_CLASS`` parameter. If this
+   parameter is set, then this connection class is used in both standalone
+   and pooled connections.
+
+   If both the :attr:`oracledb.connectionClass` property and the
+   ``POOL_CONNECTION_CLASS`` connection string parameter are set, then the
+   ``POOL_CONNECTION_CLASS`` parameter has the highest priority and overrides
+   the default or application specified values.
+
+   If :attr:`oracledb.connectionClass` and ``POOL_CONNECTION_CLASS``
+   connection string parameter are not set, then:
 
    - For standalone connections, the session request is sent to the shared
      connection class in DRCP.
@@ -2537,15 +2552,49 @@ To use DRCP in node-oracledb:
 For efficiency, it is recommended that DRCP connections should be used
 with node-oracledb’s local :ref:`connection pool <poolclass>`.
 
-The DRCP ‘Purity’ is SELF for DRCP connections. This allows reuse of
-both the pooled server process and session memory, giving maximum
-benefit from DRCP. See the Oracle documentation on `benefiting from
-scalability <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
--661BB906-74D2-4C5D-9C7E-2798F76501B3>`__.
+.. _cclasspurity:
 
-The `Oracle DRCP documentation <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-015CA8C1-2386-4626-855D-CC546DDC1086>`__
-has more details, including when to use, and when not to use DRCP.
+**Setting the Connection Class and Purity in the Connection String**
+
+Using node-oracledb Thin mode with Oracle Database 21c or later, you can
+specify the connection class and pool purity in an
+:ref:`Easy Connect String <easyconnect>` or a
+:ref:`Full Connect Descriptor string <embedtns>`. For node-oracledb Thick
+mode, you require Oracle Database 21c (or later) and Oracle Client 19c (or
+later).
+
+The connection class can be specified in a connection string by setting the
+``POOL_CONNECTION_CLASS`` parameter. The value for ``POOL_CONNECTION_CLASS``
+can be any string conforming to connection class semantics and is
+case-sensitive.
+
+The pool purity specifies whether the node-oracledb application must use a new
+session or reuse a pooled session. You can specify the pool purity in a
+connection string by setting the ``POOL_PURITY`` parameter. The valid values
+for ``POOL_PURITY`` are *SELF* and *NEW*. These values are not case-sensitive.
+The value *NEW* indicates that the application must use a new session. The
+value *SELF* allows the application to reuse both the pooled server process
+and session memory, giving maximum benefit from DRCP. See the Oracle
+documentation on `benefiting from scalability <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-661BB906-74D2-4C5D-9C7E-2798F76501B3>`__.
+If this parameter is not defined in the connect string, then by default the
+pool purity is *NEW* for standalone connections and *SELF* for pooled
+connections.
+
+An example of setting the connection class and pool purity in an Easy Connect
+string is shown below::
+
+    dsn = "localhost/orclpdb:pooled?pool_connection_class=MYAPP&pool_purity=self"
+
+An example of setting the connection class and pool purity in an Full Connect
+Descriptor string is shown below::
+
+    db_alias =
+        (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(PORT=1522)(HOST=abc.oraclecloud.com))
+          (CONNECT_DATA=(SERVICE_NAME=cdb1_pdb1.regress.rdbms.dev.us.oracle.com)(SERVER=POOLED)
+          (POOL_CONNECTION_CLASS=cclassname)(POOL_PURITY=SELF)))
+
+**Monitoring DRCP**
 
 There are a number of Oracle Database ``V$`` views that can be used to
 monitor DRCP. These are discussed in the Oracle documentation and in the
