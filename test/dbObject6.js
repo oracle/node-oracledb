@@ -44,7 +44,7 @@ describe('205. dbObject6.js', () => {
 
   before(async function() {
     conn = await oracledb.getConnection(dbConfig);
-    if (conn.oracleServerVersion < 1200000000) {
+    if (conn.oracleServerVersion < 1202000000) {
       this.skip();
     }
 

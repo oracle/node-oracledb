@@ -161,6 +161,8 @@ describe('224. booleanBind.js', function()  {
   }); // after()
 
   it('224.1 IN bind boolean value', async function() {
+    if (conn.oracleServerVersion < 1202000000)
+      this.skip();
 
     const  binds = {
       inval: true,
@@ -173,6 +175,9 @@ describe('224. booleanBind.js', function()  {
   }); // 224.1
 
   it('224.2 IN bind value "false"', async function() {
+    if (conn.oracleServerVersion < 1202000000)
+      this.skip();
+
     const  binds = {
       inval: false,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
@@ -195,21 +200,24 @@ describe('224. booleanBind.js', function()  {
   }); // 224.3
 
   it('224.4 Negative - IN bind value type mismatch', async function() {
-    const  binds = {
+    const binds = {
       inval: { type: oracledb.DB_TYPE_BOOLEAN, val: 123 },
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
     };
-    const  sql = `begin :outval := ${pkgName}.GetStringRep(:inval); end;`;
+    const sql = `begin :outval := ${pkgName}.GetStringRep(:inval); end;`;
 
     await assert.rejects(
       async function() {
         await conn.execute(sql, binds);
       },
       /NJS-011/
-    );
+    ); // 224.4
   });
 
   it('224.5 OUT bind value "false"', async function() {
+    if (conn.oracleServerVersion < 1202000000)
+      this.skip();
+
     const  binds = {
       inval: 12,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
@@ -221,6 +229,9 @@ describe('224. booleanBind.js', function()  {
   }); // 224.5
 
   it('224.6 OUT bind value "true"', async function() {
+    if (conn.oracleServerVersion < 1202000000)
+      this.skip();
+
     const  binds = {
       inval: 9,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }

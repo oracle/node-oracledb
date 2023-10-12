@@ -150,9 +150,9 @@ describe('213. dbObject14.js', () => {
 
 describe('213.2 Object Collection with BLOB fields', () => {
   let conn;
-  const TABLE = 'NODB_TAB_BUF_COLLECTION_14_1';
+  let TABLE;
   const BUF_TYPE = 'NODB_TYP_BUFFER_14_1';
-  const BUF_TYPE_COLLECTION = 'NODB_TYP_BUFFER_COLLECTION_14_1';
+  let BUF_TYPE_COLLECTION;
   const TEST_PROC = 'NODB_PROC_14_1';
 
   before(async function() {
@@ -160,6 +160,14 @@ describe('213.2 Object Collection with BLOB fields', () => {
       return this.skip();
     }
     conn = await oracledb.getConnection(dbConfig);
+    if (conn.oracleServerVersion < 1202000000) {
+      //The maximum length for 12.1 db database object names is 30 characters
+      TABLE = 'NODB_TAB_BUF_COLLECTION_14';
+      BUF_TYPE_COLLECTION = 'NODB_TYP_BUFFER_COLLECTION_14';
+    } else {
+      TABLE = 'NODB_TAB_BUF_COLLECTION_14_1';
+      BUF_TYPE_COLLECTION = 'NODB_TYP_BUFFER_COLLECTION_14_1';
+    }
 
     let sql = `
       CREATE OR REPLACE TYPE ${BUF_TYPE} AS OBJECT (

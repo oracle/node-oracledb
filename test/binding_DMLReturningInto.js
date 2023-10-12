@@ -267,6 +267,8 @@ describe('98.binding_DMLReturningInto.js', function() {
     });
 
     it('98.1.12 oracledb.STRING <--> DB: BLOB', async function() {
+      if (connection.oracleServerVersion < 1202000000)
+        this.skip();
       index++;
       const table_name = tableNamePre + index;
       const content = "small string";
@@ -535,6 +537,8 @@ describe('98.binding_DMLReturningInto.js', function() {
     });
 
     it('98.2.12 oracledb.STRING <--> DB: BLOB', async function() {
+      if (connection.oracleServerVersion < 1202000000)
+        this.skip();
       index++;
       const table_name = tableNamePre + index;
       const content = null;

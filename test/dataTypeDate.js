@@ -147,6 +147,9 @@ describe('32. dataTypeDate.js', function() {
   describe('32.4 Select invalid dates', function() {
 
     it('32.4.1 Negative - Invalid Year 0', async function() {
+      if (connection.oracleServerVersion < 1202000000)
+        this.skip();
+
       const invalidYear = 0;
       const sql = `SELECT DATE '${invalidYear}-01-01' FROM DUAL`;
 
@@ -160,7 +163,33 @@ describe('32. dataTypeDate.js', function() {
       );
     });
 
-    it('32.4.2 Negative - Invalid Year -4713', async function() {
+    it('32.4.2 No ORA-01841 error in Oracle 12.1 server', async function() {
+      if (connection.oracleServerVersion >= 1202000000)
+        this.skip();
+      const myFetchTypeHandler = function(metadata) {
+        if (metadata.dbType === oracledb.DB_TYPE_DATE) {
+          const myConverter = (v) => {
+            if (v !== null) {
+              v = v.toLocaleString('fr');
+            }
+            return v;
+          };
+          return {converter: myConverter};
+        }
+      };
+      const invalidYear = 0;
+      const sql = `SELECT DATE '${invalidYear}-01-01' FROM DUAL`;
+      const binds = [];
+      const options = {fetchTypeHandler: myFetchTypeHandler};
+      const result = await connection.execute(sql, binds, options);
+      assert.strictEqual(typeof result.rows[0][0], 'string');
+
+      // Add an assert statement to check the result
+      assert.deepStrictEqual(result.rows,
+        [['01/01/1900, 00:00:00']]);
+    });
+
+    it('32.4.3 Negative - Invalid Year -4713', async function() {
       const invalidYear = -4713;
       const sql = `SELECT DATE '${invalidYear}-01-01' FROM DUAL`;
 
@@ -174,7 +203,7 @@ describe('32. dataTypeDate.js', function() {
       );
     });
 
-    it('32.4.3 Negative - Invalid Year 10000', async function() {
+    it('32.4.4 Negative - Invalid Year 10000', async function() {
       const invalidYear = 10000;
       const sql = `SELECT DATE '${invalidYear}-01-01' FROM DUAL`;
 

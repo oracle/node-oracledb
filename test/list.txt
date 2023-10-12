@@ -534,6 +534,7 @@ Overview of node-oracledb functional tests
         32.1.3 works well with REF Cursor
         32.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
         32.1.5 columns fetched from REF CURSORS can be mapped by oracledb.fetchAsString
+        32.1.6 works well with SELECT query after session TimeZone change
     32.2 stores null value correctly
         32.2.1 testing Null, Empty string and Undefined
     32.3 insert SQL Date data
@@ -541,8 +542,9 @@ Overview of node-oracledb functional tests
         32.3.2 SELECT query - formatted data for comparison
     32.4 Select invalid dates
         32.4.1 Negative - Invalid Year 0
-        32.4.2 Negative - Invalid Year -4713
-        32.4.3 Negative - Invalid Year 10000
+        32.4.2 No ORA-01841 error in Oracle 12.1 server
+        32.4.3 Negative - Invalid Year -4713
+        32.4.4 Negative - Invalid Year 10000
 
 33. dataTypeTimestamp1.js
     33.1 Testing JavaScript Date with database TIMESTAMP
@@ -4636,14 +4638,16 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 224. booleanBind.js
     224.1 IN bind boolean value
-    224.2 IN bind value "false"
-    224.3 IN bind value "null"
-    224.4 Negative - IN bind value type mismatch
-    224.5 OUT bind value "false"
-    224.6 OUT bind value "true"
-    224.7 IN bind array with boolean data
-    224.8 OUT bind array with boolean data
-    224.9 INOUT bind record with boolean data
+    224.2 Negative: IN bind boolean value for 12.1 DB
+    224.3 IN bind value "false"
+    224.4 IN bind value "null"
+    224.5 Negative - IN bind value type mismatch
+    224.6 OUT bind value "false"
+    224.7 OUT bind value "true"
+    224.8 IN bind array with boolean data
+    224.9 OUT bind array with boolean data
+    224.10 INOUT bind record with boolean data
+    224.11 OUT bind value "null"
 
 226. dbType01.js
     226.1 DB_TYPE_VARCHAR
@@ -5062,7 +5066,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         254.2.5 Using JSON_VALUE to extract a value from a VARCHAR2 column
         254.2.6 Using dot-notation to extract a value from a VARCHAR2 column
     254.3 Map javascript object into CLOB
-        254.3.1 Number, String type (41ms)
+        254.3.1 Number, String type
         254.3.2 Boolean and null value
         254.3.3 Array type
         254.3.4 Object type
