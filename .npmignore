@@ -3,6 +3,7 @@
 .gitattributes
 .gitmodules
 .eslintrc
+.readthedocs.yaml
 INSTALL.md
 CONTRIBUTING.md
 Makefile
