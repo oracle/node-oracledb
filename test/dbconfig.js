@@ -42,14 +42,14 @@ const oracledb = require('oracledb');
 
 const config = {
   test: {
-    externalAuth:  false,
+    externalAuth: false,
     DBA_PRIVILEGE: false,
     printDebugMsg: false,
-    mode:          'thin',
+    mode: 'thin',
     instantClientPath: '',
     isCloudService: false,
-    isCmanTdm:     false,
-    drcp:          false
+    isCmanTdm: false,
+    drcp: false
   }
 };
 

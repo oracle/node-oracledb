@@ -91,22 +91,22 @@ describe('220. examineOwnedProperties.js', () => {
     const data = [
       { "rate_user": "Bob",
         "rate_time": "2019-07-26 19:42:36",
-        "item_price":338,
-        "rating":"I like it"
+        "item_price": 338,
+        "rating": "I like it"
       },
       { "rate_user": "Alice",
         "rate_time": "2019-07-26 19:42:36",
-        "item_price":338,
-        "rating":"I like it too"
+        "item_price": 338,
+        "rating": "I like it too"
       }
     ];
     const options = {
       autoCommit: true,
       bindDefs: {
-        item_price : { type: oracledb.NUMBER },
-        rate_time  : { type: oracledb.STRING, maxSize: 32 },
-        rate_user  : { type: oracledb.STRING, maxSize: 128 },
-        rating     : { type: oracledb.STRING, maxSize: 4000 },
+        item_price: { type: oracledb.NUMBER },
+        rate_time: { type: oracledb.STRING, maxSize: 32 },
+        rate_user: { type: oracledb.STRING, maxSize: 128 },
+        rating: { type: oracledb.STRING, maxSize: 4000 },
       }
     };
 

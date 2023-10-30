@@ -109,11 +109,11 @@ describe('44. plsqlBindIndexedTable2.js', function() {
     await connection.execute("BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
       {
         beach_in: { type: oracledb.STRING,
-          dir:  oracledb.BIND_IN,
-          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+          dir: oracledb.BIND_IN,
+          val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
         depth_in: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_IN,
-          val:  [45, 30, 67]
+          dir: oracledb.BIND_IN,
+          val: [45, 30, 67]
         }
       }
     );
@@ -122,10 +122,10 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
       {
         beach_out: { type: oracledb.STRING,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 },
         depth_out: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 }
       });
 
@@ -137,12 +137,12 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
       {
         beach_inout: { type: oracledb.STRING,
-          dir:  oracledb.BIND_INOUT,
-          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          dir: oracledb.BIND_INOUT,
+          val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
           maxArraySize: 3},
         depth_inout: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_INOUT,
-          val:  [8, 3, 70],
+          dir: oracledb.BIND_INOUT,
+          val: [8, 3, 70],
           maxArraySize: 3}
       });
     assert.deepStrictEqual(result.outBinds.beach_inout, ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]));
@@ -156,11 +156,11 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_in(:1, :2); END;",
       [
         { type: oracledb.STRING,
-          dir:  oracledb.BIND_IN,
-          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+          dir: oracledb.BIND_IN,
+          val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
         { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_IN,
-          val:  [45, 30, 67]
+          dir: oracledb.BIND_IN,
+          val: [45, 30, 67]
         }
       ]);
 
@@ -168,10 +168,10 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
       [
         { type: oracledb.STRING,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 },
         { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 }
       ]);
     assert.deepStrictEqual(result.outBinds[0], ([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]));
@@ -182,12 +182,12 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
       [
         { type: oracledb.STRING,
-          dir:  oracledb.BIND_INOUT,
-          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          dir: oracledb.BIND_INOUT,
+          val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
           maxArraySize: 3},
         { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_INOUT,
-          val:  [8, 3, 70],
+          dir: oracledb.BIND_INOUT,
+          val: [8, 3, 70],
           maxArraySize: 3}
       ]);
     assert.deepStrictEqual(result.outBinds[0], ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]));
@@ -202,10 +202,10 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       {
         beach_in: { //type: oracledb.STRING,
           //dir:  oracledb.BIND_IN,
-          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+          val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
         depth_in: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_IN,
-          val:  [45, 30, 67]
+          dir: oracledb.BIND_IN,
+          val: [45, 30, 67]
         }
       }
     );
@@ -213,10 +213,10 @@ describe('44. plsqlBindIndexedTable2.js', function() {
     let result = await connection.execute("BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
       {
         beach_out: { type: oracledb.STRING,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 },
         depth_out: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 }
       });
     assert.deepStrictEqual(result.outBinds.beach_out, ([ 'Malibu Beach', 'Bondi Beach', 'Waikiki Beach' ]));
@@ -228,12 +228,12 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
       {
         beach_inout: { type: oracledb.STRING,
-          dir:  oracledb.BIND_INOUT,
-          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          dir: oracledb.BIND_INOUT,
+          val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
           maxArraySize: 3},
         depth_inout: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_INOUT,
-          val:  [8, 3, 70],
+          dir: oracledb.BIND_INOUT,
+          val: [8, 3, 70],
           maxArraySize: 3}
       });
 
@@ -248,10 +248,10 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       [
         { type: oracledb.STRING,
           // dir:  oracledb.BIND_IN,
-          val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+          val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
         { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_IN,
-          val:  [45, 30, 67]
+          dir: oracledb.BIND_IN,
+          val: [45, 30, 67]
         }
       ]);
 
@@ -260,10 +260,10 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_out(:1, :2); END;",
       [
         { type: oracledb.STRING,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 },
         { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 3 }
       ]);
 
@@ -275,12 +275,12 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_inout(:1, :2); END;",
       [
         { type: oracledb.STRING,
-          dir:  oracledb.BIND_INOUT,
-          val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+          dir: oracledb.BIND_INOUT,
+          val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
           maxArraySize: 3},
         { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_INOUT,
-          val:  [8, 3, 70],
+          dir: oracledb.BIND_INOUT,
+          val: [8, 3, 70],
           maxArraySize: 3}
       ]);
     assert.deepStrictEqual(result.outBinds[0], ([ 'Chesil Beach', 'Eighty Mile Beach', 'Port Melbourne Beach' ]));
@@ -294,11 +294,11 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
       {
         beach_in: { type: oracledb.STRING,
-          dir:  oracledb.BIND_IN,
-          val:  ["Malibu Beach", "Bondi Beach", null, "Waikiki Beach", '', null] },
+          dir: oracledb.BIND_IN,
+          val: ["Malibu Beach", "Bondi Beach", null, "Waikiki Beach", '', null] },
         depth_in: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_IN,
-          val:  [null, null, 45, 30, 67, null, ]
+          dir: oracledb.BIND_IN,
+          val: [null, null, 45, 30, 67, null, ]
         }
       });
 
@@ -306,10 +306,10 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
       {
         beach_out: { type: oracledb.STRING,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 10 },
         depth_out: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_OUT,
+          dir: oracledb.BIND_OUT,
           maxArraySize: 10 }
       });
     assert.deepStrictEqual(result.outBinds.beach_out, ([ 'Malibu Beach', 'Bondi Beach', null, 'Waikiki Beach', null, null ]));
@@ -322,12 +322,12 @@ describe('44. plsqlBindIndexedTable2.js', function() {
       "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
       {
         beach_inout: { type: oracledb.STRING,
-          dir:  oracledb.BIND_INOUT,
-          val:  ["Port Melbourne Beach", "Eighty Mile Beach", '', "Chesil Beach", null, ''],
+          dir: oracledb.BIND_INOUT,
+          val: ["Port Melbourne Beach", "Eighty Mile Beach", '', "Chesil Beach", null, ''],
           maxArraySize: 10},
         depth_inout: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_INOUT,
-          val:  [null, 8, null, 3, null, 70],
+          dir: oracledb.BIND_INOUT,
+          val: [null, 8, null, 3, null, 70],
           maxArraySize: 10}
       });
 
@@ -341,11 +341,11 @@ describe('44. plsqlBindIndexedTable2.js', function() {
     await connection.execute("BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
       {
         beach_in: { type: oracledb.STRING,
-          dir:  oracledb.BIND_IN,
-          val:  [] },
+          dir: oracledb.BIND_IN,
+          val: [] },
         depth_in: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_IN,
-          val:  []
+          dir: oracledb.BIND_IN,
+          val: []
         }
       });
 
@@ -355,13 +355,13 @@ describe('44. plsqlBindIndexedTable2.js', function() {
         "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
         {
           beach_inout: { type: oracledb.STRING,
-            dir:  oracledb.BIND_INOUT,
-            val:  [],
+            dir: oracledb.BIND_INOUT,
+            val: [],
             maxArraySize: 0
           },
           depth_inout: { type: oracledb.NUMBER,
-            dir:  oracledb.BIND_INOUT,
-            val:  [],
+            dir: oracledb.BIND_INOUT,
+            val: [],
             maxArraySize: 3}
         }),
       /NJS-007:/);
@@ -402,11 +402,11 @@ describe('44. plsqlBindIndexedTable2.js', function() {
     await connection.execute("BEGIN nodb_beachpkg.array_in(:beach_in, :depth_in); END;",
       {
         beach_in: { type: oracledb.STRING,
-          dir:  oracledb.BIND_IN,
-          val:  ["Malibu", "Bondi", "Waikiki"] },
+          dir: oracledb.BIND_IN,
+          val: ["Malibu", "Bondi", "Waikiki"] },
         depth_in: { type: oracledb.NUMBER,
-          dir:  oracledb.BIND_IN,
-          val:  [45, 30, 67]
+          dir: oracledb.BIND_IN,
+          val: [45, 30, 67]
         }
       });
     await assert.rejects(
@@ -415,11 +415,11 @@ describe('44. plsqlBindIndexedTable2.js', function() {
         "BEGIN nodb_beachpkg.array_out(:beach_out, :depth_out); END;",
         {
           beach_out: { type: oracledb.STRING,
-            dir:  oracledb.BIND_OUT,
+            dir: oracledb.BIND_OUT,
             maxArraySize: 3,
             maxSize: 6 },
           depth_out: { type: oracledb.NUMBER,
-            dir:  oracledb.BIND_OUT,
+            dir: oracledb.BIND_OUT,
             maxArraySize: 3 }
         }
       ),
@@ -434,13 +434,13 @@ describe('44. plsqlBindIndexedTable2.js', function() {
         "BEGIN nodb_beachpkg.array_inout(:beach_inout, :depth_inout); END;",
         {
           beach_inout: { type: oracledb.STRING,
-            dir:  oracledb.BIND_INOUT,
-            val:  ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
+            dir: oracledb.BIND_INOUT,
+            val: ["Port Melbourne Beach", "Eighty Mile Beach", "Chesil Beach"],
             maxArraySize: 3,
-            maxSize : 5},
+            maxSize: 5},
           depth_inout: { type: oracledb.NUMBER,
-            dir:  oracledb.BIND_INOUT,
-            val:  [8, 3, 70],
+            dir: oracledb.BIND_INOUT,
+            val: [8, 3, 70],
             maxArraySize: 3}
         }),
       /NJS-058:/

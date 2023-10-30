@@ -114,7 +114,7 @@ describe('204. dbObject5.js', () => {
     const date2 = new Date(1989, 3, 4);
     const objData = {
       ENTRY: date1,
-      EXIT : date2
+      EXIT: date2
     };
     const objClass = await conn.getDbObjectClass(TYPE);
     const testObj = new objClass(objData);
@@ -142,7 +142,7 @@ describe('204. dbObject5.js', () => {
 
     const objData = {
       ENTRY: null,
-      EXIT : null
+      EXIT: null
     };
     const objClass = await conn.getDbObjectClass(TYPE);
     const testObj = new objClass(objData);
@@ -165,7 +165,7 @@ describe('204. dbObject5.js', () => {
 
     const objData = {
       ENTRY: null,
-      EXIT : null
+      EXIT: null
     };
     const objClass = await conn.getDbObjectClass(TYPE);
     const testObj = new objClass(objData);

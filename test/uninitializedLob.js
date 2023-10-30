@@ -120,9 +120,9 @@ describe('65. uninitializedLob.js', function() {
                  "    END IF;\n" +
                  "END; ";
       const binds = {
-        id        : {type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
-        blob_1    : {type: oracledb.BLOB, dir: oracledb.BIND_OUT},
-        string_1  : string_1,
+        id: {type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
+        blob_1: {type: oracledb.BLOB, dir: oracledb.BIND_OUT},
+        string_1: string_1,
         spoc_cm_id: 1
       };
       const options = {

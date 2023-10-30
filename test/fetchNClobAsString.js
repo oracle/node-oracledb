@@ -152,8 +152,8 @@ describe('251. fetchNClobAsString.js', function() {
         select_query_sql,
         [rowID],
         {
-          fetchInfo : {
-            "NC" :  { type : oracledb.STRING }
+          fetchInfo: {
+            "NC": { type: oracledb.STRING }
           }
         });
       assert.strictEqual (typeof result.rows[0][2], "string");

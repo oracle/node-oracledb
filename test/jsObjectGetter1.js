@@ -195,8 +195,8 @@ describe('140. jsObjectGetter1.js', function() {
     it('140.3.1 bind an element being altered-JSON object', async function() {
       const foo =
         {
-          beach_in: { type: oracledb.STRING, dir:  oracledb.BIND_IN, val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
-          depth_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [45, 30, 67] }
+          beach_in: { type: oracledb.STRING, dir: oracledb.BIND_IN, val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+          depth_in: { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [45, 30, 67] }
         };
 
       Object.defineProperty(foo, 'depth_in', {
@@ -215,7 +215,7 @@ describe('140. jsObjectGetter1.js', function() {
     }); // 140.3.1
 
     it('140.3.2 GetBindTypeAndSizeFromValue()', async function() {
-      const foo = { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [45, 30, 67] };
+      const foo = { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [45, 30, 67] };
       Object.defineProperty(foo, 'type', {
         get: function() {
           throw new Error('No type');
@@ -227,8 +227,8 @@ describe('140. jsObjectGetter1.js', function() {
           const sql = "BEGIN nodb_v8pkg.array_in(:beach_in, :depth_in); END;";
           const binds = {
             beach_in: { type: oracledb.STRING,
-              dir:  oracledb.BIND_IN,
-              val:  ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
+              dir: oracledb.BIND_IN,
+              val: ["Malibu Beach", "Bondi Beach", "Waikiki Beach"] },
             depth_in: foo
           };
           await connection.execute(sql, binds);
@@ -242,7 +242,7 @@ describe('140. jsObjectGetter1.js', function() {
     it('140.4.1 changes getter() of fetchInfo itself', async function() {
       const foo = {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo : { "TS_DATE": { type : oracledb.STRING } }
+        fetchInfo: { "TS_DATE": { type: oracledb.STRING } }
       };
 
       Object.defineProperty(foo, 'fetchInfo', {
@@ -262,7 +262,7 @@ describe('140. jsObjectGetter1.js', function() {
     }); // 140.4.1
 
     it('140.4.2 changes getter() of the value of fetchInfo object', async function() {
-      const foo = { type : oracledb.STRING };
+      const foo = { type: oracledb.STRING };
 
       Object.defineProperty(foo, 'type', {
         get: function() {
@@ -272,7 +272,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       const option = {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo : { "TS_DATE": foo }
+        fetchInfo: { "TS_DATE": foo }
       };
 
       await assert.rejects(
@@ -463,7 +463,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'user', {
-        get : function() {
+        get: function() {
           throw new Error('Nope');
         }
       });
@@ -480,7 +480,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'password', {
-        get : function() {
+        get: function() {
           throw new Error('Nope');
         }
       });
@@ -497,7 +497,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'connectString', {
-        get : function() {
+        get: function() {
           throw new Error('Nope');
         }
       });
@@ -514,7 +514,7 @@ describe('140. jsObjectGetter1.js', function() {
 
       const cred = JSON.parse(JSON.stringify(dbConfig));
       Object.defineProperty (cred, 'privilege', {
-        get : function() {
+        get: function() {
           throw new Error('Nope');
         }
       });

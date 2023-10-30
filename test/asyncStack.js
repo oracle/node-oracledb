@@ -54,12 +54,12 @@ describe('263. asyncStack.js', () => {
 
   it('263.2 stack on error in createPool', async () => {
     const config = {
-      user          : "asterix",
-      password      : "oblix",
-      connectString : 'doesnotexist.oracle.com',
-      poolMin       : 1,
-      poolMax       : 50,
-      poolIncrement : 5
+      user: "asterix",
+      password: "oblix",
+      connectString: 'doesnotexist.oracle.com',
+      poolMin: 1,
+      poolMax: 50,
+      poolIncrement: 5
     };
     await assert.rejects(
       async () => await oracledb.createPool(config),

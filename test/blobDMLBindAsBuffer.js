@@ -83,8 +83,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
         });
       assert.strictEqual(result.rowsAffected, 1);
     }
@@ -163,8 +163,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 32767 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: 32767 }
         });
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, null);
@@ -178,8 +178,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 50000 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: 50000 }
         });
 
       assert.strictEqual(result.rowsAffected, 1);
@@ -211,8 +211,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 32767 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: 32767 }
         });
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, null);
@@ -226,8 +226,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 50000 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: 50000 }
         });
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, null);
@@ -241,8 +241,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
             {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+              ID: { val: id },
+              C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
             });
         },
         // NJS-011: encountered bind value and type mismatch in parameter 2
@@ -258,8 +258,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
             {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+              ID: { val: id },
+              C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
             });
         },
         // NJS-011: encountered bind value and type mismatch in parameter 2
@@ -319,8 +319,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
             {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+              ID: { val: id },
+              C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
             });
         },
         // NJS-011: encountered bind value and type mismatch in parameter 2
@@ -339,7 +339,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
         [
-          id, { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+          id, { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
         ]);
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content);
@@ -352,7 +352,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
           await connection.execute(
             "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
             [
-              id, { val : {}, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+              id, { val: {}, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
             ]);
         },
         // NJS-011: encountered bind value and type mismatch in parameter 2
@@ -391,8 +391,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER, maxSize: 1 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: 1 }
         });
       assert.strictEqual(result.rowsAffected, 1);
 

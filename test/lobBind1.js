@@ -299,7 +299,7 @@ describe('71. lobBind1.js', function() {
         sql,
         {
           id: { val: seq, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-          c:  { dir: oracledb.BIND_OUT, type: oracledb.CLOB }
+          c: { dir: oracledb.BIND_OUT, type: oracledb.CLOB }
         }
       );
       const lob = result.outBinds.c;
@@ -721,7 +721,7 @@ describe('71. lobBind1.js', function() {
         "insert into nodb_tab_blob1 values (:i, :b)",
         {
           i: outBufID,
-          b: { val: outBuf, dir:oracledb.BIND_IN, type: oracledb.BUFFER }
+          b: { val: outBuf, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
         },
         { autoCommit: true });
 
@@ -812,7 +812,7 @@ describe('71. lobBind1.js', function() {
       await prepareTableWithBlob(seq, jpgFileName);
       const sql = "begin nodb_proc_blob_inout3 (:i, :io); end;";
       const bindVar = {
-        i:  seq,
+        i: seq,
         io: { val: inBuf, type: oracledb.BLOB, dir: oracledb.BIND_INOUT }
       };
       const result = await connection.execute(sql, bindVar, { autoCommit: true });

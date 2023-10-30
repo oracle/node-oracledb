@@ -98,8 +98,8 @@ describe('51. poolClose.js', function() {
   it('51.7 can not set the attributes after pool created', async function() {
     const config = {
       ...dbConfig,
-      poolMin         : 2,
-      poolMax         : 10
+      poolMin: 2,
+      poolMax: 10
     };
     const pool = await oracledb.createPool(config);
     assert.throws(
@@ -120,10 +120,10 @@ describe('51. poolClose.js', function() {
   it('51.8 can access the attributes of closed pool without error', async function() {
     const config = {
       ...dbConfig,
-      poolMin         : 2,
-      poolMax         : 10,
-      poolAlias       : "foobar",
-      poolIncrement   : 2
+      poolMin: 2,
+      poolMax: 10,
+      poolAlias: "foobar",
+      poolIncrement: 2
     };
     const pool = await oracledb.createPool(config);
     await pool.close(0);

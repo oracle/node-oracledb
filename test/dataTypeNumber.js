@@ -189,7 +189,7 @@ describe('26. dataTypeNumber.js', function() {
       const num = '-1234567890123456789012345';
       const sql = `SELECT TO_NUMBER(${num}) AS TS_NUM FROM DUAL`;
       const options = {
-        fetchInfo : { "TS_NUM"  : { type : oracledb.STRING } }
+        fetchInfo: { "TS_NUM": { type: oracledb.STRING } }
       };
       const result = await connection.execute(sql, [], options);
       const fetchedNum = result.rows[0][0];

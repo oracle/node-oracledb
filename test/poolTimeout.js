@@ -48,11 +48,11 @@ describe('269. Pool Timeout', function() {
     try {
       pool = await oracledb.createPool({
         ...dbConfig,
-        poolMin           : 0,
-        poolMax           : 10,
-        poolIncrement     : 1,
-        poolTimeout       : 0,
-        homogeneous       : true
+        poolMin: 0,
+        poolMax: 10,
+        poolIncrement: 1,
+        poolTimeout: 0,
+        homogeneous: true
       });
       assert.ok(pool);
       conn1 = await pool.getConnection();
@@ -88,11 +88,11 @@ describe('269. Pool Timeout', function() {
     try {
       pool = await oracledb.createPool({
         ...dbConfig,
-        poolMin           : 0,
-        poolMax           : 10,
-        poolIncrement     : 1,
-        poolTimeout       : 1,
-        homogeneous       : true
+        poolMin: 0,
+        poolMax: 10,
+        poolIncrement: 1,
+        poolTimeout: 1,
+        homogeneous: true
       });
       assert.ok(pool);
       conn1 = await pool.getConnection();
@@ -128,11 +128,11 @@ describe('269. Pool Timeout', function() {
     try {
       pool = await oracledb.createPool({
         ...dbConfig,
-        poolMin           : 1,
-        poolMax           : 10,
-        poolIncrement     : 1,
-        poolTimeout       : 1,
-        homogeneous       : true
+        poolMin: 1,
+        poolMax: 10,
+        poolIncrement: 1,
+        poolTimeout: 1,
+        homogeneous: true
       });
       assert.ok(pool);
       conn1 = await pool.getConnection();
@@ -167,11 +167,11 @@ describe('269. Pool Timeout', function() {
     try {
       pool = await oracledb.createPool({
         ...dbConfig,
-        poolMin           : 0,
-        poolMax           : 10,
-        poolIncrement     : 1,
-        poolPingInterval  : 90,
-        homogeneous       : true
+        poolMin: 0,
+        poolMax: 10,
+        poolIncrement: 1,
+        poolPingInterval: 90,
+        homogeneous: true
       });
       assert.ok(pool);
 

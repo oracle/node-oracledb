@@ -496,7 +496,7 @@ describe('55. resultSet2.js', function() {
         await connection.execute(
           "BEGIN get_invalid_refcur ( :p ); END; ",
           {
-            p : { type : oracledb.CURSOR, dir : oracledb.BIND_OUT }
+            p: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
           });
       }, /NJS-107:/);
 

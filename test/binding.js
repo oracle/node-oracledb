@@ -115,9 +115,9 @@ describe('4. binding.js', function() {
       let result = await connection.execute(
         "BEGIN nodb_bindproc3(:i, :io, :o); END;",
         {
-          i:  'Alan',  // bind type is determined from the data type
-          io: { val: 'Turing', dir : oracledb.BIND_INOUT },
-          o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+          i: 'Alan',  // bind type is determined from the data type
+          io: { val: 'Turing', dir: oracledb.BIND_INOUT },
+          o: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
         });
 
       assert.strictEqual(result.outBinds.io, 'Alan Turing');
@@ -126,8 +126,8 @@ describe('4. binding.js', function() {
         "BEGIN nodb_bindproc3(:i, :io, :o); END;",
         [
           'Alan',  // bind type is determined from the data type
-          { val: 'Turing', dir : oracledb.BIND_INOUT },
-          { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+          { val: 'Turing', dir: oracledb.BIND_INOUT },
+          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
         ]);
       assert.deepStrictEqual(result.outBinds, [ 'Alan Turing', 101 ]);
       await connection.execute("DROP PROCEDURE nodb_bindproc3");
@@ -146,17 +146,17 @@ describe('4. binding.js', function() {
       let result = await connection.execute(
         "BEGIN nodb_bindproc4(:io, :o, :i); END;",
         {
-          i:  'Alan',  // bind type is determined from the data type
-          io: { val: 'Turing', dir : oracledb.BIND_INOUT },
-          o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+          i: 'Alan',  // bind type is determined from the data type
+          io: { val: 'Turing', dir: oracledb.BIND_INOUT },
+          o: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
         });
 
       assert.strictEqual(result.outBinds.io, 'Alan Turing');
       result = await connection.execute(
         "BEGIN nodb_bindproc4(:io, :o, :i); END;",
         [
-          { val: 'Turing', dir : oracledb.BIND_INOUT },
-          { type: oracledb.NUMBER, dir : oracledb.BIND_OUT },
+          { val: 'Turing', dir: oracledb.BIND_INOUT },
+          { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
           'Alan',  // bind type is determined from the data type
         ]);
       assert.deepStrictEqual(result.outBinds, [ 'Alan Turing', 101 ]);
@@ -166,7 +166,7 @@ describe('4. binding.js', function() {
 
     it('4.1.5 default bind type - STRING', async function() {
       const sql = "begin :n := 1001; end;";
-      const bindVar = { n : { dir: oracledb.BIND_OUT } };
+      const bindVar = { n: { dir: oracledb.BIND_OUT } };
       const options = { };
       const result = await connection.execute(sql, bindVar, options);
       assert.strictEqual(typeof (result.outBinds.n), "string");
@@ -266,17 +266,17 @@ describe('4. binding.js', function() {
       ];
 
       // possible sql valid combinations
-      const sqlStrings = [{sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning(id)into :3', rowsAffected:1, resultVal: [[1]] },
+      const sqlStrings = [{sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning(id)into :3', rowsAffected: 1, resultVal: [[1]] },
         {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) return(id)into :3', rowsAffected: 1, resultVal: [[1]]},
         {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning(id)into:3', rowsAffected: 1, resultVal: [[1]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning (id)into :3', rowsAffected: 1, resultVal:[[1]] },
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)     returning     id    into   :3', rowsAffected: 1, resultVal:[[1]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)  return id   into   :3', rowsAffected: 1, resultVal:[[1]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) retURning ( id )intO :3', rowsAffected: 1, resultVal:[[1]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 )into :3', rowsAffected: 1, resultVal:[[3]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 + 5)into :3', rowsAffected: 1, resultVal:[[8]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id * 2 )into :3', rowsAffected: 1, resultVal:[[2]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)returning ( id * 2 )into :3', rowsAffected: 1, resultVal:[[2]]}
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning (id)into :3', rowsAffected: 1, resultVal: [[1]] },
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)     returning     id    into   :3', rowsAffected: 1, resultVal: [[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)  return id   into   :3', rowsAffected: 1, resultVal: [[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) retURning ( id )intO :3', rowsAffected: 1, resultVal: [[1]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 )into :3', rowsAffected: 1, resultVal: [[3]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 + 5)into :3', rowsAffected: 1, resultVal: [[8]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id * 2 )into :3', rowsAffected: 1, resultVal: [[2]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)returning ( id * 2 )into :3', rowsAffected: 1, resultVal: [[2]]}
       ];
       for (const sqlObj of sqlStrings) {
         const result = await connection.execute(sqlObj.sql, bindsOutNumber);
@@ -477,7 +477,7 @@ describe('4. binding.js', function() {
           await connection.execute(
             "BEGIN nodb_bindproc4(:o); END;",
             {
-              o: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:2 }
+              o: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2 }
             });
         },
         /ORA-06502:/
@@ -498,7 +498,7 @@ describe('4. binding.js', function() {
         async () => {
           await connection.execute(
             "BEGIN :o := lpad('A',201,'x'); END;",
-            { o: { type: oracledb.STRING, dir : oracledb.BIND_OUT } });
+            { o: { type: oracledb.STRING, dir: oracledb.BIND_OUT } });
         },
         /ORA-06502:/
       );
@@ -513,7 +513,7 @@ describe('4. binding.js', function() {
           :o := t_OutVal;
         END;`;
       const binds = {
-        o: { type: oracledb.STRING, dir : oracledb.BIND_OUT, maxSize:50000 }
+        o: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 50000 }
       };
       const result = await connection.execute(sql, binds);
       assert.strictEqual(result.outBinds.o.length, 32767);
@@ -544,7 +544,7 @@ describe('4. binding.js', function() {
 
     it('4.5.2 negative - DML invalid bind direction', async function() {
       await assert.rejects(
-        async () => await connection.execute("insert into nodb_raw (num) values (:id)", { id: { val: 1, type: oracledb.NUMBER, dir : 0 } }),
+        async () => await connection.execute("insert into nodb_raw (num) values (:id)", { id: { val: 1, type: oracledb.NUMBER, dir: 0 } }),
         /NJS-013:/
       );
     });
@@ -589,7 +589,7 @@ describe('4. binding.js', function() {
     it('4.7.2 Valid values when one of the value is passed as JSON ',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        const binds = [ 1, { val : 456 } ];
+        const binds = [ 1, { val: 456 } ];
         const result = await connection.execute (sql, binds);
         assert((result.rows[0][0]) instanceof Date);
       });
@@ -597,7 +597,7 @@ describe('4. binding.js', function() {
     it('4.7.3 Valid test case when one of the value is passed as JSON ',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        const binds = [ {val :  1}, 456 ];
+        const binds = [ {val: 1}, 456 ];
         const result = await connection.execute(sql, binds);
         assert((result.rows[0][0]) instanceof Date);
       });
@@ -605,7 +605,7 @@ describe('4. binding.js', function() {
     it ('4.7.4 Valid Test case when both values are passed as JSON',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        const binds = [ {val : 1}, {val : 456 } ];
+        const binds = [ {val: 1}, {val: 456 } ];
         const result = await connection.execute(sql, binds);
         assert((result.rows[0][0]) instanceof Date);
       });
@@ -613,7 +613,7 @@ describe('4. binding.js', function() {
     it('4.7.5 Invalid Test case when value is passed as named JSON',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        const binds = [ {val : 1}, { c: {val : 456 } } ];
+        const binds = [ {val: 1}, { c: {val: 456 } } ];
         await assert.rejects(
           async () => await connection.execute(sql, binds),
           /NJS-044:/
@@ -623,7 +623,7 @@ describe('4. binding.js', function() {
     it('4.7.6 Invalid Test case when other-value is passed as named JSON',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        const binds = [ { b: {val : 1} }, {val : 456 } ];
+        const binds = [ { b: {val: 1} }, {val: 456 } ];
         await assert.rejects(
           async () => await connection.execute(sql, binds),
           /NJS-044:/
@@ -633,7 +633,7 @@ describe('4. binding.js', function() {
     it('4.7.7 Invalid Test case when all values is passed as named JSON',
       async function() {
         const sql = "SELECT SYSDATE FROM DUAL WHERE :b = 1 and :c = 456 ";
-        const binds = [ { b: {val : 1} }, { c: {val : 456 } } ];
+        const binds = [ { b: {val: 1} }, { c: {val: 456 } } ];
         await assert.rejects(
           async () => await connection.execute(sql, binds),
           /NJS-044:/
@@ -731,7 +731,7 @@ describe('4. binding.js', function() {
       const result = await connection.execute(
         "BEGIN nodb_binddate3(:io); END;",
         {
-          io: { val: vdate, dir : oracledb.BIND_INOUT, type: oracledb.DATE }
+          io: { val: vdate, dir: oracledb.BIND_INOUT, type: oracledb.DATE }
         });
 
       vdate = new Date("2016-08-05T00:00:00.000Z");
@@ -763,7 +763,7 @@ describe('4. binding.js', function() {
       const sql = 'select :ROWID from dual';
       await assert.rejects(
         async () => {
-          await connection.execute(sql, {ROWID:1});
+          await connection.execute(sql, {ROWID: 1});
         },
         //NJS-098: 1 positional bind values are required but 0 were provided
         /ORA-01745:|NJS-098:/
@@ -787,7 +787,7 @@ describe('4. binding.js', function() {
 
     it('4.10.1 various quoted bind names', async function() {
       const sql = 'SELECT :"percent%" FROM DUAL';
-      const binds = {percent : "percent%" };
+      const binds = {percent: "percent%" };
 
       const connection = await oracledb.getConnection(dbConfig);
       await assert.rejects(

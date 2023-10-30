@@ -272,8 +272,8 @@ describe('6. dmlReturning.js', function() {
 
       const sql = "INSERT INTO nodb_dmlreturn (id, name) VALUES (:int_val, :str_val) RETURNING id, name into :rid, :rname";
       const binds = {
-        int_val : 6,
-        str_val : "A different test string",
+        int_val: 6,
+        str_val: "A different test string",
         rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2 }
       };
@@ -290,8 +290,8 @@ describe('6. dmlReturning.js', function() {
 
       const sql = "INSERT INTO nodb_dmlreturn (id, name) VALUES (:int_val, :str_val) RETURNING id, name into :rid, :rname";
       const binds = {
-        int_val : 7,
-        str_val : "A" * 401,
+        int_val: 7,
+        str_val: "A" * 401,
         rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
         rname: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
       };

@@ -50,7 +50,7 @@ describe('258. keepInStmtCache.js', function() {
       this.skip();
     } else {
       const dbaConfig = {
-        user : dbConfig.test.DBA_user,
+        user: dbConfig.test.DBA_user,
         password: dbConfig.test.DBA_password,
         connectionString: dbConfig.connectString,
         privilege: oracledb.SYSDBA
@@ -96,7 +96,7 @@ describe('258. keepInStmtCache.js', function() {
 
       const c1 = await testsUtil.getParseCount(sysDBAConn, sid);
       for (let i = 0; i < iters; i++) {
-        await conn.execute(q, {}, {keepInStmtCache : true});
+        await conn.execute(q, {}, {keepInStmtCache: true});
       }
       const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
       assert.strictEqual(c2 - c1, 1);
@@ -108,7 +108,7 @@ describe('258. keepInStmtCache.js', function() {
 
       const c1 = await testsUtil.getParseCount (sysDBAConn, sid);
       for (let i = 0; i < iters; i++) {
-        await conn.execute(q, {}, {keepInStmtCache : false});
+        await conn.execute(q, {}, {keepInStmtCache: false});
       }
       const c2 = await testsUtil.getParseCount(sysDBAConn, sid);
       assert.strictEqual(c2 - c1, iters);

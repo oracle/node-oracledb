@@ -117,7 +117,7 @@ describe('250. rsGetAllRows2.js', function() {
           ORDER BY EMPLOYEE_ID ) as NC
         FROM
           NODB_RSDEPT A`,
-      {}, { resultSet : true }
+      {}, { resultSet: true }
     );
 
     const rows = await result.resultSet.getRows();
@@ -165,7 +165,7 @@ describe('250. rsGetAllRows2.js', function() {
           ORDER BY EMPLOYEE_ID ) as NC
       FROM
         NODB_RSDEPT A`,
-      {}, { resultSet : true, outFormat : oracledb.OUT_FORMAT_ARRAY }
+      {}, { resultSet: true, outFormat: oracledb.OUT_FORMAT_ARRAY }
     );
 
     const rows = await result.resultSet.getRows(0);
@@ -214,7 +214,7 @@ describe('250. rsGetAllRows2.js', function() {
           ORDER BY EMPLOYEE_ID ) as NC
         FROM
           NODB_RSDEPT A`,
-      {}, { resultSet : true }
+      {}, { resultSet: true }
     );
 
     const rows1 = await result.resultSet.getRows(1);
@@ -266,7 +266,7 @@ describe('250. rsGetAllRows2.js', function() {
           ORDER BY EMPLOYEE_ID ) as NC
       FROM
         NODB_RSDEPT A`,
-      {}, { resultSet : true }
+      {}, { resultSet: true }
     );
 
     const rows1 = await result.resultSet.getRow();
@@ -318,7 +318,7 @@ describe('250. rsGetAllRows2.js', function() {
           ORDER BY EMPLOYEE_ID ) as NC
         FROM
           NODB_RSDEPT A`,
-      {}, { resultSet : true, fetchArraySize : 100 }
+      {}, { resultSet: true, fetchArraySize: 100 }
     );
 
     const rows1 = await result.resultSet.getRows(1);
@@ -368,7 +368,7 @@ describe('250. rsGetAllRows2.js', function() {
           ORDER BY EMPLOYEE_ID ) as NC
         FROM
           NODB_RSDEPT A`,
-      {}, { resultSet : true, fetchArraySize : 1 }
+      {}, { resultSet: true, fetchArraySize: 1 }
     );
 
     const rows1 = await result.resultSet.getRows(1);

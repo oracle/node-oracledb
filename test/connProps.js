@@ -51,10 +51,10 @@ describe('193. connProps.js', function() {
       this.skip();
     } else {
       const dbaConfig = {
-        user          : dbConfig.test.DBA_user,
-        password      : dbConfig.test.DBA_password,
-        connectString : dbConfig.connectString,
-        privilege     : oracledb.SYSDBA,
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA,
       };
       const dbaConnection = await oracledb.getConnection(dbaConfig);
 

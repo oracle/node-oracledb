@@ -105,7 +105,7 @@ describe('1. connection.js', function() {
 
     it('1.1.4 Negative test - invalid outFormat value', async function() {
       await assert.rejects(
-        async () => await connection.execute(query, {id: 20}, {outFormat:0 }),
+        async () => await connection.execute(query, {id: 20}, {outFormat: 0 }),
         /NJS-007:/
       );
     });

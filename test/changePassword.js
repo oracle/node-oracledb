@@ -45,10 +45,10 @@ describe('161. changePassword.js', function() {
   const myUser = dbConfig.createUser();
   if (dbConfig.test.DBA_PRIVILEGE == true) {
     DBA_config = {
-      user:          dbConfig.test.DBA_user,
-      password:      dbConfig.test.DBA_password,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
       connectString: dbConfig.connectString,
-      privilege:     oracledb.SYSDBA
+      privilege: oracledb.SYSDBA
     };
   }
 
@@ -90,8 +90,8 @@ describe('161. changePassword.js', function() {
     let conn;
     const tpass = testsUtil.generateRandomPassword();
     let credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
     conn = await oracledb.getConnection(credential);
@@ -101,8 +101,8 @@ describe('161. changePassword.js', function() {
 
     // verify with new password
     credential = {
-      user:             myUser,
-      password:         tpass,
+      user: myUser,
+      password: tpass,
       connectionString: dbConfig.connectString
     };
     conn = await oracledb.getConnection(credential);
@@ -116,8 +116,8 @@ describe('161. changePassword.js', function() {
     let pool, conn;
     const tpass = testsUtil.generateRandomPassword();
     let credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
     pool = await oracledb.createPool(credential);
@@ -140,8 +140,8 @@ describe('161. changePassword.js', function() {
 
     // verify with new password
     credential = {
-      user:             myUser,
-      password:         tpass,
+      user: myUser,
+      password: tpass,
       connectionString: dbConfig.connectString
     };
     pool = await oracledb.createPool(credential);
@@ -155,8 +155,8 @@ describe('161. changePassword.js', function() {
     const dbaConn = await oracledb.getConnection(DBA_config);
     await dbaConn.changePassword(myUser, '', tpass);
     let credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
 
@@ -167,8 +167,8 @@ describe('161. changePassword.js', function() {
 
     // verify with changed password
     credential = {
-      user:             myUser,
-      password:         tpass,
+      user: myUser,
+      password: tpass,
       connectionString: dbConfig.connectString
     };
     const conn = await oracledb.getConnection(credential);
@@ -186,8 +186,8 @@ describe('161. changePassword.js', function() {
     await dbaConn.execute(sql);
 
     let credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
 
@@ -197,9 +197,9 @@ describe('161. changePassword.js', function() {
     );
 
     credential = {
-      user:             myUser,
-      password:         myUser,
-      newPassword:      tpass,
+      user: myUser,
+      password: myUser,
+      newPassword: tpass,
       connectionString: dbConfig.connectString
     };
     let conn = await oracledb.getConnection(credential);
@@ -209,8 +209,8 @@ describe('161. changePassword.js', function() {
     await dbaConn.changePassword(myUser, '', myUser);
 
     credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
 
@@ -226,8 +226,8 @@ describe('161. changePassword.js', function() {
     await dbaConn.changePassword(myUser, 'foobar', tpass);
 
     let credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
 
@@ -238,8 +238,8 @@ describe('161. changePassword.js', function() {
 
     // verify with new password
     credential = {
-      user:             myUser,
-      password:         tpass,
+      user: myUser,
+      password: tpass,
       connectionString: dbConfig.connectString
     };
 
@@ -253,8 +253,8 @@ describe('161. changePassword.js', function() {
   it('161.6 Negative: basic case, wrong original password', async function() {
     const tpass = testsUtil.generateRandomPassword();
     let credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
     const conn = await oracledb.getConnection(credential);
@@ -268,8 +268,8 @@ describe('161. changePassword.js', function() {
     await conn.close();
 
     credential = {
-      user:             myUser,
-      password:         tpass,
+      user: myUser,
+      password: tpass,
       connectionString: dbConfig.connectString
     };
 
@@ -283,8 +283,8 @@ describe('161. changePassword.js', function() {
   it.skip('161.7 Negative: basic case. invalid parameter', async function() {
     const tpass = 123;
     const credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
 
@@ -314,8 +314,8 @@ describe('161. changePassword.js', function() {
     await dbaConn.execute(`grant create session to ${tUser}`);
 
     let credential = {
-      user:             tUser,
-      password:         tUser,
+      user: tUser,
+      password: tUser,
       connectionString: dbConfig.connectString
     };
 
@@ -327,8 +327,8 @@ describe('161. changePassword.js', function() {
     );
 
     credential = {
-      user:             myUser,
-      password:         tpass,
+      user: myUser,
+      password: tpass,
       connectionString: dbConfig.connectString
     };
 
@@ -345,9 +345,9 @@ describe('161. changePassword.js', function() {
   it("161.9 Negative: invalid type of 'newPassword'", async function() {
     const wrongOne = 123;
     const credential = {
-      user:             myUser,
-      password:         myUser,
-      newPassword:      wrongOne,
+      user: myUser,
+      password: myUser,
+      newPassword: wrongOne,
       connectionString: dbConfig.connectString
     };
     await assert.rejects(
@@ -361,9 +361,9 @@ describe('161. changePassword.js', function() {
     await dbaConn.execute(`alter user ${myUser} password expire`);
 
     let credential = {
-      user:             myUser,
-      password:         myUser,
-      newPassword:      '',
+      user: myUser,
+      password: myUser,
+      newPassword: '',
       connectionString: dbConfig.connectString
     };
 
@@ -373,8 +373,8 @@ describe('161. changePassword.js', function() {
     );
 
     credential = {
-      user:             myUser,
-      password:         myUser,
+      user: myUser,
+      password: myUser,
       connectionString: dbConfig.connectString
     };
 
@@ -402,8 +402,8 @@ describe('161. changePassword.js', function() {
     await dbaConn.execute(`grant create session to ${tUser}`);
 
     const credential = {
-      user:             tUser,
-      password:         tUser,
+      user: tUser,
+      password: tUser,
       connectionString: dbConfig.connectString
     };
 
@@ -430,10 +430,10 @@ describe('161. changePassword.js', function() {
     const longPwd = "a".repeat(1024);
     if (dbConfig.test.DBA_PRIVILEGE == true) {
       DBA_config = {
-        user:          dbConfig.test.DBA_user,
-        password:      dbConfig.test.DBA_password,
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
         connectString: dbConfig.connectString,
-        privilege:     oracledb.SYSDBA
+        privilege: oracledb.SYSDBA
       };
     }
 
@@ -483,8 +483,8 @@ describe('161. changePassword.js', function() {
       await dbaConn.close();
       // login with the same username and long password
       const credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
       const conn = await oracledb.getConnection(credential);
@@ -511,8 +511,8 @@ describe('161. changePassword.js', function() {
       await dbaConn.execute(sql);
       const lpass = 'secret';
       var credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
       pool = await oracledb.createPool(credential);
@@ -544,8 +544,8 @@ describe('161. changePassword.js', function() {
 
       // verify with new password
       credential = {
-        user:             myUser,
-        password:         lpass,
+        user: myUser,
+        password: lpass,
         connectionString: dbConfig.connectString
       };
       pool = await oracledb.createPool(credential);
@@ -572,8 +572,8 @@ describe('161. changePassword.js', function() {
 
       await dbaConn.changePassword(myUser, longPwd, newlongPwd);
       let credential = {
-        user:             myUser,
-        password:         myUser,
+        user: myUser,
+        password: myUser,
         connectionString: dbConfig.connectString
       };
 
@@ -586,8 +586,8 @@ describe('161. changePassword.js', function() {
 
       // verify with changed password
       credential = {
-        user:             myUser,
-        password:         newlongPwd,
+        user: myUser,
+        password: newlongPwd,
         connectionString: dbConfig.connectString
       };
       const conn = await oracledb.getConnection(credential);
@@ -616,8 +616,8 @@ describe('161. changePassword.js', function() {
       await dbaConn.execute(sql);
 
       let credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -628,9 +628,9 @@ describe('161. changePassword.js', function() {
       );
 
       credential = {
-        user:             myUser,
-        password:         longPwd,
-        newPassword:      newlongPwd,
+        user: myUser,
+        password: longPwd,
+        newPassword: newlongPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -641,8 +641,8 @@ describe('161. changePassword.js', function() {
       await dbaConn.changePassword(myUser, '', longPwd);
 
       credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -658,8 +658,8 @@ describe('161. changePassword.js', function() {
       await dbaConn.changePassword(myUser, 'foobar', newlongPwd);
 
       let credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -671,8 +671,8 @@ describe('161. changePassword.js', function() {
 
       // verify with new password
       credential = {
-        user:             myUser,
-        password:         newlongPwd,
+        user: myUser,
+        password: newlongPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -687,8 +687,8 @@ describe('161. changePassword.js', function() {
     it('161.12.6 Negative: basic case, wrong original password', async function() {
       const newlongPwd = "b".repeat(1024);
       let credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
       const conn = await oracledb.getConnection(credential);
@@ -704,8 +704,8 @@ describe('161. changePassword.js', function() {
       await conn.close();
 
       credential = {
-        user:             myUser,
-        password:         newlongPwd,
+        user: myUser,
+        password: newlongPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -719,8 +719,8 @@ describe('161. changePassword.js', function() {
     it('161.12.7 Negative: basic case. invalid parameter', async function() {
       const lpass = 123;
       const credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -737,8 +737,8 @@ describe('161. changePassword.js', function() {
     it('161.12.8 Negative: basic case. invalid parameter with 1025 bytes', async function() {
       const newlongPwd = "a".repeat(1025);
       const credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
 
@@ -766,8 +766,8 @@ describe('161. changePassword.js', function() {
         await dbaConn.execute(sql);
 
         let credential = {
-          user:             tUser,
-          password:         longPwd,
+          user: tUser,
+          password: longPwd,
           connectionString: dbConfig.connectString
         };
 
@@ -779,8 +779,8 @@ describe('161. changePassword.js', function() {
         );
 
         credential = {
-          user:             myUser,
-          password:         newlongPwd,
+          user: myUser,
+          password: newlongPwd,
           connectionString: dbConfig.connectString
         };
 
@@ -802,9 +802,9 @@ describe('161. changePassword.js', function() {
     it("161.12.10 Negative: invalid type of 'newPassword'", async function() {
       const wrongOne = 123;
       const credential = {
-        user:             myUser,
-        password:         longPwd,
-        newPassword:      wrongOne,
+        user: myUser,
+        password: longPwd,
+        newPassword: wrongOne,
         connectionString: dbConfig.connectString
       };
 
@@ -820,9 +820,9 @@ describe('161. changePassword.js', function() {
       await dbaConn.execute(sql);
 
       let credential = {
-        user:             myUser,
-        password:         longPwd,
-        newPassword:      '',
+        user: myUser,
+        password: longPwd,
+        newPassword: '',
         connectionString: dbConfig.connectString
       };
 
@@ -833,8 +833,8 @@ describe('161. changePassword.js', function() {
       );
 
       credential = {
-        user:             myUser,
-        password:         longPwd,
+        user: myUser,
+        password: longPwd,
         connectionString: dbConfig.connectString
       };
 

@@ -49,10 +49,10 @@ describe('277. jsonDualityView6.js', function() {
     }
 
     const dbaCredential = {
-      user          : dbConfig.test.DBA_user,
-      password      : dbConfig.test.DBA_password,
-      connectString : dbConfig.connectString,
-      privilege     : oracledb.SYSDBA,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA,
     };
     const pwd = testsUtil.generateRandomPassword();
     dbaConn = await oracledb.getConnection(dbaCredential);
@@ -265,9 +265,9 @@ describe('277. jsonDualityView6.js', function() {
 
         result = await connection.execute(`select o.data.StudentClass from student_ov o
       order by o.data desc`);
-        assert.deepEqual(result.rows[0][0], [{"StudentClassId":3, "StudentId":3}]);
-        assert.deepEqual(result.rows[1][0], [{"StudentClassId":2, "StudentId":2}]);
-        assert.deepEqual(result.rows[2][0], [{"StudentClassId":1, "StudentId":1}]);
+        assert.deepEqual(result.rows[0][0], [{"StudentClassId": 3, "StudentId": 3}]);
+        assert.deepEqual(result.rows[1][0], [{"StudentClassId": 2, "StudentId": 2}]);
+        assert.deepEqual(result.rows[2][0], [{"StudentClassId": 1, "StudentId": 1}]);
 
         result = await connection.execute(`select o.data.StudentClass.StudentId,o.data.StudentId from student_ov o
       order by 1`);
@@ -375,8 +375,8 @@ describe('277. jsonDualityView6.js', function() {
       assert.strictEqual(result.rows.length, 3);
       assert.strictEqual(result.rows[0][0].StudentId, 1);
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");
-      assert.deepEqual(result.rows[0][0].StudentClass, [{"StudentClassId":1,
-        "StudentId":1, "Class":[{"ClassId":1, "Name":"CS101"}]}]);
+      assert.deepEqual(result.rows[0][0].StudentClass, [{"StudentClassId": 1,
+        "StudentId": 1, "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
     });
 
     it('277.2.2 Sanity DMLs', async function() {
@@ -406,10 +406,10 @@ describe('277. jsonDualityView6.js', function() {
 
       const result = await connection.execute(`select * from student_ov`);
       assert.strictEqual(result.rows.length, 3);
-      assert.deepEqual(result.rows[0][0]._id, {"stuid":1});
+      assert.deepEqual(result.rows[0][0]._id, {"stuid": 1});
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");
-      assert.deepEqual(result.rows[0][0].StudentClass, [{"StudentClassId":1, "StudentId":1,
-        "Class":[{"ClassId":1, "Name":"CS101"}]}]);
+      assert.deepEqual(result.rows[0][0].StudentClass, [{"StudentClassId": 1, "StudentId": 1,
+        "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
     });
 
     it('277.2.3 with different keywords', async function() {
@@ -455,8 +455,8 @@ describe('277. jsonDualityView6.js', function() {
       assert.strictEqual(result.rows.length, 1);
       assert.deepEqual(result.rows[0][0].StudentId, 1);
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");
-      assert.deepEqual(result.rows[0][0].StudentClass, [{"StudentClassId":1, "StudentId":1,
-        "Class":[{"ClassId":1, "Name":"CS101"}]}]);
+      assert.deepEqual(result.rows[0][0].StudentClass, [{"StudentClassId": 1, "StudentId": 1,
+        "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
       await connection.execute(`create table abc2
                           as select json_value(data,'$.StudentId') col
                           from student_ov o

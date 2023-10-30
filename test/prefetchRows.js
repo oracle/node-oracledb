@@ -220,7 +220,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      await conn.execute(sql, [], { prefetchRows : 13 });
+      await conn.execute(sql, [], { prefetchRows: 13 });
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
       assert.strictEqual(rt, 1);
@@ -233,7 +233,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      await conn.execute(sql, [], { prefetchRows : 13, fetchArraySize : 2 });
+      await conn.execute(sql, [], { prefetchRows: 13, fetchArraySize: 2 });
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
       assert.strictEqual(rt, 1);
@@ -246,7 +246,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      await conn.execute(sql, [], { prefetchRows : 3, fetchArraySize : 13 });
+      await conn.execute(sql, [], { prefetchRows: 3, fetchArraySize: 13 });
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
       assert.strictEqual(rt, 2);
@@ -259,7 +259,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      await conn.execute(sql, [], { prefetchRows : 3, fetchArraySize : 12 });
+      await conn.execute(sql, [], { prefetchRows: 3, fetchArraySize: 12 });
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
       assert.strictEqual(rt, 3);
@@ -272,7 +272,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      await conn.execute(sql, [], { prefetchRows : 3, fetchArraySize : 5 });
+      await conn.execute(sql, [], { prefetchRows: 3, fetchArraySize: 5 });
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
       assert.strictEqual(rt, 4);
@@ -284,16 +284,16 @@ describe("147. prefetchRows.js", function() {
 
     it('147.2.1 set oracledb.prefetchRows to be 0', async function() {
       oracledb.prefetchRows = 0;
-      await conn.execute("select 'foobar' from dual", [], { resultSet : true });
+      await conn.execute("select 'foobar' from dual", [], { resultSet: true });
     });
 
     it('147.2.2 execute() option, value of 0', async function() {
-      const options = { resultSet : true, prefetchRows: 0 };
+      const options = { resultSet: true, prefetchRows: 0 };
       await conn.execute("select 'prefetchRows' from dual", [], options);
     });
 
     it('147.2.3 Negative - negative value', async function() {
-      const options = { resultSet : true, prefetchRows: -10 };
+      const options = { resultSet: true, prefetchRows: -10 };
       await assert.rejects(
         async function() {
           await conn.execute("select 'prefetchRows' from dual", [], options);
@@ -304,7 +304,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.4 Negative - NaN', async function() {
-      const options = { resultSet : true, prefetchRows: NaN };
+      const options = { resultSet: true, prefetchRows: NaN };
       await assert.rejects(
         async function() {
           await conn.execute("select 'prefetchRows' from dual", [], options);
@@ -314,12 +314,12 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.5 execute() option, undefined, get overrided by global attribute', async function() {
-      const options = { resultSet : true, prefetchRows: undefined };
+      const options = { resultSet: true, prefetchRows: undefined };
       await conn.execute("select 'prefetchRows' from dual", [], options);
     });
 
     it('147.2.6 Negative - null', async function() {
-      const options = { resultSet : true, prefetchRows: null };
+      const options = { resultSet: true, prefetchRows: null };
       await assert.rejects(
         async function() {
           await conn.execute("select 'prefetchRows' from dual", [], options);
@@ -329,7 +329,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.7 Negative - random string', async function() {
-      const options = { resultSet : true, prefetchRows: 'random string' };
+      const options = { resultSet: true, prefetchRows: 'random string' };
       await assert.rejects(
         async function() {
           await conn.execute("select 'prefetchRows' from dual", [], options);
@@ -339,7 +339,7 @@ describe("147. prefetchRows.js", function() {
     });
 
     it('147.2.8 Negative - Boolean', async function() {
-      const options = { resultSet : true, prefetchRows: true };
+      const options = { resultSet: true, prefetchRows: true };
       await assert.rejects(
         async function() {
           await conn.execute("select 'prefetchRows' from dual", [], options);
@@ -355,7 +355,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 0 });
+      const result = await conn.execute(sql, [], { resultSet: true, prefetchRows: 0 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -369,7 +369,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 12 });
+      const result = await conn.execute(sql, [], { resultSet: true, prefetchRows: 12 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -383,7 +383,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 13 });
+      const result = await conn.execute(sql, [], { resultSet: true, prefetchRows: 13 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -397,7 +397,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 2 });
+      const result = await conn.execute(sql, [], { resultSet: true, prefetchRows: 2, fetchArraySize: 2 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -411,7 +411,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 2 });
+      const result = await conn.execute(sql, [], { resultSet: true, prefetchRows: 2, fetchArraySize: 2 });
       await result.resultSet.getRows(12);
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
@@ -426,7 +426,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 100 });
+      const result = await conn.execute(sql, [], { resultSet: true, prefetchRows: 2, fetchArraySize: 100 });
       await result.resultSet.getRows(13);
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -440,7 +440,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const result = await conn.execute(sql, [], { resultSet : true, prefetchRows: 2, fetchArraySize : 100 });
+      const result = await conn.execute(sql, [], { resultSet: true, prefetchRows: 2, fetchArraySize: 100 });
       await result.resultSet.getRows();
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -519,7 +519,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const stream = conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize : 2 });
+      const stream = conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize: 2 });
       await testsUtil.doStream(stream);
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
@@ -533,7 +533,7 @@ describe("147. prefetchRows.js", function() {
       const sid = await testsUtil.getSid(conn);
       let rt = await testsUtil.getRoundTripCount(sid);
 
-      const stream = conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize : 100 });
+      const stream = conn.queryStream(sql, [], { prefetchRows: 2, fetchArraySize: 100 });
       await testsUtil.doStream(stream);
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 

@@ -51,10 +51,10 @@ describe('278. Pool expansion', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 2,
-      poolIncrement     : 4,
-      homogeneous       : true
+      poolMin: 0,
+      poolMax: 2,
+      poolIncrement: 4,
+      homogeneous: true
     });
     const conn = await pool.getConnection();
     assert.strictEqual(pool.connectionsInUse, 1);
@@ -72,10 +72,10 @@ describe('278. Pool expansion', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 2,
-      poolMax           : 10,
-      poolIncrement     : 4,
-      homogeneous       : true
+      poolMin: 2,
+      poolMax: 10,
+      poolIncrement: 4,
+      homogeneous: true
     });
 
     await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
@@ -93,10 +93,10 @@ describe('278. Pool expansion', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 2,
-      poolMax           : 10,
-      poolIncrement     : 3,
-      homogeneous       : true
+      poolMin: 2,
+      poolMax: 10,
+      poolIncrement: 3,
+      homogeneous: true
     });
     const conn = await pool.getConnection();
     assert.strictEqual(pool.connectionsInUse, 1);
@@ -113,10 +113,10 @@ describe('278. Pool expansion', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 2,
-      poolMax           : 10,
-      poolIncrement     : 2,
-      homogeneous       : true
+      poolMin: 2,
+      poolMax: 10,
+      poolIncrement: 2,
+      homogeneous: true
     });
     let conn1, conn2, conn3;
     const routine1 = async function() {

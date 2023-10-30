@@ -75,7 +75,7 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo : { "TS_DATE": { type : oracledb.STRING } }
+        fetchInfo: { "TS_DATE": { type: oracledb.STRING } }
       }
     );
     assert.strictEqual(typeof result.rows[0].TS_DATE, "string");
@@ -87,10 +87,10 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo :
+        fetchInfo:
         {
-          "TS_DATE" : { type : oracledb.STRING },
-          "TS_NUM"  : { type : oracledb.STRING }
+          "TS_DATE": { type: oracledb.STRING },
+          "TS_NUM": { type: oracledb.STRING }
         }
       }
     );
@@ -107,10 +107,10 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo :
+        fetchInfo:
         {
-          "TS_DATE" : { type : oracledb.STRING },
-          "TS_NUM"  : { type : oracledb.STRING }
+          "TS_DATE": { type: oracledb.STRING },
+          "TS_NUM": { type: oracledb.STRING }
         }
       }
     );
@@ -127,10 +127,10 @@ describe('56. fetchAs.js', function() {
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo :
+        fetchInfo:
         {
-          "TS_DATE" : { type : oracledb.DEFAULT },
-          "TS_NUM"  : { type : oracledb.STRING }
+          "TS_DATE": { type: oracledb.DEFAULT },
+          "TS_NUM": { type: oracledb.STRING }
         }
       }
     );
@@ -144,10 +144,10 @@ describe('56. fetchAs.js', function() {
       "SELECT ROWID from DUAL",
       [],
       {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo :
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        fetchInfo:
         {
-          "ROWID" : { type : oracledb.STRING }
+          "ROWID": { type: oracledb.STRING }
         }
       }
     );
@@ -159,11 +159,11 @@ describe('56. fetchAs.js', function() {
       "SELECT ROWID from DUAL",
       [],
       {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true,
-        fetchInfo :
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true,
+        fetchInfo:
         {
-          "ROWID" : { type : oracledb.STRING }
+          "ROWID": { type: oracledb.STRING }
         }
       }
     );
@@ -202,10 +202,10 @@ describe('56. fetchAs.js', function() {
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo :
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo:
           {
-            "TS_NUM"  : { type : oracledb.STRING }
+            "TS_NUM": { type: oracledb.STRING }
           }
         }
       );
@@ -221,7 +221,7 @@ describe('56. fetchAs.js', function() {
       const result = await connection.execute(
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
-        { outFormat : oracledb.OUT_FORMAT_OBJECT }
+        { outFormat: oracledb.OUT_FORMAT_OBJECT }
       );
       assert.strictEqual(typeof result.rows[0].TS_NUM, "string");
       assert.strictEqual(result.rows[0].TS_NUM, numResults[numStrs.indexOf(element)]);
@@ -235,7 +235,7 @@ describe('56. fetchAs.js', function() {
         await connection.execute(
           "SELECT SYSDATE AS THE_DATE FROM DUAL",
           { },
-          { fetchInfo : { "THE_DATE" : oracledb.STRING }}
+          { fetchInfo: { "THE_DATE": oracledb.STRING }}
         );
       },
       // NJS-015: type was not specified for conversion

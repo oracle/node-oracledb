@@ -303,7 +303,7 @@ describe('141. insertNaNToNumber.js', function() {
     it('141.4.1 binding in NaN by name into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN nodb_nan_pkg.array_in(:id_in); END;";
       const binds = {
-        id_in: { type: oracledb.NUMBER, val:  [1, 0, NaN] }
+        id_in: { type: oracledb.NUMBER, val: [1, 0, NaN] }
       };
       await assert.rejects(
         async () => await connection.execute(sql, binds),
@@ -314,7 +314,7 @@ describe('141. insertNaNToNumber.js', function() {
     it('141.4.2 binding in NaN by position into Oracle NUMBER column throws NJS-105', async function() {
       const sql = "BEGIN nodb_nan_pkg.array_in(:1); END;";
       const binds = [
-        {type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val:  [1, 0, NaN]}
+        {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 0, NaN]}
       ];
       await assert.rejects(
         async () => await connection.execute(sql, binds),
@@ -327,8 +327,8 @@ describe('141. insertNaNToNumber.js', function() {
       const binds = {
         id_in: {
           type: oracledb.NUMBER,
-          dir:  oracledb.BIND_INOUT,
-          val:  [1, 0, NaN],
+          dir: oracledb.BIND_INOUT,
+          val: [1, 0, NaN],
           maxArraySize: 3
         }
       };

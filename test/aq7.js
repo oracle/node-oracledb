@@ -271,7 +271,7 @@ describe('283. aq7.js', function() {
     );
 
     await queue.enqOne({
-      payload: { "employees":[ "Employee1", "Employee2", "Employee3" ] },
+      payload: { "employees": [ "Employee1", "Employee2", "Employee3" ] },
     });
     await conn.commit();
 
@@ -320,7 +320,7 @@ describe('283. aq7.js', function() {
 
     await queue.enqOne({
       payload:
-        { "employee": { "name":"Employee1", "age":30, "city":"New City" } },
+        { "employee": { "name": "Employee1", "age": 30, "city": "New City" } },
     });
     await conn.commit();
 
@@ -330,7 +330,7 @@ describe('283. aq7.js', function() {
     await conn.commit();
 
     assert.deepStrictEqual(msg.payload.employee,
-      { "name":"Employee1", "age":30, "city":"New City" });
+      { "name": "Employee1", "age": 30, "city": "New City" });
   });
 
   it('283.10 enqMany and deqMany with JSON val as object type', async function() {
@@ -339,11 +339,11 @@ describe('283. aq7.js', function() {
 
     const empList = [
       {payload: { empDetails1:
-        { "name":"Employee1", "age":24, "city":"New City" } }},
+        { "name": "Employee1", "age": 24, "city": "New City" } }},
       {payload: { empDetails2:
-        { "name":"Employee2", "age":30, "city":"New York" } }},
+        { "name": "Employee2", "age": 30, "city": "New York" } }},
       {payload: { empDetails3:
-        { "name":"Employee3", "age":28, "city":"New Land" } }}
+        { "name": "Employee3", "age": 28, "city": "New Land" } }}
     ];
 
     await queue3.enqMany(empList);
@@ -361,11 +361,11 @@ describe('283. aq7.js', function() {
     const msgs = await queue4.deqMany(3); // get at most 3 messages
 
     assert.deepStrictEqual(msgs[0].payload.empDetails1,
-      { "name":"Employee1", "age":24, "city":"New City" });
+      { "name": "Employee1", "age": 24, "city": "New City" });
     assert.deepStrictEqual(msgs[1].payload.empDetails2,
-      { "name":"Employee2", "age":30, "city":"New York" });
+      { "name": "Employee2", "age": 30, "city": "New York" });
     assert.deepStrictEqual(msgs[2].payload.empDetails3,
-      { "name":"Employee3", "age":28, "city":"New Land" });
+      { "name": "Employee3", "age": 28, "city": "New Land" });
   });
 
   it('283.11 enqOne and deqOne CLOB value into a JSON key', async function() {

@@ -153,7 +153,7 @@ describe('124. nclobDMLBindAsString.js', function() {
       sql,
       bindVar,
       {
-        fetchInfo : { CONTENT : { type : oracledb.STRING } }
+        fetchInfo: { CONTENT: { type: oracledb.STRING } }
       });
     assert.strictEqual(result.rows[0][0], insertID);
     assert.strictEqual(result.rows[0][1], insertStr);

@@ -91,7 +91,7 @@ describe('15. resultsetToStream.js', function() {
         '  open :cursor for select employees_name from nodb_rs2stream; \n' +
         'end;',
         {
-          cursor:  { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+          cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
         }
       );
       const stream = result.outBinds.cursor.toQueryStream();
@@ -174,7 +174,7 @@ describe('15. resultsetToStream.js', function() {
           open :cursor for select employees_name from nodb_rs2stream;
         end;`;
       const binds = {
-        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
       const result = await connection.execute(sql, binds);
       const cursor = result.outBinds.cursor;
@@ -193,7 +193,7 @@ describe('15. resultsetToStream.js', function() {
           open :cursor for select employees_name from nodb_rs2stream;
         end;`;
       const binds = {
-        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
       const result = await connection.execute(sql, binds);
       const cursor = result.outBinds.cursor;
@@ -212,7 +212,7 @@ describe('15. resultsetToStream.js', function() {
           open :cursor for select employees_name from nodb_rs2stream;
         end;`;
       const binds = {
-        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
       const result = await connection.execute(sql, binds);
       const cursor = result.outBinds.cursor;
@@ -231,7 +231,7 @@ describe('15. resultsetToStream.js', function() {
           open :cursor for select employees_name from nodb_rs2stream;
         end;`;
       const binds = {
-        cursor:  { type: oracledb.CURSOR, dir : oracledb.BIND_OUT }
+        cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
       const result = await connection.execute(sql, binds);
       const cursor = result.outBinds.cursor;

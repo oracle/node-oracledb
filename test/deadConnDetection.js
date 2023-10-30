@@ -40,10 +40,10 @@ describe('276. deadConnDetection.js', function() {
   let dbaConn = null;
   before(async function() {
     dbaConn = await oracledb.getConnection({
-      user          : dbConfig.test.DBA_user,
-      password      : dbConfig.test.DBA_password,
-      connectString : dbConfig.connectString,
-      privilege     : oracledb.SYSDBA,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA,
     });
   });
 

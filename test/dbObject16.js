@@ -116,7 +116,7 @@ describe('215. dbObject16.js', () => {
     assert.strictEqual(result3.rowsAffected, 1);
 
     sql = `SELECT * FROM ${TABLE}`;
-    const result4 = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
+    const result4 = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     assert.strictEqual(result4.rows[0].SPORTNAME, 'Frisbee');
     assert.strictEqual(result4.rows[1].SPORTNAME, 'Hockey');
 

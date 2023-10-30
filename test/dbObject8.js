@@ -100,7 +100,7 @@ describe('207. dbObject8.js', () => {
     const farm1 = new FarmType(
       {
         FARMERNAME: 'MacDonald',
-        HARVEST:  crops[0]
+        HARVEST: crops[0]
       }
     );
     await conn.execute(

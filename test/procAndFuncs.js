@@ -148,7 +148,7 @@ describe('268. tests for calling stored procedures and functions', function() {
     it('268.3.1 executing a stored function', async function() {
 
       const result = await connection.execute(`SELECT function_Test('hi', 5) as result FROM DUAL`, [], { outFormat: oracledb.OBJECT });
-      assert.deepStrictEqual(result.rows[0], {"RESULT":7});
+      assert.deepStrictEqual(result.rows[0], {"RESULT": 7});
     });
 
     it('268.3.2 executing a stored function with extra args', async function() {

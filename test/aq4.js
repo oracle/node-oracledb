@@ -47,7 +47,7 @@ describe('267. aq4.js', function() {
   const objTable     = "NODB_TAB_ADDR";
 
   const addrData     = {
-    NAME:    "scott",
+    NAME: "scott",
     ADDRESS: "The kennel"
   };
 
@@ -99,8 +99,8 @@ describe('267. aq4.js', function() {
     await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
 
     const credential = {
-      user:          AQ_USER,
-      password:      AQ_USER_PWD,
+      user: AQ_USER,
+      password: AQ_USER_PWD,
       connectString: dbConfig.connectString
     };
     conn = await oracledb.getConnection(credential);

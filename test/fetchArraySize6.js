@@ -187,7 +187,7 @@ describe("153. fetchArraySize6.js", function() {
       const result = await connection.execute(
         "BEGIN nodb_ref_pkg.array_inout(:id_in, :c); END;",
         {
-          id_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val: updateFromId },
+          id_in: { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: updateFromId },
           c: { type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ["something new"], maxArraySize: maxArraySizeVal },
         },
         {
@@ -334,7 +334,7 @@ describe("153. fetchArraySize6.js", function() {
       const result = await connection.execute(
         "BEGIN :output := nodb_ref_fun_pkg.array_inout(:id_in, :c_inout); END;",
         {
-          id_in: { type: oracledb.NUMBER, dir:  oracledb.BIND_IN, val: updateFromId },
+          id_in: { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: updateFromId },
           c_inout: { type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ["something new"], maxArraySize: maxArraySizeVal },
           output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxArraySize: maxArraySizeVal }
         },

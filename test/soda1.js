@@ -199,8 +199,8 @@ describe('164. soda1.js', () => {
 
     const index =
       {
-        name :  indexName,
-        fields : [ { path: "name" }]
+        name: indexName,
+        fields: [ { path: "name" }]
       };
 
     await coll.createIndex(index);

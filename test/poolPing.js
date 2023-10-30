@@ -155,9 +155,9 @@ describe("73. poolPing.js", function() {
 
   const testPoolDefine = async function(userSetInterval, expectedValue) {
     const config = {
-      user:             dbConfig.user,
-      password:         dbConfig.password,
-      connectString:    dbConfig.connectString,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString,
       poolPingInterval: userSetInterval
     };
     const pool = await oracledb.createPool(config);

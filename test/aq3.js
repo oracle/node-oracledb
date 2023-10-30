@@ -57,8 +57,8 @@ describe('219. aq3.js', function() {
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
 
       const credential = {
-        user:          AQ_USER,
-        password:      AQ_USER_PWD,
+        user: AQ_USER,
+        password: AQ_USER_PWD,
         connectString: dbConfig.connectString
       };
       conn = await oracledb.getConnection(credential);

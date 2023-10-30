@@ -72,7 +72,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.1.1 basic case: a simple string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: "PL/SQL Binding Scalar"}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -81,7 +81,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.1.2 negative: bind in value and type mismatch', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: 42}
       };
       await assert.rejects(
@@ -92,7 +92,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.1.3 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -101,7 +101,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.1.4 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ''}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -110,7 +110,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.1.5 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -119,7 +119,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.1.6 tests default dir & type', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         strValue: "PL/SQL Binding Scalar"
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -128,7 +128,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.1.7 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         strValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -161,7 +161,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.1 basic case', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: 755}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -170,7 +170,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.2 auto detect number type', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: 755
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -179,7 +179,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.3 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -188,7 +188,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.4 Negative: bind value and type mismatch - val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -199,7 +199,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.5 val: 0', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: 0}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -208,7 +208,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.6 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -217,7 +217,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.7 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -228,7 +228,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.2.8 val: -1', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         numValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: -1}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -260,7 +260,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.3.1 basic case', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: dt}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -269,7 +269,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.3.2 auto detect Date type', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: dt
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -278,7 +278,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.3.3 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -287,7 +287,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.3.4 val: empty string, negative - bind value and type mismatch', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -298,7 +298,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.3.5 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -307,7 +307,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.3.6 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -319,7 +319,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.3.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date (2016, 1, 30);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -330,7 +330,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.3.8 val: 1969-12-31', async function() {
       const date = new Date (1969, 11, 31);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -340,7 +340,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.3.9 val: epoch date 1970-1-1', async function() {
       const date = new Date (1970, 0, 1);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -350,7 +350,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.3.10 val: create Date value using numeric value: new Date(number)', async function() {
       const date = new Date (1476780296673);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -363,7 +363,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.3.11 val: create Date value using numeric value: new Date(7 number)', async function() {
       const date = new Date (2011, 5, 3, 4, 6, 23, 123);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -377,7 +377,7 @@ describe('70. plsqlBindScalar.js', function() {
       // Zero time is 01 January 1970 00:00:00 UTC
       const date = new Date(0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -411,7 +411,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.4.1 basic case', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: bindValue}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -420,7 +420,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.4.2 auto detect Buffer type', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         bufValue: bindValue
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -429,7 +429,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.4.3 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -438,7 +438,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.4.4 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -449,7 +449,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.4.5 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -458,7 +458,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.4.6 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         bufValue: {type: oracledb.BUFFER, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -489,10 +489,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.5.1 basic case: a simple string', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  "PL/SQL Binding INOUT Scalar"
+          val: "PL/SQL Binding INOUT Scalar"
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -501,9 +501,9 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.5.2 tests default type', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
-          val:  "PL/SQL Binding INOUT Scalar"
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
+          val: "PL/SQL Binding INOUT Scalar"
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -512,10 +512,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.5.3 negative: bind value and type mismatch', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  755
+          val: 755
         }
       };
       await assert.rejects(
@@ -526,10 +526,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.5.4 val: null', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  null
+          val: null
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -538,10 +538,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.5.5 val: empty string', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  ''
+          val: ''
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -550,10 +550,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.5.6 val: undefined', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  undefined
+          val: undefined
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -562,10 +562,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.5.7 val: NaN', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  NaN
+          val: NaN
         }
       };
       await assert.rejects(
@@ -581,10 +581,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "    p_inout := 'abc'; \n" +
                  "END nodb_inoutproc508;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  null
+          val: null
         }
       };
       const sqlrun508 = "begin nodb_inoutproc508(p_inout => :p_inout); end;";
@@ -602,10 +602,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "    p_inout := null; \n" +
                  "END nodb_inoutproc509;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  "abc"
+          val: "abc"
         }
       };
       const sqlrun509 = "begin nodb_inoutproc509(p_inout => :p_inout); end;";
@@ -625,10 +625,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc510;";
       const strVar = "abcdefghijklmnopqrstuvwxyz";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  strVar
+          val: strVar
         }
       };
       const sqlrun510 = "begin nodb_inoutproc510(p_inout => :p_inout); end;";
@@ -648,10 +648,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc511;";
       const strVar = "Pack my bag with five dozen liquor jugs";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  strVar
+          val: strVar
         }
       };
       const sqlrun511 = "begin nodb_inoutproc511(p_inout => :p_inout); end;";
@@ -685,10 +685,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.1 basic case', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  8396
+          val: 8396
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -697,9 +697,9 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.2 auto detect number type', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
-          val:  8396
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
+          val: 8396
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -708,10 +708,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.3 negative: bind value and type mismatch - val: empty string', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  ''
+          val: ''
         }
       };
       await assert.rejects(
@@ -722,10 +722,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.4 val: null', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  null
+          val: null
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -734,10 +734,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.5 val: undefined', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  undefined
+          val: undefined
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -746,10 +746,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.6 val: NaN', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  NaN
+          val: NaN
         }
       };
       await assert.rejects(
@@ -760,10 +760,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.7 val: 0', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  0
+          val: 0
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -772,10 +772,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.6.8 val: -1', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  -1
+          val: -1
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -789,10 +789,10 @@ describe('70. plsqlBindScalar.js', function() {
                    "    p_inout := 3; \n" +
                    "END nodb_inoutproc610;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  null
+          val: null
         }
       };
       const sqlrun610 = "begin nodb_inoutproc610(p_inout => :p_inout); end;";
@@ -811,10 +811,10 @@ describe('70. plsqlBindScalar.js', function() {
                    "    p_inout := null; \n" +
                    "END nodb_inoutproc611;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  3
+          val: 3
         }
       };
       const sqlrun611 = "begin nodb_inoutproc611(p_inout => :p_inout); end;";
@@ -849,10 +849,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.7.1 basic case', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  daterun
+          val: daterun
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -861,9 +861,9 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.7.2 auto detect Date type', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
-          val:  daterun
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
+          val: daterun
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -872,10 +872,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.7.3 val: null', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -884,10 +884,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.7.4 val: empty string, negative - bind value and type mismatch', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  ''
+          val: ''
         }
       };
       await assert.rejects(
@@ -898,10 +898,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.7.5 val: undefined', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  undefined
+          val: undefined
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -910,10 +910,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.7.6 val: NaN', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  NaN
+          val: NaN
         }
       };
       await assert.rejects(
@@ -925,10 +925,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.7.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date (2016, 1, 30);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -939,10 +939,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.7.8 val: 1969-12-31', async function() {
       const date = new Date (1969, 11, 31);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -952,10 +952,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.7.9 val: epoch date 1970-1-1', async function() {
       const date = new Date (1970, 0, 1);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -969,10 +969,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "    p_inout := TO_DATE('5-AUG-2016'); \n" +
                  "END nodb_inoutproc710;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const sqlrun710 = "begin nodb_inoutproc710(p_inout => :p_inout); end;";
@@ -992,10 +992,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc711;";
       const date = new Date(2011, 0, 12);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const sqlrun711 = "begin nodb_inoutproc711(p_inout => :p_inout); end;";
@@ -1031,10 +1031,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.1 basic case', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  bufValue,
+          val: bufValue,
           maxSize: 32767 // max allowed value of maxSize in PL/SQL
         }
       };
@@ -1044,9 +1044,9 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.2 auto detect BUFFER type', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
-          val:  bufValue,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
+          val: bufValue,
           maxSize: 32767
         }
       };
@@ -1057,10 +1057,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.8.3 val: null', async function() {
       const emptybuf = Buffer.alloc (0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  emptybuf,
+          val: emptybuf,
           maxSize: 32767
         }
       };
@@ -1071,10 +1071,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.8.4 val: empty string', async function() {
       const emptybuf = Buffer.from ("", "utf-8");
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  emptybuf,
+          val: emptybuf,
           maxSize: 32767
         }
       };
@@ -1084,10 +1084,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.5 val: undefined', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  undefined,
+          val: undefined,
           maxSize: 32767
         }
       };
@@ -1097,10 +1097,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.8.6 val: NaN', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  NaN,
+          val: NaN,
           maxSize: 32767
         }
       };
@@ -1176,24 +1176,24 @@ describe('70. plsqlBindScalar.js', function() {
       const bindVar = {
         p_in: rowid,
         p_inout1: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  "PL/SQL Binding INOUT Scalar"
+          val: "PL/SQL Binding INOUT Scalar"
         },
         p_inout2: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  101
+          val: 101
         },
         p_inout3: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  daterun
+          val: daterun
         },
         p_inout4: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  bufValue,
+          val: bufValue,
           maxSize: 32767
         }
       };
@@ -1220,24 +1220,24 @@ describe('70. plsqlBindScalar.js', function() {
       const bindVar = {
         p_in: rowid,
         p_inout1: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  null
+          val: null
         },
         p_inout2: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  null
+          val: null
         },
         p_inout3: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         },
         p_inout4: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  emptybuf,
+          val: emptybuf,
           maxSize: 32767
         }
       };
@@ -1264,24 +1264,24 @@ describe('70. plsqlBindScalar.js', function() {
       const bindVar = {
         p_in: rowid,
         p_str: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.STRING,
-          val:  null
+          val: null
         },
         p_num: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.NUMBER,
-          val:  null
+          val: null
         },
         p_dat: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.DATE,
-          val:  null
+          val: null
         },
         p_buf: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.BUFFER,
-          val:  emptybuf,
+          val: emptybuf,
           maxSize: 32767
         }
       };
@@ -1303,24 +1303,24 @@ describe('70. plsqlBindScalar.js', function() {
       const bindVar = {
         p_in: rowid,
         p_inout1: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.STRING,
-          val:  undefined
+          val: undefined
         },
         p_inout2: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.NUMBER,
-          val:  undefined
+          val: undefined
         },
         p_inout3: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  undefined
+          val: undefined
         },
         p_inout4: {
-          dir:  oracledb.BIND_INOUT,
+          dir: oracledb.BIND_INOUT,
           type: oracledb.BUFFER,
-          val:  emptybuf,
+          val: emptybuf,
           maxSize: 32767
         }
       };
@@ -1347,24 +1347,24 @@ describe('70. plsqlBindScalar.js', function() {
       const bindVar = {
         p_in: rowid,
         p_str: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.STRING,
-          val:  undefined
+          val: undefined
         },
         p_num: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.NUMBER,
-          val:  undefined
+          val: undefined
         },
         p_dat: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.DATE,
-          val:  undefined
+          val: undefined
         },
         p_buf: {
-          dir:  oracledb.BIND_IN,
+          dir: oracledb.BIND_IN,
           type: oracledb.BUFFER,
-          val:  emptybuf,
+          val: emptybuf,
           maxSize: 32767
         }
       };
@@ -1397,7 +1397,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Shenzhen City'}
       };
       let sql = "begin :output := nodb_checkplsqlvalue1 (:p_in); end;";
@@ -1405,7 +1405,7 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.output, 'the same');
       assert.strictEqual(result.outBinds.p_in, 'Shenzhen City');
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Shenzhen city'}
       };
       sql = "begin :output := nodb_checkplsqlvalue1 (:p_in); end;";
@@ -1429,7 +1429,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: null}
       };
       const sql = "begin :output := nodb_checkplsqlvalue2 (:p_in); end;";
@@ -1437,21 +1437,21 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.output, 'correct');
       assert.strictEqual(result.outBinds.p_in, null);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ''}
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'correct');
       assert.strictEqual(result.outBinds.p_in, null);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: undefined}
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'correct');
       assert.strictEqual(result.outBinds.p_in, null);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'foobar'}
       };
       result = await connection.execute(sql, bindVar);
@@ -1474,7 +1474,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: null}
       };
       const sql = "begin :output := nodb_checkplsqlvalue3 (:p_in); end;";
@@ -1482,14 +1482,14 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.output, 'correct');
       assert.strictEqual(result.outBinds.p_in, null);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: undefined}
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'correct');
       assert.strictEqual(result.outBinds.p_in, null);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: 0}
       };
       result = await connection.execute(sql, bindVar);
@@ -1512,7 +1512,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
       };
       const sql = "begin :output := nodb_checkplsqlvalue4 (:p_in); end;";
@@ -1521,13 +1521,13 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.p_in, null);
       const today = new Date();
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'wrong');
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
       };
       result = await connection.execute(sql, bindVar);
@@ -1550,7 +1550,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: null}
       };
       const sql = "begin :output := nodb_checkplsqlvalue5 (:p_in); end;";
@@ -1558,14 +1558,14 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.output, 'correct');
       assert.strictEqual(result.outBinds.p_in, null);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: Buffer.from('')}
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'correct');
       assert.strictEqual(result.outBinds.p_in, null);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: undefined}
       };
       result = await connection.execute(sql, bindVar);
@@ -1574,7 +1574,7 @@ describe('70. plsqlBindScalar.js', function() {
       const bufsize = 21;
       const bufValue = assist.createBuffer(bufsize);
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, val: bufValue}
       };
       result = await connection.execute(sql, bindVar);
@@ -1597,7 +1597,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
       };
       const sql = "begin :output := nodb_checkplsqlvalue6 (:p_in); end;";
@@ -1606,13 +1606,13 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.p_in, null);
       const today = new Date();
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'wrong');
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
       };
       result = await connection.execute(sql, bindVar);
@@ -1635,7 +1635,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
       };
       const sql = "begin :output := nodb_checkplsqlvalue7 (:p_in); end;";
@@ -1644,13 +1644,13 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.p_in, null);
       const today = new Date();
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'wrong');
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
       };
       result = await connection.execute(sql, bindVar);
@@ -1673,7 +1673,7 @@ describe('70. plsqlBindScalar.js', function() {
                  "END;";
       await connection.execute(proc);
       let bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: null}
       };
       const sql = "begin :output := nodb_checkplsqlvalue8 (:p_in); end;";
@@ -1682,13 +1682,13 @@ describe('70. plsqlBindScalar.js', function() {
       assert.strictEqual(result.outBinds.p_in, null);
       const today = new Date();
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: { type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: today }
       };
       result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.outBinds.output, 'wrong');
       bindVar = {
-        output:   { type: oracledb.STRING, dir: oracledb.BIND_OUT },
+        output: { type: oracledb.STRING, dir: oracledb.BIND_OUT },
         p_in: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: undefined}
       };
       result = await connection.execute(sql, bindVar);
@@ -1722,7 +1722,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.11.1 basic case', async function() {
       const date = '1999-12-01 11:00:00.001231000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -1731,7 +1731,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.11.2 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -1740,7 +1740,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.11.3 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ''}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -1749,7 +1749,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.11.4 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -1758,7 +1758,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.11.5 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -1770,7 +1770,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.11.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = '2016-02-30 00:00:00.000000000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       await assert.rejects(
@@ -1782,7 +1782,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.11.8 val: 1969-12-31', async function() {
       const date = '1969-12-31 00:00:00.000000000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -1792,7 +1792,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.11.9 val: epoch date 1970-1-1', async function() {
       const date = '1970-01-01 00:00:00.000000000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -1824,7 +1824,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.12.1 basic case', async function() {
       const date = new Date("2016-09-10 14:10:10.123");
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -1834,7 +1834,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.12.2 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -1843,7 +1843,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.12.3 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -1854,7 +1854,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.12.4 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -1863,7 +1863,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.12.5 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -1875,7 +1875,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.12.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date(2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -1886,7 +1886,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.12.8 val: 1969-12-31', async function() {
       const date = new Date(1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -1897,7 +1897,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.12.9 val: epoch date 1970-1-1', async function() {
       const date = new Date(1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -1908,7 +1908,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.12.10 val: create Date value using numeric value: new Date(number)', async function() {
       const date = new Date(1476780296673); //Integer value representing the number of milliseconds since 1 January 1970 00:00:00 UTC
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {
           type: oracledb.DB_TYPE_TIMESTAMP_TZ,
           dir: oracledb.BIND_IN,
@@ -1924,7 +1924,7 @@ describe('70. plsqlBindScalar.js', function() {
       //Zero time is 01 January 1970 00:00:00 UTC
       const date = new Date(0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {
           type: oracledb.DB_TYPE_TIMESTAMP_TZ,
           dir: oracledb.BIND_IN,
@@ -1960,7 +1960,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.13.1 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -1971,7 +1971,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.13.2 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -1980,7 +1980,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.13.3 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -2011,10 +2011,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.14.1 basic case', async function() {
       const date = new Date(2016, 7, 5, 12, 13, 14, 123);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2024,9 +2024,9 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.14.2 auto detect data type', async function() {
       const date = new Date(2016, 7, 5, 12, 13, 14, 123);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
-          val:  date
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2035,10 +2035,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.14.3 val: null', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2047,10 +2047,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.14.4 val: empty string', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  ''
+          val: ''
         }
       };
       await assert.rejects(
@@ -2061,10 +2061,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.14.5 val: undefined', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  undefined
+          val: undefined
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2073,10 +2073,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.14.6 val: NaN', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  NaN
+          val: NaN
         }
       };
       await assert.rejects(
@@ -2088,10 +2088,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.14.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date (2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2102,10 +2102,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.14.8 val: 1969-12-31', async function() {
       const date = new Date (1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2115,10 +2115,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.14.9 val: epoch date 1970-1-1', async function() {
       const date = new Date (1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2132,10 +2132,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "    p_inout := TO_TIMESTAMP('1999-12-01 11:00:00.001231000', 'YYYY-MM-DD HH24:MI:SS.FF'); \n" +
                  "END nodb_inoutproc71410;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const sqlrun71410 = "begin nodb_inoutproc71410(p_inout => :p_inout); end;";
@@ -2154,10 +2154,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc71411;";
       const date = new Date(2011, 0, 12, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const sqlrun71411 = "begin nodb_inoutproc71411(p_inout => :p_inout); end;";
@@ -2193,7 +2193,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.15.1 basic case', async function() {
       const date = '1999-12-01 11:00:00.123450000 -08:00';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2202,7 +2202,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.15.2 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2211,7 +2211,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.15.3 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ''}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2220,7 +2220,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.15.4 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2229,7 +2229,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.15.5 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -2241,7 +2241,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.15.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = '2016-02-30 00:00:00.000000000 -08:00';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       await assert.rejects(
@@ -2253,7 +2253,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.15.8 val: 1969-12-31', async function() {
       const date = '1969-12-31 00:00:00.000000000 -08:00';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2263,7 +2263,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.15.9 val: epoch date 1970-1-1', async function() {
       const date = '1970-01-01 00:00:00.000000000 -08:00';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2295,7 +2295,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.16.1 basic case', async function() {
       const date = new Date("2016-09-10 14:10:10.123");
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2305,7 +2305,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.16.2 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2314,7 +2314,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.16.3 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -2325,7 +2325,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.16.4 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2334,7 +2334,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.16.5 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -2346,7 +2346,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.16.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date(2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2357,7 +2357,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.16.8 val: 1969-12-31', async function() {
       const date = new Date(1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2368,7 +2368,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.16.9 val: epoch date 1970-1-1', async function() {
       const date = new Date(1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2379,7 +2379,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.16.10 val: create Date value using numeric value: new Date(number)', async function() {
       const date = new Date(1476780296673);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {
           type: oracledb.DB_TYPE_TIMESTAMP_TZ,
           dir: oracledb.BIND_IN,
@@ -2431,7 +2431,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.17.1 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -2442,7 +2442,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.17.2 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2451,7 +2451,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.17.3 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -2483,10 +2483,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.18.1 basic case', async function() {
       const date = new Date(2016, 7, 5, 12, 13, 14, 123);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2496,9 +2496,9 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.18.2 auto detect data type', async function() {
       const date = new Date(2016, 7, 5, 12, 13, 14, 123);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
-          val:  date
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2507,10 +2507,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.18.3 val: null', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2519,10 +2519,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.18.4 val: empty string', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  ''
+          val: ''
         }
       };
       await assert.rejects(
@@ -2533,10 +2533,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.18.5 val: undefined', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  undefined
+          val: undefined
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2545,10 +2545,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.18.6 val: NaN', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  NaN
+          val: NaN
         }
       };
       await assert.rejects(
@@ -2560,10 +2560,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.18.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date (2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2574,10 +2574,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.18.8 val: 1969-12-31', async function() {
       const date = new Date (1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2587,10 +2587,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.18.9 val: epoch date 1970-1-1', async function() {
       const date = new Date (1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2604,10 +2604,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "    p_inout := TO_TIMESTAMP_TZ('1999-12-01 11:00:00.001231000', 'YYYY-MM-DD HH24:MI:SS.FF'); \n" +
                  "END nodb_inoutproc71810;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const sqlrun71810 = "begin nodb_inoutproc71810(p_inout => :p_inout); end;";
@@ -2626,10 +2626,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc71811;";
       const date = new Date(2011, 0, 12, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const sqlrun71811 = "begin nodb_inoutproc71811(p_inout => :p_inout); end;";
@@ -2665,7 +2665,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.19.1 basic case', async function() {
       const date = '1999-12-01 11:00:00.123450000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2674,7 +2674,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.19.2 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2683,7 +2683,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.19.3 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ''}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2692,7 +2692,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.19.4 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2701,7 +2701,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.19.5 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -2713,7 +2713,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.19.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = '2016-02-30 00:00:00.000000000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       await assert.rejects(
@@ -2725,7 +2725,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.19.8 val: 1969-12-31', async function() {
       const date = '1969-12-31 00:00:00.000000000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2736,7 +2736,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.19.9 val: epoch date 1970-1-1', async function() {
       const date = '1970-01-01 00:00:00.000000000';
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_str, bindVar);
@@ -2769,7 +2769,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.20.1 basic case', async function() {
       const date = new Date("2016-09-10 14:10:10.123");
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2779,7 +2779,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.20.2 val: null', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: null}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2788,7 +2788,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.20.3 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -2799,7 +2799,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.20.4 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2808,7 +2808,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.20.5 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -2820,7 +2820,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.20.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date(2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2831,7 +2831,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.20.8 val: 1969-12-31', async function() {
       const date = new Date(1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2842,7 +2842,7 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.20.9 val: epoch date 1970-1-1', async function() {
       const date = new Date(1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: date}
       };
       const result = await connection.execute(sqlrun_dt, bindVar);
@@ -2905,7 +2905,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.21.1 val: empty string', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: ''}
       };
       await assert.rejects(
@@ -2916,7 +2916,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.21.2 val: undefined', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: undefined}
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2925,7 +2925,7 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.21.3 val: NaN', async function() {
       const bindVar = {
-        output:   resultBind,
+        output: resultBind,
         dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: NaN}
       };
       await assert.rejects(
@@ -2957,10 +2957,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.22.1 basic case', async function() {
       const date = new Date(2016, 7, 5, 12, 13, 14, 123);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2970,9 +2970,9 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.22.2 auto detect data type', async function() {
       const date = new Date(2016, 7, 5, 12, 13, 14, 123);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
-          val:  date
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2981,10 +2981,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.22.3 val: null', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -2993,10 +2993,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.22.4 val: empty string', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  ''
+          val: ''
         }
       };
       await assert.rejects(
@@ -3007,10 +3007,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.22.5 val: undefined', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  undefined
+          val: undefined
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -3019,10 +3019,10 @@ describe('70. plsqlBindScalar.js', function() {
 
     it('70.22.6 val: NaN', async function() {
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  NaN
+          val: NaN
         }
       };
       await assert.rejects(
@@ -3034,10 +3034,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.22.7 val: invalid Date Value: Feb 30, 2016', async function() {
       const date = new Date (2016, 1, 30, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -3048,10 +3048,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.22.8 val: 1969-12-31', async function() {
       const date = new Date (1969, 11, 31, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -3061,10 +3061,10 @@ describe('70. plsqlBindScalar.js', function() {
     it('70.22.9 val: epoch date 1970-1-1', async function() {
       const date = new Date (1970, 0, 1, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const result = await connection.execute(sqlrun, bindVar);
@@ -3078,10 +3078,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "    p_inout := TO_TIMESTAMP_TZ('1999-12-01 11:00:00.001231000', 'YYYY-MM-DD HH24:MI:SS.FF'); \n" +
                  "END nodb_inoutproc72210;";
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  null
+          val: null
         }
       };
       const sqlrun72210 = "begin nodb_inoutproc72210(p_inout => :p_inout); end;";
@@ -3100,10 +3100,10 @@ describe('70. plsqlBindScalar.js', function() {
                  "END nodb_inoutproc72211;";
       const date = new Date(2011, 0, 12, 0, 0, 0, 0);
       const bindVar = {
-        p_inout : {
-          dir:  oracledb.BIND_INOUT,
+        p_inout: {
+          dir: oracledb.BIND_INOUT,
           type: oracledb.DATE,
-          val:  date
+          val: date
         }
       };
       const sqlrun72211 = "begin nodb_inoutproc72211(p_inout => :p_inout); end;";

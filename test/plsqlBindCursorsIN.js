@@ -182,7 +182,7 @@ describe('239. plsqlBindCursorsIN.js', () => {
     await conn.execute(
       `begin ${procName1}(:bv); end;`,
       {
-        bv: {val:result.outBinds.bv, type: oracledb.CURSOR}
+        bv: {val: result.outBinds.bv, type: oracledb.CURSOR}
       }
     );
 

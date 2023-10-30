@@ -731,10 +731,10 @@ async function dropTable() {
 
     async function dropUserSession(sql) {
       const connectionDetails = {
-        user          : dbConfig.test.DBA_user,
-        password      : dbConfig.test.DBA_password,
-        connectString : dbConfig.connectString,
-        privilege     : oracledb.SYSDBA,
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA,
       };
       const conn = await oracledb.getConnection(connectionDetails);
       await conn.execute(sql);

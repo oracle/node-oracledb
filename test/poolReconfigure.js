@@ -45,20 +45,20 @@ describe('255. poolReconfigure.js', function() {
 
   let poolConfig = {
     ...dbConfig,
-    poolMin          : poolMinOriginalVal,
-    poolMax          : poolMaxOriginalVal,
-    poolIncrement    : poolIncrementOriginalVal,
-    enableStatistics : enableStatisticsOriginalVal
+    poolMin: poolMinOriginalVal,
+    poolMax: poolMaxOriginalVal,
+    poolIncrement: poolIncrementOriginalVal,
+    enableStatistics: enableStatisticsOriginalVal
   };
 
   if (dbConfig.test.externalAuth) {
     poolConfig = {
-      externalAuth     :  true,
-      connectionString : dbConfig.connectString,
-      poolMin          : poolMinOriginalVal,
-      poolMax          : poolMaxOriginalVal,
-      poolIncrement    : poolIncrementOriginalVal,
-      enableStatistics : enableStatisticsOriginalVal
+      externalAuth: true,
+      connectionString: dbConfig.connectString,
+      poolMin: poolMinOriginalVal,
+      poolMax: poolMaxOriginalVal,
+      poolIncrement: poolIncrementOriginalVal,
+      enableStatistics: enableStatisticsOriginalVal
     };
   }
 
@@ -97,7 +97,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolMin = pool.poolMin * 2;
       const config = {
-        poolMin : poolMin
+        poolMin: poolMin
       };
       await pool.reconfigure(config);
       assert.strictEqual(pool.poolMin, poolMin);
@@ -126,7 +126,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolMin = Math.floor(pool.poolMin / 2);
       const config = {
-        poolMin : poolMin
+        poolMin: poolMin
       };
 
       await pool.reconfigure (config);
@@ -153,7 +153,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolMax = pool.poolMax * 2;
       const config = {
-        poolMax : poolMax
+        poolMax: poolMax
       };
 
       await pool.reconfigure(config);
@@ -191,7 +191,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolMax = Math.floor (pool.poolMax / 2);
       const config = {
-        poolMax : poolMax
+        poolMax: poolMax
       };
 
       await pool.reconfigure(config);
@@ -222,7 +222,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolIncrement = pool.poolIncrement * 2;
       const config = {
-        poolIncrement : poolIncrement
+        poolIncrement: poolIncrement
       };
 
       await pool.reconfigure(config);
@@ -258,7 +258,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolIncrement = Math.floor(pool.poolIncrement / 2);
       const config = {
-        poolIncrement : poolIncrement
+        poolIncrement: poolIncrement
       };
       await pool.reconfigure(config);
       assert.strictEqual(pool.poolIncrement, poolIncrement);
@@ -285,8 +285,8 @@ describe('255. poolReconfigure.js', function() {
       const poolMin = 2 * pool.poolMin;
       const poolMax = 2 * pool.poolMax;
       const config =  {
-        poolMin : poolMin,
-        poolMax : poolMax
+        poolMin: poolMin,
+        poolMax: poolMax
       };
 
       await pool.reconfigure(config);
@@ -299,8 +299,8 @@ describe('255. poolReconfigure.js', function() {
       const poolMin = 2 * pool.poolMin;
       const poolIncrement = 2 * pool.poolIncrement;
       const config =  {
-        poolMin       : poolMin,
-        poolIncrement : poolIncrement
+        poolMin: poolMin,
+        poolIncrement: poolIncrement
       };
 
       await pool.reconfigure(config);
@@ -313,8 +313,8 @@ describe('255. poolReconfigure.js', function() {
       const poolMax = 2 * pool.poolMax;
       const poolIncrement = 2 * pool.poolIncrement;
       const config =  {
-        poolMax       : poolMax,
-        poolIncrement : poolIncrement
+        poolMax: poolMax,
+        poolIncrement: poolIncrement
       };
 
       await pool.reconfigure(config);
@@ -329,9 +329,9 @@ describe('255. poolReconfigure.js', function() {
       const poolMax = 2 * pool.poolMax;
       const poolIncrement = 2 * pool.poolIncrement;
       const config =  {
-        poolMin       : poolMin,
-        poolMax       : poolMax,
-        poolIncrement : poolIncrement
+        poolMin: poolMin,
+        poolMax: poolMax,
+        poolIncrement: poolIncrement
       };
 
       await pool.reconfigure(config);
@@ -342,7 +342,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.1.11 Change enableStatistics to true', async function() {
       const config = {
-        enableStatistics  : true
+        enableStatistics: true
       };
 
       await pool.reconfigure(config);
@@ -354,7 +354,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.1.12 Change enableStatistics to false', async function() {
       const config = {
-        enableStatistics  : false
+        enableStatistics: false
       };
 
       await pool.reconfigure(config);
@@ -377,7 +377,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolMax = Math.floor (pool.poolMax / 2);
       const config = {
-        poolMax : poolMax
+        poolMax: poolMax
       };
 
       await pool.reconfigure(config);
@@ -398,9 +398,9 @@ describe('255. poolReconfigure.js', function() {
       const poolMax = 2 * pool.poolMax;
       const poolIncrement = 2 * pool.poolIncrement;
       const config =  {
-        poolMin       : poolMin,
-        poolMax       : poolMax,
-        poolIncrement : poolIncrement
+        poolMin: poolMin,
+        poolMax: poolMax,
+        poolIncrement: poolIncrement
       };
 
       await pool.reconfigure(config);
@@ -423,9 +423,9 @@ describe('255. poolReconfigure.js', function() {
       let poolMax = 2 * pool.poolMax;
       let poolIncrement = 2 * pool.poolIncrement;
       let config =  {
-        poolMin       : poolMin,
-        poolMax       : poolMax,
-        poolIncrement : poolIncrement
+        poolMin: poolMin,
+        poolMax: poolMax,
+        poolIncrement: poolIncrement
       };
       await pool.reconfigure(config);
 
@@ -433,9 +433,9 @@ describe('255. poolReconfigure.js', function() {
       poolMax = 3 * pool.poolMax;
       poolIncrement = 3 * pool.poolIncrement;
       config =  {
-        poolMin       : poolMin,
-        poolMax       : poolMax,
-        poolIncrement : poolIncrement
+        poolMin: poolMin,
+        poolMax: poolMax,
+        poolIncrement: poolIncrement
       };
       await pool.reconfigure(config);
       assert.strictEqual(pool.poolMin, poolMin);
@@ -446,9 +446,9 @@ describe('255. poolReconfigure.js', function() {
       poolMax = 3;
       poolIncrement = 1;
       config =  {
-        poolMin       : poolMin,
-        poolMax       : poolMax,
-        poolIncrement : poolIncrement
+        poolMin: poolMin,
+        poolMax: poolMax,
+        poolIncrement: poolIncrement
       };
       await pool.reconfigure(config);
       assert.strictEqual(pool.poolMin, poolMin);
@@ -466,7 +466,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolMax = poolMaxOriginalVal - 2;
       const config = {
-        poolMax : poolMax
+        poolMax: poolMax
       };
 
       await pool.reconfigure(config);
@@ -533,7 +533,7 @@ describe('255. poolReconfigure.js', function() {
 
       const poolMax = pool.poolMax + 10;
       const config = {
-        poolMax : poolMax
+        poolMax: poolMax
       };
 
       await pool.reconfigure(config);
@@ -569,22 +569,22 @@ describe('255. poolReconfigure.js', function() {
 
     poolConfig = {
       ...dbConfig,
-      poolMin          : poolMinOriginalVal,
-      poolMax          : poolMaxOriginalVal,
-      poolIncrement    : poolIncrementOriginalVal,
-      enableStatistics : enableStatisticsOriginalVal,
-      queueTimeout     : 5
+      poolMin: poolMinOriginalVal,
+      poolMax: poolMaxOriginalVal,
+      poolIncrement: poolIncrementOriginalVal,
+      enableStatistics: enableStatisticsOriginalVal,
+      queueTimeout: 5
     };
 
     if (dbConfig.test.externalAuth) {
       poolConfig = {
-        externalAuth     :  true,
-        connectionString : dbConfig.connectString,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        enableStatistics : enableStatisticsOriginalVal,
-        queueTimeout     : 5
+        externalAuth: true,
+        connectionString: dbConfig.connectString,
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        enableStatistics: enableStatisticsOriginalVal,
+        queueTimeout: 5
       };
     }
 
@@ -604,7 +604,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.2.1 change poolPingInterval', async function() {
       const poolPingInterval = 2 * pool.poolPingInterval;
       const config = {
-        poolPingInterval : poolPingInterval
+        poolPingInterval: poolPingInterval
       };
 
       await pool.reconfigure(config);
@@ -615,7 +615,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.2.2 change poolTimeout', async function() {
       const poolTimeout = 2 * pool.poolTimeout;
       const config = {
-        poolTimeout : poolTimeout
+        poolTimeout: poolTimeout
       };
 
       await pool.reconfigure(config);
@@ -626,7 +626,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.2.3 change maxPerShard', async function() {
       const poolMaxPerShard = 2 * pool.poolMaxPerShard;
       const config = {
-        poolMaxPerShard : poolMaxPerShard
+        poolMaxPerShard: poolMaxPerShard
       };
 
       await pool.reconfigure(config);
@@ -637,7 +637,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.2.4 change stmtCacheSize', async function() {
       const stmtCacheSize = 2 * pool.stmtCacheSize;
       const config = {
-        stmtCacheSize : stmtCacheSize
+        stmtCacheSize: stmtCacheSize
       };
 
       await pool.reconfigure(config);
@@ -676,8 +676,8 @@ describe('255. poolReconfigure.js', function() {
       }
 
       const config = {
-        resetStatistics : true,
-        enableStatistics : true
+        resetStatistics: true,
+        enableStatistics: true
       };
       await pool.reconfigure(config);
 
@@ -708,7 +708,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.2.6 change resetStatistics', async function() {
       const config = {
-        resetStatistics : true
+        resetStatistics: true
       };
       await pool.reconfigure(config);
       assert.strictEqual(pool.enableStatistics, enableStatisticsOriginalVal);
@@ -719,12 +719,12 @@ describe('255. poolReconfigure.js', function() {
 
       poolConfig = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        enableStatistics : enableStatisticsOriginalVal,
-        queueTimeout     : 5,
-        poolAlias        : "255.2.7"
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        enableStatistics: enableStatisticsOriginalVal,
+        queueTimeout: 5,
+        poolAlias: "255.2.7"
       };
       pool = await oracledb.createPool(poolConfig);
 
@@ -750,8 +750,8 @@ describe('255. poolReconfigure.js', function() {
       }
 
       const config = {
-        resetStatistics : true,
-        enableStatistics : true
+        resetStatistics: true,
+        enableStatistics: true
       };
       await pool.reconfigure(config);
 
@@ -812,12 +812,12 @@ describe('255. poolReconfigure.js', function() {
 
       poolConfig = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        enableStatistics : enableStatisticsOriginalVal,
-        queueTimeout     : 5,
-        poolAlias        : "255.2.8"
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        enableStatistics: enableStatisticsOriginalVal,
+        queueTimeout: 5,
+        poolAlias: "255.2.8"
       };
       pool = await oracledb.createPool(poolConfig);
       await pool.reconfigure ({
@@ -836,7 +836,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.connectString, dbConfig.connectString);
 
       // reconfigure for later use
-      await pool.reconfigure({enableStatistics : false});
+      await pool.reconfigure({enableStatistics: false});
     });
 
   });
@@ -860,7 +860,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.3.1 change queueMax', async function() {
       const queueMax = pool.queueMax + 10;
       const config = {
-        queueMax : queueMax
+        queueMax: queueMax
       };
 
       await pool.reconfigure(config);
@@ -871,7 +871,7 @@ describe('255. poolReconfigure.js', function() {
     it('255.3.2 change queueTimeout', async function() {
       const queueTimeout = pool.queueTimeout + 10;
       const config = {
-        queueTimeout : queueTimeout
+        queueTimeout: queueTimeout
       };
 
       await pool.reconfigure(config);
@@ -888,7 +888,7 @@ describe('255. poolReconfigure.js', function() {
 
       const maxPerShard = 10;
       const config = {
-        poolMaxPerShard : maxPerShard
+        poolMaxPerShard: maxPerShard
       };
 
       await pool.reconfigure(config);
@@ -898,7 +898,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.3.4 sodaMetaDataCache set to true', async function() {
       const config = {
-        sodaMetaDataCache : true
+        sodaMetaDataCache: true
       };
       // The SODA metadata cache is available with Oracle Client 21.3 and
       // in 19 from 19.11
@@ -914,7 +914,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.3.5 sodaMetaDataCache set to false', async function() {
       const config = {
-        sodaMetaDataCache : false
+        sodaMetaDataCache: false
       };
       // The SODA metadata cache is available with Oracle Client 21.3 and
       // in 19 from 19.11
@@ -1043,8 +1043,8 @@ describe('255. poolReconfigure.js', function() {
       pool = await oracledb.createPool(dbConfig);
 
       const config1 = {
-        resetStatistics : true,
-        _enableStats    : true
+        resetStatistics: true,
+        _enableStats: true
       };
       await pool.reconfigure(config1);
       const poolStatistics1 = pool.getStatistics();
@@ -1053,7 +1053,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics1, null);
 
       const config2 = {
-        _enableStats : true
+        _enableStats: true
       };
       await pool.reconfigure(config2);
       const poolStatistics2 = pool.getStatistics();
@@ -1062,8 +1062,8 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics2, null);
 
       const config3 = {
-        resetStatistics : false,
-        _enableStats    : true
+        resetStatistics: false,
+        _enableStats: true
       };
       await pool.reconfigure(config3);
       const poolStatistics3 = pool.getStatistics();
@@ -1091,18 +1091,18 @@ describe('255. poolReconfigure.js', function() {
     let resetStatistics = true;
 
     let config =  {
-      poolMin           : poolMin,
-      poolMax           : poolMax,
-      poolIncrement     : poolIncrement,
-      enableStatistics  : enableStatistics,
-      poolPingInterval  : poolPingInterval,
-      poolTimeout       : poolTimeout,
-      poolMaxPerShard   : poolMaxPerShard,
-      queueMax          : queueMax,
-      queueTimeout      : queueTimeout,
-      stmtCacheSize     : stmtCacheSize,
-      sodaMetaDataCache : sodaMetaDataCache,
-      resetStatistics   : resetStatistics
+      poolMin: poolMin,
+      poolMax: poolMax,
+      poolIncrement: poolIncrement,
+      enableStatistics: enableStatistics,
+      poolPingInterval: poolPingInterval,
+      poolTimeout: poolTimeout,
+      poolMaxPerShard: poolMaxPerShard,
+      queueMax: queueMax,
+      queueTimeout: queueTimeout,
+      stmtCacheSize: stmtCacheSize,
+      sodaMetaDataCache: sodaMetaDataCache,
+      resetStatistics: resetStatistics
     };
 
     beforeEach(async function() {
@@ -1169,7 +1169,7 @@ describe('255. poolReconfigure.js', function() {
       );
 
       await assert.rejects(
-        async () => await pool.reconfigure({poolMax:"10"}),
+        async () => await pool.reconfigure({poolMax: "10"}),
         /NJS-007:/
       );
 
@@ -1177,7 +1177,7 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.5.4 passing invalid poolIncrement to pool.reconfigure', async function() {
       await assert.rejects(
-        async () => await pool.reconfigure ({poolIncrement : -1 }),
+        async () => await pool.reconfigure ({poolIncrement: -1 }),
         /NJS-007:/
       );
 
@@ -1289,17 +1289,17 @@ describe('255. poolReconfigure.js', function() {
       );
 
       await assert.rejects(
-        async () => await pool.reconfigure({queueMax : -100}),
+        async () => await pool.reconfigure({queueMax: -100}),
         /NJS-007:/
       );
 
       await assert.rejects(
-        async () => await pool.reconfigure({queueMax :NaN}),
+        async () => await pool.reconfigure({queueMax: NaN}),
         /NJS-007:/
       );
 
       await assert.rejects(
-        async () => await pool.reconfigure({queueMax :"10"}),
+        async () => await pool.reconfigure({queueMax: "10"}),
         /NJS-007:/
       );
 
@@ -1322,7 +1322,7 @@ describe('255. poolReconfigure.js', function() {
       );
 
       await assert.rejects(
-        async () => await pool.reconfigure ({queueTimeout:"10"}),
+        async () => await pool.reconfigure ({queueTimeout: "10"}),
         /NJS-007:/
       );
 
@@ -1402,18 +1402,18 @@ describe('255. poolReconfigure.js', function() {
       resetStatistics = false;
 
       config =  {
-        poolMin           : poolMin,
-        poolMax           : poolMax,
-        poolIncrement     : poolIncrement,
-        enableStatistics  : enableStatistics,
-        poolPingInterval  : poolPingInterval,
-        poolTimeout       : poolTimeout,
-        poolMaxPerShard   : poolMaxPerShard,
-        queueMax          : queueMax,
-        queueTimeout      : queueTimeout,
-        stmtCacheSize     : stmtCacheSize,
-        sodaMetaDataCache : sodaMetaDataCache,
-        resetStatistics   : resetStatistics
+        poolMin: poolMin,
+        poolMax: poolMax,
+        poolIncrement: poolIncrement,
+        enableStatistics: enableStatistics,
+        poolPingInterval: poolPingInterval,
+        poolTimeout: poolTimeout,
+        poolMaxPerShard: poolMaxPerShard,
+        queueMax: queueMax,
+        queueTimeout: queueTimeout,
+        stmtCacheSize: stmtCacheSize,
+        sodaMetaDataCache: sodaMetaDataCache,
+        resetStatistics: resetStatistics
       };
 
       await pool.reconfigure(config);
@@ -1433,18 +1433,18 @@ describe('255. poolReconfigure.js', function() {
     it('255.5.14 reconfigure closed pool', async function() {
       await pool.close(0);
       const config =  {
-        poolMin           : poolMin,
-        poolMax           : poolMax,
-        poolIncrement     : poolIncrement,
-        enableStatistics  : enableStatistics,
-        poolPingInterval  : poolPingInterval,
-        poolTimeout       : poolTimeout,
-        poolMaxPerShard   : poolMaxPerShard,
-        queueMax          : queueMax,
-        queueTimeout      : queueTimeout,
-        stmtCacheSize     : stmtCacheSize,
-        sodaMetaDataCache : sodaMetaDataCache,
-        resetStatistics   : resetStatistics
+        poolMin: poolMin,
+        poolMax: poolMax,
+        poolIncrement: poolIncrement,
+        enableStatistics: enableStatistics,
+        poolPingInterval: poolPingInterval,
+        poolTimeout: poolTimeout,
+        poolMaxPerShard: poolMaxPerShard,
+        queueMax: queueMax,
+        queueTimeout: queueTimeout,
+        stmtCacheSize: stmtCacheSize,
+        sodaMetaDataCache: sodaMetaDataCache,
+        resetStatistics: resetStatistics
       };
 
       await assert.rejects(
@@ -1461,8 +1461,8 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.5.15 get statistics of a closed pool', async function() {
       const config = {
-        resetStatistics : true,
-        enableStatistics : true
+        resetStatistics: true,
+        enableStatistics: true
       };
       await pool.reconfigure(config);
       await pool.close(0);
@@ -1492,12 +1492,12 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.1 get pool statistics by setting _enableStats', async function() {
       let poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.1.1",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : false
+        poolAlias: "255.6.1.1",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: false
       };
       let pool = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool.poolAlias, "255.6.1.1");
@@ -1527,12 +1527,12 @@ describe('255. poolReconfigure.js', function() {
 
       poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.1.2",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : true
+        poolAlias: "255.6.1.2",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: true
       };
 
       pool = await oracledb.createPool(poolConfig);
@@ -1590,12 +1590,12 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.2 get pool statistics by setting _enableStats', async function() {
       let poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.2.1",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : false
+        poolAlias: "255.6.2.1",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: false
       };
       const pool1 = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool1.poolAlias, "255.6.2.1");
@@ -1621,12 +1621,12 @@ describe('255. poolReconfigure.js', function() {
 
       poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.2.2",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : true
+        poolAlias: "255.6.2.2",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: true
       };
 
       const pool2 = await oracledb.createPool(poolConfig);
@@ -1686,12 +1686,12 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.3 set enableStatistics to true, _enableStats will be ignored', async function() {
       const poolConfig = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : false,
-        enableStatistics : true
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: false,
+        enableStatistics: true
       };
 
       const pool1 = await oracledb.createPool(poolConfig);
@@ -1704,12 +1704,12 @@ describe('255. poolReconfigure.js', function() {
 
       const poolConfig2 = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : true,
-        enableStatistics : true
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: true,
+        enableStatistics: true
       };
 
       const pool2 = await oracledb.createPool(poolConfig2);
@@ -1724,12 +1724,12 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.4 set enableStatistics to false, _enableStats will be used', async function() {
       const poolConfig = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : false,
-        _enableStats     : false
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: false,
+        _enableStats: false
       };
 
       const pool1 = await oracledb.createPool(poolConfig);
@@ -1742,12 +1742,12 @@ describe('255. poolReconfigure.js', function() {
 
       const poolConfig2 = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : false,
-        _enableStats     : true
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: false,
+        _enableStats: true
       };
 
       const pool2 = await oracledb.createPool(poolConfig2);
@@ -1762,11 +1762,11 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.5 set multiple enableStatistics', async function() {
       const poolConfig = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : false,
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: false,
         enableStatistics : true //eslint-disable-line
       };
 
@@ -1780,11 +1780,11 @@ describe('255. poolReconfigure.js', function() {
 
       const poolConfig2 = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : true,
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: true,
         enableStatistics : false //eslint-disable-line
       };
 
@@ -1797,11 +1797,11 @@ describe('255. poolReconfigure.js', function() {
 
       const poolConfig3 = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : true,
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: true,
         enableStatistics : false, //eslint-disable-line
         enableStatistics : false //eslint-disable-line
       };
@@ -1818,11 +1818,11 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.6 set multiple _enableStats', async function() {
       const poolConfig = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : false,
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: false,
         _enableStats     : true //eslint-disable-line
       };
 
@@ -1836,11 +1836,11 @@ describe('255. poolReconfigure.js', function() {
 
       const poolConfig2 = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : true,
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: true,
         _enableStats     : false //eslint-disable-line
       };
 
@@ -1853,11 +1853,11 @@ describe('255. poolReconfigure.js', function() {
 
       const poolConfig3 = {
         ...dbConfig,
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : true,
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: true,
         enableStatistics : false, //eslint-disable-line
         enableStatistics : false //eslint-disable-line
       };
@@ -1874,12 +1874,12 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.7 get pool statistics by setting enableStatistics', async function() {
       let poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.7.1",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : false
+        poolAlias: "255.6.7.1",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: false
       };
       let pool = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool.poolAlias, "255.6.7.1");
@@ -1909,12 +1909,12 @@ describe('255. poolReconfigure.js', function() {
 
       poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.7.2",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : true
+        poolAlias: "255.6.7.2",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: true
       };
 
       pool = await oracledb.createPool(poolConfig);
@@ -1972,12 +1972,12 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.8 get pool statistics by setting enableStatistics', async function() {
       let poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.8.1",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : false
+        poolAlias: "255.6.8.1",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: false
       };
       const pool1 = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool1.poolAlias, "255.6.8.1");
@@ -2005,12 +2005,12 @@ describe('255. poolReconfigure.js', function() {
 
       poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.8.2",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : true
+        poolAlias: "255.6.8.2",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: true
       };
 
       const pool2 = await oracledb.createPool(poolConfig);
@@ -2071,12 +2071,12 @@ describe('255. poolReconfigure.js', function() {
     it('255.6.9 get pool statistics by setting enableStatistics and _enableStats', async function() {
       let poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.9.1",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        enableStatistics : false
+        poolAlias: "255.6.9.1",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        enableStatistics: false
       };
       const pool1 = await oracledb.createPool(poolConfig);
       let conns = new Array();
@@ -2102,12 +2102,12 @@ describe('255. poolReconfigure.js', function() {
 
       poolConfig = {
         ...dbConfig,
-        poolAlias        : "255.6.9.2",
-        poolMin          : poolMinOriginalVal,
-        poolMax          : poolMaxOriginalVal,
-        poolIncrement    : poolIncrementOriginalVal,
-        queueTimeout     : 5,
-        _enableStats     : true
+        poolAlias: "255.6.9.2",
+        poolMin: poolMinOriginalVal,
+        poolMax: poolMaxOriginalVal,
+        poolIncrement: poolIncrementOriginalVal,
+        queueTimeout: 5,
+        _enableStats: true
       };
 
       const pool2 = await oracledb.createPool(poolConfig);

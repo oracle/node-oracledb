@@ -198,7 +198,7 @@ describe('40. dataTypeClob.js', function() {
     }
 
     async function doFirstSelect() {
-      await connection.execute(selectSqlCharBind, {val:'GEN_COL'}, { keepInStmtCache: true });
+      await connection.execute(selectSqlCharBind, {val: 'GEN_COL'}, { keepInStmtCache: true });
       await connection.execute(sqlDrop);
       await connection.execute(sqlCreate);
       await connection.executeMany(insertSql, binds);
@@ -225,7 +225,7 @@ describe('40. dataTypeClob.js', function() {
         oracledb.fetchAsString = [];
         await setupConnAndTable();
         await doFirstSelect();
-        await connection.execute(selectSqlCharBind, {val:'GEN_COL'});
+        await connection.execute(selectSqlCharBind, {val: 'GEN_COL'});
       });
 
     it('40.3.2 Recreate table after CLOB column as String is read and statement is in statement cache',
@@ -233,7 +233,7 @@ describe('40. dataTypeClob.js', function() {
         oracledb.fetchAsString = [oracledb.CLOB];
         await setupConnAndTable();
         await doFirstSelect();
-        await connection.execute(selectSqlCharBind, {val:'GEN_COL'});
+        await connection.execute(selectSqlCharBind, {val: 'GEN_COL'});
       });
 
     it('40.3.3 select with large bindvalue than previous select bindvalue after Recreate table ',
@@ -242,7 +242,7 @@ describe('40. dataTypeClob.js', function() {
         await setupConnAndTable();
         await doFirstSelect();
         // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
-        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
+        await connection.execute(selectSqlCharBind, {val: 'GEN_COL_NEW'});
       });
 
     it('40.3.4 select using fetchAsCLOB with large bindvalue than previous select bindvalue after Recreate table ',
@@ -251,7 +251,7 @@ describe('40. dataTypeClob.js', function() {
         await setupConnAndTable();
         await doFirstSelect();
         // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
-        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
+        await connection.execute(selectSqlCharBind, {val: 'GEN_COL_NEW'});
       });
 
     it('40.3.5 select using fetchAsCLOB with large bindvalue than previous select bindvalue after Recreate table twice',
@@ -260,7 +260,7 @@ describe('40. dataTypeClob.js', function() {
         await setupConnAndTable();
         await doFirstSelect();
         // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
-        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
+        await connection.execute(selectSqlCharBind, {val: 'GEN_COL_NEW'});
 
         // cleanup the connection
         await connection.execute(sqlDrop);
@@ -270,7 +270,7 @@ describe('40. dataTypeClob.js', function() {
         await setupConnAndTable();
         await doFirstSelect();
         // provide bind value 'GEN_COL_NEW' larger than earlier bind value 'GEN_COL'.
-        await connection.execute(selectSqlCharBind, {val:'GEN_COL_NEW'});
+        await connection.execute(selectSqlCharBind, {val: 'GEN_COL_NEW'});
       });
 
   });

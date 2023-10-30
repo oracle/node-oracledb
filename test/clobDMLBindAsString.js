@@ -83,8 +83,8 @@ describe('81. clobDMLBindAsString.js', function() {
       result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
         });
       assert.strictEqual(result.rowsAffected, 1);
     }
@@ -181,8 +181,8 @@ describe('81. clobDMLBindAsString.js', function() {
       const result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 32767 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: 32767 }
         });
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, null);
@@ -194,8 +194,8 @@ describe('81. clobDMLBindAsString.js', function() {
       const result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 50000 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: 50000 }
         });
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, null);
@@ -221,8 +221,8 @@ describe('81. clobDMLBindAsString.js', function() {
       const result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 32767 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: 32767 }
         });
       assert.strictEqual(result.rowsAffected, 1);
 
@@ -235,8 +235,8 @@ describe('81. clobDMLBindAsString.js', function() {
       const result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 50000 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: 50000 }
         });
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, null);
@@ -250,8 +250,8 @@ describe('81. clobDMLBindAsString.js', function() {
           await connection.execute(
             "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
             {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+              ID: { val: id },
+              C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
             });
         },
         // NJS-011: encountered bind value and type mismatch in parameter 2
@@ -267,8 +267,8 @@ describe('81. clobDMLBindAsString.js', function() {
           await connection.execute(
             "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
             {
-              ID : { val : id },
-              C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+              ID: { val: id },
+              C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
             });
         },
         // NJS-011: encountered bind value and type mismatch in parameter 2
@@ -317,8 +317,8 @@ describe('81. clobDMLBindAsString.js', function() {
       const content = 100;
       const sql = "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)";
       const binds = {
-        ID : { val : id },
-        C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        ID: { val: id },
+        C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       await assert.rejects(
         async () => await connection.execute(sql, binds),
@@ -335,7 +335,7 @@ describe('81. clobDMLBindAsString.js', function() {
       const result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:1, :2)",
         [
-          id, { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+          id, { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
         ]);
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, specialStr);
@@ -348,7 +348,7 @@ describe('81. clobDMLBindAsString.js', function() {
           await connection.execute(
             "INSERT INTO nodb_dml_clob_1 VALUES (:1, :2)",
             [
-              id, { val : {}, dir : oracledb.BIND_IN, type : oracledb.STRING }
+              id, { val: {}, dir: oracledb.BIND_IN, type: oracledb.STRING }
             ]);
         },
         // NJS-011: encountered bind value and type mismatch
@@ -383,8 +383,8 @@ describe('81. clobDMLBindAsString.js', function() {
       const result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, :C)",
         {
-          ID : { val : id },
-          C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 1 }
+          ID: { val: id },
+          C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: 1 }
         });
       assert.strictEqual(result.rowsAffected, 1);
       await checkInsertResult(id, content, specialStr);

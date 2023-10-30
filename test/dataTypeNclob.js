@@ -242,7 +242,7 @@ describe('123. dataTypeNclob.js', function() {
       "SELECT content AS C FROM " + tableName + " where num = " + insertID,
       {},
       {
-        fetchInfo : { C : { type : oracledb.STRING } }
+        fetchInfo: { C: { type: oracledb.STRING } }
       });
 
     const resultStr = result.rows[0][0];
@@ -256,8 +256,8 @@ describe('123. dataTypeNclob.js', function() {
       "SELECT content FROM " + tableName + " where num = " + insertID,
       {},
       {
-        fetchInfo : { CONTENT : { type : oracledb.STRING } },
-        resultSet : true
+        fetchInfo: { CONTENT: { type: oracledb.STRING } },
+        resultSet: true
       });
     assert.strictEqual((result.resultSet.metaData[0]).name, 'CONTENT');
     fetchRowFromRS(result.resultSet, originalStr);
@@ -277,7 +277,7 @@ describe('123. dataTypeNclob.js', function() {
       "SELECT content FROM " + tableName + " where num = " + insertID,
       {},
       {
-        resultSet : true
+        resultSet: true
       });
     assert.strictEqual((result.resultSet.metaData[0]).name, 'CONTENT');
     fetchRowFromRS(result.resultSet, originalStr);
@@ -313,7 +313,7 @@ describe('123. dataTypeNclob.js', function() {
       [
         { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       ],
-      { fetchInfo : { CONTENT : { type : oracledb.STRING } } });
+      { fetchInfo: { CONTENT: { type: oracledb.STRING } } });
     fetchRowFromRS(result.outBinds[0], originalStr);
     await connection.execute("DROP PROCEDURE testproc");
   };

@@ -127,7 +127,7 @@ describe('213. dbObject14.js', () => {
 
     // Query the data back
     sql = `SELECT * FROM ${TABLE}`;
-    const result3 = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
+    const result3 = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
     assert.strictEqual(result3.rows[0].SPORTNAME, 'Hockey');
     assert.strictEqual(result3.rows[1].SPORTNAME, 'Badminton');
     for (let i = 0; i < hockeyPlayers.length; i++) {

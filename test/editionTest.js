@@ -79,10 +79,10 @@ describe('160. editionTest.js', function() {
 
     //SYSDBA connection
     let credential = {
-      user:             dbConfig.test.DBA_user,
-      password:         dbConfig.test.DBA_password,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
       connectionString: dbConfig.connectString,
-      privilege:        oracledb.SYSDBA
+      privilege: oracledb.SYSDBA
     };
     dbaConn = await oracledb.getConnection(credential);
 
@@ -163,8 +163,8 @@ describe('160. editionTest.js', function() {
 
     // Get user connection
     credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const conn = await oracledb.getConnection(credential);
@@ -225,8 +225,8 @@ describe('160. editionTest.js', function() {
 
   it('160.1 Default. No edition. Direct connection.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const connection = await oracledb.getConnection(credential);
@@ -236,8 +236,8 @@ describe('160. editionTest.js', function() {
 
   it('160.2 Default. No edition. Pooled connection.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const pool = await oracledb.createPool(credential);
@@ -249,10 +249,10 @@ describe('160. editionTest.js', function() {
 
   it('160.3 Direct connection. Set edition at getting connection.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          edition2
+      edition: edition2
     };
     const connection = await oracledb.getConnection(credential);
     assert.strictEqual(await getEdition(connection), 'E2');
@@ -261,10 +261,10 @@ describe('160. editionTest.js', function() {
 
   it('160.4 Pooled connection. Set edition at creating pool.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          edition1
+      edition: edition1
     };
     const pool = await oracledb.createPool(credential);
     const connection = await pool.getConnection();
@@ -275,10 +275,10 @@ describe('160. editionTest.js', function() {
 
   it('160.5 Direct connection. Change session edition.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          edition2
+      edition: edition2
     };
     const connection = await oracledb.getConnection(credential);
 
@@ -291,10 +291,10 @@ describe('160. editionTest.js', function() {
 
   it('160.6 Pooled connection. Change session edition.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition          : edition1
+      edition: edition1
     };
     const pool = await oracledb.createPool(credential);
     const connection = await pool.getConnection();
@@ -312,8 +312,8 @@ describe('160. editionTest.js', function() {
   it('160.7 sets edition globally. Direct connection.', async function() {
     oracledb.edition = edition2;
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const connection = await oracledb.getConnection(credential);
@@ -331,8 +331,8 @@ describe('160. editionTest.js', function() {
   it('160.8 sets edition globally. Pooled connection.', async function() {
     oracledb.edition = edition2;
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const pool = await oracledb.createPool(credential);
@@ -354,8 +354,8 @@ describe('160. editionTest.js', function() {
   it('160.9 Negative - sets nonexistent edition globally', async function() {
     oracledb.edition = 'nonexistence';
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     await assert.rejects(
@@ -368,10 +368,10 @@ describe('160. editionTest.js', function() {
 
   it('160.10 Direct connection. Set nonexistent edition.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          "nonexistence"
+      edition: "nonexistence"
     };
     await assert.rejects(
       async () => await oracledb.getConnection(credential),
@@ -382,10 +382,10 @@ describe('160. editionTest.js', function() {
 
   it('160.11 Pooled connection. Set nonexistent edition.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          "nonexistence"
+      edition: "nonexistence"
     };
     const pool = await oracledb.createPool(credential);
     await assert.rejects(
@@ -398,10 +398,10 @@ describe('160. editionTest.js', function() {
 
   it('160.12 sets to ora$base with direct connection', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          "ora$base"
+      edition: "ora$base"
     };
     const connection = await oracledb.getConnection(credential);
     assert.strictEqual(await getEdition(connection), 'E0');
@@ -410,10 +410,10 @@ describe('160. editionTest.js', function() {
 
   it('160.13 resets to ora$base in direct connection', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          edition2
+      edition: edition2
     };
     const connection = await oracledb.getConnection(credential);
 
@@ -427,10 +427,10 @@ describe('160. editionTest.js', function() {
 
   it('160.14 sets to ora$base with pooled connection', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          "ora$base"
+      edition: "ora$base"
     };
     const pool = await oracledb.createPool(credential);
     const connection = await pool.getConnection();
@@ -444,8 +444,8 @@ describe('160. editionTest.js', function() {
   it('160.15 sets to ora$base globally', async function() {
     oracledb.edition = 'ora$base';
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const connection = await oracledb.getConnection(credential);
@@ -462,10 +462,10 @@ describe('160. editionTest.js', function() {
   it('160.16 overrides the global setting. Direct connection', async function() {
     oracledb.edition = edition1;
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          edition2
+      edition: edition2
     };
     const connection = await oracledb.getConnection(credential);
     assert.strictEqual(await getEdition(connection), 'E2');
@@ -475,10 +475,10 @@ describe('160. editionTest.js', function() {
 
   it('160.17 sets to empty string. Direct connection.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          ""
+      edition: ""
     };
     const connection = await oracledb.getConnection(credential);
     assert.strictEqual(await getEdition(connection), 'E0');
@@ -487,10 +487,10 @@ describe('160. editionTest.js', function() {
 
   it('160.18 Negative - invalid type. Direct connection.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          123
+      edition: 123
     };
     await assert.rejects(
       async () => await oracledb.getConnection(credential),
@@ -500,10 +500,10 @@ describe('160. editionTest.js', function() {
 
   it('160.19 Negative - invalid type. Pooled connection.', async function() {
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          123
+      edition: 123
     };
     await assert.rejects(
       async () => await oracledb.createPool(credential),
@@ -514,8 +514,8 @@ describe('160. editionTest.js', function() {
   it('160.20 sets ORA_EDITION. Direct connection.', async function() {
     process.env.ORA_EDITION = edition1;
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const connection = await oracledb.getConnection(credential);
@@ -527,8 +527,8 @@ describe('160. editionTest.js', function() {
   it('160.21 sets ORA_EDITION. Pooled connection.', async function() {
     process.env.ORA_EDITION = edition2;
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const pool = await oracledb.createPool(credential);
@@ -542,10 +542,10 @@ describe('160. editionTest.js', function() {
   it('160.22 sets ORA_EDITION. Direct connection. Set edition at getting connection.', async function() {
     process.env.ORA_EDITION = edition1;
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          edition2
+      edition: edition2
     };
     const connection = await oracledb.getConnection(credential);
     assert.strictEqual(await getEdition(connection), 'E2');
@@ -556,10 +556,10 @@ describe('160. editionTest.js', function() {
   it('160.23 sets ORA_EDITION. Pooled connection. Set edition at creating pool.', async function() {
     process.env.ORA_EDITION = edition2;
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString,
-      edition:          edition1
+      edition: edition1
     };
     const pool = await oracledb.createPool(credential);
     const connection = await pool.getConnection();
@@ -572,8 +572,8 @@ describe('160. editionTest.js', function() {
   it('160.24 Negative - Sets ORA_EDITION with nonexistent value. Direct connection.', async function() {
     process.env.ORA_EDITION = 'nonexistence';
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     await assert.rejects(
@@ -587,8 +587,8 @@ describe('160. editionTest.js', function() {
   it('160.25 Negative - Sets ORA_EDITION with nonexistent value. Pooled connection.', async function() {
     process.env.ORA_EDITION = 'nonexistence';
     const credential = {
-      user:             schemaEdition,
-      password:         nodbSchemaEditionPassword,
+      user: schemaEdition,
+      password: nodbSchemaEditionPassword,
       connectionString: dbConfig.connectString
     };
     const pool = await oracledb.createPool(credential);

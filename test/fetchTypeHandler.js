@@ -65,7 +65,7 @@ describe('271. fetchTypeHandler.js', function() {
 
   it('271.2 invalid syntax for "type" should result in error', async function() {
     oracledb.fetchTypeHandler = function() {
-      return {'hello' : oracledb.STRING};
+      return {'hello': oracledb.STRING};
     };
     const result = await connection.execute(`SELECT 1+1 FROM DUAL`);
     assert.strictEqual(result.rows[0][0], 2);
@@ -73,7 +73,7 @@ describe('271. fetchTypeHandler.js', function() {
 
   it('271.3 value attribute "type" must be a valid database type', async function() {
     oracledb.fetchTypeHandler = function() {
-      return {type : oracledb.BIND_IN};
+      return {type: oracledb.BIND_IN};
     };
 
     await assert.rejects(
@@ -175,8 +175,8 @@ describe('271. fetchTypeHandler.js', function() {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
         fetchInfo:
         {
-          "TS_DATE" : { type : oracledb.STRING },
-          "TS_NUM"  : { type : oracledb.STRING }
+          "TS_DATE": { type: oracledb.STRING },
+          "TS_NUM": { type: oracledb.STRING }
         }
       });
     assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
@@ -195,10 +195,10 @@ describe('271. fetchTypeHandler.js', function() {
       [],
       {
         outFormat: oracledb.OUT_FORMAT_OBJECT,
-        fetchInfo :
+        fetchInfo:
         {
-          "TS_DATE" : { type : oracledb.DEFAULT },
-          "TS_NUM"  : { type : oracledb.STRING }
+          "TS_DATE": { type: oracledb.DEFAULT },
+          "TS_NUM": { type: oracledb.STRING }
         }
       });
     assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
@@ -232,7 +232,7 @@ describe('271. fetchTypeHandler.js', function() {
     };
 
     const myFetchTypeHandler = function() {
-      return { type : oracledb.STRING };
+      return { type: oracledb.STRING };
     };
 
     const options = {fetchTypeHandler: myFetchTypeHandler};
@@ -378,7 +378,7 @@ describe('271. fetchTypeHandler.js', function() {
         "SELECT TO_NUMBER( " + element + " ) AS TS_NUM FROM DUAL",
         [],
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT
+          outFormat: oracledb.OUT_FORMAT_OBJECT
         }
       );
       assert.strictEqual(typeof result.rows[0].TS_NUM, "string");

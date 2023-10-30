@@ -70,7 +70,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj.append ("Shipping");
       obj.append ("Finance");
       obj.append ("Sales") ;
-      await connection.execute (sql, { id: id,  v : { val : obj } });
+      await connection.execute (sql, { id: id,  v: { val: obj } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB`;
@@ -97,7 +97,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj.append ("Shipping");
       obj.append ("Finance");
       obj.append ("Sales") ;
-      await connection.execute (sql, { id: id,  v : { val : obj } });
+      await connection.execute (sql, { id: id,  v: { val: obj } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB`;
@@ -122,7 +122,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj.append ("Shipping");
       obj.append ("Finance");
       obj.append ("Sales") ;
-      await connection.execute (sql, { id : id,  v : { val : obj } });
+      await connection.execute (sql, { id: id,  v: { val: obj } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB`;
@@ -158,7 +158,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj.append ("Shipping");
       obj.append ("Finance");
       obj.append ("Sales") ;
-      await connection.execute (sql, { id : id,  v : { val : obj } });
+      await connection.execute (sql, { id: id,  v: { val: obj } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB`;
@@ -196,7 +196,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj.append ("Shipping");
       obj.append ("Finance");
       obj.append ("Sales") ;
-      await connection.execute (sql, { id : id, v : { val : obj } });
+      await connection.execute (sql, { id: id, v: { val: obj } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB`;
@@ -222,7 +222,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj.append ("Shipping");
       obj.append ("Finance");
       obj.append ("Sales") ;
-      await connection.execute (sql, { id : id, v : { val : obj } });
+      await connection.execute (sql, { id: id, v: { val: obj } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB`;
@@ -242,12 +242,12 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       const objClass = await connection.getDbObjectClass ("NODB_TEST197_TYP");
       const id = 19707;
 
-      await connection.execute (sql, { id : id,
-        v : { type : objClass, val : null } });
+      await connection.execute (sql, { id: id,
+        v: { type: objClass, val: null } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :ID`;
-      const result = await connection.execute (sql, { ID : 19707});
+      const result = await connection.execute (sql, { ID: 19707});
       const obj = result.rows[0][1];
 
       assert.strictEqual (obj, null);
@@ -265,11 +265,11 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj.append (null);
       obj.append (null) ;
 
-      await connection.execute (sql, { id : id, v : { val : obj } });
+      await connection.execute (sql, { id: id, v: { val: obj } });
       await connection.commit ();
 
       sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :ID`;
-      const result = await connection.execute (sql, { ID : 19708 });
+      const result = await connection.execute (sql, { ID: 19708 });
       obj = result.rows[0][1];
       const arr = obj.getValues();
       assert.deepStrictEqual(arr, [ null, null, null ]);
@@ -285,11 +285,11 @@ describe('197. dbObjectsNestedTable.js', ()  => {
 
     let obj = new objClass ([ "One", "Two", "Three", "four" ]);
     obj.deleteElement (2);  // delete the 3rd element "Three"
-    await connection.execute (sql, { id :  id, v : { val : obj } });
+    await connection.execute (sql, { id: id, v: { val: obj } });
     await connection.commit ();
 
     sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :id`;
-    const result = await connection.execute (sql, { id :  id });
+    const result = await connection.execute (sql, { id: id });
     obj = result.rows[0][1];
     const arr = obj.getValues ();
     assert.deepStrictEqual(arr, [ 'One', 'Two', 'four' ]);
@@ -302,11 +302,11 @@ describe('197. dbObjectsNestedTable.js', ()  => {
 
     let obj = new objClass ([ "One", "Two", "Three", "Four" ]);
     obj.setElement (2, "3");
-    await connection.execute (sql, { id : id, v : { val : obj } });
+    await connection.execute (sql, { id: id, v: { val: obj } });
     await connection.commit ();
 
     sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :id`;
-    const result = await connection.execute (sql, { id : id });
+    const result = await connection.execute (sql, { id: id });
     obj = result.rows[0][1];
     const arr = obj.getValues ();
     assert.deepStrictEqual(arr, [ 'One', 'Two', '3', 'Four' ]);
@@ -319,11 +319,11 @@ describe('197. dbObjectsNestedTable.js', ()  => {
 
     let obj = new objClass ([ "One", "Two", "Three", "Four" ]);
     obj.trim (2);
-    await connection.execute (sql, { id : id, v : { val : obj } });
+    await connection.execute (sql, { id: id, v: { val: obj } });
     await connection.commit ();
 
     sql = `SELECT * FROM NODB_TEST197_TAB WHERE ID = :id`;
-    const result = await connection.execute (sql, { id : id });
+    const result = await connection.execute (sql, { id: id });
     obj = result.rows[0][1];
     const arr = obj.getValues ();
     assert.deepStrictEqual(arr, [ 'One', 'Two' ]);

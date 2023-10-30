@@ -81,9 +81,9 @@ describe('245. fetchLobAsStrBuf.js', function() {
     } else {
       const sql = "insert into fetchLobAsStrBuf_table (id, clob_col, blob_col) values(:id, :str, :buf)";
       const bindings = {
-        id : { val : id },
-        str : {val:contentClob, type:oracledb.STRING, dir:oracledb.BIND_IN},
-        buf : {val:contentBlob, type:oracledb.BUFFER,  dir:oracledb.BIND_IN}
+        id: { val: id },
+        str: {val: contentClob, type: oracledb.STRING, dir: oracledb.BIND_IN},
+        buf: {val: contentBlob, type: oracledb.BUFFER,  dir: oracledb.BIND_IN}
       };
       result = await connection.execute(sql, bindings);
       assert.strictEqual(result.rowsAffected, 1);

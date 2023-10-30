@@ -105,7 +105,7 @@ describe('42. dataTypeRaw.js', function() {
       await assert.rejects(
         async () => await connection.execute(
           "INSERT INTO " + tableName + " (content ) VALUES (:c)",
-          { c : { val: 1234, type: oracledb.BUFFER, dir:oracledb.BIND_IN } }),
+          { c: { val: 1234, type: oracledb.BUFFER, dir: oracledb.BIND_IN } }),
         // NJS-011: encountered bind value and type mismatch
         /NJS-011:/
       );
@@ -136,10 +136,10 @@ describe('42. dataTypeRaw.js', function() {
       const result = await connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         {
-          n   : seq,
-          c   : { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
-          rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          n: seq,
+          c: { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
+          rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rc: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         },
         { autoCommit: true });
 
@@ -173,10 +173,10 @@ describe('42. dataTypeRaw.js', function() {
       const result = await connection.execute(
         "INSERT INTO " + tableName + " VALUES (:n, :c) RETURNING num, content INTO :rid, :rc",
         {
-          n   : seq,
-          c   : { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
-          rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size}
+          n: seq,
+          c: { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
+          rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rc: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size}
         },
         { autoCommit: true });
       assert.strictEqual(result.outBinds.rid[0], seq);
@@ -191,10 +191,10 @@ describe('42. dataTypeRaw.js', function() {
       const result = await connection.execute(
         "UPDATE " + tableName + " SET content = :c WHERE num = :n RETURNING num, content INTO :rid, :rc",
         {
-          n   : seq,
-          c   : { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
-          rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          n: seq,
+          c: { type: oracledb.BUFFER, val: bindValue, dir: oracledb.BIND_IN },
+          rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rc: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         },
         { autoCommit: true });
       assert.strictEqual(result.outBinds.rid[0], seq);
@@ -221,9 +221,9 @@ describe('42. dataTypeRaw.js', function() {
       const result = await connection.execute(
         "DELETE FROM " + tableName + " WHERE num > :n RETURNING num, content INTO :rid, :rc",
         {
-          n   : seq,
-          rid : { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
-          rc  : { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
+          n: seq,
+          rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rc: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: 2000 }
         },
         { autoCommit: true });
       assert.deepStrictEqual(result.outBinds.rid, [2, 3]);
@@ -516,8 +516,8 @@ describe('42. dataTypeRaw.js', function() {
       } else {
         await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
         const credential = {
-          user:             AQ_USER,
-          password:         AQ_USER_PWD,
+          user: AQ_USER,
+          password: AQ_USER_PWD,
           connectionString: dbConfig.connectString
         };
         conn = await oracledb.getConnection(credential);

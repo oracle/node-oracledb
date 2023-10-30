@@ -138,7 +138,7 @@ describe('254. jsonBind2.js', function() {
     });
 
     it('254.1.3 Array type', async function() {
-      const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
+      const data = { "employees": [ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
       if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
@@ -159,7 +159,7 @@ describe('254. jsonBind2.js', function() {
     });
 
     it('254.1.4 Object type', async function() {
-      const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
+      const data = { "employee": { "name": "Employee1", "age": 30, "city": "New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
       if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
@@ -295,7 +295,7 @@ describe('254. jsonBind2.js', function() {
     });
 
     it('254.2.3 Array type', async function() {
-      const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
+      const data = { "employees": [ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
       if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
@@ -315,7 +315,7 @@ describe('254. jsonBind2.js', function() {
     });
 
     it('254.2.4 Object type', async function() {
-      const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
+      const data = { "employee": { "name": "Employee1", "age": 30, "city": "New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
       if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
@@ -452,7 +452,7 @@ describe('254. jsonBind2.js', function() {
     });
 
     it('254.3.3 Array type', async function() {
-      const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
+      const data = { "employees": [ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
       if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
@@ -472,7 +472,7 @@ describe('254. jsonBind2.js', function() {
     });
 
     it('254.3.4 Object type', async function() {
-      const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
+      const data = { "employee": { "name": "Employee1", "age": 30, "city": "New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
       if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {

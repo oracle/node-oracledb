@@ -48,9 +48,9 @@ const dbConfig = require('./dbconfig.js');
 
       const connection = await oracledb.getConnection(
         {
-          externalAuth:  false,
-          user:          dbConfig.user,
-          password:      dbConfig.password,
+          externalAuth: false,
+          user: dbConfig.user,
+          password: dbConfig.password,
           connectString: dbConfig.connectString
         }
       );
@@ -67,9 +67,9 @@ const dbConfig = require('./dbconfig.js');
         async () => {
           await oracledb.getConnection(
             {
-              externalAuth:  true,
-              user:          dbConfig.user,
-              password:      dbConfig.password,
+              externalAuth: true,
+              user: dbConfig.user,
+              password: dbConfig.password,
               connectString: dbConfig.connectString
             }
           );
@@ -87,7 +87,7 @@ const dbConfig = require('./dbconfig.js');
           await oracledb.getConnection(
             {
               externalAuth: true,
-              user:          "[ invalid_user ]",
+              user: "[ invalid_user ]",
               connectString: dbConfig.connectString
             }
           );
@@ -103,8 +103,8 @@ const dbConfig = require('./dbconfig.js');
         async () => {
           await oracledb.getConnection(
             {
-              externalAuth:  true,
-              password:      dbConfig.password,
+              externalAuth: true,
+              password: dbConfig.password,
               connectString: dbConfig.connectString
             }
           );
@@ -118,9 +118,9 @@ const dbConfig = require('./dbconfig.js');
 
       const pool = await oracledb.createPool(
         {
-          externalAuth:  false,
-          user:          dbConfig.user,
-          password:      dbConfig.password,
+          externalAuth: false,
+          user: dbConfig.user,
+          password: dbConfig.password,
           connectString: dbConfig.connectString
         }
       );
@@ -138,9 +138,9 @@ const dbConfig = require('./dbconfig.js');
         async () => {
           await oracledb.createPool(
             {
-              externalAuth:  true,
-              user:          dbConfig.user,
-              password:      dbConfig.password,
+              externalAuth: true,
+              user: dbConfig.user,
+              password: dbConfig.password,
               connectString: dbConfig.connectString
             }
           );
@@ -156,8 +156,8 @@ const dbConfig = require('./dbconfig.js');
         async () => {
           await oracledb.createPool(
             {
-              externalAuth:  true,
-              user:          dbConfig.user,
+              externalAuth: true,
+              user: dbConfig.user,
               connectString: dbConfig.connectString
             }
           );
@@ -173,8 +173,8 @@ const dbConfig = require('./dbconfig.js');
         async () => {
           await oracledb.createPool(
             {
-              externalAuth:  true,
-              password:      dbConfig.password,
+              externalAuth: true,
+              password: dbConfig.password,
               connectString: dbConfig.connectString
             }
           );
@@ -197,7 +197,7 @@ const dbConfig = require('./dbconfig.js');
 
       const connection = await oracledb.getConnection(
         {
-          externalAuth:  true,
+          externalAuth: true,
           connectString: dbConfig.connectString
         }
       );
@@ -230,11 +230,11 @@ const dbConfig = require('./dbconfig.js');
       const getConns = async function(id) {
         const connection = await oracledb.getConnection(
           {
-            externalAuth:  true,
+            externalAuth: true,
             connectString: dbConfig.connectString
           }
         );
-        return {num:  id, inst: connection};
+        return {num: id, inst: connection};
       };
 
       const closeConns = async function(conns) {
@@ -263,11 +263,11 @@ const dbConfig = require('./dbconfig.js');
       const getPools = async function(id) {
         const pool = await oracledb.createPool(
           {
-            externalAuth:  true,
+            externalAuth: true,
             connectString: dbConfig.connectString
           }
         );
-        return {num:  id, inst: pool};
+        return {num: id, inst: pool};
       };
 
       const closePools = async function(pools) {

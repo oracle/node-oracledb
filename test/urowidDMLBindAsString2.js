@@ -212,8 +212,8 @@ describe('115. urowidDMLBindAsString2.js', function() {
     const urowidLen = urowid.length;
     await testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
     const bindVar = {
-      i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
 
     try {
@@ -264,8 +264,8 @@ describe('115. urowidDMLBindAsString2.js', function() {
     const urowidLen = urowid.length;
     await testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
     const bindVar = {
-      i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 100 }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: 100 }
     };
     try {
       result = await connection.execute("insert into " + tableName_normal + " (ID, content) values (:i, :c)", bindVar);
@@ -311,15 +311,15 @@ describe('115. urowidDMLBindAsString2.js', function() {
     const id_2 = insertID++;
     sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
     bindVar = {
-      i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: id_1, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: rowid_org, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     await connection.execute(sql_insert, bindVar);
 
     sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
     bindVar = {
-      i: { val : id_2, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: id_2, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: rowid_org, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     await connection.execute(sql_insert, bindVar);
 
@@ -333,8 +333,8 @@ describe('115. urowidDMLBindAsString2.js', function() {
     await testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
-      i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER }
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING },
+      i: { val: id_1, dir: oracledb.BIND_IN, type: oracledb.NUMBER }
     };
     try {
       result = await connection.execute("update " + tableName_normal + " set content = :c where ID = :i", bindVar);
@@ -377,15 +377,15 @@ describe('115. urowidDMLBindAsString2.js', function() {
 
     sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
     bindVar = {
-      i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: id_1, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: rowid_org, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     await connection.execute(sql_insert, bindVar);
 
     sql_insert = "insert into " + tableName_normal + " (ID, content) values (:i, :c)";
     bindVar = {
-      i: { val : id_2, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : rowid_org, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: id_2, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: rowid_org, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     await connection.execute(sql_insert, bindVar);
 
@@ -399,8 +399,8 @@ describe('115. urowidDMLBindAsString2.js', function() {
     testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
-      i: { val : id_1, dir : oracledb.BIND_IN, type : oracledb.NUMBER, maxSize: 100 }
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING },
+      i: { val: id_1, dir: oracledb.BIND_IN, type: oracledb.NUMBER, maxSize: 100 }
     };
     result = await connection.execute("update " + tableName_normal + " set content = :c where ID = :i", bindVar);
     assert(result);
@@ -437,9 +437,9 @@ describe('115. urowidDMLBindAsString2.js', function() {
     testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
-      i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
-      o: { dir : oracledb.BIND_OUT, type : oracledb.STRING, maxSize: urowidLen }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING },
+      o: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: urowidLen }
     };
     result = await connection.execute("insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o",  bindVar);
     assert(result);
@@ -449,9 +449,9 @@ describe('115. urowidDMLBindAsString2.js', function() {
     assert.strictEqual(resultVal, urowid);
 
     bindVar = {
-      i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING },
-      o: { dir : oracledb.BIND_OUT, type : oracledb.STRING, maxSize: 100 }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING },
+      o: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 100 }
     };
     try {
       await connection.execute("insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o", bindVar);
@@ -476,7 +476,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     testsUtil.checkUrowidLength(urowidLen, rowidLenExpected);
 
     bindVar = {
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     result = await connection.execute("select * from " + tableName_indexed + " where ROWID = :c", bindVar);
     assert(result);
@@ -484,7 +484,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
     assert.strictEqual(result.rows[0][0], insertID);
     assert.strictEqual(result.rows[0][1], str);
     bindVar = {
-      c: { val : urowid, dir : oracledb.BIND_IN, type : oracledb.STRING, maxSize: 100 }
+      c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING, maxSize: 100 }
     };
     result = await connection.execute("select * from " + tableName_indexed + " where ROWID = :c", bindVar);
     assert(result);
@@ -518,8 +518,8 @@ describe('115. urowidDMLBindAsString2.js', function() {
     let counter = 0;
     const sql_select = "select c1, c2, ROWID from " + tableName_indexed + " where ROWID = :i1 or ROWID = :i2 order by c1";
     const bindVar = {
-      i1: { val : urowid_1, dir : oracledb.BIND_IN, type : oracledb.STRING },
-      i2: { val : urowid_2, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i1: { val: urowid_1, dir: oracledb.BIND_IN, type: oracledb.STRING },
+      i2: { val: urowid_2, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     const stream = await connection.queryStream(sql_select, bindVar);
     stream.on('error', function() {

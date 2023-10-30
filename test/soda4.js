@@ -56,11 +56,11 @@ describe('168. soda4.js', () => {
 
     // Insert a new document
     const testContent = {
-      name:    "Changjie Lin",
+      name: "Changjie Lin",
       address: {city: "Shenzhen", country: "China"},
       company: "Oracle Corporation",
       manager: null,
-      VP:      "Bruce"
+      VP: "Bruce"
     };
 
     const myDoc = await coll.insertOneAndGet(testContent);

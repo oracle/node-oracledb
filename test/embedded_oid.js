@@ -67,7 +67,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -76,7 +76,7 @@ describe('288. embedded_oid.js', function() {
       assert.strictEqual(typeof (collection.metaData), "object");
 
       // Insert a new document
-      const myContent = {"oracle":"database1a"};
+      const myContent = {"oracle": "database1a"};
       const docs = await collection.insertOneAndGet(myContent);
 
       /*
@@ -103,14 +103,14 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
       assert.strictEqual(collection.name, collname);
 
       // Insert a new document
-      const myContent = {"oracle":"database1b", "_id":"key1"};
+      const myContent = {"oracle": "database1b", "_id": "key1"};
       const docs = await collection.insertOneAndGet(myContent);
 
       const myKey = docs.key;
@@ -133,14 +133,14 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
       assert.strictEqual(collection.name, collname);
 
       // Insert a new document
-      const myContent = {"oracle":"database1c", "_id": 2};
+      const myContent = {"oracle": "database1c", "_id": 2};
       const docs = await collection.insertOneAndGet(myContent);
 
       const myKey = docs.key;
@@ -159,7 +159,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -191,7 +191,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -223,7 +223,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -255,7 +255,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -287,7 +287,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -319,7 +319,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -351,10 +351,10 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
 
-      const content = {"oracle" : "database 23.3", "_id":12345};
+      const content = {"oracle": "database 23.3", "_id": 12345};
       const doc = sd.createDocument(content);
       await assert.rejects(
         async () => await collection.save(doc),
@@ -372,10 +372,10 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod":"EMBEDDED_OID"}};
+      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
       const collection = await sd.createCollection(collname, options);
 
-      const content = {"oracle" : "database 23.3", "_id":12345};
+      const content = {"oracle": "database 23.3", "_id": 12345};
       const doc = sd.createDocument(content);
       await assert.rejects(
         async () => await collection.saveAndGet(doc),
@@ -408,9 +408,9 @@ describe('288. embedded_oid.js', function() {
     });
 
     it('288.2.1 filter()', async () => {
-      myContent = [{"oracle":"database1a"},
-        {"oracle":"database1b", "_id":"key1"},
-        {"oracle":"database1c", "_id":2}];
+      myContent = [{"oracle": "database1a"},
+        {"oracle": "database1b", "_id": "key1"},
+        {"oracle": "database1c", "_id": 2}];
 
       await Promise.all(
         myContent.map(function(content) {
@@ -434,9 +434,9 @@ describe('288. embedded_oid.js', function() {
     }); //288.2.1
 
     it('288.2.2 skip() first doc', async () => {
-      myContent = [{"oracle":"database1a"},
-        {"oracle":"database1b", "_id":"key1"},
-        {"oracle":"database1c", "_id":2}];
+      myContent = [{"oracle": "database1a"},
+        {"oracle": "database1b", "_id": "key1"},
+        {"oracle": "database1c", "_id": 2}];
 
       await Promise.all(
         myContent.map(function(content) {
@@ -468,9 +468,9 @@ describe('288. embedded_oid.js', function() {
     }); //288.2.2
 
     it('288.2.3 limit() operation to 1 doc', async () => {
-      myContent = [{"oracle":"database1a"},
-        {"oracle":"database1b", "_id":"key1"},
-        {"oracle":"database1c", "_id":2}];
+      myContent = [{"oracle": "database1a"},
+        {"oracle": "database1b", "_id": "key1"},
+        {"oracle": "database1c", "_id": 2}];
 
       await Promise.all(
         myContent.map(function(content) {
@@ -501,9 +501,9 @@ describe('288. embedded_oid.js', function() {
     }); //288.2.3
 
     it('288.2.4 remove() previously retrieved key', async () => {
-      myContent = [{"oracle":"database1a"},
-        {"oracle":"database1b", "_id":"key1"},
-        {"oracle":"database1c", "_id":2}];
+      myContent = [{"oracle": "database1a"},
+        {"oracle": "database1b", "_id": "key1"},
+        {"oracle": "database1c", "_id": 2}];
 
       await Promise.all(
         myContent.map(function(content) {
@@ -528,9 +528,9 @@ describe('288. embedded_oid.js', function() {
     }); //288.2.4
 
     it('288.2.5 remove() with filter, No key present in the input doc', async () => {
-      myContent = [{"oracle":"database1a"},
-        {"oracle":"database1b", "_id":"key1"},
-        {"oracle":"database1c", "_id":2}];
+      myContent = [{"oracle": "database1a"},
+        {"oracle": "database1b", "_id": "key1"},
+        {"oracle": "database1c", "_id": 2}];
 
       await Promise.all(
         myContent.map(function(content) {

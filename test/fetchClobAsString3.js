@@ -343,7 +343,7 @@ describe('86. fetchClobAsString3.js', function() {
     it('86.2.14 Object in fetchAsString will throw NJS-021', function() {
       assert.throws(
         function() {
-          oracledb.fetchAsString = [ {1:1} ];
+          oracledb.fetchAsString = [ {1: 1} ];
         },
         /NJS-021:/
       );

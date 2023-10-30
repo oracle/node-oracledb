@@ -78,8 +78,8 @@ describe('107. rowidDMLBindAsString.js', function() {
     it('107.1.1 works with null', async function() {
       const content = null;
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       await dmlInsert(bindVar, content);
     });
@@ -88,8 +88,8 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content = "";
       const expected = null;
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       await dmlInsert(bindVar, expected);
     });
@@ -99,8 +99,8 @@ describe('107. rowidDMLBindAsString.js', function() {
       // The encoding characters are A-Z, a-z, 0-9, +, and /
       const content = "AAABoqAADAAAAwPAAA";
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       await dmlInsert(bindVar, content);
     });
@@ -110,8 +110,8 @@ describe('107. rowidDMLBindAsString.js', function() {
         return this.skip();
       const content = "00000DD5.0000.0001";
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       await dmlInsert(bindVar, content);
     });
@@ -120,8 +120,8 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content = 0;
       const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
 
       await assert.rejects(
@@ -136,8 +136,8 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content = "0";
       const expected = "00000000.0000.0000";
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       await dmlInsert(bindVar, expected);
     });
@@ -180,8 +180,8 @@ describe('107. rowidDMLBindAsString.js', function() {
     it('107.1.12 works with undefined', async function() {
       const content = undefined;
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       await dmlInsert(bindVar, null);
     });
@@ -205,8 +205,8 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content = NaN;
       const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
 
       await assert.rejects(
@@ -245,9 +245,9 @@ describe('107. rowidDMLBindAsString.js', function() {
     it('107.3.1 INSERT null', async function() {
       const content = null;
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING },
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING },
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await insert_returning(bindVar, content);
     });
@@ -255,9 +255,9 @@ describe('107. rowidDMLBindAsString.js', function() {
     it('107.3.2 INSERT extented rowid', async function() {
       const content = "AAAA++AALAAAAQ/AAA";
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING },
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING },
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await insert_returning(bindVar, content);
     });
@@ -265,9 +265,9 @@ describe('107. rowidDMLBindAsString.js', function() {
     it('107.3.3 INSERT restricted rowid', async function() {
       const content = "00000000.0100.0100";
       const bindVar = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING },
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING },
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await insert_returning(bindVar, content);
     });
@@ -276,9 +276,9 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content_insert = null;
       const content_update = "AAABiqAADAAAAwPAAA";
       const bindVar_update = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content_update, dir: oracledb.BIND_IN, type: oracledb.STRING },
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await update_returning(content_insert, bindVar_update, content_update);
     });
@@ -287,9 +287,9 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content_insert = "AAABiqAADAAAAwPAAA";
       const content_update = null;
       const bindVar_update = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content_update, dir: oracledb.BIND_IN, type: oracledb.STRING },
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await update_returning(content_insert, bindVar_update, content_update);
     });
@@ -298,9 +298,9 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content_insert = "00000000.0100.0100";
       const content_update = "";
       const bindVar_update = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content_update, dir: oracledb.BIND_IN, type: oracledb.STRING },
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await update_returning(content_insert, bindVar_update, null);
     });
@@ -309,9 +309,9 @@ describe('107. rowidDMLBindAsString.js', function() {
       const content_insert = "00000000.0100.0100";
       const content_update = "AAABiqAADAAAAwPAAA";
       const bindVar_update = {
-        i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-        c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING },
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+        c: { val: content_update, dir: oracledb.BIND_IN, type: oracledb.STRING },
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await update_returning(content_insert, bindVar_update, content_update);
     });
@@ -321,14 +321,14 @@ describe('107. rowidDMLBindAsString.js', function() {
       const bindVar = {
         i: insertID,
         c: content,
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await insert_returning(bindVar, content);
     });
 
     it('107.3.12 INSERT with default type/dir - positional bind', async function() {
       const content = "00000000.0100.0100";
-      const bindVar = [ insertID, content, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
+      const bindVar = [ insertID, content, { dir: oracledb.BIND_OUT, type: oracledb.STRING } ];
       await insert_returning(bindVar, content);
     });
 
@@ -338,7 +338,7 @@ describe('107. rowidDMLBindAsString.js', function() {
       const bindVar_update = {
         i: insertID,
         c: content_update,
-        o: { dir : oracledb.BIND_OUT, type : oracledb.STRING }
+        o: { dir: oracledb.BIND_OUT, type: oracledb.STRING }
       };
       await update_returning(content_insert, bindVar_update, content_update);
     });
@@ -346,7 +346,7 @@ describe('107. rowidDMLBindAsString.js', function() {
     it('107.3.14 UPDATE with default type/dir - positional bind', async function() {
       const content_insert = "00000000.0100.0100";
       const content_update = "AAABiqAADAAAAwPAAA";
-      const bindVar_update = [ content_update, insertID, { dir : oracledb.BIND_OUT, type : oracledb.STRING } ];
+      const bindVar_update = [ content_update, insertID, { dir: oracledb.BIND_OUT, type: oracledb.STRING } ];
       await update_returning(content_insert, bindVar_update, content_update);
     });
   });
@@ -371,7 +371,7 @@ describe('107. rowidDMLBindAsString.js', function() {
     const id = insertID++;
     const sql_insert = "insert into " + tableName + "(id, content) values (" + id + ", CHARTOROWID(:c))";
     const sql_select = "select content, SUBSTR(content,1,6) , SUBSTR(content,7,3), SUBSTR(content,10,6), SUBSTR(content,16,3) from " + tableName + " where id = " + id;
-    const bindVar = { c: { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }};
+    const bindVar = { c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }};
     let result = await connection.execute(sql_insert, bindVar);
     assert.strictEqual(result.rowsAffected, 1);
     result = await connection.execute(sql_select);
@@ -397,12 +397,12 @@ describe('107. rowidDMLBindAsString.js', function() {
     const sql_update = "update " + tableName + " set content = :c where id = :i";
     const sql_select = "select * from " + tableName + " where id = :i";
     const bindVar_insert = {
-      i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : content_insert, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content_insert, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     const bindVar_update = {
-      i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : content_update, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content_update, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     let result = await connection.execute(sql_insert, bindVar_insert);
     assert.strictEqual(result.rowsAffected, 1);
@@ -426,8 +426,8 @@ describe('107. rowidDMLBindAsString.js', function() {
     const sql_insert = "insert into " + tableName + "(id, content) values (:i, CHARTOROWID(:c))";
     const sql_update = "update " + tableName + " set content = :c where id = :i returning content into :o";
     const bindVar_insert = {
-      i: { val : insertID, dir : oracledb.BIND_IN, type : oracledb.NUMBER },
-      c: { val : content_insert, dir : oracledb.BIND_IN, type : oracledb.STRING }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content_insert, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     let result = await connection.execute(sql_insert, bindVar_insert);
     assert.strictEqual(result.rowsAffected, 1);
@@ -451,7 +451,7 @@ describe('107. rowidDMLBindAsString.js', function() {
     sql = "select * from " + tableName + " where ROWID = CHARTOROWID(:c)";
     const binds = {
       c: {
-        val: resultVal, dir : oracledb.BIND_IN, type : oracledb.STRING
+        val: resultVal, dir: oracledb.BIND_IN, type: oracledb.STRING
       }
     };
     result = await connection.execute(sql, binds);

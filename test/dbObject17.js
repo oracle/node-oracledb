@@ -92,14 +92,14 @@ describe('216. dbObject17.js', () => {
       {
         SHIRTNUMBER: 11,
         NAME: 'Elizabeth',
-        TS:  new Date(1986, 8, 18, 12, 14, 27, 0),
+        TS: new Date(1986, 8, 18, 12, 14, 27, 0),
         TSZ: new Date(1989, 3, 4, 10, 27, 16, 201),
         LTZ: new Date(1999, 5, 4, 11, 23, 5, 45)
       },
       {
         SHIRTNUMBER: 22,
         NAME: 'Frank',
-        TS:  new Date(1987, 8, 18, 12, 14, 27, 0),
+        TS: new Date(1987, 8, 18, 12, 14, 27, 0),
         TSZ: new Date(1990, 3, 4, 10, 27, 16, 201),
         LTZ: new Date(2000, 5, 4, 11, 23, 5, 45)
       }
@@ -112,7 +112,7 @@ describe('216. dbObject17.js', () => {
     assert.strictEqual(result1.rowsAffected, 1);
 
     sql = `SELECT * FROM ${TABLE}`;
-    const result = await conn.execute(sql, [], { outFormat:oracledb.OUT_FORMAT_OBJECT });
+    const result = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
 
     assert.strictEqual(result.rows[0].SPORTNAME, 'Frisbee');
 

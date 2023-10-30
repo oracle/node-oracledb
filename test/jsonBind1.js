@@ -148,7 +148,7 @@ describe('253. jsonBind1.js', function() {
     });
 
     it('253.1.3 Array type', async function() {
-      const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
+      const data = { "employees": [ "Employee1", "Employee2", "Employee3" ] };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
 
       if (testsUtil.getClientVersion() >= 2100000000) {
@@ -175,7 +175,7 @@ describe('253. jsonBind1.js', function() {
     });
 
     it('253.1.4 Object type', async function() {
-      const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
+      const data = { "employee": { "name": "Employee1", "age": 30, "city": "New City" } };
       const sql = `INSERT into ` + tableName + ` VALUES (:bv)`;
       if (testsUtil.getClientVersion() >= 2100000000) {
         await conn.execute(sql, { bv: {val: data, type: oracledb.DB_TYPE_JSON} });
@@ -263,7 +263,7 @@ describe('253. jsonBind1.js', function() {
       await conn.execute(proc);
       result = await conn.execute("BEGIN nodb_bindjson(:io); END;",
         {
-          io: { val: data, dir : oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
+          io: { val: data, dir: oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
         });
 
       j = result.outBinds.io;
@@ -282,7 +282,7 @@ describe('253. jsonBind1.js', function() {
       await conn.execute(proc);
       result = await conn.execute("BEGIN nodb_bindjson(:io); END;",
         {
-          io: { val: data, dir : oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
+          io: { val: data, dir: oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
         });
 
       j = result.outBinds.io;
@@ -296,11 +296,11 @@ describe('253. jsonBind1.js', function() {
       if (testsUtil.getClientVersion() < 2100000000) {
         this.skip();
       }
-      const data = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
+      const data = { "employees": [ "Employee1", "Employee2", "Employee3" ] };
       await conn.execute(proc);
       result = await conn.execute("BEGIN nodb_bindjson(:io); END;",
         {
-          io: { val: data, dir : oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
+          io: { val: data, dir: oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
         });
 
       j = result.outBinds.io;
@@ -315,11 +315,11 @@ describe('253. jsonBind1.js', function() {
       if (testsUtil.getClientVersion() < 2100000000) {
         this.skip();
       }
-      const data = { "employee":{ "name":"Employee1", "age":30, "city":"New City" } };
+      const data = { "employee": { "name": "Employee1", "age": 30, "city": "New City" } };
       await conn.execute(proc);
       result = await conn.execute("BEGIN nodb_bindjson(:io); END;",
         {
-          io: { val: data, dir : oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
+          io: { val: data, dir: oracledb.BIND_INOUT, type: oracledb.DB_TYPE_JSON }
         });
 
       j = result.outBinds.io;

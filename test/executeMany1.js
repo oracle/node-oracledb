@@ -383,7 +383,7 @@ describe('163. executeMany1.js', function() {
          from nodb_tab_xmany;
     end;`;
     const bindDefs = [
-      { type : oracledb.NUMBER, dir : oracledb.BIND_OUT }
+      { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
     ];
     const options = { bindDefs: bindDefs };
     const numIterations = 8;
@@ -419,11 +419,11 @@ describe('163. executeMany1.js', function() {
     returning id, val into :1, :2`;
 
     const bindDefs = [
-      { type : oracledb.NUMBER, dir : oracledb.BIND_OUT },
-      { type : oracledb.STRING, dir : oracledb.BIND_OUT, maxSize : 30 }
+      { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+      { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 30 }
     ];
 
-    const options = { bindDefs : bindDefs };
+    const options = { bindDefs: bindDefs };
     const numIterations = 8;
     const result = await conn.executeMany(sql, numIterations, options);
     assert.strictEqual(result.outBinds.length, numIterations);

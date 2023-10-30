@@ -52,10 +52,10 @@ describe('273. jsonDualityView2.js', function() {
     }
 
     const dbaCredential = {
-      user          : dbConfig.test.DBA_user,
-      password      : dbConfig.test.DBA_password,
-      connectString : dbConfig.connectString,
-      privilege     : oracledb.SYSDBA,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA,
     };
     const pwd = testsUtil.generateRandomPassword();
 

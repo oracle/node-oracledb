@@ -84,8 +84,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       const result = await connection.execute(
         "INSERT INTO nodb_blob1 VALUES (:ID, :B)",
         {
-          ID : { val : id },
-          B : { val : content, dir : oracledb.BIND_IN, type : oracledb.BUFFER }
+          ID: { val: id },
+          B: { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
         }
       );
       assert.strictEqual(result.rowsAffected, 1);
@@ -122,9 +122,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0][1];
@@ -194,9 +194,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id, content);
       const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          fetchInfo : { B1 : { type : oracledb.BUFFER } }
+          fetchInfo: { B1: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0][0];
@@ -229,7 +229,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       let resultVal = result.rows[0][1];
@@ -250,9 +250,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          fetchInfo : {
-            B1 : { type : oracledb.BUFFER },
-            B2 : { type : oracledb.BUFFER } }
+          fetchInfo: {
+            B1: { type: oracledb.BUFFER },
+            B2: { type: oracledb.BUFFER } }
         }
       );
       let resultVal = result.rows[0][1];
@@ -279,7 +279,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0][1];
@@ -308,7 +308,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       assert.strictEqual(result.rows.length, 1);
@@ -338,7 +338,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       assert.strictEqual(result.rows.length, 2);
@@ -360,7 +360,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id, content);
 
       const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id;
-      const stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+      const stream = connection.queryStream(sql, {}, { fetchInfo: { B: { type: oracledb.BUFFER } } });
 
       let counter = 0;
       await new Promise((resolve, reject) => {
@@ -405,7 +405,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id_2, content_2);
 
       const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
-      const stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+      const stream = connection.queryStream(sql, {}, { fetchInfo: { B: { type: oracledb.BUFFER } } });
 
       let counter = 0;
       await new Promise((resolve, reject) => {
@@ -455,7 +455,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id_2, content_2);
 
       const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
-      const stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+      const stream = connection.queryStream(sql, {}, { fetchInfo: { B: { type: oracledb.BUFFER } } });
 
       let counter = 0;
       await new Promise((resolve, reject) => {
@@ -505,7 +505,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id_2, content_2);
 
       const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2;
-      const stream = connection.queryStream(sql, {}, { fetchInfo : { B : { type : oracledb.BUFFER } } });
+      const stream = connection.queryStream(sql, {}, { fetchInfo: { B: { type: oracledb.BUFFER } } });
 
       let counter = 0;
       await new Promise((resolve, reject) => {
@@ -555,10 +555,10 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0].B;
@@ -629,10 +629,10 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id, content);
       const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B1 : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B1: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0].B1;
@@ -665,8 +665,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       let resultVal = result.rows[0].B;
@@ -688,10 +688,10 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : {
-            B1 : { type : oracledb.BUFFER },
-            B2 : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: {
+            B1: { type: oracledb.BUFFER },
+            B2: { type: oracledb.BUFFER } }
         }
       );
       let resultVal = result.rows[0].B1;
@@ -717,8 +717,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0].B;
@@ -746,8 +746,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       assert.strictEqual(result.rows.length, 1);
@@ -778,8 +778,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       let resultVal = result.rows[0].B;
@@ -809,11 +809,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row =  await result.resultSet.getRow();
@@ -888,11 +888,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
       const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B1 : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B1: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row = await result.resultSet.getRow();
@@ -927,9 +927,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
 
@@ -955,11 +955,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : {
-            B1 : { type : oracledb.BUFFER },
-            B2 : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: {
+            B1: { type: oracledb.BUFFER },
+            B2: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row = await result.resultSet.getRow();
@@ -988,9 +988,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row = await result.resultSet.getRow();
@@ -1020,9 +1020,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const rowNumFetched = 2;
@@ -1057,9 +1057,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_OBJECT,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_OBJECT,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const rowNumFetched = 2;
@@ -1090,10 +1090,10 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id, insertContent);
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0][1];
@@ -1164,9 +1164,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
 
       const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          fetchInfo : { B1 : { type : oracledb.BUFFER } }
+          fetchInfo: { B1: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0][0];
@@ -1199,8 +1199,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       let resultVal = result.rows[0][1];
@@ -1221,9 +1221,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          fetchInfo : {
-            B1 : { type : oracledb.BUFFER },
-            B2 : { type : oracledb.BUFFER } }
+          fetchInfo: {
+            B1: { type: oracledb.BUFFER },
+            B2: { type: oracledb.BUFFER } }
         }
       );
       let resultVal = result.rows[0][1];
@@ -1250,8 +1250,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       const resultVal = result.rows[0][1];
@@ -1279,8 +1279,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       assert.strictEqual(result.rows.length, 1);
@@ -1310,8 +1310,8 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } }
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } }
         }
       );
       assert.strictEqual(result.rows.length, 2);
@@ -1339,11 +1339,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id, insertContent);
       const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row = await result.resultSet.getRow();
@@ -1416,11 +1416,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       await insertIntoBlobTable1(id, content);
       const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
-        { id : id },
+        { id: id },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B1 : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B1: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row = await result.resultSet.getRow();
@@ -1456,9 +1456,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const rowNumFetched = 2;
@@ -1483,11 +1483,11 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : {
-            B1 : { type : oracledb.BUFFER },
-            B2 : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: {
+            B1: { type: oracledb.BUFFER },
+            B2: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row = await result.resultSet.getRow();
@@ -1516,9 +1516,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
       const row = await result.resultSet.getRow();
@@ -1548,9 +1548,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
 
@@ -1587,9 +1587,9 @@ describe('88. fetchBlobAsBuffer2.js', function() {
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         {
-          outFormat : oracledb.OUT_FORMAT_ARRAY,
-          fetchInfo : { B : { type : oracledb.BUFFER } },
-          resultSet : true
+          outFormat: oracledb.OUT_FORMAT_ARRAY,
+          fetchInfo: { B: { type: oracledb.BUFFER } },
+          resultSet: true
         }
       );
 

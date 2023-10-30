@@ -134,7 +134,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
 
       let result = await connection.execute(
         "SELECT ID, B1 from nodb_blob2 where ID = :id",
-        { id : id }
+        { id: id }
       );
       assert.deepStrictEqual(result.rows[0][1], content_1);
 
@@ -142,7 +142,7 @@ describe('89. fetchBlobAsBuffer3.js', function() {
 
       result = await connection.execute(
         "SELECT B2 from nodb_blob2 where ID = :id",
-        { id : id }
+        { id: id }
       );
       assert.notStrictEqual(result.rows.length, 0);
       const clobData = (await result.rows[0][0].getData()).toString();

@@ -52,10 +52,10 @@ describe('274 jsonDualityView3.js', function() {
     }
 
     const dbaCredential = {
-      user          : dbConfig.test.DBA_user,
-      password      : dbConfig.test.DBA_password,
-      connectString : dbConfig.connectString,
-      privilege     : oracledb.SYSDBA,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA,
     };
 
     dbaConn = await oracledb.getConnection(dbaCredential);

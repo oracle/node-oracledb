@@ -60,10 +60,10 @@ describe.skip('185. runCQN.js', function() {
 
 
       const credential = {
-        user:          dbConfig.test.DBA_user,
-        password:      dbConfig.test.DBA_password,
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
         connectString: dbConfig.connectString,
-        privilege:     oracledb.SYSDBA
+        privilege: oracledb.SYSDBA
       };
       connAsDBA = await oracledb.getConnection(credential);
 
@@ -110,11 +110,11 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `SELECT * FROM ${TABLE} WHERE k > :bv`,
-      binds: { bv : 100 },
-      timeout : 20,
-      qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+      binds: { bv: 100 },
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
     };
 
     await conn.subscribe('sub1', options);
@@ -153,10 +153,10 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `SELECT * FROM ${TABLE}`,
-      timeout : 20,
-      qos : oracledb.SUBSCR_QOS_QUERY
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY
     };
     await conn.subscribe('sub2', options);
     sql = `INSERT INTO ${TABLE} VALUES (99)`;
@@ -166,7 +166,7 @@ describe.skip('185. runCQN.js', function() {
     await conn.execute(sql);
 
     sql = `DELETE FROM ${TABLE} WHERE k > :bv`;
-    await conn.execute(sql, { bv : 100 });
+    await conn.execute(sql, { bv: 100 });
 
     await conn.commit();
 
@@ -196,17 +196,17 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `SELECT * FROM ${TABLE}`,
-      timeout : 20,
-      qos : oracledb.SUBSCR_QOS_QUERY,
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY,
       operations: oracledb.CQN_OPCODE_INSERT
     };
 
     await conn.subscribe('sub3', options);
 
     sql = `DELETE FROM ${TABLE} WHERE k > :bv`;
-    await conn.execute(sql, { bv : 100 });
+    await conn.execute(sql, { bv: 100 });
 
     sql = `INSERT INTO ${TABLE} VALUES (103)`;
     await conn.execute(sql);
@@ -227,11 +227,11 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `DELETE FROM ${TABLE} WHERE k > :bv`,
-      binds: { bv : 100 },
-      timeout : 20,
-      qos : oracledb.SUBSCR_QOS_QUERY
+      binds: { bv: 100 },
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY
     };
 
     await assert.rejects(
@@ -259,15 +259,15 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `SELECT * FROM ${TABLE}`,
-      timeout : 60,
-      qos : oracledb.SUBSCR_QOS_ROWIDS,
+      timeout: 60,
+      qos: oracledb.SUBSCR_QOS_ROWIDS,
       // Group notifications in batches covering 1 second
       // intervals, and send a summary
-      groupingClass : oracledb.SUBSCR_GROUPING_CLASS_TIME,
-      groupingValue : 1,
-      groupingType  : oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
+      groupingClass: oracledb.SUBSCR_GROUPING_CLASS_TIME,
+      groupingValue: 1,
+      groupingType: oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
     };
 
     await conn.subscribe('sub5', options);
@@ -299,11 +299,11 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `SELECT * FROM ${TABLE} WHERE k > :bv`,
-      binds: { bv : 100 },
-      timeout : 20,
-      qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+      binds: { bv: 100 },
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
     };
 
     await conn.commit();
@@ -341,11 +341,11 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `SELECT * FROM ${TABLE} WHERE k > :bv`,
-      binds: { bv : 100 },
-      timeout : 20,
-      qos : oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+      binds: { bv: 100 },
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
     };
 
     await conn.subscribe('sub7', options);
@@ -389,11 +389,11 @@ describe.skip('185. runCQN.js', function() {
     };
 
     const options = {
-      callback : myCallback,
+      callback: myCallback,
       sql: `DELETE FROM ${TABLE} WHERE k > :bv`,
-      binds: { bv : 100 },
-      timeout : 20,
-      qos : oracledb.SUBSCR_QOS_QUERY
+      binds: { bv: 100 },
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY
     };
 
     await assert.rejects(

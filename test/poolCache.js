@@ -224,8 +224,8 @@ describe('67. poolCache.js', function() {
     it('67.2.7 gets a connection from the default pool', async function() {
       const config = {
         ...dbConfig,
-        poolMax : 4,
-        poolMin : 1,
+        poolMax: 4,
+        poolMin: 1,
         poolIncrement: 1,
         poolTimeout: 0 // never terminate unused connections
       };

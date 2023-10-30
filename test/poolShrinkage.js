@@ -48,10 +48,10 @@ describe('279. Pool Shrinkage', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 2,
-      poolMax           : 10,
-      poolTimeout       : 1,
-      homogeneous       : true
+      poolMin: 2,
+      poolMax: 10,
+      poolTimeout: 1,
+      homogeneous: true
     });
     assert.ok(pool);
     await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
@@ -68,11 +68,11 @@ describe('279. Pool Shrinkage', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 10,
-      poolTimeout       : 1,
-      poolIncrement     : 1,
-      homogeneous       : true
+      poolMin: 0,
+      poolMax: 10,
+      poolTimeout: 1,
+      poolIncrement: 1,
+      homogeneous: true
     });
     assert.ok(pool);
     const conn1 = await pool.getConnection();
@@ -90,11 +90,11 @@ describe('279. Pool Shrinkage', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 10,
-      poolIncrement     : 2,
-      poolTimeout       : 1,
-      homogeneous       : true
+      poolMin: 0,
+      poolMax: 10,
+      poolIncrement: 2,
+      poolTimeout: 1,
+      homogeneous: true
     });
     assert.ok(pool);
     const conn = await pool.getConnection();
@@ -114,11 +114,11 @@ describe('279. Pool Shrinkage', function() {
     if (!oracledb.thin) this.skip();
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 10,
-      poolIncrement     : 1,
-      poolTimeout       : 1,
-      homogeneous       : true
+      poolMin: 0,
+      poolMax: 10,
+      poolIncrement: 1,
+      poolTimeout: 1,
+      homogeneous: true
     });
     assert.ok(pool);
     const conn = await pool.getConnection();
@@ -141,11 +141,11 @@ describe('279. Pool Shrinkage', function() {
     if (!oracledb.thin) this.skip();
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 1,
-      poolMax           : 10,
-      poolIncrement     : 1,
-      poolTimeout       : 1,
-      homogeneous       : true
+      poolMin: 1,
+      poolMax: 10,
+      poolIncrement: 1,
+      poolTimeout: 1,
+      homogeneous: true
     });
     assert.ok(pool);
     const conn = await pool.getConnection();
@@ -169,11 +169,11 @@ describe('279. Pool Shrinkage', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 10,
-      poolIncrement     : 3,
-      poolTimeout       : 0,
-      homogeneous       : true
+      poolMin: 0,
+      poolMax: 10,
+      poolIncrement: 3,
+      poolTimeout: 0,
+      homogeneous: true
     });
     assert.ok(pool);
     const conn = await pool.getConnection();
@@ -192,11 +192,11 @@ describe('279. Pool Shrinkage', function() {
 
     const pool = await oracledb.createPool({
       ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 10,
-      poolTimeout       : 0,
-      poolIncrement     : 3,
-      homogeneous       : true
+      poolMin: 0,
+      poolMax: 10,
+      poolTimeout: 0,
+      poolIncrement: 3,
+      homogeneous: true
     });
     assert.ok(pool);
     const conn = await pool.getConnection();

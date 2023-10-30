@@ -56,8 +56,8 @@ describe('285. aq8.js', function() {
 
     await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
     const credential = {
-      user:          AQ_USER,
-      password:      AQ_USER_PWD,
+      user: AQ_USER,
+      password: AQ_USER_PWD,
       connectString: dbConfig.connectString
     };
     conn = await oracledb.getConnection(credential);
@@ -263,17 +263,17 @@ describe('285. aq8.js', function() {
         { payloadType: oracledb.DB_TYPE_JSON }
       );
 
-      const payload1 = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
+      const payload1 = { "employees": [ "Employee1", "Employee2", "Employee3" ] };
       const msg1 = await queue.enqOne ({
         payload: payload1,
       });
 
-      const payload2 = { "designation":[ "Developer", "Sr. Developer", "Jr. Developer" ] };
+      const payload2 = { "designation": [ "Developer", "Sr. Developer", "Jr. Developer" ] };
       const msg2 = await queue.enqOne ({
         payload: payload2,
       });
 
-      const payload3 = { "names":[ "Steve", "John", "Alice" ] };
+      const payload3 = { "names": [ "Steve", "John", "Alice" ] };
       const msg3 = await queue.enqOne ({
         payload: payload3,
       });
@@ -303,17 +303,17 @@ describe('285. aq8.js', function() {
         { payloadType: oracledb.DB_TYPE_JSON }
       );
 
-      const payload1 = { "employees":[ "Employee1", "Employee2", "Employee3" ] };
+      const payload1 = { "employees": [ "Employee1", "Employee2", "Employee3" ] };
       const msg1 = await queue.enqOne ({
         payload: payload1,
       });
 
-      const payload2 = { "designation":[ "Developer", "Sr. Developer", "Jr. Developer" ] };
+      const payload2 = { "designation": [ "Developer", "Sr. Developer", "Jr. Developer" ] };
       const msg2 = await queue.enqOne ({
         payload: payload2,
       });
 
-      const payload3 = { "names":[ "Steve", "John", "Alice" ] };
+      const payload3 = { "names": [ "Steve", "John", "Alice" ] };
       const msg3 = await queue.enqOne ({
         payload: payload3,
       });

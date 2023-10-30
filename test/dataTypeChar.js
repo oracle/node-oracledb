@@ -105,7 +105,7 @@ describe('22. dataTypeChar.js', function() {
       assert(connection);
       await connection.execute(proc);
       const bindvars = {
-        result:      {type: oracledb.STRING, dir: oracledb.BIND_OUT},
+        result: {type: oracledb.STRING, dir: oracledb.BIND_OUT},
         stringValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: 'Node.js'}
       };
       await connection.execute(
@@ -145,7 +145,7 @@ describe('22. dataTypeChar.js', function() {
                      "  stringValue := 'Hello Node.js World!';\n" +
                      "END nodb_testproc;\n";
       await connection.execute(proc);
-      const bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize:200} };
+      const bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 200} };
       result = await connection.execute(
         "BEGIN nodb_testproc(:stringValue); END;",
         bindvars);
@@ -185,7 +185,7 @@ describe('22. dataTypeChar.js', function() {
                  "END;";
       await connection.execute(proc);
       const bindvars = {
-        result:  {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
+        result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
         strings: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']}
       };
       result = await connection.execute(

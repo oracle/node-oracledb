@@ -55,13 +55,13 @@ describe('252. sodaMetaDataCache.js', function() {
   });
 
   it('252.1 sodaMetaDataCache set to TRUE', async function() {
-    const pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : true});
+    const pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache: true});
     assert.strictEqual(pool.sodaMetaDataCache, true);
     await pool.close(0);
   });
 
   it('252.2 sodaMetaDataCache set to FALSE', async function() {
-    const pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache : false});
+    const pool = await oracledb.createPool({...dbConfig, sodaMetaDataCache: false});
     assert.strictEqual(pool.sodaMetaDataCache, false);
     await pool.close(0);
   });

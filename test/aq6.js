@@ -56,8 +56,8 @@ describe('282. aq6.js', function() {
 
     await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
     const credential = {
-      user:          AQ_USER,
-      password:      AQ_USER_PWD,
+      user: AQ_USER,
+      password: AQ_USER_PWD,
       connectString: dbConfig.connectString
     };
     conn = await oracledb.getConnection(credential);
@@ -176,7 +176,7 @@ describe('282. aq6.js', function() {
       );
 
       msg = await queue.enqOne ({
-        payload: { "employees":[ "Employee1", "Employee2", "Employee3" ] },
+        payload: { "employees": [ "Employee1", "Employee2", "Employee3" ] },
       });
 
       await conn.commit();

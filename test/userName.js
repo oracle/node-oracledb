@@ -39,12 +39,12 @@ const testsUtil = require('./testsUtil.js');
 
 describe('248. userName.js', function() {
   const dbaCredential = {
-    username      : dbConfig.test.DBA_user,
-    password      : dbConfig.test.DBA_password,
+    username: dbConfig.test.DBA_user,
+    password: dbConfig.test.DBA_password,
     walletPassword: dbConfig.walletPassword,
     walletLocation: dbConfig.walletLocation,
-    connectString : dbConfig.connectString,
-    privilege     : oracledb.SYSDBA
+    connectString: dbConfig.connectString,
+    privilege: oracledb.SYSDBA
   };
 
   const createUser = async function(userSchema, password) {
@@ -75,8 +75,8 @@ describe('248. userName.js', function() {
       await createUser(userSchema, password);
 
       const credential = {
-        username     : userSchema,
-        password     : password,
+        username: userSchema,
+        password: password,
         connectString: dbConfig.connectString
       };
 
@@ -99,8 +99,8 @@ describe('248. userName.js', function() {
       await createUser(userSchema, password);
 
       const credential = {
-        username     : userSchema,
-        password     : password,
+        username: userSchema,
+        password: password,
         connectString: dbConfig.connectString
       };
 
@@ -123,8 +123,8 @@ describe('248. userName.js', function() {
       await createUser(userSchema, password);
 
       const credential = {
-        username     : userSchema,
-        password     : password,
+        username: userSchema,
+        password: password,
         connectString: dbConfig.connectString
       };
 
@@ -155,8 +155,8 @@ describe('248. userName.js', function() {
 
     it('248.1.5 negative test: username = null', async function() {
       const credential = {
-        username     : null,
-        password     : dbConfig.password,
+        username: null,
+        password: dbConfig.password,
         connectString: dbConfig.connectString
       };
       await assert.rejects(
@@ -276,8 +276,8 @@ describe('248. userName.js', function() {
       await createUser(userSchema, password);
 
       const credential = {
-        username     : userSchema,
-        password     : password,
+        username: userSchema,
+        password: password,
         connectString: dbConfig.connectString
       };
 
@@ -299,8 +299,8 @@ describe('248. userName.js', function() {
       await createUser(userSchema, password);
 
       const credential = {
-        username     : userSchema,
-        password     : password,
+        username: userSchema,
+        password: password,
         connectString: dbConfig.connectString
       };
 
@@ -330,8 +330,8 @@ describe('248. userName.js', function() {
 
     it('248.2.5 negative test: username = null', async function() {
       const credential = {
-        user         : null,
-        password     : dbConfig.password,
+        user: null,
+        password: dbConfig.password,
         connectString: dbConfig.connectString
       };
       await assert.rejects(
@@ -392,8 +392,8 @@ describe('248. userName.js', function() {
 
     it('248.2.10 negative test: username = NaN', async function() {
       const credential = {
-        user         : NaN,
-        password     : dbConfig.password,
+        user: NaN,
+        password: dbConfig.password,
         connectString: dbConfig.connectString
       };
       await assert.rejects(
@@ -406,8 +406,8 @@ describe('248. userName.js', function() {
 
     it('248.2.11 negative test: username in array', async function() {
       const credential = {
-        user         : ["scott", "scott"],
-        password     : dbConfig.password,
+        user: ["scott", "scott"],
+        password: dbConfig.password,
         connectString: dbConfig.connectString
       };
       await assert.rejects(

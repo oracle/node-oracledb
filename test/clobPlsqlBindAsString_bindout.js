@@ -423,7 +423,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         co: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len_1 },
-        ci: { val:clobStr_2, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len_2 }
+        ci: { val: clobStr_2, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len_2 }
       };
       await insertClobWithString(sequence, clobStr_1);
       await connection.execute(proc_7412);
@@ -576,7 +576,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
 
       const sid = await testsUtil.getSid(connection);
       const dbaConfig = {
-        user : dbConfig.test.DBA_user,
+        user: dbConfig.test.DBA_user,
         password: dbConfig.test.DBA_password,
         connectionString: dbConfig.connectString,
         privilege: oracledb.SYSDBA
@@ -822,7 +822,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         co: { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: len_1 },
-        ci: { val:clobStr_2, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len_2 }
+        ci: { val: clobStr_2, type: oracledb.STRING, dir: oracledb.BIND_IN, maxSize: len_2 }
       };
       await insertClobWithString(sequence, clobStr_1);
       await connection.execute(proc_7518);

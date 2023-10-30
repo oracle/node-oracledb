@@ -56,11 +56,11 @@ describe('261. connHealthy.js', function() {
       const pool = await oracledb.createPool(
         {
           ...dbConfig,
-          poolMin           : 1,
-          poolMax           : 5,
-          poolIncrement     : 1,
-          poolTimeout       : 28,
-          stmtCacheSize     : 23
+          poolMin: 1,
+          poolMax: 5,
+          poolIncrement: 1,
+          poolTimeout: 28,
+          stmtCacheSize: 23
         });
       assert.strictEqual(pool.connectionsInUse, 0);
       const conn = await pool.getConnection();

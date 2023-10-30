@@ -185,10 +185,10 @@ testsUtil.getDBCompatibleVersion = async function() {
   let compatibleVersion;
   if (dbConfig.test.DBA_PRIVILEGE) {
     const connectionDetails = {
-      user          : dbConfig.test.DBA_user,
-      password      : dbConfig.test.DBA_password,
-      connectString : dbConfig.connectString,
-      privilege     : oracledb.SYSDBA,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA,
     };
     const conn = await oracledb.getConnection(connectionDetails);
     const res = await conn.execute("select name, value from v$parameter where name = 'compatible'");
@@ -261,10 +261,10 @@ testsUtil.getRoundTripCount = async function(sid) {
     throw new Error(msg);
   } else {
     const dbaCredential = {
-      user:          dbConfig.test.DBA_user,
-      password:      dbConfig.test.DBA_password,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
       connectString: dbConfig.connectString,
-      privilege:     oracledb.SYSDBA
+      privilege: oracledb.SYSDBA
     };
 
     const sql = `
@@ -317,10 +317,10 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
     throw new Error(msg);
   } else {
     const dbaCredential = {
-      user:          dbConfig.test.DBA_user,
-      password:      dbConfig.test.DBA_password,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
       connectString: dbConfig.connectString,
-      privilege:     oracledb.SYSDBA
+      privilege: oracledb.SYSDBA
     };
 
     const plsql = `
@@ -363,10 +363,10 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
     throw new Error(msg);
   } else {
     const dbaCredential = {
-      user:          dbConfig.test.DBA_user,
-      password:      dbConfig.test.DBA_password,
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
       connectString: dbConfig.connectString,
-      privilege:     oracledb.SYSDBA
+      privilege: oracledb.SYSDBA
     };
 
     const connAsDBA = await oracledb.getConnection(dbaCredential);

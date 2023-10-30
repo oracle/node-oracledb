@@ -58,38 +58,38 @@ describe('179. soda11.js', () => {
 
       const t_tablename = "myTableName";
       const t_metadata = {
-        "schemaName" : dbConfig.user.toUpperCase(),
-        "tableName" : t_tablename,
-        "keyColumn" :
+        "schemaName": dbConfig.user.toUpperCase(),
+        "tableName": t_tablename,
+        "keyColumn":
                       {
-                        "name" : "ID",
-                        "sqlType" : "VARCHAR2",
-                        "maxLength" : 255,
-                        "assignmentMethod" : "UUID"
+                        "name": "ID",
+                        "sqlType": "VARCHAR2",
+                        "maxLength": 255,
+                        "assignmentMethod": "UUID"
                       },
-        "contentColumn" :
+        "contentColumn":
                       {
-                        "name" : "JSON_DOCUMENT",
-                        "sqlType" : "BLOB",
-                        "compress" : "NONE",
-                        "cache" : true,
-                        "encrypt" : "NONE",
-                        "validation" : "STANDARD"
+                        "name": "JSON_DOCUMENT",
+                        "sqlType": "BLOB",
+                        "compress": "NONE",
+                        "cache": true,
+                        "encrypt": "NONE",
+                        "validation": "STANDARD"
                       },
-        "versionColumn" :
+        "versionColumn":
                       {
-                        "name" : "VERSION",
-                        "method" : "SHA256"
+                        "name": "VERSION",
+                        "method": "SHA256"
                       },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                       {
-                        "name" : "LAST_MODIFIED"
+                        "name": "LAST_MODIFIED"
                       },
-        "creationTimeColumn" :
+        "creationTimeColumn":
                       {
-                        "name" : "CREATED_ON"
+                        "name": "CREATED_ON"
                       },
-        "readOnly" : true
+        "readOnly": true
       };
 
       const t_collname = "soda_test_179_1";
@@ -122,38 +122,38 @@ describe('179. soda11.js', () => {
       const sd = conn.getSodaDatabase();
 
       const t_metadata = {
-        "schemaName" : "nonexistent",
-        "tableName" : "bar",
-        "keyColumn" :
+        "schemaName": "nonexistent",
+        "tableName": "bar",
+        "keyColumn":
                       {
-                        "name" : "ID",
-                        "sqlType" : "VARCHAR2",
-                        "maxLength" : 255,
-                        "assignmentMethod" : "UUID"
+                        "name": "ID",
+                        "sqlType": "VARCHAR2",
+                        "maxLength": 255,
+                        "assignmentMethod": "UUID"
                       },
-        "contentColumn" :
+        "contentColumn":
                       {
-                        "name" : "JSON_DOCUMENT",
-                        "sqlType" : "BLOB",
-                        "compress" : "NONE",
-                        "cache" : true,
-                        "encrypt" : "NONE",
-                        "validation" : "STANDARD"
+                        "name": "JSON_DOCUMENT",
+                        "sqlType": "BLOB",
+                        "compress": "NONE",
+                        "cache": true,
+                        "encrypt": "NONE",
+                        "validation": "STANDARD"
                       },
-        "versionColumn" :
+        "versionColumn":
                       {
-                        "name" : "VERSION",
-                        "method" : "SHA256"
+                        "name": "VERSION",
+                        "method": "SHA256"
                       },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                       {
-                        "name" : "LAST_MODIFIED"
+                        "name": "LAST_MODIFIED"
                       },
-        "creationTimeColumn" :
+        "creationTimeColumn":
                       {
-                        "name" : "CREATED_ON"
+                        "name": "CREATED_ON"
                       },
-        "readOnly" : false
+        "readOnly": false
       };
 
       const t_collname = "soda_test_179_2";
@@ -184,37 +184,37 @@ describe('179. soda11.js', () => {
       const sd = conn.getSodaDatabase();
 
       const t_metadata1 = {
-        "schemaName" : dbConfig.user.toUpperCase(),
-        "tableName" : "nodb_tab_179_3",
-        "keyColumn" :
+        "schemaName": dbConfig.user.toUpperCase(),
+        "tableName": "nodb_tab_179_3",
+        "keyColumn":
                        {
-                         "name" : "ID",
-                         "sqlType" : "VARCHAR2",
-                         "maxLength" : 255,
-                         "assignmentMethod" : "UUID"
+                         "name": "ID",
+                         "sqlType": "VARCHAR2",
+                         "maxLength": 255,
+                         "assignmentMethod": "UUID"
                        },
-        "contentColumn" :
+        "contentColumn":
                        {
-                         "name" : "JSON_DOCUMENTS",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
+                         "name": "JSON_DOCUMENTS",
+                         "sqlType": "BLOB",
+                         "compress": "NONE",
+                         "cache": true,
+                         "encrypt": "NONE",
+                         "validation": "STRICT"
                        },
-        "versionColumn" :
+        "versionColumn":
                        {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
+                         "name": "VERSION",
+                         "type": "String",
+                         "method": "SHA256"
                        },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                        {
-                         "name":"LAST_MODIFIED"
+                         "name": "LAST_MODIFIED"
                        },
         "creationTimeColumn":
                        {
-                         "name":"CREATED_ON"
+                         "name": "CREATED_ON"
                        },
         "readOnly": false
       };
@@ -223,37 +223,37 @@ describe('179. soda11.js', () => {
       collection1 = await sd.createCollection(t_collname, options);
 
       const t_metadata2 = {
-        "schemaName" : "foo",
-        "tableName" : "bar",
-        "keyColumn" :
+        "schemaName": "foo",
+        "tableName": "bar",
+        "keyColumn":
                        {
-                         "name" : "ID",
-                         "sqlType" : "VARCHAR2",
-                         "maxLength" : 255,
-                         "assignmentMethod" : "UUID"
+                         "name": "ID",
+                         "sqlType": "VARCHAR2",
+                         "maxLength": 255,
+                         "assignmentMethod": "UUID"
                        },
-        "contentColumn" :
+        "contentColumn":
                        {
-                         "name" : "JSON_DOCUMENTS",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
+                         "name": "JSON_DOCUMENTS",
+                         "sqlType": "BLOB",
+                         "compress": "NONE",
+                         "cache": true,
+                         "encrypt": "NONE",
+                         "validation": "STRICT"
                        },
-        "versionColumn" :
+        "versionColumn":
                        {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
+                         "name": "VERSION",
+                         "type": "String",
+                         "method": "SHA256"
                        },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                        {
-                         "name":"LAST_MODIFIED"
+                         "name": "LAST_MODIFIED"
                        },
         "creationTimeColumn":
                        {
-                         "name":"CREATED_ON"
+                         "name": "CREATED_ON"
                        },
         "readOnly": true
       };
@@ -283,36 +283,36 @@ describe('179. soda11.js', () => {
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_4';
       const testMetaData = {
-        "schemaName" : dbConfig.user.toUpperCase(),
-        "tableName" : collectionName,
-        "keyColumn" :
+        "schemaName": dbConfig.user.toUpperCase(),
+        "tableName": collectionName,
+        "keyColumn":
                        {
-                         "name" : "ID",
-                         "sqlType" : "NUMBER",
-                         "assignmentMethod" : "CLIENT"
+                         "name": "ID",
+                         "sqlType": "NUMBER",
+                         "assignmentMethod": "CLIENT"
                        },
-        "contentColumn" :
+        "contentColumn":
                        {
-                         "name" : "JSON_DOCUMENTS",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
+                         "name": "JSON_DOCUMENTS",
+                         "sqlType": "BLOB",
+                         "compress": "NONE",
+                         "cache": true,
+                         "encrypt": "NONE",
+                         "validation": "STRICT"
                        },
-        "versionColumn" :
+        "versionColumn":
                        {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
+                         "name": "VERSION",
+                         "type": "String",
+                         "method": "SHA256"
                        },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                        {
-                         "name":"LAST_MODIFIED"
+                         "name": "LAST_MODIFIED"
                        },
         "creationTimeColumn":
                        {
-                         "name":"CREATED_ON"
+                         "name": "CREATED_ON"
                        },
         "readOnly": false
       };
@@ -320,7 +320,7 @@ describe('179. soda11.js', () => {
       const coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
       const testContent = {
-        name:    "Shelly",
+        name: "Shelly",
         address: {city: "Shenzhen", country: "China"}
       };
 
@@ -359,36 +359,36 @@ describe('179. soda11.js', () => {
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_5';
       const testMetaData = {
-        "schemaName" : dbConfig.user.toUpperCase(),
-        "tableName" : collectionName,
-        "keyColumn" :
+        "schemaName": dbConfig.user.toUpperCase(),
+        "tableName": collectionName,
+        "keyColumn":
                        {
-                         "name" : "ID",
-                         "sqlType" : "NUMBER",
-                         "assignmentMethod" : "CLIENT"
+                         "name": "ID",
+                         "sqlType": "NUMBER",
+                         "assignmentMethod": "CLIENT"
                        },
-        "contentColumn" :
+        "contentColumn":
                        {
-                         "name" : "JSON_DOCUMENTS",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
+                         "name": "JSON_DOCUMENTS",
+                         "sqlType": "BLOB",
+                         "compress": "NONE",
+                         "cache": true,
+                         "encrypt": "NONE",
+                         "validation": "STRICT"
                        },
-        "versionColumn" :
+        "versionColumn":
                        {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
+                         "name": "VERSION",
+                         "type": "String",
+                         "method": "SHA256"
                        },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                        {
-                         "name":"LAST_MODIFIED"
+                         "name": "LAST_MODIFIED"
                        },
         "creationTimeColumn":
                        {
-                         "name":"CREATED_ON"
+                         "name": "CREATED_ON"
                        },
         "readOnly": false
       };
@@ -396,7 +396,7 @@ describe('179. soda11.js', () => {
       coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
       const testContent = {
-        name:    "Shelly",
+        name: "Shelly",
         address: {city: "Shenzhen", country: "China"}
       };
 
@@ -427,40 +427,40 @@ describe('179. soda11.js', () => {
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_6';
       const testMetaData = {
-        "schemaName" : dbConfig.user.toUpperCase(),
-        "tableName" : collectionName,
-        "keyColumn" :
+        "schemaName": dbConfig.user.toUpperCase(),
+        "tableName": collectionName,
+        "keyColumn":
                      {
-                       "name" : "ID",
-                       "sqlType" : "NUMBER",
-                       "assignmentMethod" : "CLIENT"
+                       "name": "ID",
+                       "sqlType": "NUMBER",
+                       "assignmentMethod": "CLIENT"
                      },
         "mediaTypeColumn":
                          {
                            "name": "MediaType"
                          },
-        "contentColumn" :
+        "contentColumn":
                        {
-                         "name" : "DOCUMENT",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
+                         "name": "DOCUMENT",
+                         "sqlType": "BLOB",
+                         "compress": "NONE",
+                         "cache": true,
+                         "encrypt": "NONE",
+                         "validation": "STRICT"
                        },
-        "versionColumn" :
+        "versionColumn":
                        {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
+                         "name": "VERSION",
+                         "type": "String",
+                         "method": "SHA256"
                        },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                        {
-                         "name":"LAST_MODIFIED"
+                         "name": "LAST_MODIFIED"
                        },
         "creationTimeColumn":
                        {
-                         "name":"CREATED_ON"
+                         "name": "CREATED_ON"
                        },
         "readOnly": false
       };
@@ -506,40 +506,40 @@ describe('179. soda11.js', () => {
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_7';
       const testMetaData = {
-        "schemaName" : dbConfig.user.toUpperCase(),
-        "tableName" : collectionName,
-        "keyColumn" :
+        "schemaName": dbConfig.user.toUpperCase(),
+        "tableName": collectionName,
+        "keyColumn":
                      {
-                       "name" : "ID",
-                       "sqlType" : "NUMBER",
-                       "assignmentMethod" : "CLIENT"
+                       "name": "ID",
+                       "sqlType": "NUMBER",
+                       "assignmentMethod": "CLIENT"
                      },
         "mediaTypeColumn":
                          {
                            "name": "MediaType"
                          },
-        "contentColumn" :
+        "contentColumn":
                        {
-                         "name" : "DOCUMENT",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
+                         "name": "DOCUMENT",
+                         "sqlType": "BLOB",
+                         "compress": "NONE",
+                         "cache": true,
+                         "encrypt": "NONE",
+                         "validation": "STRICT"
                        },
-        "versionColumn" :
+        "versionColumn":
                        {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
+                         "name": "VERSION",
+                         "type": "String",
+                         "method": "SHA256"
                        },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                        {
-                         "name":"LAST_MODIFIED"
+                         "name": "LAST_MODIFIED"
                        },
         "creationTimeColumn":
                        {
-                         "name":"CREATED_ON"
+                         "name": "CREATED_ON"
                        },
         "readOnly": false
       };
@@ -580,40 +580,40 @@ describe('179. soda11.js', () => {
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_8';
       const testMetaData = {
-        "schemaName" : dbConfig.user.toUpperCase(),
-        "tableName" : collectionName,
-        "keyColumn" :
+        "schemaName": dbConfig.user.toUpperCase(),
+        "tableName": collectionName,
+        "keyColumn":
                      {
-                       "name" : "ID",
-                       "sqlType" : "NUMBER",
-                       "assignmentMethod" : "CLIENT"
+                       "name": "ID",
+                       "sqlType": "NUMBER",
+                       "assignmentMethod": "CLIENT"
                      },
         "mediaTypeColumn":
                          {
                            "name": "MediaType"
                          },
-        "contentColumn" :
+        "contentColumn":
                        {
-                         "name" : "DOCUMENT",
-                         "sqlType" : "BLOB",
-                         "compress" : "NONE",
-                         "cache" : true,
-                         "encrypt" : "NONE",
-                         "validation" : "STRICT"
+                         "name": "DOCUMENT",
+                         "sqlType": "BLOB",
+                         "compress": "NONE",
+                         "cache": true,
+                         "encrypt": "NONE",
+                         "validation": "STRICT"
                        },
-        "versionColumn" :
+        "versionColumn":
                        {
-                         "name" : "VERSION",
-                         "type":"String",
-                         "method":"SHA256"
+                         "name": "VERSION",
+                         "type": "String",
+                         "method": "SHA256"
                        },
-        "lastModifiedColumn" :
+        "lastModifiedColumn":
                        {
-                         "name":"LAST_MODIFIED"
+                         "name": "LAST_MODIFIED"
                        },
         "creationTimeColumn":
                        {
-                         "name":"CREATED_ON"
+                         "name": "CREATED_ON"
                        },
         "readOnly": false
       };

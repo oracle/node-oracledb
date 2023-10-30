@@ -184,11 +184,11 @@ describe('287. sodaOpLock.js', () => {
 
     // Insert a new document
     const testContent = {
-      name:    "Steven Gomes",
+      name: "Steven Gomes",
       address: {city: "Los Angeles", country: "US"},
       company: "Oracle Corporation",
       manager: null,
-      VP:      "Bruce"
+      VP: "Bruce"
     };
 
     const myDoc = await coll.insertOneAndGet(testContent);

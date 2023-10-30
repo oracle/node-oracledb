@@ -85,8 +85,8 @@ describe('84. fetchClobAsString1.js', function() {
     } else {
       const sql = "INSERT INTO nodb_clob1 VALUES (:ID, :C)";
       const binds = {
-        ID : { val : id },
-        C : { val : content, dir : oracledb.BIND_IN, type : oracledb.STRING }
+        ID: { val: id },
+        C: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
       };
       const result = await connection.execute(sql, binds);
       assert.strictEqual(result.rowsAffected, 1);
@@ -130,7 +130,7 @@ describe('84. fetchClobAsString1.js', function() {
     const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const result = await connection.execute(sql, binds);
       if (specialStr === null) {
         assert.strictEqual(result.rows[0][1], null);
@@ -192,7 +192,7 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT substr(C, 1, " + specialStrLen + ") from nodb_clob1 WHERE ID = :id";
-      const result = await connection.execute(sql, { id : id });
+      const result = await connection.execute(sql, { id: id });
       compareStrings(result.rows[0][0], specialStr, specialStr, specialStrLen);
     }); // 84.1.7
 
@@ -293,7 +293,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id, content);
       oracledb.fetchAsString = [];
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const result = await connection.execute(sql, binds);
       const lob = result.rows[0][1];
       const clobData = await lob.getData();
@@ -353,9 +353,9 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        fetchInfo : { C : { type : oracledb.DEFAULT } }
+        fetchInfo: { C: { type: oracledb.DEFAULT } }
       };
       const result = await connection.execute(sql, binds, options);
       const lob = result.rows[0][1];
@@ -516,8 +516,8 @@ describe('84. fetchClobAsString1.js', function() {
     const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const binds = { id: id };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, binds, options);
       const resultVal = result.rows[0].C;
       if (specialStr === null) {
@@ -580,8 +580,8 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const binds = { id: id };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0].C1, specialStr, specialStr, specialStrLength);
     }); // 84.2.7
@@ -606,7 +606,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id_2, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0].C, specialStr_1, content_1, contentLength_1);
       compareStrings(result.rows[1].C, specialStr_2, content_2, contentLength_2);
@@ -621,7 +621,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id, content);
       const sql = "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0].C1, specialStr, content, contentLength);
       compareStrings(result.rows[0].C2, specialStr, content, contentLength);
@@ -640,7 +640,7 @@ describe('84. fetchClobAsString1.js', function() {
       await updateClobTable1(id, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0].C, specialStr_2, content_2, contentLength_2);
     }); // 84.2.11
@@ -663,7 +663,7 @@ describe('84. fetchClobAsString1.js', function() {
       const bindVar = {
         c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, bindVar, options);
       const rows = await result.outBinds.c.getRows(3);
       const resultVal = rows[0].C;
@@ -708,7 +708,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id_2, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, binds, options);
       assert.strictEqual(result.rows.length, 1);
       compareStrings(result.rows[0].C, specialStr_1, content_1, contentLength_1);
@@ -731,7 +731,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id_2, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_OBJECT };
+      const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
       const result = await connection.execute(sql, binds, options);
       assert.strictEqual(result.rows.length, 2);
       compareStrings(result.rows[0].C, specialStr_1, content_1, contentLength_1);
@@ -747,9 +747,9 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        fetchInfo : { C : { type : oracledb.DEFAULT } }
+        fetchInfo: { C: { type: oracledb.DEFAULT } }
       };
       const result = await connection.execute(sql, binds, options);
       const lob = result.rows[0][1];
@@ -781,10 +781,10 @@ describe('84. fetchClobAsString1.js', function() {
     const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -850,10 +850,10 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -882,8 +882,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const rows = await result.resultSet.getRows(2);
@@ -902,8 +902,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -926,8 +926,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -968,8 +968,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const rows = await result.resultSet.getRows(2);
@@ -997,8 +997,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_OBJECT,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const rows = await result.resultSet.getRows(2);
@@ -1017,9 +1017,9 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        fetchInfo : { C : { type : oracledb.DEFAULT } }
+        fetchInfo: { C: { type: oracledb.DEFAULT } }
       };
       const result = await connection.execute(sql, binds, options);
       const lob = result.rows[0][1];
@@ -1051,8 +1051,8 @@ describe('84. fetchClobAsString1.js', function() {
     const insetAndFetch = async function(id, specialStr, insertcontent, insetContentLength) {
       await insertIntoClobTable1(id, insertcontent);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const binds = { id: id };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, binds, options);
       const resultVal = result.rows[0][1];
       if (specialStr === null) {
@@ -1115,8 +1115,8 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const binds = { id: id };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0][0], specialStr, specialStr, specialStrLength);
     }); // 84.4.7
@@ -1141,7 +1141,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id_2, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0][1], specialStr_1, content_1, contentLength_1);
       compareStrings(result.rows[1][1], specialStr_2, content_2, contentLength_2);
@@ -1156,7 +1156,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id, content);
       const sql = "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0][1], specialStr, content, contentLength);
       compareStrings(result.rows[0][2], specialStr, content, contentLength);
@@ -1175,7 +1175,7 @@ describe('84. fetchClobAsString1.js', function() {
       await updateClobTable1(id, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, binds, options);
       compareStrings(result.rows[0][1], specialStr_2, content_2, contentLength_2);
     }); // 84.4.11
@@ -1198,7 +1198,7 @@ describe('84. fetchClobAsString1.js', function() {
       const bindVar = {
         c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, bindVar, options);
       const rows = await result.outBinds.c.getRows(3);
       compareStrings(rows[0][0], specialStr, content, contentLength);
@@ -1241,7 +1241,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id_2, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, binds, options);
       assert.strictEqual(result.rows.length, 1);
       compareStrings(result.rows[0][1], specialStr_1, content_1, contentLength_1);
@@ -1264,7 +1264,7 @@ describe('84. fetchClobAsString1.js', function() {
       await insertIntoClobTable1(id_2, content_2);
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
-      const options = { outFormat : oracledb.OUT_FORMAT_ARRAY };
+      const options = { outFormat: oracledb.OUT_FORMAT_ARRAY };
       const result = await connection.execute(sql, binds, options);
       assert.strictEqual(result.rows.length, 2);
       compareStrings(result.rows[0][1], specialStr_1, content_1, contentLength_1);
@@ -1280,9 +1280,9 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        fetchInfo : { C : { type : oracledb.DEFAULT } }
+        fetchInfo: { C: { type: oracledb.DEFAULT } }
       };
       const result = await connection.execute(sql, binds, options);
       const lob = result.rows[0][1];
@@ -1314,10 +1314,10 @@ describe('84. fetchClobAsString1.js', function() {
     const insertAndFetch = async function(id, specialStr, insertContent, insertContentLength) {
       await insertIntoClobTable1(id, insertContent);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        outFormat : oracledb.OUT_FORMAT_ARRAY,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -1383,10 +1383,10 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT dbms_lob.substr(C, " + specialStrLength + ", 1) AS C1 from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        outFormat : oracledb.OUT_FORMAT_ARRAY,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -1415,8 +1415,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id_1 + " or id = " + id_2;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_ARRAY,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const rows = await result.resultSet.getRows(2);
@@ -1435,8 +1435,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C AS C1, C AS C2 from nodb_clob1 WHERE ID = " + id;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_ARRAY,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -1459,8 +1459,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = " + id;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_ARRAY,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const row = await result.resultSet.getRow();
@@ -1501,8 +1501,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_ARRAY,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const rows = await result.resultSet.getRows(2);
@@ -1530,8 +1530,8 @@ describe('84. fetchClobAsString1.js', function() {
       const sql = "SELECT ID, C from nodb_clob1 WHERE id = " + id_1 + " or id = " + id_2;
       const binds = {};
       const options = {
-        outFormat : oracledb.OUT_FORMAT_ARRAY,
-        resultSet : true
+        outFormat: oracledb.OUT_FORMAT_ARRAY,
+        resultSet: true
       };
       const result = await connection.execute(sql, binds, options);
       const rows = await result.resultSet.getRows(2);
@@ -1550,9 +1550,9 @@ describe('84. fetchClobAsString1.js', function() {
 
       await insertIntoClobTable1(id, content);
       const sql = "SELECT ID, C from nodb_clob1 WHERE ID = :id";
-      const binds = { id : id };
+      const binds = { id: id };
       const options = {
-        fetchInfo : { C : { type : oracledb.DEFAULT } }
+        fetchInfo: { C: { type: oracledb.DEFAULT } }
       };
       const result = await connection.execute(sql, binds, options);
       const lob = result.rows[0][1];

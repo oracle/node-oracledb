@@ -418,9 +418,9 @@ describe('3. examples.js', function() {
                  "        p_out := 101; \n" +
                  "    END; ";
       const bindVars = {
-        i:  'Chris',  // bind type is determined from the data type
-        io: { val: 'Jones', dir : oracledb.BIND_INOUT },
-        o:  { type: oracledb.NUMBER, dir : oracledb.BIND_OUT }
+        i: 'Chris',  // bind type is determined from the data type
+        io: { val: 'Jones', dir: oracledb.BIND_INOUT },
+        o: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
       };
 
       await conn.execute(proc);

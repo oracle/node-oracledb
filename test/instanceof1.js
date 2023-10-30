@@ -40,9 +40,9 @@ describe('45. instanceof1.js', function() {
   it('45.2 instanceof works for pool instances', async function() {
     const config = {
       ...dbConfig,
-      poolMin           : 0,
-      poolMax           : 1,
-      poolIncrement     : 1
+      poolMin: 0,
+      poolMax: 1,
+      poolIncrement: 1
     };
     const pool = await oracledb.createPool(config);
     assert(pool instanceof oracledb.Pool);

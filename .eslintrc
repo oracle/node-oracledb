@@ -3,16 +3,16 @@
         "ecmaVersion": 2019
     },
     "rules": {
-        require-await: "error",
-        brace-style: "error",
-        computed-property-spacing: ["error", "never"],
-        comma-spacing: [
+        "require-await": "error",
+        "brace-style": "error",
+        "computed-property-spacing": ["error", "never"],
+        "comma-spacing": [
             "error", {
                 "before": false,
                 "after": true
             }
         ],
-        no-trailing-spaces: "error",
+        "no-trailing-spaces": "error",
         "prefer-const": "error",
         "space-before-function-paren": [
             "error", {
@@ -21,22 +21,27 @@
                 "asyncArrow": "always"
             }
         ],
-        space-in-parens: "error",
-        space-infix-ops: "error",
+        "key-spacing": [
+            "error", {
+                "mode": "strict"
+            }
+        ],
+        "space-in-parens": "error",
+        "space-infix-ops": "error",
         "space-unary-ops": [
             2, {
                   "words": true,
                   "nonwords": false
               }
         ],
-        space-before-blocks: "error",
-        no-tabs: "error",
-        keyword-spacing: "error",
-        eol-last: "error",
+        "space-before-blocks": "error",
+        "no-tabs": "error",
+        "keyword-spacing": "error",
+        "eol-last": "error",
         "indent": [
             2,
             2,
-            { "SwitchCase": 1 /*, "VariableDeclarator": { "var": 2} */},
+            { "SwitchCase": 1 /*, "VariableDeclarator": { "var": 2} */}
         ],
         "quotes": [
             0,
@@ -52,7 +57,7 @@
         ],
         "no-console": [
             0
-        ],
+        ]
     },
     "env": {
         "es6": true,

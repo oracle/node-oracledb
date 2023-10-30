@@ -430,7 +430,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       const bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
       const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        bi: { val:bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_2 },
+        bi: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_2 },
         bo: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size_2 }
       };
       await insertBlobWithbuffer(sequence, bufferStr_1);
@@ -813,7 +813,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
       const bufferStr_2 = Buffer.from(bigStr_2, "utf-8");
       const bindVar = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        bi: { val:bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_2 },
+        bi: { val: bufferStr_2, type: oracledb.BUFFER, dir: oracledb.BIND_IN, maxSize: size_2 },
         bo: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size_2 }
       };
       await insertBlobWithbuffer(sequence, bufferStr_1);

@@ -63,9 +63,9 @@ describe('7. autoCommit.js', function() {
     pool = await oracledb.createPool(
       {
         ...dbConfig,
-        poolMin       : 3,
-        poolMax       : 7,
-        poolIncrement : 1
+        poolMin: 3,
+        poolMax: 7,
+        poolIncrement: 1
       });
 
     connection = await pool.getConnection();

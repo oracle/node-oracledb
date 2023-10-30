@@ -160,19 +160,19 @@ describe('244.dataTypeJson.js', function() {
         keyH: [ 9, 10, 11 ],
         keyI: new Date()
       };
-      const jsonVal6 = { "key1" : 1 };
-      const jsonVal7 = { "key2" : -3.1415 };
-      const jsonVal8 = { "key3" : false };
-      const jsonVal9 = { "key4" : null };
-      const jsonVal10 = { "key5" : "2018/11/01 18:30:00" };
-      const jsonVal11 = { "key6" : [1, 2, 3, 99] };
-      const jsonVal12 = { "key7" : ["json array1", "json array2"], "key8" : [true, false] };
-      const jsonVal13 = { "key9" : "#$%^&*()@!~`-+=" };
-      const jsonVal14 = { "key10" : "_:;?><,.|/" };
-      const jsonVal15 = { "key11" : "Math.pow(2, 53) -1" };
-      const jsonVal16 = { "key12" : "-Math.pow(2, 53) -1" };
-      const jsonVal17 = { "key13" : {"key13-1" : "value13-1", "key13-2" : "value13-2"} };
-      const jsonVal18 = { "#$%^&*()@!~`-+=" : "special key14 name" };
+      const jsonVal6 = { "key1": 1 };
+      const jsonVal7 = { "key2": -3.1415 };
+      const jsonVal8 = { "key3": false };
+      const jsonVal9 = { "key4": null };
+      const jsonVal10 = { "key5": "2018/11/01 18:30:00" };
+      const jsonVal11 = { "key6": [1, 2, 3, 99] };
+      const jsonVal12 = { "key7": ["json array1", "json array2"], "key8": [true, false] };
+      const jsonVal13 = { "key9": "#$%^&*()@!~`-+=" };
+      const jsonVal14 = { "key10": "_:;?><,.|/" };
+      const jsonVal15 = { "key11": "Math.pow(2, 53) -1" };
+      const jsonVal16 = { "key12": "-Math.pow(2, 53) -1" };
+      const jsonVal17 = { "key13": {"key13-1": "value13-1", "key13-2": "value13-2"} };
+      const jsonVal18 = { "#$%^&*()@!~`-+=": "special key14 name" };
       const binds = [
         [1, jsonVal1],
         [2, jsonVal2],
@@ -278,7 +278,7 @@ describe('244.dataTypeJson.js', function() {
 
     it('244.4.2 bind by position', async function() {
       const sequence = 101;
-      const jsonVal = { "key13" : {"key13-1" : "value13-1", "key13-2" : "value13-2"} };
+      const jsonVal = { "key13": {"key13-1": "value13-1", "key13-2": "value13-2"} };
       let binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN, maxSize: 10 }
@@ -436,7 +436,7 @@ describe('244.dataTypeJson.js', function() {
 
     it('244.6.2 bind by position', async function() {
       const sequence = 101;
-      const jsonVal = { "key13" : {"key13-1" : "value13-1", "key13-2" : "value13-2"} };
+      const jsonVal = { "key13": {"key13-1": "value13-1", "key13-2": "value13-2"} };
       let binds = [
         { type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT },
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -583,7 +583,7 @@ describe('244.dataTypeJson.js', function() {
 
     it('244.8.2 bind by position', async function() {
       const sequence = 2;
-      const jsonVal = { "key5" : "2018/11/01 18:30:00" };
+      const jsonVal = { "key5": "2018/11/01 18:30:00" };
 
       const sql = "insert into " + tableName + " ( num, content ) values (:i, :c) returning content into :output";
       const binds = [
@@ -637,7 +637,7 @@ describe('244.dataTypeJson.js', function() {
     it('244.9.1 works with oracledb.fetchAsString', async function() {
       oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
       const sequence = 1;
-      const jsonVal = { "key5" : "2018/11/01 18:30:00" };
+      const jsonVal = { "key5": "2018/11/01 18:30:00" };
       const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
 
       let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
@@ -657,7 +657,7 @@ describe('244.dataTypeJson.js', function() {
     it.skip('244.9.2 doesn\'t work with outFormat: oracledb.DB_TYPE_JSON', async function() {
       oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
       const sequence = 2;
-      const jsonVal = { "key5" : "2018/11/01 18:30:00" };
+      const jsonVal = { "key5": "2018/11/01 18:30:00" };
       const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
 
       let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
@@ -668,7 +668,7 @@ describe('244.dataTypeJson.js', function() {
 
       await connection.execute(sql, binds);
       sql = "select content as C from " + tableName + " where id = " + sequence;
-      const options = { outFormat : oracledb.DB_TYPE_JSON };
+      const options = { outFormat: oracledb.DB_TYPE_JSON };
       const result = await connection.execute(sql, [], options);
       assert.strictEqual(typeof result.rows[0][0], 'string');
       assert.strictEqual(result.rows[0][0].length, resultStr.length);
@@ -678,7 +678,7 @@ describe('244.dataTypeJson.js', function() {
     it('244.9.3 could work with fetchInfo oracledb.STRING', async function() {
       oracledb.fetchAsString = [];
       const sequence = 3;
-      const jsonVal = { "key5" : "2018/11/01 18:30:00" };
+      const jsonVal = { "key5": "2018/11/01 18:30:00" };
       const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
 
       let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
@@ -689,7 +689,7 @@ describe('244.dataTypeJson.js', function() {
       await connection.execute(sql, binds);
       sql = "select content as C from " + tableName + " where id = " + sequence;
       const options = {
-        fetchInfo : { C : { type : oracledb.STRING } }
+        fetchInfo: { C: { type: oracledb.STRING } }
       };
       const result = await connection.execute(sql, [], options);
       assert.strictEqual(typeof result.rows[0][0], 'string');

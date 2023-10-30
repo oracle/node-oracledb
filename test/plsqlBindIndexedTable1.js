@@ -76,7 +76,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       await connection.execute(proc);
       const bindvars = {
         result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
-        strings:  {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']},
+        strings: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']},
         numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [0, 8, 11]}
       };
       const sql = "BEGIN :result := nodb_plsqlbindpack1.test(:strings, :numbers); END;";
@@ -144,8 +144,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
                  "END;";
       await connection.execute(proc);
       const bindvars = {
-        strings:  {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ['John', 'Doe'], maxArraySize: 2},
-        numbers:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 4}
+        strings: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: ['John', 'Doe'], maxArraySize: 2},
+        numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 4}
       };
       const sql = "BEGIN nodb_plsqlbindpack3.test(:strings, :numbers); END;";
       const result = await connection.execute(sql, bindvars);
@@ -180,8 +180,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       await connection.execute(proc);
       const bindvars = {
         items: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: 3},
-        strings:  {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxArraySize: 3},
-        numbers:  {type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxArraySize: 3}
+        strings: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxArraySize: 3},
+        numbers: {type: oracledb.NUMBER, dir: oracledb.BIND_OUT, maxArraySize: 3}
       };
       const sql = "BEGIN nodb_plsqlbindpack4.test(:items, :strings, :numbers); END;";
       const result = await connection.execute(sql, bindvars);
@@ -229,7 +229,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.2.1 maxArraySize is ignored when specifying BIND_IN', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 2}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 2}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test1(:p); END;";
       await connection.execute(sql, bindvars);
@@ -237,7 +237,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.2.2 maxArraySize is mandatory for BIND_INOUT ', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test2(:p); END;";
       await assert.rejects(
@@ -249,7 +249,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.2.3 maxArraySize cannot smaller than the number of array elements', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test3(:p); END;";
       await assert.rejects(
@@ -262,7 +262,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     it('43.2.5 negative case: incorrect type of array element - bind by name 1', async function() {
       const bindvars = {
         id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ["1", 1]},
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: "hi"}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: "hi"}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
       await assert.rejects(
@@ -275,7 +275,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     it('43.2.6 negative case: incorrect type of array element - bind by name 2', async function() {
       const bindvars = {
         id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, "hi"]},
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 'hello']}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
       await assert.rejects(
@@ -288,7 +288,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     it('43.2.7 negative case: incorrect type of array element - bind by name 3', async function() {
       const bindvars = {
         id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2]},
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ['hello', 1]}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ['hello', 1]}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
       await assert.rejects(
@@ -300,7 +300,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
     it('43.2.8 negative case: incorrect type of array element - bind by name 4', async function() {
       const bindvars = {
         id: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3]},
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 'hello']}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 'hello']}
       };
       const sql = "BEGIN nodb_plsqlbindpack21.test4(:id, :p); END;";
       await assert.rejects(
@@ -319,8 +319,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.2.10 negative case: incorrect type of array elements - bind by pos 1', async function() {
       const bindvars = [
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : ['hello', 1] },
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ['hello', 1] },
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: "hi" }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
       await assert.rejects(
@@ -331,8 +331,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.2.11 negative case: incorrect type of array elements - bind by pos 2', async function() {
       const bindvars = [
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, "hi"] },
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : "hi" }
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, "hi"] },
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: "hi" }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
       await assert.rejects(
@@ -343,8 +343,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.2.12 negative case: incorrect type of array elements - bind by pos 3', async function() {
       const bindvars = [
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2] },
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : ["hi", 1] }
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2] },
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: ["hi", 1] }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
       await assert.rejects(
@@ -355,8 +355,8 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.2.13 negative case: incorrect type of array elements - bind by pos 4', async function() {
       const bindvars = [
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, 3] },
-        { type : oracledb.NUMBER, dir: oracledb.BIND_IN, val : [1, 2, "hi"] }
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3] },
+        { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, "hi"] }
       ];
       const sql = "BEGIN nodb_plsqlbindpack21.test4 (:1, :2); END;";
       await assert.rejects(
@@ -388,10 +388,10 @@ describe('43. plsqlBindIndexedTable1.js', function() {
                  "END nodb_plsqlbindfunc31;";
       await connection.execute(proc);
       const bindvars = {
-        result:      {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
+        result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
         stringValue: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: 'Space odyssey'},
         numberValue: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: 2001 },
-        dateValue:   {type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(1968, 3, 2) }
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_IN, val: new Date(1968, 3, 2) }
       };
       const sql = "BEGIN :result := nodb_plsqlbindfunc31(:stringValue, :numberValue, :dateValue); END;";
       const result = await connection.execute(sql, bindvars);
@@ -413,7 +413,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       const bindvars = {
         stringValue: {type: oracledb.STRING, dir: oracledb.BIND_INOUT, val: 'Space odyssey'},
         numberValue: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: 2001},
-        dateValue:   {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: releaseDate}
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_INOUT, val: releaseDate}
       };
       const sql = "BEGIN nodb_plsqlbindproc32(:stringValue, :numberValue, :dateValue); END;";
       const result = await connection.execute(sql, bindvars);
@@ -433,9 +433,9 @@ describe('43. plsqlBindIndexedTable1.js', function() {
                  "END nodb_plsqlbindproc33;\n";
       await connection.execute(proc);
       const bindvars = {
-        stringValue:  {type: oracledb.STRING, dir: oracledb.BIND_OUT},
-        numberValue:  {type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
-        dateValue:    {type: oracledb.DATE, dir: oracledb.BIND_OUT}
+        stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT},
+        numberValue: {type: oracledb.NUMBER, dir: oracledb.BIND_OUT},
+        dateValue: {type: oracledb.DATE, dir: oracledb.BIND_OUT}
       };
       const sql = "BEGIN nodb_plsqlbindproc33(:stringValue, :numberValue, :dateValue); END;";
       const result = await connection.execute(sql, bindvars);
@@ -507,7 +507,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.1 maxArraySize property is ignored for BIND_IN', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 1}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: [1, 2, 3], maxArraySize: 1}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test1(:p); END;";
       await connection.execute(sql, bindvars);
@@ -515,7 +515,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.2 maxArraySize is mandatory for BIND_INOUT', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3]}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await assert.rejects(
@@ -527,7 +527,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.3 maxArraySize cannot smaller than the number of array elements', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 2}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await assert.rejects(
@@ -538,7 +538,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.4 maxArraySize can be equal to the number of array elements', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 3}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 3}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await connection.execute(sql, bindvars);
@@ -548,7 +548,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
       if (oracledb.thin)
         return this.skip();
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 987654321}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 987654321}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await assert.rejects(
@@ -559,7 +559,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.6 negative case: < 0', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: -9}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: -9}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await assert.rejects(
@@ -570,7 +570,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.7 negative case: = 0', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 0}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 0}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await assert.rejects(
@@ -581,7 +581,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.8 negative case: assign a string to it', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 'foobar'}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: 'foobar'}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await assert.rejects(
@@ -592,7 +592,7 @@ describe('43. plsqlBindIndexedTable1.js', function() {
 
     it('43.4.9 negative case: NaN', async function() {
       const bindvars = {
-        p:  {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: NaN}
+        p: {type: oracledb.NUMBER, dir: oracledb.BIND_INOUT, val: [1, 2, 3], maxArraySize: NaN}
       };
       const sql = "BEGIN nodb_plsqlbindpack41.test2(:p); END;";
       await assert.rejects(

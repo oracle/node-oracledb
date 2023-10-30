@@ -362,7 +362,7 @@ describe('173. soda5.js', () => {
     assert.strictEqual(empInShenzhen.count, 2);
 
     // drop index
-    await collection.dropIndex("OFFICE_IDX_SP", { "force" : true });
+    await collection.dropIndex("OFFICE_IDX_SP", { "force": true });
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
@@ -398,7 +398,7 @@ describe('173. soda5.js', () => {
     assert.strictEqual(empInShenzhen.count, 2);
 
     // drop index
-    await collection.dropIndex("OFFICE_IDX", { "force" : false });
+    await collection.dropIndex("OFFICE_IDX", { "force": false });
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
