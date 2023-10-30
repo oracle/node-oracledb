@@ -74,6 +74,16 @@ testsUtil.sqlCreateType = function(typeName, sql) {
   `;
 };
 
+testsUtil.sqlCreateDomain = function(domainName, sql) {
+  const dropSql = testsUtil.sqlDropDomain(domainName);
+  return `
+    BEGIN
+        ${dropSql}
+        EXECUTE IMMEDIATE ('${sql}');
+    END;
+  `;
+};
+
 testsUtil.sqlDropSource = function(sourceType, sourceName) {
   return `
     DECLARE
@@ -96,6 +106,14 @@ testsUtil.sqlDropTable = function(tableName) {
         EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE');
     EXCEPTION
         WHEN e_table_missing THEN NULL;
+    END;
+  `;
+};
+
+testsUtil.sqlDropDomain = function(domainName) {
+  return `
+    BEGIN
+      EXECUTE IMMEDIATE ('drop domain if exists ${domainName}');
     END;
   `;
 };
@@ -123,6 +141,11 @@ testsUtil.createType = async function(conn, typeName, sql) {
   await conn.execute(plsql);
 };
 
+testsUtil.createDomain = async function(conn, domainName, sql) {
+  const plsql = testsUtil.sqlCreateDomain(domainName, sql);
+  await conn.execute(plsql);
+};
+
 testsUtil.dropSource = async function(conn, sourceType, sourceName) {
   const plsql = testsUtil.sqlDropSource(sourceType, sourceName);
   await conn.execute(plsql);
@@ -135,6 +158,11 @@ testsUtil.dropTable = async function(conn, tableName) {
 
 testsUtil.dropType = async function(conn, typeName) {
   const plsql = testsUtil.sqlDropType(typeName);
+  await conn.execute(plsql);
+};
+
+testsUtil.dropDomain = async function(conn, domainName) {
+  const plsql = testsUtil.sqlDropDomain(domainName);
   await conn.execute(plsql);
 };
 
@@ -169,6 +197,24 @@ testsUtil.isSodaRunnable = async function() {
   const sodaRole = await sodaUtil.isSodaRoleGranted();
   if (!sodaRole) return false;
 
+  return true;
+};
+
+testsUtil.isDbDomainRunnable = async function() {
+  const clientVersion = testsUtil.getClientVersion();
+  let serverVersion;
+  try {
+    const conn = await oracledb.getConnection(dbConfig);
+    serverVersion = conn.oracleServerVersion;
+
+    await conn.close();
+  } catch (error) {
+    console.log('Error in checking dbDomain prerequistes:\n', error);
+  }
+
+  if ((clientVersion < 2301000000) || (serverVersion < 2301000000)) {
+    return false;
+  }
   return true;
 };
 

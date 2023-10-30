@@ -866,7 +866,8 @@ describe('4. binding.js', function() {
         dbType: oracledb.DB_TYPE_CHAR,
         dbTypeName: "CHAR",
         nullable: true,
-        byteSize: 1
+        byteSize: 1,
+        isJson: false,
       };
       assert.deepStrictEqual(cursor.metaData, [expectedBind]);
 

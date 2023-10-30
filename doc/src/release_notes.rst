@@ -10,6 +10,16 @@ For deprecated and desupported features, see :ref:`Deprecations and desupported 
 node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...v6.3.0>`__ (TBD)
 ------------------------------------------------------------------------------------------------
 
+Common Changes
+++++++++++++++
+
+#)  Added following attributes to query column metadata:
+
+    - ``annotations`` <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>__
+    - ``domainName`` <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>__
+    - ``domainSchema`` <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>__
+    - ``isJson`` Indicates if the column is known to contain JSON data.
+
 Thin Mode Changes
 ++++++++++++++++++
 

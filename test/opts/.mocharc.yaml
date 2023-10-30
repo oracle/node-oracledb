@@ -273,3 +273,4 @@ spec:
   - test/embedded_oid.js
   - test/sqlParser.js
   - test/dbObject20.js
+  - test/dbSchema.js

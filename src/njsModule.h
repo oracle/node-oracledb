@@ -635,6 +635,13 @@ struct njsVariable {
     int8_t scale;
     bool isArray;
     bool isNullable;
+    bool isJson;
+    const char *domainSchema;
+    size_t domainSchemaLength;
+    const char *domainName;
+    size_t domainNameLength;
+    size_t numAnnotations;
+    dpiAnnotation *dpiAnnotations;
     njsVariableBuffer *buffer;
     uint32_t numDmlReturningBuffers;
     njsVariableBuffer *dmlReturningBuffers;

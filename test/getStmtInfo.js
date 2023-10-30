@@ -68,7 +68,8 @@ describe('162. getStmtInfo.js', function() {
             name: "COL",
             nullable: true,
             precision: 0,
-            scale: -127
+            scale: -127,
+            isJson: false
           }
         ]
       }

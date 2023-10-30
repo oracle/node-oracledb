@@ -226,7 +226,8 @@ describe('236. nestedCursor05.js', () => {
       dbType: oracledb.DB_TYPE_VARCHAR,
       dbTypeName: 'VARCHAR2',
       nullable: true,
-      byteSize: 200
+      byteSize: 200,
+      isJson: false
     };
     assert.deepStrictEqual(result.metaData[0], stringMetaData);
     assert.strictEqual(result.metaData[1].name, 'CHILDREN');

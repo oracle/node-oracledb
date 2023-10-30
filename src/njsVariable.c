@@ -248,6 +248,8 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
         napi_value *metadata)
 {
     napi_value temp;
+    napi_value annObject, key, value;
+    uint32_t i;
 
     // create object to store metadata on
     NJS_CHECK_NAPI(env, napi_create_object(env, metadata))
@@ -266,6 +268,42 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
     NJS_CHECK_NAPI(env, napi_get_boolean(env, var->isNullable, &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "nullable",
             temp))
+
+    // store isJson
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, var->isJson, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "isJson",
+            temp))
+
+    // store domainSchema
+    if (var->domainSchemaLength) {
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->domainSchema,
+                var->domainSchemaLength, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                "domainSchema", temp))
+    }
+
+    // store domainName
+    if (var->domainNameLength) {
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->domainName,
+                var->domainNameLength, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                "domainName", temp))
+    }
+
+    if (var->numAnnotations) {
+        NJS_CHECK_NAPI(env, napi_create_object(env, &annObject))
+        for (i = 0; i < var->numAnnotations; i++) {
+            NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+                    var->dpiAnnotations[i].value,
+                    var->dpiAnnotations[i].valueLength, &value))
+            NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+                    var->dpiAnnotations[i].key,
+                    var->dpiAnnotations[i].keyLength, &key))
+            NJS_CHECK_NAPI(env, napi_set_property(env, annObject, key, value))
+        }
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                "annotations", annObject))
+    }
 
     // store size in bytes, if applicable
     switch (var->dbTypeNum) {
@@ -446,6 +484,19 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         vars[i].dbTypeNum = queryInfo.typeInfo.oracleTypeNum;
         if (queryInfo.typeInfo.objectType)
             vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
+        vars[i].isJson = queryInfo.typeInfo.isJson;
+        if (queryInfo.typeInfo.domainSchemaLength) {
+            vars[i].domainSchemaLength = queryInfo.typeInfo.domainSchemaLength;
+            vars[i].domainSchema = queryInfo.typeInfo.domainSchema;
+        }
+        if (queryInfo.typeInfo.domainNameLength) {
+            vars[i].domainNameLength = queryInfo.typeInfo.domainNameLength;
+            vars[i].domainName = queryInfo.typeInfo.domainName;
+        }
+        vars[i].numAnnotations = queryInfo.typeInfo.numAnnotations;
+        if (queryInfo.typeInfo.annotations) {
+            vars[i].dpiAnnotations = queryInfo.typeInfo.annotations;
+        }
     }
 
     return true;
