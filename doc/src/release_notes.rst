@@ -13,6 +13,13 @@ node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...
 Common Changes
 ++++++++++++++
 
+#) Added support for fetching VARCHAR2 and LOB columns which contain JSON (and
+  have the "IS JSON" check constraint enabled) in the same way as columns of
+  type JSON (which requires Oracle Database 21 or higher) are fetched. In
+  thick mode this requires Oracle Client 19 or higher. Application can
+  get the old behaviour and avoid this conversion by defining
+  :attr:`oracledb.fetchTypeHandler`.
+
 #)  Added new connection properties :attr:`connection.dbDomain`,
     :attr:`connection.dbName`, :attr:`connection.maxOpenCursors`,
     :attr:`connection.serviceName` and :attr:`connection.transactionInProgress`

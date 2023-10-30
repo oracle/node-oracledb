@@ -218,6 +218,25 @@ testsUtil.isDbDomainRunnable = async function() {
   return true;
 };
 
+testsUtil.isJsonMetaDataRunnable = async function() {
+  const clientVersion = testsUtil.getClientVersion();
+  let serverVersion;
+  try {
+    const conn = await oracledb.getConnection(dbConfig);
+    serverVersion = conn.oracleServerVersion;
+
+    await conn.close();
+  } catch (error) {
+    console.log('Error in checking is JSON metadata prerequistes:\n', error);
+    throw error;
+  }
+
+  if (serverVersion < 1900000000 || clientVersion < 1900000000) {
+    return false;
+  }
+  return true;
+};
+
 testsUtil.generateRandomPassword = function(length = 6) {
   let result = "";
   const choices = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

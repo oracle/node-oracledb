@@ -485,4 +485,58 @@ describe('271. fetchTypeHandler.js', function() {
     await connection.execute(testsUtil.sqlDropTable(TABLE));
   });
 
+  it('271.24 getting JSON object for columns having IS JSON constraint',
+    async function() {
+      if (!await testsUtil.isJsonMetaDataRunnable()) {
+        this.skip();
+      }
+      const TABLE = 'nodb_isjsondata_271_24';
+      const createTable =
+        (`CREATE TABLE ${TABLE} (
+                            cdata CLOB,
+                            bdata BLOB,
+                            chardata VARCHAR2(256),
+                            CHECK (chardata IS JSON AND
+                              bdata IS JSON AND cdata IS JSON)
+                          )
+                        `);
+      const plsql = testsUtil.sqlCreateTable(TABLE, createTable);
+      const clobVal = '[-1, 2, 3]';
+      const blobVal = Buffer.from('{ "KeyA": 8, "KeyB": "A String" }');
+      const charVal = '[-2, 2, 3, [34, 23, 24]]';
+      const defaultFetchTypeHandler = oracledb.fetchTypeHandler;
+
+      await connection.execute(plsql);
+      const sql = `INSERT into ${TABLE} VALUES (:1, :2, :3)`;
+      await connection.execute(sql, [clobVal, blobVal, charVal]);
+
+      let result = await connection.execute(`select * from ${TABLE}`);
+      assert.deepStrictEqual(result.rows[0][0], JSON.parse(clobVal));
+      assert.deepStrictEqual(result.rows[0][1], JSON.parse(blobVal));
+      assert.deepStrictEqual(result.rows[0][2], JSON.parse(charVal));
+
+      // User defined handler can overwrite the default behaviour of
+      // converting IS JSON columns to JSON objects.
+      oracledb.fetchTypeHandler = function(metaData) {
+        // overwrite only for BLOB type to return LOB object.
+        if (metaData.isJson && metaData.dbType === oracledb.DB_TYPE_BLOB) {
+          const myConverter = (v) => {
+            return v;
+          };
+          return { converter: myConverter };
+        }
+      };
+      // mark fetch type for CLOB column as string but it will be
+      // converted to JSON object unless handler for CLOB is written.
+      result = await connection.execute(`select cdata, bdata, chardata from ${TABLE}`, {}, {
+        fetchInfo: { CDATA: { type: oracledb.STRING } }
+      });
+      oracledb.fetchTypeHandler = defaultFetchTypeHandler;
+      assert.deepStrictEqual(result.rows[0][0], JSON.parse(clobVal));
+      assert(result.rows[0][1] instanceof oracledb.Lob);
+      assert.deepStrictEqual(result.rows[0][2], JSON.parse(charVal));
+
+      await connection.execute(testsUtil.sqlDropTable(TABLE));
+    });
+
 });

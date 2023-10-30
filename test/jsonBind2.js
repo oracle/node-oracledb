@@ -38,6 +38,7 @@ const testsUtil = require('./testsUtil.js');
 describe('254. jsonBind2.js', function() {
   let conn = null;
   const outFormatBak = oracledb.outFormat;
+  const defaultFetchTypeHandler = oracledb.fetchTypeHandler;
 
   before (async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
@@ -46,11 +47,23 @@ describe('254. jsonBind2.js', function() {
     if (conn.oracleServerVersion < 1201000200) {
       this.skip();
     }
+    if (await testsUtil.isJsonMetaDataRunnable()) {
+      oracledb.fetchTypeHandler = function(metaData) {
+      // overwrite default converter for CLOB, BLOB and VARCHAR type.
+        if (metaData.isJson && metaData.dbType !== oracledb.DB_TYPE_JSON) {
+          const myConverter = (v) => {
+            return v;
+          };
+          return {converter: myConverter};
+        }
+      };
+    }
   });
 
   after (async function() {
     oracledb.outFormat = outFormatBak;
     await conn.close();
+    oracledb.fetchTypeHandler = defaultFetchTypeHandler;
   });
 
   describe('254.1 Map javascript object into BLOB', function() {
