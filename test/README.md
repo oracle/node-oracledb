@@ -80,13 +80,11 @@ npm install
 ```
 
 Running `npm install` within the node-oracledb/ directory will recompile
-oracledb and install all its dependent modules.  These are listed
-in the `devDependencies` field of `package.json` file.  Thus, 'mocha', 'async'
-and 'should' modules are installed by this command.
+oracledb and install all its dependent modules.  These are listed in the
+`devDependencies` field of `package.json` file.  Thus, 'mocha', and 'eslint'
+modules are installed by this command.
 
-The test suite uses [mocha](https://www.npmjs.com/package/mocha),
-[async](https://www.npmjs.com/package/async) and
-[should](https://www.npmjs.com/package/should).
+The test suite uses [mocha](https://www.npmjs.com/package/mocha).
 
 ### <a name="credentials"></a> 1.4 Configure Database credentials
 
@@ -112,11 +110,15 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_QA`. This boolean environment variable serves as the toggle switch of certain tests. Some tests, such as `callTimeout.js`, use hard-coded variables as assertion condition. The test results may be inconsistent in different network situations.
 
-* `NODE_ORACLEDB_DRCP` provides an option for skipping test run when DRCP is enabled. Setting this environment variable to `true` will skip certain test case run due to DRCP restrictions.
+* `NODE_ORACLEDB_DRCP` provides an option for skipping the test run when DRCP is enabled. Setting this environment variable to `true` will skip certain test case runs due to DRCP restrictions.
+
+* `NODE_ORACLEDB_DRIVER_MODE` provides an option to set the 'Thin' or 'Thick' modes of node-oracledb. Setting this environment variable to `thick` will enable Thick mode. Setting it to `thin` will retain the Thin mode. The default mode is Thin.
 
 * `NODE_ORACLEDB_WALLET_LOCATION` provides the local directory name for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases optionally. The wallet location can also be provided as a part of the database connect string.
 
 * `NODE_ORACLEDB_WALLET_PASSWORD` provides the password for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases.
+
+* `NODE_ORACLEDB_CLIENT_LIB_DIR` provides an optional path for the Oracle Client libraries to be used in Windows and macOS platforms, when using Thick mode in node-oracledb.  
 
 Note: the test suite requires the schema to have these privileges: CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER, and CREATE TYPE.
@@ -248,6 +250,9 @@ dbaccess = (description=(RETRY_COUNT=20)(RETRY_DELAY=3)
 
 ### <a name="ORA-03114"></a> 5.4 ORA-03114: not connected to ORACLE
 
-We first encoutered this error with `test/callTimeout.js`. It uses some hard-coded variables as assertion condition, which may lead to assertion fail in slow network situation.
+We first encountered this error with `test/callTimeout.js`. It uses some
+hard-coded variables as assertion conditions, which may lead to assertion fails
+in slow networks.
 
-The solution is commenting out this line `sqlnet.recv_timeout=<minutes>` from `sqlnet.ora` file.
+The solution is to comment out the line `sqlnet.recv_timeout=<minutes>` from
+the `sqlnet.ora` file.

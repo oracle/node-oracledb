@@ -1,8 +1,7 @@
 # Node-oracledb Examples
 
-The directory in node-oracledb's [Github repository](https://github.com/oracle/node-oracledb/tree/main/examples) contains a lot of [node-oracledb](https://www.npmjs.com/package/oracledb)
-examples.  Documentation is
-[here](https://node-oracledb.readthedocs.io/en/latest/).
+The directory in node-oracledb's [Github repository](https://github.com/oracle/node-oracledb/tree/main/examples) contains a lot of [node-oracledb](https://www.npmjs.com/package/oracledb) examples.
+Documentation is [here](https://node-oracledb.readthedocs.io/en/latest/).
 
 To run the examples:
 
@@ -11,18 +10,35 @@ To run the examples:
 - Ensure that you navigate to the `examples` directory in your terminal window
   or IDE, where you are running the samples.
 
-- Review `dbconfig.js`.  In your terminal window or IDE, set the environment
-  variables.  For example, set `NODE_ORACLEDB_PASSWORD` to the value of your
-  database password.
+- Review `dbconfig.js`.
 
-- Review the samples and then run them individually.  For example, to see what
+In your terminal window or IDE, set the following environment variables to
+provide credentials for the `dbconfig.js` file.
+
+- `NODE_ORACLEDB_USER` must be set to the database user.
+
+- `NODE_ORACLEDB_PASSWORD` must be set to the database password.
+
+- `NODE_ORACLEDB_CONNECTIONSTRING` must be set to the connection string that points to your database's location.
+
+- `NODE_ORACLEDB_EXTERNALAUTH` provides the options for enabling external authentication. Setting this environment variable to "true" will enable external authentication. To ensure external authentication works, firstly make sure the Oracle external authentication service is correctly configured. See [Documentation for External Authentication](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth) for details.
+
+- `NODE_ORACLEDB_DRIVER_MODE` provides an option to set the 'Thin' or 'Thick' modes of node-oracledb. Setting this environment variable to "thick" will enable Thick mode.
+Setting it to "thin" will retain the Thin mode. The default mode is Thin.
+
+- `NODE_ORACLEDB_WALLET_LOCATION` must be set to the local directory name for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud
+Autonomous Databases optionally. The wallet location can also be provided as a part of the database connect string.
+
+- `NODE_ORACLEDB_WALLET_PASSWORD` must set to the password for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases.
+
+Review the examples and then run them individually.  For example, to see what
   the file `example.js` does, use:
 
   ```
   node example.js
   ```
 
-- After running examples, the demonstration objects can be dropped with
+After running the examples, the demonstration objects can be dropped with
   `demodrop.js`:
 
   ```

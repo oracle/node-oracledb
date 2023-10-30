@@ -185,7 +185,7 @@ testsUtil.isSodaRunnable = async function() {
 
     await conn.close();
   } catch (error) {
-    console.log('Error in checking SODA prerequistes:\n', error);
+    console.log('Error in checking SODA prerequisites:\n', error);
   }
 
   if ((clientVersion < 1805000000) || (serverVersion < 1805000000)) return false;
@@ -209,7 +209,7 @@ testsUtil.isDbDomainRunnable = async function() {
 
     await conn.close();
   } catch (error) {
-    console.log('Error in checking dbDomain prerequistes:\n', error);
+    console.log('Error in checking dbDomain prerequisites:\n', error);
   }
 
   if ((clientVersion < 2301000000) || (serverVersion < 2301000000)) {
@@ -430,7 +430,6 @@ testsUtil.doStream = async function(stream) {
       stream.destroy();
     });
     stream.on('error', function(error) {
-      assert.fail(error);
       reject(error);
     });
     stream.on('close', function() {
@@ -532,7 +531,7 @@ testsUtil.checkUrowidLength = function(urowidLen, expectedLength) {
     `${urowidLen} should be >= ${expectedLength}`);
 };
 
-// function to wait till connections creation completed by background job
+// function to wait till connection creation completed by background job
 // in a given time interval
 testsUtil.checkAndWait = async function(intervalWait, numIntervals, func) {
   for (let i = 0; i < numIntervals; i++) {
