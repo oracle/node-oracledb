@@ -190,7 +190,7 @@ describe('193. connProps.js', function() {
     if (result.rows[0][0]) {
       assert.deepStrictEqual(result.rows[0][0], conn.dbDomain.toUpperCase());
     } else  {
-      assert.deepStrictEqual(conn.dbDomain, undefined);
+      assert.deepStrictEqual(conn.dbDomain, '');
     }
     await conn.close();
   }); // 193.7

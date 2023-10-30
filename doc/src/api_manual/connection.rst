@@ -104,6 +104,29 @@ The properties of a *Connection* object are listed below.
     `ALTER SESSION SET CURRENT_SCHEMA <https://www.oracle.com/pls/topic/lookup?
     ctx=dblatest&id=GUID-DC7B8CDD-4F89-40CC-875F-F70F673711D4>`__.
 
+.. attribute:: connection.dbDomain
+
+    .. versionadded:: 6.3
+
+    This read-only property is a string that specifies the Oracle Database
+    domain name associated with the connection. This property returns the
+    same value as the SQL expression::
+
+        SELECT UPPER(VALUE) FROM V$PARAMETER WHERE NAME = 'db_domain';
+
+    The above SQL expression returns NULL if the domain name is not specified.
+    The ``dbDomain`` property returns an empty string in this case.
+
+.. attribute:: connection.dbName
+
+    .. versionadded:: 6.3
+
+    This read-only property is a string that specifies the name of the Oracle
+    Database associated with the connection. This property returns the same
+    value as the SQL expression::
+
+        SELECT UPPER(NAME) FROM V$DATABASE;
+
 .. attribute:: connection.dbOp
 
     .. versionadded:: 4.1
@@ -139,6 +162,23 @@ The properties of a *Connection* object are listed below.
     This read-only attribute specifies the Oracle Database instance name
     associated with the connection. It returns the same value as the SQL expression
     ``sys_context('userenv', 'instance_name')``.
+
+.. attribute:: connection.maxOpenCursors
+
+    .. versionadded:: 6.3
+
+    This read-only property is a number that indicates the maximum number of
+    SQL statements that can be concurrently opened in one connection. This
+    value can be specified in the `server parameter file
+    <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4590634E-
+    85B1-4BA8-8293-FE9960D4E2C2>`__ using the
+    `open_cursors <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+    GUID-FAFD1247-06E5-4E64-917F-AEBD4703CF40>`__ parameter. This property
+    returns the same value as the SQL expression::
+
+        SELECT VALUE FROM V$PARAMETER WHERE NAME = 'open_cursors';
+
+    This property requires Oracle Database 12.1 or later.
 
 .. attribute:: connection.module
 
@@ -176,6 +216,16 @@ The properties of a *Connection* object are listed below.
     will only be accurate if node-oracledb is also using Oracle Database 18,
     or later, client libraries. Otherwise it will show the base release such
     as “18.0.0.0.0” instead of “18.3.0.0.0”.
+
+.. attribute:: connection.serviceName
+
+    .. versionadded:: 6.3
+
+    This read-only property is a string that identifies the Oracle Database
+    service name associated with the connection. This property returns the
+    same value as the SQL expression::
+
+        SELECT UPPER(SYS_CONTEXT('USERENV', 'SERVICE_NAME')) FROM DUAL;
 
 .. attribute:: connection.stmtCacheSize
 
@@ -281,6 +331,16 @@ The properties of a *Connection* object are listed below.
 
         This property can only be used in the node-oracledb Thick mode. See
         :ref:`enablingthick`.
+
+.. attribute:: connection.transactionInProgress
+
+    .. versionadded:: 6.3
+
+    This read-only property is a boolean that indicates whether a transaction
+    is currently in progress in the connection. If the value is *True*, then it
+    indicates that the specified connection has an active transaction. If the
+    value is *False*, then the specified connection does not have an active
+    transaction.
 
 .. _connectionmethods:
 

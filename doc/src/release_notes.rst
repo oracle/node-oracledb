@@ -13,25 +13,22 @@ node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...
 Common Changes
 ++++++++++++++
 
-#)  Added following attributes to query column metadata:
-
-    - ``annotations`` <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>__
-    - ``domainName`` <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>__
-    - ``domainSchema`` <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>__
-    - ``isJson`` Indicates if the column is known to contain JSON data.
-
-Thin Mode Changes
-++++++++++++++++++
-
-#)  Improved overall pool connection creation time by caching information
-    during the first connection establishment.
-
 #)  Added new connection properties :attr:`connection.dbDomain`,
     :attr:`connection.dbName`, :attr:`connection.maxOpenCursors`,
     :attr:`connection.serviceName` and :attr:`connection.transactionInProgress`
     that provide the database domain name, database instance name, maximum
     number of cursors that can be opened per connection, database service name
     and status of any ongoing transactions on the connection respectively.
+
+#)  Added new extended :ref:`metadata <execmetadata>` information such as
+    ``annotations``, ``domainName``, ``domainSchema`` and ``isJson`` for a
+    fetched column.
+
+Thin Mode Changes
+++++++++++++++++++
+
+#)  Improved overall pool connection creation time by caching information
+    during the first connection establishment.
 
 node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...v6.2.0>`__ (11 Oct 2023)
 --------------------------------------------------------------------------------------------------------
