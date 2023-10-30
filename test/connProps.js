@@ -166,4 +166,64 @@ describe('193. connProps.js', function() {
 
     await conn.close();
   }); // 193.4
+
+  it('193.5 Oracle Database service name associated with the connection', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const query = "SELECT upper(sys_context('userenv', 'service_name')) FROM DUAL";
+    const result = await conn.execute(query);
+    assert.deepStrictEqual(result.rows[0][0], conn.serviceName.toUpperCase());
+    await conn.close();
+  }); // 193.5
+
+  it('193.6 Oracle Database dbname associated with the connection', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const query = "SELECT upper(NAME) FROM v$database";
+    const result = await conn.execute(query);
+    assert.deepStrictEqual(result.rows[0][0], conn.dbName.toUpperCase());
+    await conn.close();
+  }); // 193.6
+
+  it('193.7 Oracle Database db domain associated with the connection', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const query = "SELECT upper(VALUE) FROM v$parameter WHERE name='db_domain'";
+    const result = await conn.execute(query);
+    if (result.rows[0][0]) {
+      assert.deepStrictEqual(result.rows[0][0], conn.dbDomain.toUpperCase());
+    } else  {
+      assert.deepStrictEqual(conn.dbDomain, undefined);
+    }
+    await conn.close();
+  }); // 193.7
+
+  it('193.8 maximum cursors that can be opened on a connection', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const query = "SELECT value FROM v$parameter WHERE name='open_cursors'";
+    const result = await conn.execute(query);
+    assert.deepStrictEqual(Number(result.rows[0][0]), conn.maxOpenCursors);
+    await conn.close();
+  }); // 193.8
+
+  it('193.9 transactionInProgress = false on a connection for query', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const query = "SELECT * FROM DUAL";
+    await conn.execute(query);
+    assert.strictEqual(conn.transactionInProgress, false);
+    await conn.close();
+  }); // 193.9
+
+  it('193.10 transactionInProgress = true on a connection', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const TABLE = 'nodb_emp';
+    const createSql = `CREATE TABLE ${TABLE} (id number)`;
+    assert.strictEqual(conn.transactionInProgress, false);
+    await testsUtil.createTable(conn, TABLE, createSql);
+    assert.strictEqual(conn.transactionInProgress, false);
+    const sql = `INSERT INTO ${TABLE} VALUES(1)`;
+    await conn.execute(sql);
+    assert.strictEqual(conn.transactionInProgress, true);
+    await conn.commit();
+    assert.strictEqual(conn.transactionInProgress, false);
+    await conn.execute(`DROP TABLE ${TABLE} PURGE`);
+    await conn.close();
+  }); // 193.10
 });

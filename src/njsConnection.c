@@ -42,17 +42,22 @@ NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_createLob);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_execute);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getCallTimeout);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getCurrentSchema);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getDbName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getDbDomain);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getDbObjectClass);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getExternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInstanceName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInternalName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getMaxOpenCursors);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersion);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersionString);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getQueue);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getServiceName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getSodaDatabase);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getStatementInfo);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getStmtCacheSize);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTag);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTransactionInProgress);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_isHealthy);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_ping);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_rollback);
@@ -137,6 +142,10 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "getCurrentSchema", NULL, njsConnection_getCurrentSchema, NULL, NULL,
             NULL, napi_default, NULL },
+    { "getDbName", NULL, njsConnection_getDbName, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getDbDomain", NULL, njsConnection_getDbDomain, NULL, NULL, NULL,
+            napi_default, NULL },
     { "getDbObjectClass", NULL, njsConnection_getDbObjectClass, NULL, NULL,
             NULL, napi_default, NULL },
     { "getExternalName", NULL, njsConnection_getExternalName, NULL, NULL, NULL,
@@ -145,12 +154,16 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "getInternalName", NULL, njsConnection_getInternalName, NULL, NULL, NULL,
             napi_default, NULL },
+    { "getMaxOpenCursors", NULL, njsConnection_getMaxOpenCursors, NULL, NULL,
+            NULL, napi_default, NULL },
     { "getOracleServerVersion", NULL, njsConnection_getOracleServerVersion,
             NULL, NULL, NULL, napi_default, NULL },
     { "getOracleServerVersionString", NULL,
             njsConnection_getOracleServerVersionString, NULL, NULL, NULL,
             napi_default, NULL },
     { "getQueue", NULL, njsConnection_getQueue, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getServiceName", NULL, njsConnection_getServiceName, NULL, NULL, NULL,
             napi_default, NULL },
     { "getSodaDatabase", NULL, njsConnection_getSodaDatabase, NULL, NULL,
             NULL, napi_default, NULL },
@@ -160,6 +173,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, napi_default, NULL },
     { "getTag", NULL, njsConnection_getTag, NULL, NULL, NULL, napi_default,
             NULL },
+    { "getTransactionInProgress", NULL, njsConnection_getTransactionInProgress,
+            NULL, NULL, NULL, napi_default, NULL },
     { "isHealthy", NULL, njsConnection_isHealthy, NULL, NULL, NULL,
             napi_default, NULL },
     { "ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
@@ -1005,6 +1020,46 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getCurrentSchema, 0, NULL)
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_getDbName()
+//   Get the Database Name of the current connection.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getDbName, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (conn->handle) {
+        if (dpiConn_getDbName(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getDbDomain()
+//   Get the database Domain of the current connection.
+//----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getDbDomain, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (conn->handle) {
+        if (dpiConn_getDbDomain(conn->handle, &value, &valueLength) < 0 )
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_getDbObjectClass()
 //   Looks up a database object type given its name and returns it to the
 // caller.
@@ -1112,6 +1167,25 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getInternalName, 0, NULL)
                 returnValue))
     }
 
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getMaxOpenCursors()
+//   Get accessor of "maxOpenCursors" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getMaxOpenCursors, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t maxOpenCursors;
+
+    if (conn->handle) {
+        if (dpiConn_getMaxOpenCursors(conn->handle, &maxOpenCursors) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_uint32(env, maxOpenCursors,
+                returnValue))
+    }
     return true;
 }
 
@@ -1408,6 +1482,26 @@ static bool njsConnection_getRowCounts(njsBaton *baton, napi_env env,
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_getServiceName()
+//   Get Accessor for "serviceName" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getServiceName, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (conn->handle) {
+        if (dpiConn_getServiceName(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_getSodaDatabase()
 //   Creates a top-level SODA object (pseudo) associated with the connection.
 //-----------------------------------------------------------------------------
@@ -1583,6 +1677,25 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getTag, 0, NULL)
 
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, conn->tag,
             conn->tagLength, returnValue))
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getTransactionInProgress()
+//  Get Accessor of "transactionInProgress" property
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getTransactionInProgress, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    int txnInProgress;
+
+    if (conn->handle) {
+        if (dpiConn_getTransactionInProgress(conn->handle, &txnInProgress) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_get_boolean(env, txnInProgress, returnValue))
+    }
+
     return true;
 }
 

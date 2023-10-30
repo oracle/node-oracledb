@@ -4478,6 +4478,12 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     193.2 clientInfo and dbOp are write-only properties
     193.3 check the results of setter()
     193.4 Negative - invalid values
+    193.5 Oracle Database service name associated with the connection
+    193.6 Oracle Database dbname associated with the connection
+    193.7 Oracle Database db domain associated with the connection
+    193.8 maximum cursors that can be opened on a connection
+    193.9 transactionInProgress = false on a connection for query
+    193.10 transactionInProgress = true on a connection
 
 196. getDataOfLob.js
     196.1 getData() works on CLOB

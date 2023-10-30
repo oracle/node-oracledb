@@ -16,6 +16,13 @@ Thin Mode Changes
 #)  Improved overall pool connection creation time by caching information
     during the first connection establishment.
 
+#)  Added new connection properties :attr:`connection.dbDomain`,
+    :attr:`connection.dbName`, :attr:`connection.maxOpenCursors`,
+    :attr:`connection.serviceName` and :attr:`connection.transactionInProgress`
+    that provide the database domain name, database instance name, maximum
+    number of cursors that can be opened per connection, database service name
+    and status of any ongoing transactions on the connection respectively.
+
 node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...v6.2.0>`__ (11 Oct 2023)
 --------------------------------------------------------------------------------------------------------
 
