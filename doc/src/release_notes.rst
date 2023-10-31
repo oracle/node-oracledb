@@ -30,6 +30,10 @@ Common Changes
     ``annotations``, ``domainName``, ``domainSchema`` and ``isJson`` for a
     fetched column.
 
+#)  Added support for using unformatted private key when callback is invoked
+    due to expiry of an Identity Access management(IAM) token after successful
+    pool creation and connection establishment.
+
 #)  Added new environment variable ``NODE_ORACLEDB_CLIENT_LIB_DIR`` to set
     an optional Oracle Client library path for the files in the ``examples``
     directory on Windows and macOS Intel platforms, when using the Thick mode.
