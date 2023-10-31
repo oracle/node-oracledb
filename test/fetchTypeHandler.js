@@ -179,7 +179,7 @@ describe('271. fetchTypeHandler.js', function() {
           "TS_NUM": { type: oracledb.STRING }
         }
       });
-    assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
+    assert.deepStrictEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
     assert.strictEqual(typeof result.rows[0].TS_NUM, 'number');
     assert.strictEqual(result.rows[0].TS_NUM, 1234567);
   });
@@ -201,7 +201,7 @@ describe('271. fetchTypeHandler.js', function() {
           "TS_NUM": { type: oracledb.STRING }
         }
       });
-    assert.deepEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
+    assert.deepStrictEqual(result.rows[0].TS_DATE, new Date('1999-12-01 11:10:01.001'));
     assert.strictEqual(typeof result.rows[0].TS_NUM, 'string');
     assert.strictEqual(result.rows[0].TS_NUM, '1234567');
   });
@@ -292,7 +292,7 @@ describe('271. fetchTypeHandler.js', function() {
     const result = await connection.execute(sql);
 
     assert.strictEqual(result.metaData[0].name, 'MyId');
-    assert.deepEqual(result.rows, [ [ '000000005', 6, 'A string' ] ]);
+    assert.deepStrictEqual(result.rows, [ [ '000000005', 6, 'A string' ] ]);
   });
 
   it('271.17 converting dates to use the requested locale-specific format', async function() {
@@ -476,12 +476,12 @@ describe('271. fetchTypeHandler.js', function() {
       }
     );
 
-    assert.deepEqual(Object.getOwnPropertyNames(result.rows[0]),
+    assert.deepStrictEqual(Object.getOwnPropertyNames(result.rows[0]),
       ["ID", "NAME", "AGE", "TS_DATE"]);
-    assert.deepEqual(result.rows[0].ID, "1");
-    assert.deepEqual(result.rows[0].NAME, "ABC");
-    assert.deepEqual(result.rows[0].AGE, "23");
-    assert.deepEqual(result.rows[0].TS_DATE, new Date('2023-04-27 10:30:00.000'));
+    assert.deepStrictEqual(result.rows[0].ID, "1");
+    assert.deepStrictEqual(result.rows[0].NAME, "ABC");
+    assert.deepStrictEqual(result.rows[0].AGE, "23");
+    assert.deepStrictEqual(result.rows[0].TS_DATE, new Date('2023-04-27 10:30:00.000'));
     await connection.execute(testsUtil.sqlDropTable(TABLE));
   });
 

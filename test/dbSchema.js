@@ -86,7 +86,7 @@ describe('291. dbSchema.js', function() {
         'second annotation', ANNO_3: ''};
 
       const result = await connection.execute(sql);
-      assert.deepEqual(result.rows[0], [1, 25]);
+      assert.deepStrictEqual(result.rows[0], [1, 25]);
       assert.strictEqual(result.metaData[0].domainSchema, undefined);
       assert.strictEqual(result.metaData[0].domainName, undefined);
       assert.strictEqual(result.metaData[0].annotations, undefined);
@@ -94,7 +94,7 @@ describe('291. dbSchema.js', function() {
         dbConfig.user.toUpperCase());
       assert.strictEqual(result.metaData[1].domainName,
         DOMAIN_NAME);
-      assert.deepEqual(result.metaData[1].annotations,
+      assert.deepStrictEqual(result.metaData[1].annotations,
         expectedAnnotations);
     }); // 291.1.1
 

@@ -90,12 +90,28 @@ const config = {
   externalAuth: process.env.NODE_ORACLEDB_EXTERNALAUTH ? true : false,
 };
 
+// Set the NODE_ORACLEDB_WALLET_LOCATION and NODE_ORACLEDB_WALLET_PASSWORD
+// environment variables for database connections that require wallets.
+// For example, creating and dropping a user.
+// See the README.md file in this directory for more details.
 if (process.env.NODE_ORACLEDB_WALLET_PASSWORD) {
   config.walletPassword = process.env.NODE_ORACLEDB_WALLET_PASSWORD;
 }
 
 if (process.env.NODE_ORACLEDB_WALLET_LOCATION) {
   config.walletLocation = process.env.NODE_ORACLEDB_WALLET_LOCATION;
+}
+
+// Set the NODE_ORACLEDB_DBA_USER and NODE_ORACLEDB_DBA_PASSWORD environment
+// variables for database operations which require SYSDBA privileges.
+// For example, creating and dropping a user. See the README.md file in this
+// directory for more details.
+if (process.env.NODE_ORACLEDB_DBA_USER) {
+  config.DBA_user = process.env.NODE_ORACLEDB_DBA_USER;
+}
+
+if (process.env.NODE_ORACLEDB_DBA_PASSWORD) {
+  config.DBA_password = process.env.NODE_ORACLEDB_DBA_PASSWORD;
 }
 
 module.exports = config;

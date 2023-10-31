@@ -56,13 +56,15 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   // is not correct, you will get a DPI-1047 error.  See the node-oracledb
   // installation documentation.
   let clientOpts = {};
-  if (process.platform === 'win32') {                                   // Windows
-    clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  // On Windows and macOS Intel platforms, set the environment
+  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+    clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
+
+console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 
 async function run() {
 
@@ -107,7 +109,7 @@ async function run() {
 
     console.log('3. Selecting JSON stored in a BLOB column');
 
-    let result, j;
+    let result;
 
     result = await connection.execute(
       `SELECT po_document
@@ -116,7 +118,7 @@ async function run() {
        OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY`
     );
     const d = await result.rows[0][0].getData();
-    j = await JSON.parse(d);
+    const j = await JSON.parse(d);
     console.log('Query results: ', j);
 
     console.log('4. Using JSON_VALUE to extract a value from a JSON column');
@@ -145,7 +147,7 @@ async function run() {
         `SELECT JSON_OBJECT('key' IS d.dummy) dummy
          FROM dual d`
       );
-      for (let row of result.rows) {
+      for (const row of result.rows) {
         console.log('Query results: ', row[0]);
       }
     }

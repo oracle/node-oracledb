@@ -28,9 +28,9 @@
  * DESCRIPTION
  *   Oracle Advanced Queuing (AQ) example passing an Oracle Database object
  *
- *   Before running this, a queue allowing an Oracle Database object
- *   payload must be created, see
- *   https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqobjexample
+ *   Warning: Creates and drops a new user for running AQ operations.
+ *   Requires NODE_ORACLEDB_DBA_USER and NODE_ORACLE_DBA_PASSWORD env variables
+ *   to be set for the AQ user to be created and dropped.
  *
  *****************************************************************************/
 
@@ -40,6 +40,7 @@ Error.stackTraceLimit = 50;
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const aqUtil = require('./aqutil.js');
 
 // This example requires node-oracledb Thick mode.
 //
@@ -51,18 +52,59 @@ const dbConfig = require('./dbconfig.js');
 // is not correct, you will get a DPI-1047 error.  See the node-oracledb
 // installation documentation.
 let clientOpts = {};
-if (process.platform === 'win32') {                                   // Windows
-  clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-} else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-  clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+// On Windows and macOS Intel platforms, set the environment
+// variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+  clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
 }
 oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 
 const queueName = "ADDR_QUEUE";
+const ADDR_TABLE = "ADDR_QUEUE_TAB";
+const DB_OBJECT = "USER_ADDRESS_TYPE";
+const AQ_USER = "NODB_SCHEMA_AQTEST1";
+const AQ_USER_PWD = aqUtil.generateRandomPassword();
+
+let connection;
+
+const credentials = {
+  user: AQ_USER,
+  password: AQ_USER_PWD,
+  connectString: dbConfig.connectString
+};
+
+async function aqSetup() {
+  await aqUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
+  connection = await oracledb.getConnection(credentials);
+
+  const createTypeSql = `
+    CREATE OR REPLACE TYPE ${AQ_USER}.${DB_OBJECT} AS OBJECT (
+      NAME        VARCHAR2(10),
+      ADDRESS     VARCHAR2(50)
+    );
+  `;
+  await connection.execute(createTypeSql);
+
+  const plsql = `
+    BEGIN
+      DBMS_AQADM.CREATE_QUEUE_TABLE(
+        QUEUE_TABLE        =>  '${AQ_USER}.${ADDR_TABLE}',
+        QUEUE_PAYLOAD_TYPE =>  '${AQ_USER}.${DB_OBJECT}'
+      );
+      DBMS_AQADM.CREATE_QUEUE(
+        QUEUE_NAME         =>  '${AQ_USER}.${queueName}',
+        QUEUE_TABLE        =>  '${AQ_USER}.${ADDR_TABLE}'
+      );
+      DBMS_AQADM.START_QUEUE(
+        QUEUE_NAME         => '${AQ_USER}.${queueName}'
+      );
+    END;
+  `;
+  await connection.execute(plsql);
+  await connection.close();
+}
 
 async function enq() {
-  let connection;
-
   // The message to send.
   // The attributes correspond to the USER_ADDRESS_TYPE fields.
   const addrData = {
@@ -71,8 +113,8 @@ async function enq() {
   };
 
   try {
-    connection = await oracledb.getConnection(dbConfig);
-    const queue = await connection.getQueue(queueName, {payloadType: "USER_ADDRESS_TYPE"});
+    connection = await oracledb.getConnection(credentials);
+    const queue = await connection.getQueue(queueName, {payloadType: `${AQ_USER}.${DB_OBJECT}`});
     const message = new queue.payloadTypeClass(addrData);
     console.log('Enqueuing: ', addrData);
     await queue.enqOne(message);
@@ -94,8 +136,8 @@ async function deq() {
   let connection;
 
   try {
-    connection = await oracledb.getConnection(dbConfig);
-    const queue = await connection.getQueue(queueName, {payloadType: "USER_ADDRESS_TYPE"});
+    connection = await oracledb.getConnection(credentials);
+    const queue = await connection.getQueue(queueName, {payloadType: `${AQ_USER}.${DB_OBJECT}`});
     const msg = await queue.deqOne();  // wait for a message
     await connection.commit();
     if (msg) {
@@ -114,5 +156,11 @@ async function deq() {
   }
 }
 
-enq();
-deq();
+async function run() {
+  await aqSetup();
+  await enq();
+  await deq();
+  await aqUtil.dropAQtestUser(AQ_USER);
+}
+
+run();

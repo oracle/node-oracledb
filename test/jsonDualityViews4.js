@@ -178,7 +178,7 @@ describe('275. jsonDualityView4.js', function() {
 
     const result = await connection.execute(`select * from Persons`);
 
-    assert.deepEqual(result.rows[0], [13, "ABC", "XYZ"]);
+    assert.deepStrictEqual(result.rows[0], [13, "ABC", "XYZ"]);
 
     // DROP the tables
     await connection.execute(`DROP TABLE Persons`);
@@ -307,7 +307,7 @@ describe('275. jsonDualityView4.js', function() {
     `);
 
     assert.strictEqual(tables.rows.length, 3);
-    assert.deepEqual(tables.rows, [["CLASS"], ["STUDENT"], ["STUDENT_CLASS"]]);
+    assert.deepStrictEqual(tables.rows, [["CLASS"], ["STUDENT"], ["STUDENT_CLASS"]]);
 
     // display user views
     const views = await connection.execute(`
@@ -326,7 +326,7 @@ describe('275. jsonDualityView4.js', function() {
       ORDER BY 1
     `);
 
-    assert.deepEqual(studentOV.rows[0], ["STUDENT_OV"]);
+    assert.deepStrictEqual(studentOV.rows[0], ["STUDENT_OV"]);
   });
 
   it('275.6 Test with dictionary views', async function() {
@@ -348,7 +348,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM DBA_JSON_DUALITY_VIEW_TAB_COLS
       ORDER BY COLUMN_NAME`);
     assert.strictEqual(result.rows.length, 7);
-    assert.deepEqual(result.rows[0], [ 'CLSID', 'NUMBER' ]);
+    assert.deepStrictEqual(result.rows[0], [ 'CLSID', 'NUMBER' ]);
   });
 
   describe('275.7 Json Duality view with GraphQL', function() {
@@ -761,7 +761,7 @@ describe('275. jsonDualityView4.js', function() {
       ORDER BY 1 ASC
     `);
 
-      assert.deepEqual(result1.rows, [[1], [4], [8], [9], [12], [19], [81]]);
+      assert.deepStrictEqual(result1.rows, [[1], [4], [8], [9], [12], [19], [81]]);
 
       // select StudentId from student_ov ordered by ascending values
       const result2 = await connection.execute(`
@@ -769,7 +769,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov s
       ORDER BY 1 ASC
     `);
-      assert.deepEqual(result2.rows, [[1], [4], [8], [9], [12], [19], [81]]);
+      assert.deepStrictEqual(result2.rows, [[1], [4], [8], [9], [12], [19], [81]]);
 
       // select StudentId from student_ov ordered by descending values
       const result3 = await connection.execute(`
@@ -777,7 +777,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov
       ORDER BY 1 DESC
     `);
-      assert.deepEqual(result3.rows, [[81], [19], [12], [9], [8], [4], [1]]);
+      assert.deepStrictEqual(result3.rows, [[81], [19], [12], [9], [8], [4], [1]]);
 
       // select StudentId from student_ov ordered by descending values
       const result4 = await connection.execute(`
@@ -785,7 +785,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov s
       ORDER BY 1 DESC
     `);
-      assert.deepEqual(result4.rows, [[81], [19], [12], [9], [8], [4], [1]]);
+      assert.deepStrictEqual(result4.rows, [[81], [19], [12], [9], [8], [4], [1]]);
 
       // select StudentName from student_ov ordered by descending values
       const result5 = await connection.execute(`
@@ -793,7 +793,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov
       ORDER BY 1 DESC
     `);
-      assert.deepEqual(result5.rows, [['H'], ['F'], ['E'], ['D'], ['C'], ['B'], ['A']]);
+      assert.deepStrictEqual(result5.rows, [['H'], ['F'], ['E'], ['D'], ['C'], ['B'], ['A']]);
 
       // select StudentName from student_ov ordered by descending values
       const result6 = await connection.execute(`
@@ -801,7 +801,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov s
       ORDER BY 1 DESC
     `);
-      assert.deepEqual(result6.rows, [['H'], ['F'], ['E'], ['D'], ['C'], ['B'], ['A']]);
+      assert.deepStrictEqual(result6.rows, [['H'], ['F'], ['E'], ['D'], ['C'], ['B'], ['A']]);
 
       // select StudentName and StudentId from student_ov ordered by StudentName descending and StudentId ascending
       const result7 = await connection.execute(`
@@ -809,7 +809,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov
       ORDER BY data.StudentName DESC, json_value(data, '$.StudentId') ASC
     `);
-      assert.deepEqual(result7.rows, [['H', 19], ['F', 4], ['E', 8], ['D', 12], ['C', 81], ['B', 9], ['A', 1]]);
+      assert.deepStrictEqual(result7.rows, [['H', 19], ['F', 4], ['E', 8], ['D', 12], ['C', 81], ['B', 9], ['A', 1]]);
     });
   });
 });

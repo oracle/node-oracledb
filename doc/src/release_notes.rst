@@ -13,12 +13,11 @@ node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...
 Common Changes
 ++++++++++++++
 
-#) Added support for fetching VARCHAR2 and LOB columns which contain JSON (and
-  have the "IS JSON" check constraint enabled) in the same way as columns of
-  type JSON (which requires Oracle Database 21 or higher) are fetched. In
-  thick mode this requires Oracle Client 19 or higher. Application can
-  get the old behaviour and avoid this conversion by defining
-  :attr:`oracledb.fetchTypeHandler`.
+#)  VARCHAR2 and LOB columns which contain JSON, and have the "IS JSON" check
+    constraint enabled, are now fetched in the same way as columns of type
+    JSON. In node-oracledb :ref:`Thick mode <enablingthick>` this requires
+    Oracle Client 19 or higher. Applications can get the old behaviour by using
+    :attr:`oracledb.fetchTypeHandler` to replace the new default conversion.
 
 #)  Added new connection properties :attr:`connection.dbDomain`,
     :attr:`connection.dbName`, :attr:`connection.maxOpenCursors`,
@@ -30,6 +29,15 @@ Common Changes
 #)  Added new extended :ref:`metadata <execmetadata>` information such as
     ``annotations``, ``domainName``, ``domainSchema`` and ``isJson`` for a
     fetched column.
+
+#)  Added new environment variable ``NODE_ORACLEDB_CLIENT_LIB_DIR`` to set
+    an optional Oracle Client library path for the files in the ``examples``
+    directory on Windows and macOS Intel platforms, when using the Thick mode.
+
+#)  Added functionality to create and drop user schemas for
+    Advanced Queuing(AQ) sample files in the ``examples`` directory. Users
+    can now simply run the AQ samples using Node.js without requiring any
+    external setup of the AQ user schema, queues and tables.
 
 Thin Mode Changes
 ++++++++++++++++++

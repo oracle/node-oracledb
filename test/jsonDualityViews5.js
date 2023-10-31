@@ -649,7 +649,7 @@ annotation or NOUPDATE annotation specified.*/
     `);
 
     const result = await connection.execute(`select s.data.StudentName."NULL" from student_ov s`);
-    assert.deepEqual(result.rows, [["ABC"], ["LMN"], ["XYZ"]]);
+    assert.deepStrictEqual(result.rows, [["ABC"], ["LMN"], ["XYZ"]]);
     await connection.execute(`
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
         AS

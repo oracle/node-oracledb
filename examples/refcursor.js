@@ -52,13 +52,15 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   // is not correct, you will get a DPI-1047 error.  See the node-oracledb
   // installation documentation.
   let clientOpts = {};
-  if (process.platform === 'win32') {                                   // Windows
-    clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  // On Windows and macOS Intel platforms, set the environment
+  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+    clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
+
+console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 
 async function run() {
 
@@ -98,7 +100,7 @@ async function run() {
          no_get_rs(:maxid, :cursor);
        END;`,
       {
-        maxid:  3,
+        maxid: 3,
         cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       });
 
@@ -127,7 +129,7 @@ async function run() {
            CONNECT BY LEVEL <= :nr;
        END;`,
       {
-        nr:     23, // number of rows to fetch
+        nr: 23, // number of rows to fetch
         cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       });
 

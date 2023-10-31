@@ -250,7 +250,7 @@ describe('274 jsonDualityView3.js', function() {
       FROM student_ov
       ORDER BY 1 ASC
     `);
-    assert.deepEqual(result1.rows, [[1], [2], [3]]);
+    assert.deepStrictEqual(result1.rows, [[1], [2], [3]]);
 
     // select StudentId from student_ov ordered by ascending values
     const result2 = await connection.execute(`
@@ -258,7 +258,7 @@ describe('274 jsonDualityView3.js', function() {
       FROM student_ov
       ORDER BY 1 ASC
     `);
-    assert.deepEqual(result2.rows, [['ABC'], ['LMN'], ['XYZ']]);
+    assert.deepStrictEqual(result2.rows, [['ABC'], ['LMN'], ['XYZ']]);
     await connection.execute(`drop table student1 PURGE`);
   });
 
@@ -332,7 +332,7 @@ describe('274 jsonDualityView3.js', function() {
       FROM student_ov
       ORDER BY 1 ASC
     `);
-    assert.deepEqual(result.rows, [[1], [2], [3]]);
+    assert.deepStrictEqual(result.rows, [[1], [2], [3]]);
     await connection.execute(`drop table student PURGE`);
     await connection.execute(`drop view student_ov`);
   });

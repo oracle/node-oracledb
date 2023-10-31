@@ -1350,12 +1350,12 @@ Overview of node-oracledb functional tests
         75.1.20 mixing named with positional binding
         75.1.21 works with UPDATE
         75.1.22 works with substr
-        75.1.23 named binging, bind out maxSize smaller than string length ( < 32K )
-        75.1.24 named binging, bind out maxSize smaller than string length ( > 32K )
-        75.1.25 named binging, bind out maxSize smaller than string length ( > 64K )
-        75.1.26 positional binging, bind out maxSize smaller than string length ( < 32K )
-        75.1.27 positional binging, bind out maxSize smaller than string length ( > 32K )
-        75.1.28 positional binging, bind out maxSize smaller than string length ( > 63K )
+        75.1.23 named binding, bind out maxSize smaller than string length ( < 32K )
+        75.1.24 named binding, bind out maxSize smaller than string length ( > 32K )
+        75.1.25 named binding, bind out maxSize smaller than string length ( > 64K )
+        75.1.26 positional binding, bind out maxSize smaller than string length ( < 32K )
+        75.1.27 positional binding, bind out maxSize smaller than string length ( > 32K )
+        75.1.28 positional binding, bind out maxSize smaller than string length ( > 63K )
     75.2 CLOB, PLSQL, BIND_OUT to VARCHAR2
         75.2.1 works with EMPTY_LOB
         75.2.2 works with EMPTY_LOB and bind out maxSize set to 1

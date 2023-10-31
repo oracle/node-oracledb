@@ -50,13 +50,15 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   // is not correct, you will get a DPI-1047 error.  See the node-oracledb
   // installation documentation.
   let clientOpts = {};
-  if (process.platform === 'win32') {                                   // Windows
-    clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  // On Windows and macOS Intel platforms, set the environment
+  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+    clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
+
+console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 
 async function run() {
 
@@ -92,7 +94,7 @@ async function run() {
     const inBuf = Buffer.from(data);
     let result = await connection.execute(
       `INSERT INTO no_raw VALUES (:r)`,
-      { r : { val: inBuf, type: oracledb.BUFFER, dir:oracledb.BIND_IN }});
+      { r: { val: inBuf, type: oracledb.BUFFER, dir: oracledb.BIND_IN }});
     console.log(result.rowsAffected + " row(s) inserted.");
 
     //

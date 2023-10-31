@@ -31,6 +31,8 @@ Autonomous Databases optionally. The wallet location can also be provided as a p
 
 - `NODE_ORACLEDB_WALLET_PASSWORD` must set to the password for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases.
 
+- `NODE_ORACLEDB_CLIENT_LIB_DIR` provides an optional path for the Oracle Client libraries to be used on Windows and macOS platforms, when using Thick mode in node-oracledb.
+
 Review the examples and then run them individually.  For example, to see what
   the file `example.js` does, use:
 

@@ -58,10 +58,10 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   // is not correct, you will get a DPI-1047 error.  See the node-oracledb
   // installation documentation.
   let clientOpts = {};
-  if (process.platform === 'win32') {                                   // Windows
-    // clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  // On Windows and macOS Intel platforms, set the environment
+  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+    clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
@@ -138,7 +138,7 @@ async function run() {
     console.log(result.rows);
 
     // Show the queried dates are of type Date
-    let ts = result.rows[0]['TIMESTAMPCOL'];
+    const ts = result.rows[0]['TIMESTAMPCOL'];
     ts.setDate(ts.getDate() + 5);
     console.log('TIMESTAMP manipulation in JavaScript:', ts);
 

@@ -461,7 +461,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       await connection.execute(proc_drop_7415);
     }); // 75.1.22
 
-    it('75.1.23 named binging, bind out maxSize smaller than string length ( < 32K )', async function() {
+    it('75.1.23 named binding, bind out maxSize smaller than string length ( < 32K )', async function() {
       const len = 300;
       const sequence = insertID++;
       const specialStr = "75.1.23";
@@ -493,7 +493,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       );
     }); // 75.1.24
 
-    it('75.1.25 named binging, bind out maxSize smaller than string length ( > 64K )', async function() {
+    it('75.1.25 named binding, bind out maxSize smaller than string length ( > 64K )', async function() {
       const len = 50000;
       const sequence = insertID++;
       const specialStr = "75.1.25";
@@ -509,7 +509,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       );
     }); // 75.1.25
 
-    it('75.1.26 positional binging, bind out maxSize smaller than string length ( < 32K )', async function() {
+    it('75.1.26 positional binding, bind out maxSize smaller than string length ( < 32K )', async function() {
       const len = 500;
       const sequence = insertID++;
       const specialStr = "75.1.26";
@@ -523,7 +523,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       );
     }); // 75.1.26
 
-    it('75.1.27 positional binging, bind out maxSize smaller than string length ( > 32K )', async function() {
+    it('75.1.27 positional binding, bind out maxSize smaller than string length ( > 32K )', async function() {
       const len = 50000;
       const sequence = insertID++;
       const specialStr = "75.1.27";
@@ -537,7 +537,7 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       );
     }); // 75.1.27
 
-    it('75.1.28 positional binging, bind out maxSize smaller than string length ( > 64K )', async function() {
+    it('75.1.28 positional binding, bind out maxSize smaller than string length ( > 64K )', async function() {
       const len = 65539;
       const sequence = insertID++;
       const specialStr = "75.1.28";

@@ -63,10 +63,10 @@ describe('280. pipelinedTables.js', function() {
         END pkg1;`);
 
     let result = await connection.execute(`SELECT * FROM TABLE (pkg1.f1(5))`);
-    assert.deepEqual(result.rows, [[1], [2], [3], [4], [5]]);
+    assert.deepStrictEqual(result.rows, [[1], [2], [3], [4], [5]]);
 
     result = await connection.execute(`SELECT * FROM TABLE (pkg1.f1(2))`);
-    assert.deepEqual(result.rows, [[1], [2]]);
+    assert.deepStrictEqual(result.rows, [[1], [2]]);
   });
 
   it('280.2 Invoking Pipelined Table Function with invalid syntax', async function() {
@@ -109,7 +109,7 @@ describe('280. pipelinedTables.js', function() {
 
     // call the table function
     let result = await connection.execute(`SELECT COLUMN_VALUE my_string FROM TABLE (strings ())`);
-    assert.deepEqual(result.rows, [['abc']]);
+    assert.deepStrictEqual(result.rows, [['abc']]);
 
     // create a pipelined version of that same table function
     await connection.execute(`CREATE OR REPLACE FUNCTION strings_pl
@@ -148,7 +148,7 @@ describe('280. pipelinedTables.js', function() {
         FROM   TABLE(get_tab_ptf(10))
         ORDER BY id DESC`);
 
-    assert.deepEqual(result.rows, [[10, "Description for 10"],
+    assert.deepStrictEqual(result.rows, [[10, "Description for 10"],
       [9, "Description for 9"],
       [8, "Description for 8"],
       [7, "Description for 7"],
@@ -184,7 +184,7 @@ describe('280. pipelinedTables.js', function() {
 
     await connection.commit();
     const result = await connection.execute(`SELECT country_code, count(*) FROM parallel_test GROUP BY country_code ORDER BY country_code ASC`);
-    assert.deepEqual(result.rows, [["IN", 25000], ["UK", 25000], ["US", 50000]]);
+    assert.deepStrictEqual(result.rows, [["IN", 25000], ["UK", 25000], ["US", 50000]]);
     await connection.execute(`drop table parallel_test PURGE`);
   });
 });

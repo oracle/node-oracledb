@@ -28,8 +28,9 @@
  * DESCRIPTION
  *   Oracle Advanced Queuing (AQ) example setting options and message attributes.
  *
- *   Before running this, a queue allowing RAW payloads must be created, see
- *   https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqrawexample
+ *   Warning: Creates and drops a new user for running AQ operations.
+ *   Requires NODE_ORACLEDB_DBA_USER and NODE_ORACLE_DBA_PASSWORD env variables
+ *   to be set for the AQ user to be created and dropped.
  *
  *****************************************************************************/
 
@@ -39,6 +40,7 @@ Error.stackTraceLimit = 50;
 
 const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
+const aqUtil = require('./aqutil.js');
 
 // This example requires node-oracledb Thick mode.
 //
@@ -50,20 +52,52 @@ const dbConfig = require('./dbconfig.js');
 // is not correct, you will get a DPI-1047 error.  See the node-oracledb
 // installation documentation.
 let clientOpts = {};
-if (process.platform === 'win32') {                                   // Windows
-  clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-} else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-  clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+// On Windows and macOS Intel platforms, set the environment
+// variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+  clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
 }
 oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 
 const queueName = "DEMO_RAW_QUEUE";
+const RAW_TABLE = "NODB_RAW_QUEUE_TAB";
+const AQ_USER = "NODB_SCHEMA_AQTEST1";
+const AQ_USER_PWD = aqUtil.generateRandomPassword();
+
+let connection;
+
+const credentials = {
+  user: AQ_USER,
+  password: AQ_USER_PWD,
+  connectString: dbConfig.connectString
+};
+
+async function aqSetup() {
+  await aqUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
+  connection = await oracledb.getConnection(credentials);
+
+  const plsql = `
+    BEGIN
+      DBMS_AQADM.CREATE_QUEUE_TABLE(
+        QUEUE_TABLE        =>  '${AQ_USER}.${RAW_TABLE}',
+        QUEUE_PAYLOAD_TYPE =>  'RAW'
+      );
+      DBMS_AQADM.CREATE_QUEUE(
+        QUEUE_NAME         =>  '${AQ_USER}.${queueName}',
+        QUEUE_TABLE        =>  '${AQ_USER}.${RAW_TABLE}'
+      );
+      DBMS_AQADM.START_QUEUE(
+        QUEUE_NAME         => '${AQ_USER}.${queueName}'
+      );
+    END;
+  `;
+  await connection.execute(plsql);
+  await connection.close();
+}
 
 async function enq() {
-  let connection;
-
   try {
-    connection = await oracledb.getConnection(dbConfig);
+    connection = await oracledb.getConnection(credentials);
 
     const queue = await connection.getQueue(queueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE; // Send a message immediately without requiring a commit
@@ -71,7 +105,7 @@ async function enq() {
     const messageString = 'This is my other message';
     const message = {
       payload: messageString, // the message itself
-      expiration: 1           // seconds the message will remain in the queue if not dequeued
+      expiration: 1           // number of seconds that the message will remain in the queue if not dequeued
     };
     console.log('Enqueuing: ' + messageString);
     await queue.enqOne(message);
@@ -92,7 +126,7 @@ async function deq() {
   let connection;
 
   try {
-    connection = await oracledb.getConnection(dbConfig);
+    connection = await oracledb.getConnection(credentials);
 
     const queue = await connection.getQueue(queueName);
     Object.assign(
@@ -122,5 +156,11 @@ async function deq() {
   }
 }
 
-enq();
-deq();
+async function run() {
+  await aqSetup();
+  await enq();
+  await deq();
+  await aqUtil.dropAQtestUser(AQ_USER);
+}
+
+run();

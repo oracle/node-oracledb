@@ -630,7 +630,7 @@ describe('290. dbObject20.js', () => {
 
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
-      assert.deepEqual(result.rows[0][1]['NAME'], objData.NAME);
+      assert.deepStrictEqual(result.rows[0][1]['NAME'], objData.NAME);
     }); // 290.3.1
 
     it('290.3.2 insert an object with null string values', async () => {
@@ -715,7 +715,7 @@ describe('290. dbObject20.js', () => {
 
       assert.strictEqual(result.rows[0].NUM, seq);
       assert.strictEqual(result.rows[0].PERSON['ID'], objData.ID);
-      assert.deepEqual(result.rows[0].PERSON.NAME, objData.NAME);
+      assert.deepStrictEqual(result.rows[0].PERSON.NAME, objData.NAME);
     }); // 290.3.5
 
     it('290.3.6 insert multiple rows using executeMany() with inferred data type', async () => {
@@ -757,7 +757,7 @@ describe('290. dbObject20.js', () => {
       for (let j = 0; j < objDataArray.length; j++) {
         assert.strictEqual(result.rows[j][0], (initialSeq + j));
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
-        assert.deepEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
+        assert.deepStrictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
     }); // 290.3.6
 
@@ -803,7 +803,7 @@ describe('290. dbObject20.js', () => {
       for (let j = 0; j < objDataArray.length; j++) {
         assert.strictEqual(result.rows[j][0], (initialSeq + j));
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
-        assert.deepEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
+        assert.deepStrictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
     }); // 290.3.7
 
@@ -846,7 +846,7 @@ describe('290. dbObject20.js', () => {
 
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ID'], objData.ID);
-      assert.deepEqual(result.rows[0][1]['NAME'], objData.NAME);
+      assert.deepStrictEqual(result.rows[0][1]['NAME'], objData.NAME);
     }); // 290.3.9
 
     it('290.3.10 insert an object with buffer value with size 100', async () => {

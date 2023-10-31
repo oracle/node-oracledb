@@ -56,13 +56,15 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   // is not correct, you will get a DPI-1047 error.  See the node-oracledb
   // installation documentation.
   let clientOpts = {};
-  if (process.platform === 'win32') {                                   // Windows
-    clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-  } else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-    clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+  // On Windows and macOS Intel platforms, set the environment
+  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+    clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
+
+console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 
 const inFileName = 'clobexample.txt';  // the file with text to be inserted into the database
 
@@ -77,7 +79,7 @@ async function run() {
 
     // Write into a temporary LOB.
     // An alternative would be to stream into it.
-    let tempLob = await connection.createLob(oracledb.CLOB);
+    const tempLob = await connection.createLob(oracledb.CLOB);
     const data = fs.readFileSync(inFileName, 'utf8');
     tempLob.write(data);
     tempLob.write("That's all!");

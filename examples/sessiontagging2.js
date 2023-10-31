@@ -66,10 +66,10 @@ const httpPort = 7000;
 // is not correct, you will get a DPI-1047 error.  See the node-oracledb
 // installation documentation.
 let clientOpts = {};
-if (process.platform === 'win32') {                                   // Windows
-  clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-} else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-  clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+// On Windows and macOS Intel platforms, set the environment
+// variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+  clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
 }
 oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 
@@ -92,8 +92,8 @@ function initSession(connection, requestedTag, callbackFn) {
   console.log(`In initSession. requested tag: ${requestedTag}, actual tag: ${connection.tag}`);
 
   // Split the requested and actual tags into property components
-  let requestedProperties = [];
-  let actualProperties = [];
+  const requestedProperties = [];
+  const actualProperties = [];
   if (requestedTag) {
     requestedTag.split(";").map(y => y.split("=")).forEach(e => {
       if (e[0]) requestedProperties[e[0]] = e[1];
@@ -109,7 +109,7 @@ function initSession(connection, requestedTag, callbackFn) {
   // correctly; these are retained in requestedProperties.  Also
   // record the final, complete set of properties the connection will
   // have; these are retained in actualProperties.
-  for (let k in requestedProperties) {
+  for (const k in requestedProperties) {
     if (actualProperties[k] && actualProperties[k] === requestedProperties[k]) {
       delete requestedProperties[k]; // already set correctly
     } else {
@@ -121,7 +121,7 @@ function initSession(connection, requestedTag, callbackFn) {
   // injection issues.  Construct a string of valid options usable by
   // ALTER SESSION.
   let s = "";
-  for (let k in requestedProperties) {
+  for (const k in requestedProperties) {
     if (k === 'TIME_ZONE') {
       switch (requestedProperties[k]) {
         case 'Australia/Melbourne':
@@ -148,7 +148,7 @@ function initSession(connection, requestedTag, callbackFn) {
         // Store the tag representing the connection's full set of
         // properties
         connection.tag = "";
-        for (let k in actualProperties) {
+        for (const k in actualProperties) {
           connection.tag += `${k}=${actualProperties[k]};`;
         }
         callbackFn(err);

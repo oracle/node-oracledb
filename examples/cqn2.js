@@ -58,10 +58,10 @@ const dbConfig = require('./dbconfig.js');
 // is not correct, you will get a DPI-1047 error.  See the node-oracledb
 // installation documentation.
 let clientOpts = {};
-if (process.platform === 'win32') {                                   // Windows
-  clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-} else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-  clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+// On Windows and macOS Intel platforms, set the environment
+// variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+  clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
 }
 oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 
@@ -100,18 +100,18 @@ function myCallback(message) {
 }
 
 const options = {
-  callback : myCallback,
+  callback: myCallback,
   sql: "SELECT * FROM no_cqntable",
   // ipAddress: '127.0.0.1',
   // Stop after 60 seconds
-  timeout : 60,
+  timeout: 60,
   // Return ROWIDs in the notification message
-  qos : oracledb.SUBSCR_QOS_ROWIDS,
+  qo: oracledb.SUBSCR_QOS_ROWIDS,
   // Group notifications in batches covering 10 second
   // intervals, and send a summary
-  groupingClass : oracledb.SUBSCR_GROUPING_CLASS_TIME,
-  groupingValue : 10,
-  groupingType  : oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
+  groupingClass: oracledb.SUBSCR_GROUPING_CLASS_TIME,
+  groupingValue: 10,
+  groupingType: oracledb.SUBSCR_GROUPING_TYPE_SUMMARY
 };
 
 async function setup(connection) {

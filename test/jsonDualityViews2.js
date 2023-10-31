@@ -513,9 +513,9 @@ describe('273. jsonDualityView2.js', function() {
       await conn.execute(`COMMIT`);
       let result = await conn.execute(`select * from redact order by 1`);
       assert.strictEqual(result.rows.length, 3);
-      assert.deepEqual(result.rows[0], [1, "ABC", 1234123412341234]);
-      assert.deepEqual(result.rows[1], [2, "LMN", 2345234523452345]);
-      assert.deepEqual(result.rows[2], [3, "XYZ", 3456345634563456]);
+      assert.deepStrictEqual(result.rows[0], [1, "ABC", 1234123412341234]);
+      assert.deepStrictEqual(result.rows[1], [2, "LMN", 2345234523452345]);
+      assert.deepStrictEqual(result.rows[2], [3, "XYZ", 3456345634563456]);
       await conn.close();
 
       await dbaConn.execute(`begin
@@ -536,9 +536,9 @@ describe('273. jsonDualityView2.js', function() {
       result = await conn.execute(`select * from redact order by 1`);
 
       assert.strictEqual(result.rows.length, 3);
-      assert.deepEqual(result.rows[0], [1, "ABC", 0]);
-      assert.deepEqual(result.rows[1], [2, "LMN", 0]);
-      assert.deepEqual(result.rows[2], [3, "XYZ", 0]);
+      assert.deepStrictEqual(result.rows[0], [1, "ABC", 0]);
+      assert.deepStrictEqual(result.rows[1], [2, "LMN", 0]);
+      assert.deepStrictEqual(result.rows[2], [3, "XYZ", 0]);
       await assert.rejects(
         async () => await conn.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov1
             AS redact

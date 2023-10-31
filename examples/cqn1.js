@@ -56,10 +56,10 @@ const dbConfig = require('./dbconfig.js');
 // is not correct, you will get a DPI-1047 error.  See the node-oracledb
 // installation documentation.
 let clientOpts = {};
-if (process.platform === 'win32') {                                   // Windows
-  clientOpts = { libDir: 'C:\\oracle\\instantclient_19_17' };
-} else if (process.platform === 'darwin' && process.arch === 'x64') { // macOS Intel
-  clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+// On Windows and macOS Intel platforms, set the environment
+// variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+  clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
 }
 oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 
@@ -103,9 +103,9 @@ function myCallback(message) {
 }
 
 const options = {
-  callback : myCallback,
+  callback: myCallback,
   sql: `SELECT * FROM no_cqntable WHERE k > :bv`,
-  binds: { bv : 100 },
+  binds: { bv: 100 },
   timeout: 60,               // stop after 60 seconds
   clientInitiated: true,     // for Oracle Database & Client 19.4 or later
   // ipAddress: '127.0.0.1', // where Node.js runs (when not using clientInitiated)
