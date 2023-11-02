@@ -543,27 +543,7 @@ for the user.
 
 If you try to connect to any supported Oracle Database with node-oracledb Thin
 mode, but the user account is created only with the 10G password verifier,
-then the connection will fail with the following error::
-
-    NJS-116: password verifier type 0x939 is not supported by node-oracledb in
-    Thin mode.
-
-Database administrators can verify if your username only uses the 10G password
-verifier with this query:
-
-.. code-block:: sql
-
-    SELECT USERNAME FROM DBA_USERS
-    WHERE ( PASSWORD_VERSIONS = '10G '
-    OR PASSWORD_VERSIONS = '10G HTTP ')
-    AND USERNAME <> 'ANONYMOUS';
-
-To use the node-oracledb Thin mode, you must upgrade your password verifier in
-Oracle Database to 11G or later, which are more secure. See `Resetting User
-Passwords with 10G Password Verifier <https://www.oracle.com/pls/topic/lookup?
-ctx=dblatest&id=GUID-D7B09DFE-F55D-449A-8F8A-174D89936304>`__ for the detailed
-steps. You can use the node-oracledb Thick mode to connect to Oracle Database
-with user accounts created only with 10G password verifiers.
+then the connection will fail with the :ref:`njs116` error.
 
 .. _pooldiff:
 

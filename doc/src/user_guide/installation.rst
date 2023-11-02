@@ -375,6 +375,12 @@ binary was built on Oracle Linux 8. If you want to use Thick mode but a
 pre-built binary is not available for your architecture, you will need to
 :ref:`compile node-oracledb from source code <github>`.
 
+If you have multiple copies of Oracle Client libraries installed, check if the
+expected version is first in ``LD_LIBRARY_PATH``.
+
+If you need system privileges to set, or preserve, variables like ``PATH``,
+you can use ``sudo -E`` on Linux.
+
 .. note::
 
     To use node-oracledb in Thick mode you must call
@@ -859,6 +865,12 @@ remote, you may need to adjust the Oracle Client installation instructions:
   technologies/appdev/xe.html>`__ release and follow the instructions in
   :ref:`instwinoh`.
 
+If you have multiple copies of Oracle Client libraries installed, check if the
+expected version is first in ``PATH``.
+
+If you need system privileges to set, or preserve, variables like ``PATH``,
+you can use an elevated command prompt on Windows.
+
 .. note::
 
     To use node-oracledb in Thick mode you must call
@@ -1032,6 +1044,8 @@ Some build tools are required to install node-oracledb from source code.
 1. Recent Node.js tools should work with Python 3 but you may need to have `Python
    2.7 <https://www.python.org/downloads/>`__ for the node-gyp utility.
 
+   - Check if you have an old version of ``node-gyp`` installed. Try updating
+     it. Also, try deleting ``$HOME/.node-gyp`` or equivalent.
    - If another version of Python occurs first in your binary path then
      run ``npm config set python /wherever/python-2.7/bin/python`` or use
      the ``--python`` option to indicate the correct version. For example:
@@ -1506,131 +1520,3 @@ The output is like::
 
     { metaData: [ { name: 'D' } ],
       rows: [ { D: '24-Nov-2019 23:39' } ] }
-
-.. _troubleshooting:
-
-Troubleshooting
-===============
-
-.. _insttroubleshooting:
-
-Installation Troubleshooting
-----------------------------
-
-If ``npm install oracledb`` fails:
-
-- Review the error messages closely. If a pre-built node-oracledb
-  binary package is not available for your Node.js version or operating
-  system, then change your Node.js version or :ref:`compile node-oracledb
-  from source code <github>`.
-
-- If there a network connection error, check if you need to use
-  ``npm config set proxy``, or set ``http_proxy`` and/or ``https_proxy``.
-
-- Use ``npm install --verbose oracledb``. Review your output and logs.
-  Try to install in a different way. **Google anything that looks like an
-  error.** Try some potential solutions.
-
-- If you are compiling node-oracledb from source, check if you have Python 2.7
-  by using ``python --version``.
-
-- If you are compiling node-oracledb from source, check if you have an old
-  version of ``node-gyp`` installed. Try updating it. Also, try deleting
-  ``$HOME/.node-gyp`` or equivalent.
-
-- Try running ``npm cache clean -f`` and deleting the
-  ``node_modules/oracledb`` directory.
-
-.. _runtimetroubleshooting:
-
-Runtime Error Troubleshooting
------------------------------
-
-If using node-oracledb fails:
-
-- If you get the error ``DPI-1047: Cannot locate an Oracle Client library``:
-
-  - Review the :ref:`features available in node-oracledb's default Thin mode
-    <featuresummary>`. If Thin mode suits your requirements, then remove calls
-    in your application to :meth:`oracledb.initOracleClient()` since this
-    loads the Oracle Client library to enable Thick mode.
-
-  - Review any messages, the installation instructions, and see
-    :ref:`Initializing Node-oracledb <initnodeoracledb>`.
-
-  - On Windows and macOS, pass the ``lib_dir`` library directory parameter
-    in your :meth:`oracledb.initOracleClient()` call. The parameter
-    should be the location of your Oracle Client libraries. Do not pass
-    this parameter on Linux.
-
-  - Check that the Node.js process has permission to open the Oracle Client
-    libraries. OS restrictions may prevent the opening of libraries installed
-    in unsafe paths, such as from a user directory. On Linux you may need to
-    install the Oracle Client libraries under a directory like ``/opt`` or
-    ``/usr/local``.
-
-  - Check if Node.js and your Oracle Client libraries are both 64-bit or
-    both 32-bit. The ``DPI-1047`` message will tell you whether the 64-bit
-    or 32-bit Oracle Client is needed for your Node.js. Run
-    ``node -p 'process.arch'`` and compare with, for example,
-    ``dumpbin /headers oci.dll`` (on Windows), ``file libclntsh.dylib``
-    (macOS) or ``file libclntsh.so.*`` (Linux).
-
-  - Set the environment variable ``DPI_DEBUG_LEVEL`` to 64 and restart
-    node-oracledb. The trace messages will show how and where node-oracledb is
-    looking for the Oracle Client libraries.
-
-    At a Windows command prompt, this could be done with::
-
-        set DPI_DEBUG_LEVEL=64
-
-    On Linux and macOS, you might use::
-
-        export DPI_DEBUG_LEVEL=64
-
-  - On Windows, if you have a full database installation, ensure that this
-    database is the `currently configured database
-    <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-33D575DD-47FF-42B1-A82F-049D3F2A8791>`__.
-
-  - On Windows, if you are not using passing a library directory parameter
-    to :meth:`oracledb.initOracleClient()`, then restart your command
-    prompt and use ``set PATH`` to check if the environment variable has the
-    correct Oracle Client listed before any other Oracle directories.
-
-  - On Windows, use the ``DIR`` command to verify that ``OCI.DLL`` exists in
-    the directory passed to :meth:`oracledb.initOracleClient()` or set in
-    ``PATH``.
-
-  - On Windows, check that the correct `Windows Redistributables
-    <https://oracle.github.io/odpi/doc/installation.html#windows>`__ have
-    been installed.
-
-  - On Linux, check if the ``LD_LIBRARY_PATH`` environment variable contains
-    the Oracle Client library directory. Some environments such as web servers
-    reset environment variables. If you are using Oracle Instant Client, a
-    preferred alternative to ``LD_LIBRARY_PATH`` is to ensure that a file in
-    the ``/etc/ld.so.conf.d`` directory contains the path to the Instant Client
-    directory, and then run ``ldconfig``.
-
-- If you get the error ``DPI-1072: the Oracle Client library version is
-  unsupported``, then review the installation requirements. The Thick
-  mode of node-oracledb needs Oracle Client libraries 11.2 or later.
-  Note that version 19 is not supported on Windows 7. Similar steps shown
-  above for ``DPI-1047`` may help. You may be able to use Thin mode which
-  can be done by removing calls :meth:`oracledb.initOracleClient()` from
-  your code.
-
-- If you need system privileges to set, or preserve, variables like
-  ``PATH``, you can use an elevated command prompt on Windows, or ``sudo -E``
-  on Linux.
-
-- If you have multiple copies of Oracle libraries installed, check if the
-  expected version is first in ``PATH`` (on Windows) or ``LD_LIBRARY_PATH``
-  (on Linux).
-
-Questions about node-oracledb can be asked as `GitHub Discussions
-<https://github.com/oracle/node-oracledb/discussions>`__ or posted on `Slack
-<https://node-oracledb.slack.com/>`__ (`link to join Slack
-<https://join.slack.com/t/node-oracledb/shared_invite/enQtNDU4Mjc2NzM
-5OTA2LWMzY2ZlZDY5MDdlMGZiMGRkY2IzYjI5OGU4YTEzZWM5YjQ3ODUzMjcxNWQyNzE4MzM5YjN
-kYjVmNDk5OWU5NDM>`__).

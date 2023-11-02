@@ -5,39 +5,52 @@
 }
 
 /*Added code to correct the font size of bullets in a table */
-.wy-table-responsive table td p{
+.wy-table-responsive table td p {
     font-size: 11pt;
 }
 
 /*Added code to remove the line spacing between bullet lists in a table */
-.wy-table-responsive table td ul{
+.wy-table-responsive table td ul {
     line-height: 0pt;
     margin-bottom: 0pt;
 }
 
 /* Added code to remove the extra white line displayed at the bottom of the code-block in a table */
-.wy-table-responsive table td div{
+.wy-table-responsive table td div {
     line-height: 0pt;
     margin-bottom: 0pt;
 }
 
 /* Added code to wrap the code-blocks that are used in a table*/
-.wy-table-responsive table td pre{
+.wy-table-responsive table td pre {
     white-space: pre-wrap !important;
 }
 
-/* Added code to add white space between the figure and the figure caption */
-figcaption{
+/* Added code to align the row headers of tables using the stub-column property to the top and left */
+.wy-table-responsive table th.stub {
+    vertical-align: top;
+    text-align: left;
+}
+
+/* Added code to add whitespace between the figure and the figure caption */
+figcaption {
     margin-top: 10pt;
 }
 
-/* Added code to add white space between the bullet point and text after bullet */
-li p{
+/* Added code to add whitespace between the bullet point and text after bullet */
+li p {
     padding-left: 5pt;
 }
 
+/* Added code to align code blocks in ordered and unordered lists and remove the extra whitespace after code blocks */
+li div.highlight-default.notranslate, li div.highlight-shell.notranslate, li div.highlight-sql.notranslate {
+    margin-top: 5pt;
+    margin-left: 5pt;
+    margin-bottom: 5pt;
+}
+
 /* Added code to make the deprecated, versionadded, versionmodified, and desupported directives bold and font smaller */
-.versionmodified{
+.versionmodified {
     font-size: 11pt;
     font-weight: bold;
 }
