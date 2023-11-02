@@ -118,7 +118,7 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_WALLET_PASSWORD` provides the password for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases.
 
-* `NODE_ORACLEDB_CLIENT_LIB_DIR` provides an optional path for the Oracle Client libraries to be used in Windows and macOS platforms, when using Thick mode in node-oracledb.  
+* `NODE_ORACLEDB_CLIENT_LIB_DIR` provides an optional path for the Oracle Client libraries to be used in Windows and macOS platforms, when using Thick mode in node-oracledb.
 
 Note: the test suite requires the schema to have these privileges: CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER, and CREATE TYPE.

@@ -70,7 +70,7 @@ An example passing credentials is:
     run();
 
 Connections must be released with :meth:`connection.close()` when they are no
-longer needed. Make sure to release connections in all codes paths, include
+longer needed. Make sure to release connections in all code paths including in
 error handlers.
 
 .. note::
@@ -310,7 +310,7 @@ This can be referenced in node-oracledb:
 Connections, Threads, and Parallelism
 =====================================
 
-To scale and optimize your applications it is useful to understand how
+To scale and optimize your applications, it is useful to understand how
 connections interact with Node.js.
 
 .. _workerthreads:
@@ -332,9 +332,9 @@ of worker threads available to node-oracledb.
     when using Thin mode.
 
 A worker thread pool that is too small can cause a decrease in
-application performance, can cause
+application performance,
 `deadlocks <https://github.com/oracle/node-oracledb/issues/603#issuecomment-
-277017313>`__, or can cause connection requests to fail with the error
+277017313>`__, or failure in connection requests with the error
 *NJS-040: connection request timeout* or *NJS-076: connection request
 rejected*.
 
@@ -457,12 +457,11 @@ Note that using functions like ``Promise.all()`` to fetch rows from
 :ref:`nested cursor result sets <nestedcursors>` can result in
 inconsistent data.
 
-During development, you can set
-:attr:`oracledb.errorOnConcurrentExecute` to
-*true* to help identify application code that executes concurrent
+During development, you can set :attr:`oracledb.errorOnConcurrentExecute`
+to *true* to help identify application code that executes concurrent
 database operations on a single connection. Such uses may be logic
 errors such as missing ``await`` keywords that could lead to unexpected
-results. When ``errorOnConcurrentExecute`` is set to *true* an error
+results. When ``errorOnConcurrentExecute`` is set to *true*, an error
 will be thrown so you can identify offending code. Setting
 ``errorOnConcurrentExecute`` is not recommended for production use in
 case it generates errors during normal operation. For example
@@ -471,7 +470,7 @@ in its generic code. Or your application may be coded under the
 assumption that node-oracledb will do any necessary serialization. Note
 the use of ``errorOnConcurrentExecute`` will not affect parallel use of
 multiple connections, which may all be in use concurrently, and each of
-which can be doing one operation.
+which can be doing a single operation.
 
 .. _pooled-connections:
 .. _connpooling:
@@ -502,18 +501,18 @@ Pools are created by calling :meth:`oracledb.createPool()`. Generally,
 applications will create a pool once as part of initialization.  After an
 application finishes using a connection pool, it should release all connections
 and terminate the connection pool by calling the :meth:`pool.close()`
-method. During runtime, some pool properties can be changed with
-:meth:`pool.reconfigure()`.  Note in node-oracledb Thick mode, the number of
-:ref:`worker threads <workerthreads>` should be sized correctly before creating
-a pool.
+method.  During runtime, some pool properties can be changed with
+:meth:`pool.reconfigure()`.  Note that in node-oracledb Thick mode, the number
+of :ref:`worker threads <workerthreads>` should be sized correctly before
+creating a pool.
 
-Connections from the pool are obtained with
-:meth:`pool.getConnection()`. If all connections in
-a pool are being used, then subsequent ``getConnection()`` calls will be
-put in a :ref:`queue <connpoolqueue>` until a connection is available.
-Connections must be released with :meth:`connection.close()`
-when no longer needed so they can be reused. Make sure to release connections
-in all codes paths, include error handlers.
+Connections from the pool are obtained with :meth:`pool.getConnection()`.
+If all connections in a pool are being used, then
+subsequent ``getConnection()`` calls will be put in
+a :ref:`queue <connpoolqueue>` until a connection is available.
+Connections must be released with :meth:`connection.close()` when no longer
+needed so they can be reused. Make sure to release connections in all
+code paths including in error handlers.
 
 Each connection in a pool should be used for a given unit of work, such as a
 transaction or a set of sequentially executed statements. Statements should be
@@ -789,8 +788,8 @@ in a `sqlnet.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
 id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642>`__ file, see
 :ref:`Optional Oracle Net Configuration <tnsadmin>`.
 
-Non-zero ``drainTime`` values are recommended so applications have the
-opportunity to gracefully finish database operations, however pools can
+Non-zero ``drainTime`` values are recommended so that applications have the
+opportunity to gracefully finish database operations. However, pools can
 be forcibly closed by specifying a zero drain time:
 
 .. code-block:: javascript
@@ -1278,7 +1277,7 @@ Connection Pool Pinging
 -----------------------
 
 When a connection is aquired from a pool with ``getConnection()``,
-node-oracledb does some internal checks to validate the about-to-be-returned
+node-oracledb does some internal checks to validate if the about-to-be-returned
 connection is usable.  If it is not usable, node-oracledb can replace it with a
 different connection before returning this to the application.
 
@@ -1290,14 +1289,14 @@ manager <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
 -ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3>`__, or from a DBA issuing an ``ALTER
 SYSTEM KILL SESSION`` command.
 
-By default, idle connections in the pool are unaware of these events so a
+By default, idle connections in the pool are unaware of these events. So, a
 ``getConnection()`` call could return an unusable connection to the application
 and errors would only occur when it is later used.  The internal pool
 validation checks help provide tolerance against this situation so that
 statement execution using a connection is more likely to succeed.
 
 Each time ``getConnection()`` is called, a lightweight connection validity
-check occurs. (In node-oracledb Thick mode this requires Oracle client library
+check occurs. (In node-oracledb Thick mode, this requires Oracle Client library
 version 12.2 or later).  The lightweight check allows node-oracledb to detect
 and replace connections that have become unusable due to some network errors.
 
@@ -1305,8 +1304,8 @@ An additional internal check performed by ``getConnection()`` can be configured
 during pool creation.  This extra check helps detect errors such as the
 connection having exceeded the user profile resource limits, or from an
 explicit session closure from a DBA.  This extra check performs a
-:ref:`round-trip <roundtrips>` ping to the database which impacts performance,
-so it is not done for each ``getConnection()`` call by default.
+:ref:`round-trip <roundtrips>` ping to the database which impacts performance.
+So, it is not done for each ``getConnection()`` call by default.
 
 The frequency of pinging can be controlled with the
 :attr:`oracledb.poolPingInterval` property or during :ref:`pool creation
@@ -1401,7 +1400,7 @@ setting session state if a previous user of a connection has already set
 it. The caller of ``pool.getConnection()`` can always assume the correct
 state is set. The ``sessionCallback`` can also be a PL/SQL procedure.
 
-Connection tagging and ``sessionCallback`` are new features in
+Connection tagging and ``sessionCallback`` were introduced in
 node-oracledb 3.1.
 
 There are three common scenarios for ``sessionCallback``:
@@ -1413,7 +1412,7 @@ There are three common scenarios for ``sessionCallback``:
 -  When connections in the pool require different state for different
    users use a :ref:`Node.js Session Tagging Callback <sessiontaggingnode>`.
 
--  When using :ref:`DRCP <drcp>` then use a :ref:`PL/SQL Session Tagging
+-  With :ref:`DRCP <drcp>`, use a :ref:`PL/SQL Session Tagging
    Callback <sessiontaggingplsql>`.
 
 .. _sessionfixuptagging:
@@ -1780,9 +1779,9 @@ Different user names may be used each time ``pool.getConnection()`` is
 called.
 
 When applications want to use connection pools but are not able to use
-:attr:`connection.clientId` to distinguish
-application users from database schema owners, a ‘heterogeneous’
-connection pool might be an option.
+:attr:`connection.clientId` to distinguish application users from
+database schema owners then a ‘heterogeneous’ connection pool might be an
+option.
 
 To use heterogeneous pools with the :ref:`connection pool
 cache <connpoolcache>`, the alias should be explicitly stated, even
@@ -1797,9 +1796,8 @@ if it is the default pool:
     });
 
 For heterogeneous pools, the number of connections initially created is
-zero even if a larger value is specified for
-:attr:`~oracledb.poolMin`. The pool increment is always 1,
-regardless of the value of
+zero even if a larger value is specified for :attr:`~oracledb.poolMin`.
+The pool increment is always 1, regardless of the value of
 :ref:`poolIncrement <createpoolpoolattrspoolincrement>`. Once the
 number of open connections exceeds ``poolMin`` and connections are idle
 for more than the :attr:`~oracledb.poolTimeout` seconds, then
@@ -2033,7 +2031,7 @@ later), or 21.7 (or later) are needed.
 OAuth 2.0 Token Generation
 ++++++++++++++++++++++++++
 
-Authentication tokens can be obtained in several ways. For example you
+Authentication tokens can be obtained in several ways. For example, you
 can use a curl command against the Azure Active Directory API such as::
 
     curl -X POST -H 'Content-Type: application/x-www-form-urlencoded'
@@ -2085,9 +2083,32 @@ Azure Active Directory REST API, for example:
         });
     }
 
-Substitute your own values as appropriate for each argument.
+Substitute your own values as appropriate for each argument. The use of
+``getOauthToken()`` is shown in subsequent examples.
 
-Use of ``getOauthToken()`` is shown in subsequent examples.
+Alternatively, OAuth 2.0 authentication tokens can be generated in the
+node-oracledb driver using the Azure Software Development Kit (SDK). This was
+introduced in node-oracledb 6.3. To use the Azure SDK, you must install the
+`Microsoft Authentication Library for Node (msal-node) <https://www.npmjs.com/
+package/@azure/msal-node>`__ package which can be done with the following
+command::
+
+    npm install @azure/msal-node
+
+
+Authentication tokens generated by the Azure SDK can be read by your
+application. For example:
+
+.. code-block:: javascript
+
+    async function getToken(accessTokenConfig) {
+        ... // Azure-specific authentication types
+    }
+
+See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
+main/examples/sampleazuretokenauth.js>`__ for a runnable example using the
+Azure SDK. The use of ``getToken()`` and ``accessTokenConfig`` is shown in
+subsequent examples.
 
 .. _oauthstandalone:
 
@@ -2102,10 +2123,10 @@ authentication, for example:
     let accessTokenStr;  // the token string. In this app it is also the token "cache"
 
     async function tokenCallback(refresh) {
-        if (refresh || !acccessTokenStr) {
+        if (refresh || !accessTokenStr) {
             accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
         }
-        return acccessTokenStr;
+        return accessTokenStr;
     }
 
     async function init() {
@@ -2135,8 +2156,12 @@ used by node-oracledb for authentication. This function
 If the returned token is found to have expired, then ``tokenCallback()``
 will be called a second time. If the second invocation of
 ``tokenCallback()`` also returns an expired token, then the connection
-will fail. The value of the ``refresh`` parameter will be different each
-of the times the callback is invoked:
+will fail.
+
+The ``refresh`` parameter is set internally by the node-oracledb driver
+depending on the status and validity of the authentication token provided by
+the application. The value of the ``refresh`` parameter will be different
+every time the callback is invoked:
 
 -  When ``refresh`` is *true*, the token is known to have expired so the
    application must get a new token. This is then stored in the global
@@ -2146,6 +2171,46 @@ of the times the callback is invoked:
    stored in ``accessTokenStr``, if it is set. But if it is not set
    (meaning there is no token cached), then the application externally
    acquires a token, stores it in ``accessTokenStr``, and returns it.
+
+If you set the
+:ref:`accessTokenConfig <getconnectiondbattrsaccesstokenconfig>` property in
+addition to the :ref:`accessToken <getconnectiondbattrsaccesstoken>`,
+:ref:`externalAuth <getconnectiondbattrsexternalauth>`, and
+:ref:`connectString <getconnectiondbattrsconnectstring>` properties
+during standalone connection creation, then you can use the Azure SDK to
+generate tokens in the callback method. For example:
+
+.. code-block:: javascript
+
+    let accessTokenData;  // The token string
+
+    async function callbackfn(refresh, accessTokenConfig) {
+        if (refresh || !accessTokenData) {
+            accessTokenData = await getToken(accessTokenConfig); // getToken() was shown earlier
+        }
+        return accessTokenData;
+    }
+
+    async function init() {
+        try {
+            await oracledb.getConnection({
+                accessToken   : callbackfn,        // the callback returning the token
+                accessTokenConfig : {
+                                        ...        // Azure-specific parameters to be set
+                                                   // when using Azure SDK
+                                    }
+                externalAuth  : true,              // must specify external authentication
+                connectString : '...'              // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
+main/examples/sampleazuretokenauth.js>`__ for a runnable example using the
+Azure SDK. The callback and ``refresh`` parameter descriptions are detailed
+in the example above.
 
 .. _oauthpool:
 
@@ -2160,10 +2225,10 @@ authentication, for example:
     let accessTokenStr;  // The token string. In this app it is also the token "cache"
 
     async function tokenCallback(refresh) {
-        if (refresh || !acccessTokenStr) {
+        if (refresh || !accessTokenStr) {
             accessTokenStr = await getOauthToken(); // getOauthToken() was shown earlier
         }
-        return acccessToken;
+        return accessToken;
     }
 
     async function init() {
@@ -2186,6 +2251,48 @@ attribute sets a callback function which will be invoked at the time the
 pool is created (even if ``poolMin`` is 0). It is also called when the
 pool needs to expand (causing new connections to be created) and the
 current token has expired.
+
+If you set the
+:ref:`accessTokenConfig <createpoolpoolattrsaccesstokenconfig>` property
+in addition to the :ref:`accessToken <createpoolpoolattrsaccesstoken>`,
+:ref:`externalAuth <createpoolpoolattrsexternalauth>`,
+:ref:`homogeneous <createpoolpoolattrshomogeneous>`, and
+:ref:`connectString <createpoolpoolattrsconnectstring>` properties
+during connection pool creation, then you can use the Azure SDK to
+generate tokens in the callback method. For example:
+
+.. code-block:: javascript
+
+    let accessTokenData;  // The token string
+
+    async function callbackfn(refresh, accessTokenConfig) {
+        if (refresh || !accessTokenData) {
+            accessTokenData = await getToken(accessTokenConfig);  // getToken() was shown earlier
+        }
+        return accessTokenData;
+    }
+
+    async function init() {
+        try {
+            await oracledb.createPool({
+                accessToken   : tokenCallback,        // the callback returning the token
+                accessTokenConfig : {
+                                        ...           // Azure-specific parameters to be set
+                                                      // when using Azure SDK
+                                    }
+                externalAuth  : true,                 // must specify external authentication
+                homogeneous   : true,                 // must use an homogeneous pool
+                connectString : '...'                 // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
+main/examples/sampleazuretokenauth.js>`__ for a runnable example using the
+Azure SDK. See :ref:`OAuth 2.0 Standalone Connections <oauthstandalone>` for a
+description of the callback and ``refresh`` parameter.
 
 .. _oauthconnectstring:
 
@@ -2270,6 +2377,17 @@ See `Working with the Command Line Interface <https://docs.oracle.com/en-us/
 iaas/Content/API/Concepts/cliconcepts.htm>`__ for more information on the OCI
 CLI.
 
+Alternatively, IAM authentication tokens can be generated in the node-oracledb
+driver using the Oracle Cloud Infrastructure (OCI) SDK. This was introduced in
+node-oracledb 6.3. To use the OCI SDK, you must install the `oci-sdk package
+<https://www.npmjs.com/package/oci-sdk>`__ which can be done with the
+following command::
+
+    npm install oci-sdk
+
+See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+
 .. _iamtokenextraction:
 
 IAM Token and Private Key Extraction
@@ -2309,6 +2427,20 @@ applications, for example like:
 
 The token and key can be used during subsequent authentication.
 
+Token and private key values generated by the OCI SDK can be read by your
+application. For example:
+
+.. code-block:: javascript
+
+    async function getToken(accessTokenConfig) {
+        ... // OCI-specific authentication details
+    }
+
+See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+The use of ``getToken()`` and ``accessTokenConfig`` is shown in subsequent
+examples.
+
 .. _iamstandalone:
 
 IAM Standalone Connections
@@ -2322,10 +2454,10 @@ modes using IAM token-based authentication.
     let accessTokenObj;  // the token object. In this app it is also the token "cache"
 
     function tokenCallback(refresh) {
-        if (refresh || !acccessTokenObj) {
+        if (refresh || !accessTokenObj) {
             accessTokenObj = getIAMToken();     // getIAMToken() was shown earlier
         }
-        return acccessTokenObj;
+        return accessTokenObj;
     }
 
     async function init() {
@@ -2356,8 +2488,12 @@ private key used by node-oracledb for authentication. This function
 If the returned token is found to have expired, then ``tokenCallback()``
 will be called a second time. If the second invocation of
 ``tokenCallback()`` also returns an expired token, then the connection
-will fail. The value of the ``refresh`` parameter will be different each
-of the times the callback is invoked:
+will fail.
+
+The ``refresh`` parameter is set internally by the node-oracledb driver
+depending on the status and validity of the authentication token provided by
+the application. The value of the ``refresh`` parameter will be different
+every time the callback is invoked:
 
 -  When ``refresh`` is *true*, the token is known to have expired so the
    application must get a new token and private key. These are then
@@ -2368,6 +2504,46 @@ of the times the callback is invoked:
    not set (meaning there is no token or key cached), then the
    application externally acquires a token and private key, stores them
    in ``accessTokenObj``, and returns it.
+
+If you set the
+:ref:`accessTokenConfig <getconnectiondbattrsaccesstokenconfig>` property in
+addition to the :ref:`accessToken <getconnectiondbattrsaccesstoken>`,
+:ref:`externalAuth <getconnectiondbattrsexternalauth>`, and
+:ref:`connectString <getconnectiondbattrsconnectstring>` properties
+during standalone connection creation, then you can use the OCI SDK to
+generate tokens in the callback method. For example:
+
+.. code-block:: javascript
+
+    let accessTokenData;  // The token string
+
+    async function callbackfn(refresh, accessTokenConfig) {
+        if (refresh || !accessTokenData) {
+            accessTokenData = await getToken(accessTokenConfig); // getToken() was shown earlier
+        }
+        return accessTokenData;
+    }
+
+    async function init() {
+        try {
+            await oracledb.getConnection({
+                accessToken   : callbackfn,        // the callback returning the token
+                accessTokenConfig : {
+                                        ...        // OCI-specific parameters to be set
+                                                   // when using OCI SDK
+                                    }
+                externalAuth  : true,              // must specify external authentication
+                connectString : '...'              // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+The callback and ``refresh`` parameter descriptions are detailed in the
+example above.
 
 .. _iampool:
 
@@ -2382,10 +2558,10 @@ for example:
     let accessTokenObj;  // The token string. In this app it is also the token "cache"
 
     function tokenCallback(refresh) {
-        if (refresh || !acccessTokenObj) {
+        if (refresh || !accessTokenObj) {
             accessTokenObj = getIAMToken();      // getIAMToken() was shown earlier
         }
-        return acccessToken;
+        return accessToken;
     }
 
     async function init() {
@@ -2408,6 +2584,48 @@ callback function which will be invoked at the time the pool is created
 (even if ``poolMin`` is 0). It is also called when the pool needs to
 expand (causing new connections to be created) and the current token has
 expired.
+
+If you set the
+:ref:`accessTokenConfig <createpoolpoolattrsaccesstokenconfig>` property
+in addition to the :ref:`accessToken <createpoolpoolattrsaccesstoken>`,
+:ref:`externalAuth <createpoolpoolattrsexternalauth>`,
+:ref:`homogeneous <createpoolpoolattrshomogeneous>`, and
+:ref:`connectString <createpoolpoolattrsconnectstring>` properties
+during connection pool creation, then you can use the OCI SDK to
+generate tokens in the callback method. For example:
+
+.. code-block:: javascript
+
+    let accessTokenData;  // The token string
+
+    async function callbackfn(refresh, accessTokenConfig) {
+        if (refresh || !accessTokenData) {
+            accessTokenData = await getToken(accessTokenConfig);
+        }
+        return accessTokenData;
+    }
+
+    async function init() {
+        try {
+            await oracledb.createPool({
+                accessToken   : tokenCallback,        // the callback returning the token
+                accessTokenConfig : {
+                                        ...           // OCI-specific parameters to be set
+                                                      // when using Azure SDK
+                                    }
+                externalAuth  : true,                 // must specify external authentication
+                homogeneous   : true,                 // must use an homogeneous pool
+                connectString : '...'                 // Oracle Autonomous Database connection string
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+See :ref:`IAM Standalone Connections <iamstandalone>` for a description of
+the callback and ``refresh`` parameter.
 
 .. _iamconnectstring:
 
@@ -2484,8 +2702,8 @@ lookup?ctx=dblatest&id=GUID-015CA8C1-2386-4626-855D-CC546DDC1086>`__
 (DRCP) enables database resource sharing for applications which use a large
 number of connections that run in multiple client processes or run on multiple
 middle-tier application servers. DRCP reduces the overall number of
-connections that a database must handle. DRCP is available in both Thin and
-:ref:`Thick <enablingthick>` modes.
+connections that a database must handle. DRCP support is available in both
+Thin and :ref:`Thick <enablingthick>` modes.
 
 DRCP is generally used only when the database host does not have enough
 memory to keep all connections open concurrently. For example, if your
@@ -2509,6 +2727,7 @@ has more details, including when to use, and when not to use DRCP.
 To use DRCP in node-oracledb:
 
 1. The DRCP pool must be started in the database, for example:
+
    ``SQL> EXECUTE DBMS_CONNECTION_POOL.START_POOL();``
 
 2. The :attr:`oracledb.connectionClass` property should be set by the
@@ -2626,7 +2845,7 @@ example:
     console.log("I have power");
 
 Note that if node-oracledb is using the Oracle Client libraries located
-in the Oracle Database installation, that is on the same machine as the
+in the Oracle Database installation, that is on the same machine as the
 database and is not using Oracle Instant Client, then operating system
 privileges may be used for authentication. In this case the password
 value is ignored. For example on Linux, membership of the operating
@@ -2647,7 +2866,7 @@ Securely Encrypting Network Traffic to Oracle Database
 ======================================================
 
 You can `encrypt <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
--7F12066A-2BA1-476C-809B-BB95A3F727CF>`__ data transferred between the Oracle
+-7F12066A-2BA1-476C-809B-BB95A3F727CF>`__ the data transferred between Oracle
 Database and node-oracledb so that unauthorized parties are not able to view
 plain text values as the data passes over the network.
 
@@ -2790,7 +3009,7 @@ ignored and can be an empty string:
 Connecting with an Expired Password
 -----------------------------------
 
-When creating a standalone, non-pooled connection the user’s password
+When creating a standalone (non-pooled) connection, the user’s password
 can be changed at the time of connection. This is most useful when the
 user’s password has expired, because it allows a user to connect without
 requiring a DBA to reset their password.
@@ -3214,7 +3433,9 @@ For example:
 
 You can download the ADB connection wallet using the **DB Connection** button
 and extract the ``tnsnames.ora`` file, or create one yourself if you prefer to
-keep connections strings out of application code, see :ref:`tnsnames`.
+keep connection strings out of application code. See :ref:`tnsnames` for
+details on adding connection strings to a Net Service Name in a
+``tnsnames.ora`` file.
 
 .. _connectionadbmtls:
 
@@ -3222,13 +3443,13 @@ Mutual TLS connections to Oracle Cloud Autonomous Database
 ----------------------------------------------------------
 
 To enable connections from node-oracledb to Oracle Autonomous Database in
-Oracle Cloud using mTLS, a wallet needs to be downloaded from the cloud
+Oracle Cloud using mutual TLS (mTLS), a wallet needs to be downloaded from the cloud
 console. mTLS is sometimes called Two-way TLS.
 
 Install the Wallet and Network Configuration Files
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-From the Oracle Cloud console for the database download the wallet zip
+From the Oracle Cloud console for the database, download the wallet zip
 file using the **DB Connection** button. The zip contains the wallet and
 network configuration files. When downloading the zip, the cloud console
 will ask you to create a wallet password. This password is used by

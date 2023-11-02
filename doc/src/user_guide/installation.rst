@@ -20,7 +20,7 @@ that the pre-built node-oracledb binaries are compatible with will change as
 the Node.js project evolves. The binaries are not guaranteed to be available or
 usable in your environment.  The Thick mode binary may additionally build from
 available C source code on other platforms like Windows 32-bit, Solaris, and
-AIX environments, see :ref:`github`.
+AIX environments. See :ref:`github`.
 
 .. _quickstart:
 
@@ -252,8 +252,8 @@ To use node-oracledb, you need:
   client-server version interoperability allows connection to both older and
   newer databases.
 
-  Run ``node -p "process.arch"`` to identify the Node.js architecture so you
-  can install the appropriate 64-bit or 32-bit Oracle Client libraries.
+  Run ``node -p "process.arch"`` to identify the Node.js architecture so that
+  you can install the appropriate 64-bit or 32-bit Oracle Client libraries.
 
 .. _linuxinstall:
 
@@ -370,7 +370,7 @@ remote, you may need to adjust the Oracle Client installation instructions:
   instructions in :ref:`instoh`.
 
 For Linux x86_64, the pre-built node-oracledb binary was built on Oracle Linux
-7 and requires glibc 2.14 version or later. For Linux ARM (aarch64), the
+8 and requires glibc 2.14 version or later. For Linux ARM (aarch64), the
 binary was built on Oracle Linux 8. If you want to use Thick mode but a
 pre-built binary is not available for your architecture, you will need to
 :ref:`compile node-oracledb from source code <github>`.
@@ -386,7 +386,7 @@ pre-built binary is not available for your architecture, you will need to
         const oracledb = require('oracledb');
         oracledb.initOracleClient();
 
-On Linux, do not pass the ``lib_dir`` attribute in the function options: the
+On Linux, do not pass the ``libDir`` attribute in the function options: the
 Oracle Client libraries on Linux *must* be in the system library search path
 *before* the Node.js process starts.
 
@@ -426,7 +426,7 @@ To use node-oracledb Thick mode with Oracle Instant Client zip files:
         wget https://download.oracle.com/otn_software/linux/instantclient/instantclient-basic-linuxx64.zip
         unzip instantclient-basic-linuxx64.zip
 
-   Note OS restrictions may prevent the opening of Oracle Client libraries
+   Note: OS restrictions may prevent the opening of Oracle Client libraries
    installed in unsafe paths, such as from a user directory. You may need to
    install under a directory like ``/opt`` or ``/usr/local``.
 

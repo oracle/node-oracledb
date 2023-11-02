@@ -734,7 +734,7 @@ Connection Methods
 
             If ``type`` is not set for IN or IN OUT binds its value will be derived from the type of the input data. It is recommended to explicitly set the type because null data will be assumed to be ``oracledb.STRING``. With OUT binds, ``type`` defaults to ``oracledb.STRING``.
 
-            Commonly, ``type`` is set to a :ref:`node-oracledb Type Constant <oracledbconstantsnodbtype>` that matches the JavaScript type. Node-oracledb and the underlying Oracle client libraries then do a mapping to, or from, the actual database data type. Since Oracle Database does not provide actual database type information prior to binding, some special cases need ``type`` set explicitly to avoid data conversion issues. For example, binding a String to an NVARCHAR needs ``type`` set to ``oracledb.DB_TYPE_NVARCHAR``.
+            Commonly, ``type`` is set to a :ref:`node-oracledb Type Constant <oracledbconstantsnodbtype>` that matches the JavaScript type. Node-oracledb and the underlying Oracle Client libraries then do a mapping to, or from, the actual database data type. Since Oracle Database does not provide actual database type information prior to binding, some special cases need ``type`` set explicitly to avoid data conversion issues. For example, binding a String to an NVARCHAR needs ``type`` set to ``oracledb.DB_TYPE_NVARCHAR``.
 
             For each JavaScript and database type combination, the ``type`` property can be one of the values in the :ref:`executebindparamtypevalues` table. For example, if you are inserting data from a String into an Oracle Database CHAR column, then set ``type`` to ``oracledb.DB_TYPE_CHAR``.
 
@@ -1062,15 +1062,28 @@ Connection Methods
 
             Extended metadata is now always returned and includes the following information:
 
+            - ``annotations``: The `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object associated with the fetched column. If the column has no associated annotations, this property value is `undefined`. Annotations are supported from Oracle Database 23c onwards. If node-oracledb Thick mode is used, Oracle Client 23c is also required.
+
             - ``byteSize``: The database byte size. This is only set for ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR`` and ``oracledb.DB_TYPE_RAW`` column types.
             - ``dbType``: one of the :ref:`Oracle Database Type Constant <oracledbconstantsdbtype>` values.
             - ``dbTypeClass``: The class associated with the database type. This is only set if the database type is an object type.
             - ``dbTypeName``: The name of the database type, such as “NUMBER” or “VARCHAR2”. For object types, this will be the object name.
+            - ``domainName``: The name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a SQL domain, this property value is `undefined`. SQL domains are supported from Oracle Database 23c onwards. If node-oracledb Thick mode is used, Oracle Client 23c is also required.
+
+            - ``domainSchema``: The schema name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a SQL domain, this property value is `undefined`. SQL domains are supported from Oracle Database 23c onwards. If node-oracledb Thick mode is used, Oracle Client 23c is also required.
+
             - ``fetchType``: One of the :ref:`Node-oracledb Type Constant <oracledbconstantsnodbtype>` values.
+            - ``isJson``: Indicates if the column is known to contain JSON data. This will be ``true`` for JSON columns (from Oracle Database 21c) and for LOB and VARCHAR2 columns where "IS JSON" constraint is enabled (from Oracle Database 19c). This property will be ``false`` for all the other columns. It will also be ``false`` for any column when Oracle Client 18c or earlier is used in Thick mode or the Oracle Database version is earlier than 19c.
+
+
             - ``name``: The column name follows Oracle’s standard name-casing rules. It will commonly be uppercase, since most applications create tables using unquoted, case-insensitive names.
             - ``nullable``: Indicates whether ``NULL`` values are permitted for this column.
             - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ``, and ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` columns.
             - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` columns.
+
+            .. versionchanged:: 6.3
+
+                The ``annotations``, ``domainName``, ``domainSchema``, and ``isJson`` information attributes were added.
 
             For numeric columns: when ``precision`` is ``0``, then the column is simply a NUMBER. If ``precision`` is nonzero and ``scale`` is ``-127``, then the column is a FLOAT. Otherwise, it is a NUMBER(precision, scale).
 
@@ -1236,7 +1249,7 @@ Connection Methods
 
             The default value is *false*.
 
-            This feature works when node-oracledb is using version 12, or later, of the Oracle client library, and using Oracle Database 12, or later.
+            This feature works when node-oracledb is using version 12, or later, of the Oracle Client library, and using Oracle Database 12, or later.
         * - ``keepInStmtCache``
           - Boolean
           - .. _executemanyoptkeepinstmtcache:
@@ -1366,7 +1379,7 @@ Connection Methods
 
     When the definition of a type changes in the database, such as might
     occur in a development environment, you should fully close connections
-    to clear the object caches used by node-oracledb and the Oracle client
+    to clear the object caches used by node-oracledb and the Oracle Client
     libraries. For example, when using a pool you could use
     :ref:`await connection.close({drop: true}) <connectionclose>`, or
     restart the pool. Then ``getDbObjectClass()`` can be called again to get

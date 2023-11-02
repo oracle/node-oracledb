@@ -124,7 +124,7 @@ first turn on DBMS_OUTPUT buffering for the current connection by
 calling the PL/SQL procedure ``DBMS_OUTPUT.ENABLE(NULL)``. Then any
 PL/SQL executed by the connection can put text into the buffer using
 ``DBMS_OUTPUT.PUT_LINE()``. Finally ``DBMS_OUTPUT.GET_LINE()`` is used
-to fetch from that buffer. Note, any PL/SQL code that uses DBMS_OUTPUT
+to fetch from that buffer. Note that any PL/SQL code that uses DBMS_OUTPUT
 runs to completion before any output is available to the user. Also,
 other database connections cannot access your buffer.
 
@@ -207,7 +207,7 @@ The `Edition-Based Redefinition <https://www.oracle.com/pls/topic/lookup
 ?ctx=dblatest&id=GUID-58DE05A0-5DEF-4791-8FA8-F04D11964906>`__
 (EBR) feature of Oracle Database allows multiple versions of views,
 synonyms, PL/SQL objects and SQL Translation profiles to be used
-concurrently. Each items version is associated with an ‘edition’ which
+concurrently. Each item's version is associated with an ‘edition’ which
 can be nominated at runtime by applications. This lets database logic be
 updated and tested while production users are still accessing the
 original version. Once every user has begun using the objects in the new

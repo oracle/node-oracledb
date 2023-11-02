@@ -162,7 +162,7 @@ An example of an application managing the two-phase commit protocol is:
     run();
 
 The two-phase commit functions allow one process or connection to start
-a transaction, and then a second to continue it. For example, if a table
+a transaction, and then a second one to continue it. For example, if a table
 contained a salary with initial value 100, then one process could start
 a transaction, update the table, and then suspend the transaction:
 

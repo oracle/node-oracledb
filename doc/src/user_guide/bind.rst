@@ -37,7 +37,7 @@ If a statement is executed more than once with different values for the
 bind parameters, then Oracle can re-use context from the initial
 execution, generally improving performance. However, if similar
 statements contain hard coded values instead of bind parameters, Oracle
-sees the statement text is different and will be less efficient.
+sees that the statement text is different and will be less efficient.
 
 Bind parameters can be used to substitute data values. They cannot be
 used for direct substitution of column or table names in dynamically
@@ -160,7 +160,7 @@ the context of PL/SQL statements the position ‘n’ in the bind call
 indicates a binding for the n’th unique parameter name in the statement
 when scanned left to right.
 
-If a bind parameter name is repeated in the SQL string then :ref:`bind by
+If a bind parameter name is repeated in the SQL string, then :ref:`bind by
 name <bindbyname>` syntax should be used.
 
 .. _binddatatypenotes:

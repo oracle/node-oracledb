@@ -155,7 +155,7 @@ static bool njsPool_closeAsync(njsBaton *baton)
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
 {
-    napi_value callback;
+    napi_value callback, accessTokenConfig;
 
     if (!njsBaton_commonConnectProcessArgs(baton, env, args))
         return false;
@@ -192,7 +192,10 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
     if (!njsUtils_getNamedProperty(env, args[0], "accessTokenFn",
             &callback))
         return false;
-    if (callback && !njsTokenCallback_new(baton, env, callback))
+    if (!njsUtils_getNamedProperty(env, args[0], "accessTokenConfig",
+            &accessTokenConfig))
+        return false;
+    if (callback && !njsTokenCallback_new(baton, env, callback, accessTokenConfig))
         return false;
 
     return njsBaton_queueWork(baton, env, "create", njsPool_createAsync,

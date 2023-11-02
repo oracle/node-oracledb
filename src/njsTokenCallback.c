@@ -75,7 +75,7 @@ int njsTokenCallback_eventHandler(njsTokenCallback *callback,
 //   This method allocates memory to structure accessTokenCallback.
 //-----------------------------------------------------------------------------
 bool njsTokenCallback_new(njsBaton *baton, napi_env env,
-        napi_value userCallback)
+        napi_value userCallback, napi_value accessTokenConfig)
 {
     njsTokenCallback *callback;
     napi_value jsPool;
@@ -91,6 +91,9 @@ bool njsTokenCallback_new(njsBaton *baton, napi_env env,
     callback->globals = baton->globals;
     NJS_CHECK_NAPI(env, napi_create_reference(env, userCallback, 1,
             &callback->jsCallback))
+    if (accessTokenConfig)
+        NJS_CHECK_NAPI(env, napi_create_reference(env, accessTokenConfig, 1,
+                &callback->jsAccessTokenConfig))
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &jsPool))
     NJS_CHECK_NAPI(env, napi_create_reference(env, jsPool, 1,
@@ -151,14 +154,17 @@ static void njsTokenCallback_processNotification(uv_async_t *handle)
 static bool njsTokenCallback_processNotificationHelper(
         njsTokenCallback *callback)
 {
-    napi_value jsCallback, jsCallbackHandler, jsPool, refresh, result;
-    napi_value jsCallbackArgs[3], externalObj;
+    napi_value jsAccessTokenConfig, jsCallback, jsCallbackHandler, jsPool, refresh, result;
+    napi_value jsCallbackArgs[4], externalObj;
     napi_env env = callback->env;
 
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, callback->jsPool,
             &jsPool))
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, callback->jsCallback,
             &jsCallback))
+    if (callback->jsAccessTokenConfig)
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env, callback->jsAccessTokenConfig,
+                &jsAccessTokenConfig))
     NJS_CHECK_NAPI(env, napi_get_named_property(env, jsPool,
             "_accessTokenHandler", &jsCallbackHandler))
     NJS_CHECK_NAPI(env, napi_create_external(env, callback, NULL, NULL,
@@ -167,8 +173,9 @@ static bool njsTokenCallback_processNotificationHelper(
     jsCallbackArgs[0] = jsCallback;
     jsCallbackArgs[1] = externalObj;
     jsCallbackArgs[2] = refresh;
+    jsCallbackArgs[3] = jsAccessTokenConfig;
     NJS_CHECK_NAPI(env, napi_make_callback(env, NULL, jsPool,
-            jsCallbackHandler, 3, jsCallbackArgs, &result));
+            jsCallbackHandler, 4, jsCallbackArgs, &result));
 
     return true;
 }

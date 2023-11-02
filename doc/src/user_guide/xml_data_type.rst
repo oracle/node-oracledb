@@ -42,5 +42,5 @@ length.
      { id: 1, bv: myxml }
     );
 
-LOB handling as discussed in the section :ref:`Working with CLOB, NCLOB and
+LOB handling is as discussed in the section :ref:`Working with CLOB, NCLOB and
 BLOB Data <lobhandling>`.

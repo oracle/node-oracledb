@@ -72,7 +72,7 @@ This gives::
 The ``type`` value of 2023 corresponds to the ``oracledb.DB_TYPE_OBJECT``
 constant. The value 2010 corresponds to ``oracledb.DB_TYPE_NUMBER``.
 
-Now the object prototype has been found, an object can be created by
+Now that the object prototype has been found, an object can be created by
 passing a JavaScript object to the constructor.
 
 .. note::

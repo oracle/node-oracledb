@@ -353,14 +353,15 @@ Statement Caching
 
 Node-oracledb’s :meth:`~connection.execute()`,
 :meth:`~connection.executeMany()`, :meth:`~connection.getStatementInfo()`,
-and :meth:`~connection.queryStream()` methods use the `Oracle Call
-Interface statement cache <https://www.oracle.com/pls/topic/lookup?
-ctx=dblatest&id=GUID-4947CAE8-1F00-4897-BB2B-7F921E495175>`__
-to make re-execution of statements efficient. Statement caching lets
-cursors be used without re-parsing the statement. Each cached statement
-will retain its cursor. Statement caching also reduces meta data
-transfer costs between node-oracledb and the database. Performance and
-scalability are improved.
+and :meth:`~connection.queryStream()` methods use statement caching to make
+re-execution of statements efficient. Statement caching lets cursors be used
+without re-parsing the statement. Each cached statement will retain
+its cursor. Statement caching also reduces meta data transfer costs between
+node-oracledb and the database. Performance and scalability are improved.
+
+The node-oracledb Thick mode uses `Oracle Call Interface statement
+cache <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4947CAE8-1F00-4897-BB2B-7F921E495175>`__,
+whereas the Thin mode uses natively implemented statement caching.
 
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30. The cache key is
@@ -393,15 +394,14 @@ For example:
     stmtCacheSize     : 50
   });
 
-When using Oracle Client 21 (or later), changing the cache size with
-:meth:`pool.reconfigure()` does not immediately affect connections
-previously acquired and currently in use. When those connections are
-subsequently released to the pool and re-acquired, they will then use
-the new value. When using Oracle Client prior to version
-21, changing the pool’s statement cache size has no effect on
-connections that already exist in the pool but will affect new
-connections that are subsequently created, for example when the pool
-grows.
+When node-oracledb Thick mode uses Oracle Client 21 (or later), changing the
+cache size with :meth:`pool.reconfigure()` does not immediately affect
+connections previously acquired and currently in use. When those connections
+are subsequently released to the pool and re-acquired, they will then use
+the new value. When the Thick mode uses Oracle Client prior to version
+21, changing the pool’s statement cache size has no effect on connections
+that already exist in the pool but will affect new connections that are
+subsequently created, for example when the pool grows.
 
 Tuning the Statement Cache
 --------------------------
@@ -411,9 +411,9 @@ statements being executed by the application. :ref:`SODA <sodaoverview>`
 internally makes SQL calls, so tuning the cache is also beneficial for
 SODA applications.
 
-With Oracle Client Libraries 12c, or later, the statement cache size can
-be automatically tuned with the :ref:`Oracle Client
-Configuration <oraaccess>` ``oraaccess.xml`` file.
+In node-oracledb Thick mode with Oracle Client libraries 12c, or later,
+the statement cache size can be automatically tuned with
+the :ref:`Oracle Client Configuration <oraaccess>` ``oraaccess.xml`` file.
 
 For manual tuning use views like ``V$SYSSTAT``:
 

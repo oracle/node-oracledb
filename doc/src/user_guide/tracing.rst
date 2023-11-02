@@ -14,7 +14,7 @@ There are multiple approaches for application tracing and monitoring:
 - :ref:`End-to-end database tracing <endtoendtracing>` attributes such as
   :attr:`connection.action` and :attr:`connection.module` are supported in the
   node-oracledb Thin and Thick modes. Using these attributes is recommended
-  since they aid application monitoring and troubleshooting.
+  as they aid application monitoring and troubleshooting.
 
 - The Java Debug Wire Protocol (JDWP) for debugging PL/SQL can be used. See
   :ref:`jdwp`.
@@ -63,15 +63,15 @@ resource usage, or improper access.
 The ``clientId`` property can also be used by applications that do their
 own mid-tier authentication but connect to the database using the one
 database schema. By setting ``clientId`` to the application’s
-authenticated user name, the database is aware of who the actual end
-user is. This can, for example, be used by Oracle `Virtual Private
+authenticated user name, the database is aware of who the actual end user is.
+This can, for example, be used by Oracle `Virtual Private
 Database <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
 4F37BAE5-CA2E-42AC-9CDF-EC9181671FFE>`__ policies to automatically restrict
 data access by that user.
 
 The attributes are set on a :attr:`connection <oracledb.connectionClass>`
-object and sent to the database on the next :ref:`round-trip <roundtrips>` from
-node-oracledb, for example, with ``execute()``:
+object and sent to the database on the next :ref:`round-trip <roundtrips>`
+from node-oracledb, for example, with ``execute()``:
 
 .. code-block:: javascript
 
@@ -91,7 +91,7 @@ node-oracledb, for example, with ``execute()``:
 
     const result = await connection.execute(`SELECT . . .`);
 
-While the connection is open the attribute values can be seen, for
+While the connection is open, the attribute values can be seen, for
 example with SQL*Plus::
 
     SQL> SELECT username, client_identifier, client_info, action, module FROM v$session WHERE username = 'HR';
@@ -117,8 +117,8 @@ Metadata values can also be manually set by calling
 `DBMS_APPLICATION_INFO <https://www.oracle.com/pls/topic/lookup?ctx=dblatest
 &id=GUID-14484F86-44F2-4B34-B34E-0C873D323EAD>`__ procedures or
 `DBMS_SESSION.SET_IDENTIFIER <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-988EA930-BDFE-4205-A806-E54F05333562>`__,
-however these cause explicit :ref:`round-trips <roundtrips>`, reducing
+dblatest&id=GUID-988EA930-BDFE-4205-A806-E54F05333562>`__.
+However, these cause explicit :ref:`round-trips <roundtrips>`, reducing
 scalability.
 
 Applications should be consistent about how, and when, they set the

@@ -1240,6 +1240,7 @@ Each of the configuration properties is described below.
     called once for each column that is being fetched with a single object
     argument containing the following attributes:
 
+    - ``annotations``: The object representing the `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__.
     - ``byteSize``: The maximum size in bytes. This is only set if ``dbType``
       is ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR``, or
       ``oracledb.DB_TYPE_RAW``.
@@ -1249,6 +1250,9 @@ Each of the configuration properties is described below.
       "VARCHAR2".
     - ``dbTypeClass``: The class associated with the database type. This is
       only set if ``dbType`` is ``oracledb.DB_TYPE_OBJECT``.
+    - ``domainName``: The name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
+    - ``domainSchema``: The schema name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
+    - ``isJson``: Indicates if the column is known to contain JSON data.
     - ``name``: The name of the column.
     - ``nullable``: Indicates whether ``NULL`` values are permitted for this
       column.
@@ -1274,6 +1278,11 @@ Each of the configuration properties is described below.
     <propexecfetchtypehandler>` option in :meth:`~connection.execute()`.
 
     See :ref:`fetchtypehandler`.
+
+    .. versionchanged:: 6.3
+
+        The ``annotations``, ``domainName``, ``domainSchema``, and ``isJson``
+        information attributes were added.
 
     **Example**
 
@@ -1767,7 +1776,7 @@ Each of the configuration properties is described below.
 
 .. attribute:: oracledb.stmtCacheSize
 
-    This properry is the number of statements that are cached in the
+    This property is the number of statements that are cached in the
     :ref:`statementcache <stmtcache>` of each connection.
 
     The default value is *30*.
@@ -1941,7 +1950,7 @@ Oracledb Methods
           - Both
           - .. _createpoolpoolattrsaccesstoken:
 
-            For Microsoft Azure Active Directory OAuth 2.0 token-based authentication ``accessToken`` can be:
+            For Microsoft Azure Active Directory OAuth 2.0 token-based authentication, ``accessToken`` can be:
 
             -  a callback function returning the token as a string
             -  an object with a ``token`` attribute containing the token as a string
@@ -1949,18 +1958,19 @@ Oracledb Methods
 
             Tokens can be obtained using various approaches. For example, using the Azure Active Directory API.
 
-            For Oracle Cloud Infrastructure Identity and Access Management (IAM) token-based authentication ``accessToken`` can be:
+            For Oracle Cloud Infrastructure Identity and Access Management (IAM) token-based authentication, ``accessToken`` can be:
 
             -  a callback function returning an object containing ``token`` and ``privateKey`` attributes
             -  or an object containing ``token`` and ``privateKey`` attributes
 
             The properties of the ``accessToken`` object are described in :ref:`accesstokenproperties`.
 
-            If the ``accessToken`` is a callback function::
+            If ``accessToken`` is a callback function::
 
-              function accessToken(boolean refresh)
+              function accessToken(boolean refresh, object accessTokenConfig)
 
             When ``accessToken`` is a callback function, it will be invoked at the time the pool is created (even if ``poolMin`` is 0). It is also called when the pool needs to expand (causing new connections to be created) and the current token has expired. The returned token is used by node-oracledb for authentication. The ``refresh`` parameter is described in :ref:`refresh`.
+            The ``accessTokenConfig`` parameter is described in :ref:`accessTokenConfig <createpoolpoolattrsaccesstokenconfig>`.
 
             When the callback is first invoked, the ``refresh`` parameter will be set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
@@ -1970,9 +1980,11 @@ Oracledb Methods
 
             .. versionadded:: 5.4
 
-            This attribute was added to support IAM token-based authentication. In this release the attribute must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
+                The ``accessToken`` property was added to support IAM token-based authentication.For IAM token-based authentiation, this property must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
 
-            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For OAuth 2.0, the attribute should be a string, or a callback. For node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
+            .. versionchanged:: 5.5
+
+                The ``accessToken`` property was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For OAuth 2.0, the property should be a string, or a callback. For node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
         * - ``accessTokenCallback``
           - Object
           - NA
@@ -1991,6 +2003,16 @@ Oracledb Methods
             .. desupported:: 6.0
 
             Use :ref:`accessToken <createpoolpoolattrsaccesstoken>` with a callback instead.
+        * - ``accessTokenConfig``
+          - Object
+          - Both
+          - .. _createpoolpoolattrsaccesstokenconfig:
+
+            An object containing the Azure-specific or OCI-specific parameters that need to be set when using the :ref:`Azure Software Development Kit (SDK) <oauthtokengeneration>` or :ref:`Oracle Cloud Infrastructure (OCI) SDK <iamtokengeneration>` for token generation. This property should only be specified when the :ref:`accessToken <createpoolpoolattrsaccesstoken>` property is a callback function. For more information on the Azure-specific parameters, see `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/sampleazuretokenauth.js>`__  and for the OCI-specific parameters, see `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/sampleocitokenauth.js>`__.
+
+            For OAuth2.0 token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. For IAM token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) are required.
+
+            .. versionadded:: 6.3
         * - ``connectString``, ``connectionString``
           - String
           - Both
@@ -2627,14 +2649,14 @@ Oracledb Methods
           - Both
           - .. _getconnectiondbattrsaccesstoken:
 
-            For Microsoft Azure Active Directory OAuth 2.0 token-based authentication ``accessToken`` can be:
+            For Microsoft Azure Active Directory OAuth 2.0 token-based authentication, ``accessToken`` can be:
 
             -  a callback function returning the token as a string
             -  or the token as a string
 
             For OAuth 2.0, tokens can be obtained using various approaches. For example, using the Azure Active Directory API.
 
-            For Oracle Cloud Infrastructure Identity and Access Management (IAM) token-based authentication ``accessToken`` can be:
+            For Oracle Cloud Infrastructure Identity and Access Management (IAM) token-based authentication, ``accessToken`` can be:
 
             -  an object containing ``token`` and ``privateKey`` attributes
             -  or a callback function returning an object containing ``token`` and ``privateKey`` attributes
@@ -2643,21 +2665,35 @@ Oracledb Methods
 
             The properties of the ``accessToken`` object are described in :ref:`accesstokenobjproperties`.
 
-            If the ``accessToken`` is a callback function::
+            If ``accessToken`` is a callback function::
 
-              function accessToken(boolean refresh)
+              function accessToken(boolean refresh, object accessTokenConfig)
 
-            When ``accessToken`` is a callback function, the returned token is used by node-oracledb for authentication. The ``refresh`` parameter is described in :ref:`getconnectionrefresh`.
+            When ``accessToken`` is a callback function, the returned token is used by node-oracledb for authentication. The ``refresh`` parameter is described in :ref:`getconnectionrefresh`. See :ref:`accessTokenConfig <getconnectiondbattrsaccesstokenconfig>` for information on this parameter.
 
-            For each connection, the callback is invoked with the ``refresh`` parameter set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
+            For each connection, the callback is invoked with the ``refresh`` parameter set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case, the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
             For token-based authentication, the ``externalAuth`` connection attribute must be set to *true*. The ``user`` (or ``username``) and ``password`` attributes should not be set.
 
             See :ref:`Token-Based Authentication <tokenbasedauthentication>` for more information.
 
-            The ``accessToken`` attribute was added in node-oracledb 5.4 to support IAM token-based authentication. In this release the attribute must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
+            .. versionadded:: 5.4
 
-            The ``accessToken`` attribute was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For OAuth 2.0, the attribute should be a string, or a callback. For node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
+                The ``accessToken`` property was added to support IAM token-based authentication. For IAM token-based authentication, this property must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
+
+            .. versionchanged:: 5.5
+
+                The ``accessToken`` property was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For OAuth 2.0, the property should be a string, or a callback. For node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
+        * - ``accessTokenConfig``
+          - Object
+          - Both
+          - .. _getconnectiondbattrsaccesstokenconfig:
+
+            An object containing the Azure-specific or OCI-specific parameters that need to be set when using the :ref:`Azure Software Development Kit (SDK) <oauthtokengeneration>` or :ref:`Oracle Cloud Infrastructure (OCI) SDK <iamtokengeneration>` for token generation. This property should only be specified when the :ref:`accessToken <createpoolpoolattrsaccesstoken>` property is a callback function. For more information on the Azure-specific parameters, see `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/sampleazuretokenauth.js>`__  and for the OCI-specific parameters, see `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/sampleocitokenauth.js>`__.
+
+            For OAuth2.0 token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. For IAM token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) are required.
+
+            .. versionadded:: 6.3
         * - ``connectString``, ``connectionString``
           - String
           - Both

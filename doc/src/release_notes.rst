@@ -13,11 +13,16 @@ node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...
 Common Changes
 ++++++++++++++
 
+#)  Added support for using the Azure and Oracle Cloud Infrastructure (OCI)
+    Software Development Kits (SDKs) to generate
+    :ref:`authentication tokens <tokenbasedauthentication>`.
+
 #)  VARCHAR2 and LOB columns which contain JSON, and have the "IS JSON" check
     constraint enabled, are now fetched in the same way as columns of type
     JSON. In node-oracledb :ref:`Thick mode <enablingthick>` this requires
-    Oracle Client 19 or higher. Applications can get the old behaviour by using
-    :attr:`oracledb.fetchTypeHandler` to replace the new default conversion.
+    Oracle Client 19 or higher. Applications can get the old behaviour by
+    using :attr:`oracledb.fetchTypeHandler` to replace the new default
+    conversion.
 
 #)  Added new connection properties :attr:`connection.dbDomain`,
     :attr:`connection.dbName`, :attr:`connection.maxOpenCursors`,
@@ -26,12 +31,12 @@ Common Changes
     number of cursors that can be opened per connection, database service name
     and status of any ongoing transactions on the connection respectively.
 
-#)  Added new extended :ref:`metadata <execmetadata>` information such as
+#)  Added new extended :ref:`metadata <execmetadata>` information attributes
     ``annotations``, ``domainName``, ``domainSchema`` and ``isJson`` for a
     fetched column.
 
 #)  Added support for using unformatted private key when callback is invoked
-    due to expiry of an Identity Access management(IAM) token after successful
+    due to expiry of an Identity Access Management (IAM) token after successful
     pool creation and connection establishment.
 
 #)  Added new environment variable ``NODE_ORACLEDB_CLIENT_LIB_DIR`` to set
@@ -39,7 +44,7 @@ Common Changes
     directory on Windows and macOS Intel platforms, when using the Thick mode.
 
 #)  Added functionality to create and drop user schemas for
-    Advanced Queuing(AQ) sample files in the ``examples`` directory. Users
+    Advanced Queuing (AQ) sample files in the ``examples`` directory. Users
     can now simply run the AQ samples using Node.js without requiring any
     external setup of the AQ user schema, queues and tables.
 
@@ -48,6 +53,13 @@ Thin Mode Changes
 
 #)  Improved overall pool connection creation time by caching information
     during the first connection establishment.
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Fixed bug resulting in a segfault on some platforms when using two-phase
+    commit. (`ODPI-C change
+    <https://github.com/oracle/odpi/commit/3102b45c6712c9b6d53eb770b1314c06102c69e0>`__).
 
 node-oracledb `v6.2.0 <https://github.com/oracle/node-oracledb/compare/v6.1.0...v6.2.0>`__ (11 Oct 2023)
 --------------------------------------------------------------------------------------------------------
@@ -71,7 +83,8 @@ Thin Mode Changes
 #)  Fixed bug that caused cursors to be leaked when calling
     :meth:`connection.getStatementInfo()`.
 
-#)  Fixed bug that caused an exception to be thrown unnecessarily when a connection was closed.
+#)  Fixed bug that caused an exception to be thrown unnecessarily when a
+    connection was closed.
     `Issue #1604 <https://github.com/oracle/node-oracledb/issues/1604>`__.
 
 #)  Fixed bug that prevented getting the value of a RAW attribute on a DbObject
@@ -151,7 +164,7 @@ Thin Mode Changes
     enables ``sslServerDNMatch`` / ``SSL_SERVER_DN_MATCH`` to check the
     database server certificate (but not the listener) and enables the service
     name to be used for partial DN matching. The search order is: the host
-    name, then the subject alternative name (SAN), and then the service name.
+    name, then the Subject Alternative Name (SAN), and then the service name.
 
 #)  Added support to include database error cause/action URLs (introduced from
     Oracle Database 23c onwards) for ORA error messages.

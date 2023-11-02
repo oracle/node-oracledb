@@ -34,7 +34,7 @@ root_doc = master_doc = 'index'
 
 # General substitutions.
 project = 'node-oracledb'
-copyright = u'Copyright (c) 2015, 2023, Oracle and/or its affiliates.'
+copyright = u'2015, 2023, Oracle and/or its affiliates'
 author = 'Oracle'
 
 # The default replacements for |version| and |release|, also used in various
@@ -45,8 +45,8 @@ author = 'Oracle'
 # from the other)
 #
 # The short X.Y version.
-version = '6.0'
-release = '6.0.0'
+version = '6.3'
+release = '6.3.0'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -118,8 +118,11 @@ htmlhelp_basename = 'oracledbdoc'
 numfig = True
 
 # Display tables with no horizontal scrollbar
+
+
 def setup(app):
     app.add_css_file('custom.css')
+
 
 # Set the primary domain to js
 primary_domain = "js"

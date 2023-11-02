@@ -702,6 +702,7 @@ struct njsTokenCallback {
     uv_barrier_t barrier;
     napi_ref jsPool;
     napi_ref jsCallback;
+    napi_ref jsAccessTokenConfig;
     napi_env env;
     bool result;
 };
@@ -938,7 +939,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 int njsTokenCallback_eventHandler(njsTokenCallback *callback,
         dpiAccessToken *accessToken);
 bool njsTokenCallback_new(njsBaton *baton, napi_env env,
-        napi_value userCallback);
+        napi_value userCallback, napi_value accessTokenConfig);
 bool njsTokenCallback_startNotifications(njsTokenCallback *callback,
         napi_env env);
 bool njsTokenCallback_returnAccessToken(njsTokenCallback *callback,

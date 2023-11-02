@@ -198,7 +198,7 @@ Creating and Dropping SODA Collections
 ======================================
 
 The following examples use Node.js 8’s
-:ref:`async/await <asyncawaitoverview>` syntax, however callbacks can also
+:ref:`Async/Await <asyncawaitoverview>` syntax. However, callbacks can also
 be used. There are runnable examples in the GitHub
 `examples <https://github.com/oracle/node-oracledb/tree/main/examples>`__
 directory.

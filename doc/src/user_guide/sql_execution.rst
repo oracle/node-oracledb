@@ -5,8 +5,8 @@ Executing SQL
 *************
 
 A single SQL or PL/SQL statement may be executed using the *Connection*
-:meth:`~connection.execute()` method. The callback style shown below, or
-:ref:`promises <promiseoverview>`, or :ref:`Async/Await <asyncawaitoverview>`
+:meth:`~connection.execute()` method. :ref:`Promises <promiseoverview>`,
+:ref:`Async/Await <asyncawaitoverview>` or :ref:`Callback style <callbackoverview>`
 may be used.
 
 Results may be returned in a single array, or fetched in batches with a
@@ -21,13 +21,13 @@ statements.
 
 Tune query performance by adjusting
 :ref:`fetchArraySize <propexecfetcharraysize>` and
-:ref:`prefetchRows <propexecprefetchrows>`, see :ref:`Tuning Fetch
+:ref:`prefetchRows <propexecprefetchrows>`. See :ref:`Tuning Fetch
 Performance <rowfetching>`.
 
 Connections can handle one database operation at a time. Other database
 operations will block. Structure your code to avoid starting parallel
-operations on a connection. For example avoid using ``async.parallel``
-or ``Promise.all()`` which call each of their items in parallel, see
+operations on a connection. For example, avoid using ``async.parallel``
+or ``Promise.all()`` which call each of their items in parallel. See
 :ref:`Parallelism on Each Connection <parallelism>`.
 
 After all database calls on the connection complete, the application
@@ -70,8 +70,8 @@ returning unexpectedly large numbers of rows.
 Internally, rows are fetched from Oracle Database in batches to improve
 performance. The internal batch size is based on the lesser of
 :ref:`fetchArraySize <propexecfetcharraysize>` and ``maxRows``. Row
-prefetching can also be adjusted for tuning, see :ref:`Tuning Fetch
-Performance <rowfetching>`. Each internally fetched batch is
+prefetching can also be adjusted for tuning (See :ref:`Tuning Fetch
+Performance <rowfetching>`). Each internally fetched batch is
 concatenated into the array eventually returned to the application.
 
 For queries expected to return a small number of rows, reduce
@@ -247,7 +247,7 @@ Class <resultsetclass>`. In particular, successive calls to
 ``data`` event. For tuning, adjust the values of the
 ``connection.querystream()`` options
 :ref:`fetchArraySize <propexecfetcharraysize>` and
-:ref:`prefetchRows <propexecprefetchrows>`, see :ref:`Tuning Fetch
+:ref:`prefetchRows <propexecprefetchrows>`. See :ref:`Tuning Fetch
 Performance <rowfetching>`.
 
 An example of streaming query results is:
@@ -600,12 +600,13 @@ Using Fetch Type Handlers
 
 Other than common data type conversions using the global ``fetchAsString`` and
 ``fetchAsBuffer`` settings, you may need more flexibility to modify the
-fetched column data. In such cases, a fetch type handler can be specified for
-queries. The fetch type handler asks the database to perform a conversion of
-the column data type to the desired data type before the data is returned from
-the database to node-oracledb. If the database does not support the conversion
-of data types, an error will be returned. Also, fetch type handlers allow you
-to change column names, for example, to change the column names to lowercase.
+fetched column data. In such cases, a fetch type handler introduced in
+node-oracledb 6.0 can be specified for queries. The fetch type handler
+asks the database to perform a conversion of the column data type to the
+desired data type before the data is returned from the database to
+node-oracledb. If the database does not support the conversion of data types,
+an error will be returned. Also, fetch type handlers allow you to change
+column names, for example, to lowercase.
 The fetch type handler functionality replaces the deprecated
 :ref:`fetchInfo <propexecfetchinfo>` property.
 
@@ -624,8 +625,9 @@ in the ``connection.execute()`` overrides the value of
 :attr:`oracledb.fetchTypeHandler`.
 
 The fetch type handler is expected to be a function with a single object
-argument. This single object argument contains the ``byteSize``, ``dbType``,
-``dbTypeName``, ``dbTypeClass``, ``name``, ``nullable``, ``precision``, and
+argument. This single object argument contains the ``annotations``,
+``byteSize``, ``dbType``, ``dbTypeName``, ``dbTypeClass``, ``domainName``,
+``domainSchema``, ``isJson``, ``name``, ``nullable``, ``precision``, and
 ``scale`` attributes. See :attr:`oracledb.fetchTypeHandler` for more
 information on these attributes.
 
@@ -799,15 +801,14 @@ from queries as JavaScript strings.
 Fetching Numbers
 ++++++++++++++++
 
-By default all numeric columns are mapped to JavaScript numbers. Node.js
+By default, all numeric columns are mapped to JavaScript numbers. Node.js
 uses double floating point numbers as its native number type.
 
 Node.js can also only represent numbers up to 2 ^ 53 which is
 9007199254740992. Numbers larger than this will be truncated.
 
 The primary recommendation for number handling is to use Oracle SQL or
-PL/SQL for mathematical operations, particularly for currency
-calculations.
+PL/SQL for mathematical operations, particularly for currency calculations.
 
 When working with numbers in Node.js, the output may result in "unexpected"
 representations. For example, a binary floating-point arithmetic purely in
@@ -819,7 +820,7 @@ Node.js:
 
 To reliably work with numbers in Node.js, you can use
 :attr:`~oracledb.fetchAsString` or a
-:ref:`fetch type handler <fetchtypehandler>` (see
+:ref:`fetch type handler <fetchtypehandler>` (See
 :ref:`fetchasstringhandling`) to fetch numbers in string format, and then use
 one of the available third-party JavaScript number libraries that handles
 large values and more precision.
@@ -878,7 +879,7 @@ Fetching Dates and Timestamps
 Oracle Database DATE and TIMESTAMP columns are fetched as dates in the timezone
 of the application.  The TIMESTAMP WITH TIME ZONE and TIMESTAMP WITH LOCAL TIME
 ZONE columns are fetched as absolute dates.  Note that JavaScript Date has
-millisecond precision therefore timestamps will lose any sub-millisecond
+millisecond precision. Therefore, timestamps will lose any sub-millisecond
 fractional part when fetched.
 
 Oracle INTERVAL types are not supported.
@@ -896,9 +897,9 @@ Oracle INTERVAL types are not supported.
     Also use a similar type when binding if compatibility is needed.
 
 To make applications more portable, it is recommended to set the client system
-time zone (for example the ``TZ`` environment variable or the Windows time zone
-region) to match the Oracle session time zone, and to use a pre-determined
-value, such as UTC.
+time zone (for example, the ``TZ`` environment variable or the Windows
+time zone region) to match the Oracle session time zone, and to use a
+pre-determined value, such as UTC.
 
 You can find the current session time zone with:
 
@@ -1237,9 +1238,9 @@ Techniques include:
    in Oracle Magazine for details.
 
 As an anti-example, another way to limit the number of rows returned
-involves setting :attr:`~oracledb.maxRows`. However it is more
-efficient to let Oracle Database do the row selection in the SQL query
-and only fetch the exact number of rows required from the database.
+involves setting :attr:`~oracledb.maxRows`. However it is more efficient
+to let Oracle Database do the row selection in the SQL query and only
+fetch the exact number of rows required from the database.
 
 The videos `SQL for pagination queries - memory and
 performance <https://www.youtube.com/watch?v=rhOVF82KY7E>`__ and `SQL
@@ -1372,8 +1373,7 @@ here are possible solutions:
    be in the cache, you might even want to disable the cache to eliminate its
    management overheads.
 
-   Incorrectly sizing the statement cache will reduce application
-   efficiency.
+   Incorrectly sizing the statement cache will reduce application efficiency.
 
    To help set the cache size, you can turn on auto-tuning with Oracle Client
    libraries 12.1 or later, using an :ref:`oraaccess.xml <oraaccess>` file.
