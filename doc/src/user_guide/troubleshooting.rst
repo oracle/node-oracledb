@@ -21,7 +21,7 @@ Installation Errors
 ===================
 
 You may encounter issues while installing node-oracledb. Ensure that you have
-installed the node-oracledb :ref:`prerequsites <prerequisites>`. Review the
+installed the node-oracledb :ref:`prerequisites <prerequisites>`. Review the
 error messages closely.
 
 - If there is a network connection error, check if you need to use
