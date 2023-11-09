@@ -52,7 +52,8 @@ describe('212. dbObject13.js', function() {
 
       let plsql = `
         CREATE OR REPLACE PACKAGE ${PKG} AS
-          TYPE playerType IS RECORD (name VARCHAR2(40), position VARCHAR2(20), shirtnumber NUMBER);
+          TYPE playerType IS RECORD (name VARCHAR2(40), position VARCHAR2(20), shirtnumber NUMBER,
+            address VARCHAR2(1024));
           TYPE teamType IS VARRAY(10) OF playerType;
           PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType);
         END ${PKG};
@@ -92,11 +93,14 @@ describe('212. dbObject13.js', function() {
 
   it('212.1 examples/plsqlvarrayrecord.js', async () => {
     const CALL = `CALL ${PKG}.assignShirtNumbers(:inbv, :outbv)`;
+    const maxLen = 1024;
+    const largeString = 'A'.repeat(maxLen);
 
     const players = [
-      { NAME: 'Jay',    POSITION: 'GOAL ATTACK',  SHIRTNUMBER: 1 },
-      { NAME: 'Leslie', POSITION: 'CENTRE',       SHIRTNUMBER: 2 },
-      { NAME: 'Chris',  POSITION: 'WING DEFENCE', SHIRTNUMBER: 3 }
+      { NAME: 'Jay',    POSITION: 'GOAL ATTACK',  SHIRTNUMBER: 1, ADDRESS: 'CA 94103' },
+      { NAME: 'Leslie', POSITION: 'CENTRE', SHIRTNUMBER: 2, ADDRESS: 'CA 94132' },
+      { NAME: 'Chris', POSITION: 'WING DEFENCE', SHIRTNUMBER: 3, ADDRESS: 'CA 94610' },
+      { NAME: 'Sam', POSITION: 'WING DEFENCE', SHIRTNUMBER: 4, ADDRESS: largeString}
     ];
     const binds = {
       inbv:
@@ -116,6 +120,7 @@ describe('212. dbObject13.js', function() {
       assert.strictEqual(out[i].NAME, players[i].NAME);
       assert.strictEqual(out[i].POSITION, players[i].POSITION);
       assert.strictEqual(out[i].SHIRTNUMBER, players[i].SHIRTNUMBER);
+      assert.strictEqual(out[i].ADDRESS, players[i].ADDRESS);
     }
   }); // 212.1
 

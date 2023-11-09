@@ -51,6 +51,11 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Fixed bug that caused an 'ORA-00600' exception to be thrown
+    with :ref:`DbObject Class <dbobjectclass>` objects binding that have
+    attributes whose values exceed 252 bytes in length.
+    `Issue #1616 <https://github.com/oracle/node-oracledb/issues/1616>`__.
+
 #)  Improved overall pool connection creation time by caching information
     during the first connection establishment.
 

@@ -78,7 +78,8 @@ describe('200. dbObject1.js', () => {
     let sql =
       `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
         id NUMBER,
-        name VARCHAR2(30)
+        name VARCHAR2(30),
+        address VARCHAR2(1024)
       );`;
     await conn.execute(sql);
 
@@ -367,6 +368,27 @@ describe('200. dbObject1.js', () => {
     assert.equal(resultSet.length, 3);
     result.outBinds.p_cur2.close();
   }); // 200.10;
+
+  it('200.11 insert an object with large string values', async () => {
+    let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+    const maxLen = 1024;
+    const largeString = 'A'.repeat(maxLen);
+    const objData = {
+      ADDRESS: largeString
+    };
+    const objClass = await conn.getDbObjectClass(TYPE);
+    const testObj = new objClass(objData);
+    const seq = 111;
+
+    let result = await conn.execute(sql, [seq, testObj]);
+    assert.strictEqual(result.rowsAffected, 1);
+
+    sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
+    result = await conn.execute(sql);
+
+    assert.strictEqual(result.rows[0][0], seq);
+    assert.strictEqual(result.rows[0][1]['ADDRESS'], objData.ADDRESS);
+  }); // 200.11
 
 });
 
