@@ -100,10 +100,9 @@ describe('276. jsonDualityView5.js', function() {
   after(async function() {
     if (!isRunnable || dbConfig.test.isCmanTdm) return;
 
-    //await connection.execute(`drop table student_class PURGE`);
-    await connection.execute(`drop table student_class PURGE`);
-    await connection.execute(`drop table class PURGE`);
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable('student_class'));
+    await connection.execute(testsUtil.sqlDropTable('class'));
+    await connection.execute(testsUtil.sqlDropTable('student'));
     await connection.close();
 
     await dbaConn.execute(`drop user njs_jsonDv5 cascade`);
@@ -532,7 +531,7 @@ describe('276. jsonDualityView5.js', function() {
         StudentClass :
         student_class @insert@update@delete
            {StudentClassId : scid,
-            Class : class  {ClassId: clsid, Name: name}}}
+            Class : class {ClassId: clsid, Name: name}}}
     `),
       /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
                     conflicting annotations in the WITH clause */
@@ -561,7 +560,7 @@ describe('276. jsonDualityView5.js', function() {
         StudentClass :
         student_class @insert@update@delete
            {StudentClassId : scid,
-            Class : class  {ClassId: clsid, Name: name}}}
+            Class : class {ClassId: clsid, Name: name}}}
     `);
 
     await assert.rejects(

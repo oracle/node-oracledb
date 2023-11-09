@@ -139,7 +139,7 @@ describe('274 jsonDualityView3.js', function() {
         StudentId: stuid, StudentName: name
       }
     `);
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
     await connection.execute(`drop view student_ov`);
   });
 
@@ -169,7 +169,7 @@ describe('274 jsonDualityView3.js', function() {
       //ORA-40945: Column 'GROSS_MARGIN' of table 'PARTS' cannot be selected in JSON
       //relational duality view as it is virtual.
     );
-    await connection.execute(`drop table parts PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`parts`));
   });
 
   it('274.3 Have columns of all scalar types, including FLOAT, TIMESTAMP, TIMESTAMP WITH TIME ZONE', async function() {
@@ -202,7 +202,7 @@ describe('274 jsonDualityView3.js', function() {
       }
     `);
 
-    await connection.execute(`drop table stores PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`stores`));
     await connection.execute(`drop view student_ov`);
   });
 
@@ -222,7 +222,7 @@ describe('274 jsonDualityView3.js', function() {
       /ORA-00904:/ //ORA-00904: "SCOTTY__STUDENT__STUID": invalid identifier
     );
 
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
   });
 
   it('274.5 Select over Invisible columns', async function() {
@@ -259,7 +259,7 @@ describe('274 jsonDualityView3.js', function() {
       ORDER BY 1 ASC
     `);
     assert.deepStrictEqual(result2.rows, [['ABC'], ['LMN'], ['XYZ']]);
-    await connection.execute(`drop table student1 PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student1`));
   });
 
   it('274.6 Add is (Ex: "deptno" IS d.department_id)', async function() {
@@ -285,7 +285,7 @@ describe('274 jsonDualityView3.js', function() {
       AS student{stuid: stuid, StudentName: name}
     `);
 
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
     await connection.execute(`drop view student_ov`);
   });
 
@@ -305,7 +305,7 @@ describe('274 jsonDualityView3.js', function() {
       /ORA-00904:/ //ORA-00904: "INVISIBLE": invalid identifier
     );
 
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
   });
 
   it('274.8 Create view on NULL columns - empty columns', async function() {
@@ -333,7 +333,7 @@ describe('274 jsonDualityView3.js', function() {
       ORDER BY 1 ASC
     `);
     assert.deepStrictEqual(result.rows, [[1], [2], [3]]);
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
     await connection.execute(`drop view student_ov`);
   });
 });

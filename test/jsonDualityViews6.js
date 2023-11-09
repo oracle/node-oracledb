@@ -172,7 +172,7 @@ describe('277. jsonDualityView6.js', function() {
       assert.strictEqual(result.rows.length, 3);
       assert.strictEqual(result.rows[0][0].student_id, 3);
       assert.strictEqual(result.rows[0][0].student_name, "Shashank");
-      assert.Strict(result.rows[0][0].student_class, [{"student_class_id": 3, "student_id": 3}]);
+      assert.deepStrictEqual(result.rows[0][0].student_class, [{"student_class_id": 3, "student_id": 3}]);
 
       await connection.execute(`
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
@@ -252,53 +252,53 @@ describe('277. jsonDualityView6.js', function() {
       it('277.1.2.1 With SNT', async function() {
         let result = await connection.execute(`select o.data.StudentId as name from student_ov o
       order by o.data.StudentId`);
-        assert.Strict(result.rows, [[1], [2], [3]]);
+        assert.deepStrictEqual(result.rows, [[1], [2], [3]]);
 
         result = await connection.execute(`select o.data.StudentName as name from student_ov o
       order by o.data.StudentName`);
-        assert.Strict(result.rows, [['Ajit'], ['Shashank'], ['Tirthankar']]);
+        assert.deepStrictEqual(result.rows, [['Ajit'], ['Shashank'], ['Tirthankar']]);
 
         result = await connection.execute(`select o.data.StudentClass.StudentClassId from student_ov o
       order by o.data desc
       fetch first 2 rows only`);
-        assert.Strict(result.rows, [[3], [2]]);
+        assert.deepStrictEqual(result.rows, [[3], [2]]);
 
         result = await connection.execute(`select o.data.StudentClass from student_ov o
       order by o.data desc`);
-        assert.Strict(result.rows[0][0], [{"StudentClassId": 3, "StudentId": 3}]);
-        assert.Strict(result.rows[1][0], [{"StudentClassId": 2, "StudentId": 2}]);
-        assert.Strict(result.rows[2][0], [{"StudentClassId": 1, "StudentId": 1}]);
+        assert.deepStrictEqual(result.rows[0][0], [{"StudentClassId": 3, "StudentId": 3}]);
+        assert.deepStrictEqual(result.rows[1][0], [{"StudentClassId": 2, "StudentId": 2}]);
+        assert.deepStrictEqual(result.rows[2][0], [{"StudentClassId": 1, "StudentId": 1}]);
 
         result = await connection.execute(`select o.data.StudentClass.StudentId,o.data.StudentId from student_ov o
       order by 1`);
-        assert.Strict(result.rows, [[1, 1], [2, 2], [3, 3]]);
+        assert.deepStrictEqual(result.rows, [[1, 1], [2, 2], [3, 3]]);
       });
 
       it('277.1.2.2 SNT+where clause)', async function() {
         let result = await connection.execute(`select o.data.StudentId from student_ov o
       where o.data.StudentId in (1,3) order by 1`);
-        assert.Strict(result.rows, [[1], [3]]);
+        assert.deepStrictEqual(result.rows, [[1], [3]]);
 
         result = await connection.execute(`select distinct o.data.StudentId from student_ov o
       where o.data.StudentId between 1 and 5 order by 1 desc`);
-        assert.Strict(result.rows, [[3], [2], [1]]);
+        assert.deepStrictEqual(result.rows, [[3], [2], [1]]);
 
         result = await connection.execute(`select o.data.StudentId,o.data.StudentName as name from student_ov o
       where o.data.StudentId=2 and o.data.StudentId!=3 order by o.data.StudentName`);
-        assert.Strict(result.rows, [[2, "Tirthankar"]]);
+        assert.deepStrictEqual(result.rows, [[2, "Tirthankar"]]);
 
         result = await connection.execute(`select o.data.StudentId,o.data.StudentClass.StudentId as clsid from student_ov o
       where o.data.StudentId>=2 and o.data.StudentName='Shashank' order by o.data.StudentId`);
-        assert.Strict(result.rows, [[3, 3]]);
+        assert.deepStrictEqual(result.rows, [[3, 3]]);
 
         result = await connection.execute(`select o.data.StudentId from student_ov o
       where o.data.StudentId=1 or o.data.StudentClass.StudentId=3 order by o.data.StudentId desc
       fetch first 2 rows only`);
-        assert.Strict(result.rows, [[3], [1]]);
+        assert.deepStrictEqual(result.rows, [[3], [1]]);
 
         result = await connection.execute(`select o.data.StudentId.number() from student_ov o
       where o.data.StudentId like '%3%' order by o.data.StudentId desc`);
-        assert.Strict(result.rows, [[3]]);
+        assert.deepStrictEqual(result.rows, [[3]]);
       });
     });
   });
@@ -375,7 +375,7 @@ describe('277. jsonDualityView6.js', function() {
       assert.strictEqual(result.rows.length, 3);
       assert.strictEqual(result.rows[0][0].StudentId, 1);
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");
-      assert.Strict(result.rows[0][0].StudentClass, [{"StudentClassId": 1,
+      assert.deepStrictEqual(result.rows[0][0].StudentClass, [{"StudentClassId": 1,
         "StudentId": 1, "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
     });
 
@@ -406,9 +406,9 @@ describe('277. jsonDualityView6.js', function() {
 
       const result = await connection.execute(`select * from student_ov`);
       assert.strictEqual(result.rows.length, 3);
-      assert.Strict(result.rows[0][0]._id, {"stuid": 1});
+      assert.deepStrictEqual(result.rows[0][0]._id, {"stuid": 1});
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");
-      assert.Strict(result.rows[0][0].StudentClass, [{"StudentClassId": 1, "StudentId": 1,
+      assert.deepStrictEqual(result.rows[0][0].StudentClass, [{"StudentClassId": 1, "StudentId": 1,
         "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
     });
 
@@ -453,9 +453,9 @@ describe('277. jsonDualityView6.js', function() {
       let result = await connection.execute(`select * from abc1`);
 
       assert.strictEqual(result.rows.length, 1);
-      assert.Strict(result.rows[0][0].StudentId, 1);
+      assert.deepStrictEqual(result.rows[0][0].StudentId, 1);
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");
-      assert.Strict(result.rows[0][0].StudentClass, [{"StudentClassId": 1, "StudentId": 1,
+      assert.deepStrictEqual(result.rows[0][0].StudentClass, [{"StudentClassId": 1, "StudentId": 1,
         "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
       await connection.execute(`create table abc2
                           as select json_value(data,'$.StudentId') col

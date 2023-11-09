@@ -128,8 +128,8 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
-      await connection.execute(`drop table employees PURGE`);
-      await connection.execute(`drop table departments PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`employees`));
+      await connection.execute(testsUtil.sqlDropTable(`departments`));
       await connection.execute(`drop view emp_ov`);
       await connection.execute(`drop view dept_ov`);
       await connection.close();
@@ -291,8 +291,8 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
-      await connection.execute(`drop table employees PURGE`);
-      await connection.execute(`drop table departments PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`employees`));
+      await connection.execute(testsUtil.sqlDropTable(`departments`));
       await connection.execute(`drop view emp_ov`);
       await connection.execute(`drop view dept_ov`);
       await connection.close();
@@ -454,9 +454,9 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
-      await connection.execute(`drop table student_class`);
-      await connection.execute(`drop table class`);
-      await connection.execute(`drop table student`);
+      await connection.execute(testsUtil.sqlDropTable(`student_class`));
+      await connection.execute(testsUtil.sqlDropTable(`class`));
+      await connection.execute(testsUtil.sqlDropTable(`student`));
       await connection.close();
     });
 

@@ -96,7 +96,7 @@ describe('273. jsonDualityView2.js', function() {
     const result = await connection.execute(`select * from student order by 1`);
 
     assert.strictEqual(result.rows.length, 3);
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
   });
 
   it('273.2 Base table name with various sizes (128)', async function() {
@@ -116,8 +116,8 @@ describe('273. jsonDualityView2.js', function() {
       {StudentId: stuid , StudentName: name}`);
 
 
-    await connection.execute(`drop table hTKFRCNOJyYYvuyUvKsEWhfuObJBjBNnzLVuwqR` +
-      `faqQAdtXBKxOHeheawjKeezZbgmfJJRhovKkhtwTXXnTWYpojdeawBFuAxPNaDAPjxuRzdpzYcHYwYggVCQueeXiv PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`hTKFRCNOJyYYvuyUvKsEWhfuObJBjBNnzLVuwqR` +
+      `faqQAdtXBKxOHeheawjKeezZbgmfJJRhovKkhtwTXXnTWYpojdeawBFuAxPNaDAPjxuRzdpzYcHYwYggVCQueeXiv`));
   });
 
   it('273.3 Perform dbms_metadata.get_ddl() and verify tags were properly added to columns and tables', async function() {
@@ -168,7 +168,7 @@ describe('273. jsonDualityView2.js', function() {
                             {stuid, NOINSERT }`);
     const result = await connection.execute(`select * from student order by 1`);
     assert.strictEqual(result.rows.length, 3);
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
   });
 
   it('273.6 Specify DELETE, NODELETE both, BUG number : 34657745', async function() {
@@ -201,7 +201,7 @@ describe('273. jsonDualityView2.js', function() {
       /ORA-40934:/ //ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV':
       //Invalid or c onflicting annotations in the WITH clause.
     );
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
   });
 
   it('273.7 Repetitive tags', async function() {
@@ -226,7 +226,7 @@ describe('273. jsonDualityView2.js', function() {
       /ORA-40947:/ //ORA-40947: A JSON relational duality view is created with duplicate tag 'INSERT'
     );
 
-    await connection.execute(`drop table student PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`student`));
   });
 
   describe('273.3 Verify view creation on different types of tables', function() {
@@ -247,20 +247,20 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     after(async function() {
-      await connection.execute('drop table student PURGE');
+      await connection.execute(testsUtil.sqlDropTable('student'));
     });
 
     it('273.3.1 View with Heap', async function() {
       await connection.execute(`CREATE TABLE t1 (c1 NUMBER PRIMARY KEY, c2 VARCHAR2(30)) ORGANIZATION HEAP`);
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW heap AS t1{c1,c2}`);
-      await connection.execute(`drop table t1 PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`t1`));
       await connection.execute(`drop view heap`);
     });
 
     it('273.3.2 View with IOT', async function() {
       await connection.execute(`CREATE TABLE my_iot (id INTEGER PRIMARY KEY, value VARCHAR2(50)) ORGANIZATION INDEX`);
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW iot AS my_iot{id,value}`);
-      await connection.execute(`drop table my_iot PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`my_iot`));
       await connection.execute(`drop view iot`);
     });
 
@@ -281,7 +281,7 @@ describe('273. jsonDualityView2.js', function() {
               ` ))\n` +
           `)`);
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW partition AS sales{prod_id,cust_id}`);
-      await connection.execute(`drop table sales PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`sales`));
       await connection.execute(`drop view partition`);
     });
 
@@ -310,7 +310,7 @@ describe('273. jsonDualityView2.js', function() {
 
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW GTT\n` +
                    `AS today_sales{order_id}`);
-      await connection.execute(`drop table today_sales PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`today_sales`));
       await connection.execute(`drop view GTT`);
     });
   });
@@ -406,7 +406,7 @@ describe('273. jsonDualityView2.js', function() {
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov AS unq_idx_demo{a,b}
       `);
 
-      await connection.execute(`drop table unq_idx_demo PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`unq_idx_demo`));
       await connection.execute('drop view student_ov');
     });
 
@@ -430,7 +430,7 @@ describe('273. jsonDualityView2.js', function() {
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov AS cmp_idx_demo{a,b}
       `);
 
-      await connection.execute(`drop table cmp_idx_demo PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`cmp_idx_demo`));
       await connection.execute('drop view student_ov');
     });
 
@@ -450,7 +450,7 @@ describe('273. jsonDualityView2.js', function() {
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov AS members{id,a__b:first_name}
       `);
 
-      await connection.execute(`drop table MEMBERS PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`MEMBERS`));
       await connection.execute('drop view student_ov');
     });
 
@@ -471,7 +471,7 @@ describe('273. jsonDualityView2.js', function() {
 
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov AS bitmap_index_demo{id,active}`);
 
-      await connection.execute(`drop table bitmap_index_demo PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`bitmap_index_demo`));
       await connection.execute('drop view student_ov');
     });
   });
@@ -546,7 +546,7 @@ describe('273. jsonDualityView2.js', function() {
         /ORA-63101:/ //ORA-63101: JSON Duality View Entity Tag (ETAG) column cannot be redacted
       );
 
-      await conn.execute(`drop table redact PURGE`);
+      await conn.execute(testsUtil.sqlDropTable(`redact`));
       await conn.close();
     });
   });

@@ -56,7 +56,6 @@ describe('181. dataTypeXML.js', function() {
   before('create table and insert a row', async function() {
     if (oracledb.thin) {
       this.skip();
-      return;
     }
 
     const connection = await oracledb.getConnection(dbConfig);
@@ -175,7 +174,7 @@ describe('181. dataTypeXML.js', function() {
   }); // 181.4
 
   // ORA-19011: Character string buffer too small
-  it.skip('181.5 inserts data that larger than 4K', async () => {
+  it.skip('181.5 inserts data that is larger than 4K', async () => {
 
     const ID = 50;
     const str = 'a'.repeat(31 * 1024);

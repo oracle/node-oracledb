@@ -181,7 +181,7 @@ describe('275. jsonDualityView4.js', function() {
     assert.deepStrictEqual(result.rows[0], [13, "ABC", "XYZ"]);
 
     // DROP the tables
-    await connection.execute(`DROP TABLE Persons`);
+    await connection.execute(`DROP TABLE IF EXISTS Persons`);
   });
 
   it('275.3 Test with Virtual columns', async function() {
@@ -718,10 +718,10 @@ describe('275. jsonDualityView4.js', function() {
       );
 
       // drop table student_class
-      await connection.execute(`DROP TABLE student_class`);
+      await connection.execute(`DROP TABLE IF EXISTS student_class`);
 
       // drop table student
-      await connection.execute(`DROP TABLE student`);
+      await connection.execute(`DROP TABLE IF EXISTS student`);
 
       // create table student
       await connection.execute(`
@@ -809,7 +809,7 @@ describe('275. jsonDualityView4.js', function() {
       FROM student_ov
       ORDER BY data.StudentName DESC, json_value(data, '$.StudentId') ASC
     `);
-      assert.deepStrictEqual(result7.rows, [['H', 19], ['F', 4], ['E', 8], ['D', 12], ['C', 81], ['B', 9], ['A', 1]]);
+      assert.deepStrictEqual(result7.rows, [['H', '19'], ['F', '4'], ['E', '8'], ['D', '12'], ['C', '81'], ['B', '9'], ['A', '1']]);
     });
   });
 });

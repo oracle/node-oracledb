@@ -167,7 +167,12 @@ async function run() {
   //  Configuration for accessTokenConfig:
   //    clientId:           Must be set to app id of Azure's application
   //    authority:          Must be set to a string, in URI format with tenant
-  //                        https://{uri}/{tenantId}
+  //                        https://{identity provider instance}/{tenantId}
+  //                        Common authority URLs:
+  //                        https://login.microsoftonline.com/<tenant>/
+  //                        https://login.microsoftonline.com/common/
+  //                        https://login.microsoftonline.com/organizations/
+  //                        https://login.microsoftonline.com/consumers/
   //    scopes:             Must be set https://{uri}/clientID/.default for client
   //                        credential flows
   //    clientSecret:       Can be set only when authType property is set to
