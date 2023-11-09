@@ -59,6 +59,9 @@ Thin Mode Changes
 #)  Improved overall pool connection creation time by caching information
     during the first connection establishment.
 
+#)  Internal changes to improve protocol handling between the database and
+    the client.
+
 Thick Mode Changes
 ++++++++++++++++++
 
