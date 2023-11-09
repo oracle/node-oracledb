@@ -51,6 +51,10 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Fixed bug that caused an 'ORA-03120' exception to be thrown when
+    a string whose size is greater than "database initialization parameter",
+    ``MAX_STRING_SIZE`` is bound to a PL/SQL function.
+
 #)  Fixed bug that caused an 'ORA-00600' exception to be thrown
     with :ref:`DbObject Class <dbobjectclass>` objects binding that have
     attributes whose values exceed 252 bytes in length.
