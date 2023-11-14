@@ -35,13 +35,14 @@ Common Changes
     ``annotations``, ``domainName``, ``domainSchema`` and ``isJson`` for a
     fetched column.
 
-#)  Added support for using unformatted private key when callback is invoked
-    due to expiry of an Identity Access Management (IAM) token after successful
-    pool creation and connection establishment.
+#)  Added support for using an unformatted private key when the connection
+    token callback is invoked due to expiry of an Identity Access Management
+    (IAM) token after successful pool creation and connection establishment.
 
 #)  Added new environment variable ``NODE_ORACLEDB_CLIENT_LIB_DIR`` to set
     an optional Oracle Client library path for the files in the ``examples``
-    directory on Windows and macOS Intel platforms, when using the Thick mode.
+    directory on Windows and macOS Intel platforms, when using node-oracledb
+    Thick mode.
 
 #)  Added functionality to create and drop user schemas for
     Advanced Queuing (AQ) sample files in the ``examples`` directory. Users

@@ -684,9 +684,9 @@ Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>` and
 Continuous Query Notification (CQN) Constants
 ---------------------------------------------
 
-Constants for the Continuous Query Notification (CQN) comprises all the
-possible integer mask values for the following properties of the ``options``
-parameter in the :meth:`connection.subscribe()` method:
+Constants for Continuous Query Notification (CQN) are integer mask values
+for the following properties of the ``options`` parameter in
+the :meth:`connection.subscribe()` method:
 
 - :ref:`operations <consubscribeoptoperations>` property
 - :ref:`operation <consubscribeoptcallback>` property in the
