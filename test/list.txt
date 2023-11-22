@@ -4159,6 +4159,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     162.33 Bind Variable before, inbetween and after comments in sql
     162.34 ignore literals only during bind processing
     162.35 Parse and Execute twice
+    162.36 Multiple line and Multiple Asterisks
 
 163. executeMany1.js
     163.1 inserts many rows with bind by name

@@ -481,4 +481,16 @@ describe('162. getStmtInfo.js', function() {
       key = key + 1;
     }
   });
+
+  it('162.36 Multiple line and Multiple Asterisks', async function() {
+    const sql = `/****--select * from :a where :a = 1
+    select * from table_names where :a = 1****/
+    select :table_name, :value from dual`;
+    const expectedRes = ['TAB', 'VAL'];
+
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, ['TABLE_NAME', 'VALUE']);
+    const result = await conn.execute(sql, expectedRes);
+    assert.deepStrictEqual(result.rows[0], expectedRes);
+  });
 });

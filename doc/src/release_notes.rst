@@ -52,6 +52,10 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Fixed bug in parsing SQL statements containing multi-line comments
+    with multiple asterisks before the closing slash.
+    `Issue #1625 <https://github.com/oracle/node-oracledb/issues/1625>`__.
+
 #)  Fixed bug that caused an 'ORA-03120' exception to be thrown when
     a string whose size is greater than "database initialization parameter",
     ``MAX_STRING_SIZE`` is bound to a PL/SQL function.
