@@ -4150,6 +4150,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     162.24 COMMIT
     162.25 ROLLBACK
     162.26 TRUNCATE
+    162.27 test various quoted bind names
+    162.28 PL/SQL block bindname following newline character
+    162.29 Ignore multiple single line comments having : in sql
+    162.30 Ignore multiple single and multi line comments having : in sql
+    162.31 Multiple single line comments with binds before the comment in sql
+    162.32 Multiple single line comments with binds after the comment in sql
+    162.33 Bind Variable before, inbetween and after comments in sql
+    162.34 ignore literals only during bind processing
+    162.35 Parse and Execute twice
 
 163. executeMany1.js
     163.1 inserts many rows with bind by name
