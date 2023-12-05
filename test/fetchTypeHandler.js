@@ -504,8 +504,8 @@ describe('271. fetchTypeHandler.js', function() {
       const clobVal = '[-1, 2, 3]';
       const blobVal = Buffer.from('{ "KeyA": 8, "KeyB": "A String" }');
       const charVal = '[-2, 2, 3, [34, 23, 24]]';
-      const defaultFetchTypeHandler = oracledb.fetchTypeHandler;
 
+      oracledb.future.oldJsonColumnAsObj = true;
       await connection.execute(plsql);
       const sql = `INSERT into ${TABLE} VALUES (:1, :2, :3)`;
       await connection.execute(sql, [clobVal, blobVal, charVal]);
@@ -515,10 +515,12 @@ describe('271. fetchTypeHandler.js', function() {
       assert.deepStrictEqual(result.rows[0][1], JSON.parse(blobVal));
       assert.deepStrictEqual(result.rows[0][2], JSON.parse(charVal));
 
-      // User defined handler can overwrite the default behaviour of
-      // converting IS JSON columns to JSON objects.
+      // fetchtype handlers given preference than oldJsonColumnAsObj setting.
+      const defaultFetchTypeHandler = oracledb.fetchTypeHandler;
+
+      // register typehandler only for BLOB.
+      // For other columns, they are still returned as JSON object.
       oracledb.fetchTypeHandler = function(metaData) {
-        // overwrite only for BLOB type to return LOB object.
         if (metaData.isJson && metaData.dbType === oracledb.DB_TYPE_BLOB) {
           const myConverter = (v) => {
             return v;
@@ -526,15 +528,15 @@ describe('271. fetchTypeHandler.js', function() {
           return { converter: myConverter };
         }
       };
-      // mark fetch type for CLOB column as string but it will be
-      // converted to JSON object unless handler for CLOB is written.
-      result = await connection.execute(`select cdata, bdata, chardata from ${TABLE}`, {}, {
-        fetchInfo: { CDATA: { type: oracledb.STRING } }
-      });
-      oracledb.fetchTypeHandler = defaultFetchTypeHandler;
+      result = await connection.execute(`select * from ${TABLE}`);
       assert.deepStrictEqual(result.rows[0][0], JSON.parse(clobVal));
-      assert(result.rows[0][1] instanceof oracledb.Lob);
+      const blobData = await result.rows[0][1].getData();
+      assert.deepStrictEqual(blobData, blobVal);
       assert.deepStrictEqual(result.rows[0][2], JSON.parse(charVal));
+
+      // restore the global settings.
+      oracledb.future.oldJsonColumnAsObj = false;
+      oracledb.fetchTypeHandler = defaultFetchTypeHandler;
 
       await connection.execute(testsUtil.sqlDropTable(TABLE));
     });

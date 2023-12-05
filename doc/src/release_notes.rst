@@ -13,6 +13,16 @@ node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...
 Common Changes
 ++++++++++++++
 
+#)  VARCHAR2 and LOB columns which contain JSON, and have the "IS JSON" check
+    constraint enabled, can now be fetched in the same way as columns of type
+    JSON. In node-oracledb :ref:`Thick mode <enablingthick>` this requires
+    Oracle Client 19 or higher. Applications can get this new fetch behaviour
+    by setting the new oracledb property
+    :attr:`oracledb.future.oldJsonColumnAsObj` to `true`. The default value
+    for this property is `false` which retains the existing fetch behaviour.
+    In a future version, the new fetch behaviour will become default and
+    setting this property will no longer be needed.
+
 #)  Added constant ``oracledb.DB_TYPE_XMLTYPE`` to represent data of type
     ``SYS.XMLTYPE`` in metadata ``fetchType`` and ``dbType`` attributes.
     Previously the constant used was ``oracledb.DB_TYPE_LONG`` in Thick mode.
@@ -20,13 +30,6 @@ Common Changes
 #)  Added support for using the Azure and Oracle Cloud Infrastructure (OCI)
     Software Development Kits (SDKs) to generate
     :ref:`authentication tokens <tokenbasedauthentication>`.
-
-#)  VARCHAR2 and LOB columns which contain JSON, and have the "IS JSON" check
-    constraint enabled, are now fetched in the same way as columns of type
-    JSON. In node-oracledb :ref:`Thick mode <enablingthick>` this requires
-    Oracle Client 19 or higher. Applications can get the old behaviour by
-    using :attr:`oracledb.fetchTypeHandler` to replace the new default
-    conversion.
 
 #)  Added new connection properties :attr:`connection.dbDomain`,
     :attr:`connection.dbName`, :attr:`connection.maxOpenCursors`,

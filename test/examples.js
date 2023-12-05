@@ -199,7 +199,6 @@ describe('3. examples.js', function() {
     let conn = null;
     const testData = { "userId": 1, "userName": "Chris", "location": "Australia" };
     let featureAvailable = true;
-    const defaultFetchTypeHandler = oracledb.fetchTypeHandler;
 
     before(async function() {
       conn = await oracledb.getConnection(dbConfig);
@@ -228,17 +227,6 @@ describe('3. examples.js', function() {
       sql = "INSERT INTO nodb_purchaseorder (po_document) VALUES (:bv)";
       const result = await conn.execute(sql, [s]);
       assert.strictEqual(result.rowsAffected, 1);
-      if (await testsUtil.isJsonMetaDataRunnable()) {
-        oracledb.fetchTypeHandler = function(metaData) {
-        // overwrite default converter for VARCHAR2 type.
-          if (metaData.isJson && metaData.dbType === oracledb.DB_TYPE_VARCHAR) {
-            const myConverter = (v) => {
-              return v;
-            };
-            return {converter: myConverter};
-          }
-        };
-      }
     }); // before
 
     after(async function() {
@@ -247,7 +235,6 @@ describe('3. examples.js', function() {
           await conn.execute("DROP TABLE nodb_purchaseorder PURGE");
         }
         await conn.close();
-        oracledb.fetchTypeHandler = defaultFetchTypeHandler;
       }
     }); // after
 
