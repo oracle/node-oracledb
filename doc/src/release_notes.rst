@@ -25,7 +25,8 @@ Common Changes
 
 #)  Added constant ``oracledb.DB_TYPE_XMLTYPE`` to represent data of type
     ``SYS.XMLTYPE`` in metadata ``fetchType`` and ``dbType`` attributes.
-    Previously the constant used was ``oracledb.DB_TYPE_LONG`` in Thick mode.
+    Previously the constant used was ``oracledb.DB_TYPE_LONG`` in Thick mode
+    and ``oracledb.DB_TYPE_OBJECT`` in Thin mode.
 
 #)  Added support for using the Azure and Oracle Cloud Infrastructure (OCI)
     Software Development Kits (SDKs) to generate
@@ -58,6 +59,10 @@ Common Changes
 
 Thin Mode Changes
 ++++++++++++++++++
+
+#)  Added support for fetching SYS.XMLTYPE data as strings. Note that unlike in
+    Thick mode, fetching longer values does not require using
+    ``XMLTYPE.GETCLOBVAL()``.
 
 #)  Fixed bug in parsing SQL statements containing multi-line comments
     with multiple asterisks before the closing slash.

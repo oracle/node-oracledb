@@ -54,9 +54,6 @@ describe('181. dataTypeXML.js', function() {
     '</Warehouse>\n';
 
   before('create table and insert a row', async function() {
-    if (oracledb.thin) {
-      this.skip();
-    }
 
     const connection = await oracledb.getConnection(dbConfig);
 
@@ -74,8 +71,9 @@ describe('181. dataTypeXML.js', function() {
       "    EXECUTE IMMEDIATE (' \n" +
       "        CREATE TABLE " + tableName + " ( \n" +
       "            num        number(9) not null, \n" +
-      "            content    xmltype not null \n" +
-      "        ) \n" +
+      "            content    xmltype not null, \n" +
+      "            embedLOBXML xmltype          \n" +
+      "        ) XMLTYPE embedLOBXML STORE AS CLOB\n" +
       "    '); \n" +
       "END; ";
     await connection.execute(sql);
@@ -106,19 +104,17 @@ describe('181. dataTypeXML.js', function() {
   it('181.1 basic case, insert XML data and query back', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const sql = "select content from " + tableName + " where num = :id";
-    const expectedMetadata = {
-      name: 'CONTENT',
-      dbType: oracledb.DB_TYPE_XMLTYPE,
-      nullable: false,
-      isJson: false,
-      dbTypeName: 'XMLTYPE',
-      fetchType: oracledb.DB_TYPE_XMLTYPE
-    };
     const bindVar = { id: testRowID };
     const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
-    const result = await conn.execute(sql, bindVar, options);
-    assert.strictEqual(result.rows[0].CONTENT, testXMLData);
-    assert.deepStrictEqual(result.metaData[0], expectedMetadata);
+
+    // test execute and re-execute
+    for (let i = 0; i < 2; i++) {
+      const result = await conn.execute(sql, bindVar, options);
+      assert.strictEqual(result.rows[0].CONTENT, testXMLData);
+      assert.strictEqual(result.metaData[0].dbType, oracledb.DB_TYPE_XMLTYPE);
+      assert.strictEqual(result.metaData[0].fetchType, oracledb.DB_TYPE_XMLTYPE);
+    }
+
     await conn.close();
   }); // 181.1
 
@@ -182,9 +178,7 @@ describe('181. dataTypeXML.js', function() {
     await conn.close();
   }); // 181.4
 
-  // ORA-19011: Character string buffer too small
-  it.skip('181.5 inserts data that is larger than 4K', async () => {
-
+  it('181.5 inserts data that is larger than 4K', async () => {
     const ID = 50;
     const str = 'a'.repeat(31 * 1024);
     const head = '<data>', tail = '</data>\n';
@@ -197,13 +191,60 @@ describe('181. dataTypeXML.js', function() {
     let result = await conn.execute(sql, bindValues);
     assert.strictEqual(result.rowsAffected, 1);
 
-    sql = "select content from " + tableName + " where num = :id";
     const bindVar = { id: ID };
     const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
-    result = await conn.execute(sql, bindVar, options);
-    assert.strictEqual(result.rows[0].CONTENT, xml);
+    if (oracledb.thin) {
+      sql = "select content from " + tableName + " where num = :id";
+      result = await conn.execute(sql, bindVar, options);
+      assert.strictEqual(result.rows[0].CONTENT, xml);
+    } else {
+      // For thick, we get an error ORA-19011: Character string buffer too small, so use getclobval
+      options.fetchInfo = { "OBJ": { type: oracledb.STRING } };
+      sql = "select xmltype.getclobval(content) as obj from " + tableName + " where num = :id";
+      result = await conn.execute(sql, bindVar, options);
+      assert.strictEqual(result.rows[0].OBJ, xml);
+    }
     await conn.commit();
     await conn.close();
   }); // 181.5
+
+  it('181.6 Insert and Verify Embedded LOB locator inside XML', async () => {
+    const ID = 51;
+    const largestr = 'a'.repeat(64 * 1024);
+    const smallstr = 'a'.repeat(1 * 1024);
+    const head = '<data>', tail = '</data>\n';
+    const xml = head.concat(smallstr).concat(tail);
+    const largexml = head.concat(largestr).concat(tail);
+
+    const conn = await oracledb.getConnection(dbConfig);
+    const lob = await conn.createLob(oracledb.CLOB);
+    await lob.write(largexml);
+
+    let sql = `insert into  ${tableName}  ( num, content, embedLOBXML )
+      values(:id, XMLType(:bv1), XMLType(:bv2))`;
+    const bindValues = { id: ID, bv1: xml, bv2: {type: oracledb.CLOB, val: lob }};
+    let result = await conn.execute(sql, bindValues);
+    assert.strictEqual(result.rowsAffected, 1);
+
+    const bindVar = { id: ID };
+    const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+
+    if (oracledb.thin) {
+      sql = "select embedlobxml as OBJ from " + tableName + " where num = :id";
+    } else {
+      options.fetchInfo = {"OBJ": {type: oracledb.STRING}};
+      sql = "select xmltype.getclobval(embedlobxml) as OBJ from " + tableName + " where num = :id";
+    }
+    result = await conn.execute(sql, bindVar, options);
+    assert.strictEqual(result.rows[0].OBJ, largexml);
+
+    // free  temp lob
+    await new Promise((resolve) => {
+      lob.once('close', resolve);
+      lob.destroy();
+    });
+    await conn.commit();
+    await conn.close();
+  }); // 181.6
 
 });

@@ -120,7 +120,14 @@ describe('200. dbObject1.js', () => {
     assert.strictEqual(result.rowsAffected, 1);
     await conn.commit();
 
+    const options = {};
     sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
+    options.fetchInfo = {"PERSON": { type: oracledb.STRING }};
+    await assert.rejects(
+      async () => await conn.execute(sql, [], options),
+      /NJS-119:/
+    );
+
     result = await conn.execute(sql);
 
     assert.strictEqual(result.rows[0][0], seq);

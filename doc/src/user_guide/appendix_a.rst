@@ -764,7 +764,7 @@ when binding numeric values.
       - Thick mode only
     * - XMLType
       - DB_TYPE_XMLTYPE
-      - Thick mode only
+      - Yes
 
 .. _testingmode:
 
