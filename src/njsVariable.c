@@ -62,6 +62,7 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_LONG_NVARCHAR:
         case DPI_ORACLE_TYPE_LONG_VARCHAR:
         case DPI_ORACLE_TYPE_LONG_RAW:
+        case DPI_ORACLE_TYPE_XMLTYPE:
             var->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
             break;
         case DPI_ORACLE_TYPE_NATIVE_FLOAT:

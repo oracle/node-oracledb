@@ -178,6 +178,9 @@ instead of ``result.metadata[0].fetchType == 2001``.
     * - ``oracledb.DB_TYPE_VARCHAR``
       - 2001
       - VARCHAR2
+    * - ``oracledb.DB_TYPE_XMLTYPE``
+      - 2032
+      - XMLTYPE
 
 Note that the values for these constants changed in node-oracledb 4.0.
 

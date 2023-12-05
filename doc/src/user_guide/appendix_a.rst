@@ -763,8 +763,8 @@ when binding numeric values.
       - DB_TYPE_OBJECT
       - Thick mode only
     * - XMLType
-      - Not applicable
-      - No
+      - DB_TYPE_XMLTYPE
+      - Thick mode only
 
 .. _testingmode:
 

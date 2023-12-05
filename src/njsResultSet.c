@@ -334,6 +334,7 @@ static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
             case DPI_ORACLE_TYPE_LONG_NVARCHAR:
             case DPI_ORACLE_TYPE_LONG_VARCHAR:
             case DPI_ORACLE_TYPE_LONG_RAW:
+            case DPI_ORACLE_TYPE_XMLTYPE:
                 var->maxSize = (uint32_t) -1;
                 break;
             case DPI_ORACLE_TYPE_DATE:

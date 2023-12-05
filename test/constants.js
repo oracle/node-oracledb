@@ -79,6 +79,7 @@ describe('18. constants.js', function() {
     assert.strictEqual(2014, oracledb.DB_TYPE_TIMESTAMP_LTZ.num);
     assert.strictEqual(2013, oracledb.DB_TYPE_TIMESTAMP_TZ.num);
     assert.strictEqual(2001, oracledb.DB_TYPE_VARCHAR.num);
+    assert.strictEqual(2032, oracledb.DB_TYPE_XMLTYPE.num);
 
   });
 

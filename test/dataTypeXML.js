@@ -106,10 +106,19 @@ describe('181. dataTypeXML.js', function() {
   it('181.1 basic case, insert XML data and query back', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const sql = "select content from " + tableName + " where num = :id";
+    const expectedMetadata = {
+      name: 'CONTENT',
+      dbType: oracledb.DB_TYPE_XMLTYPE,
+      nullable: false,
+      isJson: false,
+      dbTypeName: 'XMLTYPE',
+      fetchType: oracledb.DB_TYPE_XMLTYPE
+    };
     const bindVar = { id: testRowID };
     const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
     const result = await conn.execute(sql, bindVar, options);
     assert.strictEqual(result.rows[0].CONTENT, testXMLData);
+    assert.deepStrictEqual(result.metaData[0], expectedMetadata);
     await conn.close();
   }); // 181.1
 

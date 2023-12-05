@@ -13,6 +13,10 @@ node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...
 Common Changes
 ++++++++++++++
 
+#)  Added constant ``oracledb.DB_TYPE_XMLTYPE`` to represent data of type
+    ``SYS.XMLTYPE`` in metadata ``fetchType`` and ``dbType`` attributes.
+    Previously the constant used was ``oracledb.DB_TYPE_LONG`` in Thick mode.
+
 #)  Added support for using the Azure and Oracle Cloud Infrastructure (OCI)
     Software Development Kits (SDKs) to generate
     :ref:`authentication tokens <tokenbasedauthentication>`.
