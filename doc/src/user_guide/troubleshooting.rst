@@ -96,7 +96,7 @@ DPI-1047
 
         - On Windows:
 
-          - If node-oracledb is using libraries from a local database installation, ensure that this database is the `currently configured database <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-33D575DD-47FF-42B1-A82F-049D3F2A8791>`__.
+          - If node-oracledb is using libraries from a local database installation, ensure that this database is the `currently configured database <https://docs.oracle.com/pls/topic/lookup?ctx=db21&id=RIWIN-GUID-33D575DD-47FF-42B1-A82F-049D3F2A8791>`__.
 
           - If you are not using passing a library directory parameter to :meth:`oracledb.initOracleClient()`, then restart your command prompt and use ``set PATH`` to check if the environment variable has the correct Oracle Client listed before any other Oracle directories.
 

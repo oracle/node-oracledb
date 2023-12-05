@@ -80,7 +80,7 @@ const dbConfig = require('./dbconfig.js');
 
     }); // 5.1.2
 
-    it("5.1.3 throws error when gettting connection from oracledb given only invalid 'user' when externalAuth is enabled", async function() {
+    it("5.1.3 throws error when getting connection from oracledb given only invalid 'user' when externalAuth is enabled", async function() {
 
       await assert.rejects(
         async () => {
@@ -97,7 +97,7 @@ const dbConfig = require('./dbconfig.js');
       );
     }); // 5.1.3
 
-    it("5.1.4 throws error when gettting connection from oracledb given only 'password' when externalAuth is enabled", async function() {
+    it("5.1.4 throws error when getting connection from oracledb given only 'password' when externalAuth is enabled", async function() {
 
       await assert.rejects(
         async () => {
@@ -251,7 +251,8 @@ const dbConfig = require('./dbconfig.js');
       // Main function of this case
       const connArr = []; // Initialize array of connections with IDs from 1 to 9
       for (let id = 1; id <= 9; id++) {
-        connArr[id] = await getConns(id);
+        // connArr index 0 stores ID=1, index 1 stores ID=2 ,...
+        connArr.push(await getConns(id));
       }
 
       await closeConns(connArr);
@@ -286,7 +287,8 @@ const dbConfig = require('./dbconfig.js');
       // Main function of this case
       const poolArr = []; // Initialize array of pools with IDs from 1 to 9
       for (let id = 1; id <= 9; id++) {
-        poolArr[id] = await getPools(id);
+        // poolArr index 0 stores ID=1, index 1 stores ID=2 ,...
+        poolArr.push(await getPools(id));
       }
 
       await closePools(poolArr);

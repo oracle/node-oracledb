@@ -181,8 +181,8 @@ Overview of node-oracledb functional tests
     5.1 tests that work both when DB has configured externalAuth and not configured
         5.1.1 can get connection from oracledb with correct user/password when externalAuth is disabled
         5.1.2 throws error when getting connection from oracledb with correct user/password when externalAuth is enabled
-        5.1.3 throws error when gettting connection from oracledb given only invalid 'user' when externalAuth is enabled
-        5.1.4 throws error when gettting connection from oracledb given only 'password' when externalAuth is enabled
+        5.1.3 throws error when getting connection from oracledb given only invalid 'user' when externalAuth is enabled
+        5.1.4 throws error when getting connection from oracledb given only 'password' when externalAuth is enabled
         5.1.5 can get pool from oracledb with user/password when externalAuth is disabled
         5.1.6 throws error when getting pool from oracledb given user/password when externalAuth is enabled
         5.1.7 throws error when getting pool from oracledb only given username when externalAuth is enabled

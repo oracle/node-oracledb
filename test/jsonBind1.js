@@ -65,6 +65,7 @@ describe('253. jsonBind1.js', function() {
                      "    p_inout := p_inout; \n" +
                      "END;";
   let skip = false;
+  const defaultFetchTypeHandler = oracledb.fetchTypeHandler;
   before (async function() {
     oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT;
     oracledb.extendedMetaData = true;
@@ -73,6 +74,15 @@ describe('253. jsonBind1.js', function() {
       skip = true;
       this.skip();
     }
+    oracledb.fetchTypeHandler = function(metaData) {
+      // overwrite default converter for CLOB, BLOB and VARCHAR type.
+      if (metaData.isJson && metaData.dbType !== oracledb.DB_TYPE_JSON) {
+        const myConverter = (v) => {
+          return v;
+        };
+        return {converter: myConverter};
+      }
+    };
     await conn.execute(create_table_sql);
     await conn.commit();
   });
@@ -85,6 +95,7 @@ describe('253. jsonBind1.js', function() {
     if (conn) {
       await conn.close();
     }
+    oracledb.fetchTypeHandler = defaultFetchTypeHandler;
   });
 
   beforeEach(async function() {
