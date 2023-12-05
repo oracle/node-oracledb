@@ -285,7 +285,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - Yes
       - Yes
     * - XMLType data type (see :ref:`xmltype`)
-      - Yes - May need to fetch as CLOB
+      - Yes
       - Yes - May need to fetch as CLOB
     * - BFILE data type
       - No

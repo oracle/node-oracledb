@@ -15,52 +15,29 @@ For more information about using JSON in Oracle Database see the
 `Database JSON Developer’s Guide <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=ADJSN>`__.
 
-**Oracle Database 12c JSON Data Type**
+.. _json21ctype:
 
-Prior to Oracle Database 21, JSON in relational tables is stored as
-BLOB, CLOB or VARCHAR2 data, allowing easy access with node-oracledb.
-All of these types can be used with node-oracledb in Thin or Thick mode.
-
-The older syntax to create a table with a JSON column is like:
-
-.. code-block:: sql
-
-    CREATE TABLE j_purchaseorder (po_document BLOB CHECK (po_document IS JSON));
-
-The check constraint with the clause ``IS JSON`` ensures only JSON data
-is stored in that column.
-
-The older syntax can still be used in Oracle Database 21, however the
-recommendation is to move to the new JSON type. With the old syntax, the
-storage can be BLOB, CLOB, or VARCHAR2. Of these, BLOB is preferred to
-avoid character set conversion overheads.
-
-**Oracle Database 21c JSON Data Type**
+Using the Oracle Database 21c JSON Type in node-oracledb
+========================================================
 
 Oracle Database 21c introduced a dedicated JSON data type with a new
 `binary storage format <https://blogs.oracle.com/database/post/
 autonomous-json-database-under-the-covers-oson-format>`__
-that improves performance and functionality. To use the new dedicated
-JSON type, you can use node-oracledb 5.1 or later. The 21c JSON data
-type can be used in both node-oracledb Thin and Thick modes. With Thick mode,
-the Oracle Client libraries must be version 21, or later.
+that improves performance and functionality. To take advantage of the new
+dedicated JSON type in Oracle Database 21c and later versions, use
+node-oracledb 5.1 or later. For Thick mode, you must additionally use
+Oracle Client 21c (or later).
 
-In Oracle Database 21 or later, to create a table with a column called
+In Oracle Database 21c or later, to create a table with a column called
 ``PO_DOCUMENT`` for JSON data:
 
 .. code-block:: sql
 
     CREATE TABLE j_purchaseorder (po_document JSON);
 
-.. _json21ctype:
+**Inserting JSON Data**
 
-Using the Oracle Database 21c JSON Type in node-oracledb
-========================================================
-
-Using node-oracledb Thin mode with Oracle Database 21c or later, or using
-node-oracledb Thick mode or node-oracledb 5.1 (or later) with Oracle Database
-21c (or later) and Oracle Client 21c (or later), you can insert JavaScript
-objects directly by binding as ``oracledb.DB_TYPE_JSON``:
+To insert JavaScript objects directly by binding as ``oracledb.DB_TYPE_JSON``:
 
 .. code-block:: javascript
 
@@ -70,6 +47,10 @@ objects directly by binding as ``oracledb.DB_TYPE_JSON``:
         `INSERT INTO j_purchaseorder (po_document) VALUES (:bv)`,
         { bv: {val: data, type: oracledb.DB_TYPE_JSON} }
     );
+
+.. _json21fetch:
+
+**Fetching JSON Data**
 
 To query a JSON column, use:
 
@@ -86,11 +67,11 @@ The output is::
         }
     ]
 
-Using Oracle Client Libraries 19 or Earlier
--------------------------------------------
+Using Oracle Client Libraries 19c or Earlier
+--------------------------------------------
 
-If node-oracledb Thick mode uses Oracle Client Libraries 19 (or earlier),
-querying an Oracle Database 21 (or later), then JSON column returns a
+If node-oracledb Thick mode uses Oracle Client Libraries 19c (or earlier),
+querying an Oracle Database 21c (or later), then JSON column returns a
 :ref:`Lob Class <lobclass>` BLOB. You can stream the Lob or use
 :meth:`lob.getData()`:
 
@@ -117,6 +98,26 @@ shown above.
 Using the Oracle Database 12c JSON Type in node-oracledb
 ========================================================
 
+In Oracle Database versions 12c or later (prior to Oracle Database 21c), JSON
+in relational tables is stored as BLOB, CLOB, or VARCHAR2 data. All of these
+types can be used with node-oracledb in Thin or Thick mode.
+
+The older syntax to create a table with a JSON column is like:
+
+.. code-block:: sql
+
+    CREATE TABLE j_purchaseorder (po_document BLOB CHECK (po_document IS JSON));
+
+The check constraint with the clause ``IS JSON`` ensures only JSON data
+is stored in that column.
+
+The older syntax can still be used in Oracle Database 21c. However the
+recommendation is to move to the new JSON type. With the old syntax, the
+storage can be BLOB, CLOB, or VARCHAR2. Of these, BLOB is preferred to
+avoid character set conversion overheads.
+
+**Inserting JSON Data**
+
 When using Oracle Database 12c or later with JSON using BLOB storage, you can
 insert JSON strings:
 
@@ -131,11 +132,27 @@ insert JSON strings:
         [b]  // bind the JSON string
     );
 
+**Fetching JSON Data**
+
+With Oracle Database 12c (or later), you can fetch VARCHAR2 and LOB columns
+that contain JSON data in the same way that
+:ref:`JSON type columns <json21fetch>` are fetched when using Oracle
+Database 21c (or later). This can be done by setting
+:attr:`oracledb.future.oldJsonColumnAsObj` to the value *true* as shown below.
+If you are using node-oracledb Thick mode, you must use Oracle Client 19c
+(or later) for this setting to work. For example:
+
+.. code-block:: javascript
+
+    oracledb.future.oldJsonColumnAsObj = true;
+    const r = await conn.execute(`SELECT po_document FROM j_purchaseorder`);
+    console.dir(r.rows, { depth: null });
+
 IN Bind Type Mapping
 ====================
 
 When binding a JavaScript object as ``oracledb.DB_TYPE_JSON`` for
-``oracledb.BIND_IN`` or ``oracledb.BIND_INOUT`` in Oracle Database 21
+``oracledb.BIND_IN`` or ``oracledb.BIND_INOUT`` in Oracle Database 21c
 (or later), JavaScript values are converted to JSON attributes as shown
 in the following table. The ‘SQL Equivalent’ syntax can be used in SQL
 INSERT and UPDATE statements if specific attribute types are needed but
@@ -221,7 +238,7 @@ might be like::
 Query and OUT Bind Type Mapping
 ===============================
 
-When getting Oracle Database 21 or later JSON values from the database, the
+When getting Oracle Database 21c or later JSON values from the database, the
 following attribute mapping occurs:
 
 .. list-table-with-summary::

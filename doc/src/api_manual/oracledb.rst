@@ -3416,3 +3416,30 @@ Oracledb Methods
           - Description
         * - Error ``error``
           - If ``startup()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+
+.. _oracledbfuture:
+
+Oracledb Future Object
+======================
+
+A special object that contains properties which control the behavior of
+node-oracledb, allowing use of new features.
+
+.. versionadded:: 6.3
+
+.. attribute:: oracledb.future.oldJsonColumnAsObj
+
+    This property is a boolean which when set to *true* while using Oracle
+    Database 12c (or later), fetches VARCHAR2 and LOB columns that were
+    created with the ``IS JSON`` constraint in the same way that
+    :ref:`columns of type JSON <json21fetch>` are fetched when using
+    Oracle Database 21c (or later). The ``IS JSON`` constraint that is
+    specified when creating VARCHAR2 and LOB columns ensures that only JSON
+    data is stored in these columns.
+
+    The default value is *false*.
+
+    In a future version of node-oracledb, the setting of this attribute will
+    no longer be required since this will be the default behavior.
+
+    .. versionadded:: 6.3

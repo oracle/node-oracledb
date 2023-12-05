@@ -4,22 +4,26 @@
 Using XMLType Data
 ******************
 
-``XMLType`` columns queried will return Strings by default, limited
-to the size of a VARCHAR2.
+Oracle XMLType columns are fetched as strings by default in node-oracledb Thin
+and Thick modes. Note that in Thick mode, you may need to use the
+``XMLTYPE.GETCLOBVAL()`` function as detailed below.
 
-However, if desired, the SQL query could be changed to return a CLOB,
-for example:
+The examples below demonstrate using ``XMLType`` data with node-oracledb. The
+following table will be used in these examples:
 
 .. code-block:: sql
 
-    const sql = `SELECT XMLTYPE.GETCLOBVAL(res) FROM resource_view`;
+    CREATE TABLE xwarehouses(
+        warehouse_id NUMBER,
+        warehouse_spec XMLTYPE
+    );
 
-The CLOB can be fetched in node-oracledb as a String or
-:ref:`Lob <lobclass>`.
+Inserting XML
+=============
 
-To insert into an ``XMLType`` column, directly insert a string
-containing the XML, or use a temporary LOB, depending on the data
-length.
+To insert into an ``XMLType`` column, you can directly insert a string
+containing the XML or use a temporary LOB, depending on the data
+length. For example:
 
 .. code-block:: javascript
 
@@ -42,5 +46,32 @@ length.
      { id: 1, bv: myxml }
     );
 
+Fetching XML
+============
+
+Fetching XML data can be done directly in node-oracledb Thin mode. This also
+works in Thick mode for values that are shorter than the `maximum allowed
+length of a VARCHAR2 column <https://docs.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-D424D23B-0933-425F-BC69-9C0E6724693C>`__:
+
+.. code-block:: javascript
+
+    myxmldata = await connection.execute(`SELECT warehouse_spec FROM xwarehouses
+                        WHERE warehouse_id = :id`, [1]);
+    console.log(myxmldata);
+
+In Thick mode, for values that exceed the `maximum allowed length of a
+VARCHAR2 column <https://docs.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
+-D424D23B-0933-425F-BC69-9C0E6724693C>`__, a CLOB must be returned by using
+the ``XMLTYPE.GETCLOBVAL()`` function:
+
+.. code-block:: javascript
+
+    myxmldata = connection.execute(`SELECT XMLTYPE.GETCLOBVAL(warehouse_spec)
+                                    AS mycontent FROM xwarehouses
+                                    WHERE warehouse_id = :id`, [1]);
+    console.log(myxmldata);
+
+The CLOB can be fetched in node-oracledb as a String or :ref:`Lob <lobclass>`.
 LOB handling is as discussed in the section :ref:`Working with CLOB, NCLOB and
 BLOB Data <lobhandling>`.
