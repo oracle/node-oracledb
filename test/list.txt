@@ -4344,6 +4344,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         180.1.3 Non-Pool Connect: Basic Auth with proxy
         180.1.4 Non-Pool Connect: External Auth with proxy
         180.1.5 Non-Pool Connect: External Auth with proxy no brackets
+        180.1.6 Non-Pool Connect: External Auth with proxy and session user
    180.2 Pooled Connect
         180.2.1 Pooled Connect: Basic Auth
         180.2.2 Pooled Connect: External Auth

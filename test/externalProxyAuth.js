@@ -120,9 +120,27 @@ describe('180. externalProxyAuth.js', function() {
             externalAuth: true,
           });
         },
-        /DPI-1069:/
+        /NJS-140:/
       );
     });
+
+    it('180.1.6 Non-Pool Connect: External Auth with proxy and session user', async function() {
+      if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
+        this.skip();
+      }
+
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection({
+            connectString: dbConfig.connectString,
+            user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
+            externalAuth: true,
+          });
+        },
+        /NJS-140:/
+      );
+    });
+
   });
 
   describe('180.2 Pooled Connect', function() {
@@ -262,7 +280,7 @@ describe('180. externalProxyAuth.js', function() {
         async () => {
           await pool.getConnection({user: dbConfig.test.proxySessionUser});
         },
-        /DPI-1069:/
+        /NJS-140:/
       );
       await pool.close(0);
     });

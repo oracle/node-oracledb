@@ -86,6 +86,10 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Fixed bug that causes an 'NJS-136' exception to be thrown
+    when a proxy user is used for external authentication.
+    `Issue #1628 <https://github.com/oracle/node-oracledb/issues/1628>`__.
+
 #)  Fixed bug resulting in a segfault on some platforms when using two-phase
     commit. (`ODPI-C change
     <https://github.com/oracle/odpi/commit/3102b45c6712c9b6d53eb770b1314c06102c69e0>`__).

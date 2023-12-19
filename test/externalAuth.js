@@ -92,8 +92,8 @@ const dbConfig = require('./dbconfig.js');
             }
           );
         },
-        // NJS-136: user and password should not be set when using external authentication
-        /NJS-136:/
+        // ORA-01017: ORA-01017: invalid credential or not authorized; logon denied'
+        /ORA-01017:/
       );
     }); // 5.1.3
 
