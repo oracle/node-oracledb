@@ -4,6 +4,65 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev62v63:
+
+Upgrading from node-oracledb 6.2 to 6.3
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- Using the new :ref:`warning <execwarning>` property of the
+  :ref:`result object <resultobject>` in :meth:`connection.execute()`, your
+  application can manually check for database warnings such as
+  :ref:`plsqlcompwarnings`. Also, you can use the new
+  :ref:`warning <execmanywarning>` property in the
+  :ref:`result object <resultobjproperties>` of
+  :meth:`connection.executeMany()` to check for similar warnings.
+
+- The new :attr:`connection.warning` property can be used to check for
+  warnings that are generated during connection such as the password being in
+  the grace period.
+
+- By setting the new :attr:`oracledb.future.oldJsonColumnAsObj` property to
+  *true*, you can fetch the VARCHAR2 and LOB columns which contain JSON in the
+  same way as :ref:`columns of type JSON <json21fetch>`. See
+  :ref:`json12ctype` for more information. In a future version of
+  node-oracledb, the setting of this attribute will no longer be required
+  since this will become the default behavior.
+
+- With the new :ref:`oracledb.DB_TYPE_XMLTYPE <oracledbconstantsdbtype>`
+  constant, you can now represent data of type ``SYS.XMLTYPE`` in the
+  ``fetchType`` and ``dbType`` :ref:`metadata <execmetadata>` information
+  attributes.
+
+- node-oracledb now supports using Azure and Oracle Cloud Infrastructure (OCI)
+  Software Development Kits (SDKs) to generate
+  :ref:`authentication tokens <tokenbasedauthentication>`.
+
+- With the new connection properties :attr:`connection.dbDomain`,
+  :attr:`connection.dbName`, :attr:`connection.maxOpenCursors`,
+  :attr:`connection.serviceName` and :attr:`connection.transactionInProgress`,
+  you can identify the database domain name, database instance name, maximum
+  number of cursors that can be opened per connection, database service name,
+  and status of any ongoing transactions on the connection respectively.
+
+- The new :ref:`metadata <execmetadata>` information attribute ``isJson``
+  indicates whether the fetched column contains JSON data.
+
+- The new :ref:`metadata <execmetadata>` information attributes
+  ``annotations``, ``domainName``, and ``domainSchema`` identifies the
+  `annotations <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+  GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object, the name of the
+  `SQL domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+  GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`_, and the schema name of the
+  `SQL domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+  GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched
+  column. Annotations and SQL domains are supported from Oracle Database 23c
+  onwards. For node-oracledb Thick mode, Oracle Client 23c is also required.
+
+- In node-oracledb Thin mode, ``SYS.XMLTYPE`` data can now be
+  :ref:`fetched as strings <xmltype>`.
+
 .. _upgradev61v62:
 
 Upgrading from node-oracledb 6.1 to 6.2

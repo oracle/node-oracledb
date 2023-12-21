@@ -37,7 +37,7 @@ const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('203. dbObject4.js', () => {
-  let conn;
+  let conn, testCount = 0;
   const TYPE = 'NODB_TYP_OBJ_4';
   const TABLE  = 'NODB_TAB_OBJ4';
 
@@ -106,7 +106,13 @@ describe('203. dbObject4.js', () => {
     await conn.close();
   }); // after()
 
-  it('203.1 insert an object with LTZ type attribute', async () => {
+  it('203.1 insert an object with LTZ type attribute', async function() {
+    /*
+     * The Oracle Instant Client version should be 19.20 or greater as there is a
+     * bug in setting the timezone with the lower Oracle Instant Client versions.
+    */
+    const isRunnable = await testsUtil.checkPrerequisites(1920000000, undefined);
+    if (!isRunnable) this.skip();
     const seq = 101;
     let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
@@ -129,6 +135,7 @@ describe('203. dbObject4.js', () => {
     assert.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
     assert.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
     assert.strictEqual(result.rows[0][0], seq);
+    testCount++;
   }); // 203.1
 
   it('203.2 insert null value for LTZ type attribute', async () => {
@@ -152,6 +159,7 @@ describe('203. dbObject4.js', () => {
     assert.strictEqual(result.rows[0][1]['ENTRY'], null);
     assert.strictEqual(result.rows[0][1]['EXIT'], null);
     assert.strictEqual(result.rows[0][0], seq);
+    testCount++;
   }); // 203.2
 
   it('203.3 insert undefined value for LTZ type attribute', async () => {
@@ -175,6 +183,7 @@ describe('203. dbObject4.js', () => {
     assert.strictEqual(result.rows[0][1]['ENTRY'], null);
     assert.strictEqual(result.rows[0][1]['EXIT'], null);
     assert.strictEqual(result.rows[0][0], seq);
+    testCount++;
   }); // 203.3
 
   it('203.4 insert an empty JSON', async () => {
@@ -193,6 +202,7 @@ describe('203. dbObject4.js', () => {
 
     assert.strictEqual(result.rows[0][1]['ENTRY'], null);
     assert.strictEqual(result.rows[0][1]['EXIT'], null);
+    testCount++;
   }); // 203.4
 
   it('203.5 call procedure with 2 OUT binds of DbObject', async function() {
@@ -207,11 +217,11 @@ describe('203. dbObject4.js', () => {
     );
 
     let resultSet = await result.outBinds.p_cur1.getRows();
-    assert.equal(resultSet.length, 4);
+    assert.equal(resultSet.length, testCount);
     result.outBinds.p_cur1.close();
 
     resultSet = await result.outBinds.p_cur2.getRows();
-    assert.equal(resultSet.length, 4);
+    assert.equal(resultSet.length, testCount);
     result.outBinds.p_cur2.close();
   }); // 203.5;
 

@@ -194,6 +194,9 @@ testsUtil.isSodaRunnable = async function() {
 
   if ((clientVersion >= 1909000000) && (serverVersion < 1909000000)) return false;
 
+  // Using JSON type collections in SODA requires same or higher Oracle Client versions
+  if (clientVersion < serverVersion) return false;
+
   const sodaRole = await sodaUtil.isSodaRoleGranted();
   if (!sodaRole) return false;
 

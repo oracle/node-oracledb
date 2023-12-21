@@ -133,7 +133,6 @@ describe('287. sodaOpLock.js', () => {
 
     // Lock all documents
     const docs = await coll.find().lock().getDocuments();
-
     await docs.forEach(function(element) {
       const content = element.getContent();
       assert.strictEqual(content.name, myContent.name);
@@ -146,6 +145,7 @@ describe('287. sodaOpLock.js', () => {
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
   }); // 287.2
+
 
   it('287.3 lock on fetching multiple documents', async () => {
     const sd = conn.getSodaDatabase();
@@ -222,12 +222,17 @@ describe('287. sodaOpLock.js', () => {
       })
     );
 
+    await conn.commit();
+
     await assert.rejects(
       async () => await collection.find()
         .lock().filter({ "office": {"$like": "Shenzhen"} })
         .count(),
       /ORA-40821:/ //ORA-40821: LOCK attribute cannot be set for count operation
     );
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 287.5
 
   it('287.6 lock on key()', async function() {
@@ -306,11 +311,14 @@ describe('287. sodaOpLock.js', () => {
       })
     );
 
+    await conn.commit();
     // Fetch back
     await assert.rejects(
       async () => await collection.find().lock().count(),
       /ORA-40821:/ //ORA-40821: LOCK attribute cannot be set for count operation
     );
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 287.8
 
   it('287.9 lock on keys().count()', async () => {
@@ -330,6 +338,9 @@ describe('287. sodaOpLock.js', () => {
       async () => await collection.find().lock().keys(keysToCount).count(),
       /ORA-40821:/ //ORA-40821: LOCK attribute cannot be set for count operation
     );
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 287.9
 
   it('287.10 lock on getCursor()', async () => {
@@ -377,13 +388,15 @@ describe('287. sodaOpLock.js', () => {
         return collection.insertOne(content);
       })
     );
-
+    await conn.commit();
     // Fetch back
     const numberToSkip = 3;
     await assert.rejects(
       async () => await collection.find().lock().skip(numberToSkip).getCursor(),
       /ORA-40820:/ //ORA-40820: Cannot set LOCK attribute on the operation if SKIP or LIMIT attributes are set
     );
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 287.11
 
   it('287.12 lock on getDocuments()', async () => {
@@ -468,12 +481,14 @@ describe('287. sodaOpLock.js', () => {
         return collection.insertOne(content);
       })
     );
-
+    await conn.commit();
     // Fetch back
     const limitNumbers = 3;
     await assert.rejects(
       async () => await collection.find().lock().limit(limitNumbers).getCursor(),
       /ORA-40820:/ //ORA-40820: Cannot set LOCK attribute on the operation if SKIP or LIMIT attributes are set
     );
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 287.15
 });

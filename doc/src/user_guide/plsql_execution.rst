@@ -446,17 +446,26 @@ tree/main/examples/plsqlproc.js>`__ and `plsqlfunc.js
 PL/SQL Compilation Warnings
 ---------------------------
 
-When creating PL/SQL procedures and functions in node-oracledb,
-compilation warnings must be manually checked for. This can be done by
-querying ``USER_ERRORS`` like:
+When creating PL/SQL procedures and functions (or creating types) in
+node-oracledb using SQL statements, the statement might succeed without
+throwing an error, but there may be additional informational messages. (These
+messages are sometimes known in Oracle as "success with info" messages). Your
+application can manually check for these messages using the
+:ref:`warning <execwarning>` property of the
+:ref:`result object <resultobject>` in :meth:`connection.execute()` or
+:meth:`connection.executemany()`. A subsequent query from a table like
+``USER_ERRORS`` will show more details. For example:
 
 .. code-block:: javascript
 
-    await connection.execute(
+    const result = await connection.execute(
         `CREATE OR REPLACE PROCEDURE badproc AS
         BEGIN
             INVALID
         END;`);
+
+    if (result.warning && result.warning.code == "NJS-700")
+        console.log(result.warning.message)
 
     const r = await connection.execute(
         `SELECT line, position, text
@@ -471,8 +480,20 @@ querying ``USER_ERRORS`` like:
         console.error('at line', r.rows[0].LINE, 'position', r.rows[0].POSITION);
     }
 
-Output is like::
+In node-oracledb Thin mode, the output would be::
 
+    NJS-700: creation succeeded with compilation errors
+    PLS-00103: Encountered the symbol "END" when expecting one of the following:
+
+        := . ( @ % ;
+    The symbol ";" was substituted for "END" to continue.
+
+    at line 4 position 8
+
+In node-oracledb Thick mode, the output would be::
+
+    NJS-700: creation succeeded with compilation errors
+    ORA-24344: success with compilation error
     PLS-00103: Encountered the symbol "END" when expecting one of the following:
 
         := . ( @ % ;
