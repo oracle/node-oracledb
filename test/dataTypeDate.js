@@ -186,7 +186,7 @@ describe('32. dataTypeDate.js', function() {
 
       // Add an assert statement to check the result
       assert.deepStrictEqual(result.rows,
-        [['01/01/1900, 00:00:00']]);
+        [['01/01/1900 00:00:00']]);
     });
 
     it('32.4.3 Negative - Invalid Year -4713', async function() {
