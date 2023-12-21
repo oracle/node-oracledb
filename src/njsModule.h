@@ -282,6 +282,7 @@ struct njsBaton {
     bool hasError;
     char error[NJS_MAX_ERROR_MSG_LEN + 1];
     dpiErrorInfo errorInfo;
+    dpiErrorInfo warningInfo;
 
     // strings (requires free)
     char *sql;
@@ -489,6 +490,7 @@ struct njsConnection {
     char *tag;
     size_t tagLength;
     bool retag;
+    dpiErrorInfo warningInfo;
 };
 
 // data for acquiring implicit results
@@ -561,6 +563,7 @@ struct njsPool {
     int32_t poolPingInterval;
     bool  sodaMetadataCache;
     njsTokenCallback *accessTokenCallback;
+    dpiErrorInfo warningInfo;
 };
 
 // data for class ResultSet exposed to JS.

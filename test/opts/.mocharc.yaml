@@ -274,3 +274,5 @@ spec:
   - test/sqlParser.js
   - test/dbObject20.js
   - test/dbSchema.js
+  - test/passwordExpiryWarning.js
+  - test/plsqlWarnings.js

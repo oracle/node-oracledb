@@ -267,6 +267,9 @@ static bool njsPool_createAsync(njsBaton *baton)
             &params, &baton->dpiPoolHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 
+    // handle warnings if any
+    dpiContext_getError(baton->globals->context, &baton->warningInfo);
+
     return true;
 }
 
@@ -279,6 +282,11 @@ static bool njsPool_createPostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
     njsPool *pool = (njsPool*) baton->callingInstance;
+
+    // process warnings if any
+    if (baton->warningInfo.isWarning) {
+        pool->warningInfo = baton->warningInfo;
+    }
 
     // transfer the ODPI-C pool handle to the new object
     pool->handle = baton->dpiPoolHandle;
@@ -392,6 +400,9 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
             &baton->dpiConnHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 
+    // handle warnings if any
+    dpiContext_getError(baton->globals->context, &baton->warningInfo);
+
     // keep track of return parameters
     NJS_FREE_AND_CLEAR(baton->tag);
     baton->tagLength = 0;
@@ -415,7 +426,14 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
 static bool njsPool_getConnectionPostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
+    njsPool *pool = (njsPool*) baton->callingInstance;
     napi_value temp;
+
+    // transfer pool warning to connection, only if it is new
+    if (baton->newSession && !baton->warningInfo.isWarning && pool->warningInfo.isWarning)
+    {
+        baton->warningInfo = pool->warningInfo;
+    }
 
     // create connection
     if (!njsConnection_newFromBaton(baton, env, result))

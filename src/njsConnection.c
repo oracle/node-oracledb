@@ -58,6 +58,7 @@ NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getStatementInfo);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getStmtCacheSize);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTag);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTransactionInProgress);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getWarning);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_isHealthy);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_ping);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_rollback);
@@ -175,6 +176,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL },
     { "getTransactionInProgress", NULL, njsConnection_getTransactionInProgress,
             NULL, NULL, NULL, napi_default, NULL },
+    { "getWarning", NULL, njsConnection_getWarning, NULL, NULL, NULL,
+            napi_default, NULL },
     { "isHealthy", NULL, njsConnection_isHealthy, NULL, NULL, NULL,
             napi_default, NULL },
     { "ping", NULL, njsConnection_ping, NULL, NULL, NULL, napi_default,
@@ -483,6 +486,9 @@ static bool njsConnection_connectAsync(njsBaton *baton)
             &baton->dpiConnHandle) < 0)
         return njsBaton_setErrorDPI(baton);
 
+    // handle warnings if any
+    dpiContext_getError(baton->globals->context, &baton->warningInfo);
+
     return true;
 }
 
@@ -495,6 +501,11 @@ static bool njsConnection_connectPostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    // process warnings if any
+    if (baton->warningInfo.isWarning) {
+        conn->warningInfo = baton->warningInfo;
+    }
 
     // transfer the ODPI-C connection handle to the new object
     conn->handle = baton->dpiConnHandle;
@@ -662,6 +673,9 @@ static bool njsConnection_executeAsync(njsBaton *baton)
     if (dpiStmt_execute(baton->dpiStmtHandle, mode, &baton->numQueryVars) < 0)
         return njsBaton_setErrorDPI(baton);
 
+    // handle warnings if any
+    dpiContext_getError(baton->globals->context, &baton->warningInfo);
+
     // for queries, initialize query variables
     if (baton->numQueryVars > 0) {
 
@@ -698,7 +712,7 @@ static bool njsConnection_executeAsync(njsBaton *baton)
 static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
-    napi_value resultSet, rowsAffected, outBinds, lastRowid;
+    napi_value resultSet, rowsAffected, outBinds, lastRowid, error;
     napi_value implicitResults;
     uint32_t rowidValueLength;
     const char *rowidValue;
@@ -710,6 +724,14 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
 
     // create result object
     NJS_CHECK_NAPI(env, napi_create_object(env, result))
+
+    // process warnings if any
+    if (baton->warningInfo.isWarning) {
+        if (!njsUtils_getError(env, &baton->warningInfo, NULL, &error))
+            return false;
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "warning",
+                error))
+    }
 
     // handle queries
     if (baton->queryVars) {
@@ -1701,6 +1723,25 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getTransactionInProgress, 0, NULL)
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_getWarning()
+//  Get the warning set on connection object. This is set at connection
+//  creation time. The only warning expected is password-will-expire-soon
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getWarning, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+
+    if (conn->handle) {
+        if (conn->warningInfo.isWarning) {
+            if (!njsUtils_getError(env, &conn->warningInfo, NULL, returnValue))
+                return njsUtils_throwErrorDPI(env, globals);
+        }
+    }
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_newFromBaton()
 //   Called when a connection is being created from the baton.
 //-----------------------------------------------------------------------------
@@ -1727,6 +1768,10 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
         baton->tagLength = 0;
     }
 
+    // transfer any warning information to the connection
+    if (baton->warningInfo.isWarning) {
+        conn->warningInfo = baton->warningInfo;
+    }
     return true;
 }
 

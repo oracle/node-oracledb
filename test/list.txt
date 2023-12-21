@@ -5616,3 +5616,16 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 291. dbSchema.js
     291.1 dbSchema and Annotations
         291.1.1 Verify dbDomain and Annotations
+
+292. passwordExpiryWarning.js
+    292.1 password expiry warning
+    292.2 password expiry warning on homogeneous pool
+    292.3 password expiry warning on heterogeneous pool
+    292.4 with poolMin=0 with regular user and password
+    292.5 with poolMin=0 with password in grace time
+    292.6 with poolMin=1 with password in grace time
+    292.7 no warning after password change on new connection
+
+293. plsqlWarnings.js
+    293.1 Warning on executing PL/SQL procedure
+    293.2 Warning from PL/SQL query on a non-existing table
