@@ -1399,15 +1399,6 @@ Connection Methods
             It is only present if a DML statement was executed.
 
             Due to Node.js type limitations, the largest value shown will be 232 - 1, even if more rows were affected. Larger values will wrap.
-        * - ``warning``
-          - Object
-          - .. _execmanywarning:
-
-            This property provides an :ref:`error <errorobj>` object that gives information about any database warnings (such as PL/SQL compilation warnings) that were generated during the last call to :meth:`connection.executeMany()`.
-
-            See :ref:`plsqlcompwarnings` for more information.
-
-            .. versionadded:: 6.3
 
 .. method:: connection.getDbObjectClass()
 

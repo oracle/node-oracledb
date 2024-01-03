@@ -940,7 +940,7 @@ Overview of node-oracledb functional tests
     63.1 nested execute() functions
 
 64. sqlWithWarnings.js
-    64.1 test case offered by GitHub user
+    64.1 SQL - Success With Info
         64.1.1 Executes an aggregate query which causes warnings
     64.2 PL/SQL - Success With Info
         64.2.1 Execute SQL Statement to create PLSQL procedure with warnings

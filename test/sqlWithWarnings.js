@@ -31,7 +31,7 @@
  *   table will result in warnings (OCI_SUCCESS_WITH_INFO).
  *
  *****************************************************************************/
-"use strict";
+'use strict';
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
@@ -48,7 +48,7 @@ describe('64. sqlWithWarnings.js', function() {
     await connection.close();
   });
 
-  describe('64.1 test case offered by GitHub user', function() {
+  describe('64.1 SQL - Success With Info', function() {
 
     const tableName = "nodb_aggregate";
 
@@ -102,7 +102,7 @@ describe('64. sqlWithWarnings.js', function() {
 
     it('64.2.1 Execute SQL Statement to create PLSQL procedure with warnings', async function() {
       assert.strictEqual(typeof connection, "object");
-      await connection.execute (plsqlWithWarning);
+      await connection.execute(plsqlWithWarning);
     }); // 64.2.1
 
   }); // 64.2
