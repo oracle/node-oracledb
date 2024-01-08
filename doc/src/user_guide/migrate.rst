@@ -14,10 +14,7 @@ Upgrading from node-oracledb 6.2 to 6.3
 - Using the new :ref:`warning <execwarning>` property of the
   :ref:`result object <resultobject>` in :meth:`connection.execute()`, your
   application can manually check for database warnings such as
-  :ref:`plsqlcompwarnings`. Also, you can use the new
-  :ref:`warning <execmanywarning>` property in the
-  :ref:`result object <resultobjproperties>` of
-  :meth:`connection.executeMany()` to check for similar warnings.
+  :ref:`plsqlcompwarnings`.
 
 - The new :attr:`connection.warning` property can be used to check for
   warnings that are generated during connection such as the password being in
