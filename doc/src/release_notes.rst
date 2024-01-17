@@ -7,6 +7,25 @@ node-oracledb Release Notes
 
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
+node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...v6.4.0>`__ (TBD)
+--------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+Thin Mode Changes
+++++++++++++++++++
+
+#)  Error ``NJS-141: errors in array DML exceed 65535`` is now raised
+    when the number of batch errors exceed 65535 when calling
+    :meth:`connection.executeMany()` with the parameter ``batchErrors``
+    set to the value `true`. Note that in thick mode, this error is not raised
+    unless the number of batch errors is a multiple of 65536; instead,
+    the number of batch errors returned is modulo 65536.
+
+Thick Mode Changes
+++++++++++++++++++
+
 node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...v6.3.0>`__ (21 Dec 2023)
 --------------------------------------------------------------------------------------------------------
 
