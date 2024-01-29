@@ -36,8 +36,16 @@ const oracledb  = require('oracledb');
 const dbConfig  = require('./dbconfig.js');
 const assert    = require('assert');
 
-
 describe('293. plsqlWarnings.js', function() {
+  let conn;
+  before(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  after(async function() {
+    await conn.close();
+  });
+
   it('293.1 Warning on executing PL/SQL procedure', async () => {
     const plsql = `
     CREATE OR REPLACE PROCEDURE GETDATEPROC(OUTTIME OUT TIMESTAMP) AS
@@ -46,13 +54,11 @@ describe('293. plsqlWarnings.js', function() {
     END;
   `;
 
-    const conn = await oracledb.getConnection(dbConfig);
     const result = await conn.execute(plsql);
     assert.strictEqual(result.warning.message.startsWith("NJS-700:"), true);
 
     // cleanup
     await conn.execute(`DROP PROCEDURE GETDATEPROC`);
-    await conn.close();
   }); // 293.1
 
   // GH issue #823: https://github.com/oracle/node-oracledb/issues/823
@@ -65,13 +71,36 @@ describe('293. plsqlWarnings.js', function() {
       end;
     `;
 
-    const conn = await oracledb.getConnection(dbConfig);
     const result = await conn.execute(plsql);
     assert.strictEqual(result.warning.message.startsWith("NJS-700:"), true);
 
     // cleanup
     await conn.execute(`DROP PROCEDURE test293_2`);
-    await conn.close();
   }); // 293.2
 
+  it('293.3 Warning from function in a PLSQL query', async () => {
+    const plsql = `
+      create or replace function test293_3 (x in number)
+      return varchar2(25)
+      as
+          f varchar2(25);
+      begin
+          f := 'This is a test';
+          return f;
+      end test293_3;
+    `;
+
+    const result = await conn.execute(plsql);
+    assert.strictEqual(result.warning.message.startsWith("NJS-700"), true);
+    // cleanup
+    await conn.execute(`DROP function test293_3`);
+  }); // 293.3
+
+  it('293.4 with poolMin=0 with password in grace time with heterogeneous pool', async function() {
+    const result = await conn.execute(`create or replace procedure selempty(empName in VARCHAR2) AS
+                    BEGIN
+                    select * from emp where ename = empName;
+                    end;`);
+    assert.strictEqual(result.warning.code.startsWith("NJS-700"), true);
+  }); // 293.4
 });

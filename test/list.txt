@@ -5629,3 +5629,5 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 293. plsqlWarnings.js
     293.1 Warning on executing PL/SQL procedure
     293.2 Warning from PL/SQL query on a non-existing table
+    293.3 Warning from function in a PLSQL query
+    293.4 with poolMin=0 with password in grace time with heterogeneous pool
