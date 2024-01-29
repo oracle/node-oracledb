@@ -23,6 +23,11 @@ Thin Mode Changes
     unless the number of batch errors is a multiple of 65536; instead,
     the number of batch errors returned is modulo 65536.
 
+#)  Updated pool functionality to scan and remove idle connections from
+    beginning of free connection list. This will ensure removal of all idle
+    connections present in free connection list.
+    `Issue #1633 <https://github.com/oracle/node-oracledb/issues/1633>`__.
+
 Thick Mode Changes
 ++++++++++++++++++
 
