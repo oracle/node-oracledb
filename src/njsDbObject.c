@@ -889,7 +889,7 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
 {
     dpiObjectAttr **attrHandles;
     dpiObjectAttrInfo attrInfo;
-    napi_value attrs, temp;
+    napi_value attrs, temp, elementTypeInfo;
     njsDbObjectAttr *attr;
     napi_value element;
     uint16_t i;
@@ -935,6 +935,12 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
                 info->elementTypeInfo.oracleTypeNum,
                 objType->elementTypeInfo.objectType))
             return false;
+        NJS_CHECK_NAPI(env, napi_create_object(env, &elementTypeInfo))
+        if (!njsUtils_addMetaDataProperties(env, elementTypeInfo,
+                &info->elementTypeInfo))
+            return false;
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, jsObjectType,
+                "elementTypeInfo", elementTypeInfo))
 
     // process object types with attributes
     } else {
@@ -958,6 +964,9 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
             if (!njsUtils_addTypeProperties(env, element, "type",
                     attrInfo.typeInfo.oracleTypeNum,
                     attr->typeInfo.objectType))
+                return false;
+            if (!njsUtils_addMetaDataProperties(env, element,
+                    &attrInfo.typeInfo))
                 return false;
             NJS_CHECK_NAPI(env, napi_wrap(env, element, attr, NULL, NULL,
                     NULL))
@@ -1002,6 +1011,9 @@ static bool njsDbObjectType_populateTypeInfo(njsDataTypeInfo *info,
 
     info->oracleTypeNum = sourceInfo->oracleTypeNum;
     info->nativeTypeNum = sourceInfo->defaultNativeTypeNum;
+    info->precision = sourceInfo->precision;
+    info->scale = sourceInfo->scale;
+    info->dbSizeInBytes = sourceInfo->dbSizeInBytes;
     if (sourceInfo->objectType) {
         return njsDbObject_getSubClass(baton, sourceInfo->objectType, env,
                 &temp, &info->objectType);

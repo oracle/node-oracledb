@@ -670,6 +670,9 @@ struct njsDbObject {
 struct njsDataTypeInfo {
     dpiOracleTypeNum oracleTypeNum;
     dpiNativeTypeNum nativeTypeNum;
+    int16_t precision;
+    int8_t scale;
+    uint32_t dbSizeInBytes;
     njsDbObjectType *objectType;
 };
 
@@ -861,6 +864,8 @@ bool njsSubscription_stopNotifications(njsSubscription *subscr);
 bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
         const char *propertyNamePrefix, uint32_t oracleTypeNum,
         njsDbObjectType *objType);
+bool njsUtils_addMetaDataProperties(napi_env env, napi_value obj,
+        dpiDataTypeInfo *info);
 bool njsUtils_copyString(napi_env env, char *source, size_t sourceLength,
         char **dest, size_t *destLength);
 bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,

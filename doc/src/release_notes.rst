@@ -13,6 +13,12 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Attribute and element values of :ref:`DbObject Class
+    <dbobjectclass>` objects that contain strings or bytes now have their
+    maximum size constraints checked. Errors ``NJS-142`` and ``NJS-143`` are
+    now raised when the size constraints are violated.
+    `Issue #1630 <https://github.com/oracle/node-oracledb/issues/1630>`__.
+
 Thin Mode Changes
 ++++++++++++++++++
 
@@ -533,13 +539,13 @@ node-oracledb `v5.5.0 <https://github.com/oracle/node-oracledb/compare/v5.4.0...
 
     - Deprecated ``pool.setAccessToken()``.
 
-#)  ResultSets now implement the ``asyncIterator()`` symbol to support asynchonous
-    iteration.
+#)  ResultSets now implement the ``asyncIterator()`` symbol to support
+    asynchronous iteration.
 
 #)  Added support for Oracle Advanced Queuing (AQ) :ref:`aqrecipientlists`.
 
 #)  Fixed a regression that could cause a pool alias to be recorded in the
-    internal list of aliases even if pool creation failed.
+    internal list of aliases even if pool creation had failed.
 
 
 node-oracledb `v5.4.0 <https://github.com/oracle/node-oracledb/compare/v5.3.0...v5.4.0>`__ (9 Jun 2022)
@@ -717,8 +723,8 @@ node-oracledb `v5.1.0 <https://github.com/oracle/node-oracledb/compare/v5.0.0...
     format.  A new type ``oracledb.DB_TYPE_JSON`` was added.
 
 #)  Numeric suffixes are now added to duplicate SELECT column names when using
-    ``oracledb.OUT_FORMAT_OBJECT`` mode, allowing all columns to be represented in
-    the JavaScript object.
+    ``oracledb.OUT_FORMAT_OBJECT`` mode, allowing all columns to be represented
+    in the JavaScript object.
 
 #)  The value of ``prefetchRows`` set when getting a REF CURSOR as a BIND_OUT
     parameter is now used in the subsequent data retrieval from that cursor.
@@ -759,8 +765,8 @@ node-oracledb `v5.0.0 <https://github.com/oracle/node-oracledb/compare/v4.2.0...
       to the Node.js image `Issue #1201 <https://github.com/oracle/
       node-oracledb/issues/1201>`__.
 
-    - Removed use of git in `package/buildpackage.js` making offline builds cleaner
-      for self-hosting node-oracledb.
+    - Removed use of git in `package/buildpackage.js` making offline builds
+      cleaner for self-hosting node-oracledb.
 
 #)  Connection Pool changes:
 
@@ -770,8 +776,8 @@ node-oracledb `v5.0.0 <https://github.com/oracle/node-oracledb/compare/v4.2.0...
       `Issue #514 <https://github.com/oracle/node-oracledb/issues/514>`__.
 
     - Made an internal change to use an Oracle Client 20 Session Pool feature
-      allowing node-oracledb connection pools to shrink to ``poolMin`` even when
-      there is no pool activity.
+      allowing node-oracledb connection pools to shrink to ``poolMin`` even
+      when there is no pool activity.
 
 #)  Added :attr:`oracledb.prefetchRows` and equivalent ``execute()`` option
     attribute :ref:`prefetchRows <propexecprefetchrows>` for query row fetch

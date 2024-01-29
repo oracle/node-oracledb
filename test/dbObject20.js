@@ -850,19 +850,196 @@ describe('290. dbObject20.js', () => {
     }); // 290.3.9
 
     it('290.3.10 insert an object with buffer value with size 100', async () => {
-      const sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const objData = {
         ID: 211,
         NAME: assist.createBuffer(100)
       };
       const objClass = await conn.getDbObjectClass(TYPE);
-      const testObj = new objClass(objData);
-      const seq = 211;
-
-      await assert.rejects(
-        async () => await conn.execute(sql, [seq, testObj]),
-        /ORA-21525:|ORA-00910:/ //ORA-21525: attribute number or (collection element at index) %s violated its constraints
+      assert.throws(
+        () => new objClass(objData),
+        /NJS-142:/
       );
     }); // 290.3.10
+  });
+
+  describe(`290.4 db Object tests with Invalid values to attributes`, () => {
+    let conn;
+    const TYPE1 = 'NODB_TEST_INVALID_VALUES_OBJ_TBL_LINE';
+    const TYPE2 = 'NODB_TEST_INVALID_VALUES_OBJ_TBL';
+    const TYPE3 = 'NODB_TEST_INVALID_VALUES_OBJ';
+    const TYPE4 = 'NODB_TEST_INVALID_VALUES_OBJ_TBL_VARCHAR';
+    const maxVarCharLen = 4;
+    const maxVarNCharLen = 4;
+    const maxVarRawLen = 10;
+
+    before(async () => {
+      conn = await oracledb.getConnection(dbConfig);
+
+      const sqlStmts = [
+        {
+          type: TYPE1, sql: `CREATE TYPE ${TYPE1} FORCE AS OBJECT ( LINE_ID NUMBER,
+              LINE_STR VARCHAR2(${maxVarCharLen}), LINE_FIXED_CHAR CHAR(${maxVarCharLen}),
+              LINE_NSTR NVARCHAR2(${maxVarNCharLen}), LINE_FIXED_NSTR NCHAR(${maxVarNCharLen}),
+              LINE_ID2 FLOAT, rawAttr RAW(${maxVarRawLen}))`
+        },
+        {
+          type: TYPE2, sql: `CREATE TYPE ${TYPE2} FORCE AS TABLE OF
+              ${TYPE1}`
+        },
+        { type: TYPE3, sql: `CREATE TYPE ${TYPE3} FORCE AS OBJECT (HEADER_ID NUMBER(5,2), TBL ${TYPE2})` },
+        {
+          type: TYPE4, sql: `CREATE OR REPLACE TYPE ${TYPE4} IS TABLE OF VARCHAR2 (${maxVarCharLen})`
+        }
+      ];
+
+      for (const { type, sql } of sqlStmts) {
+        await testsUtil.createType(conn, type, sql);
+      }
+
+    }); // before()
+
+    after(async () => {
+      if (conn) {
+        await testsUtil.dropType(conn, TYPE4);
+        await testsUtil.dropType(conn, TYPE3);
+        await testsUtil.dropType(conn, TYPE2);
+        await testsUtil.dropType(conn, TYPE1);
+        await conn.close();
+      }
+    }); // after()
+
+    it('290.4.1 Invalid Values for nested property string ', async () => {
+      //prepare data.
+      const expectedTBLEntries = [
+        {
+          LINE_ID: 9999.231412342, // precision and scale of attributes inside object are ignored .
+          LINE_STR: "1".repeat(maxVarCharLen),
+          LINE_FIXED_CHAR: "1".repeat(maxVarCharLen),
+          LINE_NSTR: "Э".repeat(maxVarNCharLen),
+          LINE_FIXED_NSTR: "Э".repeat(maxVarNCharLen),
+          LINE_ID2: -8,
+          RAWATTR: Buffer.from("A".repeat(maxVarRawLen))
+        },
+        {
+          LINE_ID: -8,
+          LINE_STR: "1".repeat(maxVarCharLen),
+          LINE_FIXED_CHAR: "1".repeat(maxVarCharLen),
+          LINE_NSTR: "Ő".repeat(maxVarNCharLen),
+          LINE_FIXED_NSTR: "Ő".repeat(maxVarNCharLen),
+          LINE_ID2: -1234,
+          RAWATTR: Buffer.from("B".repeat(maxVarRawLen))
+        }
+      ];
+      const data = {
+        HEADER_ID: 1,
+        TBL: [
+          expectedTBLEntries[0],
+          expectedTBLEntries[1]
+        ]
+      };
+      const pInClass = await conn.getDbObjectClass(TYPE3);
+      const pOutClass = await conn.getDbObjectClass(TYPE3);
+      const pInObj = new pInClass(data);
+      const pOutObj = new pOutClass({}); //out obj inited as empty one
+
+      // create Procedure.
+      const PROC = 'nodb_proc_test2029041';
+      const createProc = `
+      CREATE OR REPLACE PROCEDURE ${PROC}
+        (a IN ${TYPE3}, b IN OUT ${TYPE3}) AS
+      BEGIN
+         b := a;
+      END;
+    `;
+      let result = await conn.execute(createProc);
+
+      // Call procedure.
+      const plsql = `BEGIN ${PROC} (:pIn, :pOut); END;`;
+      const bindVar = {
+        pIn: { val: pInObj, dir: oracledb.BIND_IN },
+        pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
+      };
+      result = await conn.execute(plsql, bindVar);
+
+      // Verify the result.
+      assert.strictEqual(JSON.stringify(data), JSON.stringify(result.outBinds.pOut));
+
+      // Assign large value greater than maxVarCharLen.
+      // Verify proper error message is thrown in different binding methods.
+      data.TBL[0].LINE_STR = "1".repeat(maxVarCharLen + 1);
+      // Method 1.
+      assert.throws(
+        () => new pInClass(data),
+        /NJS-142:/
+      );
+
+      // Method2
+      const pInObj2 = new pInClass();
+      assert.throws(
+        () => pInObj2.TBL = data.TBL,
+        /NJS-142:/
+      );
+
+      // Method3
+      const bindVar2 = {
+        pIn: { val: data, dir: oracledb.BIND_IN, type: pInClass},
+        pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
+      };
+      await assert.rejects(
+        async () => await conn.execute(plsql, bindVar2),
+        /NJS-142:/
+      );
+
+    }); // 290.4.1
+
+    it('290.4.2 Invalid Values for different datatypes ', async () => {
+      const pInClass = await conn.getDbObjectClass(TYPE1);
+      const obj = new pInClass();
+      const inputs = [
+        { attrName: 'LINE_NSTR', invalidMaxVal: "A".repeat(maxVarNCharLen * 2) + "A"},
+        { attrName: 'LINE_FIXED_NSTR', invalidMaxVal: "A".repeat(maxVarNCharLen * 2) + "A"},
+        { attrName: 'LINE_STR', invalidMaxVal: "A".repeat(maxVarCharLen) + "A"},
+        { attrName: 'LINE_FIXED_CHAR', invalidMaxVal: "A".repeat(maxVarCharLen) + "A"},
+        { attrName: 'RAWATTR', invalidMaxVal: Buffer.from("A".repeat(maxVarRawLen + 1))}
+      ];
+      for (const { attrName, invalidMaxVal } of inputs) {
+        assert.throws(
+          () => obj[attrName] = invalidMaxVal,
+          /NJS-142:/
+        );
+      }
+    });
+
+    it('290.4.3 Invalid Values for collection ', async () => {
+      const pInClass = await conn.getDbObjectClass(TYPE4);
+      const obj = new pInClass();
+
+      // Initial append.
+      assert.throws(
+        () => obj.append("1".repeat(maxVarCharLen + 1)),
+        /NJS-143:/
+      );
+
+      // Add some data.
+      const data = [
+        "1".repeat(maxVarCharLen),
+        "2".repeat(maxVarCharLen),
+        "3".repeat(maxVarCharLen)
+      ];
+      const obj2 = new pInClass(data);
+
+      // Check updating by index.
+      assert.throws(
+        () => obj2[2] = "1".repeat(maxVarCharLen + 1),
+        /NJS-143:/
+      );
+
+      // append again.
+      assert.throws(
+        () => obj.append("1".repeat(maxVarCharLen + 1)),
+        /NJS-143:/
+      );
+    });
+
   });
 });

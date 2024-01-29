@@ -62,6 +62,37 @@ bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
     return true;
 }
 
+//-----------------------------------------------------------------------------
+// njsUtils_addMetaDataProperties()
+//   Add Metadata properties to the specified object given the ODPI-C type info
+//-----------------------------------------------------------------------------
+bool njsUtils_addMetaDataProperties(napi_env env, napi_value obj,
+        dpiDataTypeInfo *info)
+{
+    napi_value temp;
+
+    if (info->dbSizeInBytes > 0) {
+        // set the maxSize
+        NJS_CHECK_NAPI(env, napi_create_uint32(env, info->dbSizeInBytes, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, "maxSize",
+            temp))
+    }
+
+    if (info->precision > 0 || info->scale > 0) {
+        // set the precision
+        NJS_CHECK_NAPI(env, napi_create_int32(env, info->precision, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, "precision",
+                temp))
+
+        // set the scale
+        NJS_CHECK_NAPI(env, napi_create_int32(env, info->scale, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, "scale",
+                temp))
+    }
+
+    return true;
+}
+
 
 //-----------------------------------------------------------------------------
 // njsUtils_copyString()

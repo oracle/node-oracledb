@@ -5612,6 +5612,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         290.3.8 call procedure with 2 OUT binds of DbObject
         290.3.9 insert an object with buffer value with size 10
         290.3.10 insert an object with buffer value with size 100
+    290.4 db Object tests with Invalid values to attributes
+        290.4.1 Invalid Values for nested property string
+        290.4.2 Invalid Values for different datatypes
+        290.4.3 Invalid Values for collection
 
 291. dbSchema.js
     291.1 dbSchema and Annotations
