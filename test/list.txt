@@ -876,6 +876,8 @@ Overview of node-oracledb functional tests
         58.1.39 Negative - poolMax
         58.1.40 Negative - poolTimeout
         58.1.41 Negative - stmtCacheSize
+        58.1.42 poolPingTimeout
+        58.1.43 Negative - poolPingTimeout
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
@@ -887,6 +889,7 @@ Overview of node-oracledb functional tests
         58.2.8 queueTimeout
         58.2.9 poolPingInterval
         58.2.10 poolMax
+        58.2.11 poolPingTimeout
     58.3 Connection Class
         58.3.1 Connection object initial toString values
         58.3.2 stmtCacheSize (read-only)
@@ -1267,6 +1270,8 @@ Overview of node-oracledb functional tests
     73.20 can be set at pool creation. Negative: 'random-string'
     73.21 cannot surpass the upper limit at pool creation
     73.22 cannot surpass the lower limit at pool creation
+    73_1 poolPingTimeout
+        73_1.1 larger pingTimeout to simulate healthy conns
 
 74. clobPlsqlBindAsString_bindin.js
     74.1 CLOB, PLSQL, BIND_IN

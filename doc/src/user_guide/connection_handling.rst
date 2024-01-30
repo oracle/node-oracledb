@@ -1244,6 +1244,9 @@ function record the following:
     * - ``poolPingInterval``
       - :attr:`poolPingInterval (seconds) <pool.poolPingInterval>`
       - The maximum number of seconds that a connection can remain idle in a connection pool before node-oracledb pings the database prior to returning that connection to the application.
+    * - ``poolPingTimeout``
+      - :attr:`poolPingTimeout (milliseconds) <pool.poolPingTimeout>`
+      - The number of milliseconds that a connection should wait for a response from :meth:`connection.ping()`.
     * - ``poolTimeout``
       - :attr:`poolTimeout (seconds) <pool.poolTimeout>`
       - The time (in seconds) after which the pool terminates idle connections (unused in the pool).
@@ -1371,6 +1374,35 @@ This allows a valid connection to the database to be opened by some
 subsequent ``getConnection()`` call.
 
 Explicit pings can be performed at any time with :meth:`connection.ping()`.
+
+The time to wait for a response from :meth:`connection.ping()` can be
+controlled with the :attr:`oracledb.poolPingTimeout` property or with the
+:ref:`poolPingTimeout <createpoolpoolattrspoolpingtimeout>` property during
+:ref:`pool creation <createpoolpoolattrspoolpingtimeout>`.
+
+The default :attr:`~oracledb.poolPingTimeout` value is *5000* milliseconds.
+The behavior of a pool ``getConnection()`` call differs based on the value
+specified in the ``poolPingTimeout`` property as detailed below.
+
+.. list-table-with-summary:: ``poolPingTimeout`` Value
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 15 40
+    :summary: The first column displays the poolPingTimeout value. The second column displays the behavior of a pool getConnection() call.
+
+    * - ``poolPingTimeout`` Value
+      - Behavior of a Pool ``getConnection()`` Call
+    * - ``n`` < ``0``
+      - Returns the error ``NJS-007: invalid value for "poolPingTimeout" in parameter 1`` if the :ref:`poolPingTimeout <createpoolpoolattrspoolpingtimeout>` property in :meth:`oracledb.createPool()` is set to a negative value.
+
+        Returns the error ``NJS-004: invalid value for property "poolPingTimeout"`` if :attr:`oracledb.poolPingTimeout` is set to a negative value.
+    * - ``n`` = ``0``
+      - Waits until :meth:`connection.ping()` succeeds with a response or fails with an error.
+    * - ``n`` > ``0``
+      - Waits for :meth:`connection.ping()` to respond by ``n`` milliseconds.
+
+        If :meth:`~connection.ping()` does not respond by ``n`` milliseconds, then the connection is forcefully closed.
 
 .. _connpooltagging:
 

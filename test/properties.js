@@ -61,6 +61,7 @@ describe('58. properties.js', function() {
       defaultValues.queueMax         = oracledb.queueMax;
       defaultValues.stmtCacheSize    = oracledb.stmtCacheSize;
       defaultValues.poolPingInterval = oracledb.poolPingInterval;
+      defaultValues.poolPingTimeout  = oracledb.poolPingTimeout;
       defaultValues.fetchAsBuffer    = oracledb.fetchAsBuffer;
       defaultValues.edition          = oracledb.edition;
       defaultValues.events           = oracledb.events;
@@ -84,6 +85,7 @@ describe('58. properties.js', function() {
       oracledb.queueMax         = defaultValues.queueMax;
       oracledb.stmtCacheSize    = defaultValues.stmtCacheSize;
       oracledb.poolPingInterval = defaultValues.poolPingInterval;
+      oracledb.poolPingTimeout  = defaultValues.poolPingTimeout;
       oracledb.fetchAsBuffer    = defaultValues.fetchAsBuffer;
       oracledb.edition          = defaultValues.edition;
       oracledb.events           = defaultValues.events;
@@ -467,6 +469,23 @@ describe('58. properties.js', function() {
         /NJS-004:/
       );
     });
+
+    it('58.1.42 poolPingTimeout', function() {
+      const t = oracledb.poolPingTimeout;
+      oracledb.poolPingTimeout = t + 100;
+
+      assert.equal(t, defaultValues.poolPingTimeout);
+      assert.notEqual(oracledb.poolPingTimeout, defaultValues.poolPingTimeout);
+    });
+
+    it('58.1.43 Negative - poolPingTimeout', function() {
+      assert.throws(
+        function() {
+          oracledb.poolPingTimeout = -2022;
+        },
+        /NJS-004:/
+      );
+    });
   }); // 58.1
 
   describe('58.2 Pool Class', function() {
@@ -601,6 +620,19 @@ describe('58. properties.js', function() {
         "TypeError: Cannot assign to read only property 'queueMax' of object '#<Pool>"
       );
     });
+
+    it('58.2.11 poolPingTimeout', function() {
+      const t = pool.poolPingTimeout;
+      assert.equal(typeof t, 'number');
+
+      assert.throws(
+        function() {
+          pool.poolPingTimeout = t + 100;
+        },
+        "TypeError: Cannot assign to read only property 'poolPingTimeout' of object '#<Pool>"
+      );
+    });
+
 
   }); // 58.2
 

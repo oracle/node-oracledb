@@ -46,6 +46,7 @@ describe('2. pool.js', function() {
       assert.strictEqual(pool.poolMax, oracledb.poolMax);
       assert.strictEqual(pool.poolIncrement, oracledb.poolIncrement);
       assert.strictEqual(pool.poolTimeout, oracledb.poolTimeout);
+      assert.strictEqual(pool.poolPingTimeout, oracledb.poolPingTimeout);
       assert.strictEqual(pool.stmtCacheSize, oracledb.stmtCacheSize);
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(pool.connectionsInUse, 0);

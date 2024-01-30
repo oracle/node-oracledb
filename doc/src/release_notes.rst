@@ -13,6 +13,10 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Added :attr:`oracledb.poolPingTimeout` and :attr:`pool.poolPingTimeout`
+    to limit the :meth:`connection.ping()` call time.
+    `Issue #1626 <https://github.com/oracle/node-oracledb/issues/1626>`__.
+
 #)  Added the :ref:`warning <execmanywarning>` property to the
     :ref:`result <resultobjproperties>` object of
     :meth:`connection.executeMany()`.

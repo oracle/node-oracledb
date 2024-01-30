@@ -1627,6 +1627,49 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.poolPingInterval = 60;     // seconds
 
+.. attribute:: oracledb.poolPingTimeout
+
+    .. versionadded:: 6.4
+
+    This property is the number of milliseconds that a connection should wait
+    for a response from :meth:`connection.ping()`. If
+    :meth:`~connection.ping()` does not respond by the time specified in this
+    property, then the connection is forcefully closed.
+
+    The default value is *5000* milliseconds. The behavior of a pool
+    ``getConnection()`` call differs based on the value specified in the
+    ``poolPingTimeout`` property as detailed below.
+
+    .. list-table-with-summary:: ``poolPingTimeout`` Values
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 15 35
+        :summary: The first column displays the ``poolPingTimeout`` value. The second column displays the behavior of a pool ``getConnection()`` call.
+
+        * - ``poolPingTimeout`` Value
+          - Behavior of a Pool ``getConnection()`` Call
+        * - ``n`` < ``0``
+          - Returns the error ``NJS-007: invalid value for "poolPingTimeout" in parameter 1`` if the :ref:`poolPingTimeout <createpoolpoolattrspoolpingtimeout>` property in :meth:`oracledb.createPool()` is set to a negative value.
+
+            Returns the error ``NJS-004: invalid value for property "poolPingTimeout"`` if :attr:`oracledb.poolPingTimeout` is set to a negative value.
+        * - ``n`` = ``0``
+          - Waits until :meth:`connection.ping()` succeeds with a response or fails with an error.
+        * - ``n`` > ``0``
+          - Waits for :meth:`connection.ping()` to respond by ``n`` milliseconds.
+
+            If :meth:`~connection.ping()` does not respond by ``n`` milliseconds, then the connection is forcefully closed.
+
+    This property may be overridden when
+    :meth:`creating a connection pool <oracledb.createPool()>`.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.poolPingTimeout = 5000; // milliseconds
+
 .. attribute:: oracledb.poolTimeout
 
     This property is a number that allows the number of open connections in a
@@ -2354,6 +2397,20 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.poolPingInterval` property.
 
             See :ref:`Connection Pool Pinging <connpoolpinging>` for more information.
+        * - ``poolPingTimeout``
+          - Number
+          - Both
+          - .. _createpoolpoolattrspoolpingtimeout:
+
+            The number of milliseconds that a connection should wait for a response from :meth:`connection.ping()`. Refer to :attr:`oracledb.poolPingTimeout` for details.
+
+            The default value is *5000* milliseconds.
+
+            This optional property overrides the :attr:`oracledb.poolPingTimeout` property.
+
+            See :ref:`Connection Pool Pinging <connpoolpinging>` for more information.
+
+            .. versionadded:: 6.4
         * - ``poolTimeout``
           - Number
           - Both

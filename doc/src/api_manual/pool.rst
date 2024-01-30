@@ -169,6 +169,18 @@ values.
     parameter of :meth:`oracledb.createPool()` and
     :attr:`oracledb.poolPingInterval`.
 
+.. attribute:: pool.poolPingTimeout
+
+    .. versionadded:: 6.4
+
+    This read-only property is a number which specifies the maximum number
+    of milliseconds that a connection should wait for a response from
+    :meth:`connection.ping()`.
+
+    See :ref:`poolPingTimeout <createpoolpoolattrspoolpingtimeout>`
+    parameter of :meth:`oracledb.createPool()` and
+    :attr:`oracledb.poolPingTimeout`.
+
 .. attribute:: pool.poolTimeout
 
     This read-only property is a number which specifies the time (in seconds)

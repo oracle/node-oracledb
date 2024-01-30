@@ -232,3 +232,45 @@ describe("73. poolPing.js", function() {
   }); // 73.22
 
 });
+
+describe('73_1 poolPingTimeout', function() {
+  let newSessions = 0, pool;
+
+  afterEach(async function() {
+    if (pool) {
+      await pool.close(0);
+    }
+  });
+
+  function newSessionHandler(_, __, cb) {
+    newSessions += 1;
+    cb();
+  }
+
+  it('73_1.1 larger pingTimeout to simulate healthy conns',
+    async function() {
+      const largePingTimeout = 240000; // 4 min
+      const iter = 3;
+      newSessions = 0;
+      const config = {
+        ...dbConfig,
+        poolMin: 0,
+        poolMax: 1,
+        poolIncrement: 1,
+        poolTimeout: 10,
+        poolPingInterval: 0, // always do pool ping
+        sessionCallback: newSessionHandler
+      };
+
+      oracledb.poolPingTimeout = largePingTimeout;
+      pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.poolPingTimeout, largePingTimeout);
+
+      let conn;
+      for (let i = 0; i < iter; ++i) {
+        conn = await pool.getConnection();
+        await conn.close();
+      }
+      assert.strictEqual(newSessions, 1);
+    });
+});

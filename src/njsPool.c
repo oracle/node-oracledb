@@ -43,6 +43,7 @@ NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolMax);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolMaxPerShard);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolMin);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolPingInterval);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolPingTimeout);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolTimeout);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getStmtCacheSize);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getSodaMetaDataCache);
@@ -83,6 +84,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "getPoolMin", NULL, njsPool_getPoolMin, NULL, NULL, NULL, napi_default,
             NULL },
     { "getPoolPingInterval", NULL, njsPool_getPoolPingInterval, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "getPoolPingTimeout", NULL, njsPool_getPoolPingTimeout, NULL, NULL,
             NULL, napi_default, NULL },
     { "getPoolTimeout", NULL, njsPool_getPoolTimeout, NULL, NULL, NULL,
             napi_default, NULL },
@@ -180,6 +183,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
     if (!njsUtils_getNamedPropertyInt(env, args[0], "poolPingInterval",
             &baton->poolPingInterval))
         return false;
+    if (!njsUtils_getNamedPropertyInt(env, args[0], "poolPingTimeout",
+            &baton->poolPingTimeout))
+        return false;
     if (!njsUtils_getNamedPropertyBool(env, args[0], "homogeneous",
             &baton->homogeneous))
         return false;
@@ -233,6 +239,7 @@ static bool njsPool_createAsync(njsBaton *baton)
     if (params.externalAuth && !baton->token && !baton->privateKey)
         params.homogeneous = 0;
     params.pingInterval = baton->poolPingInterval;
+    params.pingTimeout = baton->poolPingTimeout;
 
     // call function for token based authentication
     if (baton->accessTokenCallback) {
@@ -299,6 +306,7 @@ static bool njsPool_createPostAsync(njsBaton *baton, napi_env env,
     pool->poolIncrement = baton->poolIncrement;
     pool->poolTimeout = baton->poolTimeout;
     pool->poolPingInterval = baton->poolPingInterval;
+    pool->poolPingTimeout = baton->poolPingTimeout;
     pool->stmtCacheSize = baton->stmtCacheSize;
     pool->sodaMetadataCache = baton->sodaMetadataCache;
 
@@ -665,6 +673,19 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolPingInterval, 0, NULL)
     njsPool *pool = (njsPool*) callingInstance;
 
     NJS_CHECK_NAPI(env, napi_create_int32(env, pool->poolPingInterval,
+            returnValue))
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsPool_getPoolPingTimeout()
+//   Get accessor of "poolPingTimeout" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolPingTimeout, 0, NULL)
+{
+    njsPool *pool = (njsPool*) callingInstance;
+
+    NJS_CHECK_NAPI(env, napi_create_int32(env, pool->poolPingTimeout,
             returnValue))
     return true;
 }
