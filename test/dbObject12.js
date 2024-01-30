@@ -53,7 +53,7 @@ describe('211. dbObject12.js', function() {
 
       let plsql = `
         CREATE OR REPLACE PACKAGE ${PKG} AS
-          TYPE ${TYPE} IS RECORD (name VARCHAR2(40), pos NUMBER);
+          TYPE ${TYPE} IS RECORD (name VARCHAR2(40), pos NUMBER, force PLS_INTEGER);
           PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE});
         END ${PKG};
       `;
@@ -65,6 +65,7 @@ describe('211. dbObject12.js', function() {
           BEGIN
             p_out := p_in;
             p_out.pos := p_out.pos * 2;
+            p_out.force := p_out.pos * -1;
           END;
         END ${PKG};
       `;
@@ -101,6 +102,7 @@ describe('211. dbObject12.js', function() {
     assert.strictEqual(out.toString(), expect);
     assert.strictEqual(out.NAME, obj1.NAME);
     assert.strictEqual(out.POS, (obj1.POS * 2));
+    assert.strictEqual(out.FORCE, (obj1.POS * -2));
 
     // Binding the record values directly'
     const obj2 = { NAME: 'Plane', POS: 34 };
@@ -112,6 +114,7 @@ describe('211. dbObject12.js', function() {
     out = result2.outBinds.outbv;
     assert.strictEqual(out.NAME, obj2.NAME);
     assert.strictEqual(out.POS, (obj2.POS * 2));
+    assert.strictEqual(out.FORCE, (obj2.POS * -2));
 
     // Using the type name
     const obj3 = { NAME: 'Car', POS: 56 };
@@ -123,15 +126,18 @@ describe('211. dbObject12.js', function() {
     out = result3.outBinds.outbv;
     assert.strictEqual(out.NAME, obj3.NAME);
     assert.strictEqual(out.POS, (obj3.POS * 2));
+    assert.strictEqual(out.FORCE, (obj3.POS * -2));
 
     // Batch exeuction with executeMany()
     const obj4 = [
       { NAME: 'Train', POS: 78 },
-      { NAME: 'Bike', POS: 83 }
+      { NAME: 'Bike', POS: 83 },
+      { NAME: 'Cycle', POS: -2 }
     ];
     binds = [
       { inbv: obj4[0] },
-      { inbv: obj4[1] }
+      { inbv: obj4[1] },
+      { inbv: obj4[2] }
     ];
     const opts = {
       bindDefs: {
@@ -143,6 +149,8 @@ describe('211. dbObject12.js', function() {
     for (let i = 0, out = result4.outBinds; i < binds.length; i++) {
       assert.strictEqual(out[i].outbv.NAME, obj4[i].NAME);
       assert.strictEqual(out[i].outbv.POS, (obj4[i].POS * 2));
+      assert.strictEqual(out[i].outbv.FORCE, (obj4[i].POS * -2));
+
     }
   }); // 211.1
 });

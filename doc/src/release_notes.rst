@@ -30,6 +30,8 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Fixed bug in reading PLS_INTEGER type when used in PL/SQL records.
+
 #)  Error ``NJS-141: errors in array DML exceed 65535`` is now raised
     when the number of batch errors exceed 65535 when calling
     :meth:`connection.executeMany()` with the parameter ``batchErrors``
