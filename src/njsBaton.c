@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2024, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -245,10 +245,6 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     if (baton->dpiLobHandle) {
         dpiLob_release(baton->dpiLobHandle);
         baton->dpiLobHandle = NULL;
-    }
-    if (baton->dpiMsgPropsHandle) {
-        dpiMsgProps_release(baton->dpiMsgPropsHandle);
-        baton->dpiMsgPropsHandle = NULL;
     }
     if (baton->dpiPoolHandle) {
         dpiPool_release(baton->dpiPoolHandle);

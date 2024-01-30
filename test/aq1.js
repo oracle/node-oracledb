@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -169,4 +169,25 @@ describe('217. aq1.js', function() {
       assert.strictEqual(messages2[2].expiration, 10);
     }
   }); // 217.3
+
+  it('217.4 one message in enqMany/deqMany', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messages1 = ["Message 1"];
+
+    await queue1.enqMany(messages1);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messages2 = await queue2.deqMany(1);
+    if (messages2) {
+      assert.strictEqual(messages2[0].payload.toString(), messages1[0]);
+      assert.strictEqual(messages2.length, messages1.length);
+    }
+  });   // 217.4
+
 });

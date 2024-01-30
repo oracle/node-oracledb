@@ -875,6 +875,7 @@ Overview of node-oracledb functional tests
         58.1.38 Negative - poolMin
         58.1.39 Negative - poolMax
         58.1.40 Negative - poolTimeout
+        58.1.41 Negative - stmtCacheSize
     58.2 Pool Class
         58.2.1 poolMin
         58.2.2 poolMax
@@ -4610,6 +4611,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.1 examples/aqraw.js
     217.2 examples/aqoptions.js
     217.3 examples/aqmulti.js
+    217.4 one message in enqMany/deqMany
 
 218. aq2.js
     218.1 examples/aqobject.js

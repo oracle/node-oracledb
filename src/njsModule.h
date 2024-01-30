@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2024, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -340,7 +340,6 @@ struct njsBaton {
     // ODPI-C handles (requires release)
     dpiConn *dpiConnHandle;
     dpiLob *dpiLobHandle;
-    dpiMsgProps *dpiMsgPropsHandle;
     dpiPool *dpiPoolHandle;
     dpiStmt *dpiStmtHandle;
     dpiObjectType *dpiObjectTypeHandle;
