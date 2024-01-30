@@ -19,7 +19,7 @@
  *   sampleocitokenauth.js
  *
  * DESCRIPTION
- *   This script shows connection pooling with token based authentication to
+ *   Shows connection pooling with OAuth 2.0 token based authentication to
  *   Oracle Autonomous Database from OCI-SDK. It shows how to create a
  *   connection pool.
  *

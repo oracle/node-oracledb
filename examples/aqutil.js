@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   aqsetup.js
+ *   aqutil.js
  *
  * DESCRIPTION
  *   Setup the user credentials for all the Advanced Queuing (AQ) examples.

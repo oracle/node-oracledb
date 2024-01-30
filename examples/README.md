@@ -63,6 +63,7 @@ File Name                                                 | Description
 [`aqobject.js`](aqobject.js)                              | Oracle Advanced Queuing (AQ) example passing an Oracle Database object
 [`aqoptions.js`](aqoptions.js)                            | Oracle Advanced Queuing (AQ) example setting options and message attributes
 [`aqraw.js`](aqraw.js)                                    | Basic Oracle Advanced Queuing (AQ) example passing text messages
+[`aqutil.js`](aqutil.js)                                  | Common file to setup the user credentials for all the Advanced Queuing (AQ) examples.
 [`blobhttp.js`](blobhttp.js)                              | Simple web app that streams an image
 [`calltimeout.js`](calltimeout.js)                        | Shows how to cancel a SQL statement if it doesn't complete in a specified time
 [`connect.js`](connect.js)                                | Basic example for creating a standalone (non-pooled) connection
@@ -112,6 +113,8 @@ File Name                                                 | Description
 [`resultset2.js`](resultset2.js)                          | Executes a query and uses a ResultSet to fetch batches of rows with `getRows()`
 [`resultsettoquerystream.js`](resultsettoquerystream.js)  | Converts a ResultSet returned from `execute()` into a Readable Stream.
 [`rowlimit.js`](rowlimit.js)                              | Shows ways to limit the number of records fetched by queries
+[`sampleazuretokenauth.js`](sampleazuretokenauth.js)      | Shows connection pooling with Azure token based authentication.
+[`sampleocitokenauth.js`](sampleocitokenauth.js)          | Shows connection pooling with OCI OAuth 2.0 token based authentication.
 [`select1.js`](select1.js)                                | Executes a basic query without using a connection pool or ResultSet
 [`select2.js`](select2.js)                                | Executes queries to show array and object output formats
 [`selectgeometry.js`](selectgeometry.js)                  | Insert and query Oracle Spatial geometries
