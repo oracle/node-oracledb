@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -103,4 +103,20 @@ describe('293. plsqlWarnings.js', function() {
                     end;`);
     assert.strictEqual(result.warning.code.startsWith("NJS-700"), true);
   }); // 293.4
+
+  it('293.5 Warning from executeMany', async () => {
+    const plsql = `
+      CREATE OR REPLACE PROCEDURE nodb_proc_em2() AS
+      BEGIN
+        NULL
+      END nodb_proc_em2;
+    `;
+    const conn = await oracledb.getConnection(dbConfig);
+    const result = await conn.executeMany(plsql, 1);
+
+    assert.strictEqual(result.warning.message.startsWith("NJS-700:"), true);
+
+    await conn.execute(`DROP PROCEDURE nodb_proc_em2`);
+    await conn.close();
+  });   // 293.5
 });

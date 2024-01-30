@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2024, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -834,6 +834,7 @@ static bool njsConnection_executeManyAsync(njsBaton *baton)
     if (dpiStmt_executeMany(baton->dpiStmtHandle, mode,
             baton->bindArraySize) < 0)
         return njsBaton_setErrorDPI(baton);
+    dpiContext_getError(baton->globals->context, &baton->warningInfo);
 
     // process any LOBS for out binds, as needed
     if (dpiStmt_getRowCount(baton->dpiStmtHandle, &baton->rowsAffected) < 0)
@@ -878,7 +879,7 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
     uint32_t numOutBinds;
-    napi_value temp;
+    napi_value temp, error;
 
     // set JavaScript values to simplify creation of returned objects
     if (!njsBaton_setJsValues(baton, env))
@@ -886,6 +887,14 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
 
     // create object for result
     NJS_CHECK_NAPI(env, napi_create_object(env, result))
+
+    // process warnings if any
+    if (baton->warningInfo.isWarning) {
+        if (!njsUtils_getError(env, &baton->warningInfo, NULL, &error))
+            return false;
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "warning",
+                                                    error))
+    }
 
     // get out binds
     numOutBinds = njsBaton_getNumOutBinds(baton);

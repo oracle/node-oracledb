@@ -453,7 +453,7 @@ messages are sometimes known in Oracle as "success with info" messages). Your
 application can manually check for these messages using the
 :ref:`warning <execwarning>` property of the
 :ref:`result object <resultobject>` in :meth:`connection.execute()` or
-:meth:`connection.executemany()`. A subsequent query from a table like
+:meth:`connection.executeMany()`. A subsequent query from a table like
 ``USER_ERRORS`` will show more details. For example:
 
 .. code-block:: javascript

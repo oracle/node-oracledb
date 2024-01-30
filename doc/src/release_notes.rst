@@ -13,6 +13,10 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Added the :ref:`warning <execmanywarning>` property to the
+    :ref:`result <resultobjproperties>` object of
+    :meth:`connection.executeMany()`.
+
 #)  Attribute and element values of :ref:`DbObject Class
     <dbobjectclass>` objects that contain strings or bytes now have their
     maximum size constraints checked. Errors ``NJS-142`` and ``NJS-143`` are
