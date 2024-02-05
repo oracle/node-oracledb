@@ -13,6 +13,13 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Accept an object as an input parameter for :meth:`connection.execute()`
+    as per GitHub user request.
+    See `Issue #1629 <https://github.com/oracle/node-oracledb/issues/1629>`__.
+    This object is returned from the 3rd party ``sql-template-tag`` module and
+    exposes statement and values properties to retrieve sql string
+    and bind values.
+
 #)  Added new extended :ref:`metadata <execmetadata>` information attribute
     ``isOson`` for a fetched column.
 
@@ -44,13 +51,15 @@ Thin Mode Changes
     unless the number of batch errors is a multiple of 65536; instead,
     the number of batch errors returned is modulo 65536.
 
-#)  Updated pool functionality to scan and remove idle connections from
-    beginning of free connection list. This will ensure removal of all idle
-    connections present in free connection list.
+#)  Updated connection pool to scan and remove idle connections from
+    the beginning of the free connection list. This will ensure removal of all
+    idle connections present in the free connection list.
     `Issue #1633 <https://github.com/oracle/node-oracledb/issues/1633>`__.
 
 Thick Mode Changes
 ++++++++++++++++++
+
+#)  Internal code and memory optimization changes for Advanced Queuing.
 
 node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...v6.3.0>`__ (21 Dec 2023)
 --------------------------------------------------------------------------------------------------------
