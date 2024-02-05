@@ -69,7 +69,8 @@ describe('162. getStmtInfo.js', function() {
             nullable: true,
             precision: 0,
             scale: -127,
-            isJson: false
+            isJson: false,
+            isOson: false
           }
         ]
       }

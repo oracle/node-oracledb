@@ -868,6 +868,7 @@ describe('4. binding.js', function() {
         nullable: true,
         byteSize: 1,
         isJson: false,
+        isOson: false
       };
       assert.deepStrictEqual(cursor.metaData, [expectedBind]);
 

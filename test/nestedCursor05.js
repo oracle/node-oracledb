@@ -227,7 +227,8 @@ describe('236. nestedCursor05.js', () => {
       dbTypeName: 'VARCHAR2',
       nullable: true,
       byteSize: 200,
-      isJson: false
+      isJson: false,
+      isOson: false
     };
     assert.deepStrictEqual(result.metaData[0], stringMetaData);
     assert.strictEqual(result.metaData[1].name, 'CHILDREN');
