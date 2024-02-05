@@ -654,6 +654,8 @@ Overview of node-oracledb functional tests
         41.1.2 BLOB getData()
     41.2 stores null value correctly
         41.2.1 testing Null, Empty string and Undefined
+    41.3 OSON column metadata
+        41.3.1 Verify isOson flag in column metadata
 
 42. dataTypeRaw.js
     42.1 testing RAW data in various lengths

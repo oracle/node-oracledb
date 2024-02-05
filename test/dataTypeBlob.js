@@ -41,6 +41,7 @@ const fs       = require('fs');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
+const testsUtil = require(`./testsUtil.js`);
 
 const inFileName = 'test/fuzzydinosaur.jpg';  // contains the image to be inserted
 const outFileName = 'test/blobstreamout.jpg';
@@ -152,5 +153,43 @@ describe('41. dataTypeBlob.js', function() {
       await assist.verifyNullValues(connection, tableName);
     });
   });
+
+  describe('41.3 OSON column metadata ', function() {
+    let isRunnable = false;
+    const TABLE = "nodb_myblobs_oson_col";
+    const createTable = (`CREATE TABLE ${TABLE} (
+        IntCol number(9) not null,
+        OsonCol  blob not null,
+        blobCol  blob not null,
+        constraint TestOsonCols_ck_1 check (OsonCol is json format oson)
+        )`
+    );
+    const plsql = testsUtil.sqlCreateTable(TABLE, createTable);
+
+    before('create table', async function() {
+      if (testsUtil.getClientVersion() >= 2100000000 &&
+        connection.oracleServerVersion >= 2100000000) {
+        isRunnable = true;
+      }
+
+      if (!isRunnable) {
+        this.skip();
+      }
+
+      await connection.execute(plsql);
+    });
+
+    after(async function() {
+      await connection.execute(testsUtil.sqlDropTable(TABLE));
+    });
+
+    it('41.3.1 Verify isOson flag in column metadata', async function() {
+      const result = await connection.execute(`select * from ${TABLE}`);
+      assert.strictEqual(result.metaData[0].isOson, false);
+      assert.strictEqual(result.metaData[1].isOson, true);
+      assert.strictEqual(result.metaData[2].isOson, false);
+    }); // 41.3.1
+
+  }); //41.3
 
 });

@@ -13,6 +13,9 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Added new extended :ref:`metadata <execmetadata>` information attribute
+    ``isOson`` for a fetched column.
+
 #)  Added :attr:`oracledb.poolPingTimeout` and :attr:`pool.poolPingTimeout`
     to limit the :meth:`connection.ping()` call time.
     `Issue #1626 <https://github.com/oracle/node-oracledb/issues/1626>`__.

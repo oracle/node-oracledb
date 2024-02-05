@@ -275,6 +275,11 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "isJson",
             temp))
 
+    // store isOson
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, var->isOson, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "isOson",
+            temp))
+
     // store domainSchema
     if (var->domainSchemaLength) {
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->domainSchema,
@@ -486,6 +491,7 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         if (queryInfo.typeInfo.objectType)
             vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
         vars[i].isJson = queryInfo.typeInfo.isJson;
+        vars[i].isOson = queryInfo.typeInfo.isOson;
         if (queryInfo.typeInfo.domainSchemaLength) {
             vars[i].domainSchemaLength = queryInfo.typeInfo.domainSchemaLength;
             vars[i].domainSchema = queryInfo.typeInfo.domainSchema;

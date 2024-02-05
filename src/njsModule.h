@@ -428,6 +428,7 @@ struct njsBaton {
     bool sodaMetadataCache;
     bool keepInStmtCache;
     bool isJson;
+    bool isOson;
 
     // LOB buffer (requires free only if string was used)
     uint64_t bufferSize;
@@ -640,6 +641,7 @@ struct njsVariable {
     bool isArray;
     bool isNullable;
     bool isJson;
+    bool isOson;
     const char *domainSchema;
     size_t domainSchemaLength;
     const char *domainName;
