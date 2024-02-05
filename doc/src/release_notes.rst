@@ -33,6 +33,8 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Fixed potential cursor issues when using DRCP.
+
 #)  Fixed bug in reading PLS_INTEGER type when used in PL/SQL records.
 
 #)  Error ``NJS-141: errors in array DML exceed 65535`` is now raised
