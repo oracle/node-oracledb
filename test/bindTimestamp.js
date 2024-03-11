@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -86,7 +86,7 @@ describe('102. bindTimestamp.js', function() {
       {
         i: id,
         ts: bv,
-        tz: bv
+        tz: {type: oracledb.DB_TYPE_TIMESTAMP_TZ, val: bv }
       },
       {
         autoCommit: true
@@ -203,9 +203,9 @@ describe('102. bindTimestamp.js', function() {
       {
         i: id,
         ts: bv,
-        tz: bv,
+        tz: {type: oracledb.DB_TYPE_TIMESTAMP_TZ, val: bv},
         oid: {dir: oracledb.BIND_OUT, type: oracledb.NUMBER},
-        otz: {dir: oracledb.BIND_OUT, type: oracledb.DATE}
+        otz: {dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_TIMESTAMP_TZ}
       },
       { autoCommit: true});
     assert(result);
@@ -276,9 +276,9 @@ describe('102. bindTimestamp.js', function() {
       {
         i: id,
         ts: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DATE },
-        tz: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DATE },
+        tz: { val: bv, dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_TIMESTAMP_TZ },
         ts1: { dir: oracledb.BIND_OUT, type: oracledb.DATE },
-        tz1: { dir: oracledb.BIND_OUT, type: oracledb.DATE }
+        tz1: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_TIMESTAMP_TZ }
       },
       { autoCommit: true});
 
