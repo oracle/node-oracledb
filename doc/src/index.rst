@@ -66,6 +66,7 @@ API Manual
     api_manual/statistics.rst
     api_manual/resultset.rst
     api_manual/sodacollection.rst
+    api_manual/sodaoperation.rst
     api_manual/sodadb.rst
     api_manual/sodadocument.rst
     api_manual/sodacursor.rst

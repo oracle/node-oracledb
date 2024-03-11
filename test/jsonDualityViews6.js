@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -236,7 +236,7 @@ describe('277. jsonDualityView6.js', function() {
       );
     });
 
-    describe('277.1.2 Queries(SNT,SNT+where clause)', function() {
+    describe('277.2 Queries(SNT,SNT+where clause)', function() {
       before (async function() {
         await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
         AS
@@ -249,7 +249,7 @@ describe('277. jsonDualityView6.js', function() {
     `);
       });
 
-      it('277.1.2.1 With SNT', async function() {
+      it('277.2.1 With SNT', async function() {
         let result = await connection.execute(`select o.data.StudentId as name from student_ov o
       order by o.data.StudentId`);
         assert.deepStrictEqual(result.rows, [[1], [2], [3]]);
@@ -274,7 +274,7 @@ describe('277. jsonDualityView6.js', function() {
         assert.deepStrictEqual(result.rows, [[1, 1], [2, 2], [3, 3]]);
       });
 
-      it('277.1.2.2 SNT+where clause)', async function() {
+      it('277.2.2 SNT+where clause', async function() {
         let result = await connection.execute(`select o.data.StudentId from student_ov o
       where o.data.StudentId in (1,3) order by 1`);
         assert.deepStrictEqual(result.rows, [[1], [3]]);
@@ -302,7 +302,7 @@ describe('277. jsonDualityView6.js', function() {
       });
     });
   });
-  describe('277.2 PK-PK-FK', function() {
+  describe('277.3 PK-PK-FK', function() {
     before(async function() {
       // create the student table
       await connection.execute(`
@@ -337,7 +337,7 @@ describe('277. jsonDualityView6.js', function() {
       await connection.execute(`drop table student PURGE`);
     });
 
-    it('277.2.1 Insert data in table and views', async function() {
+    it('277.3.1 Insert data in table and views', async function() {
       await connection.execute(`insert into student values (1, 'Ajit')`);
       await connection.execute(`insert into student values (2, 'Tirthankar')`);
       await connection.execute(`insert into student values (3, 'Shashank')`);
@@ -379,7 +379,7 @@ describe('277. jsonDualityView6.js', function() {
         "StudentId": 1, "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
     });
 
-    it('277.2.2 Sanity DMLs', async function() {
+    it('277.3.2 Sanity DMLs', async function() {
       await connection.execute(`
         insert into student_ov values ('{"StudentId":4,
         "StudentName":"Abcd","StudentClass":[{"StudentClassId":1,
@@ -412,7 +412,7 @@ describe('277. jsonDualityView6.js', function() {
         "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
     });
 
-    it('277.2.3 with different keywords', async function() {
+    it('277.3.3 with different keywords', async function() {
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
           AS
           Student @INSERT@UPDATE@DELETE

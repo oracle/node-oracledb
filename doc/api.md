@@ -1318,7 +1318,7 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaCollection.createIndex)
 
-#### <a name="sodacolldrop"></a> 10.2.2 `sodaCollection.drop()`
+#### <a name="sodacolldrop"></a> 11.2.2 `sodaCollection.drop()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaCollection.drop)
 
@@ -1349,78 +1349,6 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 #### <a name="sodacollfind"></a> 11.2.4 `sodaCollection.find()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaCollection.find)
-
-##### <a name="sodaoperationclass"></a> 11.2.4.1 SodaOperation Class
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaoperationclass)
-
-##### <a name="sodaoperationclassnonterm"></a> 11.2.4.1.1 Non-terminal SodaOperation Methods
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaoperationclassnonterm)
-
-###### <a name="sodaoperationclassfetcharraysize"></a> 11.2.4.1.1.1 `sodaOperation.fetchArraySize()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.fetchArraySize)
-
-###### <a name="sodaoperationclassfilter"></a> 11.2.4.1.1.2 `sodaOperation.filter()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.filter)
-
-###### <a name="sodaoperationclasshint"></a> 11.2.4.1.1.3 `sodaOperation.hint()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.hint)
-
-###### <a name="sodaoperationclasskey"></a> 11.2.4.1.1.4 `sodaOperation.key()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.key)
-
-###### <a name="sodaoperationclasskeys"></a> 11.2.4.1.1.5 `sodaOperation.keys()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.keys)
-
-###### <a name="sodaoperationclasslimit"></a> 11.2.4.1.1.6 `sodaOperation.limit()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.limit)
-
-###### <a name="sodaoperationclassskip"></a> 11.2.4.1.1.7 `sodaOperation.skip()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.skip)
-
-###### <a name="sodaoperationclassversion"></a> 11.2.4.1.1.8 `sodaOperation.version()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.version)
-
-##### <a name="sodaoperationclassterm"></a> 11.2.4.1.2 Terminal SodaOperation Methods
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaoperationclassterm)
-
-###### <a name="sodaoperationclasscount"></a> 11.2.4.1.2.1 `sodaOperation.count()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.count)
-
-###### <a name="sodaoperationclassgetcursor"></a> 11.2.4.1.2.2 `sodaOperation.getCursor()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.getCursor)
-
-###### <a name="sodaoperationclassgetdocuments"></a> 11.2.4.1.2.3 `sodaOperation.getDocuments()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.getDocuments)
-
-###### <a name="sodaoperationclassgetone"></a> 11.2.4.1.2.4 `sodaOperation.getOne()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.getOne)
-
-###### <a name="sodaoperationclassremove"></a> 11.2.4.1.2.5 `sodaOperation.remove()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.remove)
-
-###### <a name="sodaoperationclassreplaceone"></a> 11.2.4.1.2.6 `sodaOperation.replaceOne()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.replaceOne)
-
-###### <a name="sodaoperationclassreplaceoneandget"></a> 11.2.4.1.2.7 `sodaOperation.replaceOneAndGet()`
-
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaOperation.replaceOneAndGet)
 
 #### <a name="sodacollgetdataguide"></a> 11.2.5 `sodaCollection.getDataGuide()`
 
@@ -1482,229 +1410,301 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacollection.html#sodaCollection.truncate)
 
-## <a name="sodadatabaseclass"></a> 12. SodaDatabase Class
+## <a name="sodaoperationclass"></a> 12 SodaOperation Class
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaoperationclass)
+
+### <a name="sodaoperationclassnonterm"></a> 12.1 Non-terminal SodaOperation Methods
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaoperationclassnonterm)
+
+#### <a name="sodaoperationclassfetcharraysize"></a> 12.1.1 `sodaOperation.fetchArraySize()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.fetchArraySize)
+
+#### <a name="sodaoperationclassfilter"></a> 12.1.2 `sodaOperation.filter()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.filter)
+
+#### <a name="sodaoperationclasshint"></a> 12.1.3 `sodaOperation.hint()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.hint)
+
+#### <a name="sodaoperationclasskey"></a> 12.1.4 `sodaOperation.key()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.key)
+
+#### <a name="sodaoperationclasskeys"></a> 12.1.5 `sodaOperation.keys()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.keys)
+
+#### <a name="sodaoperationclasslimit"></a> 12.1.6 `sodaOperation.limit()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.limit)
+
+#### <a name="sodaoperationclassskip"></a> 12.1.7 `sodaOperation.skip()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.skip)
+
+#### <a name="sodaoperationclassversion"></a> 12.1.8 `sodaOperation.version()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.version)
+
+### <a name="sodaoperationclassterm"></a> 12.2 Terminal SodaOperation Methods
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaoperationclassterm)
+
+#### <a name="sodaoperationclasscount"></a> 12.2.1 `sodaOperation.count()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.count)
+
+#### <a name="sodaoperationclassgetcursor"></a> 12.2.2 `sodaOperation.getCursor()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.getCursor)
+
+#### <a name="sodaoperationclassgetdocuments"></a> 12.2.3 `sodaOperation.getDocuments()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.getDocuments)
+
+#### <a name="sodaoperationclassgetone"></a> 12.2.4 `sodaOperation.getOne()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.getOne)
+
+#### <a name="sodaoperationclassremove"></a> 12.2.5 `sodaOperation.remove()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.remove)
+
+#### <a name="sodaoperationclassreplaceone"></a> 12.2.6 `sodaOperation.replaceOne()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.replaceOne)
+
+#### <a name="sodaoperationclassreplaceoneandget"></a> 12.2.7 `sodaOperation.replaceOneAndGet()`
+
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodaoperation.html#sodaOperation.replaceOneAndGet)
+
+## <a name="sodadatabaseclass"></a> 13. SodaDatabase Class
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadatabaseclass)
 
-#### <a name="sodadatabasemethods"></a> 12.1 SodaDatabase Methods
+### <a name="sodadatabasemethods"></a> 13.1 SodaDatabase Methods
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadatabasemethods)
 
-#### <a name="sodadbcreatecollection"></a> 12.1.1 `sodaDatabase.createCollection()`
+#### <a name="sodadbcreatecollection"></a> 13.1.1 `sodaDatabase.createCollection()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodaDatabase.createCollection)
 
-##### <a name="sodadbcreatecollectionname"></a> 12.1.1.1 `createCollection(): collectionName`
+##### <a name="sodadbcreatecollectionname"></a> 13.1.1.1 `createCollection(): collectionName`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#createcoll)
 
-##### <a name="sodadbcreatecollectionoptions"></a> 12.1.1.2 `createCollection(): options`
+##### <a name="sodadbcreatecollectionoptions"></a> 13.1.1.2 `createCollection(): options`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#createcoll)
 
-###### <a name="sodadbcreatecollectionoptsmetadata"></a> 12.1.1.2.1 `metaData`
+###### <a name="sodadbcreatecollectionoptsmetadata"></a> 13.1.1.2.1 `metaData`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadbcreatecollectionoptions)
 
-###### <a name="sodadbcreatecollectionoptsmode"></a> 12.1.1.2.2 `mode`
+###### <a name="sodadbcreatecollectionoptsmode"></a> 13.1.1.2.2 `mode`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadbcreatecollectionoptions)
 
-##### <a name="sodadbcreatecollectioncb"></a> 12.1.1.3 `createCollection()`: Callback Function
+##### <a name="sodadbcreatecollectioncb"></a> 13.1.1.3 `createCollection()`: Callback Function
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodaDatabase.createCollection)
 
-#### <a name="sodadbcreatedocument"></a> 12.1.2 `sodaDatabase.createDocument()`
+#### <a name="sodadbcreatedocument"></a> 13.1.2 `sodaDatabase.createDocument()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodaDatabase.createDocument)
 
-##### <a name="sodadbcreatedocumentcontent"></a> 12.1.2.1 `createDocument(): content`
+##### <a name="sodadbcreatedocumentcontent"></a> 13.1.2.1 `createDocument(): content`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#createdocument)
 
-##### <a name="sodadbcreatedocumentoptions"></a> 12.1.2.2 `createDocument(): options`
+##### <a name="sodadbcreatedocumentoptions"></a> 13.1.2.2 `createDocument(): options`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#createdocument)
 
-###### <a name="sodadbcreatedocumentoptskey"></a> 12.1.2.2.1 `key`
+###### <a name="sodadbcreatedocumentoptskey"></a> 13.1.2.2.1 `key`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadbcreatedocumentoptions)
 
-###### <a name="sodadbcreatedocumentoptsmediatype"></a> 12.1.2.2.2 `mediaType`
+###### <a name="sodadbcreatedocumentoptsmediatype"></a> 13.1.2.2.2 `mediaType`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodadbcreatedocumentoptions)
 
-#### <a name="sodadbgetcollectionnames"></a> 12.1.3 `sodaDatabase.getCollectionNames()`
+#### <a name="sodadbgetcollectionnames"></a> 13.1.3 `sodaDatabase.getCollectionNames()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodaDatabase.getCollectionNames)
 
-##### <a name="sodadbgetcollectionnamesparams"></a> 12.1.3.1 `getCollectionNames()`: Parameters
+##### <a name="sodadbgetcollectionnamesparams"></a> 13.1.3.1 `getCollectionNames()`: Parameters
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#getcollectionnames)
 
-###### <a name="sodadbgetcollectionnamesoptions"></a> 12.1.3.1.1 `options`
+###### <a name="sodadbgetcollectionnamesoptions"></a> 13.1.3.1.1 `options`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#getcollectionnamesoptions)
 
-##### <a name="sodadbgetcollectionnamescb"></a> 12.1.3.2 `getCollectionNames()`: Callback Function
+##### <a name="sodadbgetcollectionnamescb"></a> 13.1.3.2 `getCollectionNames()`: Callback Function
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodaDatabase.getCollectionNames)
 
-#### <a name="sodadbopencollection"></a> 12.1.4 `sodaDatabase.openCollection()`
+#### <a name="sodadbopencollection"></a> 13.1.4 `sodaDatabase.openCollection()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodaDatabase.openCollection)
 
-##### <a name="sodadbopencollectionparams"></a> 12.1.4.1 `openCollection()`: Parameters
+##### <a name="sodadbopencollectionparams"></a> 13.1.4.1 `openCollection()`: Parameters
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#opencoll)
 
-###### <a name="sodadbopencollectionname"></a> 12.1.4.1.1 `collectionName`
+###### <a name="sodadbopencollectionname"></a> 13.1.4.1.1 `collectionName`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#opencoll)
 
-##### <a name="sodadbopencollectioncb"></a> 12.1.4.2 `openCollection()`: Callback Function
+##### <a name="sodadbopencollectioncb"></a> 13.1.4.2 `openCollection()`: Callback Function
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadb.html#sodaDatabase.openCollection)
 
-## <a name="sodadocumentclass"></a> 13. SodaDocument Class
+## <a name="sodadocumentclass"></a> 14. SodaDocument Class
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodadocumentclass)
 
-### <a name="sodadocumentproperties"></a> 13.1 SodaDocument Properties
+### <a name="sodadocumentproperties"></a> 14.1 SodaDocument Properties
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodadocumentproperties)
 
-### <a name="sodadocumentmethods"></a> 13.2 SodaDocument Methods
+### <a name="sodadocumentmethods"></a> 14.2 SodaDocument Methods
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodadocumentmethods)
 
-#### <a name="sodadocgetcontent"></a> 13.2.1 `sodaDocument.getContent()`
+#### <a name="sodadocgetcontent"></a> 14.2.1 `sodaDocument.getContent()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodaDocument.getContent)
 
-#### <a name="sodadocgetcontentasbuffer"></a> 13.2.2 `sodaDocument.getContentAsBuffer()`
+#### <a name="sodadocgetcontentasbuffer"></a> 14.2.2 `sodaDocument.getContentAsBuffer()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodaDocument.getContentAsBuffer)
 
-#### <a name="sodadocgetcontentasstring"></a> 13.2.3 `sodaDocument.getContentAsString()`
+#### <a name="sodadocgetcontentasstring"></a> 14.2.3 `sodaDocument.getContentAsString()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodadocument.html#sodaDocument.getContentAsString)
 
-## <a name="sodadocumentcursorclass"></a> 14. SodaDocumentCursor Class
+## <a name="sodadocumentcursorclass"></a> 15. SodaDocumentCursor Class
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacursor.html#sodadocumentcursorclass)
 
-### <a name="sodadoccursormethods"></a> 14.1 SodaDocumentCursor Methods
+### <a name="sodadoccursormethods"></a> 15.1 SodaDocumentCursor Methods
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacursor.html#sodadoccursormethods)
 
-#### <a name="sodadoccursorclose"></a> 14.1.1 `sodaDocumentCursor.close()`
+#### <a name="sodadoccursorclose"></a> 15.1.1 `sodaDocumentCursor.close()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacursor.html#sodaDocumentCursor.close)
 
-#### <a name="sodadoccursorgetnext"></a> 13.1.2 `sodaDocumentCursor.getNext()`
+#### <a name="sodadoccursorgetnext"></a> 15.1.2 `sodaDocumentCursor.getNext()`
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/api_manual/sodacursor.html#sodaDocumentCursor.getNext)
 
 ## <a name="usermanual"></a> NODE-ORACLEDB USER MANUAL
 
-## <a name="initnodeoracledb"></a> <a name="configureconnections"></a> 15. Initializing Node-oracledb
+## <a name="initnodeoracledb"></a> <a name="configureconnections"></a> 16. Initializing Node-oracledb
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#initnodeoracledb)
 
-### <a name="oracleclientloading"></a> 15.1 Setting the Oracle Client Library Directory
+### <a name="oracleclientloading"></a> 16.1 Setting the Oracle Client Library Directory
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#oracleclientloading)
 
-#### <a name="oracleclientloadingwindows"></a> 15.1.1 Setting the Oracle Client Directory on Windows
+#### <a name="oracleclientloadingwindows"></a> 16.1.1 Setting the Oracle Client Directory on Windows
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#oracleclientloadingwindows)
 
-#### <a name="oracleclientloadingmacos"></a> 15.1.2 Setting the Oracle Client Directory on macOS
+#### <a name="oracleclientloadingmacos"></a> 16.1.2 Setting the Oracle Client Directory on macOS
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#oracleclientloadingmacos)
 
-#### <a name="oracleclientloadinglinux"></a> 15.1.3 Setting the Oracle Client Directory on Linux and Related Platforms
+#### <a name="oracleclientloadinglinux"></a> 16.1.3 Setting the Oracle Client Directory on Linux and Related Platforms
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#oracleclientloadinglinux)
 
-#### <a name="oracleclientcallinginit"></a> 15.1.4 Calling `initOracleClient()` to set the Oracle Client Directory
+#### <a name="oracleclientcallinginit"></a> 16.1.4 Calling `initOracleClient()` to set the Oracle Client Directory
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#oracleclientcallinginit)
 
-### <a name="tnsadmin"></a> 15.2 Optional Oracle Net Configuration
+### <a name="tnsadmin"></a> 16.2 Optional Oracle Net Configuration
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#tnsadmin)
 
-### <a name="oraaccess"></a> 15.3 Optional Oracle Client Configuration
+### <a name="oraaccess"></a> 16.3 Optional Oracle Client Configuration
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#oraaccess)
 
-### <a name="environmentvariables"></a> 15.4 Oracle Environment Variables
+### <a name="environmentvariables"></a> 16.4 Oracle Environment Variables
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#environmentvariables)
 
-### <a name="otherinit"></a> 15.5 Other Node-oracledb Initialization
+### <a name="otherinit"></a> 16.5 Other Node-oracledb Initialization
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/initialization.html#otherinit)
 
-## <a name="connectionhandling"></a> 16. Connection Handling
+## <a name="connectionhandling"></a> 17. Connection Handling
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionhandling)
 
-### <a name="connectionstrings"></a> 16.1 Connection Strings
+### <a name="connectionstrings"></a> 17.1 Connection Strings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionstrings)
 
-#### <a name="easyconnect"></a> 16.1.1 Easy Connect Syntax for Connection Strings
+#### <a name="easyconnect"></a> 17.1.1 Easy Connect Syntax for Connection Strings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#easyconnect)
 
-#### <a name="embedtns"></a> 16.1.2 Embedded Connect Descriptor Strings
+#### <a name="embedtns"></a> 17.1.2 Embedded Connect Descriptor Strings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#embedtns)
 
-#### <a name="tnsnames"></a> 16.1.3 Net Service Names for Connection Strings
+#### <a name="tnsnames"></a> 17.1.3 Net Service Names for Connection Strings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#tnsnames)
 
-#### <a name="notjdbc"></a> 16.1.4 JDBC and Oracle SQL Developer Connection Strings
+#### <a name="notjdbc"></a> 17.1.4 JDBC and Oracle SQL Developer Connection Strings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#notjdbc)
 
-### <a name="numberofthreads"></a> 16.2 Connections, Threads, and Parallelism
+### <a name="numberofthreads"></a> 17.2 Connections, Threads, and Parallelism
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#numberofthreads)
 
-#### <a name="workerthreads"></a> 16.2.1 Connections and Worker Threads
+#### <a name="workerthreads"></a> 17.2.1 Connections and Worker Threads
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#workerthreads)
 
-#### <a name="parallelism"></a> 16.2.2 Parallelism on Each Connection
+#### <a name="parallelism"></a> 17.2.2 Parallelism on Each Connection
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#parallelism)
 
-### <a name="connpooling"></a> 16.3 Connection Pooling
+### <a name="connpooling"></a> 17.3 Connection Pooling
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connpooling)
 
-#### <a name="conpoolsizing"></a> 16.3.1 Connection Pool Sizing
+#### <a name="conpoolsizing"></a> 17.3.1 Connection Pool Sizing
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#conpoolsizing)
 
-#### <a name="conpooldraining"></a> 16.3.2 Connection Pool Closing and Draining
+#### <a name="conpooldraining"></a> 17.3.2 Connection Pool Closing and Draining
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#conpooldraining)
 
-#### <a name="connpoolcache"></a> 16.3.3 Connection Pool Cache
+#### <a name="connpoolcache"></a> 17.3.3 Connection Pool Cache
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connpoolcache)
 
-#### <a name="connpoolqueue"></a> 16.3.4 Connection Pool Queue
+#### <a name="connpoolqueue"></a> 17.3.4 Connection Pool Queue
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connpoolqueue)
 
-#### <a name="connpoolmonitor"></a> 16.3.5 Connection Pool Monitoring
+#### <a name="connpoolmonitor"></a> 17.3.5 Connection Pool Monitoring
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connpoolmonitor)
 
@@ -1712,383 +1712,383 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#poolstats)
 
-#### <a name="connpoolpinging"></a> 16.3.6 Connection Pool Pinging
+#### <a name="connpoolpinging"></a> 17.3.6 Connection Pool Pinging
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connpoolpinging)
 
-#### <a name="connpooltagging"></a> 16.3.7 Connection Tagging and Session State
+#### <a name="connpooltagging"></a> 17.3.7 Connection Tagging and Session State
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connpooltagging)
 
-##### <a name="sessionfixupnode"></a> 16.3.7.1 Node.js Session Callback
+##### <a name="sessionfixupnode"></a> 17.3.7.1 Node.js Session Callback
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#sessionfixupnode)
 
-##### <a name="sessiontaggingnode"></a> 16.3.7.2 Node.js Session Tagging Callback
+##### <a name="sessiontaggingnode"></a> 17.3.7.2 Node.js Session Tagging Callback
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#sessiontaggingnode)
 
-##### <a name="sessiontaggingplsql"></a> 16.3.7.3 PL/SQL Session Tagging Callback
+##### <a name="sessiontaggingplsql"></a> 17.3.7.3 PL/SQL Session Tagging Callback
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#sessiontaggingplsql)
 
-#### <a name="connpoolproxy"></a> 16.3.8 Heterogeneous Connection Pools and Pool Proxy Authentication
+#### <a name="connpoolproxy"></a> 17.3.8 Heterogeneous Connection Pools and Pool Proxy Authentication
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connpoolproxy)
 
-### <a name="extauth"></a> 16.4 External Authentication
+### <a name="extauth"></a> 17.4 External Authentication
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth)
 
-### <a name="tokenbasedauthentication"></a> 16.5 Token-Based Authentication
+### <a name="tokenbasedauthentication"></a> 17.5 Token-Based Authentication
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#tokenbasedauthentication)
 
-#### <a name="oauthtokenbasedauthentication"></a> 16.5.1 OAuth 2.0 Token-Based Authentication
+#### <a name="oauthtokenbasedauthentication"></a> 17.5.1 OAuth 2.0 Token-Based Authentication
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthtokenbasedauthentication)
 
-##### <a name="oauthtokengeneration"></a> 16.5.1.1 OAuth 2.0 Token Generation
+##### <a name="oauthtokengeneration"></a> 17.5.1.1 OAuth 2.0 Token Generation
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthtokengeneration)
 
-##### <a name="oauthstandalone"></a> 16.5.1.2 OAuth 2.0 Standalone Connections
+##### <a name="oauthstandalone"></a> 17.5.1.2 OAuth 2.0 Standalone Connections
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthstandalone)
 
-##### <a name="oauthpool"></a> 16.5.1.3 OAuth 2.0 Connection Pooling
+##### <a name="oauthpool"></a> 17.5.1.3 OAuth 2.0 Connection Pooling
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthpool)
 
-##### <a name="oauthconnectstring"></a> 16.5.1.4 OAuth 2.0 Connection Strings
+##### <a name="oauthconnectstring"></a> 17.5.1.4 OAuth 2.0 Connection Strings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthconnectstring)
 
-#### <a name="tokenbasedauth"></a> <a name="iamtokenbasedauthentication"></a> 16.5.2 IAM Token-Based Authentication
+#### <a name="tokenbasedauth"></a> <a name="iamtokenbasedauthentication"></a> 17.5.2 IAM Token-Based Authentication
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamtokenbasedauthentication)
 
-##### <a name="tokengen"></a> <a name="iamtokengeneration"></a> 16.5.2.1 IAM Token Generation
+##### <a name="tokengen"></a> <a name="iamtokengeneration"></a> 17.5.2.1 IAM Token Generation
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamtokengeneration)
 
-##### <a name="tokenread"></a> <a name="iamtokenextraction"></a> 16.5.2.2 IAM Token and Private Key Extraction
+##### <a name="tokenread"></a> <a name="iamtokenextraction"></a> 17.5.2.2 IAM Token and Private Key Extraction
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamtokenextraction)
 
-##### <a name="tokenbasedstandaloneconn"></a> <a name="iamstandalone"></a> 16.5.2.3 IAM Standalone Connections
+##### <a name="tokenbasedstandaloneconn"></a> <a name="iamstandalone"></a> 17.5.2.3 IAM Standalone Connections
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamstandalone)
 
-##### <a name="settingpooltokens"></a> <a name="tokenbasedpool"></a> <a name="iampool"></a> 16.5.2.4 IAM Connection Pooling
+##### <a name="settingpooltokens"></a> <a name="tokenbasedpool"></a> <a name="iampool"></a> 17.5.2.4 IAM Connection Pooling
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iampool)
 
-##### <a name="tokenbasedconnstrings"></a> <a name="iamconnectstring"></a> 16.5.2.5 IAM Connection Strings
+##### <a name="tokenbasedconnstrings"></a> <a name="iamconnectstring"></a> 17.5.2.5 IAM Connection Strings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamconnectstring)
 
-### <a name="drcp"></a> 16.6 Database Resident Connection Pooling (DRCP)
+### <a name="drcp"></a> 17.6 Database Resident Connection Pooling (DRCP)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#drcp)
 
-### <a name="privconn"></a> 16.7 Privileged Connections
+### <a name="privconn"></a> 17.7 Privileged Connections
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#privconn)
 
-### <a name="securenetwork"></a> 16.8 Securely Encrypting Network Traffic to Oracle Database
+### <a name="securenetwork"></a> 17.8 Securely Encrypting Network Traffic to Oracle Database
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#securenetwork)
 
-### <a name="changingpassword"></a> 16.9 Changing Passwords and Connecting with an Expired Password
+### <a name="changingpassword"></a> 17.9 Changing Passwords and Connecting with an Expired Password
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#changingpassword)
 
-### <a name="connectionha"></a> 16.10 Connections and High Availability
+### <a name="connectionha"></a> 17.10 Connections and High Availability
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionha)
 
-#### <a name="connectionpremclose"></a> 16.10.1 Preventing Premature Connection Closing
+#### <a name="connectionpremclose"></a> 17.10.1 Preventing Premature Connection Closing
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionpremclose)
 
-#### <a name="connectionfan"></a> 16.10.2 Fast Application Notification (FAN)
+#### <a name="connectionfan"></a> 17.10.2 Fast Application Notification (FAN)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionfan)
 
-#### <a name="connectionrlb"></a> 16.10.3 Runtime Load Balancing (RLB)
+#### <a name="connectionrlb"></a> 17.10.3 Runtime Load Balancing (RLB)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionrlb)
 
-#### <a name="appcontinuity"></a> 16.10.4 Application Continuity
+#### <a name="appcontinuity"></a> 17.10.4 Application Continuity
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#appcontinuity)
 
-#### <a name="dbcalltimeouts"></a> 16.10.5 Database Call Timeouts
+#### <a name="dbcalltimeouts"></a> 17.10.5 Database Call Timeouts
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#dbcalltimeouts)
 
-### <a name="connectionrac"></a> 16.11 Connecting to Oracle Real Application Clusters (RAC)
+### <a name="connectionrac"></a> 17.11 Connecting to Oracle Real Application Clusters (RAC)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionrac)
 
-### <a name="connectionadb"></a> 16.12 Connecting to Oracle Cloud Autonomous Databases
+### <a name="connectionadb"></a> 17.12 Connecting to Oracle Cloud Autonomous Databases
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionadb)
 
-#### <a name="connectionadbtls"></a> 16.12.1 TLS Connections to Oracle Cloud Autonomous Database
+#### <a name="connectionadbtls"></a> 17.12.1 TLS Connections to Oracle Cloud Autonomous Database
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionadbtls)
 
-#### <a name="connectionadbmtls"></a> 16.12.2 Mutal TLS connections to Oracle Cloud Autonomous Database
+#### <a name="connectionadbmtls"></a> 17.12.2 Mutal TLS connections to Oracle Cloud Autonomous Database
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#connectionadbmtls)
 
-### <a name="sharding"></a> 16.13 Connecting to Sharded Databases
+### <a name="sharding"></a> 17.13 Connecting to Sharded Databases
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#sharding)
 
-## <a name="sqlexecution"></a> 17. SQL Execution
+## <a name="sqlexecution"></a> 18. SQL Execution
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#sqlexecution)
 
-### <a name="select"></a> 17.1 SELECT Statements
+### <a name="select"></a> 18.1 SELECT Statements
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#select)
 
-#### <a name="fetchingrows"></a> 17.1.1 Fetching Rows with Direct Fetches
+#### <a name="fetchingrows"></a> 18.1.1 Fetching Rows with Direct Fetches
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchingrows)
 
-#### <a name="resultsethandling"></a> 17.1.2 Fetching Rows with Result Sets
+#### <a name="resultsethandling"></a> 18.1.2 Fetching Rows with Result Sets
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#resultsethandling)
 
-#### <a name="streamingresults"></a> 17.1.3 Query Streaming
+#### <a name="streamingresults"></a> 18.1.3 Query Streaming
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#streamingresults)
 
-#### <a name="queryoutputformats"></a> 17.1.4 Query Output Formats
+#### <a name="queryoutputformats"></a> 18.1.4 Query Output Formats
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#queryoutputformats)
 
-#### <a name="nestedcursors"></a> 17.1.5 Fetching Nested Cursors
+#### <a name="nestedcursors"></a> 18.1.5 Fetching Nested Cursors
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#nestedcursors)
 
-#### <a name="querymeta"></a> 17.1.6 Query Column Metadata
+#### <a name="querymeta"></a> 18.1.6 Query Column Metadata
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#querymeta)
 
-#### <a name="typemap"></a> 17.1.7 Query Result Type Mapping
+#### <a name="typemap"></a> 18.1.7 Query Result Type Mapping
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#typemap)
 
-##### <a name="stringhandling"></a> 17.1.7.1 Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR
+##### <a name="stringhandling"></a> 18.1.7.1 Fetching CHAR, VARCHAR2, NCHAR and NVARCHAR
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#stringhandling)
 
-##### <a name="numberhandling"></a> 17.1.7.2 Fetching Numbers
+##### <a name="numberhandling"></a> 18.1.7.2 Fetching Numbers
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#numberhandling)
 
-##### <a name="datehandling"></a> 17.1.7.3 Fetching Dates and Timestamps
+##### <a name="datehandling"></a> 18.1.7.3 Fetching Dates and Timestamps
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#datehandling)
 
-##### <a name="fetchasstringhandling"></a> 17.1.7.4 Fetching Numbers and Dates as String
+##### <a name="fetchasstringhandling"></a> 18.1.7.4 Fetching Numbers and Dates as String
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchasstringhandling)
 
-##### <a name="fetchlob"></a> 17.1.7.5 Fetching BLOB, CLOB and NCLOB
+##### <a name="fetchlob"></a> 18.1.7.5 Fetching BLOB, CLOB and NCLOB
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchlob)
 
-##### <a name="fetchlong"></a> 17.1.7.6 Fetching LONG and LONG RAW
+##### <a name="fetchlong"></a> 18.1.7.6 Fetching LONG and LONG RAW
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchlong)
 
-##### <a name="fetchrowid"></a> 17.1.7.7 Fetching ROWID and UROWID
+##### <a name="fetchrowid"></a> 18.1.7.7 Fetching ROWID and UROWID
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchrowid)
 
-##### <a name="fetchxml"></a> 17.1.7.8 Fetching XMLType
+##### <a name="fetchxml"></a> 18.1.7.8 Fetching XMLType
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchxml)
 
-##### <a name="fetchraw"></a> 17.1.7.9 Fetching RAW
+##### <a name="fetchraw"></a> 18.1.7.9 Fetching RAW
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchraw)
 
-##### <a name="fetchobjects"></a> 17.1.7.10 Fetching Oracle Database Objects and Collections
+##### <a name="fetchobjects"></a> 18.1.7.10 Fetching Oracle Database Objects and Collections
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#fetchobjects)
 
-#### <a name="pagingdata"></a> 17.1.8 Limiting Rows and Creating Paged Datasets
+#### <a name="pagingdata"></a> 18.1.8 Limiting Rows and Creating Paged Datasets
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#pagingdata)
 
-#### <a name="autoincrement"></a> 17.1.9 Auto-Increment Columns
+#### <a name="autoincrement"></a> 18.1.9 Auto-Increment Columns
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#autoincrement)
 
-### <a name="cursors1000"></a> 17.2 Cursor Management
+### <a name="cursors1000"></a> 18.2 Cursor Management
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/sql_execution.html#cursors1000)
 
-## <a name="plsqlexecution"></a> 18. PL/SQL Execution
+## <a name="plsqlexecution"></a> 19. PL/SQL Execution
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlexecution)
 
-### <a name="plsqlproc"></a> 18.1 PL/SQL Stored Procedures
+### <a name="plsqlproc"></a> 19.1 PL/SQL Stored Procedures
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlproc)
 
-### <a name="plsqlfunc"></a> 18.2 PL/SQL Stored Functions
+### <a name="plsqlfunc"></a> 19.2 PL/SQL Stored Functions
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlfunc)
 
-### <a name="plsqlanon"></a> 18.3 PL/SQL Anonymous PL/SQL Blocks
+### <a name="plsqlanon"></a> 19.3 PL/SQL Anonymous PL/SQL Blocks
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlanon)
 
-### <a name="dbmsoutput"></a> 18.4 Using DBMS_OUTPUT
+### <a name="dbmsoutput"></a> 19.4 Using DBMS_OUTPUT
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#dbmsoutput)
 
-### <a name="ebr"></a> 18.5 Edition-Based Redefinition
+### <a name="ebr"></a> 19.5 Edition-Based Redefinition
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#ebr)
 
-### <a name="implicitresults"></a> 18.6 Implicit Results
+### <a name="implicitresults"></a> 19.6 Implicit Results
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#implicitresults)
 
-### <a name="plsqlcreate"></a> 18.7 Creating PL/SQL Procedures and Functions
+### <a name="plsqlcreate"></a> 19.7 Creating PL/SQL Procedures and Functions
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlcreate)
 
-#### <a name="plsqlcompwarnings"></a> 18.7.1 PL/SQL Compilation Warnings
+#### <a name="plsqlcompwarnings"></a> 19.7.1 PL/SQL Compilation Warnings
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/plsql_execution.html#plsqlcompwarnings)
 
-## <a name="lobhandling"></a> 19. Working with CLOB, NCLOB and BLOB Data
+## <a name="lobhandling"></a> 20. Working with CLOB, NCLOB and BLOB Data
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#lobhandling)
 
-### <a name="basiclobinsert"></a> 19.1 Simple Insertion of LOBs
+### <a name="basiclobinsert"></a> 20.1 Simple Insertion of LOBs
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#basiclobinsert)
 
-### <a name="queryinglobs"></a> 19.2 Simple LOB Queries and PL/SQL OUT Binds
+### <a name="queryinglobs"></a> 20.2 Simple LOB Queries and PL/SQL OUT Binds
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#queryinglobs)
 
-### <a name="streamsandlobs"></a> 19.3 Streaming Lobs
+### <a name="streamsandlobs"></a> 20.3 Streaming Lobs
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#streamsandlobs)
 
-### <a name="lobinsertdiscussion"></a> 19.4 Using RETURNING INTO to Insert into LOBs
+### <a name="lobinsertdiscussion"></a> 20.4 Using RETURNING INTO to Insert into LOBs
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#lobinsertdiscussion)
 
-### <a name="loboutstream"></a> 19.5 Getting LOBs as Streams from Oracle Database
+### <a name="loboutstream"></a> 20.5 Getting LOBs as Streams from Oracle Database
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#loboutstream)
 
-### <a name="templobdiscussion"></a> 19.6 Using `createLob()` for PL/SQL IN Binds
+### <a name="templobdiscussion"></a> 20.6 Using `createLob()` for PL/SQL IN Binds
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#templobdiscussion)
 
-### <a name="closinglobs"></a> 19.7 Closing Lobs
+### <a name="closinglobs"></a> 20.7 Closing Lobs
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/lob_data.html#closinglobs)
 
-## <a name="jsondatatype"></a> 20. Oracle Database JSON Data Type
+## <a name="jsondatatype"></a> 21. Oracle Database JSON Data Type
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/json_data_type.html#jsondatatype)
 
-## <a name="xmltype"></a> 21. Working with XMLType
+## <a name="xmltype"></a> 22. Working with XMLType
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/xml_data_type.html#xmltype)
 
-## <a name="bind"></a> 22. Bind Parameters for Prepared Statements
+## <a name="bind"></a> 23. Bind Parameters for Prepared Statements
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#bind)
 
-### <a name="inbind"></a> 22.1 IN Bind Parameters
+### <a name="inbind"></a> 23.1 IN Bind Parameters
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#inbind)
 
-### <a name="outbind"></a> 22.2 OUT and IN OUT Bind Parameters
+### <a name="outbind"></a> 23.2 OUT and IN OUT Bind Parameters
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#outbind)
 
-### <a name="dmlreturn"></a> 22.3 DML RETURNING Bind Parameters
+### <a name="dmlreturn"></a> 23.3 DML RETURNING Bind Parameters
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#dmlreturn)
 
-### <a name="refcursors"></a> 22.4 REF CURSOR Bind Parameters
+### <a name="refcursors"></a> 23.4 REF CURSOR Bind Parameters
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#refcursors)
 
-### <a name="lobbinds"></a> 22.5 LOB Bind Parameters
+### <a name="lobbinds"></a> 23.5 LOB Bind Parameters
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#lobbinds)
 
-### <a name="sqlwherein"></a> 22.6 Binding Multiple Values to a SQL `WHERE IN` Clause
+### <a name="sqlwherein"></a> 23.6 Binding Multiple Values to a SQL `WHERE IN` Clause
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#sqlwherein)
 
-### <a name="sqlbindlike"></a> 22.7 Binding in a `LIKE` or `REGEXP_LIKE` Clause
+### <a name="sqlbindlike"></a> 23.7 Binding in a `LIKE` or `REGEXP_LIKE` Clause
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#sqlbindlike)
 
-### <a name="sqlbindtablename"></a> 22.8 Binding Column and Table Names in Queries
+### <a name="sqlbindtablename"></a> 23.8 Binding Column and Table Names in Queries
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/bind.html#sqlbindtablename)
 
-## <a name="objects"></a> 23. Oracle Database Objects and Collections
+## <a name="objects"></a> 24. Oracle Database Objects and Collections
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objects)
 
-### <a name="objectinsert"></a> 23.1 Inserting Objects
+### <a name="objectinsert"></a> 24.1 Inserting Objects
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objectinsert)
 
-### <a name="objectfetch"></a> 23.2 Fetching Objects
+### <a name="objectfetch"></a> 24.2 Fetching Objects
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objectfetch)
 
-### <a name="plsqlcollections"></a> 23.3 PL/SQL Collection Types
+### <a name="plsqlcollections"></a> 24.3 PL/SQL Collection Types
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#plsqlcollections)
 
-#### <a name="plsqlindexbybinds"></a> 23.3.1 PL/SQL Collection Associative Arrays (Index-by)
+#### <a name="plsqlindexbybinds"></a> 24.3.1 PL/SQL Collection Associative Arrays (Index-by)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#plsqlindexbybinds)
 
-#### <a name="plsqlvarray"></a> 23.3.2 PL/SQL Collection VARRAY Types
+#### <a name="plsqlvarray"></a> 24.3.2 PL/SQL Collection VARRAY Types
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#plsqlvarray)
 
-#### <a name="plsqlnestedtables"></a> 23.3.3 PL/SQL Collection Nested Tables
+#### <a name="plsqlnestedtables"></a> 24.3.3 PL/SQL Collection Nested Tables
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#plsqlnestedtables)
 
-### <a name="plsqlrecords"></a> 23.4 PL/SQL RECORD Types
+### <a name="plsqlrecords"></a> 24.4 PL/SQL RECORD Types
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#plsqlrecords)
 
-### <a name="objexecmany"></a> 23.5 Inserting or Passing Multiple Objects of the Same Type
+### <a name="objexecmany"></a> 24.5 Inserting or Passing Multiple Objects of the Same Type
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objexecmany)
 
-### <a name="objectlimitations"></a> 23.6 Oracle Database Object Type Limitations
+### <a name="objectlimitations"></a> 24.6 Oracle Database Object Type Limitations
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/objects.html#objectlimitations)
 
-## <a name="batchexecution"></a> 24. Batch Statement Execution and Bulk Loading
+## <a name="batchexecution"></a> 25. Batch Statement Execution and Bulk Loading
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/batch_statement.html#batchexecution)
 
@@ -2100,47 +2100,47 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/batch_statement.html#executemanyobjects)
 
-## <a name="transactionmgt"></a> 25. Transaction Management
+## <a name="transactionmgt"></a> 26. Transaction Management
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/txn_management.html#transactionmgt)
 
-## <a name="cqn"></a> 26. Continuous Query Notification (CQN)
+## <a name="cqn"></a> 27. Continuous Query Notification (CQN)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/cqn.html#cqn)
 
-## <a name="aq"></a> 27. Oracle Advanced Queuing (AQ)
+## <a name="aq"></a> 28. Oracle Advanced Queuing (AQ)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aq)
 
-### <a name="aqrawexample"></a> 27.1 Sending Simple AQ Messages
+### <a name="aqrawexample"></a> 28.1 Sending Simple AQ Messages
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqrawexample)
 
-### <a name="aqobjexample"></a> 27.2 Sending Oracle Database Object AQ Messages
+### <a name="aqobjexample"></a> 28.2 Sending Oracle Database Object AQ Messages
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqobjexample)
 
-### <a name="aqoptions"></a> 27.3 Changing AQ options
+### <a name="aqoptions"></a> 28.3 Changing AQ options
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqoptions)
 
-### <a name="aqmultiplemessages"></a> 27.4 Enqueuing and Dequeuing Multiple Messages
+### <a name="aqmultiplemessages"></a> 28.4 Enqueuing and Dequeuing Multiple Messages
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqmultiplemessages)
 
-### <a name="aqnotifications"></a> 27.5 Advanced Queuing Notifications
+### <a name="aqnotifications"></a> 28.5 Advanced Queuing Notifications
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqnotifications)
 
-### <a name="aqrecipientlists"></a> 27.6 Recipient Lists
+### <a name="aqrecipientlists"></a> 28.6 Recipient Lists
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/aq.html#aqrecipientlists)
 
-## <a name="nls"></a> 28. Globalization and National Language Support (NLS)
+## <a name="nls"></a> 29. Globalization and National Language Support (NLS)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/globalization.html#nls)
 
-## <a name="endtoend"></a> 29. End-to-end Tracing, Mid-tier Authentication, and Auditing
+## <a name="endtoend"></a> 30. End-to-end Tracing, Mid-tier Authentication, and Auditing
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tracing.html#endtoend)
 
@@ -2148,130 +2148,130 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tracing.html#drivernameview)
 
-## <a name="sodaoverview"></a> 30. Simple Oracle Document Access (SODA)
+## <a name="sodaoverview"></a> 31. Simple Oracle Document Access (SODA)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodaoverview)
 
-### <a name="sodarequirements"></a> 30.1 Node-oracledb SODA Requirements
+### <a name="sodarequirements"></a> 31.1 Node-oracledb SODA Requirements
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodarequirements)
 
-### <a name="creatingsodacollections"></a> 30.2 Creating and Dropping SODA Collections
+### <a name="creatingsodacollections"></a> 31.2 Creating and Dropping SODA Collections
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#creatingsodacollections)
 
-### <a name="accessingsodadocuments"></a> 30.3 Creating and Accessing SODA documents
+### <a name="accessingsodadocuments"></a> 31.3 Creating and Accessing SODA documents
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#accessingsodadocuments)
 
-### <a name="sodaqbesearches"></a> 30.4 SODA Query-by-Example Searches for JSON Documents
+### <a name="sodaqbesearches"></a> 31.4 SODA Query-by-Example Searches for JSON Documents
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodaqbesearches)
 
-### <a name="sodatextsearches"></a> 30.5 SODA Text Searches
+### <a name="sodatextsearches"></a> 31.5 SODA Text Searches
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodatextsearches)
 
-### <a name="sodaclientkeys"></a> 30.6 SODA Client-Assigned Keys and Collection Metadata
+### <a name="sodaclientkeys"></a> 31.6 SODA Client-Assigned Keys and Collection Metadata
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodaclientkeys)
 
-### <a name="sodajsondataguide"></a> 30.7 JSON Data Guides in SODA
+### <a name="sodajsondataguide"></a> 31.7 JSON Data Guides in SODA
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodajsondataguide)
 
-#### <a name="sodamdcache"></a> 30.8 Using the SODA Metadata Cache
+#### <a name="sodamdcache"></a> 31.8 Using the SODA Metadata Cache
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/soda.html#sodamdcache)
 
-## <a name="startupshutdown"></a> 31. Database Start Up and Shut Down
+## <a name="startupshutdown"></a> 32. Database Start Up and Shut Down
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/startup.html#startupshutdown)
 
-### <a name="startupshutdownsimple"></a> 31.1 Simple Database Start Up and Shut Down
+### <a name="startupshutdownsimple"></a> 32.1 Simple Database Start Up and Shut Down
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/startup.html#startupshutdownsimple)
 
-### <a name="startupshutdownflexible"></a> 31.2 Flexible Database Start Up and Shut Down
+### <a name="startupshutdownflexible"></a> 32.2 Flexible Database Start Up and Shut Down
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/startup.html#startupshutdownflexible)
 
-### <a name="startupshutdownpdb"></a> 31.3 Oracle Multitenant Pluggable and Container Databases
+### <a name="startupshutdownpdb"></a> 32.3 Oracle Multitenant Pluggable and Container Databases
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/startup.html#startupshutdownpdb)
 
-## <a name="tuning"></a> 32. Node-oracledb Tuning
+## <a name="tuning"></a> 33. Node-oracledb Tuning
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#tuning)
 
-#### <a name="rowfetching"></a> 32.1 Tuning Fetch Performance
+#### <a name="rowfetching"></a> 33.1 Tuning Fetch Performance
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#rowfetching)
 
-### <a name="roundtrips"></a> 32.2 Database Round-trips
+### <a name="roundtrips"></a> 33.2 Database Round-trips
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#roundtrips)
 
-### <a name="stmtcache"></a> 32.3. Statement Caching
+### <a name="stmtcache"></a> 33.3 Statement Caching
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#stmtcache)
 
-### <a name="clientresultcache"></a> 32.4 Client Result Caching (CRC)
+### <a name="clientresultcache"></a> 33.4 Client Result Caching (CRC)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tuning.html#clientresultcache)
 
-## <a name="bindtrace"></a> <a name="tracingsql"></a> 33. Tracing SQL and PL/SQL Statements
+## <a name="bindtrace"></a> <a name="tracingsql"></a> 34. Tracing SQL and PL/SQL Statements
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/tracingsql.html#tracingsql)
 
-## <a name="twopc"></a> 34. Two-Phase Commits (TPC)
+## <a name="twopc"></a> 35. Two-Phase Commits (TPC)
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/two_phase_commit.html#twopc)
 
-## <a name="programstyles"></a> 35. Node.js Programming Styles and node-oracledb
+## <a name="programstyles"></a> 36. Node.js Programming Styles and node-oracledb
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#programstyles)
 
-### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 35.1 Callbacks and node-oracledb
+### <a name="callbackoverview"></a> <a name="examplequerycb"></a> 36.1 Callbacks and node-oracledb
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#callbackoverview)
 
-### <a name="promiseoverview"></a> 35.2 Promises and node-oracledb
+### <a name="promiseoverview"></a> 36.2 Promises and node-oracledb
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#promiseoverview)
 
-#### <a name="custompromises"></a> 35.2.1 Custom Promise Libraries
+#### <a name="custompromises"></a> 36.2.1 Custom Promise Libraries
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#custompromises)
 
-### <a name="asyncawaitoverview"></a> 35.3 Async/Await and node-oracledb
+### <a name="asyncawaitoverview"></a> 36.3 Async/Await and node-oracledb
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/pgmstyle.html#asyncawaitoverview)
 
-## <a name="migrate"></a> 36. Migrating from Previous node-oracledb Releases
+## <a name="migrate"></a> 37. Migrating from Previous node-oracledb Releases
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migrate)
 
-### <a name="migratev31v40"></a> 36.1 Migrating from node-oracledb 3.1 to node-oracledb 4.0
+### <a name="migratev31v40"></a> 37.1 Migrating from node-oracledb 3.1 to node-oracledb 4.0
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migratev31v40)
 
-### <a name="migratev40v41"></a> 36.2 Migrating from node-oracledb 4.0 to node-oracledb 4.1
+### <a name="migratev40v41"></a> 37.2 Migrating from node-oracledb 4.0 to node-oracledb 4.1
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migratev40v41)
 
-### <a name="migratev41v42"></a> 36.3 Migrating from node-oracledb 4.1 to node-oracledb 4.2
+### <a name="migratev41v42"></a> 37.3 Migrating from node-oracledb 4.1 to node-oracledb 4.2
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migratev41v42)
 
-### <a name="migratev42v50"></a> 36.4 Migrating from node-oracledb 4.2 to node-oracledb 5.0
+### <a name="migratev42v50"></a> 37.4 Migrating from node-oracledb 4.2 to node-oracledb 5.0
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migratev42v50)
 
-### <a name="migratev51v52"></a> 36.5 Migrating from node-oracledb 5.1 to node-oracledb 5.2
+### <a name="migratev51v52"></a> 37.5 Migrating from node-oracledb 5.1 to node-oracledb 5.2
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/migrate.html#migratev51v52)
 
-## <a name="otherresources"></a> 37. Useful Resources for Node-oracledb
+## <a name="otherresources"></a> 38. Useful Resources for Node-oracledb
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/resources.html#otherresources)

@@ -13,8 +13,6 @@ Makefile.win32
 /examples/*
 !/examples/example.js
 !/examples/dbconfig.js
-!/examples/vectortype1.js
-!/examples/vectortype2.js
 /test
 /build/Release/oracledb.node
 /build/oracledb.target.mk

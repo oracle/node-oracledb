@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -864,10 +864,10 @@ describe('290. dbObject20.js', () => {
 
   describe(`290.4 db Object tests with Invalid values to attributes`, () => {
     let conn;
-    const TYPE1 = 'NODB_TEST_INVALID_VALUES_OBJ_TBL_LINE';
-    const TYPE2 = 'NODB_TEST_INVALID_VALUES_OBJ_TBL';
-    const TYPE3 = 'NODB_TEST_INVALID_VALUES_OBJ';
-    const TYPE4 = 'NODB_TEST_INVALID_VALUES_OBJ_TBL_VARCHAR';
+    const TYPE1 = 'NODB_TEST_INV_OBJ_TBL_LINE';
+    const TYPE2 = 'NODB_TEST_INV_OBJ_TBL';
+    const TYPE3 = 'NODB_TEST_INV_OBJ';
+    const TYPE4 = 'NODB_TEST_INV_OBJ_TBL_VARCHAR';
     const maxVarCharLen = 4;
     const maxVarNCharLen = 4;
     const maxVarRawLen = 10;

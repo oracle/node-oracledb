@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -64,7 +64,7 @@ describe('289. sqlParser.js', function() {
   }); // 289.1
 
   it('289.2 bind variables between quoted string', async () => {
-    const sql = `select
+    const sql = `SELECT
       :a,
       q'{This contains ' and " and : just fine}',
       :b,
@@ -76,19 +76,19 @@ describe('289. sqlParser.js', function() {
       :e,
       q'$This contains ' and " and : just fine$',
       :f
-      from dual`;
+      FROM DUAL`;
     const info = await conn.getStatementInfo(sql);
     assert.deepStrictEqual(info.bindNames, ["A", "B", "C", "D", "E", "F"]);
   }); // 289.2
 
-  it('289.3 single line comment', async () => {
+  it('289.3 PL/SQL - single line comment', async () => {
     const sql = `--begin :value2 := :a + :b + :c +:a +3; end;
-                begin :value2 := :a + :c +3; end; -- not a :bindv`;
+                begin :value2 := :a + :c +3; end; -- not a :bindVariable`;
     const info = await conn.getStatementInfo(sql);
     assert.deepStrictEqual(info.bindNames, ["VALUE2", "A", "C"]);
   }); // 289.3
 
-  it('289.4 constant string', async () => {
+  it('289.4 PL/SQL - constant string', async () => {
     const sql = `begin
                   :value := to_date('20021231 12:31:00', :format);
                  end;`;
@@ -142,4 +142,11 @@ describe('289. sqlParser.js', function() {
     const info = await conn.getStatementInfo(sql);
     assert.deepStrictEqual(info.bindNames, ['TEST']);
   }); // 289.10
+
+  it('289.11 single line comment at the end', async () => {
+    const sql = `
+                SELECT :test, 'String' FROM DUAL -- not a :bindVariable`;
+    const info = await conn.getStatementInfo(sql);
+    assert.deepStrictEqual(info.bindNames, ['TEST']);
+  }); // 289.11
 });
