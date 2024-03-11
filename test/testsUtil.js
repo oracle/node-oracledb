@@ -167,7 +167,7 @@ testsUtil.dropDomain = async function(conn, domainName) {
 };
 
 testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, serverVersion = 1805000000) {
-  if (testsUtil.getClientVersion() < clientVersion) return false;
+  if (!oracledb.thin && testsUtil.getClientVersion() < clientVersion) return false;
   const connection = await oracledb.getConnection(dbConfig);
   const version = connection.oracleServerVersion;
   await connection.close();

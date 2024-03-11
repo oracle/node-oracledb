@@ -169,6 +169,8 @@
     "NJS-024: memory allocation failed"
 #define NJS_ERR_UNSUPPORTED_DATA_TYPE_IN_JSON \
     "NJS-078: unsupported data type %d in JSON value"
+#define NJS_ERR_VECTOR_FORMAT_NOT_SUPPORTED \
+    "NJS-144: VECTOR format %d is not supported"
 
 // pool statuses
 #define NJS_POOL_STATUS_OPEN            6000
@@ -648,6 +650,9 @@ struct njsVariable {
     size_t domainNameLength;
     size_t numAnnotations;
     dpiAnnotation *dpiAnnotations;
+    uint32_t vectorDimensions;
+    uint8_t vectorFormat;
+    uint8_t vectorFlags;
     njsVariableBuffer *buffer;
     uint32_t numDmlReturningBuffers;
     njsVariableBuffer *dmlReturningBuffers;
@@ -762,6 +767,10 @@ bool njsBaton_setErrorUnsupportedDataTypeInJson(njsBaton *baton,
         uint32_t oracleTypeNum);
 bool njsBaton_setErrorDPI(njsBaton *baton);
 bool njsBaton_setJsValues(njsBaton *baton, napi_env env);
+bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
+        napi_env env, napi_value *value);
+bool njsBaton_setErrorUnsupportedVectorFormat(njsBaton *baton,
+        uint8_t format);
 
 
 //-----------------------------------------------------------------------------

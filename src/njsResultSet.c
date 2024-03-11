@@ -353,6 +353,7 @@ static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
             case DPI_ORACLE_TYPE_STMT:
             case DPI_ORACLE_TYPE_JSON:
             case DPI_ORACLE_TYPE_BOOLEAN:
+            case DPI_ORACLE_TYPE_VECTOR:
                 break;
             default:
                 return njsUtils_throwUnsupportedDataType(env, var->varTypeNum,

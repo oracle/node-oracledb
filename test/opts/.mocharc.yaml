@@ -276,3 +276,6 @@ spec:
   - test/dbSchema.js
   - test/passwordExpiryWarning.js
   - test/plsqlWarnings.js
+  - test/dataTypeVector1.js
+  - test/dataTypeVector2.js
+  - test/dataTypeVector3.js

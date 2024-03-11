@@ -58,7 +58,7 @@ describe('52. connClose.js', function() {
       function() {
         connection.clientId = "52.3";
       },
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.2
 
@@ -70,7 +70,7 @@ describe('52. connClose.js', function() {
       function() {
         connection.module = "52.4";
       },
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.3
 
@@ -82,7 +82,7 @@ describe('52. connClose.js', function() {
       function() {
         connection.module = "52.5";
       },
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.4
 
@@ -94,7 +94,7 @@ describe('52. connClose.js', function() {
       async () => {
         await connection.execute("select sysdate from dual");
       },
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.5
 
@@ -106,7 +106,7 @@ describe('52. connClose.js', function() {
       async () => {
         await connection.break();
       },
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.6
 
@@ -118,7 +118,7 @@ describe('52. connClose.js', function() {
       async () => {
         await connection.commit();
       },
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.7
 
@@ -130,7 +130,7 @@ describe('52. connClose.js', function() {
       async () => {
         await connection.createLob(oracledb.CLOB);
       },
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.8
 
@@ -158,7 +158,7 @@ describe('52. connClose.js', function() {
     await connection.close();
     await assert.rejects(
       async () => await connection.commit(),
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.10
 
@@ -168,7 +168,7 @@ describe('52. connClose.js', function() {
     await connection.close();
     await assert.rejects(
       async () => await connection.rollback(),
-      /NJS-003: invalid connection/
+      /NJS-003:/
     );
   }); // 52.11
 

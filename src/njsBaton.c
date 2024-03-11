@@ -792,3 +792,64 @@ bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
 
     return true;
 }
+
+//-----------------------------------------------------------------------------
+// njsBaton_getVectorValue()
+//   Return an appropriate JavaScript value for the Vector type.
+//-----------------------------------------------------------------------------
+bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
+        napi_env env, napi_value *value)
+{
+    dpiVectorInfo vectorInfo;
+    size_t elementLength = 0;
+    size_t byteLength = 0;
+    const size_t bufferOffset = 0;
+    void *destData = NULL;
+    napi_typedarray_type type = napi_int8_array;
+    size_t numElem = 0;
+    napi_value arrBuf;
+
+    if (dpiVector_getValue(vector, &vectorInfo) < 0) {
+        return njsBaton_setErrorDPI(baton);
+    }
+    numElem = vectorInfo.numDimensions;
+
+    switch(vectorInfo.format) {
+        case DPI_VECTOR_FORMAT_FLOAT64:
+            type = napi_float64_array;
+            elementLength = 8;
+            break;
+        case DPI_VECTOR_FORMAT_FLOAT32:
+            type = napi_float32_array;
+            elementLength = 4;
+            break;
+        case DPI_VECTOR_FORMAT_INT8:
+            type = napi_int8_array;
+            elementLength = 1;
+            break;
+        default:
+            return njsBaton_setErrorUnsupportedVectorFormat
+                            (baton, vectorInfo.format);
+    }
+    byteLength = elementLength * numElem;
+    NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, byteLength, 
+            &destData, &arrBuf))
+    NJS_CHECK_NAPI(env, napi_create_typedarray(
+            env, type, numElem, arrBuf, bufferOffset, value))
+    memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsBaton_setErrorUnsupportedVectorFormat()
+//  Set the error on the baton to indicate that an unsupported vector format
+//  was encountered. Returns false as a convenience to the caller.
+//-----------------------------------------------------------------------------
+bool njsBaton_setErrorUnsupportedVectorFormat(njsBaton *baton,
+        uint8_t format)
+{
+    (void) snprintf(baton->error, sizeof(baton->error),
+            NJS_ERR_VECTOR_FORMAT_NOT_SUPPORTED, format);
+    baton->hasError = true;
+    return false;
+}

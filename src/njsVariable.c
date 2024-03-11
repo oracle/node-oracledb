@@ -101,6 +101,9 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_ROWID:
             var->nativeTypeNum = DPI_NATIVE_TYPE_ROWID;
             break;
+        case DPI_ORACLE_TYPE_VECTOR:
+            var->nativeTypeNum = DPI_NATIVE_TYPE_VECTOR;
+            break;
     }
 
     // allocate buffer
@@ -348,6 +351,21 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
                 temp))
     }
 
+    if (var->dbTypeNum == DPI_ORACLE_TYPE_VECTOR) {
+        if (!(var->vectorFlags & DPI_VECTOR_FLAGS_FLEXIBLE_DIM)) {
+            NJS_CHECK_NAPI(env, napi_create_uint32(env, var->vectorDimensions,
+                    &temp))
+            NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                    "vectorDimensions", temp))
+        }
+        if (var->vectorFormat != 0) {
+            NJS_CHECK_NAPI(env, napi_create_int32(env, var->vectorFormat,
+                    &temp))
+            NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                    "vectorFormat", temp))
+        }
+    }
+
     return true;
 }
 
@@ -450,6 +468,9 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
                     &topNode) < 0)
                 return njsBaton_setErrorDPI(baton);
             return njsBaton_getJsonNodeValue(baton, topNode, env, value);
+        case DPI_NATIVE_TYPE_VECTOR:
+            return njsBaton_getVectorValue(baton, data->value.asVector,
+                    env, value);
         default:
             break;
     }
@@ -488,6 +509,9 @@ bool njsVariable_initForQuery(njsVariable *vars, uint32_t numVars,
         vars[i].scale = queryInfo.typeInfo.scale;
         vars[i].isNullable = queryInfo.nullOk;
         vars[i].dbTypeNum = queryInfo.typeInfo.oracleTypeNum;
+        vars[i].vectorDimensions = queryInfo.typeInfo.vectorDimensions;
+        vars[i].vectorFormat = queryInfo.typeInfo.vectorFormat;
+        vars[i].vectorFlags = queryInfo.typeInfo.vectorFlags;
         if (queryInfo.typeInfo.objectType)
             vars[i].dpiObjectTypeHandle = queryInfo.typeInfo.objectType;
         vars[i].isJson = queryInfo.typeInfo.isJson;
@@ -725,6 +749,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     njsJsonBuffer jsonBuffer;
     njsResultSet *resultSet;
     dpiLob *tempLobHandle;
+    dpiVectorInfo vectorInfo;
     size_t bufferLength;
     double tempDouble;
     njsDbObject *obj;
@@ -732,6 +757,13 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     void *buffer;
     njsLob *lob;
     bool check;
+    napi_value arrBuf;
+    napi_value dVal;
+    napi_typedarray_type type;
+    void *rawdata = NULL;
+    bool isTyped = false;
+    size_t numElem = 0;
+    size_t byteOffset = 0;
 
     // initialization
     data = &var->buffer->dpiVarData[pos];
@@ -756,6 +788,32 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
     if (valueType == napi_undefined || valueType == napi_null) {
         data->isNull = 1;
+        return true;
+    }
+
+    // Handle vectors
+    if (var->varTypeNum == DPI_ORACLE_TYPE_VECTOR) {
+        // only typed arrays are sent
+        NJS_CHECK_NAPI(env, napi_get_typedarray_info(env, value, &type,
+                &numElem, &rawdata, &arrBuf, &byteOffset))
+        vectorInfo.numDimensions = (uint32_t)numElem;
+        switch (type) {
+            case napi_float64_array:
+                vectorInfo.format = DPI_VECTOR_FORMAT_FLOAT64;
+                break;
+            case napi_float32_array:
+                vectorInfo.format = DPI_VECTOR_FORMAT_FLOAT32;
+                break;
+            case napi_int8_array:
+                vectorInfo.format = DPI_VECTOR_FORMAT_INT8;
+                break;
+            default:
+                break;
+        }
+        vectorInfo.dimensions.asPtr = rawdata + byteOffset;
+        if (dpiVector_setValue(data->value.asVector, &vectorInfo) < 0) {
+            return njsBaton_setErrorDPI(baton);
+        }
         return true;
     }
 

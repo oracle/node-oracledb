@@ -56,7 +56,8 @@
              "odpi/src/dpiStringList.c",
              "odpi/src/dpiSubscr.c",
              "odpi/src/dpiUtils.c",
-             "odpi/src/dpiVar.c"
+             "odpi/src/dpiVar.c",
+             "odpi/src/dpiVector.c"
     ],
     "conditions" : [
     [
