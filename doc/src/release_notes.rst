@@ -13,6 +13,10 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Connections to standby database opened `MOUNTED` return
+    `NAN <https://github.com/nodejs/nan>` for :meth:`~connection.maxOpenCursors`
+    Fixed to return 0.
+
 #)  Added :meth:`~dbObject.toMap` method to :ref:`DbObject Class<dbobjectclass>`
     which returns a map object.
     See `Issue #1627 <https://github.com/oracle/node-oracledb/issues/1627>`__.
