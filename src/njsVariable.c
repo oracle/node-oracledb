@@ -757,11 +757,9 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     void *buffer;
     njsLob *lob;
     bool check;
-    napi_value arrBuf;
     napi_typedarray_type type;
     void *rawdata = NULL;
     size_t numElem = 0;
-    size_t byteOffset = 0;
 
     // initialization
     data = &var->buffer->dpiVarData[pos];
@@ -793,7 +791,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     if (var->varTypeNum == DPI_ORACLE_TYPE_VECTOR) {
         // only typed arrays are sent
         NJS_CHECK_NAPI(env, napi_get_typedarray_info(env, value, &type,
-                &numElem, &rawdata, &arrBuf, &byteOffset))
+                &numElem, &rawdata, NULL, NULL))
         vectorInfo.numDimensions = (uint32_t)numElem;
         switch (type) {
             case napi_float64_array:
@@ -808,7 +806,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
             default:
                 break;
         }
-        vectorInfo.dimensions.asPtr = rawdata + byteOffset;
+        vectorInfo.dimensions.asPtr = rawdata;
         if (dpiVector_setValue(data->value.asVector, &vectorInfo) < 0) {
             return njsBaton_setErrorDPI(baton);
         }

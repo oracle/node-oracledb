@@ -1584,4 +1584,25 @@ describe('294. dataTypeVector1.js', function() {
     assert.strictEqual(clobData, arr2.toString('utf8'));
     await connection.execute(testsUtil.sqlDropTable(table));
   }); // 294.59
+
+  it('294.60 insert a float64 typed array created from ArrayBuffer', async function() {
+    const elements = [8.1, 7.2, 6.3, 5.4, 4.5, 3.6, 2.7, 1.8, 9.9, 0.0];
+    const arrBuf = new ArrayBuffer(128);
+
+    // Create typed array of 10 elements from byteOffset 8
+    const float64Arr = new Float64Array(arrBuf, 8, 10);
+
+    // initialize
+    elements.forEach((element, index) => {
+      float64Arr[index] = element;
+    });
+
+    // insert and verify.
+    const binds = { emdbedding: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float64Arr } };
+    const sql = `insert into ${tableName} (IntCol, Vector64Col)
+    values(2, :emdbedding)`;
+    await connection.execute(sql, binds);
+    const result = await connection.execute(`select Vector64Col from ${tableName}`);
+    assert.deepStrictEqual(result.rows[0][0], Array.from(float64Arr));
+  }); // 294.60
 });
