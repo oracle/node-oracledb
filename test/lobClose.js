@@ -101,7 +101,7 @@ describe('54. lobClose.js', function() {
           lob2.on('finish', resolve);
         });
       },
-      /NJS-108:/
+      /NJS-003:/
     );
   }); // 54.4
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2024, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -758,10 +758,8 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     njsLob *lob;
     bool check;
     napi_value arrBuf;
-    napi_value dVal;
     napi_typedarray_type type;
     void *rawdata = NULL;
-    bool isTyped = false;
     size_t numElem = 0;
     size_t byteOffset = 0;
 

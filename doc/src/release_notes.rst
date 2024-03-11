@@ -37,6 +37,11 @@ Common Changes
     now raised when the size constraints are violated.
     `Issue #1630 <https://github.com/oracle/node-oracledb/issues/1630>`__.
 
+#)  Error ``NJS-003`` is now raised when an attempt is made to perform an
+    operation using a closed connection. Error ``NJS-108``, which was
+    earlier used to flag errors when LOB operations were attempted on a closed
+    or invalid connection, is now removed.
+
 Thin Mode Changes
 ++++++++++++++++++
 

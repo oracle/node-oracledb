@@ -423,7 +423,7 @@ describe('242. dbObject18.js', () => {
       } else {
         assert.throws(
           () => row.TEAM[0],
-          /NJS-500:/
+          /NJS-003:/
         );
       }
 
