@@ -167,7 +167,6 @@ describe('41. dataTypeBlob.js', function() {
     const plsql = testsUtil.sqlCreateTable(TABLE, createTable);
 
     before('create table', async function() {
-      oracledb.fetchAsBuffer = [oracledb.BLOB];
       if (testsUtil.getClientVersion() >= 2100000000 &&
         connection.oracleServerVersion >= 2100000000) {
         isRunnable = true;
@@ -177,11 +176,13 @@ describe('41. dataTypeBlob.js', function() {
         this.skip();
       }
 
+      // Allows automatically converting OSON formatted columns to JSON objects.
+      oracledb.future.oldJsonColumnAsObj = true;
       await connection.execute(plsql);
     });
 
     after(async function() {
-      oracledb.fetchAsBuffer = [];
+      oracledb.future.oldJsonColumnAsObj = false;
       await connection.execute(testsUtil.sqlDropTable(TABLE));
     });
 
@@ -203,8 +204,7 @@ describe('41. dataTypeBlob.js', function() {
       values (1, :1, :2) `,
       [byteBuf, byteBuf]);
       result = await connection.execute(`select OSONCOL from ${TABLE}`);
-      let generatedObj = connection.decodeOSON(result.rows[0][0]);
-      assert.deepStrictEqual(expectedObj1, generatedObj);
+      assert.deepStrictEqual(expectedObj1, result.rows[0][0]);
 
       // Generate OSON bytes and insert these bytes and verify with decode.
       const osonBytes = connection.encodeOSON(expectedObj2);
@@ -212,8 +212,7 @@ describe('41. dataTypeBlob.js', function() {
       values (2, :1, :2) `,
       [osonBytes, byteBuf]);
       result = await connection.execute(`select OSONCOL from ${TABLE} where IntCol = 2`);
-      generatedObj = connection.decodeOSON(result.rows[0][0]);
-      assert.deepStrictEqual(expectedObj2, generatedObj);
+      assert.deepStrictEqual(expectedObj2, result.rows[0][0]);
 
       // Verify vector inside OSON image for 23.4 server onwards.
       if (connection.oracleServerVersion >= 2304000000) {
@@ -221,7 +220,14 @@ describe('41. dataTypeBlob.js', function() {
       values (3, :1, :2) `,
         [connection.encodeOSON(expectedObj3), byteBuf]);
         result = await connection.execute(`select OSONCOL from ${TABLE} where IntCol = 3`);
-        generatedObj = connection.decodeOSON(result.rows[0][0]);
+        assert.deepStrictEqual(expectedObj3, result.rows[0][0]);
+
+        // Verify LOB is returned by default (oracledb.future.oldJsonColumnAsObj = false).
+        // We need to explicitly use decodeOSON to convert the LOB data into JSON object.
+        oracledb.future.oldJsonColumnAsObj = false;
+        result = await connection.execute(`select OSONCOL from ${TABLE} where IntCol = 3`);
+        const lob = result.rows[0][0];
+        const generatedObj = connection.decodeOSON(await lob.getData());
         assert.deepStrictEqual(expectedObj3, generatedObj);
       }
 
