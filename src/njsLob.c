@@ -188,13 +188,20 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsLob_getType, 0, NULL)
 
 //-----------------------------------------------------------------------------
 // njsLob_getData()
-//   Read all of the data from the LOB and return it as a single string or
+//   Read data from the LOB and return it as a single string or
 // buffer.
 //
-// PARAMETERS - NONE
+// PARAMETERS
+//   - lobOffset
+//   - lobAmount
+//
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_getData, 0, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_getData, 2, NULL)
 {
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0],
+            &baton->lobOffset))
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[1],
+            &baton->lobAmount))
     return njsBaton_queueWork(baton, env, "GetData", njsLob_getDataAsync,
             njsLob_getDataPostAsync, returnValue);
 }
@@ -208,6 +215,7 @@ static bool njsLob_getDataAsync(njsBaton *baton)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;
     bool ok = true;
+    uint32_t len;
 
     // if the length is marked dirty, acquire it at this time
     if (lob->dirtyLength) {
@@ -215,11 +223,23 @@ static bool njsLob_getDataAsync(njsBaton *baton)
             return njsBaton_setErrorDPI(baton);
         lob->dirtyLength = false;
     }
+    len = lob->length;
+    if ((baton->lobAmount == 0) || (baton->lobAmount >= lob->length)) {
+        // If user has not given lobAmount or user gave greater than
+        // lob length, adjust the len value.
+        if (lob->length >= baton->lobOffset) {
+            len = lob->length - (baton->lobOffset - 1);
+        } else {
+            len = 1;
+        }
+    } else {
+        len = baton->lobAmount;
+    }
 
     // determine size of buffer that is required
     if (lob->dataType == NJS_DATATYPE_BLOB) {
-        baton->bufferSize = lob->length;
-    } else if (dpiLob_getBufferSize(lob->handle, lob->length,
+        baton->bufferSize = len;
+    } else if (dpiLob_getBufferSize(lob->handle, len,
             &baton->bufferSize) < 0) {
         ok = njsBaton_setErrorDPI(baton);
     }
@@ -232,8 +252,8 @@ static bool njsLob_getDataAsync(njsBaton *baton)
     }
 
     // read from the LOB into the provided buffer
-    if (ok && baton->bufferSize > 0 && dpiLob_readBytes(lob->handle, 1,
-            lob->length, baton->bufferPtr, &baton->bufferSize) < 0)
+    if (ok && baton->bufferSize > 0 && dpiLob_readBytes(lob->handle,
+            baton->lobOffset, len, baton->bufferPtr, &baton->bufferSize) < 0)
         ok = njsBaton_setErrorDPI(baton);
 
     return ok;

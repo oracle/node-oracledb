@@ -83,6 +83,17 @@ describe('123. dataTypeNclob.js', function() {
 
     });
 
+    it('123.1.3 works with lob getData(offset, len)', async function() {
+      const insertLength = 100;
+
+      const insertStr = random.getRandomLengthString(insertLength);
+
+      await insertData(tableName, insertStr);
+
+      await getLobData(tableName, insertStr);
+
+    });
+
   }); // 123.1
 
   describe('123.2 insert and fetch as string with fetchInfo', function() {
@@ -234,6 +245,28 @@ describe('123. dataTypeNclob.js', function() {
 
       lob.on('error', reject);
     });
+  };
+
+  const getLobData = async function(tableName, originalStr) {
+    let result = null;
+    result = await connection.execute("SELECT TO_CLOB(content) FROM " + tableName + " where num = " + insertID);
+    const lob = result.rows[0][0];
+
+    assert(lob);
+    lob.setEncoding('utf8'); // set the encoding so we get a 'string' not a 'buffer'
+    let data = await lob.getData();
+    assert.strictEqual(originalStr, data);
+
+    let offset = 5;
+    data = await lob.getData(offset);
+    assert.strictEqual(originalStr.slice(offset - 1), data);
+
+    // len exceeding lob length is simply ignored and
+    // characters till end starting from offset is returned.
+    offset = 5;
+    const len = 99999;
+    data = await lob.getData(offset, len);
+    assert.strictEqual(originalStr.slice(offset - 1), data);
   };
 
   const fetchLob_fetchInfo = async function(tableName, originalStr) {

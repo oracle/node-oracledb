@@ -13,6 +13,9 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Enhanced :meth:`~lob.getData` method to accept offset and amount arguments.
+    See `Issue #1643 <https://github.com/oracle/node-oracledb/issues/1643>`__.
+
 #)  Add support for fetching BLOB columns which have "IS JSON FORMAT OSON"
     constraint enabled in the same way as columns of type JSON.
     In node-oracledb :ref:`Thick mode <enablingthick>` this requires

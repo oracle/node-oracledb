@@ -42,6 +42,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 const testsUtil = require(`./testsUtil.js`);
+const random   = require('./random.js');
 
 const inFileName = 'test/fuzzydinosaur.jpg';  // contains the image to be inserted
 const outFileName = 'test/blobstreamout.jpg';
@@ -146,6 +147,60 @@ describe('41. dataTypeBlob.js', function() {
       const blob = await lob.getData();
       assert.deepStrictEqual(data, blob);
     }); // 41.1.2
+
+    it('41.1.3 BLOB getData(offset, len)', async function() {
+      const size = 32768;
+      const specialStr = "41.1.3";
+      const bigStr = random.getRandomString(size, specialStr);
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+
+      let result = await connection.execute(
+        `INSERT INTO nodb_myblobs (num, content) VALUES (:1, :2) `,
+        [4, bufferStr]);
+
+      assert.strictEqual(result.rowsAffected, 1);
+      result = await connection.execute(
+        "SELECT content FROM nodb_myblobs WHERE num = :n",
+        { n: 4 });
+
+      const lob = result.rows[0][0];
+
+      // both offset and end.
+      let offset = 5;
+      let len = 10;
+
+      // Returns data from offset -1 (lob[offset - 1])
+      let blob = await lob.getData(offset, len);
+      assert.deepStrictEqual(bufferStr.subarray(offset - 1,
+        offset + len - 1), blob);
+
+      // end not specified gives entire data starting from offset
+      offset = 5;
+      blob = await lob.getData(offset);
+      assert.deepStrictEqual(bufferStr.subarray(offset - 1), blob);
+
+      // large number of bytes starting from offset 5.
+      offset = 5;
+      len = 9999;
+      blob = await lob.getData(offset, len);
+      assert.deepStrictEqual(bufferStr.subarray(offset - 1, offset + len - 1),
+        blob);
+
+      // large length which is ignored and entire lob data starting
+      // from offset is returned.
+      offset = 5;
+      len = 99999;
+      blob = await lob.getData(offset, len);
+      assert.deepStrictEqual(bufferStr.subarray(offset - 1),
+        blob);
+
+      // Invalid offset, we return null.
+      offset = 99999;
+      len = 10;
+      blob = await lob.getData(offset, len);
+      assert.equal(blob, null);
+
+    }); // 41.1.3
   }); //41.1
 
   describe('41.2 stores null value correctly', function() {

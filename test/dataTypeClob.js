@@ -43,6 +43,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 const testsUtil = require('./testsUtil.js');
+const random   = require('./random.js');
 
 const inFileName = 'test/clobexample.txt';  // the file with text to be inserted into the database
 const outFileName = 'test/clobstreamout.txt'; // output file with the stream out data
@@ -163,6 +164,89 @@ describe('40. dataTypeClob.js', function() {
       assert.strictEqual(data, clob);
 
     }); // 40.1.2
+
+    it('40.1.3 CLOB getData(offset, len)', async function() {
+      const lenStr = 32768;
+      const specialStr = "40.1.3";
+      const largeStr = random.getRandomString(lenStr, specialStr);
+      const multiByteStr = 'aüÅæÖÆåøübcd';
+
+      const binds = [
+        [3, largeStr],
+        [4, multiByteStr]
+      ];
+      let result = await connection.executeMany(
+        `INSERT INTO nodb_myclobs (num, content) ` +
+        `VALUES (:1, :2)`,
+        binds,
+        [
+          { type: oracledb.NUMBER },
+          { type: oracledb.CLOB }
+        ]);
+      assert.strictEqual(result.rowsAffected, 2);
+
+      result = await connection.execute(
+        "SELECT content FROM nodb_myclobs WHERE num = :n",
+        { n: 3 });
+
+      let lob = result.rows[0][0];
+      let clob = await lob.getData();
+      assert.strictEqual(largeStr, clob);
+
+      let offset = 5;
+      let len = 10;
+      // starting from position 4 (largeStr[4]) to 10 characters.
+      clob = await lob.getData(offset, len);
+      assert.strictEqual(largeStr.slice(offset - 1, offset + len - 1), clob);
+
+      // len not specified gives entire data starting from offset
+      offset = 5;
+      clob = await lob.getData(offset);
+      assert.strictEqual(largeStr.slice(offset - 1), clob);
+
+      // len specified as 0 gives error.
+      offset = 5;
+      len = 0;
+      await assert.rejects(
+        async () => await lob.getData(offset, len),
+        /NJS-005:/
+      );
+
+      // large number of characters starting from offset 5.
+      offset = 5;
+      len = 9999;
+      clob = await lob.getData(offset, len);
+      assert.strictEqual(largeStr.slice(offset - 1,  offset + len - 1), clob);
+
+      // len exceeding lob length is simply ignored and
+      // characters till end starting from offset is returned.
+      offset = 5;
+      len = 99999;
+      clob = await lob.getData(offset, len);
+      assert.strictEqual(largeStr.slice(offset - 1), clob);
+
+      // Invalid ofset, we get null.
+      offset = 99999;
+      len = 10;
+      clob = await lob.getData(offset, len);
+      assert.equal(clob, null);
+
+      result = await connection.execute(
+        "SELECT content FROM nodb_myclobs WHERE num = :n",
+        { n: 4 });
+
+      lob = result.rows[0][0];
+
+      clob = await lob.getData();
+      assert.strictEqual(multiByteStr, clob);
+
+      offset = 2;
+      len = 10;
+      // starting from position 1 (multiByteStr[1]) to 10 characters. "üÅæÖÆåøübc"
+      clob = await lob.getData(offset, len);
+      assert.strictEqual(multiByteStr.slice(offset - 1, offset + len - 1), clob);
+
+    }); // 40.1.3
 
   }); // 40.1
 
