@@ -351,13 +351,13 @@ Other examples of chained read and write operations include:
     while ((myDocument = await docCursor.getNext())) {
         console.log(myDocument.getContent());
     }
-    docCursor.close();
+    await docCursor.close();
 
 - To remove the documents matching the supplied keys:
 
   .. code-block:: javascript
 
-    await collection.find().keys(["k1", "k2"])).remove();
+    await collection.find().keys(["k1", "k2"]).remove();
 
 - To remove the document with the key ‘k1’ and version ‘v1’:
 
@@ -488,7 +488,7 @@ Some QBE examples are:
     while ((myDocument = await docCursor.getNext())) {
         console.log(myDocument.getContent());
     }
-    docCursor.close();
+    await docCursor.close();
 
 - Same as the previous example, but allowing for pagination of results
   by only getting 10 documents:
