@@ -1042,4 +1042,60 @@ describe('290. dbObject20.js', () => {
     });
 
   });
+
+  describe('290.5 Associative Arrays fetch ', function() {
+    let conn;
+    const PKG1 = 'NODB_PKG_OBJ_1_PLS_INTEGER';
+    const TYPE1 = 'NODB_TYP_OBJ_1_PLS_ARRAY_INTEGER';
+
+    before(async () => {
+      conn = await oracledb.getConnection(dbConfig);
+      let sql =
+        `CREATE OR REPLACE PACKAGE ${PKG1} AUTHID DEFINER AS
+      TYPE ${TYPE1} IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+      FUNCTION F1  RETURN ${TYPE1};
+      END;`;
+      await conn.execute(sql);
+
+      sql = `CREATE OR REPLACE PACKAGE BODY ${PKG1}  AS
+              FUNCTION F1  RETURN ${TYPE1} IS
+              R ${TYPE1};
+              BEGIN
+                R(2):=22;
+                R(5):=55;
+                RETURN R;
+              END ;
+              END ${PKG1} ;`;
+      await conn.execute(sql);
+
+    }); // before()
+
+    after(async () => {
+      if (conn) {
+        await testsUtil.dropType(conn, TYPE1);
+        const sql = `DROP package ${PKG1}`;
+        await conn.execute(sql);
+        await conn.close();
+      }
+    }); // after()
+
+    it('290.5.1 verify associative array outbinds ', async () => {
+      // verify pls array of integers
+      const inDataobj = {2: 22, 5: 55};
+      const result = await conn.execute(
+        `BEGIN
+          :ret := ${PKG1}.f1;
+         END;`,
+        {
+          ret: {
+            dir: oracledb.BIND_OUT,
+            type: `${PKG1}.${TYPE1}`
+          }
+        });
+      const res = result.outBinds.ret;
+      const outMap = res.toMap();
+      assert.deepStrictEqual(JSON.stringify(Object.fromEntries(outMap)), JSON.stringify(inDataobj));
+    });
+  });
+
 });

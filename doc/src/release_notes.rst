@@ -13,6 +13,10 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Added :meth:`~dbObject.toMap` method to :ref:`DbObject Class<dbobjectclass>`
+    which returns a map object.
+    See `Issue #1627 <https://github.com/oracle/node-oracledb/issues/1627>`__.
+
 #)  Accept an object as an input parameter for :meth:`connection.execute()`
     as per GitHub user request.
     See `Issue #1629 <https://github.com/oracle/node-oracledb/issues/1629>`__.
