@@ -1100,12 +1100,15 @@ Connection Methods
 
             - ``fetchType``: One of the :ref:`Node-oracledb Type Constant <oracledbconstantsnodbtype>` values.
             - ``isJson``: Indicates if the column is known to contain JSON data. This will be ``true`` for JSON columns (from Oracle Database 21c) and for LOB and VARCHAR2 columns where "IS JSON" constraint is enabled (from Oracle Database 19c). This property will be ``false`` for all the other columns. It will also be ``false`` for any column when Oracle Client 18c or earlier is used in Thick mode or the Oracle Database version is earlier than 19c.
-
-
+            - ``isOson``: Indicates if the column is known to contain binary encoded OSON data. This attribute will be ``true`` in Thin mode and while using Oracle Client version 21c (or later) in Thick mode when the "IS JSON FORMAT OSON" check constraint is enabled on BLOB and RAW columns. It will be set to ``false`` for all other columns. It will also be set to ``false`` for any column when the Thick mode uses Oracle Client versions earlier than 21c. Note that the "IS JSON FORMAT OSON" check constraint is available from Oracle Database 19c onwards.
             - ``name``: The column name follows Oracle’s standard name-casing rules. It will commonly be uppercase, since most applications create tables using unquoted, case-insensitive names.
             - ``nullable``: Indicates whether ``NULL`` values are permitted for this column.
             - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ``, and ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` columns.
             - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` columns.
+
+            .. versionchanged:: 6.4
+
+                The ``isOson`` information attribute was added.
 
             .. versionchanged:: 6.3
 

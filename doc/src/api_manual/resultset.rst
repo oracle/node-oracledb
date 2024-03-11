@@ -11,7 +11,7 @@ handle in a single array.
 
 ResultSets can optionally be converted to Readable Streams. Also, from
 node-oracledb 5.5, the ResultSet class implements the
-``asyncIterator()`` symbol to support asynchonous iteration.
+``asyncIterator()`` symbol to support asynchronous iteration.
 
 A *ResultSet* object is obtained by setting ``resultSet: true`` in the
 ``options`` parameter of the *Connection* :meth:`~connection.execute()`

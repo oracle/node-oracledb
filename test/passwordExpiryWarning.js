@@ -71,6 +71,7 @@ describe('292. passwordExpiryWarning.js', function() {
   };
 
   before(async function() {
+    if (dbConfig.test.drcp) this.skip();
     const connAsDBA = await oracledb.getConnection(dbaCredential);
     await connAsDBA.execute(plsql);
     await testsUtil.sleep(2000);
