@@ -88,7 +88,7 @@ describe('55. resultSet2.js', function() {
       assert.strictEqual(rowCount, 100);
     });
 
-  });
+  }); // 55.2
 
   describe('55.3 alternating getRow() & getRows() function', function() {
     before(async function() {
@@ -157,7 +157,7 @@ describe('55. resultSet2.js', function() {
       assert.strictEqual(accessCount, (100 / (numRows + 1)) * 2);
     });
 
-  });
+  }); // 55.3
 
   describe('55.4 automatically close result sets and LOBs when the connection is closed', function() {
     before(async function() {
@@ -204,7 +204,7 @@ describe('55. resultSet2.js', function() {
       await fetchRowFromRS(result.outBinds.out);
     });
 
-  });
+  }); // 55.4
 
   describe('55.5 the content of resultSet should be consistent', function() {
     before(async function() {
@@ -233,7 +233,7 @@ describe('55. resultSet2.js', function() {
       await rs.close();
     });
 
-  });
+  }); // 55.5
 
   describe('55.6 access resultSet simultaneously', function() {
     before(async function() {
@@ -306,7 +306,7 @@ describe('55. resultSet2.js', function() {
       assert.match(values[1].reason.message, /NJS-017:/);
     });
 
-  });
+  }); // 55.6
 
   describe('55.7 getting multiple resultSets', function() {
     before(async function() {
@@ -371,9 +371,9 @@ describe('55. resultSet2.js', function() {
       }
     });
 
-  });
+  }); // 55.7
 
-  describe('55.9 test querying a PL/SQL function', function() {
+  describe('55.8 test querying a PL/SQL function', function() {
     before(async function() {
       await setUp(connection, tableName);
     });
@@ -382,7 +382,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.9.1 ', async function() {
+    it('55.8.1 ', async function() {
       const proc =
         "CREATE OR REPLACE FUNCTION nodb_rs2_testfunc RETURN VARCHAR2 \
            IS \
@@ -403,9 +403,9 @@ describe('55. resultSet2.js', function() {
       await result.resultSet.close();
       await connection.execute("DROP FUNCTION nodb_rs2_testfunc");
     });
-  });
+  }); // 55.8
 
-  describe('55.10 calls getRows() once and then close RS before getting more rows', function() {
+  describe('55.9 calls getRows() once and then close RS before getting more rows', function() {
     before(async function() {
       await setUp(connection, tableName);
     });
@@ -414,7 +414,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.10.1 ', async function() {
+    it('55.9.1 ', async function() {
       const numRows = 10;
       const result = await connection.execute(
         "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
@@ -428,19 +428,19 @@ describe('55. resultSet2.js', function() {
         /NJS-018:/
       );
     });
-  });
+  }); // 55.9
 
-  describe('55.11 result set with unsupported data types', function() {
-    it('55.11.1 INTERVAL YEAR TO MONTH data type', async function() {
+  describe('55.10 result set with unsupported data types', function() {
+    it('55.10.1 INTERVAL YEAR TO MONTH data type', async function() {
       await assert.rejects(async () => {
         await connection.execute(
           "SELECT dummy, to_yminterval('1-3') FROM dual");
       }, /NJS-010:/);
     });
 
-  }); // 55.11
+  }); // 55.10
 
-  describe.skip('55.12 bind a cursor BIND_INOUT', function() {
+  describe.skip('55.11 bind a cursor BIND_INOUT', function() {
 
     before('prepare table nodb_rs2_emp', async function() {
       await setUp(connection, tableName);
@@ -450,7 +450,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.12.1 has not supported binding a cursor with BIND_INOUT', async function() {
+    it('55.11.1 has not supported binding a cursor with BIND_INOUT', async function() {
       const proc =
           "CREATE OR REPLACE PROCEDURE nodb_rs2_get_emp_inout (p_in IN NUMBER, p_out IN OUT SYS_REFCURSOR) \
              AS \
@@ -467,13 +467,13 @@ describe('55. resultSet2.js', function() {
             in: 200,
             out: { type: oracledb.CURSOR, dir: oracledb.BIND_INOUT }
           });
-      }, /NJS-0007:/);
+      }, /NJS-007:/);
       await connection.execute("DROP PROCEDURE nodb_rs2_get_emp_inout");
     });
 
-  }); // 55.12
+  }); // 55.11
 
-  describe('55.13 Invalid Ref Cursor', function() {
+  describe('55.12 Invalid Ref Cursor', function() {
     const proc =
       "CREATE OR REPLACE PROCEDURE get_invalid_refcur ( p OUT SYS_REFCURSOR) " +
       "  AS " +
@@ -491,7 +491,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.13.1 ', async function() {
+    it('55.12.1 ', async function() {
       await assert.rejects(async () => {
         await connection.execute(
           "BEGIN get_invalid_refcur ( :p ); END; ",
@@ -500,8 +500,8 @@ describe('55. resultSet2.js', function() {
           });
       }, /NJS-107:/);
 
-    }); // 55.13.1
-  }); // 55.13
+    }); // 55.12.1
+  }); // 55.12
 
 });
 

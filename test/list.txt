@@ -736,10 +736,10 @@ Overview of node-oracledb functional tests
     44.8 maxSize option applies to each elements of an array
 
 45. instanceof1.js
-    45.2 instanceof works for pool instances
-    45.3 instanceof works for connection instances
-    45.4 instanceof works for resultset instances
-    45.5 instanceof works for lob instances
+    45.1 instanceof works for pool instances
+    45.2 instanceof works for connection instances
+    45.3 instanceof works for resultset instances
+    45.4 instanceof works for lob instances
 
 51. poolClose.js
     51.1 can not get connections from the terminated pool
@@ -800,16 +800,16 @@ Overview of node-oracledb functional tests
     55.7 getting multiple resultSets
         55.7.1 can access multiple resultSet on one connection
         55.7.2 can access multiple REF Cursor
-    55.9 test querying a PL/SQL function
+    55.8 test querying a PL/SQL function
+        55.8.1
+    55.9 calls getRows() once and then close RS before getting more rows
         55.9.1
-    55.10 calls getRows() once and then close RS before getting more rows
-        55.10.1
-    55.11 result set with unsupported data types
-        55.11.1 INTERVAL YEAR TO MONTH data type
-    55.12 bind a cursor BIND_INOUT
-        55.12.1 has not supported binding a cursor with BIND_INOUT
-    55.13 Invalid Ref Cursor
-        55.13.1
+    55.10 result set with unsupported data types
+        55.10.1 INTERVAL YEAR TO MONTH data type
+    55.11 bind a cursor BIND_INOUT
+        55.11.1 has not supported binding a cursor with BIND_INOUT
+    55.12 Invalid Ref Cursor
+        55.12.1
 
 56. fetchAs.js
     56.1 property value check

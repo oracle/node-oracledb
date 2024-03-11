@@ -672,11 +672,12 @@ Connection Methods
     **Promise**::
 
         promise = execute(String sql [, Object bindParams [, Object options]]);
+        promise = execute(Object sql [, Object options]);
 
-    Executes a single SQL or PL/SQL statement. See :ref:`SQL
-    Execution <sqlexecution>` for examples. Also see
-    :meth:`connection.queryStream()` for an alternative way of executing
-    queries.
+    Executes a single SQL statement, PL/SQL statement, or the SQL statement
+    in the object that was returned by the ``sql`` function of the third-party
+    `sql-template-tag <https://www.npmjs.com/package/sql-template-tag#
+    oracledb>`__ module. See :ref:`SQL Execution <sqlexecution>` for examples.
 
     The statement to be executed may contain :ref:`IN binds <inbind>`,
     :ref:`OUT or IN OUT <outbind>` bind values or variables, which are bound
@@ -699,10 +700,18 @@ Connection Methods
           - Data Type
           - Description
         * - ``sql``
-          - String
+          - String or Object
           - .. _executesqlparam:
 
-            The SQL statement that is executed. The statement may contain bind parameters.
+            This function parameter can either be a string or an object.
+
+            If the parameter is a string, then it is the SQL statement that is executed. The statement may contain bind parameters.
+
+            If the parameter is an object, then it is the object that is returned from the ``sql`` function of the third-party `sql-template-tag <https://www.npmjs.com/package/sql-template-tag#oracledb>`__ module. This object exposes the SQL statement and values properties to retrieve the SQL string and bind values. See :ref:`example <executeobj>`. If the object returned by the ``sql`` function contains a SQL statement with a ``RETURNING INTO`` clause, then :meth:`connection.execute()` will not work and an error will be thrown.
+
+            .. versionchanged:: 6.4
+
+                The ability to accept an object (returned from the ``sql`` function of the third-party ``sql-template-tag`` module) as an input parameter was added to :meth:`connection.execute()`.
         * - ``bindParams``
           - Object or Array
           - .. _executebindParams:

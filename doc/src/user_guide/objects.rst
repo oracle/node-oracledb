@@ -421,6 +421,66 @@ Parameters <executebindParams>` for more information about binding.
 See `plsqlarray.js <https://github.com/oracle/node-oracledb/tree/
 main/examples/plsqlarray.js>`__ for a runnable example.
 
+.. _indexbyplsinteger:
+
+Associative Array Indexed By PLS_INTEGER
+++++++++++++++++++++++++++++++++++++++++
+
+The following example defines an associative array indexed by PLS_INTEGER and
+a function that returns an associative array of that type.
+
+.. code-block:: sql
+
+    DROP TABLE mytable;
+
+    CREATE TABLE mytable (id NUMBER, numcol NUMBER);
+
+    CREATE OR REPLACE PACKAGE mypkg IS
+        TYPE numtype IS TABLE OF NUMBER INDEX BY PLS_INTEGER;
+        FUNCTION F1 RETURN numtype;
+    END;
+    /
+
+    CREATE OR REPLACE PACKAGE BODY mypkg AS
+        FUNCTION F1 RETURN numtype IS
+        R numtype;
+        BEGIN
+            R(2):=22;
+            R(5):=55;
+            RETURN R;
+        END;
+    END;
+    /
+
+To return a map object for collection types indexed by PLS_INTEGER to
+get the keys along with values, you can use the :meth:`dbObject.toMap()`
+method:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // contains the hr schema password
+        connectString : "localhost/FREEPDB1"
+    });
+
+    const result = await connection.execute(
+        `BEGIN
+            :ret := mypkg.f1;
+         END;`,
+        {
+            ret: {
+                dir: oracledb.BIND_OUT,
+                type: `mypkg.numtype`
+            }
+        });
+    const res = result.outBinds.ret;
+    console.log(res.toMap());
+
+This will print::
+
+    Map(2) { 2 => 22, 5 => 55 }
+
 .. _plsqlvarray:
 
 PL/SQL Collection VARRAY Types

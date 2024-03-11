@@ -37,7 +37,7 @@ const dbConfig = require('./dbconfig.js');
 
 describe('45. instanceof1.js', function() {
 
-  it('45.2 instanceof works for pool instances', async function() {
+  it('45.1 instanceof works for pool instances', async function() {
     const config = {
       ...dbConfig,
       poolMin: 0,
@@ -47,34 +47,34 @@ describe('45. instanceof1.js', function() {
     const pool = await oracledb.createPool(config);
     assert(pool instanceof oracledb.Pool);
     await pool.close(0);
-  });
+  }); // 45.1
 
-  it('45.3 instanceof works for connection instances', async function() {
+  it('45.2 instanceof works for connection instances', async function() {
     const conn = await oracledb.getConnection(dbConfig);
     assert(conn instanceof oracledb.Connection);
     await conn.close();
-  });
+  }); // 45.2
 
-  it('45.4 instanceof works for resultset instances', async function() {
+  it('45.3 instanceof works for resultset instances', async function() {
     const conn = await oracledb.getConnection(dbConfig);
     const sql = 'select 1 from dual union select 2 from dual';
     const binds = [];
     const options = {
       resultSet: true
-    };
+    }; // 45.3
     const result = await conn.execute(sql, binds, options);
     assert(result.resultSet instanceof oracledb.ResultSet);
     await result.resultSet.close();
     await conn.close();
   });
 
-  it('45.5 instanceof works for lob instances', async function() {
+  it('45.4 instanceof works for lob instances', async function() {
     const conn = await oracledb.getConnection(dbConfig);
     const result = await conn.execute('select to_clob(dummy) from dual');
     const lob = result.rows[0][0];
     assert(lob instanceof oracledb.Lob);
     lob.destroy();
     await conn.close();
-  }); // 45.5
+  }); // 45.4
 
 });

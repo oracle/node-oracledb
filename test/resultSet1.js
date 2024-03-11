@@ -187,7 +187,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-  });
+  }); // 12.1
 
   describe('12.2 Testing fetchArraySize option', function() {
     it('12.2.1 negative - negative value', async function() {
@@ -255,7 +255,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-  });
+  }); // 12.2
 
   describe('12.3 Testing function getRows()', function() {
     it('12.3.1 retrieved set is exactly the size of result', async function() {
@@ -457,7 +457,7 @@ describe('12. resultSet1.js', function() {
       );
     });
 
-  });
+  }); // 12.3
 
   describe('12.4 Testing function getRow()', function() {
     it('12.4.1 works well with all correct setting', async function() {
@@ -545,7 +545,7 @@ describe('12. resultSet1.js', function() {
       await rs.close();
     });
 
-  });
+  }); // 12.4
 
   describe('12.5 Testing function close()', function() {
     it('12.5.1 does not call close()', async function() {
@@ -622,7 +622,7 @@ describe('12. resultSet1.js', function() {
 
     });
 
-  });
+  }); // 12.5
 
   describe('12.6 Testing metaData', function() {
 
@@ -767,7 +767,7 @@ describe('12. resultSet1.js', function() {
       await rs.close();
       await conn.execute("DROP TABLE " + tableName + " PURGE");
     });
-  });
+  }); // 12.6
 
   describe('12.7 Testing maxRows', function() {
     it('12.7.1 maxRows option is ignored when resultSet option is true', async function() {

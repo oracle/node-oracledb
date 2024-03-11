@@ -21,12 +21,12 @@ Common Changes
     which returns a map object.
     See `Issue #1627 <https://github.com/oracle/node-oracledb/issues/1627>`__.
 
-#)  Accept an object as an input parameter for :meth:`connection.execute()`
-    as per GitHub user request.
+#)  Added support to accept an object as an input parameter in the
+    :meth:`connection.execute()` method. This object is returned from the
+    third-party `sql-template-tag <https://www.npmjs.com/package/sql-template-
+    tag#oracledb>`__ module and exposes statement and values properties to
+    retrieve SQL string and bind values.
     See `Issue #1629 <https://github.com/oracle/node-oracledb/issues/1629>`__.
-    This object is returned from the 3rd party ``sql-template-tag`` module and
-    exposes statement and values properties to retrieve sql string
-    and bind values.
 
 #)  Added new extended :ref:`metadata <execmetadata>` information attribute
     ``isOson`` for a fetched column.

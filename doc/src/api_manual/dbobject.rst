@@ -168,6 +168,14 @@ it is to convert that DbObject to and from a JavaScript object.
 
     Returns an array of element values as a JavaScript array in key order.
 
+.. method:: dbObject.toMap()
+
+    Returns a map object for the collection types indexed by PLS_INTEGER where
+    the collection’s indexes are the keys and the elements are its values. See
+    :ref:`indexbyplsinteger` for example.
+
+    .. versionadded:: 6.4
+
 .. method:: dbObject.trim(count)
 
     Trims the specified number of elements from the end of the collection.

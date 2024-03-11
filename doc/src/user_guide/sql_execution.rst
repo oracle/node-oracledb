@@ -92,6 +92,28 @@ cases:
 In both cases, use a :ref:`ResultSet <resultsethandling>` or :ref:`Query
 Stream <streamingresults>` instead of a direct fetch.
 
+.. _executeobj:
+
+If you are using the ``sql`` function of the third-party `sql-template-tag
+<https://www.npmjs.com/package/sql-template-tag#oracledb>`__ module, then you
+can pass the object returned by this function in :meth:`connection.execute()`.
+This object exposes the SQL statement and values properties to retrieve the
+SQL string and bind values.
+
+.. code-block:: javascript
+
+    import sql from sql-template-tag;
+
+    const id = 20;
+    let options = { maxRows: 1 };
+    query = sql`SELECT * FROM departments WHERE department_id = ${id}`;
+    result = await connection.execute(query, options);
+    console.log(result.rows);
+
+If the object returned by the ``sql`` function contains a SQL statement with a
+``RETURNING INTO`` clause, then :meth:`connection.execute()` will not work and
+an error will be thrown.
+
 .. _resultsethandling:
 
 Fetching Rows with Result Sets

@@ -35,7 +35,6 @@ const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
-const util      = require('util');
 
 describe('192. implicitResults.js', function() {
 
@@ -162,7 +161,7 @@ describe('192. implicitResults.js', function() {
     rs = await results.implicitResults[1];
     let row, len = 0;
     while ((row = await rs.getRow())) {
-      assert(util.isDate(row[1]));
+      assert(testsUtil.isDate(row[1]));
       len++;
     }
     const tab2Len = 5;
@@ -185,7 +184,7 @@ describe('192. implicitResults.js', function() {
     rs = await results.implicitResults[1];
     let row, len = 0;
     while ((row = await rs.getRow())) {
-      assert(util.isDate(row.TSVAL));
+      assert(testsUtil.isDate(row.TSVAL));
       len++;
     }
     const tab2Len = 5;
