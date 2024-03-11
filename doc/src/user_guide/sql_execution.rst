@@ -211,7 +211,7 @@ To fetch multiple rows at a time, use ``getRows()``:
     // always close the ResultSet
     await rs.close();
 
-From node-oracledb 5.5, you can iterate over ResultSets:
+From node-oracledb 5.5, you can asynchronously iterate over ResultSets:
 
 .. code-block:: javascript
 
@@ -223,13 +223,19 @@ From node-oracledb 5.5, you can iterate over ResultSets:
         }
     );
 
+    // Fetch rows from the resultSet object using asyncIterator
     const rs = result.resultSet;
+
+    // Call the asyncIterator for the resultSet object
     for await (const row of rs) {
         console.log(row);
     }
 
     // always close the ResultSet
     await rs.close();
+
+See `resultset3.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/resultset3.js>`__ for a runnable example.
 
 .. _streamingresults:
 

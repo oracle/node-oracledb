@@ -5,13 +5,17 @@ API: SodaDocumentCursor Class
 *****************************
 
 A SodaDocumentCursor is used to walk through a set of SODA documents
-returned from a :meth:`sodaCollection.find()`
-:meth:`sodaOperation.getCursor()` method.
+returned from :meth:`sodaCollection.find()` and
+:meth:`sodaOperation.getCursor()` methods.
 
 .. note::
 
     In this release, SODA is only supported in the node-oracledb Thick mode.
     See :ref:`enablingthick`.
+
+From node-oracledb 6.4, the SodaDocumentCursor class implements the
+``asyncIterator()`` symbol to support asynchronous iteration. See
+:ref:`accessingsodadocuments` for examples.
 
 .. _sodadoccursormethods:
 

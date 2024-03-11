@@ -94,6 +94,8 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Added support for asynchronous iteration of SODA document cursors.
+
 #)  Internal code and memory optimization changes for Advanced Queuing.
 
 node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...v6.3.0>`__ (21 Dec 2023)

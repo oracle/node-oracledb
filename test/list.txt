@@ -4300,16 +4300,17 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     175.3 Negative - limit().count()
     175.4 keys().count()
     175.5 getCursor(), basic case
-    175.6 skip().getCursor()
-    175.7 getCursor(), empty document matched
-    175.8 Negative - close document cursor two times
-    175.9 getDocuments(), basic case
-    175.10 getDocuments(), no documents matched
-    175.11 getOne(), basic case
-    175.12 getOne(), the filter matches multiple documents
-    175.13 remove(), basic case
-    175.14 remove(), remove zero document
-    175.15 remove(), remove multiple times
+    175.6 getCursor(), asyncIterator
+    175.7 skip().getCursor()
+    175.8 getCursor(), empty document matched
+    175.9 Negative - close document cursor two times
+    175.10 getDocuments(), basic case
+    175.11 getDocuments(), no documents matched
+    175.12 getOne(), basic case
+    175.13 getOne(), the filter matches multiple documents
+    175.14 remove(), basic case
+    175.15 remove(), remove zero document
+    175.16 remove(), remove multiple times
 
   176. soda8.js
     176.1 replaceOne(), basic case with document content

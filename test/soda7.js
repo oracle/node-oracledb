@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -183,11 +183,44 @@ describe('175. soda7.js', () => {
     assert.strictEqual(res.dropped, true);
     await conn.close();
   }); // 175.5
-
-  it('175.6 skip().getCursor()', async () => {
+  
+  it('175.6 getCursor(), asyncIterator', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_175_6");
+
+    await Promise.all(
+      t_contents.map(function(content) {
+        return collection.insertOne(content);
+      })
+    );
+
+    // Fetch back
+    const docCursor = await collection.find().getCursor();
+
+    const myContents = [];
+    // Use the asyncIterator of the sodaDocumentCursor object
+    for await (const doc of docCursor) {
+      const content = doc.getContent();
+      myContents.push(content);
+      (t_contents).includes(content);
+    }
+
+    assert.strictEqual(myContents.length, t_contents.length);
+
+    await docCursor.close();
+
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 175.6
+
+  it('175.7 skip().getCursor()', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_175_7");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -219,12 +252,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.6
+  }); // 175.7
 
-  it('175.7 getCursor(), empty document matched', async () => {
+  it('175.8 getCursor(), empty document matched', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_7");
+    const collection = await soda.createCollection("soda_test_175_8");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -245,12 +278,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.7
+  }); // 175.8
 
-  it('175.8 Negative - close document cursor two times', async () => {
+  it('175.9 Negative - close document cursor two times', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_8");
+    const collection = await soda.createCollection("soda_test_175_9");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -287,12 +320,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.8
+  }); // 175.9
 
-  it('175.9 getDocuments(), basic case', async () => {
+  it('175.10 getDocuments(), basic case', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_9");
+    const collection = await soda.createCollection("soda_test_175_10");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -315,12 +348,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.9
+  }); // 175.10
 
-  it('175.10 getDocuments(), no documents matched', async () => {
+  it('175.11 getDocuments(), no documents matched', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_10");
+    const collection = await soda.createCollection("soda_test_175_11");
 
     // Fetch back
     const documents = await collection.find().getDocuments();
@@ -329,12 +362,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.10
+  }); // 175.11
 
-  it('175.11 getOne(), basic case', async () => {
+  it('175.12 getOne(), basic case', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_11");
+    const collection = await soda.createCollection("soda_test_175_12");
 
     const myKeys = [];
     for (let i = 0; i < t_contents.length; i++) {
@@ -352,12 +385,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.11
+  }); // 175.12
 
-  it('175.12 getOne(), the filter matches multiple documents', async () => {
+  it('175.13 getOne(), the filter matches multiple documents', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_12");
+    const collection = await soda.createCollection("soda_test_175_13");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -374,12 +407,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.12
+  }); // 175.13
 
-  it('175.13 remove(), basic case', async () => {
+  it('175.14 remove(), basic case', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_13");
+    const collection = await soda.createCollection("soda_test_175_14");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -402,12 +435,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.13
+  }); // 175.14
 
-  it('175.14 remove(), remove zero document', async () => {
+  it('175.15 remove(), remove zero document', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_14");
+    const collection = await soda.createCollection("soda_test_175_15");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -430,12 +463,12 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.14
+  }); // 175.15
 
-  it('175.15 remove(), remove multiple times', async () => {
+  it('175.16 remove(), remove multiple times', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
-    const collection = await soda.createCollection("soda_test_175_13");
+    const collection = await soda.createCollection("soda_test_175_16");
 
     await Promise.all(
       t_contents.map(function(content) {
@@ -456,5 +489,5 @@ describe('175. soda7.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.15
+  }); // 175.16
 });

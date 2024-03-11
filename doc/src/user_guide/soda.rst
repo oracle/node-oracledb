@@ -450,6 +450,31 @@ attribute values, or use
 SodaDocument returned by a :meth:`sodaCollection.find()`
 query.
 
+From node-oracledb 6.4, you can asynchronously iterate over
+:ref:`SodaDocumentCursor object <sodadocumentcursorclass>`:
+
+.. code-block:: javascript
+
+    const soda = connection.getSodaDatabase();
+    // Create a SODA collection
+    const collection = await soda.createCollection("mycollection");
+    const data = [
+        { name: "John", age: 57 },
+        { name: "Sally", age: 53 }
+    ];
+    await collection.insertMany(data);
+    const docCursor = await collection.find().getCursor();
+    // Use the asyncIterator for the SodaDocumentCursor object
+    for await (const doc of docCursor) {
+        console.log(doc.getContent());
+    }
+    await docCursor.close();
+    await collection.drop();
+    await connection.close();
+
+See `soda2.js <https://github.com/oracle/node-oracledb/tree/main/examples/
+soda2.js>`__ for a runnable example.
+
 .. _sodaqbesearches:
 
 SODA Query-by-Example Searches for JSON Documents
