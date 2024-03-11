@@ -65,6 +65,9 @@ Thin Mode Changes
     idle connections present in the free connection list.
     `Issue #1633 <https://github.com/oracle/node-oracledb/issues/1633>`__.
 
+#)  Fixed bug in identifying bind variables in SQL and PL/SQL statements
+    containing a single line comment at the end of the statement.
+
 Thick Mode Changes
 ++++++++++++++++++
 

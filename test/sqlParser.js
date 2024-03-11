@@ -83,7 +83,7 @@ describe('289. sqlParser.js', function() {
 
   it('289.3 single line comment', async () => {
     const sql = `--begin :value2 := :a + :b + :c +:a +3; end;
-                begin :value2 := :a + :c +3; end;`;
+                begin :value2 := :a + :c +3; end; -- not a :bindv`;
     const info = await conn.getStatementInfo(sql);
     assert.deepStrictEqual(info.bindNames, ["VALUE2", "A", "C"]);
   }); // 289.3
