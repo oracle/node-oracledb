@@ -45,6 +45,10 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Fix for the intermittent error ``NJS-103`` seen while fetching large number
+    of CLOB columns whose metadata is split across multiple packets.
+    `Issue #1642 <https://github.com/oracle/node-oracledb/issues/1642>`__.
+
 #)  Fixed potential cursor issues when using DRCP.
 
 #)  Fixed bug in reading PLS_INTEGER type when used in PL/SQL records.

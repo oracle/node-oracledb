@@ -217,22 +217,23 @@ describe('9. columnMetadata.js', function() {
   });  // 9.2
 
   describe('9.3 Large number of columns', function() {
-    function genColumns(size) {
+    function genColumns(size, dbType) {
       const  buffer = [];
       for (var  i = 0; i < size; i++) {
-        buffer[i] = " column_" + i + " NUMBER";
+        buffer[i] = " column_" + i + dbType;
       }
       return buffer.join();
     }
 
     it('9.10 works with a large number of columns', async function() {
-      const column_size = 100;
-      const columns_string = genColumns(column_size);
+      const column_size = 300;
+      let columns_string = genColumns(column_size, " NUMBER");
       const table_name = "nodb_large_columns";
       const sqlSelect = "SELECT * FROM " + table_name;
       const sqlDrop = "DROP TABLE " + table_name + " PURGE";
 
-      const proc = "BEGIN \n" +
+      function generateProcedure() {
+        return "BEGIN \n" +
                "    DECLARE \n" +
                "        e_table_missing EXCEPTION; \n" +
                "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
@@ -248,10 +249,25 @@ describe('9. columnMetadata.js', function() {
                "        ) \n" +
                "    '); \n" +
                "END; ";
+      }
 
-      await connection.execute(proc);
-      const result = await connection.execute(sqlSelect);
-      for (var i = 0; i < column_size; i++) {
+      // check NUMBER type column
+      await connection.execute(generateProcedure());
+
+      // Dont cache statment as we re-run with different
+      // column type with same table.
+      let result = await connection.execute(sqlSelect, [],
+        { keepInStmtCache: false });
+      for (let i = 0; i < column_size; i++) {
+        assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
+      }
+      await connection.execute(sqlDrop);
+
+      // check CLOB type (GH Issue 1642)
+      columns_string = genColumns(column_size, " CLOB");
+      await connection.execute(generateProcedure());
+      result = await connection.execute(sqlSelect);
+      for (let i = 0; i < column_size; i++) {
         assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
       }
       await connection.execute(sqlDrop);
