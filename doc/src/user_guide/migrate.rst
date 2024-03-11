@@ -4,6 +4,53 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev63v64:
+
+Upgrading from node-oracledb 6.3 to 6.4
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- By setting the new :attr:`oracledb.future.oldJsonColumnAsObj` property to
+  *true*, you can fetch the BLOB columns which have the the
+  ``IS JSON FORMAT OSON`` constraint enabled in the same way as
+  :ref:`columns of type JSON <json21fetch>`. See
+  :ref:`osontype` for more information. In a future version of
+  node-oracledb, the setting of this attribute will no longer be required
+  since this will become the default behavior.
+
+- With the new :meth:`connection.encodeOSON()` and
+  :meth:`connection.decodeOSON()` methods, you can fetch and insert into
+  columns which have the ``IS JSON FORMAT OSON`` constraint enabled.
+
+- The new metadata information attribute ``isOson`` indicates whether the
+  fetched column contains binary encoded OSON data.
+
+- The :meth:`lob.getData()` now accepts the ``offset`` and ``amount`` as input
+  parameters.
+
+- The :meth:`connection.execute()` now accepts an object as an input
+  parameter. The object is returned from the third-party
+  `sql-template-tag <https://www.npmjs.com/package/sql-template-
+  tag#oracledb>`__ module and exposes ``statement`` and ``values`` properties
+  to retrieve SQL string and bind values.
+
+- The new :meth:`dbObject.toMap()` method returns a map object for the
+  collection types indexed by PLS_INTEGER.
+
+- Using the new :attr:`oracledb.poolPingTimeout` and
+  :attr:`pool.poolPingTimeout` properties, you can now limit the
+  :meth:`connection.ping()` call time.
+
+- Using the new :ref:`warning <execmanywarning>` property of the
+  :ref:`result object <resultobject>` in :meth:`connection.executeMany()`,
+  your application can manually check for database warnings such as
+  :ref:`plsqlcompwarnings`.
+
+- In node-oracledb Thick mode, the
+  :ref:`SodaDocumentCursor class <sodadocumentcursorclass>` now supports
+  asynchronous iteration.
+
 .. _upgradev62v63:
 
 Upgrading from node-oracledb 6.2 to 6.3

@@ -3494,9 +3494,20 @@ node-oracledb, allowing use of new features.
     specified when creating VARCHAR2 and LOB columns ensures that only JSON
     data is stored in these columns.
 
+    Also, BLOB columns that were created with the ``IS JSON FORMAT OSON``
+    check constraint are fetched in the same way as
+    :ref:`columns of type JSON <json21fetch>` when this property is set to
+    *true*. The node-oracledb :ref:`Thick mode <enablingthick>` requires
+    Oracle Client 21c (or later).
+
     The default value is *false*.
 
     In a future version of node-oracledb, the setting of this attribute will
     no longer be required since this will be the default behavior.
 
     .. versionadded:: 6.3
+
+    .. versionchanged:: 6.4
+
+        BLOB columns with the ``IS JSON FORMAT OSON`` check constraint enabled
+        can now be fetched as JSON type columns when this property is set.

@@ -667,6 +667,67 @@ Connection Methods
         * - Error ``error``
           - If ``createLob()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
+.. method:: connection.decodeOSON()
+
+    .. versionadded:: 6.4
+
+    .. code-block:: javascript
+
+        decodeOSON(Buffer buf);
+
+    This synchronous method decodes an OSON Buffer and returns a Javascript
+    value. This method is useful for fetching BLOB columns that have the check
+    constraint ``IS JSON FORMAT OSON`` enabled.
+
+    The parameters of the ``connection.decodeOSON()`` are:
+
+    .. list-table-with-summary:: connection.decodeOSON() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``buf``
+          - Buffer
+          - The OSON buffer that is to be decoded.
+
+    See :ref:`osontype` for an example.
+
+.. method:: connection.encodeOSON()
+
+    .. versionadded:: 6.4
+
+    .. code-block:: javascript
+
+        encodeOSON(Any value);
+
+    This synchronous method encodes a JavaScript value to OSON bytes and
+    returns a Buffer. This method is useful for inserting OSON bytes directly
+    into BLOB columns that have the check constraint ``IS JSON FORMAT OSON``
+    enabled.
+
+    The parameters of the ``connection.encodeOSON()`` are:
+
+    .. list-table-with-summary:: connection.encodeOSON() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 20
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``value``
+          - Any
+          - The JavaScript value that is to be encoded into OSON bytes. The JavaScript value can be any value supported by `JSON <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FBC22D72-AA64-4B0A-92A2-837B32902E2C>`__.
+
+    See :ref:`osontype` for an example.
+
 .. method:: connection.execute()
 
     **Promise**::

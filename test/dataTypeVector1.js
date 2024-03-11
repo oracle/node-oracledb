@@ -179,7 +179,7 @@ describe('294. dataTypeVector1.js', function() {
     assert.deepStrictEqual(result.rows[0][0], [4.0, 5.0]);
   }); // 294.4
 
-  it('294.5 test update vector type into table', async function() {
+  it('294.5 update vector type into table', async function() {
     let binds = [
       { type: oracledb.DB_TYPE_VECTOR, val: [1, 2] },
     ];
@@ -425,7 +425,10 @@ describe('294. dataTypeVector1.js', function() {
     assert.deepStrictEqual(result.rows[0][0], Array.from(float64Array));
   }); // 294.17
 
-  it.skip('294.18 insert float64 typed array to float32 vector column', async function() {
+  it('294.18 insert float64 typed array to float32 vector column', async function() {
+    const expectedResult = [-999999.125, -314159.25, -12345.6787109375,
+      -100000, -87654.3203125, 43210.98828125, 56789.01171875,
+      65432.109375, 291828.1875, 987654.3125];
 
     // Create a Float64Array
     const float64Array = new Float64Array(assist.vectorValues);
@@ -439,7 +442,7 @@ describe('294. dataTypeVector1.js', function() {
                 values(2, :val)`;
     await connection.execute(sql, binds);
     const result = await connection.execute(`select Vector32Col from ${tableName}`);
-    assert.deepStrictEqual(result.rows[0][0], float64Array);
+    assert.deepStrictEqual(result.rows[0][0], expectedResult);
   }); // 294.18
 
   it('294.19 insert float64 typed array to flex vector column', async function() {
@@ -518,14 +521,14 @@ describe('294. dataTypeVector1.js', function() {
     assert.deepStrictEqual(result.rows[0][0], expected_vectors);
   }); // 294.21
 
-  it('294.22 test inserting vector with invalid values', async function() {
+  it('294.22 inserting vector with invalid values', async function() {
 
     const sql = `insert into ${tableName} (IntCol, Vector64Col)
                  values(2, :1)`;
 
     const matrix = [[-6.231, -423.4321], [5.231, 0.42589]];
 
-    // Inserting a matrix of 2x2
+    // inserting a matrix of 2x2
     await assert.rejects(
       async () => await connection.execute(sql,
         {1:
@@ -541,7 +544,7 @@ describe('294. dataTypeVector1.js', function() {
        */
     );
 
-    // Inserting an int array
+    // inserting an int array
     await assert.rejects(
       async () => await connection.execute(sql,
         {1:
@@ -557,7 +560,7 @@ describe('294. dataTypeVector1.js', function() {
        */
     );
 
-    // Inserting a character in an array
+    // inserting a character in an array
     await assert.rejects(
       async () => await connection.execute(sql,
         {1:
@@ -573,7 +576,7 @@ describe('294. dataTypeVector1.js', function() {
        */
     );
 
-    // Inserting a character
+    // inserting a character
     await assert.rejects(
       async () => await connection.execute(sql,
         {1:
@@ -587,18 +590,21 @@ describe('294. dataTypeVector1.js', function() {
   }); // 294.22
 
   it('294.23 insert float and double array into vector column of default storage (float32)', async function() {
+    // If a vector with -0 is inserted and read, it comes as 0 in thick mode.
+    // Refer Bug: 36210055
+    if (dbConfig.test.mode === 'thick') this.skip();
 
     const FloatArray = new Float32Array([0 * -0.23987, 1 * -0.23987, 2 * -0.23987]);
 
     const DoubleArray = new Float64Array([0 * 2 * -0.23987, 1 * 2 * -0.23987, 2 * 2 * -0.23987]);
 
-    // Inserting a float32 array
+    // inserting a float32 array
     await connection.execute(`insert into ${tableName} (IntCol, VectorCol)
                 values(1, :2)`, {2: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR,
       val: FloatArray
     }});
 
-    // Inserting a double array
+    // inserting a double array
     await connection.execute(`insert into ${tableName} (IntCol, VectorCol)
                 values(1, :2)`, {2: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR,
       val: DoubleArray
@@ -608,7 +614,31 @@ describe('294. dataTypeVector1.js', function() {
     assert.deepStrictEqual(result.rows[0][0], [-0, -0.23986999690532684, -0.4797399938106537]);
   }); // 294.23
 
-  it('294.24 insert an array into vector', async function() {
+  it('294.24 insert float and double array into vector column of default storage (float32)', async function() {
+    const FloatArray = new Float32Array([3 * -0.23987, 1 * -0.23987, 2 * -0.23987]);
+
+    const DoubleArray = new Float64Array([3 * 2 * -0.23987, 1 * 2 * -0.23987, 2 * 2 * -0.23987]);
+
+    // inserting a float32 array
+    await connection.execute(`insert into ${tableName} (IntCol, VectorCol)
+                values(1, :2)`, {2: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR,
+      val: FloatArray
+    }});
+
+    let result = await connection.execute(`select VectorCol from ${tableName}`);
+    assert.deepStrictEqual(result.rows[0][0], [-0.7196099758148193, -0.23986999690532684, -0.4797399938106537]);
+
+    // inserting a double array
+    await connection.execute(`insert into ${tableName} (IntCol, VectorCol)
+                values(1, :2)`, {2: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR,
+      val: DoubleArray
+    }});
+
+    result = await connection.execute(`select VectorCol from ${tableName}`);
+    assert.deepStrictEqual(result.rows[1][0], [-1.43922, -0.47974, -0.95948]);
+  }); // 294.24
+
+  it('294.25 insert an array into vector', async function() {
     const arr = [];
     for (let num = 0; num < 3; num++) {
       arr.push(num * -0.23987);
@@ -617,9 +647,12 @@ describe('294. dataTypeVector1.js', function() {
     await connection.execute(`insert into ${tableName} (IntCol, VectorCol)
             values(1, :1)`, {1: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR,
       val: arr}});
-  }); // 294.24
+  }); // 294.25
 
-  it('294.25 insert float and double array into flex vector column', async function() {
+  it('294.26 insert float and double array into flex vector column', async function() {
+    // If a vector with -0 is inserted and read, it comes as 0 in thick mode.
+    // Refer Bug: 36210055
+    if (dbConfig.test.mode === 'thick') this.skip();
 
     const FloatArray = new Float32Array([0 * -0.23987, 1 * -0.23987, 2 * -0.23987]);
     const DoubleArray = new Float64Array([0 * 2 * -0.23987, 1 * 2 * -0.23987, 2 * 2 * -0.23987]);
@@ -638,9 +671,12 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(result.rows[0][0], [-0, -0.23986999690532684, -0.4797399938106537]);
     assert.deepStrictEqual(result.rows[1][0], [-0, -0.47974, -0.95948]);
-  }); // 294.25
+  }); // 294.26
 
-  it('294.26 insert an array into vector', async function() {
+  it('294.27 insert an array into vector', async function() {
+    // If a vector with -0 is inserted and read, it comes as 0 in thick mode.
+    // Refer Bug: 36210055
+    if (dbConfig.test.mode === 'thick') this.skip();
     const arr = [];
     for (let num = 0; num < 3; num++) {
       arr.push(num * -0.23987);
@@ -653,9 +689,9 @@ describe('294. dataTypeVector1.js', function() {
     const result = await connection.execute(`select VectorFlexCol from ${tableName}`);
 
     assert.deepStrictEqual(result.rows[0][0], [-0, -0.23987, -0.47974]);
-  }); // 294.26
+  }); // 294.27
 
-  it('294.27 test returning vector as clob', async function() {
+  it('294.28 returning vector as clob', async function() {
     const statements = ["select from_vector(vector('[0.9, 7.7]', 2) returning clob)",
       "select vector_serialize(vector('[-0.1, 0]', 2) returning clob)"];
     const expected_vectors = ["[8.99999976E-001,7.69999981E+000]",
@@ -677,9 +713,9 @@ describe('294. dataTypeVector1.js', function() {
       });
       assert.deepStrictEqual(clobData, expected_vectors[i]);
     }
-  }); // 294.27
+  }); // 294.28
 
-  it('294.28 test creating vector with clob', async function() {
+  it('294.29 creating vector with clob', async function() {
     const sql = "select to_clob(:1) from dual";
 
     const binds = [
@@ -700,9 +736,9 @@ describe('294. dataTypeVector1.js', function() {
       });
     });
     assert.deepStrictEqual(clobData, '[7.5E-001,3.75E-001,-1.5625E-002]');
-  }); // 294.28
+  }); // 294.29
 
-  it('294.29 test vector_serialize', async function() {
+  it('294.30 vector_serialize', async function() {
     // Create a Float64Array
     const float64Array = new Float64Array([2.3, 4.5]);
     const result = await connection.execute(`select vector_serialize(:1)
@@ -712,9 +748,9 @@ describe('294. dataTypeVector1.js', function() {
         }
     });
     assert.deepStrictEqual(result.rows[0][0], "[2.2999999999999998E+000,4.5E+000]");
-  }); // 294.29
+  }); // 294.30
 
-  it('294.30 test create table as select', async function() {
+  it('294.31 create table as select', async function() {
     const sql = `insert into ${tableName} (IntCol, VectorFixedCol) values (1, :1)`;
 
     const binds = [
@@ -727,9 +763,9 @@ describe('294. dataTypeVector1.js', function() {
     const result = await connection.execute(`select VectorFixedCol from TestVector2`);
 
     assert.deepStrictEqual(result.rows[0][0], [1, 2]);
-  }); // 294.30
+  }); // 294.31
 
-  it('294.31 insert float64 typed array to float64 vector column', async function() {
+  it('294.32 insert float64 typed array to float64 vector column', async function() {
     // Create a Float64Array
     const float64Array = new Float64Array(
       [-999999.12345, 987654.321, -12345.6789, 56789.0123,
@@ -746,38 +782,43 @@ describe('294. dataTypeVector1.js', function() {
     const result = await connection.execute(`select Vector64Col from ${tableName}`);
 
     assert.deepStrictEqual(result.rows[0][0], Array.from(float64Array));
-  }); // 294.31
+  }); // 294.32
 
-  it.skip('294.32 test Fetch Vector Column as string', async function() {
-    oracledb.fetchTypeHandler = undefined;
+  it('294.33 Fetch Vector Column as string', async function() {
     oracledb.fetchTypeHandler = function() {
       return {type: oracledb.STRING};
     };
-
     // Create a Float64Array
     const float64Array = new Float64Array(
       [-999999.12345, 987654.321, -12345.6789, 56789.0123,
         -314159.2654, 291828.1828, -99999.9999, 43210.9876, -87654.321, 65432.1098]);
-    const expected_vectors = "[-9.99999125E+005,9.87654312E+005,-1.23456787E+004,5.67890117E+004," +
-    "-3.1415925E+005,2.91828188E+005,-1.0E+005,4.32109883E+004,-8.76543203E+004,6.54321094E+004]";
 
-    let result = await connection.execute(`insert into ${tableName} (IntCol, Vector64Col) values(:id, :vec64)`,
+    const expected_vectors = `[-9.9999912344999996E+005,9.87654321E+005,` +
+      `-1.2345678900000001E+004,5.6789012300000002E+004,-3.1415926539999997E+005,` +
+      `2.9182818280000001E+005,-9.9999999899999995E+004,4.32109876E+004,-8.7654320999999996E+004,6.5432109799999998E+004]`;
+    await connection.execute(`insert into ${tableName} (IntCol, Vector64Col) values(:id, :vec64)`,
       { id: 2,
         vec64: float64Array
       });
 
-    result = await connection.execute(`select Vector64Col from ${tableName}`);
+    /* Setting keepInStmtCache as false as
+     * we earlier fetched vector as a clob; the same statement is used for fetching it as a string now.
+     */
+    const result = await connection.execute(`select Vector64Col from ${tableName}`, [], {keepInStmtCache: false});
     assert.deepStrictEqual(result.rows[0][0], expected_vectors);
-  }); // 294.32
+  }); // 294.33
 
-  it.skip('294.33 test Fetch Vector Column as string using fetchInfo', async function() {
-    oracledb.fetchTypeHandler = undefined;
+  it('294.34 Fetch Vector Column as string using fetchInfo', async function() {
+    oracledb.fetchTypeHandler = function() {
+      return {type: oracledb.STRING};
+    };
     // Create a Float64Array
     const float64Array = new Float64Array(
       [-999999.12345, 987654.321, -12345.6789, 56789.0123,
         -314159.2654, 291828.1828, -99999.9999, 43210.9876, -87654.321, 65432.1098]);
-    const expected_vectors = "[-9.99999125E+005,9.87654312E+005,-1.23456787E+004,5.67890117E+004," +
-    "-3.1415925E+005,2.91828188E+005,-1.0E+005,4.32109883E+004,-8.76543203E+004,6.54321094E+004]";
+    const expected_vectors = '[-9.9999912344999996E+005,9.87654321E+005,-1.2345678900000001E+004,' +
+                '5.6789012300000002E+004,-3.1415926539999997E+005,2.9182818280000001E+005,' +
+                '-9.9999999899999995E+004,4.32109876E+004,-8.7654320999999996E+004,6.5432109799999998E+004]';
 
     let result = await connection.execute(`insert into ${tableName} (IntCol, Vector64Col) values(:id, :vec64)`,
       { id: 2,
@@ -792,9 +833,9 @@ describe('294. dataTypeVector1.js', function() {
     result = await connection.execute(
       `select Vector64Col from ${tableName}`, [], options);
     assert.deepStrictEqual(result.rows[0][0], expected_vectors);
-  }); // 294.33
+  }); // 294.34
 
-  it('294.34 test add drop rename vector column', async function() {
+  it('294.35 add drop rename vector column', async function() {
     // Add column
     const addColumnSql = `ALTER TABLE ${tableName} ADD NewVectorCol VECTOR(2)`;
     await connection.execute(addColumnSql);
@@ -828,9 +869,9 @@ describe('294. dataTypeVector1.js', function() {
     );
     const columnsDrop = resultDrop.rows.map((row) => row[0]);
     assert(!columnsDrop.includes('RENAMEDVECTORCOL'));
-  }); // 294.34
+  }); // 294.35
 
-  it('294.35 test vector metadata verification', async function() {
+  it('294.36 vector metadata verification', async function() {
     const sql = `SELECT COUNT(*) FROM all_tables WHERE table_name = UPPER('${tableName}')`;
     let result = await connection.execute(sql);
     assert.strictEqual(result.rows[0][0], 1);
@@ -841,9 +882,9 @@ describe('294. dataTypeVector1.js', function() {
     result = await connection.execute(`SELECT DBMS_METADATA.GET_DDL('TABLE', UPPER('${tableName}')) AS table_ddl
     FROM dual`);
     assert.strictEqual(result.metaData[0].name, "TABLE_DDL");
-  }); // 294.35
+  }); // 294.36
 
-  it('294.36 test transactional features on vector', async function() {
+  it('294.37 transactional features on vector', async function() {
     oracledb.autoCommit = false;
     let sql = `insert into ${tableName} (IntCol, VectorFixedCol) values (1, :1)`;
 
@@ -866,9 +907,9 @@ describe('294. dataTypeVector1.js', function() {
     const result = await connection.execute(`SELECT COUNT(*) FROM ${tableName}`);
     assert.strictEqual(result.rows[0][0], 1);
     oracledb.autoCommit = true;
-  }); // 294.36
+  }); // 294.37
 
-  it('294.37 test validate assm mssm on test vector table', async function() {
+  it('294.38 validate assm mssm on vector table', async function() {
     let sql = `SELECT table_name, tablespace_name
     FROM user_tables
     WHERE table_name = UPPER('${tableName}')`;
@@ -882,9 +923,9 @@ describe('294. dataTypeVector1.js', function() {
     WHERE tablespace_name = '${tablespaceName}'`;
     result = await connection.execute(sql);
     assert.strictEqual(result.rows[0][1], 'AUTO' || result.rows[0][1] === 'MANUAL');
-  }); // 294.37
+  }); // 294.38
 
-  it('294.38 Test fuzzing of vector datatype', async function() {
+  it('294.39 Test fuzzing of vector datatype', async function() {
     const vector_variations = ["Vector", "vector", "veCtor", "VECTOR"];
 
     for (const vector_case of vector_variations) {
@@ -916,9 +957,9 @@ describe('294. dataTypeVector1.js', function() {
       await connection.execute(createProcedureSql);
       await connection.execute(`DROP PROCEDURE IF EXISTS ${vector_case}`);
     }
-  }); // 294.38
+  }); // 294.39
 
-  it('294.39 test dml returning vector type', async function() {
+  it('294.40 dml returning vector type', async function() {
     const sql = `insert into ${tableName} (IntCol, VectorFixedCol)
                 values (1, :value)
                 returning VectorFixedCol into :vector_val`;
@@ -933,9 +974,9 @@ describe('294. dataTypeVector1.js', function() {
 
     result = await connection.execute(`select VectorFixedCol from ${tableName}`);
     assert.deepStrictEqual(result.rows[0][0], [1, 2]);
-  }); // 294.39
+  }); // 294.40
 
-  it('294.40 test inserting more dimensions than defined in flexible vector column', async function() {
+  it('294.41 inserting more dimensions than defined in flexible vector column', async function() {
     const embeddingValues = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120];
     const binds = [
       { type: oracledb.DB_TYPE_VECTOR, dir: oracledb.BIND_IN, val: embeddingValues }
@@ -951,13 +992,13 @@ describe('294. dataTypeVector1.js', function() {
       ),
       /ORA-51803:/
       /*
-        ORA-51808: VECTOR_DISTANCE() is not supported
+        ORA-51803: VECTOR_DISTANCE() is not supported
         for vectors with different dimension counts (2, 12)
       */
     );
-  }); // 294.40
+  }); // 294.41
 
-  it('294.41 test executemany with positional args', async function() {
+  it('294.42 executemany with positional args', async function() {
     const rows = [
       [1, [1, 2]],
       [2, [3, 4]],
@@ -979,10 +1020,10 @@ describe('294. dataTypeVector1.js', function() {
 
     const result = await connection.execute(`select * from ${tableName}`);
     assert.strictEqual(result.rows.length, 3);
-  }); // 294.41
+  }); // 294.42
 
-  it('294.42 handling of NULLs and default values for vector types', async function() {
-    // Insert with default value
+  it('294.43 handling of NULLs and default values for vector types', async function() {
+    // insert with default value
     await connection.execute(`
         INSERT INTO ${tableName} (IntCol) VALUES (1)
     `);
@@ -995,7 +1036,7 @@ describe('294. dataTypeVector1.js', function() {
     `);
     assert.strictEqual(result.rows[0][0], null);
 
-    // Insert with NULL value
+    // insert with NULL value
     await connection.execute(`
         INSERT INTO ${tableName} (IntCol, VectorFixedCol) VALUES (2, NULL)
     `);
@@ -1007,9 +1048,9 @@ describe('294. dataTypeVector1.js', function() {
         SELECT VectorFixedCol FROM ${tableName} WHERE IntCol = 2
     `);
     assert.strictEqual(result.rows[0][0], null);
-  }); // 294.42
+  }); // 294.43
 
-  it('294.43 test ORDER BY and GROUP BY with vector types as negative test', async function() {
+  it('294.44 ORDER BY and GROUP BY with vector types as negative test', async function() {
     await assert.rejects(
       async () => await connection.execute(`SELECT VectorFixedCol, COUNT(*) as count
           FROM ${tableName}
@@ -1025,11 +1066,11 @@ describe('294. dataTypeVector1.js', function() {
       `),
       /ORA-22848:/ // ORA-22848: cannot use VECTOR type as comparison key
     );
-  }); // 294.43
+  }); // 294.44
 
-  it('294.44 selection of top vectors by Euclidean distance', async function() {
+  it('294.45 selection of top vectors by Euclidean distance', async function() {
     const sampleVector = "VECTOR('[3.1, 4.2, 5.9, 6.5, 7.3, 2.1, 8.4, 9.7, 3.4, 2.2]', 10, FLOAT64)";
-    const vectorsToInsert = [
+    const vectorsToinsert = [
       [8.1, 7.2, 6.3, 5.4, 4.5, 3.6, 2.7, 1.8, 9.9, 0.0],
       [0.1, 1.2, 2.3, 3.4, 4.5, 5.6, 6.7, 7.8, 8.9, 9.0],
       [1.0, 3.2, 5.4, 7.6, 9.8, 2.1, 4.3, 6.5, 8.7, 0.9],
@@ -1067,8 +1108,8 @@ describe('294. dataTypeVector1.js', function() {
       ]
     ];
 
-    for (let i = 0; i < vectorsToInsert.length; i++) {
-      const vector = vectorsToInsert[i];
+    for (let i = 0; i < vectorsToinsert.length; i++) {
+      const vector = vectorsToinsert[i];
       const float64Array = new Float64Array(vector);
       const binds = [
         { type: oracledb.NUMBER, dir: oracledb.BIND_IN, val: i + 1 },
@@ -1088,9 +1129,9 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.strictEqual(result.rows.length, 4);
     assert.deepStrictEqual(result.rows, expected_vectors);
-  }); // 294.44
+  }); // 294.45
 
-  it('294.45 test fetching vector Metadata', async function() {
+  it('294.46 fetching vector Metadata', async function() {
     const testValues = [
       { name: 'VectorFixedCol', dimensions: 2, format: undefined },
       { name: 'VectorInt8Col', dimensions: 4, format: oracledb.VECTOR_FORMAT_INT8},
@@ -1099,7 +1140,7 @@ describe('294. dataTypeVector1.js', function() {
     ];
 
     for (const { name, dimensions, format } of testValues) {
-      // Inserting data into the table
+      // inserting data into the table
       await connection.execute(
         `insert into ${tableName} (IntCol, ${name}) values (1, :1)`,
         {
@@ -1112,17 +1153,19 @@ describe('294. dataTypeVector1.js', function() {
       );
 
       // Fetching data from the table
-      const result = await connection.execute(`select ${name} from ${tableName}`);
+      /* Setting keepInStmtCache as false as
+       * we earlier fetched vector as a clob; the same statement is used for fetching it as a string now.
+       */
+      const result = await connection.execute(`select ${name} from ${tableName}`, [], {keepInStmtCache: false});
       assert.strictEqual(result.metaData[0].vectorDimensions, dimensions);
       assert.strictEqual(result.metaData[0].dbType, oracledb.DB_TYPE_VECTOR);
       assert.strictEqual(result.metaData[0].vectorFormat, format);
       assert.strictEqual(result.metaData[0].isJson, false);
     }
-  }); // 294.45
+  }); // 294.46
 
-  it('294.46 test handling of NULL vector value', async function() {
+  it('294.47 handling of NULL vector value', async function() {
     const table = 'nodb_vectorDbTable1';
-    await connection.execute(testsUtil.sqlDropTable(table));
     const sql = `CREATE TABLE ${table} (
         IntCol     NUMBER,
         VectorFlex32Col vector(*, float32)
@@ -1137,9 +1180,9 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.strictEqual(result.rows[0][0], null);
     await connection.execute(testsUtil.sqlDropTable(table));
-  });
+  }); // 294.47
 
-  it('294.47 insert a float32 vector with 8127 dimensions into a float32 flex column', async function() {
+  it('294.48 insert a float32 vector with 8127 dimensions into a float32 flex column', async function() {
     const arr = Array(8127).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
@@ -1163,15 +1206,15 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(result.rows[0], [1, arr]);
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.47
+  }); // 294.48
 
-  it('294.48 insert a float32 vector with 65534 dimensions into a vector column of same dimensions', async function() {
-    const arr = Array(65534).fill(2.5);
+  it('294.49 insert a float32 vector with 65535 dimensions into a vector column of same dimensions', async function() {
+    const arr = Array(65535).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
     const sql = `CREATE TABLE ${table} (
         IntCol     NUMBER,
-        Vector32Col VECTOR(65534, FLOAT32)
+        Vector32Col VECTOR(65535, FLOAT32)
         )`;
     const plsql = testsUtil.sqlCreateTable(table, sql);
     await connection.execute(plsql);
@@ -1189,10 +1232,10 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(result.rows[0], [1, arr]);
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.48
+  }); // 294.49
 
-  it('294.49 insert a float64 vector with 65534 dimensions into a float64 flex column', async function() {
-    const arr = Array(65534).fill(2.5);
+  it('294.50 insert a float64 vector with 65535 dimensions into a float64 flex column', async function() {
+    const arr = Array(65535).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
     const sql = `CREATE TABLE ${table} (
@@ -1215,9 +1258,9 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(result.rows[0], [1, arr]);
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.49
+  }); // 294.50
 
-  it('294.50 insert a float64 vector with 65533 dimensions to float32 vector', async function() {
+  it('294.51 insert a float64 vector with 65533 dimensions to float32 vector', async function() {
     const arr = Array(65533).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
@@ -1240,14 +1283,14 @@ describe('294. dataTypeVector1.js', function() {
     );
     assert.deepStrictEqual(result.rows[0], [1, arr]);
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.50
+  }); // 294.51
 
-  it.skip('294.51 insert a float64 vector with 65534 dimensions to flex float32 vector', async function() {
-    const arr = Array(65534).fill(0.002253931947052479);
+  it('294.52 insert a float64 vector with 65535 dimensions to flex float32 vector', async function() {
+    const arr = Array(65535).fill(0.002253931947052479);
     const table = 'nodb_vectorDbTable1';
     const sql = `CREATE TABLE ${table} (
         IntCol     NUMBER,
-        Vector32Col VECTOR(65534, FLOAT32)
+        Vector32Col VECTOR(65535, FLOAT32)
         )`;
     const plsql = testsUtil.sqlCreateTable(table, sql);
     await connection.execute(plsql);
@@ -1264,9 +1307,9 @@ describe('294. dataTypeVector1.js', function() {
     );
     assert.deepStrictEqual(result.rows[0], [1, arr]);
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.51
+  }); // 294.52
 
-  it('294.52 insert a int8 vector with 65533 dimensions to flex int8 coloumn', async function() {
+  it('294.53 insert a int8 vector with 65533 dimensions to flex int8 coloumn', async function() {
     const arr = Array(65533).fill(2);
     const int8arr = new Int8Array(arr);
 
@@ -1291,9 +1334,9 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(result.rows[0], [1, arr]);
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.52
+  }); // 294.53
 
-  it('294.53 Insert using executeMany, update, delete and select vectors', async function() {
+  it('294.54 insert using executeMany, update, delete and select vectors', async function() {
     const table = 'nodb_vectorDbTable1';
     const sql = `CREATE TABLE ${table} (
         IntCol      NUMBER,
@@ -1316,7 +1359,7 @@ describe('294. dataTypeVector1.js', function() {
         { type: oracledb.DB_TYPE_VECTOR},
       ]};
 
-    // Insert
+    // insert
     await connection.executeMany(
       `insert into ${table} (IntCol, Vector64Col) values (:1, :2)`,
       rows,
@@ -1347,10 +1390,10 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(result.rows, [[1, [1.1, 2.2, 3.14]], [3, [6.3, 0.042, 9.148]]]);
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.53
+  }); // 294.54
 
-  it('294.54 insert clob with array of 65534 elements to a vector column', async function() {
-    const arr = Array(65534).fill(2);
+  it('294.55 insert clob with array of 65535 elements to a vector column', async function() {
+    const arr = Array(65535).fill(2);
     let lob = await connection.createLob(oracledb.CLOB);
     // Write the buffer to the CLOB
     await lob.write(JSON.stringify (arr));
@@ -1382,9 +1425,9 @@ describe('294. dataTypeVector1.js', function() {
     //assert.deepStrictEqual(clobData.map(num => parseFloat(num.toFixed(4))), arr.join(','));
     assert.strictEqual(clobData, arr.toString('utf8'));
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.54
+  }); // 294.55
 
-  it('294.55 Insert vector as clob to Int8 column', async function() {
+  it('294.56 insert vector as clob to Int8 column', async function() {
     const table = 'nodb_vectorDbTable1';
     let sql = `CREATE TABLE ${table} (
         IntCol      NUMBER,
@@ -1418,9 +1461,9 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(clobData, arr.join(','));
     await connection.execute(testsUtil.sqlDropTable(table));
-  });
+  }); // 294.56
 
-  it('294.56 Insert vector as clob to float64 column', async function() {
+  it('294.57 insert vector as clob to float64 column', async function() {
     const table = 'nodb_vectorDbTable1';
     let sql = `CREATE TABLE ${table} (
         IntCol      NUMBER,
@@ -1455,9 +1498,9 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(clobData, arr.join(','));
     await connection.execute(testsUtil.sqlDropTable(table));
-  });
+  }); // 294.57
 
-  it('294.57 Insert vector as clob to float32 column', async function() {
+  it('294.58 insert vector as clob to float32 column', async function() {
     const table = 'nodb_vectorDbTable1';
     let sql = `CREATE TABLE ${table} (
         IntCol      NUMBER,
@@ -1491,10 +1534,10 @@ describe('294. dataTypeVector1.js', function() {
 
     assert.deepStrictEqual(clobData, arr.join(','));
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.57
+  }); // 294.58
 
-  it('294.58 insert a clob with 65534 elements to float64 vector column', async function() {
-    const maxval = 65534;
+  it('294.59 insert a clob with 65535 elements to float64 vector column', async function() {
+    const maxval = 65535;
     const arr = Array(maxval).fill(12);
 
     const table = 'nodb_vectorDbTable1';
@@ -1534,10 +1577,10 @@ describe('294. dataTypeVector1.js', function() {
       lob2.destroy();
     });
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.58
+  }); // 294.59
 
-  it('294.59 insert and update vector as clob', async function() {
-    const arr1 = Array(65534).fill(2);
+  it('294.60 insert and update vector as clob', async function() {
+    const arr1 = Array(65535).fill(2);
     let lob = await connection.createLob(oracledb.CLOB);
     // Write the buffer to the CLOB
     await lob.write(JSON.stringify (arr1));
@@ -1560,7 +1603,7 @@ describe('294. dataTypeVector1.js', function() {
     await connection.commit();
 
     // Update
-    const arr2 = Array(65534).fill(2.5);
+    const arr2 = Array(65535).fill(2.5);
     lob = await connection.createLob(oracledb.CLOB);
 
     // Write the buffer to the CLOB
@@ -1583,26 +1626,217 @@ describe('294. dataTypeVector1.js', function() {
     const clobData = await lob.toString('utf8');
     assert.strictEqual(clobData, arr2.toString('utf8'));
     await connection.execute(testsUtil.sqlDropTable(table));
-  }); // 294.59
-
-  it('294.60 insert a float64 typed array created from ArrayBuffer', async function() {
-    const elements = [8.1, 7.2, 6.3, 5.4, 4.5, 3.6, 2.7, 1.8, 9.9, 0.0];
-    const arrBuf = new ArrayBuffer(128);
-
-    // Create typed array of 10 elements from byteOffset 8
-    const float64Arr = new Float64Array(arrBuf, 8, 10);
-
-    // initialize
-    elements.forEach((element, index) => {
-      float64Arr[index] = element;
-    });
-
-    // insert and verify.
-    const binds = { emdbedding: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float64Arr } };
-    const sql = `insert into ${tableName} (IntCol, Vector64Col)
-    values(2, :emdbedding)`;
-    await connection.execute(sql, binds);
-    const result = await connection.execute(`select Vector64Col from ${tableName}`);
-    assert.deepStrictEqual(result.rows[0][0], Array.from(float64Arr));
   }); // 294.60
+
+  it('291.61 insert a Float64 vector array with 65535 dimensions to Float32 vector column', async function() {
+    const arr = Array(65535).fill(0.002253931947052479);
+
+    const table = 'nodb_vectorDbTable66';
+    const sql = `CREATE TABLE ${table} (
+        IntCol     NUMBER,
+        Vector32Col VECTOR(65535, FLOAT32)
+    )`;
+
+    const plsql = testsUtil.sqlCreateTable(table, sql);
+    await connection.execute(plsql);
+
+    const float32arr = new Float64Array(arr);
+    await connection.execute(
+      `INSERT INTO ${table}
+         (IntCol, Vector32Col) VALUES (:id, :vec32)`,
+      { id: 1,
+        vec32: float32arr
+      });
+
+    const result = await connection.execute(
+      `SELECT IntCol, Vector32Col FROM ${table} ORDER BY IntCol`
+    );
+
+    assert.deepStrictEqual(result.rows[0], [1, arr]);
+    await testsUtil.dropTable(connection, table);
+  }); // 294.61
+
+  it('291.62 Procedure Call with Vector Type Parameters', async function() {
+    await connection.execute(`
+      CREATE OR REPLACE PROCEDURE nodb_VectorTest (
+        a_InValue       IN  VECTOR,
+        a_InOutValue    IN OUT VECTOR,
+        a_OutValue      OUT VECTOR
+      ) AS
+      BEGIN
+        a_OutValue := a_InValue;
+      END;
+    `);
+
+    await connection.commit();
+
+    const inputVector = new Float32Array([2.5, 2.5, 2.5, 2.5, 2.5]);
+    const inOutVector = { val: inputVector, dir: oracledb.BIND_INOUT, type: oracledb.DB_TYPE_VECTOR };
+    const outVector = { val: inputVector, dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_VECTOR };
+
+    const bindings = [inputVector, inOutVector, outVector];
+
+    const result = await connection.execute(
+      `BEGIN nodb_VectorTest(:1, :2, :3); END;`,
+      bindings
+    );
+
+    assert.deepStrictEqual(inputVector, result.outBinds[1]);
+    await connection.execute(`DROP PROCEDURE nodb_VectorTest`);
+  }); // 294.62
+
+  it('294.63 binding a vector with inf values (negative)', async function() {
+    const value = new Float32Array([-Infinity, -Infinity, -Infinity, -Infinity, -Infinity]);
+    await assert.rejects(
+      async () => await connection.execute("select :1 from dual", [value]),
+      /OCI-51805:|ORA-51805:/
+    );
+  });  // 294.63
+
+  it('294.64 fetch JSON value with an embedded vector', async function() {
+    const value = new Float32Array([1, 2, 3]);
+    const result = await connection.execute(
+      "select json_object('id' value 6432, 'vector' value to_vector('[1, 2, 3]') returning json) from dual"
+    );
+    const expectedVal = { id: 6432, vector: value };
+    assert.deepStrictEqual(result.rows[0][0], expectedVal);
+  }); // 294.64
+
+  it('294.65 bind JSON value with an embedded vector', async function() {
+    const table = 'nodb_vector_desc_65';
+    const sql = `CREATE TABLE ${table} (
+      IntCol number(9) not null,
+      JsonCol json not null
+    )`;
+    const plsql = testsUtil.sqlCreateTable(table, sql);
+    await connection.execute(plsql);
+
+    const value = new Float32Array([6433, 6433.25, 6433.5]);
+    const bindVariables = [
+      { dir: oracledb.BIND_IN, type: oracledb.NUMBER, val: 1 },
+      { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_JSON, val: value }
+    ];
+
+    await connection.execute(`insert into ${table} values (:1, :2)`, bindVariables);
+
+    await connection.commit();
+
+    const result = await connection.execute(`select JsonCol from ${table}`);
+    assert.deepStrictEqual(result.rows[0][0], value);
+    await connection.execute(testsUtil.sqlDropTable(table));
+  }); // 294.65
+
+  it('294.66 with type Int16Array invalid typed arrays', async function() {
+    // Create a intArray
+    const intArray = new Uint16Array([1, 2]);
+
+    // Bind the Float32Array using oracledb.DB_TYPE_VECTOR
+    const binds = [
+      { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: intArray },
+    ];
+
+    const sql = `insert into ${tableName} (IntCol, VectorInt8Col)
+        values(2, :val)`;
+    await assert.rejects(
+      async () => await connection.execute(sql, binds),
+      /NJS-011:/ // encountered bind value and type mismatch
+    );
+  }); // 294.66
+
+  it('294.67 typed arrays with strings', async function() {
+    // Create a Float32Array with strings
+    const float32ArrayWithString = new Float32Array([1, 'invalid', 3, 4]);
+
+    // Bind the Float32Array using oracledb.DB_TYPE_VECTOR
+    const binds = [
+      { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float32ArrayWithString },
+    ];
+
+    const sql = `insert into ${tableName} (IntCol, VectorInt8Col)
+      values(2, :val)`;
+    await assert.rejects(
+      async () => await connection.execute(sql, binds),
+      /ORA-51805:/ /*
+                    ORA-51805: Vector is not properly formatted
+                    (dimension value  is either not a number or infinity)
+                  */
+    );
+  }); // 294.67
+
+  it('294.68 typed arrays with objects', async function() {
+  // Create a Float32Array with objects
+    const float32ArrayWithObjects = new Float32Array([{ key: 'value' }, 2, 3, 4]);
+
+    // Bind the Float32Array using oracledb.DB_TYPE_VECTOR
+    const binds = [
+      { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float32ArrayWithObjects },
+    ];
+
+    const sql = `insert into ${tableName} (IntCol, VectorInt8Col)
+      values(2, :val)`;
+    await assert.rejects(
+      async () => await connection.execute(sql, binds),
+      /ORA-51805:/ /*
+                  ORA-51805: Vector is not properly formatted
+                  (dimension value  is either not a number or infinity)
+                */
+    );
+  }); // 294.68
+
+  it('294.69 typed arrays with boolean values', async function() {
+    // Create a Float32Array with boolean values
+    const float32ArrayWithBooleans = new Float32Array([true, false, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+    // Bind the Float32Array using oracledb.DB_TYPE_VECTOR
+    const binds = [
+      { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float32ArrayWithBooleans },
+    ];
+
+    const sql = `insert into ${tableName} (IntCol, Vector64Col)
+      values(2, :val)`;
+    await connection.execute(sql, binds);
+    await connection.commit();
+
+    const result = await connection.execute(`select Vector64Col from ${tableName}`);
+    assert.deepStrictEqual(result.rows[0][0], [1, 0, 3, 4, 5, 6, 7, 8, 9, 10]);
+  }); // 294.69
+
+  it('294.70 typed arrays with undefined value', async function() {
+    // Create a Float32Array with undefined value
+    const float32ArrayWithUndefined = new Float32Array([1, undefined, 3, 4, 5, 6, 7, 8, 9, 0]);
+
+    // Bind the Float32Array using oracledb.DB_TYPE_VECTOR
+    const binds = [
+      { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float32ArrayWithUndefined },
+    ];
+
+    const sql = `insert into ${tableName} (IntCol, Vector64Col)
+      values(2, :val)`;
+    await assert.rejects(
+      async () => await connection.execute(sql, binds),
+      /ORA-51805:/ /*
+                 ORA-51805: Vector is not properly formatted
+                 (dimension value is either not a number or infinity)
+               */
+    );
+  }); // 294.70
+
+  it('294.71 typed arrays with null values', async function() {
+    // Create a Float32Array with null values
+    const float32ArrayInvalidValues = new Float32Array([1, null, 3, 4, 5, 6, 7, 8, 9, 0]);
+
+    // Bind the Float32Array using oracledb.DB_TYPE_VECTOR
+    const binds = [
+      { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float32ArrayInvalidValues },
+    ];
+
+    const sql = `insert into ${tableName} (IntCol, Vector64Col)
+      values(2, :val)`;
+
+    await connection.execute(sql, binds);
+    await connection.commit();
+
+    const result = await connection.execute(`select Vector64Col from ${tableName}`);
+    assert.deepStrictEqual(result.rows[0][0], [1, 0, 3, 4, 5, 6, 7, 8, 9, 0]);
+  }); // 294.71
 });

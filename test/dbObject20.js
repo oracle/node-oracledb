@@ -1156,10 +1156,10 @@ describe('290. dbObject20.js', () => {
 
   });
 
-  describe('290.5 Associative Arrays fetch ', function() {
+  describe('290.5 Associative Arrays fetch', function() {
     let conn;
     const PKG1 = 'NODB_PKG_OBJ_1_PLS_INTEGER';
-    const TYPE1 = 'NODB_TYP_OBJ_1_PLS_ARRAY_INTEGER';
+    const TYPE1 = 'NODB_TYP_OBJ_1_PLS_ARR_INTEGER';
 
     before(async () => {
       conn = await oracledb.getConnection(dbConfig);

@@ -5654,3 +5654,118 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     293.3 Warning from function in a PLSQL query
     293.4 with poolMin=0 with password in grace time with heterogeneous pool
     293.5 Warning from executeMany
+
+294. dataTypeVector1.js
+    294.1 binding a vector type with various numeric array types
+    294.2 binding a vector type with unsupported typed arrays
+    294.3 binding a vector type with null vector array types
+    294.4 binding a vector type with various number typed arrays
+    294.5 test update vector type into table
+    294.6 verify different vector constructors
+    294.7 insert 32 bit vector to 32 bit table
+    294.8 insert Int8 vector to Int8 vector column
+    294.9 insert int8 typed array to float64 vector column
+    294.10 insert int8arr typed array to flex vector column
+    294.11 insert int8arr typed array to float32 vector column
+    294.12 insert a float32 typed array into an int8 vector column
+    294.13 insert a float32 vector into an int8 column (negative)
+    294.14 insert a float64 typed array into an int8 vector column
+    294.15 insert float32 typed array to float64 vector column
+    294.16 insert float32 typed array to flex vector column
+    294.17 insert float64 typed array to float64 vector column
+    294.18 insert float64 typed array to float32 vector column
+    294.19 insert float64 typed array to flex vector column
+    294.20 insert vector with invalid size
+    294.21 insert double array to float32 vector column
+    294.22 test inserting vector with invalid values
+    294.23 insert float and double array into vector column of default storage (float32)
+    294.24 insert float and double array into vector column of default storage (float32)
+    294.25 insert an array into vector
+    294.26 insert float and double array into flex vector column
+    294.27 insert an array into vector
+    294.28 test returning vector as clob
+    294.29 test creating vector with clob
+    294.30 test vector_serialize
+    294.31 test create table as select
+    294.32 insert float64 typed array to float64 vector column
+    294.33 test Fetch Vector Column as string
+    294.34 test Fetch Vector Column as string using fetchInfo
+    294.35 test add drop rename vector column
+    294.36 test vector metadata verification
+    294.37 test transactional features on vector
+    294.38 test validate assm mssm on test vector table
+    294.39 Test fuzzing of vector datatype
+    294.40 test dml returning vector type
+    294.41 test inserting more dimensions than defined in flexible vector column
+    294.42 test executemany with positional args
+    294.43 handling of NULLs and default values for vector types
+    294.44 test ORDER BY and GROUP BY with vector types as negative test
+    294.45 selection of top vectors by Euclidean distance
+    294.46 test fetching vector Metadata
+    294.47 test handling of NULL vector value
+    294.48 insert a float32 vector with 8127 dimensions into a float32 flex column
+    294.49 insert a float32 vector with 65535 dimensions into a vector column of same dimensions
+    294.50 insert a float64 vector with 65535 dimensions into a float64 flex column
+    294.51 insert a float64 vector with 65533 dimensions to float32 vector
+    294.52 insert a float64 vector with 65535 dimensions to flex float32 vector
+    294.53 insert a int8 vector with 65533 dimensions to flex int8 coloumn
+    294.54 Insert using executeMany, update, delete and select vectors
+    294.55 insert clob with array of 65535 elements to a vector column
+    294.56 Insert vector as clob to Int8 column
+    294.57 Insert vector as clob to float64 column
+    294.58 Insert vector as clob to float32 column
+    294.59 insert a clob with 65535 elements to float64 vector column
+    294.60 insert and update vector as clob
+    291.61 insert a Float64 vector array with 65535 dimensions to Float32 vector column
+    291.62 test Procedure Call with Vector Type Parameters
+    294.63 test binding a vector with inf values (negative)
+    294.64 fetch JSON value with an embedded vector
+    294.65 bind JSON value with an embedded vector
+
+295. dataTypeVector2.js
+    295.1 verify fetch information for older clients
+    295.2 verify default fetched value is an array
+    295.3 verify fetched value as intermediate long value
+    295.4 verify fetched value as intermediate string value
+
+296. dataTypeVector3.js
+    296.1 insert rows into the table
+    296.2 retrieve rows from the table and verify values
+    296.3 calculate vector distances to a given embedding
+    296.4 perform a top 3 similarity search to a given embedding
+    296.5 find nearest neighbors with distance < 34 for a given embedding
+    296.6 calculate cosine distances to a given embedding
+    296.7 calculate inner products with a given embedding
+    296.8 should handle negative vector components
+    296.9 should handle large vector components
+    296.10 should handle zero vector components
+
+297. jsonDualityView7.js
+    297.1 With tables and without constraints relationship using vectors
+      297.1.1 Insert float32 vector data in table and views
+      297.1.2 Insert float32 vector data with dimension 10
+      297.1.3 Insert float64 vector data
+      297.1.4 Insert fixed vector data
+      297.1.5 Insert int8 vector data
+      297.1.6 insert int8 typed array to float64 vector column
+      297.1.7 insert int8 typed array to flex vector column
+      297.1.8 insert int8 typed array to float32 vector column
+      297.1.9 insert a float32 typed array into an int8 vector column
+      297.1.10 insert a float64 into an int8 vector column
+      297.1.11 Insert vector as clob to Int8 column
+      297.1.12 insert clob with array of 65535 elements to a vector column
+      297.1.13 insert a float32 vector with 65535 dimensions into a vector column of same dimensions
+      297.1.14 insert a float64 typed array created from ArrayBuffer
+    297.2 Sanity DMLs
+      297.2.1 insert a float32 typed array into tables from JSON DV
+      297.2.2 insert a 65535 dimension float32 typed array into tables from JSON DV
+      297.2.3 insert a 65536 dimension float32 typed array into tables from JSON DV
+      297.2.4 insert a float32 typed array into tables from JSON DV wrong dimension
+      297.2.5 update a float32 typed array into tables from JSON DV
+      297.2.6 delete a float32 typed array into tables from JSON DV
+      297.2.7 insert a float64 into tables from JSON DV
+      297.2.8 update a float64 into tables from JSON DV
+      297.2.9 delete a float64 into tables from JSON DV
+      297.2.10 insert a VectorInt8Col typed array into tables from JSON DV
+      297.2.11 update a VectorInt8Col typed array into tables from JSON DV
+      297.2.12 delete a VectorInt8Col typed array into tables from JSON DV

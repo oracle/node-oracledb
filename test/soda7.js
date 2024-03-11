@@ -183,7 +183,7 @@ describe('175. soda7.js', () => {
     assert.strictEqual(res.dropped, true);
     await conn.close();
   }); // 175.5
-  
+
   it('175.6 getCursor(), asyncIterator', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();

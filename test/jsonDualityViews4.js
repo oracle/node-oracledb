@@ -45,7 +45,7 @@ describe('275. jsonDualityView4.js', function() {
   before(async function() {
     isRunnable = (!dbConfig.test.drcp);
     if (isRunnable) {
-      isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+      isRunnable = await testsUtil.checkPrerequisites(2300000000, 2300000000);
     }
     if (!isRunnable || dbConfig.test.isCmanTdm) {
       this.skip();
@@ -101,8 +101,9 @@ describe('275. jsonDualityView4.js', function() {
   after(async function() {
     if (!isRunnable || dbConfig.test.isCmanTdm) return;
 
-    await connection.execute(`drop table student PURGE`);
-    await connection.execute(`drop table class PURGE`);
+    await testsUtil.dropTable(connection, 'student_class');
+    await testsUtil.dropTable(connection, 'student');
+    await testsUtil.dropTable(connection, 'class');
 
     await connection.close();
     await dbaConn.execute(`drop user njs_jsonDv4 cascade`);
@@ -331,23 +332,29 @@ describe('275. jsonDualityView4.js', function() {
 
   it('275.6 Test with dictionary views', async function() {
     // Query 1: select view_name,view_owner,ROOT_TABLE_NAME from DBA_JSON_DUALITY_VIEWS
-    await dbaConn.execute(`
+    let result = await dbaConn.execute(`
       SELECT view_name, view_owner, ROOT_TABLE_NAME
       FROM DBA_JSON_DUALITY_VIEWS
       ORDER BY view_name`);
+    assert.strictEqual(result.rows.length, 4);
 
     // Query 2: select VIEW_OWNER, VIEW_NAME, RELATIONSHIP from DBA_JSON_DUALITY_VIEW_TABS
-    await dbaConn.execute(`
+    result = await dbaConn.execute(`
       SELECT VIEW_OWNER, VIEW_NAME, RELATIONSHIP
       FROM DBA_JSON_DUALITY_VIEW_TABS
       ORDER BY VIEW_OWNER`);
+    assert.strictEqual(result.rows.length, 11);
 
     // Query 3: select COLUMN_NAME,DATA_TYPE from DBA_JSON_DUALITY_VIEW_TAB_COLS
-    const result = await dbaConn.execute(`
+    result = await dbaConn.execute(`
       SELECT COLUMN_NAME, DATA_TYPE
       FROM DBA_JSON_DUALITY_VIEW_TAB_COLS
       ORDER BY COLUMN_NAME`);
-    assert.strictEqual(result.rows.length, 7);
+    /*
+      Due to the JSON duality views created in the earlier tests,
+      the SELECT query above will return 25 rows.
+    */
+    assert.strictEqual(result.rows.length, 25);
     assert.deepStrictEqual(result.rows[0], [ 'CLSID', 'NUMBER' ]);
   });
 

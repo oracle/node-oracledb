@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -67,7 +67,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -103,7 +103,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -133,7 +133,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -159,7 +159,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -191,7 +191,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -223,7 +223,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -255,7 +255,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -287,7 +287,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -319,7 +319,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
       await conn.commit();
 
@@ -351,7 +351,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
 
       const content = {"oracle": "database 23.3", "_id": 12345};
@@ -372,7 +372,7 @@ describe('288. embedded_oid.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
-      const options = {metaData: {"assignmentMethod": "EMBEDDED_OID"}};
+      const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
       const collection = await sd.createCollection(collname, options);
 
       const content = {"oracle": "database 23.3", "_id": 12345};

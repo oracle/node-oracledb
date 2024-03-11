@@ -13,30 +13,31 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
-#)  Enhanced :meth:`~lob.getData` method to accept offset and amount arguments.
+#)  Enhanced :meth:`lob.getData()` method to accept ``offset`` and ``amount``
+    arguments.
     See `Issue #1643 <https://github.com/oracle/node-oracledb/issues/1643>`__.
 
-#)  Add support for fetching BLOB columns which have "IS JSON FORMAT OSON"
-    constraint enabled in the same way as columns of type JSON.
-    In node-oracledb :ref:`Thick mode <enablingthick>` this requires
-    Oracle Client 21c or higher. Applications can get this new fetch behaviour
+#)  Added support for fetching BLOB columns which have the
+    ``IS JSON FORMAT OSON`` constraint enabled in the same way as columns of
+    type JSON. In node-oracledb :ref:`Thick mode <enablingthick>` this requires
+    Oracle Client 21c or later. Applications can get this new fetch behaviour
     by setting the oracledb property :attr:`oracledb.future.oldJsonColumnAsObj`
     to `true`. The default value for this property is `false` which retains
     the existing fetch behaviour.
     In a future version, the new fetch behaviour will become default and
     setting this property will no longer be needed.
 
-#)  Added methods :meth:`~Connection.decodeOSON` and
-    :meth:`~Connection.encodeOSON` to support fetching and inserting into
+#)  Added methods :meth:`connection.decodeOSON()` and
+    :meth:`connection.encodeOSON()` to support fetching and inserting into
     columns which have the check constraint ``IS JSON FORMAT OSON``
-    enabled. Refer `Storing and Managing JSON Data <https://docs.oracle.com/en/database/oracle/oracle-database/19/adjsn/overview-of-storage-and-management-of-JSON-data.html#GUID-26AB85D2-3277-451B-BFAA-9DD45355FCC7>`__
+    enabled. See :ref:`osontype` for more information.
 
 #)  Connections to standby database opened `MOUNTED` return
-    `NAN <https://github.com/nodejs/nan>` for :meth:`~connection.maxOpenCursors`
-    Fixed to return 0.
+    `NAN <https://github.com/nodejs/nan>`__ for
+    :attr:`connection.maxOpenCursors`. Fixed to return 0.
 
-#)  Added :meth:`~dbObject.toMap` method to :ref:`DbObject Class<dbobjectclass>`
-    which returns a map object.
+#)  Added :meth:`~dbObject.toMap()` method to
+    :ref:`DbObject Class <dbobjectclass>` which returns a map object.
     See `Issue #1627 <https://github.com/oracle/node-oracledb/issues/1627>`__.
 
 #)  Added support to accept an object as an input parameter in the
@@ -46,18 +47,18 @@ Common Changes
     retrieve SQL string and bind values.
     See `Issue #1629 <https://github.com/oracle/node-oracledb/issues/1629>`__.
 
-#)  Added new extended :ref:`metadata <execmetadata>` information attribute
+#)  Added a new extended :ref:`metadata <execmetadata>` information attribute
     ``isOson`` for a fetched column.
 
 #)  Added :attr:`oracledb.poolPingTimeout` and :attr:`pool.poolPingTimeout`
-    to limit the :meth:`connection.ping()` call time.
+    properties to limit the :meth:`connection.ping()` call time.
     `Issue #1626 <https://github.com/oracle/node-oracledb/issues/1626>`__.
 
 #)  Added the :ref:`warning <execmanywarning>` property to the
     :ref:`result <resultobjproperties>` object of
     :meth:`connection.executeMany()`.
 
-#)  Attribute and element values of :ref:`DbObject Class
+#)  The attribute and element values of :ref:`DbObject Class
     <dbobjectclass>` objects that contain strings or bytes now have their
     maximum size constraints checked. Errors ``NJS-142`` and ``NJS-143`` are
     now raised when the size constraints are violated.
@@ -74,20 +75,21 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
-#)  Fix for the intermittent error ``NJS-103`` seen while fetching large number
-    of CLOB columns whose metadata is split across multiple packets.
+#)  Fixed the intermittent error ``NJS-103`` which was seen while fetching
+    large number of CLOB columns whose metadata is split across multiple
+    packets.
     `Issue #1642 <https://github.com/oracle/node-oracledb/issues/1642>`__.
 
-#)  Fixed potential cursor issues when using DRCP.
+#)  Fixed potential cursor issues when using :ref:`DRCP <drcp>`.
 
 #)  Fixed bug in reading PLS_INTEGER type when used in PL/SQL records.
 
 #)  Error ``NJS-141: errors in array DML exceed 65535`` is now raised
     when the number of batch errors exceed 65535 when calling
     :meth:`connection.executeMany()` with the parameter ``batchErrors``
-    set to the value `true`. Note that in thick mode, this error is not raised
-    unless the number of batch errors is a multiple of 65536; instead,
-    the number of batch errors returned is modulo 65536.
+    set to the value `true`. Note that in node-oracledb Thick mode, this
+    error is not raised unless the number of batch errors is a multiple of
+    65536; instead, the number of batch errors returned is modulo 65536.
 
 #)  Updated connection pool to scan and remove idle connections from
     the beginning of the free connection list. This will ensure removal of all
@@ -100,9 +102,11 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Added support for asynchronous iteration of SODA document cursors.
+#)  Added support for asynchronous iteration of
+    :ref:`SODA document cursors <sodadocumentcursorclass>`.
 
-#)  Internal code and memory optimization changes for Advanced Queuing.
+#)  Internal code and memory optimization changes for
+    :ref:`Advanced Queuing <aq>`.
 
 node-oracledb `v6.3.0 <https://github.com/oracle/node-oracledb/compare/v6.2.0...v6.3.0>`__ (21 Dec 2023)
 --------------------------------------------------------------------------------------------------------

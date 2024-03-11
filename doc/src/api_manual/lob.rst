@@ -161,22 +161,61 @@ Lob Methods
 
     **Promise**::
 
-        promise = getData();
+        promise = getData(Number offset, Number amount);
 
-    Returns all the LOB data. CLOBs and NCLOBs will be returned as strings.
-    BLOBs will be returned as a Buffer. This method is usable for LOBs up to
-    1 GB in length.
+    Returns a portion (or all) of the data in the LOB.
+
+    The parameters of ``lob.getData()`` are:
+
+    .. list-table-with-summary:: lob.getData() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``offset``
+          - Number
+          - For LOBs of type CLOB and NCLOB, the offset is the position from which the data is to be fetched, in `UCS-2 code points <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-42BCD57A-A380-4ED9-897F-0500A94803D1>`__. UCS-2 code points are equivalent to characters for all but supplemental characters. If supplemental characters are in the LOB, the offset and amount will have to be chosen carefully to avoid splitting a character.
+
+            For LOBs of type BLOB and BFILE, the offset is the position of the byte from which the data is to be fetched.
+
+            The default is *1*.
+
+            The value of ``offset`` must be greater than or equal to *1*.
+
+            If the ``offset`` specified in :meth:`lob.getData()` exceeds the length of the LOB, then the value *null* is returned.
+        * - ``amount``
+          - Number
+          - For LOBs of type CLOB and NCLOB, the amount is the number of UCS-2 code points to be read from the absolute offset of the CLOB or NCLOB.
+
+            For LOBs of type BLOB and BFILE, the amount is the number of bytes to be read from the absolute offset of the BLOB or BFILE.
+
+            The default is the length of the LOB.
+
+            The value of ``amount`` must be greater than *0*.
+
+            If the ``amount`` specified in :meth:`lob.getData()` exceeds the length of the LOB, then only the data starting from the offset to the end of the LOB is returned.
+
+            If the ``amount`` specified in :meth:`lob.getData()` is *0*, then you will get the error ``NJS-005: invalid value for parameter 2``.
 
     For queries returning LOB columns, it can be more efficient to use
     :attr:`~oracledb.fetchAsString`, :attr:`~oracledb.fetchAsBuffer`, or
     :ref:`fetchInfo <propexecfetchinfo>` instead of ``lob.getData()``.
 
     Note that it is an asynchronous method and requires a round-trip to the
-    database:
+    database.
 
     .. code-block:: javascript
 
-        const data = await myLob.getData();
+        const data = await myLob.getData(offset, amount);
+
+    .. versionchanged:: 6.4
+
+        The ``offset`` and ``amount`` parameters were added.
 
     **Callback**:
 

@@ -148,6 +148,93 @@ If you are using node-oracledb Thick mode, you must use Oracle Client 19c
     const r = await conn.execute(`SELECT po_document FROM j_purchaseorder`);
     console.dir(r.rows, { depth: null });
 
+.. _osontype:
+
+Using BLOB columns with OSON Storage Format in node-oracledb
+============================================================
+
+You can use BLOB columns with Oracle's optimized binary storage format called
+`OSON <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-CBEDC779-
+39A3-43C9-AF38-861AE3FC0AEC>`__ if you want the fastest query and update
+performance. This OSON binary encoding format can be used with BLOB columns in
+both node-oracledb Thin or Thick modes. For Release 19c, BLOB with format OSON
+is supported only for Oracle Autonomous Databases. For Thick mode, you must
+additionally use Oracle Client 21c (or later).
+
+To specify `OSON format for BLOB columns <https://docs.oracle.com/en/database/
+oracle/oracle-database/19/adjsn/overview-of-storage-and-management-of-JSON-
+data.html#GUID-26AB85D2-3277-451B-BFAA-9DD45355FCC7>`__, you can use the check
+constraint with the clause ``IS JSON FORMAT OSON`` when creating a table. This
+check constraint ensures that only binary encoded OSON data is stored in that
+column. For example, to create a table with a BLOB column containing OSON
+data:
+
+.. code-block:: sql
+
+    CREATE TABLE my_table (oson_col BLOB CHECK (oson_col IS JSON FORMAT OSON));
+
+**Inserting into BLOB columns with OSON Data**
+
+To encode the Javascript value into OSON bytes, you can use the
+:meth:`connection.encodeOSON()` method. For example:
+
+.. code-block:: javascript
+
+    const data = {key1: "val1"};
+    // Generate OSON bytes
+    const osonBytes = connection.encodeOSON(data);
+    console.log(osonBytes);
+
+This method returns a Buffer and prints an output such as::
+
+    <Buffer ff 4a 5a 01 21 02 01 00 05 00 0d 00 00 fa 00 00 04 6b 65 79 32 a4 01 01 00 00 00 07 33 04 76 61 6c 32>
+
+To insert the OSON bytes into the table, you can use:
+
+.. code-block:: javascript
+
+    // Insert the OSON bytes
+    const result = await connection.execute(
+      `INSERT INTO my_table (oson_col) VALUES (:1)`,
+      [osonBytes]
+    );
+
+**Fetching BLOB Columns with OSON Data**
+
+You can fetch BLOB columns which have the ``IS JSON FORMAT OSON`` check
+constraint enabled in the same way :ref:`JSON type columns <json21fetch>`
+are fetched when using Oracle Database 21c (or later). This can be done by
+setting :attr:`oracledb.future.oldJsonColumnAsObj` to the value *true* as
+shown below. If you are using node-oracledb Thick mode, you must use Oracle
+Client 21c (or later) for this setting to work. For example:
+
+.. code-block:: javascript
+
+    oracledb.future.oldJsonColumnAsObj = true;
+    const result = await connection.execute(`SELECT oson_col FROM my_table`);
+    console.log(result.rows[0][0]);
+
+This prints an output such as::
+
+    {key1: "val1"}
+
+If you do not set the :attr:`oracledb.future.oldJsonColumnAsObj` to *true*,
+then you can fetch BLOB columns that contain OSON data as shown below:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `SELECT json_object ('hello' value 'world' returning blob format oson
+         ) FROM dual`
+    );
+    const decodeOsonObj = connection.decodeOSON(result.rows[0][0]);
+    console.log(decodeOsonObj);
+
+The :meth:`connection.decodeOSON()` decodes the OSON Buffer and returns a
+Javascript value. This prints an ouput such as::
+
+    { hello: 'world' }
+
 IN Bind Type Mapping
 ====================
 
