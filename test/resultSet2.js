@@ -159,7 +159,7 @@ describe('55. resultSet2.js', function() {
 
   }); // 55.3
 
-  describe('55.4 automatically close result sets and LOBs when the connection is closed', function() {
+  describe('55.4 automatically close resultSets and LOBs when the connection is closed', function() {
     before(async function() {
       await setUp(connection, tableName);
     });
@@ -430,11 +430,11 @@ describe('55. resultSet2.js', function() {
     });
   }); // 55.9
 
-  describe('55.10 result set with unsupported data types', function() {
+  describe('55.10 resultSet with unsupported data types', function() {
     it('55.10.1 INTERVAL YEAR TO MONTH data type', async function() {
       await assert.rejects(async () => {
         await connection.execute(
-          "SELECT dummy, to_yminterval('1-3') FROM dual");
+          "SELECT dummy, to_yminterval('1-3') FROM dual", [], { resultSet: true });
       }, /NJS-010:/);
     });
 
@@ -475,7 +475,7 @@ describe('55. resultSet2.js', function() {
 
   describe('55.12 Invalid Ref Cursor', function() {
     const proc =
-      "CREATE OR REPLACE PROCEDURE get_invalid_refcur ( p OUT SYS_REFCURSOR) " +
+      "CREATE OR REPLACE PROCEDURE get_invalid_refcur (p OUT SYS_REFCURSOR) " +
       "  AS " +
       "  BEGIN " +
       "    NULL; " +
@@ -500,8 +500,30 @@ describe('55. resultSet2.js', function() {
           });
       }, /NJS-107:/);
 
-    }); // 55.12.1
+    });
   }); // 55.12
+
+  describe('55.13 use Resultset asyncIterator', function() {
+    before(async function() {
+      await setUp(connection, tableName);
+    });
+
+    after(async function() {
+      await clearUp(connection, tableName);
+    });
+
+    it('55.13.1 ', async function() {
+      const result = await connection.execute(
+        "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
+        [],
+        { resultSet: true });
+      const rs = result.resultSet;
+      for await (const row of rs) {
+        assert.strictEqual(row.length, 2);
+      }
+      await rs.close();
+    });
+  }); // 55.13
 
 });
 

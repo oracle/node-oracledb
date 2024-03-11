@@ -868,9 +868,16 @@ describe('290. dbObject20.js', () => {
     const TYPE2 = 'NODB_TEST_INV_OBJ_TBL';
     const TYPE3 = 'NODB_TEST_INV_OBJ';
     const TYPE4 = 'NODB_TEST_INV_OBJ_TBL_VARCHAR';
+
+    // GH issue https://github.com/oracle/node-oracledb/issues/1646
+    const TYPE5 = 'NODB_TEST_VARCHAR_CHAR';
+    const TYPE6 = 'NODB_TEST_VARCHAR_BYTE';
+
     const maxVarCharLen = 4;
     const maxVarNCharLen = 4;
     const maxVarRawLen = 10;
+    const maxVarChar2CharLen = 100;
+    const maxVarChar2ByteLen = 100;
 
     before(async () => {
       conn = await oracledb.getConnection(dbConfig);
@@ -889,6 +896,12 @@ describe('290. dbObject20.js', () => {
         { type: TYPE3, sql: `CREATE TYPE ${TYPE3} FORCE AS OBJECT (HEADER_ID NUMBER(5,2), TBL ${TYPE2})` },
         {
           type: TYPE4, sql: `CREATE OR REPLACE TYPE ${TYPE4} IS TABLE OF VARCHAR2 (${maxVarCharLen})`
+        },
+        {
+          type: TYPE5, sql: `CREATE OR REPLACE TYPE ${TYPE5} IS TABLE OF VARCHAR2 (${maxVarChar2CharLen} CHAR)`
+        },
+        {
+          type: TYPE6, sql: `CREATE OR REPLACE TYPE ${TYPE6} IS TABLE OF VARCHAR2 (${maxVarChar2ByteLen} BYTE)`
         }
       ];
 
@@ -900,6 +913,8 @@ describe('290. dbObject20.js', () => {
 
     after(async () => {
       if (conn) {
+        await testsUtil.dropType(conn, TYPE6);
+        await testsUtil.dropType(conn, TYPE5);
         await testsUtil.dropType(conn, TYPE4);
         await testsUtil.dropType(conn, TYPE3);
         await testsUtil.dropType(conn, TYPE2);
@@ -1040,6 +1055,104 @@ describe('290. dbObject20.js', () => {
         /NJS-143:/
       );
     });
+
+    it('290.4.4 Verify table of VARCHAR2 with CHAR/BYTE specifier', async () => {
+      // Verify table of VARCHAR2 CHAR.
+      const dataChar = [
+        "1".repeat(maxVarChar2CharLen),
+        "A".repeat(maxVarChar2CharLen)
+      ];
+      const charset = await testsUtil.getDBCharSet(conn);
+      const isUTF8Charset = (charset === "AL32UTF8");
+      if (isUTF8Charset) {
+        // push multi byte characters test...
+        dataChar.push("Ő".repeat(maxVarChar2CharLen));
+        dataChar.push("𠜎".repeat(maxVarChar2CharLen));
+      }
+
+      let pInClass = await conn.getDbObjectClass(TYPE5);
+      let pOutClass = await conn.getDbObjectClass(TYPE5);
+      let pInObj = new pInClass(dataChar);
+      let pOutObj = new pOutClass();
+
+      // create Procedure.
+      let PROC = 'nodb_proc_test2029044';
+      let createProc = `
+      CREATE OR REPLACE PROCEDURE ${PROC}
+        (a IN ${TYPE5}, b IN OUT ${TYPE5}) AS
+      BEGIN
+         b := a;
+      END;
+    `;
+      let result = await conn.execute(createProc);
+
+      // Call procedure.
+      let plsql = `BEGIN ${PROC} (:pIn, :pOut); END;`;
+      let bindVar = {
+        pIn: { val: pInObj, dir: oracledb.BIND_IN },
+        pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
+      };
+      result = await conn.execute(plsql, bindVar);
+
+      // Verify the result.
+      assert.strictEqual(JSON.stringify(dataChar), JSON.stringify(result.outBinds.pOut));
+
+      if (isUTF8Charset) {
+      // Check more than max characters allowed (utf-8 DB charset) but with-in max bytes.
+        dataChar.push("Ő".repeat(maxVarChar2CharLen + 1));
+        new pInClass(dataChar);
+      }
+
+      // Throw an error if number of characters exceed max bytes storage.
+      if (isUTF8Charset) {
+        dataChar.push("𠜎".repeat(maxVarChar2CharLen + 1));
+      } else {
+        dataChar.push("A".repeat(maxVarChar2CharLen + 1));
+      }
+      assert.throws(
+        () => new pInClass(dataChar),
+        /NJS-143:/
+      );
+
+      // Verify table of VARCHAR2 BYTE
+      const dataBytes = [
+        "1".repeat(maxVarChar2ByteLen),
+        "A".repeat(maxVarChar2ByteLen)
+      ];
+
+      // create Procedure.
+      PROC = 'nodb_proc_test2029044_byte';
+      createProc = `
+      CREATE OR REPLACE PROCEDURE ${PROC}
+        (a IN ${TYPE6}, b IN OUT ${TYPE6}) AS
+      BEGIN
+         b := a;
+      END;
+    `;
+      result = await conn.execute(createProc);
+      pInClass = await conn.getDbObjectClass(TYPE6);
+      pOutClass = await conn.getDbObjectClass(TYPE6);
+      pInObj = new pInClass(dataBytes);
+      pOutObj = new pOutClass();
+
+      // Call procedure.
+      plsql = `BEGIN ${PROC} (:pIn, :pOut); END;`;
+      bindVar = {
+        pIn: { val: pInObj, dir: oracledb.BIND_IN },
+        pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
+      };
+      result = await conn.execute(plsql, bindVar);
+
+      // Verify the result.
+      assert.strictEqual(JSON.stringify(dataBytes), JSON.stringify(result.outBinds.pOut));
+
+      // Verify data larger than max size.
+      dataBytes.push("A".repeat(maxVarChar2ByteLen + 1));
+      assert.throws(
+        () => new pInClass(dataBytes),
+        /NJS-143:/
+      );
+    }); // 290.4.4
 
   });
 

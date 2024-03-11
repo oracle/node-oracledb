@@ -565,3 +565,13 @@ testsUtil.checkAndWait = async function(intervalWait, numIntervals, func) {
   err.totalTimeWaited = (intervalWait * numIntervals) / 1000;
   throw err;
 };
+
+// function to return DBCHARSET
+testsUtil.getDBCharSet = async function(conn) {
+  const res = await conn.execute(`
+      select value
+      from nls_database_parameters
+      where parameter = 'NLS_CHARACTERSET'`
+  );
+  return res.rows[0][0];
+};

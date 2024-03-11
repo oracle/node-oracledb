@@ -788,7 +788,7 @@ Overview of node-oracledb functional tests
     55.3 alternating getRow() & getRows() function
         55.3.1 result set
         55.3.2 REF Cursor
-    55.4 automatically close result sets and LOBs when the connection is closed
+    55.4 automatically close resultSets and LOBs when the connection is closed
         55.4.1 resultSet gets closed automatically
         55.4.2 REF Cursor gets closed automatically
     55.5 the content of resultSet should be consistent
@@ -805,12 +805,14 @@ Overview of node-oracledb functional tests
         55.8.1
     55.9 calls getRows() once and then close RS before getting more rows
         55.9.1
-    55.10 result set with unsupported data types
+    55.10 resultSet with unsupported data types
         55.10.1 INTERVAL YEAR TO MONTH data type
     55.11 bind a cursor BIND_INOUT
         55.11.1 has not supported binding a cursor with BIND_INOUT
     55.12 Invalid Ref Cursor
         55.12.1
+    55.13 use Resultset asyncIterator
+        55.13.1
 
 56. fetchAs.js
     56.1 property value check
@@ -5627,6 +5629,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         290.4.1 Invalid Values for nested property string
         290.4.2 Invalid Values for different datatypes
         290.4.3 Invalid Values for collection
+        290.4.4 Verify table of VARCHAR2 with CHAR/BYTE specifier
 
 291. dbSchema.js
     291.1 dbSchema and Annotations
