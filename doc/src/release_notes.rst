@@ -60,6 +60,9 @@ Common Changes
     now raised when the size constraints are violated.
     `Issue #1630 <https://github.com/oracle/node-oracledb/issues/1630>`__.
 
+#)  Added support for columns of type vector (currently requires access to a
+    limited availability release of the database).
+
 #)  Error ``NJS-003`` is now raised when an attempt is made to perform an
     operation using a closed connection. Error ``NJS-108``, which was
     earlier used to flag errors when LOB operations were attempted on a closed
