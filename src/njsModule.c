@@ -124,6 +124,8 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsSodaOperationConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsGetDateComponentsFn);
     NJS_DELETE_REF_AND_CLEAR(globals->jsMakeDateFn);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsDecodeVectorFn);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsEncodeVectorFn);
     free(globals);
 }
 
@@ -198,6 +200,18 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
             &temp))
     NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
             &globals->jsMakeDateFn))
+
+    // store a reference to the _decodeVector() function
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings, "_decodeVector",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+            &globals->jsDecodeVectorFn))
+
+    // store a reference to the _encodeVector() function
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings, "_encodeVector",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+            &globals->jsEncodeVectorFn))
 
     // acquire Oracle client version and store this in the settings object
     if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0)

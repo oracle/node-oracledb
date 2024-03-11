@@ -13,6 +13,11 @@ node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...
 Common Changes
 ++++++++++++++
 
+#)  Added methods :meth:`~Connection.decodeOSON` and
+    :meth:`~Connection.encodeOSON` to support fetching and inserting into
+    columns which have the check constraint ``IS JSON FORMAT OSON``
+    enabled. Refer `Storing and Managing JSON Data <https://docs.oracle.com/en/database/oracle/oracle-database/19/adjsn/overview-of-storage-and-management-of-JSON-data.html#GUID-26AB85D2-3277-451B-BFAA-9DD45355FCC7>`__
+
 #)  Connections to standby database opened `MOUNTED` return
     `NAN <https://github.com/nodejs/nan>` for :meth:`~connection.maxOpenCursors`
     Fixed to return 0.

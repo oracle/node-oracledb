@@ -428,6 +428,7 @@ bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
     dpiJsonObject *obj;
     double temp_double;
     uint32_t i;
+    napi_value global, vectorBytes;
 
     // null is a special case
     if (node->nativeTypeNum == DPI_NATIVE_TYPE_NULL) {
@@ -483,6 +484,14 @@ bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
         case DPI_ORACLE_TYPE_BOOLEAN:
             NJS_CHECK_NAPI(env, napi_get_boolean(env, node->value->asBoolean,
                     value))
+            return true;
+        case DPI_ORACLE_TYPE_VECTOR:
+            NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+            NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
+                    node->value->asBytes.length, node->value->asBytes.ptr,
+                    NULL, &vectorBytes))
+            NJS_CHECK_NAPI(env, napi_call_function(env, global,
+                    baton->jsDecodeVectorFn, 1, &vectorBytes, value))
             return true;
         default:
             break;
@@ -789,6 +798,14 @@ bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
     // acquire the _makeDate() function
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
             baton->globals->jsMakeDateFn, &baton->jsMakeDateFn))
+
+    // acquire the _decodeVector function
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsDecodeVectorFn, &baton->jsDecodeVectorFn))
+
+    // acquire the _encodeVector function
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsEncodeVectorFn, &baton->jsEncodeVectorFn))
 
     return true;
 }

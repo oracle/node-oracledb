@@ -140,14 +140,16 @@ static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
 static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         napi_env env, napi_value value, njsBaton *baton)
 {
-    napi_value temp, name, fieldNames, fieldValues;
+    napi_value temp, name, fieldNames, fieldValues, vectorVal, global;
     napi_valuetype valueType;
+    napi_typedarray_type type;
     size_t tempBufferLength;
     dpiJsonArray *array;
     dpiJsonObject *obj;
     char *tempBuffer;
     uint32_t i;
     bool check;
+    bool isTyped = false;
 
     // determine type of value
     NJS_CHECK_NAPI(env, napi_typeof(env, value, &valueType))
@@ -215,6 +217,27 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         node->nativeTypeNum = DPI_NATIVE_TYPE_TIMESTAMP;
         return njsUtils_setDateValue(DPI_ORACLE_TYPE_TIMESTAMP, env, value,
                 baton->jsGetDateComponentsFn, &node->value->asTimestamp);
+    }
+
+    // handle vectors
+    NJS_CHECK_NAPI(env, napi_is_typedarray(env, value, &isTyped))
+    if (isTyped) {
+        // check for type as buffer is a typedarray of type napi_uint8_array.
+        NJS_CHECK_NAPI(env, napi_get_typedarray_info(env, value, &type,
+                NULL, NULL, NULL, NULL))
+        if ((type == napi_float64_array) || (type == napi_float32_array)
+                || (type == napi_int8_array)) {
+            node->oracleTypeNum = DPI_ORACLE_TYPE_VECTOR;
+            node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+            NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+            NJS_CHECK_NAPI(env, napi_call_function(env, global,
+                    baton->jsEncodeVectorFn, 1, &value, &vectorVal))
+            NJS_CHECK_NAPI(env, napi_get_buffer_info(env, vectorVal,
+                    (void**) &tempBuffer, &tempBufferLength))
+            node->value->asBytes.ptr = tempBuffer;
+            node->value->asBytes.length = (uint32_t) tempBufferLength;
+            return true;
+        }
     }
 
     // handle buffers

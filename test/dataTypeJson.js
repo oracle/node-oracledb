@@ -115,6 +115,7 @@ describe('244.dataTypeJson.js', function() {
         return;
       }
 
+      oracledb.fetchAsBuffer = [oracledb.BLOB];
       const proc = "BEGIN \n" +
           "    DECLARE \n" +
           "        e_table_missing EXCEPTION; \n" +
@@ -128,7 +129,9 @@ describe('244.dataTypeJson.js', function() {
           "    EXECUTE IMMEDIATE (' \n" +
           "        CREATE TABLE " + tableName + " ( \n" +
           "            id         NUMBER, \n" +
-          "            content    JSON \n" +
+          "            content    JSON, \n" +
+          "            osonCol    BLOB, \n" +
+          "            constraint Oson_ck_1 check (OsonCol is json format oson)" +
           "        ) \n" +
           "    '); \n" +
           "END; ";
@@ -140,6 +143,7 @@ describe('244.dataTypeJson.js', function() {
         this.skip();
         return;
       }
+      oracledb.fetchAsBuffer = [];
       oracledb.stmtCacheSize = default_stmtCacheSize;
       await connection.execute("DROP table " + tableName + " PURGE");
     }); // after()
@@ -173,6 +177,13 @@ describe('244.dataTypeJson.js', function() {
       const jsonVal16 = { "key12": "-Math.pow(2, 53) -1" };
       const jsonVal17 = { "key13": {"key13-1": "value13-1", "key13-2": "value13-2"} };
       const jsonVal18 = { "#$%^&*()@!~`-+=": "special key14 name" };
+      const jsonVal19 = [new Float32Array([1.23, 4.43, -12.13]), [1, 2]];
+      const jsonVal20 = {
+        KeyF32: new Float32Array([1, 2]),
+        KeyF64: new Float64Array([-992.1, 994.3]),
+        KeyInt8: new Int8Array([-123, 12, 123]),
+        keyBuf: Buffer.from("A Raw")
+      };
       const binds = [
         [1, jsonVal1],
         [2, jsonVal2],
@@ -193,19 +204,33 @@ describe('244.dataTypeJson.js', function() {
         [17, jsonVal17],
         [18, jsonVal18]
       ];
-      let sql = "INSERT INTO " + tableName + " VALUES (:1, :2)";
+
+      if (connection.oracleServerVersion >= 2304000000) {
+        binds.push([19, jsonVal19]);
+        binds.push([20, jsonVal20]);
+      }
+      binds.forEach((element, index) => {
+        binds[index].push(connection.encodeOSON(element[1]));
+      });
+      let sql = "INSERT INTO " + tableName + " VALUES (:1, :2, :3)";
       const options = {
         autoCommit: true,
         bindDefs: [
           { type: oracledb.NUMBER },
-          { type: oracledb.DB_TYPE_JSON }
+          { type: oracledb.DB_TYPE_JSON },
+          { type: oracledb.DB_TYPE_BLOB }
         ]
       };
       let result = await connection.executeMany(sql, binds, options);
       assert.strictEqual(result.rowsAffected, binds.length);
       sql = "SELECT * FROM " + tableName + " ORDER BY id";
       result = await connection.execute(sql);
-      assert.deepStrictEqual(result.rows, binds);
+      const retRows = result.rows;
+      retRows.forEach((element, index) => {
+        assert.deepStrictEqual(binds[index][1], connection.decodeOSON(element[2]));
+        assert.deepStrictEqual(binds[index][0], element[0]);
+        assert.deepStrictEqual(binds[index][1], element[1]);
+      });
     }); // 244.3.1
 
   }); // 244.3

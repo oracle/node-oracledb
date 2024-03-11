@@ -656,6 +656,7 @@ Overview of node-oracledb functional tests
         41.2.1 testing Null, Empty string and Undefined
     41.3 OSON column metadata
         41.3.1 Verify isOson flag in column metadata
+        41.3.2 Verify Basic encode/decode OSON on OSON format column
 
 42. dataTypeRaw.js
     42.1 testing RAW data in various lengths

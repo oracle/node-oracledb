@@ -167,6 +167,7 @@ describe('41. dataTypeBlob.js', function() {
     const plsql = testsUtil.sqlCreateTable(TABLE, createTable);
 
     before('create table', async function() {
+      oracledb.fetchAsBuffer = [oracledb.BLOB];
       if (testsUtil.getClientVersion() >= 2100000000 &&
         connection.oracleServerVersion >= 2100000000) {
         isRunnable = true;
@@ -180,6 +181,7 @@ describe('41. dataTypeBlob.js', function() {
     });
 
     after(async function() {
+      oracledb.fetchAsBuffer = [];
       await connection.execute(testsUtil.sqlDropTable(TABLE));
     });
 
@@ -189,6 +191,54 @@ describe('41. dataTypeBlob.js', function() {
       assert.strictEqual(result.metaData[1].isOson, true);
       assert.strictEqual(result.metaData[2].isOson, false);
     }); // 41.3.1
+
+    it('41.3.2 Verify Basic encode/decode OSON on OSON format column', async function() {
+      const expectedObj1 = {key1: "val1"};
+      const expectedObj2 = {key2: "val2"};
+      const expectedObj3 = [new Float32Array([1, 2]), [1, 2]];
+      const byteBuf = Buffer.from(JSON.stringify((expectedObj1)));
+
+      // Insert Buffer into OSON format column and verify with decode.
+      let result = await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
+      values (1, :1, :2) `,
+      [byteBuf, byteBuf]);
+      result = await connection.execute(`select OSONCOL from ${TABLE}`);
+      let generatedObj = connection.decodeOSON(result.rows[0][0]);
+      assert.deepStrictEqual(expectedObj1, generatedObj);
+
+      // Generate OSON bytes and insert these bytes and verify with decode.
+      const osonBytes = connection.encodeOSON(expectedObj2);
+      result = await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
+      values (2, :1, :2) `,
+      [osonBytes, byteBuf]);
+      result = await connection.execute(`select OSONCOL from ${TABLE} where IntCol = 2`);
+      generatedObj = connection.decodeOSON(result.rows[0][0]);
+      assert.deepStrictEqual(expectedObj2, generatedObj);
+
+      // Verify vector inside OSON image for 23.4 server onwards.
+      if (connection.oracleServerVersion >= 2304000000) {
+        result = await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
+      values (3, :1, :2) `,
+        [connection.encodeOSON(expectedObj3), byteBuf]);
+        result = await connection.execute(`select OSONCOL from ${TABLE} where IntCol = 3`);
+        generatedObj = connection.decodeOSON(result.rows[0][0]);
+        assert.deepStrictEqual(expectedObj3, generatedObj);
+      }
+
+      // Check invalid values to decodeOSON
+      assert.rejects(
+        () => connection.decodeOSON(Buffer.from('invalid')),
+        /NJS-113:/
+      );
+      assert.rejects(
+        () => connection.decodeOSON('invalid'),
+        /NJS-005:/
+      );
+      assert.rejects(
+        () => connection.decodeOSON(),
+        /NJS-009:/
+      );
+    }); // 41.3.2
 
   }); //41.3
 
