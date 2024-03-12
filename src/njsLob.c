@@ -223,8 +223,8 @@ static bool njsLob_getDataAsync(njsBaton *baton)
             return njsBaton_setErrorDPI(baton);
         lob->dirtyLength = false;
     }
-    len = lob->length;
-    if ((baton->lobAmount == 0) || (baton->lobAmount >= lob->length)) {
+    len = baton->lobAmount;
+    if ((len == 0) || (len >= lob->length)) {
         // If user has not given lobAmount or user gave greater than
         // lob length, adjust the len value.
         if (lob->length >= baton->lobOffset) {
@@ -232,8 +232,6 @@ static bool njsLob_getDataAsync(njsBaton *baton)
         } else {
             len = 1;
         }
-    } else {
-        len = baton->lobAmount;
     }
 
     // determine size of buffer that is required
