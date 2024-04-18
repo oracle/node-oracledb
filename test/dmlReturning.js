@@ -327,6 +327,40 @@ describe('6. dmlReturning.js', function() {
       assert.deepStrictEqual(info.bindNames, ["I", "RID", "MÉIL"]);
     });
 
+    it('6.1.16 Execute DML with Duplicated bind names for input and returning into clause', async function() {
+      if (!oracledb.thin) {
+        this.skip();
+      }
+
+      // Insert DML with returning into clause
+      let sql = "INSERT INTO nodb_dmlreturn (id, name) VALUES (:int_val, :str_val) RETURNING id, name into :rid, :str_val";
+      let inpstr = "A different test string";
+      let binds = {
+        int_val: 6,
+        rid: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        str_val: { type: oracledb.STRING, val: inpstr, dir: oracledb.BIND_INOUT, maxSize: inpstr.length }
+      };
+      const options = {
+        autoCommit: true
+      };
+      await assert.rejects(
+        async () => await connection.execute(sql, binds, options),
+        /NJS-149:/
+      );
+
+      // update DML with returning into clause
+      sql = "update nodb_dmlreturn set name = name || :name_val  where id = :id_val returning name into :name_val";
+      inpstr = "A different test string";
+      binds = {
+        id_val: 6,
+        name_val: { type: oracledb.STRING, val: inpstr, dir: oracledb.BIND_INOUT, maxSize: 500 }
+      };
+      await assert.rejects(
+        async () => await connection.execute(sql, binds, options),
+        /NJS-149:/
+      );
+    });
+
   }); // 6.1
 
   describe('6.2 DATE and TIMESTAMP data', function() {

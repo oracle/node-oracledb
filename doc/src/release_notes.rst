@@ -13,6 +13,14 @@ node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Error ``NJS-149: the bind variable placeholder "%s" cannot be used
+    both before and after the RETURNING clause in a DML RETURNING statement``
+    is now raised when the same bind variable placeholder name is used both
+    before and after the RETURNING clause in a
+    :ref:`DML RETURNING statement <dml-returning-bind>`. Previously, various
+    internal errors were raised.
+    See `Issue #1652 <https://github.com/oracle/node-oracledb/issues/1652>`__.
+
 #)  Added support for Oracle Database 23c
     :ref:`Implicit Connection Pooling <implicitpool>` in DRCP and PRCP.
 
