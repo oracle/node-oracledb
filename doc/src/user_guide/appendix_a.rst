@@ -128,6 +128,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database Dedicated Servers, Shared Servers, and Database Resident Connection Pooling (DRCP) (see :ref:`drcp`)
       - Yes
       - Yes
+    * - Oracle Database 23c Implicit connection pooling for DRCP and PRCP (see :ref:`implicitpool`)
+      - Yes
+      - Yes
     * - Multitenant Databases
       - Yes
       - Yes

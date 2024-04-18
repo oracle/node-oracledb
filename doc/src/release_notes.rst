@@ -7,6 +7,15 @@ node-oracledb Release Notes
 
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
+node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...v6.5.0>`__ (TBD)
+--------------------------------------------------------------------------------------------------------
+
+Thin Mode Changes
+++++++++++++++++++
+
+#)  Added support for Oracle Database 23c
+    :ref:`Implicit Connection Pooling <implicitpool>` in DRCP and PRCP.
+
 node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...v6.4.0>`__ (11 Mar 2024)
 --------------------------------------------------------------------------------------------------------
 
