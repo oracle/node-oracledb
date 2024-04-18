@@ -206,6 +206,10 @@ Overview of node-oracledb functional tests
         6.1.9 DELETE statement with Array binding
         6.1.10 Stress test - support 4k varchars
         6.1.11 Negative test - throws correct error message
+        6.1.12 INSERT DML returning into too small a variable
+        6.1.13 INSERT statement with NaN
+        6.1.14 INSERT statement with an invalid bind name (reserved namespace keyword)
+        6.1.15 INSERT statement parse non ascii returning bind
     6.2 DATE and TIMESTAMP data
         6.2.1 INSERT statement, single row matched, Object binding, no bind in data
         6.2.2 INSERT statement with JavaScript date bind in
