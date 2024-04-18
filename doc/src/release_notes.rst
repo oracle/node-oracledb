@@ -17,8 +17,8 @@ Thin Mode Changes
     both before and after the RETURNING clause in a DML RETURNING statement``
     is now raised when the same bind variable placeholder name is used both
     before and after the RETURNING clause in a
-    :ref:`DML RETURNING statement <dml-returning-bind>`. Previously, various
-    internal errors were raised.
+    :ref:`DML RETURNING statement <dmlreturn>`. Previously, various internal
+    errors were raised.
     See `Issue #1652 <https://github.com/oracle/node-oracledb/issues/1652>`__.
 
 #)  Added support for Oracle Database 23c

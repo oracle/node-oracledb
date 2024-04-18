@@ -361,11 +361,6 @@ returned array length is not greater than one. This will help identify
 invalid data or an incorrect ``WHERE`` clause that causes more results
 to be returned.
 
-Duplicate binds (using the same bind name more than once in the
-statement) are not allowed in a DML statement with a ``RETURNING``
-clause, and no duplication is allowed between bind parameters in the DML
-section and the ``RETURNING`` section of the statement.
-
 An example of DML RETURNING binds is:
 
 .. code-block:: javascript
@@ -402,6 +397,36 @@ If the ``WHERE`` clause matches no rows, the output would be:
 ::
 
     { ids: [], rids: [] }
+
+The same bind variable placeholder name cannot be used both before and after
+the RETURNING clause. Consider the example below.
+
+.. code-block:: javascript
+
+    // a variable cannot be used for both input and output in a DML returning
+    // statement
+    const result = await connection.execute(
+     `UPDATE mytab SET name = :name || ' EXTRA TEXT'
+      WHERE id = :id
+      RETURNING name INTO :name`,
+     {
+        id:    1001,
+        name:  { type: oracledb.STRING, val: "Krishna", dir: oracledb.BIND_INOUT, maxSize: 100 }
+     }
+    );
+    console.log(result.outBinds.name);
+
+Here, the ``:name`` bind variable is used both before and after the RETURNING
+clause. In node-oracledb Thick mode, the bind variable will not be updated as
+expected with the ' EXTRA TEXT' value and no error is thrown. The Thick mode
+prints the following output::
+
+    Krishna
+
+With node-oracledb Thin mode, the above example returns the following error::
+
+    NJS-149: the bind variable placeholder "NAME" cannot be used both before
+    and after the RETURNING clause in a DML RETURNING statement
 
 .. _refcursors:
 
