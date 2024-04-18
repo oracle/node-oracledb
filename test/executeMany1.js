@@ -492,6 +492,38 @@ describe('163. executeMany1.js', function() {
     await dotruncate();
   }); // 163.16
 
+  it('163.17 calls PL/SQL, with round trip count check', async function() {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
+      this.skip();
+    }
+    await doCreateProc();
+    const plsql = "BEGIN nodb_proc_em(:1, :2, :3); END;";
+    const binds = [ [1], [2], [3], [4], [6]];
+    const options = {
+      bindDefs: [
+        { type: oracledb.NUMBER },
+        { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+        { type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 20 }
+      ]
+    };
+    const sid = await testsUtil.getSid(conn);
+    const rt1 = await testsUtil.getRoundTripCount(sid);
+    await conn.executeMany(plsql, binds, options);
+    const rt2 = await testsUtil.getRoundTripCount(sid);
+    let result = false;
+    // thick does OAL8 after each iterations. Round trip count increases
+    // with each iteration.
+    if (dbConfig.test.mode === 'thick' && rt2 - rt1 === 5) {
+      result = true;
+    }
+
+    if (dbConfig.test.mode === 'thin' && rt2 - rt1 < 3) {
+      result = true;
+    }
+    assert.deepStrictEqual(result, true);
+    await doDropProc();
+  }); // 163.17
+
   const doCreateProc = async function() {
     const proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +
                "    a_outnum OUT NUMBER, a_outstr OUT VARCHAR2) \n" +
