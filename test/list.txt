@@ -4190,6 +4190,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     163.12 numIterations - No parameters
     163.13 numIterations - DML RETURNING
     163.14 Negative - set numIterations to be negative value
+    163.15 getting dmlrowcounts after executemany with dmlrowcounts=False
+    163.16 executemany() with an invalid row
+    163.17 calls PL/SQL, with round trip count check
 
 164. soda1.js
     164.1 getSodaDatabase() creates a sodaDatabase Object
@@ -5721,6 +5724,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     294.63 test binding a vector with inf values (negative)
     294.64 fetch JSON value with an embedded vector
     294.65 bind JSON value with an embedded vector
+    294.66 with type Int16Array invalid typed arrays
+    294.67 typed arrays with strings
+    294.68 typed arrays with objects
+    294.69 typed arrays with boolean values
+    294.70 typed arrays with undefined value
+    294.71 typed arrays with null values
+    294.72 inserting empty vector in Fixed and Flex vector columns
 
 295. dataTypeVector2.js
     295.1 verify fetch information for older clients

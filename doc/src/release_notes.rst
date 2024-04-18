@@ -28,18 +28,18 @@ Common Changes
 
 #)  Added support for fetching BLOB columns which have the
     ``IS JSON FORMAT OSON`` constraint enabled in the same way as columns of
-    type JSON. In node-oracledb :ref:`Thick mode <enablingthick>` this requires
-    Oracle Client 21c or later. Applications can get this new fetch behaviour
-    by setting the oracledb property :attr:`oracledb.future.oldJsonColumnAsObj`
-    to `true`. The default value for this property is `false` which retains
-    the existing fetch behaviour.
+    type JSON. In node-oracledb :ref:`Thick mode <enablingthick>`, this
+    requires Oracle Client 21c or later. Applications can get this new fetch
+    behaviour by setting the oracledb property
+    :attr:`oracledb.future.oldJsonColumnAsObj` to `true`. The default value
+    for this property is `false` which retains the existing fetch behaviour.
     In a future version, the new fetch behaviour will become default and
     setting this property will no longer be needed.
 
 #)  Added methods :meth:`connection.decodeOSON()` and
     :meth:`connection.encodeOSON()` to support fetching and inserting into
-    columns which have the check constraint ``IS JSON FORMAT OSON``
-    enabled. See :ref:`osontype` for more information.
+    columns that have the ``IS JSON FORMAT OSON`` check constraint enabled.
+    See :ref:`osontype` for more information.
 
 #)  Connections to standby database opened `MOUNTED` return
     `NAN <https://github.com/nodejs/nan>`__ for

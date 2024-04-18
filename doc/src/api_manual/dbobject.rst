@@ -8,9 +8,11 @@ Calling :meth:`connection.getDbObjectClass()` returns a prototype object
 representing a named Oracle Database object or collection. Use
 ``dbObject.prototype`` on the class to see the available attributes.
 
-Objects of a named DbObject type are: - created from a DbObject
-prototype by calling ``new()`` - returned by queries - returned when
-using BIND_OUT for an Oracle Database object.
+Objects of a named DbObject type are:
+
+- created from a DbObject prototype by calling ``new()``
+- returned by queries
+- returned when using BIND_OUT for an Oracle Database object
 
 See :ref:`Oracle Database Objects and Collections <objects>` for more
 information.
@@ -26,10 +28,10 @@ The properties of a DbObject object are listed below.
 
 .. attribute:: dbObject.attributes
 
-    This property is an object. When ``dbObject.isCollection`` is *false*,
-    this will be an object containing attributes corresponding to the Oracle
-    Database object attributes. The name of each attribute follows normal
-    Oracle casing semantics.
+    This read-only property is an object. When :attr:`dbObject.isCollection`
+    is *false*, this will be an object containing attributes corresponding to
+    the Oracle Database object attributes. The name of each attribute follows
+    normal Oracle casing semantics.
 
     Each attribute will have an object that contains:
 
@@ -57,19 +59,19 @@ The properties of a DbObject object are listed below.
 
 .. attribute:: dbObject.elementType
 
-    This read-only property is a number. When ``dbObject.isCollection`` is
+    This read-only property is a number. When :attr:`dbObject.isCollection` is
     *true*, this will have a value corresponding to one of the
     :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
 
 .. attribute:: dbObject.elementTypeClass
 
-    This read-only property is an object. When ``dbObject.isCollection`` is
-    *true* and the elements in the collection refer to database objects, this
-    property provides the type class information of the elements.
+    This read-only property is an object. When :attr:`dbObject.isCollection`
+    is *true* and the elements in the collection refer to database objects,
+    this property provides the type class information of the elements.
 
 .. attribute:: dbObject.elementTypeName
 
-    This read-only property is a string. When ``dbObject.isCollection`` is
+    This read-only property is a string. When :attr:`dbObject.isCollection` is
     *true*, this will have the name of the element type, such as “VARCHAR2”
     or “NUMBER”.
 
@@ -85,7 +87,7 @@ The properties of a DbObject object are listed below.
 
 .. attribute:: dbObject.length
 
-    This read-only property is a number. When ``dbObject.isCollection`` is
+    This read-only property is a number. When :attr:`dbObject.isCollection` is
     *true*, this will have the number of elements in the collection. It is
     undefined for non-collections.
 

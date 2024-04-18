@@ -1839,4 +1839,33 @@ describe('294. dataTypeVector1.js', function() {
     const result = await connection.execute(`select Vector64Col from ${tableName}`);
     assert.deepStrictEqual(result.rows[0][0], [1, 0, 3, 4, 5, 6, 7, 8, 9, 0]);
   }); // 294.71
+
+  it('294.72 inserting empty vector in Fixed and Flex vector columns', async function() {
+    const emptyVector = [];
+    const columns = ['VectorFixedCol', 'VectorFlexCol', 'VectorFlex32Col',
+      'VectorFlex64Col',
+      'VectorFlex8Col'
+    ];
+
+    const binds = [
+      { type: oracledb.DB_TYPE_VECTOR, dir: oracledb.BIND_IN, val: emptyVector }
+    ];
+
+    for (let i = 0; i < columns.length; i++) {
+      const sql = `INSERT INTO ${tableName} (IntCol, ${columns[i]})
+                       VALUES (2, :embed_array)`;
+
+      await assert.rejects(
+        async () => await connection.execute(
+          sql,
+          binds
+        ),
+        /ORA-51803:/
+        /*
+          ORA-51803: Vector dimension count must match the dimension count
+          specified in the column definition (actual: , required: ).
+       */
+      );
+    }
+  }); // 294.72
 });
