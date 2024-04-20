@@ -1097,6 +1097,13 @@ describe('290. dbObject20.js', () => {
       // Verify the result.
       assert.strictEqual(JSON.stringify(dataChar), JSON.stringify(result.outBinds.pOut));
 
+      // Verify the collection is iteratable.
+      const generatedArray = [];
+      for (const ele of result.outBinds.pOut) {
+        generatedArray.push(ele);
+      }
+      assert.deepStrictEqual(generatedArray, dataChar);
+
       if (isUTF8Charset) {
       // Check more than max characters allowed (utf-8 DB charset) but with-in max bytes.
         dataChar.push("Ő".repeat(maxVarChar2CharLen + 1));

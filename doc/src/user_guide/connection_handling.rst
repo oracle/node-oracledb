@@ -2362,7 +2362,7 @@ The connect descriptor parameter ``TOKEN_AUTH`` must be set to
           (SSL_SERVER_DN_MATCH=ON)
           (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
           (TOKEN_AUTH=OAUTH)
-          (TOKEN_LOCATION='/opt/oracle/token')
+          (TOKEN_LOCATION="/opt/oracle/token")
           ))
 
 You can alternatively set ``TOKEN_AUTH`` and ``TOKEN_LOCATION`` in a
@@ -2715,7 +2715,7 @@ For example in a ``tnsnames.ora`` file:
           (SSL_SERVER_DN_MATCH=ON)
           (SSL_SERVER_CERT_DN="CN=efg.oraclecloud.com, O=Oracle Corporation, L=Redwood City, ST=California, C=US")
           (TOKEN_AUTH=OCI_TOKEN)
-          (TOKEN_LOCATION='/opt/oracle/token')
+          (TOKEN_LOCATION="/opt/oracle/token")
           ))
 
 You can alternatively set ``TOKEN_AUTH`` and ``TOKEN_LOCATION`` in a

@@ -5784,3 +5784,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       297.2.10 insert a VectorInt8Col typed array into tables from JSON DV
       297.2.11 update a VectorInt8Col typed array into tables from JSON DV
       297.2.12 delete a VectorInt8Col typed array into tables from JSON DV
+
+  298. dataTypeVector4.js
+    298.1 inserting and fetching vector using parallel execution
+    298.2 insert data as select all elements
+    298.3 insert data as select all elements by setting degree of parallelism to 2
+    298.4 insert and select Min vector distance function
+    298.5 insert and select Max vector distance function
+    298.6 sum vector distance function vector columns with parallel execution
+    298.7 average vector distance function vector columns with parallel execution
+    298.8 aggregate functions on vector columns vector columns with parallel execution
+    298.9 parallel delete operation on vector columns
+    298.10 no parallel delete operation on vector columns
