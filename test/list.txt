@@ -5796,3 +5796,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     298.8 aggregate functions on vector columns vector columns with parallel execution
     298.9 parallel delete operation on vector columns
     298.10 no parallel delete operation on vector columns
+
+  299. invalidNumber.js
+    299.1 throws error for invalid numbers

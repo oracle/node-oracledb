@@ -63,13 +63,13 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_LONG_VARCHAR:
         case DPI_ORACLE_TYPE_LONG_RAW:
         case DPI_ORACLE_TYPE_XMLTYPE:
+        case DPI_ORACLE_TYPE_NUMBER:
             var->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
             break;
         case DPI_ORACLE_TYPE_NATIVE_FLOAT:
             var->nativeTypeNum = DPI_NATIVE_TYPE_FLOAT;
             break;
         case DPI_ORACLE_TYPE_NATIVE_DOUBLE:
-        case DPI_ORACLE_TYPE_NUMBER:
             var->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
             break;
         case DPI_ORACLE_TYPE_DATE:
@@ -382,6 +382,7 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
     const char *rowidValue;
     dpiJsonNode *topNode;
     dpiData *data;
+    napi_value numStr;
 
     // get the value from ODPI-C
     bufferRowIndex = baton->bufferRowIndex + pos;
@@ -413,19 +414,26 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
                     value))
             break;
         case DPI_NATIVE_TYPE_BYTES:
-            if (data->value.asBytes.length > var->maxSize)
-                return njsBaton_setErrorInsufficientBufferForBinds(baton);
-            if (data->value.asBytes.length == 0) {
-                NJS_CHECK_NAPI(env, napi_get_null(env, value))
-            } else if (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
-                    var->varTypeNum == DPI_ORACLE_TYPE_LONG_RAW) {
-                NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
-                        data->value.asBytes.length, data->value.asBytes.ptr,
-                        NULL, value))
-            } else {
+            if (var->varTypeNum == DPI_ORACLE_TYPE_NUMBER) {
                 NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
                         data->value.asBytes.ptr, data->value.asBytes.length,
-                        value))
+                        &numStr))
+                NJS_CHECK_NAPI(env, napi_coerce_to_number(env, numStr, value))
+            } else {
+                if (data->value.asBytes.length > var->maxSize)
+                    return njsBaton_setErrorInsufficientBufferForBinds(baton);
+                if (data->value.asBytes.length == 0) {
+                    NJS_CHECK_NAPI(env, napi_get_null(env, value))
+                } else if (var->varTypeNum == DPI_ORACLE_TYPE_RAW ||
+                        var->varTypeNum == DPI_ORACLE_TYPE_LONG_RAW) {
+                    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
+                            data->value.asBytes.length, data->value.asBytes.ptr,
+                            NULL, value))
+                } else {
+                    NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
+                            data->value.asBytes.ptr, data->value.asBytes.length,
+                            value))
+                }
             }
             break;
         case DPI_NATIVE_TYPE_LOB:
@@ -760,6 +768,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     napi_typedarray_type type;
     void *rawdata = NULL;
     size_t numElem = 0;
+    napi_value numStr;
 
     // initialization
     data = &var->buffer->dpiVarData[pos];
@@ -815,6 +824,11 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 
     // handle binding numbers
     if (valueType == napi_number) {
+        if (var->varTypeNum == DPI_ORACLE_TYPE_NUMBER) {
+            NJS_CHECK_NAPI(env, napi_coerce_to_string(env, value, &numStr));
+            return njsVariable_setFromString(var, pos, env, numStr, baton);
+        }
+
         NJS_CHECK_NAPI(env, napi_get_value_double(env, value, &tempDouble))
         if (var->varTypeNum == DPI_ORACLE_TYPE_NATIVE_FLOAT) {
             data->value.asFloat = (float) tempDouble;

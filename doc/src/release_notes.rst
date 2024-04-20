@@ -28,6 +28,15 @@ Thin Mode Changes
 #)  Added support for Oracle Database 23c
     :ref:`Implicit Connection Pooling <implicitpool>` in DRCP and PRCP.
 
+Thick Mode Changes
++++++++++++++++++++
+
+#)  Fix bug which inserted invalid value `~` if an unacceptable out of bound number is given.
+    Now, numbers like 1.0e+128, -1e128, etc. will throw an error ``NJS-115: value cannot be represented
+    as an Oracle Database number``
+    Additionally, it resolves the issue related to JS numbers with precisions where
+   `2.3` is returned as `2.300003`.
+
 node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...v6.4.0>`__ (11 Mar 2024)
 --------------------------------------------------------------------------------------------------------
 
