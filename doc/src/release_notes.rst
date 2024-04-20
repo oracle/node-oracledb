@@ -13,6 +13,10 @@ node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Added support for Oracle Database 23c feature that can improve the
+    performance of connection creation by reducing the number of
+    round trips required for all connections created.
+
 #)  Error ``NJS-149: the bind variable placeholder "%s" cannot be used
     both before and after the RETURNING clause in a DML RETURNING statement``
     is now raised when the same bind variable placeholder name is used both
