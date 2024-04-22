@@ -481,12 +481,13 @@ Connection Pooling
 Applications which frequently create and close connections should use a
 connection pool.  This is important for performance and scalability when
 applications need to handle a large number of users who do database work for
-short periods of time but have relatively long periods when the connections are
-not needed. The high availability features of pools also make small pools
+short periods of time but have relatively long periods when the connections
+are not needed. The high availability features of pools also make small pools
 useful for applications that want a few connections available for infrequent
-use and requires them to be immediately usable when acquired. Applications that
-would benefit from connection pooling but are too difficult to modify from
-standalone connections may be able to take advantage of :ref:`implicitpool`.
+use and requires them to be immediately usable when acquired. Applications
+that would benefit from connection pooling but are too difficult to modify
+from the use of standalone connections can take advantage of
+:ref:`implicitpool`.
 
 Each node-oracledb process can use one or more connection pools. Each pool can
 contain zero or more connections. In addition to providing an immediately
@@ -2862,58 +2863,80 @@ Implicit Connection Pooling with DRCP and PRCP
 ----------------------------------------------
 
 Starting from Oracle Database 23c, Node.js applications that use
-:ref:`DRCP <drcp>` or `Proxy Resident Connection Pooling (PRCP) <https://
-www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E5586BC8-6311-434D-B605-
-204560D3A777>`__ in Oracle Connection Manager in Traffic Director Mode
-(CMAN-TDM) can enable implicit connection pooling with DRCP and PRCP. With
-this feature, applications do not need to explicitly close or release a
-connection to return the connection back to the DRCP or PRCP pool.
+:ref:`DRCP <drcp>` and Oracle Connection Manager in Traffic Director Mode's
+(CMAN-TDM) pooling capability `Proxy Resident Connection Pooling (PRCP)
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E0032017-03B1-
+4F14-AF9B-BCC87C982DA8>`__ can enable `implicit connection pooling <https://
+www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A9D74994-D81A-47BF-BAF2-
+E4E1A354CA99>`__ with DRCP and PRCP. For more information on PRCP, see the
+Oracle technical brief `CMAN-TDM — An Oracle Database connection proxy for
+scalable and highly available applications <https://download.oracle.com/
+ocomdocs/global/CMAN_TDM_Oracle_DB_Connection_Proxy_for_scalable_apps.pdf>`__.
+
 Applications that do not use client-side connection pooling can take advantage
 of the implicit connection pooling feature. Both node-oracledb Thin and Thick
 modes support implicit connection pooling. The Thick mode requires Oracle 23c
 Client libraries for implicit connection pooling support. The Thin mode works
 with implicit connection pooling from node-oracledb 6.4 onwards.
 
-Implicit connection pooling uses two types of boundary values to determine
-when the connection should be released back to the DRCP or PRCP pool. The
+With implicit connection pooling, applications do not need to explicitly close
+or release a connection to return the connection back to the DRCP or PRCP
+pool. This feature uses two types of boundary values which determine when
+connections are implicitly released back to the DRCP or PRCP pool. The
 boundary value can be specified in the ``POOL_BOUNDARY`` parameter in the
 :ref:`Easy Connect string <easyconnect>` or the
 :ref:`Connect Descriptor string <embedtns>`. The two boundary values which
 can be specified in the ``POOL_BOUNDARY`` parameter are:
 
 - *STATEMENT*: If this boundary value is specified, then the connection is
-  released back to the DRCP or PRCP connection pool when the connection is
-  implicitly stateless. A connection is implicitly stateless when all open
-  cursors in a session have been fetched through to completion, and there
-  are no active transactions, temporary tables, or temporary LOBs.
+  released back to the DRCP or PRCP pool when the connection is implicitly
+  stateless. A connection is implicitly stateless when all open cursors in a
+  session have been fetched through to completion, and there are no active
+  transactions, no temporary tables, and no temporary LOBs.
 
-- *TRANSACTION*: If this boundary value is specified, then the connection is
-  released back to the DRCP or PRCP connection pool when a
-  :meth:`commit <connection.commit>` or :meth:`rollback <connection.rollback>`
-  is explicitly performed on the transaction in progress on the connection.
-  It is recommended to not set the :attr:`Connection.autocommit` property to
-  *true* when using implicit connection pooling.
+- *TRANSACTION*: If this boundary value is specified, then a connection is
+  released back to the DRCP or PRCP pool when either one of the methods
+  :meth:`connection.commit()` or :meth:`connection.rollback()` are
+  called. It is recommended to not set the
+  :ref:`autoCommit <propexecautocommit>` property to *true* when using
+  implicit connection pooling. If you do set this attribute to *true*, then
+  you will be unable to:
 
-To use implicit connection pooling with DRCP or PRCP, you must specify the
-server type as *pooled* and set the ``POOL_BOUNDARY`` attribute to either
-*STATEMENT* or *TRANSACTION* in:
+  - Fetch any data that requires multiple :ref:`round-trips <roundtrips>` to
+    the database
+  - Run queries that fetch :ref:`LOB <lobhandling>` and
+    :ref:`JSON <jsondatatype>` data
+
+To use implicit connection pooling with DRCP or PRCP in node-oracledb, you
+must specify the server type as *pooled* and set the ``POOL_BOUNDARY``
+attribute to either *STATEMENT* or *TRANSACTION* in:
 
 - The :ref:`Easy Connect string <easyconnect>`. For example, to use implicit
-  connection pooling with the statement boundary value:
+  connection pooling with the *statement* boundary:
 
   .. code-block:: javascript
 
-    dsn = localhost:1521/orclpdb:pooled?pool_boundary=statement
+        const connection = await oracledb.getConnection({
+            user          : "hr",
+            password      : mypw,  // mypw contains the hr schema password
+            connectString : "mydbmachine.example.com:1521/orclpdb1:pooled?pool_boundary=statement"
+        });
 
 - Or the ``CONNECT_DATA`` section of the
   :ref:`Connect Descriptor string <embedtns>`. For example, to use implicit
-  connection pooling with the transaction boundary value:
-
-.. code-block:: javascript
+  connection pooling with the *transaction* boundary::
 
     tnsalias = (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=mymachine.example.com)
                 (PORT=1521))(CONNECT_DATA=(SERVICE_NAME=orcl)
                 (SERVER=POOLED)(POOL_BOUNDARY=TRANSACTION)))
+
+If you specify an invalid ``POOL_BOUNDARY`` in the
+:ref:`Easy Connect string <easyconnect>` or the
+:ref:`Connect Descriptor string <embedtns>`, then the following error is
+returned::
+
+    ORA-24545: invalid value of POOL_BOUNDARY specified in connect
+    string
 
 .. note::
 
@@ -2925,8 +2948,8 @@ server type as *pooled* and set the ``POOL_BOUNDARY`` attribute to either
       *SELF*. You can specify the purity using the ``POOL_PURITY`` parameter
       in the connection string to override the default purity value.
 
-Note that it is recommended to use :ref:`connpooling` over implicit connection
-pooling.
+Note that it is recommended to use :ref:`connection pooling <connpooling>`
+over implicit connection pooling.
 
 .. _privconn:
 
