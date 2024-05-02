@@ -154,11 +154,11 @@ the latest `Easy Connect Plus <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-8C85D289-6AF3-41BC-848B-BF39D32648BA>`__ syntax allows the
 use of multiple hosts or ports, along with optional entries for the wallet
 location, the distinguished name of the database server, and even lets some
-network configuration options be set. Oracle's `Technical Paper on Easy Connect
-Plus Syntax <https://download.oracle.com/ocomdocs/global/Oracle-Net-21c-Easy-
-Connect-Plus.pdf>`__ discusses the syntax. The Easy Connect Plus syntax means
-that :ref:`tnsnames.ora <tnsadmin>` or :ref:`sqlnet.ora <tnsadmin>` files are
-not needed for some further common connection scenarios.
+network configuration options be set. Oracle's `Technical Paper on Easy
+Connect Plus Syntax <https://download.oracle.com/ocomdocs/global/Oracle-Net-
+Easy-Connect-Plus.pdf>`__ discusses the syntax. The Easy Connect Plus syntax
+means that :ref:`tnsnames.ora <tnsadmin>` or :ref:`sqlnet.ora <tnsadmin>`
+files are not needed for some further common connection scenarios.
 
 For example, if a firewall terminates idle connections every five minutes, you
 may decide it is more efficient to keep connections alive instead of having the
