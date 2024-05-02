@@ -13,6 +13,9 @@ node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...
 Common Changes
 ++++++++++++++
 
+#)  Incorporate changes to use end of data request flag set with data packets
+    available in Oracle database 23c to improve handling the async reads.
+
 #)  Added class :ref:`oracledb.JsonId <jsonid>` to represent JSON ID values
     returned by SODA in Oracle Database 23.4 and higher in the ``_id``
     attribute of documents stored in native collections.
