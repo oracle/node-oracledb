@@ -211,13 +211,96 @@ describe('164. soda1.js', () => {
     await conn.close();
   }); // 164.9
 
-  it('164.10 the "examples/soda1.js" case', async () => {
+  it('164.10 the "examples/soda1.js" case with autoCommit = true', async () => {
+    oracledb.autoCommit = true;
     const conn = await oracledb.getConnection(dbConfig);
     // Create the parent object for SODA
     const soda = conn.getSodaDatabase();
 
     // Create a new SODA collection and index
     const collection = await soda.createCollection("soda_test_164_10");
+    const indexSpec = {
+      "name": "CITY_IDX",
+      "fields": [
+        {
+          "path": "address.city",
+          "datatype": "string",
+          "order": "asc"
+        }
+      ]
+    };
+    await collection.createIndex(indexSpec);
+
+    // Insert a document
+    // A system generated key is created by default
+    const content1 = { name: "Matilda", address: {city: "Melbourne"} };
+    const doc1 = await collection.insertOneAndGet(content1);
+    const myKey = doc1.key;
+    assert(myKey);
+    assert.strictEqual(typeof (myKey), "string");
+
+    // Fetch the document back
+    const doc2 = await collection.find().key(myKey).getOne();
+    const content2 = doc2.getContent(); // A JavaScript object
+    testsUtil.removeID(content1);
+    testsUtil.removeID(content2);
+    assert.deepStrictEqual(content2, content1);
+
+    const content3 = testsUtil.removeID(doc2.getContentAsString()); // A JSON string
+
+    assert.strictEqual(JSON.stringify(content2), content3);
+
+    // Replace document contents
+    const content4 = { name: "Matilda", address: {city: "Sydney"} };
+    await collection.find().key(myKey).replaceOne(content4);
+
+    // Insert some more documents without caring about their keys
+    const content5 = { name: "Venkat", address: {city: "Bengaluru"} };
+    await collection.insertOne(content5);
+    const content6 = { name: "May", address: {city: "London"} };
+    await collection.insertOne(content6);
+    const content7 = { name: "Sally-Ann", address: {city: "San Francisco"} };
+    await collection.insertOne(content7);
+
+    // Find all documents with city names starting with 'S'
+    const documents = await collection.find()
+      .filter({"address.city": {"$like": "S%"}})
+      .getDocuments();
+
+    for (let i = 0; i < documents.length; i++) {
+      const content = documents[i].getContent();
+      (['Sydney', 'San Francisco']).includes(content.address.city);
+    }
+
+    // Count all documents
+    const res1 = await collection.find().count();
+    assert.strictEqual(res1.count, 4);
+    oracledb.autoCommit = false;
+    // Remove documents with cities containing 'o'
+    const res2 = await collection.find().filter({"address.city": {"$regex": ".*o.*"}}).remove();
+    assert.strictEqual(res2.count, 2);
+
+    // Count all documents
+    const res3 = await collection.find().count();
+    assert.strictEqual(res3.count, 2);
+
+    await collection.dropIndex("CITY_IDX");
+
+    // Commit changes
+    await conn.commit();
+
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 164.10
+
+  it('164.11 the "examples/soda1.js" case with no autocommit set up', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    // Create the parent object for SODA
+    const soda = conn.getSodaDatabase();
+
+    // Create a new SODA collection and index
+    const collection = await soda.createCollection("soda_test_164_11");
     const indexSpec = {
       "name": "CITY_IDX",
       "fields": [
@@ -291,9 +374,9 @@ describe('164. soda1.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 164.10
+  }); // 164.11
 
-  it('164.11 Negative: create collection with invalid metaData value', async () => {
+  it('164.12 Negative: create collection with invalid metaData value', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
@@ -306,6 +389,6 @@ describe('164. soda1.js', () => {
     );
 
     await conn.close();
-  }); // 164.11
+  }); // 164.12
 
 });

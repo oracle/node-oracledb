@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -166,7 +166,7 @@ describe('10. nullColumnValues.js', function() {
 
     await connection.execute(
       "UPDATE nodb_nullcol_dept SET department_name = :dname, \
-          manager_id = :mid WHERE department_id = :did ",
+          manager_id = :mid WHERE department_id = :did",
       {
         dname: '',
         mid: null,
@@ -177,7 +177,7 @@ describe('10. nullColumnValues.js', function() {
       "SELECT * FROM nodb_nullcol_dept WHERE department_id = :1",
       [50],
       { resultSet: true });
-    await  fetchRowFromRS(result.resultSet);
+    await fetchRowFromRS(result.resultSet);
 
     async function fetchRowFromRS(rs) {
       let accessCount = 0;

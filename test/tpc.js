@@ -189,42 +189,82 @@ describe('259. tpc.js', function() {
     });
 
     it('259.2.5 negative - missing formatId in XID', async function() {
-      try {
-        const xid = {
-          globalTransactionId: "txn3900",
-          branchQualifier: "branchId"
-        };
-        await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      } catch (e) {
-        assert.strictEqual(e.message.startsWith("NJS-005"), true);
-      }
+      const xid = {
+        globalTransactionId: "txn3900",
+        branchQualifier: "branchId"
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60),
+        /NJS-005:/
+      );
     });
 
-
     it('259.2.6 negative missing globalTxnId in XID', async function() {
-      try {
-        const xid = {
-          formatId: 3900,
-          branchQualifier: "branchId"
-        };
-        await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      } catch (e) {
-        assert.strictEqual(e.message.startsWith("NJS-005"), true);
-      }
+      const xid = {
+        formatId: 3900,
+        branchQualifier: "branchId"
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60),
+        /NJS-005:/
+      );
     });
 
     it('259.2.7 negative missing branchQualifier in XID', async function() {
-      try {
-        const xid = {
-          formatId: 3900,
-          globalTransactionId: "txn3900",
-        };
-        await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      } catch (e) {
-        assert.strictEqual(e.message.startsWith("NJS-005"), true);
-      }
+      const xid = {
+        formatId: 3900,
+        globalTransactionId: "txn3900",
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60),
+        /NJS-005:/
+      );
     });
 
+    it('259.2.8 negative tpcForget after tpcPrepare', async function() {
+      const xid = {
+        formatId: 3998,
+        globalTransactionId: "txn3998",
+        branchQualifier: "branchId"
+      };
+
+      // Begin a new transaction
+      await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
+
+      // Perform some database operations within the transaction
+      await conn.execute(`INSERT INTO TBL_259_2 VALUES (102, 'test#2')`);
+
+      // Prepare the transaction
+      await conn.tpcPrepare(xid);
+
+      // Call tpcForget to forget the transaction
+      await assert.rejects(
+        async () => await conn.tpcForget(xid),
+        /ORA-24770:/ //ORA-24770: cannot forget a prepared transaction
+      );
+      await conn.tpcRollback(xid);
+    });
+
+    it('259.2.9 negative tpcForget without tpcPrepare', async function() {
+      const xid = {
+        formatId: 3999,
+        globalTransactionId: "txn3999",
+        branchQualifier: "branchId"
+      };
+
+      // Begin a new transaction
+      await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
+
+      // Perform some database operations within the transaction
+      await conn.execute(`INSERT INTO TBL_259_2 VALUES (102, 'test#2')`);
+
+      // Call tpcForget to forget the transaction
+      await assert.rejects(
+        async () => await conn.tpcForget(xid),
+        /ORA-24769:/ //ORA-24769: cannot forget an active transaction
+      );
+      await conn.tpcRollback(xid);
+    });
   });
 
   describe('259.3 TPC Functions with no default values', function() {
@@ -351,40 +391,37 @@ describe('259. tpc.js', function() {
     });
 
     it('259.3.5 negative - missing formatId in XID', async function() {
-      try {
-        const xid = {
-          globalTransactionId: "txn3900",
-          branchQualifier: "branchId"
-        };
-        await conn.tpcBegin(xid);
-      } catch (e) {
-        assert.strictEqual(e.message.startsWith("NJS-005"), true);
-      }
+      const xid = {
+        globalTransactionId: "txn3900",
+        branchQualifier: "branchId"
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid),
+        /NJS-005/
+      );
     });
 
 
     it('259.3.6 negative missing globalTxnId in XID', async function() {
-      try {
-        const xid = {
-          formatId: 3900,
-          branchQualifier: "branchId"
-        };
-        await conn.tpcBegin(xid);
-      } catch (e) {
-        assert.strictEqual(e.message.startsWith("NJS-005"), true);
-      }
+      const xid = {
+        formatId: 3900,
+        branchQualifier: "branchId"
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid),
+        /NJS-005/
+      );
     });
 
     it('259.3.7 negative missing branchQualifier in XID', async function() {
-      try {
-        const xid = {
-          formatId: 3900,
-          globalTransactionId: "txn3900",
-        };
-        await conn.tpcBegin(xid);
-      } catch (e) {
-        assert.strictEqual(e.message.startsWith("NJS-005"), true);
-      }
+      const xid = {
+        formatId: 3900,
+        globalTransactionId: "txn3900",
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid),
+        /NJS-005/
+      );
     });
 
   });
@@ -529,60 +566,52 @@ describe('259. tpc.js', function() {
     });
 
     it('259.6.1 tpcBegin invalid number of arguments', async function() {
-      try {
-        await conn.tpcBegin (xid, oracledb.TPC_BEGIN_NEW, 60, "abc");
-      } catch (e) {
-        assert.strictEqual (e.message.startsWith("NJS-009"), true);
-      }
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60, "abc"),
+        /NJS-009/
+      );
     });
 
     it('259.6.2 tpcCommit invalid number of arguments', async function() {
-      try {
-        await conn.tpcCommit (xid, true, "abc");
-      } catch (e) {
-        assert.strictEqual (e.message.startsWith("NJS-009"), true);
-      }
+      await assert.rejects(
+        async () => await conn.tpcCommit(xid, true, "abc"),
+        /NJS-009/
+      );
     });
 
     it('259.6.3 tpcEnd invalid number of arguments', async function() {
-      try {
-        await conn.tpcEnd (xid, oracledb.TPC_END_SUSPEND, "abc");
-      } catch (e) {
-        assert.strictEqual (e.message.startsWith("NJS-009"), true);
-      }
+      await assert.rejects(
+        async () => await conn.tpcEnd(xid, oracledb.TPC_END_SUSPEND, "abc"),
+        /NJS-009/
+      );
     });
 
     it('259.6.4 tpcForget invalid number of arguments', async function() {
-      try {
-        await conn.tpcForget (xid, "abc");
-      } catch (e) {
-        assert.strictEqual (e.message.startsWith("NJS-009"), true);
-      }
+      await assert.rejects(
+        async () => await conn.tpcForget(xid, "abc"),
+        /NJS-009/
+      );
     });
 
     it('259.6.5 tpcPrepare invalid number of args', async function() {
-      try {
-        await conn.tpcPrepare (xid, "abc");
-      } catch (e) {
-        assert.strictEqual (e.message.startsWith("NJS-009"), true);
-      }
+      await assert.rejects(
+        async () => await conn.tpcPrepare(xid, "abc"),
+        /NJS-009/
+      );
     });
 
     it('259.6.6 tpcRecover invalid number of args', async function() {
-      try {
-        await conn.tpcRecover (true, "abc");
-      } catch (e) {
-        assert.strictEqual (e.message.startsWith("NJS-009"), true);
-      }
+      await assert.rejects(
+        async () => await conn.tpcRecover(xid, "abc"),
+        /NJS-009/
+      );
     });
 
     it('259.6.7 tpcRollback invalid number of args', async function() {
-      try {
-        await conn.tpcRollback (xid, "abc");
-      } catch (e) {
-        assert.strictEqual (e.message.startsWith("NJS-009"), true);
-      }
+      await assert.rejects(
+        async () => await conn.tpcRollback(xid, "abc"),
+        /NJS-009/
+      );
     });
   });
-
 });

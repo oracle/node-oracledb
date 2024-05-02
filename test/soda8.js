@@ -88,7 +88,47 @@ describe('176. soda8.js', () => {
     await conn.close();
   }); // 176.1
 
-  it('176.2 replaceOne(), basic case with document object', async () => {
+  it('176.2 replaceOne(), basic case with document content with autocommit = true', async () => {
+    oracledb.autoCommit = true;
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_1");
+
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
+
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    let res = await collection.find().key(myKeys[1]).replaceOne(inContent);
+    assert.strictEqual(res.replaced, true);
+
+    // Fetch all back
+    const outDocuments = await collection.find().getDocuments();
+    const contents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      contents[i] = outDocuments[i].getContent();
+      if (i == 1) {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(inContent);
+        assert.deepStrictEqual(contents[i], inContent);
+      } else {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(t_contents);
+        testsUtil.assertOneOf(t_contents, contents[i]);
+      }
+    }
+
+    await conn.commit();
+    res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+    oracledb.autoCommit = false;
+  }); // 176.2
+
+  it('176.3 replaceOne(), basic case with document object', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_2");
@@ -125,9 +165,9 @@ describe('176. soda8.js', () => {
     res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 176.2
+  }); // 176.3
 
-  it('175.3 replaceOne(), no error is reported if the query criteria do not match any document', async () => {
+  it('175.4 replaceOne(), no error is reported if the query criteria do not match any document', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_3");
@@ -160,9 +200,9 @@ describe('176. soda8.js', () => {
     res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.3
+  }); // 175.4
 
-  it('175.4 Negative - replaceOne(), the key() method must be used', async () => {
+  it('175.5 Negative - replaceOne(), the key() method must be used', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_4");
@@ -196,9 +236,9 @@ describe('176. soda8.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.4
+  }); // 175.5
 
-  it('175.5 replaceOneAndGet(), basic case with document content', async () => {
+  it('175.6 replaceOneAndGet(), basic case with document content', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_5");
@@ -234,9 +274,49 @@ describe('176. soda8.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.5
+  }); // 175.6
 
-  it('175.6 replaceOneAndGet(), basic case with document object', async () => {
+  it('175.7 replaceOneAndGet(), basic case with document content with autocommit = true', async () => {
+    oracledb.autoCommit = true;
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = await conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_176_5");
+
+    const myKeys = [];
+    for (let i = 0; i < t_contents.length; i++) {
+      const content = t_contents[i];
+      const doc = await collection.insertOneAndGet(content);
+      myKeys[i] = doc.key;
+    }
+
+    const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
+    const updatedDocument = await collection.find().key(myKeys[1]).replaceOneAndGet(inContent);
+    assert(updatedDocument);
+
+    // Fetch all back
+    const outDocuments = await collection.find().getDocuments();
+    const contents = [];
+    for (let i = 0; i < outDocuments.length; i++) {
+      contents[i] = outDocuments[i].getContent();
+      if (i == 1) {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(inContent);
+        assert.deepStrictEqual(contents[i], inContent);
+      } else {
+        testsUtil.removeID(contents[i]);
+        testsUtil.removeID(t_contents);
+        testsUtil.assertOneOf(t_contents, contents[i]);
+      }
+    }
+
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+    oracledb.autoCommit = false;
+  }); // 175.7
+
+  it('175.8 replaceOneAndGet(), basic case with document object', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_6");
@@ -275,9 +355,9 @@ describe('176. soda8.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.6
+  }); // 175.8
 
-  it('175.7 replaceOneAndGet(), updatedDocument does not have document content', async () => {
+  it('175.9 replaceOneAndGet(), updatedDocument does not have document content', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_7");
@@ -300,9 +380,9 @@ describe('176. soda8.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.7
+  }); // 175.9
 
-  it('175.8 replaceOneAndGet(), no error is reported if it does not match any document', async () => {
+  it('175.10 replaceOneAndGet(), no error is reported if it does not match any document', async () => {
     const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_8");
@@ -325,5 +405,5 @@ describe('176. soda8.js', () => {
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
     await conn.close();
-  }); // 175.8
+  }); // 175.10
 });

@@ -157,4 +157,16 @@ describe('222. callTimeout.js', function() {
     const result = await conn.execute(`SELECT (1+2) AS SUM FROM DUAL`);
     assert.strictEqual(3, result.rows[0][0]);
   });
+
+  it('222.9 get the callTimeout value', async () => {
+    const TIME_OUT = 10;
+    const DB_OP_TIME = 2;
+
+    //set the callTimeout
+    conn.callTimeout = TIME_OUT * 1000;  // milliseconds
+
+    // get and assert the set callTimeout
+    assert.strictEqual(conn.callTimeout, TIME_OUT * 1000);
+    await conn.execute(`BEGIN DBMS_SESSION.SLEEP(:sleepsec); END;`, [DB_OP_TIME]);
+  });
 });

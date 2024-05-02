@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -27,34 +27,34 @@
  *
  * DESCRIPTION
  *   generate a random string which length is 'length', with specialStr
- *   in it's head and tail
+ *   at its head and tail
  *
  *****************************************************************************/
 'use strict';
 
-var random = exports;
+let random = exports;
 module.exports = random;
 
 // generate a random string which length is 'length', with specialStr in it's head and tail
 random.getRandomString = function(length, specialStr) {
-  var str = '';
-  var strLength = length - specialStr.length * 2;
+  let str = '';
+  let strLength = length - specialStr.length * 2;
   for (; str.length < strLength; str += Math.random().toString(36).slice(2));
-  str = str.substr(0, strLength);
+  str = str.slice(0, strLength);
   str = specialStr + str + specialStr;
   return str;
 };
 
 random.getRandomLengthString = function(length) {
-  var str = '';
+  let str = '';
   for (; str.length < length; str += Math.random().toString(36).slice(2));
-  str = str.substr(0, length);
+  str = str.slice(0, length);
   return str;
 };
 
 random.getRandomNumArray = function(size) {
-  var numbers = new Array(size);
-  for (var i = 0; i < numbers.length; i++) {
+  let numbers = new Array(size);
+  for (let i = 0; i < numbers.length; i++) {
     numbers[i] = this.getRandomInt(1, 9999999);
   }
   return numbers;
@@ -67,7 +67,7 @@ random.getRandomInt = function(min, max) {
 };
 
 random.getIntArray = function(N) {
-  var arr = Array.apply(null, Array(N));
+  let arr = Array.apply(null, Array(N));
   // The map() method creates a new array with the results of calling a provided function on every element in this array.
   //   var new_array = arr.map(callback[, thisArg])
   // Parameters

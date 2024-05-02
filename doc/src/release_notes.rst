@@ -13,11 +13,11 @@ node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...
 Common Changes
 ++++++++++++++
 
-#)  Incorporate changes to use end of data request flag set with data packets
+#)  Incorporated changes to use end of data request flag set with data packets
     available in Oracle Database 23c to improve handling of the async reads.
 
 #)  Added class :ref:`oracledb.JsonId <jsonid>` to represent JSON ID values
-    returned by SODA in Oracle Database 23.4 and higher in the ``_id``
+    returned by SODA in Oracle Database 23.4 and later in the ``_id``
     attribute of documents stored in native collections.
 
 #)  Added support for an Oracle Database 23c JSON feature allowing for field
@@ -26,27 +26,31 @@ Common Changes
 #)  Added support for an Oracle Database 23c JSON feature improving JSON
     storage usage.
 
-#)  Updated error thrown during pool reconfiguration from `ORA-24413` to
-    `NJS-007` when poolMax is 0.
+#)  Updated the error thrown during pool reconfiguration from ``ORA-24413`` to
+    ``NJS-007`` when ``poolMax`` is *0*.
 
-#)  Throw `NJS-092` error if `poolMin` > `poolMax` during pool
-    reconfiguration.
+#)  Error ``NJS-092`` is now thrown during
+    :meth:`pool reconfiguration <pool.reconfigure()>` if the ``poolMin`` value is
+    greater than the ``poolMax`` value.
 
-#)  Added support for binding BigInt values. BigInts like ``123n`` can
-    be passed to ``connection.execute()``, ``connection.executeMany()``.
+#)  Added support for :ref:`binding BigInt values <binddatatypenotes>`.
+    BigInts such as ``123n`` can be passed to :meth:`connection.execute()` and
+    :meth:`connection.executeMany()`.
     See `PR #1572 <https://github.com/oracle/node-oracledb/pull/1572>`__
     (Slawomir Osoba).
 
 Thin Mode Changes
 ++++++++++++++++++
+
 #)  Updated the ClientInfo terminal parameter to remove the hardcoded value.
     See `Issue #1662 <https://github.com/oracle/node-oracledb/issues/1662>`__.
 
 #)  Fixed issue with connecting to Oracle Database, when the full path of
-    the Node.js executable contains certain non-standard characters like '(' and ')'.
+    the Node.js executable contains certain non-standard characters such as
+    '(' and ')'.
     See `Issue #1664 <https://github.com/oracle/node-oracledb/issues/1664>`__.
 
-#)  Added support for easy connect string entries in tnsnames.ora
+#)  Added support for easy connect string entries in tnsnames.ora.
     See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1644>`__.
 
 #)  Added support for Oracle Database 23c feature that can improve the
@@ -61,22 +65,23 @@ Thin Mode Changes
     errors were raised.
     See `Issue #1652 <https://github.com/oracle/node-oracledb/issues/1652>`__.
 
-#)  Added support for pool reconfiguration.
+#)  Added support for :meth:`pool reconfiguration <pool.reconfigure()>`.
 
 #)  Added support for Oracle Database 23c
-    :ref:`Implicit Connection Pooling <implicitpool>` in DRCP and PRCP.
+    :ref:`Implicit Connection Pooling <implicitpool>` in Database Resident
+    Connection Pooling (DRCP) and Proxy Resident Connection Pooling (PRCP).
 
-#)  Added support for usage with extension of Array.prototype methods
+#)  Added support for usage with extension of Array.prototype methods.
     See `Issue #1653 <https://github.com/oracle/node-oracledb/issues/1653>`__.
 
 #)  Fixed bug which threw an error due to the presence of duplicate cursors
-    with DRCP.
+    with :ref:`DRCP <drcp>`.
 
 Thick Mode Changes
 +++++++++++++++++++
 
-#)  Fixed an issue with privileges that prevented the startup() function from
-    bringing up the database.
+#)  Fixed an issue with privileges that prevented the
+    :meth:`oracledb.startup()` method from bringing up the database.
 
 #)  Tightened code to avoid possible unexpected runtime errors during token
     callback.
@@ -86,7 +91,7 @@ Thick Mode Changes
 
 #)  Fixed the bug which inserted the invalid value `~`  into the database
     if an unacceptable out-of-bounds number is bound to a DML statement. Now,
-    numbers like 1.0e+128, -1e128, etc. will throw an error
+    numbers such as 1.0e+128, -1e128, and so on will throw an error
     ``NJS-115: value cannot be represented as an Oracle Database number``.
     Additionally, this fix resolves the issue related to JS numbers with
     precisions where `2.3` is returned as `2.300003`.

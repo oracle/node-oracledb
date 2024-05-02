@@ -34,17 +34,20 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('299. invalidNumber.js', function() {
   let conn;
+  let tableName = 'nodb_num';
 
   before(async function() {
     conn = await oracledb.getConnection(dbConfig);
-    await conn.execute('CREATE TABLE nodb_num(id NUMBER)');
+    const sql = `CREATE TABLE ${tableName}(id NUMBER)`;
+    await testsUtil.createTable(conn, tableName, sql);
   });
 
   after(async function() {
-    await conn.execute('DROP TABLE nodb_num PURGE');
+    await testsUtil.dropTable(conn, tableName);
     await conn.close();
   });
 
@@ -56,6 +59,6 @@ describe('299. invalidNumber.js', function() {
       async () => await conn.execute(sql, binds),
       /NJS-115:/
     );
-  }); //299.1
+  }); // 299.1
 
 });

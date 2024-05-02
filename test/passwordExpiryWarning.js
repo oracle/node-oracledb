@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -71,7 +71,8 @@ describe('292. passwordExpiryWarning.js', function() {
   };
 
   before(async function() {
-    if (dbConfig.test.drcp) this.skip();
+    if (!dbConfig.test.DBA_PRIVILEGE || dbConfig.test.drcp) this.skip();
+
     const connAsDBA = await oracledb.getConnection(dbaCredential);
     await connAsDBA.execute(plsql);
     await testsUtil.sleep(2000);
@@ -79,6 +80,8 @@ describe('292. passwordExpiryWarning.js', function() {
   });
 
   after(async function() {
+    if (!dbConfig.test.DBA_PRIVILEGE || dbConfig.test.drcp) return;
+
     const connAsDBA = await oracledb.getConnection(dbaCredential);
     await connAsDBA.execute (`ALTER USER ${userName} PROFILE DEFAULT`);
     await connAsDBA.execute (`DROP PROFILE SHORT_LIFE_PROFILE1`);
