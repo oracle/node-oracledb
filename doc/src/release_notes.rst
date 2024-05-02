@@ -50,6 +50,9 @@ Thin Mode Changes
 Thick Mode Changes
 +++++++++++++++++++
 
+#)  Tightened code to avoid possible unexpected runtime errors during token
+    callback.
+
 #)  Fixed an issue that caused unexpected behavior with SODA functions in
     some platforms.
 
