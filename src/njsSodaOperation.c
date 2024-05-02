@@ -391,7 +391,7 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
         napi_value options)
 {
     dpiVersionInfo *versionInfo;
-    bool lock;
+    bool lock = false;
 
     // allocate memory for ODPI-C operations structure
     baton->sodaOperOptions = calloc(1, sizeof(dpiSodaOperOptions));

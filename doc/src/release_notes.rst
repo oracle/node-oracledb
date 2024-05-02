@@ -50,12 +50,16 @@ Thin Mode Changes
 Thick Mode Changes
 +++++++++++++++++++
 
+#)  Fixed an issue that caused unexpected behavior with SODA functions in
+    some platforms.
+
 #)  Fixed the bug which inserted the invalid value `~`  into the database
-    if an unacceptable out-of-bound number is bound to a DML statement. Now,
+    if an unacceptable out-of-bounds number is bound to a DML statement. Now,
     numbers like 1.0e+128, -1e128, etc. will throw an error
     ``NJS-115: value cannot be represented as an Oracle Database number``.
     Additionally, this fix resolves the issue related to JS numbers with
     precisions where `2.3` is returned as `2.300003`.
+    See `Issue #1659 <https://github.com/oracle/node-oracledb/issues/1659>`__.
 
 #)  Fixed a regression that caused :meth:`~aqQueue.deqOne()` and
     :meth:`~aqQueue.deqMany()` to return an invalid object in node-oracledb
