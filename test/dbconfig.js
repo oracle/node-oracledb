@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -65,10 +65,8 @@ if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
 }
 
 if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
-  let eauth = process.env.NODE_ORACLEDB_EXTERNALAUTH;
-  eauth = String(eauth);
-  eauth = eauth.toLowerCase();
-  if (eauth == 'true') {
+  const eauth = process.env.NODE_ORACLEDB_EXTERNALAUTH;
+  if (eauth.toLowerCase() === 'true') {
     config.test.externalAuth = true;
   }
 }
@@ -90,19 +88,15 @@ if (process.env.NODE_ORACLEDB_PASSWORD) {
 }
 
 if (process.env.NODE_ORACLEDB_QA) {
-  let isQA = process.env.NODE_ORACLEDB_QA;
-  isQA = String(isQA);
-  isQA = isQA.toLowerCase();
-  if (isQA == 'true') {
+  const isQA = process.env.NODE_ORACLEDB_QA;
+  if (isQA.toLowerCase() === 'true') {
     config.test.NODE_ORACLEDB_QA = true;
   }
 }
 
 if (process.env.NODE_ORACLEDB_DBA_PRIVILEGE) {
-  let priv = process.env.NODE_ORACLEDB_DBA_PRIVILEGE;
-  priv = String(priv);
-  priv = priv.toLowerCase();
-  if (priv == 'true') {
+  const priv = process.env.NODE_ORACLEDB_DBA_PRIVILEGE;
+  if (priv.toLowerCase() == 'true') {
     config.test.DBA_PRIVILEGE = true;
   }
 }
@@ -132,10 +126,8 @@ if (process.env.NODE_ORACLEDB_PROXY_SESSION_USER) {
 }
 
 if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
-  let printDebugMsg = process.env.NODE_PRINT_DEBUG_MESSAGE;
-  printDebugMsg = String(printDebugMsg);
-  printDebugMsg = printDebugMsg.toLowerCase();
-  if (printDebugMsg == 'true') {
+  const printDebugMsg = process.env.NODE_PRINT_DEBUG_MESSAGE;
+  if (printDebugMsg.toLowerCase() == 'true') {
     config.test.printDebugMsg = true;
   }
 }
