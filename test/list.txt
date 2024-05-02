@@ -5812,3 +5812,12 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
   299. invalidNumber.js
     299.1 throws error for invalid numbers
+
+  300. bigInt.js
+    300.1 can bind bigInts
+      300.1.1 with execute
+      300.1.2 with executeMany
+    300.2 fetch values
+      300.2.1 fetches the value as number(default)
+      300.2.2 use fetchTypeHandler to get BigInt value
+      300.2.3 fetches values greater than Number.MAX_SAFE_INTEGER correctly

@@ -281,3 +281,4 @@ spec:
   - test/dataTypeVector3.js
   - test/jsonDualityViews7.js
   - test/invalidNumber.js
+  - test/bigInt.js

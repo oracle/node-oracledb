@@ -23,11 +23,16 @@ Common Changes
 #)  Added support for an Oracle Database 23c JSON feature improving JSON
     storage usage.
 
-#)  Updated error thrown during pool reconfiguration while poolMax is 0 from
-    `ORA-24413` to `NJS-007`.
+#)  Updated error thrown during pool reconfiguration from `ORA-24413` to
+    `NJS-007` when poolMax is 0.
 
-#)  Added new condition check during pool reconfiguration for `poolMin > poolMax`
-    and error `NJS-092` will be thrown.
+#)  Throw `NJS-092`` error if `poolMin` > `poolMax` during pool
+    reconfiguration.
+
+#)  Added support for binding BigInt values. BigInts like ``123n`` can
+    be passed to ``connection.execute()``, ``connection.executeMany()``.
+    See `PR #1572 <https://github.com/oracle/node-oracledb/pull/1572>`__
+    (Slawomir Osoba).
 
 Thin Mode Changes
 ++++++++++++++++++

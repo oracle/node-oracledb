@@ -823,7 +823,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     }
 
     // handle binding numbers
-    if (valueType == napi_number) {
+    if (valueType == napi_number || valueType == napi_bigint) {
         if (var->varTypeNum == DPI_ORACLE_TYPE_NUMBER) {
             NJS_CHECK_NAPI(env, napi_coerce_to_string(env, value, &numStr));
             return njsVariable_setFromString(var, pos, env, numStr, baton);
