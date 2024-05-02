@@ -38,6 +38,11 @@ Thick Mode Changes
     Additionally, this fix resolves the issue related to JS numbers with
     precisions where `2.3` is returned as `2.300003`.
 
+#) Fixed a regression that caused ``deqOne()``and ``deqMany()`` to return an
+   invalid object in 6.4 instead of undefined, which was returned in the
+   previous releases.
+   See `Issue #1656 <https://github.com/oracle/node-oracledb/issues/1656>`__.
+
 node-oracledb `v6.4.0 <https://github.com/oracle/node-oracledb/compare/v6.3.0...v6.4.0>`__ (11 Mar 2024)
 --------------------------------------------------------------------------------------------------------
 

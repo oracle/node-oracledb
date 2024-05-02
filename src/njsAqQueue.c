@@ -357,6 +357,10 @@ static bool njsAqQueue_deqAsync(njsBaton* baton)
     if (baton->numMsgProps == 1) {
         if (dpiQueue_deqOne(queue->handle, &baton->msgProps[0]) < 0)
             return njsBaton_setErrorDPI(baton);
+
+        // Handle the case when message queue is empty
+        if (baton->msgProps[0] == NULL)
+           baton->numMsgProps = 0;
     } else {
         // deqMany case
         if (dpiQueue_deqMany(queue->handle, &baton->numMsgProps,

@@ -190,4 +190,18 @@ describe('217. aq1.js', function() {
     }
   });   // 217.4
 
+  it('217.5 deqOne on empty queue', async () => {
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+    const message = await queue2.deqOne();
+    assert.strictEqual(message, undefined);
+  });
+
+  it('217.6 deqMany on empty queue', async () => {
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+    const messages = await queue2.deqMany(1);
+    assert.deepStrictEqual(messages, []);
+  });
+
 });

@@ -4634,6 +4634,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.2 examples/aqoptions.js
     217.3 examples/aqmulti.js
     217.4 one message in enqMany/deqMany
+    217.5 deqOne on empty queue
+    217.6 deqMany on empty queue
 
 218. aq2.js
     218.1 examples/aqobject.js
