@@ -14,7 +14,7 @@ Common Changes
 ++++++++++++++
 
 #)  Incorporate changes to use end of data request flag set with data packets
-    available in Oracle database 23c to improve handling the async reads.
+    available in Oracle Database 23c to improve handling of the async reads.
 
 #)  Added class :ref:`oracledb.JsonId <jsonid>` to represent JSON ID values
     returned by SODA in Oracle Database 23.4 and higher in the ``_id``
@@ -44,7 +44,7 @@ Thin Mode Changes
 
 #)  Fixed issue with connecting to Oracle Database, when the full path of
     the Node.js executable contains certain non-standard characters like '(' and ')'.
-    See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1664>`__.
+    See `Issue #1664 <https://github.com/oracle/node-oracledb/issues/1664>`__.
 
 #)  Added support for easy connect string entries in tnsnames.ora
     See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1644>`__.
