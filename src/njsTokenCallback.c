@@ -154,7 +154,7 @@ static void njsTokenCallback_processNotification(uv_async_t *handle)
 static bool njsTokenCallback_processNotificationHelper(
         njsTokenCallback *callback)
 {
-    napi_value jsAccessTokenConfig = napi_undefined, jsCallback,
+    napi_value jsAccessTokenConfig = NULL, jsCallback,
             jsCallbackHandler, jsPool, refresh, result;
     napi_value jsCallbackArgs[4], externalObj;
     napi_env env = callback->env;
