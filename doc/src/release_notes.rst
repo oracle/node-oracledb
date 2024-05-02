@@ -457,7 +457,7 @@ Thick Mode Changes
 
 #)  Added support to return a message object from the :meth:`queue.enqOne()
     <aqQueue.enqOne()>` and :meth:`queue.enqMany() <aqQueue.enqMany()>`
-    functions.  This message object contains a ``msgId`` attribute identifying
+    functions. This message object contains a ``msgId`` attribute identifying
     each message.
 
 #)  Added support to enqueue and dequeue AQ messages as
