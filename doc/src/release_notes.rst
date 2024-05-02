@@ -39,6 +39,9 @@ Common Changes
 
 Thin Mode Changes
 ++++++++++++++++++
+#)  Updated the ClientInfo terminal parameter to remove the hardcoded value.
+    See `Issue #1662 <https://github.com/oracle/node-oracledb/issues/1662>`__.
+
 #)  Fixed issue with connecting to Oracle Database, when the full path of
     the Node.js executable contains certain non-standard characters like '(' and ')'.
     See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1664>`__.
