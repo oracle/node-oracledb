@@ -13,6 +13,9 @@ node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...
 Thin Mode Changes
 ++++++++++++++++++
 
+#)  Added support for easy connect string entries in tnsnames.ora
+    See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1644>`__.
+
 #)  Added support for Oracle Database 23c feature that can improve the
     performance of connection creation by reducing the number of
     round trips required for all connections created.
