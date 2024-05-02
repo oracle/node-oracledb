@@ -299,6 +299,69 @@ operations using :meth:`sodaCollection.save()` and
 are similar to the insertion methods, however if an existing document
 with the same key already exists in the collection, it is replaced.
 
+If you are using Oracle Database 23.4 (or later), you can define the key
+directly in the document content by specifying the key in the ``_id`` field
+as shown below:
+
+.. code-block:: javascript
+
+    try {
+        const myContent = {_id: 1, name: "Sally", address: {city: "Melbourne"}};
+        const newDoc = soda.createDocument(myContent);
+        await collection.insertOne(newDoc);
+    } catch(err) {
+        console.error(err);
+    }
+
+If you do not specify the ``_id`` field, then the :ref:`jsonid` returns an
+automatically generated hex-encoded string as the key value. Once the key is
+automatically generated, it cannot be overwritten with a new value. If you do
+try to update the value, then the following error will be returned::
+
+    ORA-54059:/ // cannot update an immutable column to a different value
+
+The JsonId value from one SODA document collection can be specified in another
+document collection. For example, ``STUDENTS`` collection can have courseID
+set from ``COURSES`` collection _id:
+
+.. code-block:: javascript
+
+    // Create STUDENTS Collection
+    await connection.execute(`CREATE JSON COLLECTION TABLE if not exists STUDENTS`);
+
+    // Create COURSES Collection
+    await connection.execute(`CREATE JSON COLLECTION TABLE if not exists COURSES`);
+
+    // Add a course document
+    const courseDoc = {"department": "Physics", "Professor": "Fred"};
+    let sql = `INSERT INTO COURSES VALUES (:1)`;
+    let result = await connection.execute(sql, [{
+        type: oracledb.DB_TYPE_JSON,
+        val: courseDoc
+    }]);
+
+    // Read the course inserted above which would have _id (JsonId type) populated.
+    sql = `SELECT * FROM COURSES`;
+    result = await connection.execute(sql);
+
+    // Add a student document with foreign key, courseID referring to COURSES collection.
+    const studentDoc = {"name": "Jenny"};
+    studentDoc.courseID = [];
+    studentDoc.courseID.push(result.rows[0][0]._id);
+    sql = `INSERT INTO STUDENTS VALUES (:1)`;
+    result = await connection.execute(sql, [{
+        type: oracledb.DB_TYPE_JSON,
+        val: studentDoc
+    }]);
+
+    // Read the student documents
+    sql = `SELECT * FROM STUDENTS`;
+    result = await connection.execute(sql);
+    console.log('Student Document:', JSON.stringify(result.rows[0][0])) // Student Document:
+                 {"name":"Jenny","courseID":
+                   ["661e0fea4583f699cc6a0b2a"],"_id":"661e105445ac389beaaf05ec"
+                 }
+
 To extract documents from a collection, the
 :meth:`~sodaCollection.find()` method can be used to build a
 :ref:`SodaOperation <sodaoperationclass>` object specifying the keys of

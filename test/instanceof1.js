@@ -73,7 +73,11 @@ describe('45. instanceof1.js', function() {
     const result = await conn.execute('select to_clob(dummy) from dual');
     const lob = result.rows[0][0];
     assert(lob instanceof oracledb.Lob);
-    lob.destroy();
+    await new Promise((resolve, reject) => {
+      lob.on('error', reject);
+      lob.on('close', resolve);
+      lob.destroy();
+    });
     await conn.close();
   }); // 45.4
 

@@ -3511,3 +3511,17 @@ node-oracledb, allowing use of new features.
 
         BLOB columns with the ``IS JSON FORMAT OSON`` check constraint enabled
         can now be fetched as JSON type columns when this property is set.
+
+.. _jsonid:
+
+Oracledb JsonId Class
+=====================
+
+Objects of this class are returned by :ref:`SODA <sodaoverview>` in the
+``_id`` attribute of documents stored in native collections when using
+Oracle Database 23.4 (or later). The JsonId class is a subclass of `Uint8Array
+<https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/
+Global_Objects/Uint8Array>`__ and can be instantiated in the same way as an
+Uint8Array datatype object.
+
+.. versionadded:: 6.5

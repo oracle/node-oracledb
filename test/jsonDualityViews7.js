@@ -710,7 +710,7 @@ describe('297. jsonDualityViews7.js', function() {
       let lob = await connection.createLob(oracledb.CLOB);
 
       // Write the buffer to the CLOB
-      await lob.write(JSON.stringify (arr));
+      await lob.write(JSON.stringify(arr));
 
       await connection.execute(
         `INSERT INTO vector

@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -129,6 +129,6 @@ describe('281.aq5.js', function() {
     assert(msg);
 
     await conn.unsubscribe(objQueueName);
-  });
+  }); // 281.1
 
 });

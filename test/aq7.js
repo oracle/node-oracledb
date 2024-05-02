@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -112,7 +112,7 @@ describe('283. aq7.js', function() {
 
     assert.strictEqual(msg.payload.empName, "Chris");
     assert.strictEqual(msg.payload.empCity, "Melbourne");
-  });
+  }); // 283.1
 
   it('283.2 JSON type in enqMany/deqMany', async () => {
     const queue3 = await conn.getQueue(objQueueName,
@@ -146,7 +146,7 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[0].payload.empId, 101);
     assert.equal(msgs[1].payload.empId, 102);
     assert.equal(msgs[2].payload.empId, 103);
-  });
+  }); // 283.2
 
   it('283.3 Map JS object directly into JSON - enqOne/deqOne', async () => {
     const queue = await conn.getQueue(objQueueName,
@@ -171,7 +171,7 @@ describe('283. aq7.js', function() {
 
     assert.equal(msg.payload.empName, "employee name");
     assert.equal(msg.payload.empCity, "City");
-  });
+  }); // 283.3
 
   it('283.4 Map JS object directly into JSON - enqMany/deqMany', async () => {
     const queue = await conn.getQueue(objQueueName,
@@ -185,7 +185,7 @@ describe('283. aq7.js', function() {
     ];
 
     await queue.enqMany(dataList);
-    await conn.commit ();
+    await conn.commit();
 
     const queue2 = await conn.getQueue(objQueueName,
       {payloadType: oracledb.DB_TYPE_JSON});
@@ -205,7 +205,7 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[0].payload.empCity, "City1");
     assert.equal(msgs[1].payload.empCity, "City2");
     assert.equal(msgs[2].payload.empCity, "City3");
-  });
+  }); // 283.4
 
   it('283.5 enqOne and deqOne Null & Boolean in JSON', async function() {
     const queue = await conn.getQueue(objQueueName,
@@ -229,7 +229,7 @@ describe('283. aq7.js', function() {
 
     assert.equal(msg.payload.empName, null);
     assert.equal(msg.payload.empCity, true);
-  });
+  }); // 283.5
 
   it('283.6 enqMany and deqMany Null & Boolean in JSON', async function() {
     const queue = await conn.getQueue(objQueueName,
@@ -263,7 +263,7 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[0].payload.empCity, true);
     assert.equal(msgs[1].payload.empCity, false);
     assert.equal(msgs[2].payload.empCity, true);
-  });
+  }); // 283.6
 
   it('283.7 enqOne and deqOne with JSON val as array type', async function() {
     const queue = await conn.getQueue(objQueueName,
@@ -278,11 +278,11 @@ describe('283. aq7.js', function() {
     const queue2 = await conn.getQueue(objQueueName,
       {payloadType: oracledb.DB_TYPE_JSON});
     const msg = await queue2.deqOne();
-    await conn.commit ();
+    await conn.commit();
 
     assert.deepStrictEqual(msg.payload.employees,
       [ "Employee1", "Employee2", "Employee3" ]);
-  });
+  }); // 283.7
 
   it('283.8 enqMany and deqMany with JSON val as array type', async function() {
     const queue3 = await conn.getQueue (objQueueName,
@@ -294,8 +294,8 @@ describe('283. aq7.js', function() {
       {payload: { empName3: ["Employee #3", 103] }}
     ];
 
-    await queue3.enqMany (empList);
-    await conn.commit ();
+    await queue3.enqMany(empList);
+    await conn.commit();
 
     const queue4 = await conn.getQueue(objQueueName,
       {payloadType: oracledb.DB_TYPE_JSON});
@@ -311,7 +311,7 @@ describe('283. aq7.js', function() {
     assert.deepStrictEqual(msgs[0].payload.empName1, ["Employee #1", 101]);
     assert.deepStrictEqual(msgs[1].payload.empName2, ["Employee #2", 102]);
     assert.deepStrictEqual(msgs[2].payload.empName3, ["Employee #3", 103]);
-  });
+  }); // 283.8
 
   it('283.9 enqOne and deqOne JSON val as object type', async function() {
     const queue = await conn.getQueue(objQueueName,
@@ -331,7 +331,7 @@ describe('283. aq7.js', function() {
 
     assert.deepStrictEqual(msg.payload.employee,
       { "name": "Employee1", "age": 30, "city": "New City" });
-  });
+  }); // 283.9
 
   it('283.10 enqMany and deqMany with JSON val as object type', async function() {
     const queue3 = await conn.getQueue (objQueueName,
@@ -366,7 +366,7 @@ describe('283. aq7.js', function() {
       { "name": "Employee2", "age": 30, "city": "New York" });
     assert.deepStrictEqual(msgs[2].payload.empDetails3,
       { "name": "Employee3", "age": 28, "city": "New Land" });
-  });
+  }); // 283.10
 
   it('283.11 enqOne and deqOne CLOB value into a JSON key', async function() {
     const inFileName = './test/clobexample.txt';
@@ -391,5 +391,5 @@ describe('283. aq7.js', function() {
     await conn.commit();
 
     assert.deepStrictEqual(msg.payload, jsonDoc);
-  });
+  }); // 283.11
 });

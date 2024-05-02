@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -151,7 +151,7 @@ describe('267. aq4.js', function() {
       },
       /ORA-24033:/
     );
-  });
+  }); // 267.1
 
   it('267.2 single element in array', async () => {
     // Enqueue
@@ -179,7 +179,7 @@ describe('267. aq4.js', function() {
     const msg = await queue2.deqOne ();
     assert.strictEqual(msg.payload.NAME, "scott");
     await conn.commit();
-  });
+  }); // 267.2
 
 
   it('267.3 Negative - numbers as recipients ', async () => {
@@ -197,7 +197,7 @@ describe('267. aq4.js', function() {
       },
       /NJS-007:/
     );
-  });
+  }); // 267.3
 
   it('267.4 Negative - number, string, date as recipients ', async () => {
     const queue1 = await conn.getQueue(
@@ -214,7 +214,7 @@ describe('267. aq4.js', function() {
       },
       /NJS-007:/
     );
-  });
+  }); // 267.4
 
   it('267.5 Negative -  null value for recipient', async () => {
     const queue1 = await conn.getQueue(
@@ -231,7 +231,7 @@ describe('267. aq4.js', function() {
       },
       /NJS-007:/
     );
-  });
+  }); // 267.5
 
   it('267.6 Negative - undefined value for recipient', async () => {
     const queue1 = await conn.getQueue(
@@ -248,7 +248,7 @@ describe('267. aq4.js', function() {
       },
       /NJS-007:/
     );
-  });
+  }); // 267.6
 
   it('267.7 Negative - dequeue non-existent name', async () => {
     await assert.rejects(
@@ -279,7 +279,7 @@ describe('267. aq4.js', function() {
       },
       /ORA-25242:/
     );
-  });
+  }); // 267.7
 
 
   it('267.8 empty recipient list with enqMany', async () => {
@@ -297,7 +297,7 @@ describe('267. aq4.js', function() {
       },
       /ORA-24033:/
     );
-  });
+  }); // 267.8
 
   it('267.9 recipient list with enqMany', async () => {
     const msgList = [];
@@ -322,7 +322,7 @@ describe('267. aq4.js', function() {
     );
     const msgs = await queue2.deqMany(5);
     assert.strictEqual(msgs.length, 4);
-  });
+  }); // 267.9
 
 
   it('267.10 recipient list with enqMany non-existent in dequeue', async () => {
@@ -348,7 +348,7 @@ describe('267. aq4.js', function() {
     );
     const msgs = await queue2.deqMany(5);
     assert.strictEqual(msgs.length, 0);
-  });
+  }); // 267.10
 
   it('267.11 recipient list with enqMany invalid datatype in dequeue', async () => {
     const msgList = [];
@@ -366,6 +366,6 @@ describe('267. aq4.js', function() {
       },
       /NJS-007:/
     );
-  });
+  }); // 267.11
 
 });

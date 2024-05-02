@@ -188,20 +188,20 @@ describe('217. aq1.js', function() {
       assert.strictEqual(messages2[0].payload.toString(), messages1[0]);
       assert.strictEqual(messages2.length, messages1.length);
     }
-  });   // 217.4
+  }); // 217.4
 
   it('217.5 deqOne on empty queue', async () => {
     const queue2 = await conn.getQueue(rawQueueName);
     queue2.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
     const message = await queue2.deqOne();
     assert.strictEqual(message, undefined);
-  });
+  }); // 217.5
 
   it('217.6 deqMany on empty queue', async () => {
     const queue2 = await conn.getQueue(rawQueueName);
     queue2.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
     const messages = await queue2.deqMany(1);
     assert.deepStrictEqual(messages, []);
-  });
+  }); // 217.6
 
 });
