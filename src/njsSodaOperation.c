@@ -390,7 +390,7 @@ static bool njsSodaOperation_getOnePostAsync(njsBaton *baton, napi_env env,
 static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
         napi_value options)
 {
-    dpiVersionInfo versionInfo;
+    dpiVersionInfo *versionInfo;
     bool lock;
 
     // allocate memory for ODPI-C operations structure
@@ -399,11 +399,9 @@ static bool njsSodaOperation_processOptions(njsBaton *baton, napi_env env,
         return njsBaton_setErrorInsufficientMemory(baton);
 
     // set fetch array size, but ONLY if the client version exceeds 19.5
-    if (dpiContext_getClientVersion(baton->globals->context,
-            &versionInfo) < 0)
-        return njsUtils_throwErrorDPI(env, baton->globals);
-    if (versionInfo.versionNum > 19 ||
-            (versionInfo.versionNum == 19 && versionInfo.releaseNum >= 5))
+    versionInfo = &baton->globals->clientVersionInfo;
+    if (versionInfo->versionNum > 19 ||
+            (versionInfo->versionNum == 19 && versionInfo->releaseNum >= 5))
         baton->sodaOperOptions->fetchArraySize = baton->fetchArraySize;
 
     // process each of the options

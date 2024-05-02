@@ -489,6 +489,11 @@ static bool njsConnection_connectAsync(njsBaton *baton)
     // handle warnings if any
     dpiContext_getError(baton->globals->context, &baton->warningInfo);
 
+    // Set the Oracle server version on the baton
+    if (dpiConn_getServerVersion(baton->dpiConnHandle, NULL, NULL,
+            &baton->versionInfo) < 0)
+        return njsBaton_setErrorDPI(baton);
+
     return true;
 }
 
@@ -501,10 +506,24 @@ static bool njsConnection_connectPostAsync(njsBaton *baton, napi_env env,
         napi_value *result)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
+    napi_value connObj, osonMaxFieldNameSize;
 
     // process warnings if any
     if (baton->warningInfo.isWarning) {
         conn->warningInfo = baton->warningInfo;
+    }
+
+    // For Oracle Database 23c and Oracle Client 23c, the maximum field name
+    // size for the OSON object is 65535
+    conn->versionInfo = baton->versionInfo;
+    if (conn->versionInfo.versionNum >= 23
+            && baton->globals->clientVersionInfo.versionNum >= 23) {
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->jsCallingObjRef, &connObj))
+        NJS_CHECK_NAPI(env, napi_create_uint32(env,
+            65535, &osonMaxFieldNameSize))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, connObj,
+            "_osonMaxFieldNameSize", osonMaxFieldNameSize))
     }
 
     // transfer the ODPI-C connection handle to the new object
@@ -1007,7 +1026,6 @@ static bool njsConnection_getBatchErrors(njsBaton *baton, napi_env env,
 NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getCallTimeout, 0, NULL)
 {
     njsConnection *conn = (njsConnection*) callingInstance;
-    dpiVersionInfo versionInfo;
     uint32_t callTimeout;
 
     // return undefined for an invalid connection
@@ -1015,9 +1033,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getCallTimeout, 0, NULL)
         return true;
 
     // if an Oracle Client less than 18.1 is being used, return undefined
-    if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0)
-        return njsUtils_throwErrorDPI(env, globals);
-    if (versionInfo.versionNum < 18)
+    if (globals->clientVersionInfo.versionNum < 18)
         return true;
 
     // get value and return it
@@ -1373,14 +1389,10 @@ static bool njsConnection_getOutBinds(njsBaton *baton, napi_env env,
 NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersion, 0, NULL)
 {
     njsConnection *conn = (njsConnection*) callingInstance;
-    dpiVersionInfo versionInfo;
 
     if (conn->handle) {
-        if (dpiConn_getServerVersion(conn->handle, NULL, NULL,
-                &versionInfo) < 0)
-            return njsUtils_throwErrorDPI(env, globals);
-        NJS_CHECK_NAPI(env, napi_create_uint32(env, versionInfo.fullVersionNum,
-                returnValue))
+        NJS_CHECK_NAPI(env, napi_create_uint32(env,
+                conn->versionInfo.fullVersionNum, returnValue))
     }
 
     return true;
@@ -1394,17 +1406,13 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersion, 0, NULL)
 NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersionString, 0, NULL)
 {
     njsConnection *conn = (njsConnection*) callingInstance;
-    dpiVersionInfo versionInfo;
     char versionString[40];
 
     if (conn->handle) {
-        if (dpiConn_getServerVersion(conn->handle, NULL, NULL,
-                &versionInfo) < 0)
-            return njsUtils_throwErrorDPI(env, globals);
         (void) snprintf(versionString, sizeof(versionString), "%d.%d.%d.%d.%d",
-                versionInfo.versionNum, versionInfo.releaseNum,
-                versionInfo.updateNum, versionInfo.portReleaseNum,
-                versionInfo.portUpdateNum);
+                conn->versionInfo.versionNum, conn->versionInfo.releaseNum,
+                conn->versionInfo.updateNum, conn->versionInfo.portReleaseNum,
+                conn->versionInfo.portUpdateNum);
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, versionString,
                 NAPI_AUTO_LENGTH, returnValue))
     }
@@ -1781,6 +1789,10 @@ bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
     if (baton->warningInfo.isWarning) {
         conn->warningInfo = baton->warningInfo;
     }
+
+    // set the version information on the connection object
+    conn->versionInfo = baton->versionInfo;
+
     return true;
 }
 
@@ -1990,13 +2002,10 @@ static bool njsConnection_processBinds(njsBaton *baton, napi_env env,
 static bool njsConnection_processImplicitResults(njsBaton *baton)
 {
     njsImplicitResult *implicitResult = NULL, *tempImplicitResult;
-    dpiVersionInfo versionInfo;
     dpiStmt *stmt;
 
     // clients earlier than 12.1 do not support implicit results
-    if (dpiContext_getClientVersion(baton->globals->context, &versionInfo) < 0)
-        return njsBaton_setErrorDPI(baton);
-    if (versionInfo.versionNum < 12)
+    if (baton->globals->clientVersionInfo.versionNum < 12)
         return true;
 
     // process all implicit results returned

@@ -411,6 +411,10 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
     // handle warnings if any
     dpiContext_getError(baton->globals->context, &baton->warningInfo);
 
+    if (dpiConn_getServerVersion(baton->dpiConnHandle, NULL, NULL,
+            &baton->versionInfo) < 0)
+        return njsBaton_setErrorDPI(baton);
+
     // keep track of return parameters
     NJS_FREE_AND_CLEAR(baton->tag);
     baton->tagLength = 0;

@@ -142,7 +142,6 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
 static bool njsModule_populateGlobals(napi_env env, napi_value module,
         napi_value settings, njsModuleGlobals *globals)
 {
-    dpiVersionInfo versionInfo;
     char versionString[40];
     napi_value temp;
 
@@ -221,16 +220,18 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
             &globals->jsEncodeVectorFn))
 
     // acquire Oracle client version and store this in the settings object
-    if (dpiContext_getClientVersion(globals->context, &versionInfo) < 0)
+    if (dpiContext_getClientVersion(globals->context, &globals->clientVersionInfo) < 0)
         return njsUtils_throwErrorDPI(env, globals);
-    NJS_CHECK_NAPI(env, napi_create_uint32(env, versionInfo.fullVersionNum,
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, globals->clientVersionInfo.fullVersionNum,
             &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, settings,
             "oracleClientVersion", temp))
     (void) snprintf(versionString, sizeof(versionString), "%d.%d.%d.%d.%d",
-            versionInfo.versionNum, versionInfo.releaseNum,
-            versionInfo.updateNum, versionInfo.portReleaseNum,
-            versionInfo.portUpdateNum);
+            globals->clientVersionInfo.versionNum,
+            globals->clientVersionInfo.releaseNum,
+            globals->clientVersionInfo.updateNum,
+            globals->clientVersionInfo.portReleaseNum,
+            globals->clientVersionInfo.portUpdateNum);
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, versionString,
             strlen(versionString), &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, settings,

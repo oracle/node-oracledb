@@ -4884,6 +4884,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         244.1.2 resultSet stores JSON data correctly
         244.1.3 works well with REF Cursor
         244.1.4 columns fetched from REF CURSORS can be mapped by fetchInfo settings
+        244.1.5 Negative field name length > 255 bytes - Oracle 21c
     244.2 stores null value correctly
         244.2.1 testing Null, Empty string and Undefined
     244.3 testing JSON with executeMany()
@@ -4905,10 +4906,18 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         244.8.2 bind by position
     244.9 testing JSON with oracledb.fetchAsString and fetchInfo oracledb.STRING
         244.9.1 works with oracledb.fetchAsString
-        244.9.2 doesn't work with outFormat: oracledb.DB_TYPE_JSON
-        244.9.3 could work with fetchInfo oracledb.STRING
-    244.10 Verify auto-generated SODA document key
-        244.10.1 Verify Json Id on select
+        244.9.2 could work with fetchInfo oracledb.STRING
+    244.10 testing JSON with Long Field Names > 255 bytes
+        244.10.1 single long JSON field name
+        244.10.2 multiple long JSON field names
+        244.10.3 multiple long and short JSON field names
+        244.10.4 negative case for out-of-bounds field length names
+    244.11 testing compressed JSON with relative offsets
+        244.11.1 fetch JSON with relative offsets
+        244.11.2 fetch JSON with relative offsets and shared fields and values
+        244.11.3 fetch JSON with relative offsets and shared fields, not values
+    244.12 Verify auto-generated SODA document key
+        244.12.1 Verify Json Id on select
 
 245. fetchLobAsStrBuf.js
     245.1 CLOB,BLOB Insert

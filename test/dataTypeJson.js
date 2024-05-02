@@ -41,6 +41,7 @@ describe('244.dataTypeJson.js', function() {
 
   let connection;
   let isRunnable = false;
+  let isOracle_23_4 = false;
   const tableName = "nodb_json";
 
   const jsonVals = assist.jsonValues;
@@ -52,6 +53,11 @@ describe('244.dataTypeJson.js', function() {
     if (testsUtil.getClientVersion() >= 2100000000 && connection.oracleServerVersion >= 2100000000) {
       isRunnable = true;
     }
+
+    // Check if we are running the latest Oracle Server and Client versions
+    // for vector and long field names support
+    isOracle_23_4 = connection.oracleServerVersion >= 2304000000
+      && (oracledb.thin || oracledb.oracleClientVersion >= 2304000000);
 
     if (!isRunnable) {
       this.skip();
@@ -78,7 +84,7 @@ describe('244.dataTypeJson.js', function() {
         this.skip();
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, tableName);
     }); // after()
 
     it('244.1.1 SELECT query', async function() {
@@ -97,6 +103,28 @@ describe('244.dataTypeJson.js', function() {
       await assist.verifyRefCursorWithFetchInfo(connection, tableName, jsonVals);
     }); // 244.1.4
 
+    it('244.1.5 Negative field name length > 255 bytes - Oracle 21c', async function() {
+      if (isOracle_23_4 || !oracledb.thin) {
+        this.skip();
+      }
+      // The server does not throw an error for out-of-bounds field length
+      // names as of now.
+      const sequence = 1;
+      const longFieldName = 'A'.repeat(256);
+      const jsonVal = {};
+      jsonVal[longFieldName] = "2018/11/01 18:30:00";
+      const sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
+      ];
+      await assert.rejects(
+        async () => await connection.execute(sql, binds),
+        // NJS-114: OSON field names may not exceed %d UTF-8 encoded bytes
+        /NJS-114:/
+      );
+    }); // 244.1.5
+
   }); // 244.1
 
   describe('244.2 stores null value correctly', function() {
@@ -112,40 +140,26 @@ describe('244.dataTypeJson.js', function() {
     before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
 
       oracledb.fetchAsBuffer = [oracledb.BLOB];
-      const proc = "BEGIN \n" +
-          "    DECLARE \n" +
-          "        e_table_missing EXCEPTION; \n" +
-          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-          "    BEGIN \n" +
-          "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-          "    EXCEPTION \n" +
-          "        WHEN e_table_missing \n" +
-          "        THEN NULL; \n" +
-          "    END; \n" +
-          "    EXECUTE IMMEDIATE (' \n" +
-          "        CREATE TABLE " + tableName + " ( \n" +
-          "            id         NUMBER, \n" +
-          "            content    JSON, \n" +
-          "            osonCol    BLOB, \n" +
-          "            constraint Oson_ck_1 check (OsonCol is json format oson)" +
-          "        ) \n" +
-          "    '); \n" +
-          "END; ";
-      await connection.execute(proc);
+      const sql = " CREATE TABLE " + tableName +
+        " ( \n" +
+        " id         NUMBER, \n" +
+        " content    JSON, \n" +
+        " osonCol    BLOB, \n" +
+        " constraint Oson_ck_1 check (OsonCol is json format oson)" +
+        " )";
+      await testsUtil.createTable(connection, tableName, sql);
     }); // before()
 
     after(async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.fetchAsBuffer = [];
       oracledb.stmtCacheSize = default_stmtCacheSize;
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, tableName);
     }); // after()
 
     it('244.3.1 works with executeMany()', async function() {
@@ -205,7 +219,9 @@ describe('244.dataTypeJson.js', function() {
         [18, jsonVal18]
       ];
 
-      if (connection.oracleServerVersion >= 2304000000) {
+      // Inserting TypedArrays is only allowed with Oracle Database 23c and
+      // Oracle Client 23c versions and above
+      if (isOracle_23_4) {
         binds.push([19, jsonVal19]);
         binds.push([20, jsonVal20]);
       }
@@ -256,7 +272,6 @@ describe('244.dataTypeJson.js', function() {
     before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = 0;
       await assist.setUp(connection, tableName, jsonVals);
@@ -267,12 +282,11 @@ describe('244.dataTypeJson.js', function() {
     after(async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
       await connection.execute(drop_proc_in);
       await connection.execute(drop_proc_out);
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, tableName);
     }); // after()
 
     it('244.4.1 bind by name', async function() {
@@ -332,7 +346,6 @@ describe('244.dataTypeJson.js', function() {
     before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = 0;
       await assist.setUp(connection, tableName, jsonVals);
@@ -342,11 +355,10 @@ describe('244.dataTypeJson.js', function() {
     after(async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
       await connection.execute(proc_drop);
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, tableName);
     }); // after()
 
     it('244.5.1 bind by name', async function() {
@@ -410,7 +422,6 @@ describe('244.dataTypeJson.js', function() {
     before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = 0;
       await assist.setUp(connection, tableName, jsonVals);
@@ -421,12 +432,11 @@ describe('244.dataTypeJson.js', function() {
     after(async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
       await connection.execute(drop_proc_in);
       await connection.execute(drop_proc_out);
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, tableName);
     }); // after()
 
     it('244.6.1 bind by name', async function() {
@@ -495,7 +505,6 @@ describe('244.dataTypeJson.js', function() {
     before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = 0;
       await assist.setUp(connection, tableName, jsonVals);
@@ -505,11 +514,10 @@ describe('244.dataTypeJson.js', function() {
     after(async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
       await connection.execute(proc_drop);
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, tableName);
     }); // after()
 
     it('244.7.1 bind by name', async function() {
@@ -551,35 +559,20 @@ describe('244.dataTypeJson.js', function() {
     before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
-      const proc = "BEGIN \n" +
-          "    DECLARE \n" +
-          "        e_table_missing EXCEPTION; \n" +
-          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-          "    BEGIN \n" +
-          "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-          "    EXCEPTION \n" +
-          "        WHEN e_table_missing \n" +
-          "        THEN NULL; \n" +
-          "    END; \n" +
-          "    EXECUTE IMMEDIATE (' \n" +
-          "        CREATE TABLE " + tableName + " ( \n" +
-          "            num         NUMBER, \n" +
-          "            content    JSON \n" +
-          "        ) \n" +
-          "    '); \n" +
-          "END; ";
-      await connection.execute(proc);
+      const sql = " CREATE TABLE " + tableName + " ( \n" +
+        "  num        NUMBER, \n" +
+        "  content    JSON \n" +
+        "  )";
+      await testsUtil.createTable(connection, tableName, sql);
     }); // before()
 
     after(async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, tableName);
     }); // after()
 
     it('244.8.1 bind by name', async function() {
@@ -624,107 +617,310 @@ describe('244.dataTypeJson.js', function() {
 
   describe('244.9 testing JSON with oracledb.fetchAsString and fetchInfo oracledb.STRING', function() {
 
+    let sequence = 1;
     before('create table, insert data', async function() {
       if (!isRunnable) {
         this.skip();
-        return;
       }
-      const proc = "BEGIN \n" +
-          "    DECLARE \n" +
-          "        e_table_missing EXCEPTION; \n" +
-          "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-          "    BEGIN \n" +
-          "        EXECUTE IMMEDIATE('DROP TABLE " + tableName + " PURGE'); \n" +
-          "    EXCEPTION \n" +
-          "        WHEN e_table_missing \n" +
-          "        THEN NULL; \n" +
-          "    END; \n" +
-          "    EXECUTE IMMEDIATE (' \n" +
-          "        CREATE TABLE " + tableName + " ( \n" +
-          "            id         NUMBER, \n" +
-          "            content    JSON \n" +
-          "        ) \n" +
-          "    '); \n" +
-          "END; ";
-      await connection.execute(proc);
+      const sql = " CREATE TABLE " + tableName + " ( \n" +
+          " id         NUMBER, \n" +
+          " content    JSON \n" +
+          " )";
+      await testsUtil.createTable(connection, tableName, sql);
     }); // before()
 
     after(async function() {
       if (!isRunnable) {
         this.skip();
+      }
+      oracledb.stmtCacheSize = default_stmtCacheSize;
+      oracledb.fetchAsString = [];
+      await testsUtil.dropTable(connection, tableName);
+    }); // after()
+
+    const testInsertAndFetch = async function(seq, jsonVal, resultStr, selectOpts) {
+      let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: seq, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
+      ];
+
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + tableName + " where id = " + seq;
+      const result = await connection.execute(sql, [], selectOpts);
+      assert.strictEqual(typeof result.rows[0][0], 'string');
+      assert.strictEqual(result.rows[0][0].length, resultStr.length);
+      assert.strictEqual(result.rows[0][0], resultStr);
+    };
+
+    it('244.9.1 works with oracledb.fetchAsString', async function() {
+      oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
+      const jsonVals = [{ "key5": "2018/11/01 18:30:00" }];
+      const resultStr = ["{\"key5\":\"2018/11/01 18:30:00\"}"];
+
+      // Add the JSON Field with Long Field Name to the JSON Values Array
+      // for Oracle DB 23.4 (and Oracle Client 23.4)
+      if (isOracle_23_4) {
+        const longFieldName = 'A'.repeat(1000);
+        const jsonVal = {};
+        jsonVal[longFieldName] = "2018/11/01 18:30:00";
+        jsonVals.push(jsonVal);
+        resultStr.push(`{"${longFieldName}":"2018/11/01 18:30:00"}`);
+      }
+
+      for (let i = 1; i <= jsonVals.length; i++) {
+        await testInsertAndFetch(sequence, jsonVals[i - 1], resultStr[i - 1], {});
+        sequence++;
+      }
+    }); // 244.9.1
+
+    it('244.9.2 could work with fetchInfo oracledb.STRING', async function() {
+      oracledb.fetchAsString = [];
+      const jsonVal = { "key5": "2018/11/01 18:30:00" };
+      const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
+
+      const options = {
+        fetchInfo: { C: { type: oracledb.STRING } }
+      };
+
+      // Test Insert and Fetch of JSON Data
+      await testInsertAndFetch(sequence, jsonVal, resultStr, options);
+      sequence++;
+
+    }); // 244.9.2
+
+  }); // 244.9
+
+  describe('244.10 testing JSON with long field names > 255 bytes', function() {
+
+    const table = 'nodb_json_long';
+    let sequence = 1;
+
+    before('create table, insert data', async function() {
+      if (!isOracle_23_4) {
+        this.skip();
+      }
+      const sql = " CREATE TABLE " + table + " ( \n" +
+        " id         NUMBER, \n" +
+        " content    JSON \n" +
+        " )";
+      await testsUtil.createTable(connection, table, sql);
+    }); // before()
+
+    after(async function() {
+      if (!isOracle_23_4) {
         return;
       }
       oracledb.stmtCacheSize = default_stmtCacheSize;
       oracledb.fetchAsString = [];
-      await connection.execute("DROP table " + tableName + " PURGE");
+      await testsUtil.dropTable(connection, table);
     }); // after()
 
-    it('244.9.1 works with oracledb.fetchAsString', async function() {
+    it('244.10.1 single long JSON field name', async function() {
       oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
-      const sequence = 1;
-      const jsonVal = { "key5": "2018/11/01 18:30:00" };
-      const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
+      const longFieldName = 'A'.repeat(1000);
+      const jsonVal = {};
+      jsonVal[longFieldName] = "2018/11/01 18:30:00";
+      const resultStr = `{"${longFieldName}":"2018/11/01 18:30:00"}`;
 
-      let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
+      let sql = "insert into " + table + " ( id, content ) values (:i, :c)";
       const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
       ];
 
       await connection.execute(sql, binds);
-      sql = "select content as C from " + tableName + " where id = " + sequence;
+      sql = "select content as C from " + table + " where id = " + sequence;
       const result = await connection.execute(sql);
       assert.strictEqual(typeof result.rows[0][0], 'string');
       assert.strictEqual(result.rows[0][0].length, resultStr.length);
       assert.strictEqual(result.rows[0][0], resultStr);
-    }); // 244.9.1
+      sequence++;
 
-    it.skip('244.9.2 doesn\'t work with outFormat: oracledb.DB_TYPE_JSON', async function() {
-      oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
-      const sequence = 2;
-      const jsonVal = { "key5": "2018/11/01 18:30:00" };
-      const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
+    }); // 244.10.1
 
-      let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
-      const binds = [
-        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
-        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
-      ];
-
-      await connection.execute(sql, binds);
-      sql = "select content as C from " + tableName + " where id = " + sequence;
-      const options = { outFormat: oracledb.DB_TYPE_JSON };
-      const result = await connection.execute(sql, [], options);
-      assert.strictEqual(typeof result.rows[0][0], 'string');
-      assert.strictEqual(result.rows[0][0].length, resultStr.length);
-      assert.strictEqual(result.rows[0][0], resultStr);
-    }); // 244.9.2
-
-    it('244.9.3 could work with fetchInfo oracledb.STRING', async function() {
+    it('244.10.2 multiple long JSON field names', async function() {
       oracledb.fetchAsString = [];
-      const sequence = 3;
-      const jsonVal = { "key5": "2018/11/01 18:30:00" };
-      const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
 
-      let sql = "insert into " + tableName + " ( id, content ) values (:i, :c)";
+      const jsonVal = {};
+      const NO_OF_ALPHABETS = 26;
+      for (let i = 0; i < NO_OF_ALPHABETS; i++) {
+        for (let j = 0; j < NO_OF_ALPHABETS; j++) {
+          const longFieldName = String.fromCharCode('A'.charCodeAt(0) + i) +
+            String.fromCharCode('A'.charCodeAt(0) + j) + 'X'.repeat(500);
+          jsonVal[longFieldName] = i + j;
+        }
+      }
+
+      // Testing multi-byte field names and multi-byte field values
+      const multiByteLongFieldName = '𠜎'.repeat(1000);
+      jsonVal[multiByteLongFieldName] = '𠜎𠜎𠜎𠜎𠜎';
+
+      let sql = "insert into " + table + " ( id, content ) values (:i, :c)";
       const binds = [
         { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
         { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
       ];
+
       await connection.execute(sql, binds);
-      sql = "select content as C from " + tableName + " where id = " + sequence;
-      const options = {
-        fetchInfo: { C: { type: oracledb.STRING } }
-      };
-      const result = await connection.execute(sql, [], options);
-      assert.strictEqual(typeof result.rows[0][0], 'string');
-      assert.strictEqual(result.rows[0][0].length, resultStr.length);
-      assert.strictEqual(result.rows[0][0], resultStr);
-    }); // 244.9.3
+      sql = "select content as C from " + table + " where id = " + sequence;
+      const result = await connection.execute(sql);
+      assert.deepStrictEqual(result.rows[0][0], jsonVal);
+      sequence++;
 
-  }); // 244.9
+    }); // 244.10.2
 
-  describe('244.10 Verify auto-generated SODA document key', function() {
+    it('244.10.3 multiple long and short JSON field names', async function() {
+      oracledb.fetchAsString = [];
+
+      const jsonVal = {};
+      const NO_OF_ALPHABETS = 26;
+      for (let i = 0; i < NO_OF_ALPHABETS; i++) {
+        for (let j = 0; j < NO_OF_ALPHABETS; j++) {
+          const shortFieldName = String.fromCharCode('A'.charCodeAt(0) + i) +
+            String.fromCharCode('A'.charCodeAt(0) + j);
+          jsonVal[shortFieldName] = 6.75;
+          const longFieldName = String.fromCharCode('A'.charCodeAt(0) + i) +
+            String.fromCharCode('A'.charCodeAt(0) + j) + 'X'.repeat(254);
+          jsonVal[longFieldName] = i + j;
+        }
+      }
+
+      let sql = "insert into " + table + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
+      ];
+
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + table + " where id = " + sequence;
+      const result = await connection.execute(sql);
+      assert.deepStrictEqual(result.rows[0][0], jsonVal);
+      sequence++;
+
+    }); // 244.10.3
+
+    it('244.10.4 negative case for out-of-bounds field length names', async function() {
+      // The server does not throw an error for out-of-bounds field length
+      // names as of now.
+      if (!oracledb.thin)
+        this.skip();
+      const longFieldName = 'A'.repeat(65536);
+      const jsonVal = {};
+      jsonVal[longFieldName] = "2018/11/01 18:30:00";
+      const sql = "insert into " + table + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
+      ];
+      await assert.rejects(
+        async () => await connection.execute(sql, binds),
+        // NJS-114: OSON field names may not exceed %d UTF-8 encoded bytes
+        /NJS-114:/
+      );
+      sequence++;
+    }); // 244.10.4
+
+  }); // 244.10
+
+  describe('244.11 testing compressed JSON with relative offsets', function() {
+    // Relative offsets enable the offset values in the OSON format to be
+    // much smaller and also allow for repeated values, which lends itself
+    // well to compression.
+
+    const table = 'nodb_json_rel_offsets';
+    let sequence = 1;
+
+    before('create table, insert data', async function() {
+      if (!isOracle_23_4) {
+        this.skip();
+      }
+      const sql = " CREATE TABLE " + table + " ( \n" +
+          " id         NUMBER, \n" +
+          " content    JSON \n" +
+          " ) JSON (content) STORE AS (COMPRESS HIGH)";
+      await testsUtil.createTable(connection, table, sql);
+    }); // before()
+
+    after(async function() {
+      if (!isOracle_23_4) {
+        return;
+      }
+      oracledb.stmtCacheSize = default_stmtCacheSize;
+      oracledb.fetchAsString = [];
+      await testsUtil.dropTable(connection, table);
+    }); // after()
+
+    it('244.11.1 fetch JSON with relative offsets', async function() {
+      const longFieldName = 'A'.repeat(1000);
+      const jsonVal = {};
+      jsonVal[longFieldName] = "2018/11/01 18:30:00";
+      jsonVal['num_list'] = [1.5, 2.25, 3.75, 5.5];
+      jsonVal['str_list'] = ["string 1", "string 2"];
+
+      // Send a JSON string, which is converted and stored as compressed JSON
+      // by the database
+      let sql = "insert into " + table + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: JSON.stringify(jsonVal) }
+      ];
+
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + table + " where id = " + sequence;
+      const result = await connection.execute(sql);
+      assert.deepStrictEqual(result.rows[0][0], jsonVal);
+      sequence++;
+
+    }); // 244.11.1
+
+    it('244.11.2 fetch JSON with relative offsets and shared fields and values', async function() {
+      const jsonVal = [];
+      for (let i = 0; i < 15; i++) {
+        jsonVal.push({a: 6711, b: 'String value'});
+      }
+
+      // Send a JSON string, which is converted and stored as compressed JSON
+      // by the database
+      let sql = "insert into " + table + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: JSON.stringify(jsonVal) }
+      ];
+
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + table + " where id = " + sequence;
+      const result = await connection.execute(sql);
+      assert.deepStrictEqual(result.rows[0][0], jsonVal);
+      sequence++;
+
+    }); // 244.11.2
+
+    it('244.11.3 fetch JSON with relative offsets and shared fields, not values', async function() {
+      const jsonVal = [];
+      for (let i = 0; i < 15; i++) {
+        jsonVal.push({a: 6711 + i, b: 'String value ' + i});
+      }
+
+      // Send a JSON string, which is converted and stored as compressed JSON
+      // by the database
+      let sql = "insert into " + table + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: JSON.stringify(jsonVal) }
+      ];
+
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + table + " where id = " + sequence;
+      const result = await connection.execute(sql);
+      assert.deepStrictEqual(result.rows[0][0], jsonVal);
+      sequence++;
+
+    }); // 244.11.3
+
+  }); // 244.11
+
+  describe('244.12 Verify auto-generated SODA document key', function() {
     const TABLE = 'nodb_244_63soda';
     let supportsJsonId;
 
@@ -746,7 +942,7 @@ describe('244.dataTypeJson.js', function() {
       await connection.execute(sql);
     }); // after()
 
-    it('244.10.1 Verify Json Id on select', async function() {
+    it('244.12.1 Verify Json Id on select', async function() {
       const inpDoc = {"name": "Jenny"};
       let sql = ` insert into ${TABLE} values (:1)`;
       let result = await connection.execute(sql, [{
@@ -826,7 +1022,8 @@ describe('244.dataTypeJson.js', function() {
       result = await connection.execute(sql);
       genDoc = result.rows[2][0];
       assert.deepStrictEqual(genDoc, inpDocWithUserKey);
-    });
-  });
+    }); // 244.12.1
+
+  });  // 244.12
 
 });

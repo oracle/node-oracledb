@@ -17,6 +17,12 @@ Common Changes
     returned by SODA in Oracle Database 23.4 and higher in the ``_id``
     attribute of documents stored in native collections.
 
+#)  Added support for an Oracle Database 23c JSON feature allowing for field
+    names with more than 255 UTF-8 encoded bytes.
+
+#)  Added support for an Oracle Database 23c JSON feature improving JSON
+    storage usage.
+
 Thin Mode Changes
 ++++++++++++++++++
 

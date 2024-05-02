@@ -279,6 +279,9 @@ struct njsBaton {
     njsModuleGlobals *globals;
     void *callingInstance;
 
+    // version information
+    dpiVersionInfo versionInfo;
+
     // error handling
     bool dpiError;
     bool hasError;
@@ -493,6 +496,7 @@ struct njsClassDef {
 // data for class Connection exposed to JS.
 struct njsConnection {
     dpiConn *handle;
+    dpiVersionInfo versionInfo;
     char *tag;
     size_t tagLength;
     bool retag;
@@ -539,6 +543,7 @@ struct njsLobBuffer {
 // data for module globals
 struct njsModuleGlobals {
     dpiContext *context;
+    dpiVersionInfo clientVersionInfo;
     napi_ref jsAqDeqOptionsConstructor;
     napi_ref jsAqEnqOptionsConstructor;
     napi_ref jsAqMessageConstructor;
