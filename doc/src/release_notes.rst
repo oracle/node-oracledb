@@ -23,6 +23,12 @@ Common Changes
 #)  Added support for an Oracle Database 23c JSON feature improving JSON
     storage usage.
 
+#)  Updated error thrown during pool reconfiguration while poolMax is 0 from
+    `ORA-24413` to `NJS-007`.
+
+#)  Added new condition check during pool reconfiguration for `poolMin > poolMax`
+    and error `NJS-092` will be thrown.
+
 Thin Mode Changes
 ++++++++++++++++++
 

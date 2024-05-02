@@ -1165,7 +1165,7 @@ describe('255. poolReconfigure.js', function() {
 
       await assert.rejects(
         async () => await pool.reconfigure({poolMax: 0}),
-        /ORA-24413:/
+        /NJS-007:/
       );
 
       await assert.rejects(
@@ -1173,6 +1173,10 @@ describe('255. poolReconfigure.js', function() {
         /NJS-007:/
       );
 
+      await assert.rejects(
+        async () => await pool.reconfigure({poolMax: 4, poolMin: 5}),
+        /NJS-092:/
+      );
     });
 
     it('255.5.4 passing invalid poolIncrement to pool.reconfigure', async function() {
