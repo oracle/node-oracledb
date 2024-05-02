@@ -44,6 +44,9 @@ Thin Mode Changes
 #)  Added support for Oracle Database 23c
     :ref:`Implicit Connection Pooling <implicitpool>` in DRCP and PRCP.
 
+#)  Added support for usage with extension of Array.prototype methods 
+    See `Issue #1653 <https://github.com/oracle/node-oracledb/issues/1653>`__.
+
 Thick Mode Changes
 +++++++++++++++++++
 

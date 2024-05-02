@@ -73,15 +73,15 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   const insertData = async function(connection, tableName) {
-    for (const element in dataArray) {
-      const sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
+    for (let index = 0; index < dataArray.length; index++) {
+      const sql = "INSERT INTO " + tableName + "(num) VALUES(" + index + ")";
       await connection.execute(sql);
     }
   };
 
   const updateData = async function(connection, tableName) {
-    for (const element in dataArray) {
-      const sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
+    for (let index = 0; index < dataArray.length; index++) {
+      const sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + index;
       await connection.execute(sql);
     }
   };
@@ -442,8 +442,8 @@ describe('116. fetchUrowidAsString.js', function() {
   });
 
   async function test1(option, object) {
-    for (const element in dataArray) {
-      const sql = "select content,rowid from " + tableName + " where num = " + element;
+    for (let index = 0; index < dataArray.length; index++) {
+      const sql = "select content,rowid from " + tableName + " where num = " + index;
       const result = await connection.execute(sql, [], option);
       let resultVal_1 = result.rows[0][0];
       let resultVal_2 = result.rows[0][1];
@@ -458,8 +458,8 @@ describe('116. fetchUrowidAsString.js', function() {
   }
 
   async function test2(option, object) {
-    for (const element in dataArray) {
-      const sql = "select content,rowid from " + tableName + " where num = " + element;
+    for (let index = 0; index < dataArray.length; index++) {
+      const sql = "select content,rowid from " + tableName + " where num = " + index;
       const result = await connection.execute(sql, [], option);
       const row = await result.resultSet.getRow();
       let resultVal_1 = row[0];
