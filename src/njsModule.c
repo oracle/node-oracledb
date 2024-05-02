@@ -126,6 +126,7 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsMakeDateFn);
     NJS_DELETE_REF_AND_CLEAR(globals->jsDecodeVectorFn);
     NJS_DELETE_REF_AND_CLEAR(globals->jsEncodeVectorFn);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsJsonIdConstructor);
     free(globals);
 }
 
@@ -188,6 +189,12 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
     if (!njsModule_extendClass(env, module, globals, &njsClassDefSodaOperation,
             &globals->jsSodaOperationConstructor))
         return false;
+
+    // get the JsonId class
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings, "_JsonId",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+                &globals->jsJsonIdConstructor))
 
     // store a reference to the _makeDate() function
     NJS_CHECK_NAPI(env, napi_get_named_property(env, settings,
@@ -267,6 +274,7 @@ static bool njsModule_initDPI(napi_env env, napi_value *args,
 
     // initialize structure
     memset(&params, 0, sizeof(params));
+    params.useJsonId = 1; // Enable JSONID
     if (*libDirLength > 0)
         params.oracleClientLibDir = *libDir;
     if (*configDirLength > 0)

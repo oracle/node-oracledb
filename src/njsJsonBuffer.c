@@ -243,9 +243,16 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     // handle buffers
     NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &check))
     if (check) {
+        NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+                baton->jsJsonIdConstructor, &check))
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value,
                 (void**) &tempBuffer, &tempBufferLength))
-        node->oracleTypeNum = DPI_ORACLE_TYPE_RAW;
+        if (check) {
+            // Handle JsonId
+            node->oracleTypeNum = DPI_ORACLE_TYPE_JSON_ID;
+        } else {
+            node->oracleTypeNum = DPI_ORACLE_TYPE_RAW;
+        }
         node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
         node->value->asBytes.ptr = tempBuffer;
         node->value->asBytes.length = (uint32_t) tempBufferLength;

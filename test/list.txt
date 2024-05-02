@@ -4907,6 +4907,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         244.9.1 works with oracledb.fetchAsString
         244.9.2 doesn't work with outFormat: oracledb.DB_TYPE_JSON
         244.9.3 could work with fetchInfo oracledb.STRING
+    244.10 Verify auto-generated SODA document key
+        244.10.1 Verify Json Id on select
 
 245. fetchLobAsStrBuf.js
     245.1 CLOB,BLOB Insert

@@ -500,7 +500,7 @@ testsUtil.isDate = function(date) {
 // return a fake version for thin to facilitate client version checks
 testsUtil.getClientVersion = function() {
   if (oracledb.thin)
-    return 2302000000;
+    return 2304000000;
   return oracledb.oracleClientVersion;
 };
 

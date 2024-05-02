@@ -469,6 +469,7 @@ struct njsBaton {
     napi_value jsMakeDateFn;
     napi_value jsDecodeVectorFn;
     napi_value jsEncodeVectorFn;
+    napi_value jsJsonIdConstructor;
 
     // calling object value (used for setting a reference on created objects)
     napi_value jsCallingObj;
@@ -556,6 +557,7 @@ struct njsModuleGlobals {
     napi_ref jsMakeDateFn;
     napi_ref jsDecodeVectorFn;
     napi_ref jsEncodeVectorFn;
+    napi_ref jsJsonIdConstructor;
 };
 
 // data for class Pool exposed to JS.

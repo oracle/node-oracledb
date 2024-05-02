@@ -10,6 +10,13 @@ For deprecated and desupported features, see :ref:`Deprecations and desupported 
 node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...v6.5.0>`__ (TBD)
 --------------------------------------------------------------------------------------------------------
 
+Common Changes
+++++++++++++++
+
+#)  Added class :ref:`oracledb.JsonId <jsonid>` to represent JSON ID values
+    returned by SODA in Oracle Database 23.4 and higher in the ``_id``
+    attribute of documents stored in native collections.
+
 Thin Mode Changes
 ++++++++++++++++++
 

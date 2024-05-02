@@ -724,4 +724,109 @@ describe('244.dataTypeJson.js', function() {
 
   }); // 244.9
 
+  describe('244.10 Verify auto-generated SODA document key', function() {
+    const TABLE = 'nodb_244_63soda';
+    let supportsJsonId;
+
+    before('create table, insert data', async function() {
+      supportsJsonId = (testsUtil.getClientVersion() >= 2304000000) &&
+        (connection.oracleServerVersion >= 2304000000);
+      if (!supportsJsonId) {
+        this.skip();
+      }
+      const sql = `CREATE JSON COLLECTION TABLE if not exists ${TABLE}`;
+      await connection.execute(sql);
+    }); // before()
+
+    after(async function() {
+      if (!supportsJsonId) {
+        return;
+      }
+      const sql = `DROP TABLE if exists ${TABLE}`;
+      await connection.execute(sql);
+    }); // after()
+
+    it('244.10.1 Verify Json Id on select', async function() {
+      const inpDoc = {"name": "Jenny"};
+      let sql = ` insert into ${TABLE} values (:1)`;
+      let result = await connection.execute(sql, [{
+        type: oracledb.DB_TYPE_JSON,
+        val: inpDoc
+      }]);
+
+      // Verify _id is generated.
+      sql = `select * from ${TABLE}`;
+      result = await connection.execute(sql);
+      let genDoc = result.rows[0][0];
+      assert(("_id" in genDoc));
+      const autogenID = genDoc._id;
+
+      // Verify update with new values without passing _id.
+      inpDoc.name = "Scott";
+      sql = ` update ${TABLE} set DATA = :1`;
+      result = await connection.execute(sql, [{
+        type: oracledb.DB_TYPE_JSON,
+        val: inpDoc
+      }]);
+      sql = `select * from ${TABLE}`;
+      result = await connection.execute(sql);
+      genDoc = result.rows[0][0];
+      const updatedID = genDoc._id;
+      assert.deepStrictEqual(updatedID, autogenID);
+      assert.strictEqual(inpDoc.name, genDoc.name);
+
+      // Verify update with new values with passing _id from the generated Doc.
+      genDoc.name = "John";
+      sql = ` update ${TABLE} set DATA = :1`;
+      result = await connection.execute(sql, [{
+        type: oracledb.DB_TYPE_JSON,
+        val: genDoc
+      }]);
+      sql = `select * from ${TABLE}`;
+      result = await connection.execute(sql);
+      const updatedDoc = result.rows[0][0];
+      assert.deepStrictEqual(updatedDoc, genDoc);
+      const expectedJsonData = genDoc;
+      expectedJsonData._id = Buffer.from(autogenID).toString('hex');
+      assert.deepStrictEqual(JSON.stringify(expectedJsonData),
+        JSON.stringify(updatedDoc));
+
+      // Insert Document with Previously generated JsonId type.
+      const jsonId = new oracledb.JsonId(genDoc._id);
+      const inpDocWithJsonIdKey = {"_id": jsonId, "name": "Bob"};
+      sql = ` insert into ${TABLE} values (:1)`;
+      result = await connection.execute(sql, [{
+        type: oracledb.DB_TYPE_JSON,
+        val: inpDocWithJsonIdKey
+      }]);
+      sql = `select * from ${TABLE}`;
+      result = await connection.execute(sql);
+      genDoc = result.rows[1][0];
+      assert.deepStrictEqual(genDoc, inpDocWithJsonIdKey);
+
+      // overwrite the auto-generated _id with user key should fail.
+      genDoc._id = "RandomId";
+      sql = ` update ${TABLE} set DATA = :1`;
+      await assert.rejects(
+        async () => await connection.execute(sql, [{
+          type: oracledb.DB_TYPE_JSON,
+          val: genDoc
+        }]),
+        /ORA-54059:/ // cannot update an immutable column to a different value
+      );
+
+      // User provided keys should still work.
+      const inpDocWithUserKey = {"_id": 1, "name": "Jenny"};
+      sql = ` insert into ${TABLE} values (:1)`;
+      result = await connection.execute(sql, [{
+        type: oracledb.DB_TYPE_JSON,
+        val: inpDocWithUserKey
+      }]);
+      sql = `select * from ${TABLE}`;
+      result = await connection.execute(sql);
+      genDoc = result.rows[2][0];
+      assert.deepStrictEqual(genDoc, inpDocWithUserKey);
+    });
+  });
+
 });
