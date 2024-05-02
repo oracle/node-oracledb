@@ -26,7 +26,7 @@ Common Changes
 #)  Updated error thrown during pool reconfiguration from `ORA-24413` to
     `NJS-007` when poolMax is 0.
 
-#)  Throw `NJS-092`` error if `poolMin` > `poolMax` during pool
+#)  Throw `NJS-092` error if `poolMin` > `poolMax` during pool
     reconfiguration.
 
 #)  Added support for binding BigInt values. BigInts like ``123n`` can
@@ -55,7 +55,7 @@ Thin Mode Changes
 #)  Added support for Oracle Database 23c
     :ref:`Implicit Connection Pooling <implicitpool>` in DRCP and PRCP.
 
-#)  Added support for usage with extension of Array.prototype methods 
+#)  Added support for usage with extension of Array.prototype methods
     See `Issue #1653 <https://github.com/oracle/node-oracledb/issues/1653>`__.
 
 Thick Mode Changes
