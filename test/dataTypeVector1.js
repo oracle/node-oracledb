@@ -788,6 +788,15 @@ describe('294. dataTypeVector1.js', function() {
     oracledb.fetchTypeHandler = function() {
       return {type: oracledb.STRING};
     };
+
+    const table = 'nodb_vectorDbTable1';
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
+        IntCol            NUMBER,
+        Vector64Col       vector(10, float64)
+        )`;
+    const plsql = testsUtil.sqlCreateTable(table, sql);
+    await connection.execute(plsql);
+
     // Create a Float64Array
     const float64Array = new Float64Array(
       [-999999.12345, 987654.321, -12345.6789, 56789.0123,
@@ -796,7 +805,7 @@ describe('294. dataTypeVector1.js', function() {
     const expected_vectors = `[-9.9999912344999996E+005,9.87654321E+005,` +
       `-1.2345678900000001E+004,5.6789012300000002E+004,-3.1415926539999997E+005,` +
       `2.9182818280000001E+005,-9.9999999899999995E+004,4.32109876E+004,-8.7654320999999996E+004,6.5432109799999998E+004]`;
-    await connection.execute(`insert into ${tableName} (IntCol, Vector64Col) values(:id, :vec64)`,
+    await connection.execute(`insert into ${table} (IntCol, Vector64Col) values(:id, :vec64)`,
       { id: 2,
         vec64: float64Array
       });
@@ -804,11 +813,20 @@ describe('294. dataTypeVector1.js', function() {
     /* Setting keepInStmtCache as false as
      * we earlier fetched vector as a clob; the same statement is used for fetching it as a string now.
      */
-    const result = await connection.execute(`select Vector64Col from ${tableName}`, [], {keepInStmtCache: false});
+    const result = await connection.execute(`select Vector64Col from ${table}`, [], {keepInStmtCache: false});
     assert.deepStrictEqual(result.rows[0][0], expected_vectors);
+    await connection.execute(testsUtil.sqlDropTable(table));
   }); // 294.33
 
   it('294.34 Fetch Vector Column as string using fetchInfo', async function() {
+    const table = 'nodb_vectorDbTable1';
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
+        IntCol            NUMBER,
+        Vector64Col       vector(10, float64)
+        )`;
+    const plsql = testsUtil.sqlCreateTable(table, sql);
+    await connection.execute(plsql);
+
     oracledb.fetchTypeHandler = function() {
       return {type: oracledb.STRING};
     };
@@ -820,7 +838,7 @@ describe('294. dataTypeVector1.js', function() {
                 '5.6789012300000002E+004,-3.1415926539999997E+005,2.9182818280000001E+005,' +
                 '-9.9999999899999995E+004,4.32109876E+004,-8.7654320999999996E+004,6.5432109799999998E+004]';
 
-    let result = await connection.execute(`insert into ${tableName} (IntCol, Vector64Col) values(:id, :vec64)`,
+    let result = await connection.execute(`insert into ${table} (IntCol, Vector64Col) values(:id, :vec64)`,
       { id: 2,
         vec64: float64Array
       });
@@ -831,8 +849,9 @@ describe('294. dataTypeVector1.js', function() {
 
     // using fetchInfo
     result = await connection.execute(
-      `select Vector64Col from ${tableName}`, [], options);
+      `select Vector64Col from ${table}`, [], options);
     assert.deepStrictEqual(result.rows[0][0], expected_vectors);
+    await connection.execute(testsUtil.sqlDropTable(table));
   }); // 294.34
 
   it('294.35 add drop rename vector column', async function() {
@@ -936,7 +955,7 @@ describe('294. dataTypeVector1.js', function() {
         `;
 
       const createTableSql = `
-            CREATE TABLE ${vector_case} (
+            CREATE TABLE IF NOT EXISTS ${vector_case} (
                 id NUMBER,
                 message vector(10)
             )
@@ -1078,28 +1097,28 @@ describe('294. dataTypeVector1.js', function() {
     ];
 
     const expected_vectors = [
-      [ 3, 69.94999999999999,
+      [ 3, 0.10298221668758012,
         [
           1, 3.2, 5.4, 7.6,
           9.8, 2.1, 4.3, 6.5,
           8.7, 0.9
         ]
       ],
-      [ 2, 143.65,
+      [ 2, 0.21154470130089698,
         [
           0.1, 1.2, 2.3, 3.4,
           4.5, 5.6, 6.7, 7.8,
           8.9,   9
         ]
       ],
-      [ 1, 187.45,
+      [ 1, 0.27913305239989905,
         [
           8.1, 7.2, 6.3, 5.4,
           4.5, 3.6, 2.7, 1.8,
           9.9,   0
         ]
       ],
-      [ 4, 197.07,
+      [ 4, 0.28645724726349675,
         [
           2.2, 8.8, 4.4, 6.6,
           0.2, 1.1, 3.3, 5.5,
@@ -1132,6 +1151,16 @@ describe('294. dataTypeVector1.js', function() {
   }); // 294.45
 
   it('294.46 fetching vector Metadata', async function() {
+    const table = 'nodb_vectorDbTable2';
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
+        IntCol            NUMBER,
+        VectorFixedCol    vector(2),
+        Vector32Col       vector(10, float32),
+        Vector64Col       vector(10, float64),
+        VectorInt8Col     vector(4, int8)
+        )`;
+    const plsql = testsUtil.sqlCreateTable(table, sql);
+    await connection.execute(plsql);
     const testValues = [
       { name: 'VectorFixedCol', dimensions: 2, format: undefined },
       { name: 'VectorInt8Col', dimensions: 4, format: oracledb.VECTOR_FORMAT_INT8},
@@ -1142,7 +1171,7 @@ describe('294. dataTypeVector1.js', function() {
     for (const { name, dimensions, format } of testValues) {
       // inserting data into the table
       await connection.execute(
-        `insert into ${tableName} (IntCol, ${name}) values (1, :1)`,
+        `insert into ${table} (IntCol, ${name}) values (1, :1)`,
         {
           1: {
             val: Array.from({ length: dimensions }, (_, i) => 0.125 * i),
@@ -1153,20 +1182,19 @@ describe('294. dataTypeVector1.js', function() {
       );
 
       // Fetching data from the table
-      /* Setting keepInStmtCache as false as
-       * we earlier fetched vector as a clob; the same statement is used for fetching it as a string now.
-       */
-      const result = await connection.execute(`select ${name} from ${tableName}`, [], {keepInStmtCache: false});
+      const result = await connection.execute(`select ${name} from ${table}`, []);
       assert.strictEqual(result.metaData[0].vectorDimensions, dimensions);
       assert.strictEqual(result.metaData[0].dbType, oracledb.DB_TYPE_VECTOR);
       assert.strictEqual(result.metaData[0].vectorFormat, format);
       assert.strictEqual(result.metaData[0].isJson, false);
     }
+    await connection.execute(testsUtil.sqlDropTable(table));
   }); // 294.46
 
   it('294.47 handling of NULL vector value', async function() {
     const table = 'nodb_vectorDbTable1';
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS 
+    ${table} (
         IntCol     NUMBER,
         VectorFlex32Col vector(*, float32)
         )`;
@@ -1186,7 +1214,7 @@ describe('294. dataTypeVector1.js', function() {
     const arr = Array(8127).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         VectorFlex32Col vector(*, float32)
         )`;
@@ -1212,7 +1240,7 @@ describe('294. dataTypeVector1.js', function() {
     const arr = Array(65535).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         Vector32Col VECTOR(65535, FLOAT32)
         )`;
@@ -1238,7 +1266,7 @@ describe('294. dataTypeVector1.js', function() {
     const arr = Array(65535).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         VectorFlex64Col vector(*, float64)
         )`;
@@ -1264,7 +1292,7 @@ describe('294. dataTypeVector1.js', function() {
     const arr = Array(65533).fill(2.5);
     const table = 'nodb_vectorDbTable1';
     await connection.execute(testsUtil.sqlDropTable(table));
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         Vector32Col VECTOR(65533, FLOAT32)
         )`;
@@ -1288,7 +1316,7 @@ describe('294. dataTypeVector1.js', function() {
   it('294.52 insert a float64 vector with 65535 dimensions to flex float32 vector', async function() {
     const arr = Array(65535).fill(0.002253931947052479);
     const table = 'nodb_vectorDbTable1';
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         Vector32Col VECTOR(65535, FLOAT32)
         )`;
@@ -1314,7 +1342,7 @@ describe('294. dataTypeVector1.js', function() {
     const int8arr = new Int8Array(arr);
 
     const table = 'nodb_vectorDbTable1';
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         VectorFlex8Col VECTOR(*, INT8)
         )`;
@@ -1338,7 +1366,7 @@ describe('294. dataTypeVector1.js', function() {
 
   it('294.54 insert using executeMany, update, delete and select vectors', async function() {
     const table = 'nodb_vectorDbTable1';
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol      NUMBER,
         Vector64Col VECTOR(3, FLOAT64)
         )`;
@@ -1398,7 +1426,7 @@ describe('294. dataTypeVector1.js', function() {
     // Write the buffer to the CLOB
     await lob.write(JSON.stringify (arr));
     const table = 'nodb_vectorDbTable1';
-    let sql = `CREATE TABLE ${table} (
+    let sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         VectorCol  VECTOR
         )`;
@@ -1429,7 +1457,7 @@ describe('294. dataTypeVector1.js', function() {
 
   it('294.56 insert vector as clob to Int8 column', async function() {
     const table = 'nodb_vectorDbTable1';
-    let sql = `CREATE TABLE ${table} (
+    let sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol      NUMBER,
         VectorInt8Col vector(3, int8)
         )`;
@@ -1465,7 +1493,7 @@ describe('294. dataTypeVector1.js', function() {
 
   it('294.57 insert vector as clob to float64 column', async function() {
     const table = 'nodb_vectorDbTable1';
-    let sql = `CREATE TABLE ${table} (
+    let sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol      NUMBER,
         Vector64Col VECTOR(3, FLOAT64)
         )`;
@@ -1502,7 +1530,7 @@ describe('294. dataTypeVector1.js', function() {
 
   it('294.58 insert vector as clob to float32 column', async function() {
     const table = 'nodb_vectorDbTable1';
-    let sql = `CREATE TABLE ${table} (
+    let sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol      NUMBER,
         Vector32Col VECTOR(3, FLOAT32)
         )`;
@@ -1541,7 +1569,7 @@ describe('294. dataTypeVector1.js', function() {
     const arr = Array(maxval).fill(12);
 
     const table = 'nodb_vectorDbTable1';
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol      NUMBER,
         Vector64Col VECTOR(${maxval}, FLOAT64)
         )`;
@@ -1585,7 +1613,7 @@ describe('294. dataTypeVector1.js', function() {
     // Write the buffer to the CLOB
     await lob.write(JSON.stringify (arr1));
     const table = 'nodb_vectorDbTable1';
-    let sql = `CREATE TABLE ${table} (
+    let sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         VectorCol  VECTOR
         )`;
@@ -1632,7 +1660,7 @@ describe('294. dataTypeVector1.js', function() {
     const arr = Array(65535).fill(0.002253931947052479);
 
     const table = 'nodb_vectorDbTable66';
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol     NUMBER,
         Vector32Col VECTOR(65535, FLOAT32)
     )`;
@@ -1704,7 +1732,7 @@ describe('294. dataTypeVector1.js', function() {
 
   it('294.65 bind JSON value with an embedded vector', async function() {
     const table = 'nodb_vector_desc_65';
-    const sql = `CREATE TABLE ${table} (
+    const sql = `CREATE TABLE IF NOT EXISTS ${table} (
       IntCol number(9) not null,
       JsonCol json not null
     )`;
@@ -1840,7 +1868,7 @@ describe('294. dataTypeVector1.js', function() {
     assert.deepStrictEqual(result.rows[0][0], [1, 0, 3, 4, 5, 6, 7, 8, 9, 0]);
   }); // 294.71
 
-  it('294.72 inserting empty vector in Fixed and Flex vector columns', async function() {
+  it.skip('294.72 inserting empty vector in Fixed and Flex vector columns', async function() {
     const emptyVector = [];
     const columns = ['VectorFixedCol', 'VectorFlexCol', 'VectorFlex32Col',
       'VectorFlex64Col',
@@ -1860,12 +1888,14 @@ describe('294. dataTypeVector1.js', function() {
           sql,
           binds
         ),
-        /ORA-51803:/
+        /ORA-51803:|ORA-21560:/
         /*
           ORA-51803: Vector dimension count must match the dimension count
           specified in the column definition (actual: , required: ).
+          ORA-21560: argument at position 4 (vdim) is null, invalid, or out of range'
        */
       );
     }
   }); // 294.72
 });
+

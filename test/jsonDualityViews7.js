@@ -750,8 +750,56 @@ describe('297. jsonDualityViews7.js', function() {
       assert.strictEqual(clobData, arr.toString('utf8'));
     }); // 297.2.11
 
-    it('297.2.12 insert clob with array of 65535 elements to a vector column', async function() {
+    it.skip('297.2.12 insert clob with array of 65535 elements to a vector column', async function() {
+      /* Bug: 36455264
+         Sorting JSON data with a large size is not feasible.
+      */
       const arr = Array(65535).fill(2);
+      const lob = await connection.createLob(oracledb.CLOB);
+
+      // Write the buffer to the CLOB
+      await lob.write(JSON.stringify (arr));
+
+      await connection.execute(
+        `INSERT INTO vector
+         (vec_id, VectorCol) VALUES (:id, :clob)`,
+        { id: 1,
+          clob: lob
+        });
+
+      lob.destroy();
+      await connection.execute(`
+         insert into vector_class values (1, 1, 1)
+       `);
+
+      await connection.commit();
+
+      // Create the JSON relational duality view
+      await connection.execute(`
+         create or replace json relational duality view vector_ov
+         as
+         vector @insert@update@delete {
+           vector_id: vec_id,
+           vector_name: VectorCol,
+           vector_class: vector_class @insert@update@delete {
+             vector_class_id: vcid,
+             vector_id: vec_id
+           }
+         }
+       `);
+
+      // Select data from the view
+      await assert.rejects(
+        async () => await connection.execute(`select * from vector_ov order by 1`),
+        /ORA-51862:/ /*
+                      ORA-51862: VECTOR library processing error in 'qjsnErrHndl'
+                      JZN-00755: vector too large for comparison or indexing operation
+                    */
+      );
+    }); // 297.2.12
+
+    it('297.2.13 insert clob with array of less elements to a vector column', async function() {
+      const arr = Array(10).fill(2);
       let lob = await connection.createLob(oracledb.CLOB);
 
       // Write the buffer to the CLOB
@@ -793,10 +841,49 @@ describe('297. jsonDualityViews7.js', function() {
       const clobData = await lob.toString('utf8');
 
       assert.strictEqual(clobData, arr.toString('utf8'));
-    }); // 297.2.12
+    }); // 297.2.13
 
-    it('297.2.13 insert a float32 vector with 65535 dimensions into a vector column of same dimensions', async function() {
+    it.skip('297.2.14 insert a float32 vector with 65535 dimensions into a vector column of same dimensions', async function() {
+      /* Bug: 36455264
+         Sorting JSON data with a large size is not feasible.
+      */
       const arr = Array(65535).fill(2.5);
+      const float32arr = new Float32Array(arr);
+
+      await connection.execute(`insert into vector (vec_id, VectorFlexCol) values (1, :1)`,
+        {1: { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float32arr }});
+
+      await connection.execute(`
+         insert into vector_class values (1, 1, 1)
+       `);
+
+      await connection.commit();
+
+      // Create the JSON relational duality view
+      await connection.execute(`
+         create or replace json relational duality view vector_ov
+         as
+         vector @insert@update@delete {
+           vector_id: vec_id,
+           vector_name: VectorFlexCol,
+           vector_class: vector_class @insert@update@delete {
+             vector_class_id: vcid,
+             vector_id: vec_id
+           }
+         }
+       `);
+
+      await assert.rejects(
+        async () => await connection.execute(`select * from vector_ov order by 1`),
+        /ORA-51862:/ /*
+                      ORA-51862: VECTOR library processing error in 'qjsnErrHndl'
+                      JZN-00755: vector too large for comparison or indexing operation
+                    */
+      );
+    }); // 297.2.14
+
+    it('297.2.15 insert a float32 vector with less dimensions into a vector column of same dimensions', async function() {
+      const arr = Array(10).fill(2.5);
       const float32arr = new Float32Array(arr);
 
       await connection.execute(`insert into vector (vec_id, VectorFlexCol) values (1, :1)`,
@@ -829,9 +916,9 @@ describe('297. jsonDualityViews7.js', function() {
       assert.strictEqual(result.rows[0][0].vector_class[0].vector_class_id, 1);
       assert.deepStrictEqual(Array.from(result.rows[0][0].vector_name),
         arr);
-    }); // 297.2.13
+    }); // 297.2.15
 
-    it('297.2.14 insert a float64 typed array created from ArrayBuffer', async function() {
+    it('297.2.16 insert a float64 typed array created from ArrayBuffer', async function() {
       const elements = [8.1, 7.2, 6.3, 5.4, 4.5, 3.6, 2.7, 1.8, 9.9, 0.0];
       const arrBuf = new ArrayBuffer(128);
 
@@ -872,7 +959,7 @@ describe('297. jsonDualityViews7.js', function() {
       assert.strictEqual(result.rows[0][0].vector_class[0].vector_class_id, 1);
       assert.deepStrictEqual(Array.from(result.rows[0][0].vector_name),
         [8.1, 7.2, 6.3, 5.4, 4.5, 3.6, 2.7, 1.8, 9.9, 0.0]);
-    }); // 297.2.14
+    }); // 297.2.16
   });
 
   describe('297.3 Sanity DMLs', function() {
@@ -984,13 +1071,14 @@ describe('297. jsonDualityViews7.js', function() {
 
       // insert data into vector table
       const bv = {c: {dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_JSON, val: {"vector_id": 1, "vector_name": FloatArray} }};
-      await assert.rejects(
-        async () => await connection.execute(`
+      await connection.execute(`
         insert into vector_ov values (:c)`,
-        bv
-        ),
-        /ORA-42692:/); //ORA-42692: Cannot insert into JSON Relational Duality View 'VECTOR_OV'
-      //ORA-51808: qvc_deflate_vector is not supported for vectors with different dimension counts (0, 65535).
+      bv
+      );
+      const result = await connection.execute(`select * from vector_ov`);
+      assert.strictEqual(result.rows[0][0].vector_id, 1);
+      assert.deepStrictEqual(Array.from(result.rows[0][0].vector_name),
+        arr);
     }); // 297.3.3
 
     it('297.3.4 insert a float32 typed array into tables from JSON DV wrong dimension', async function() {
@@ -1292,3 +1380,4 @@ describe('297. jsonDualityViews7.js', function() {
     }); // 297.3.12
   });
 });
+

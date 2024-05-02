@@ -68,6 +68,8 @@ describe('241. dbType04.js', function() {
   after(async function() {
 
     if (!isRunnable) {
+      if (conn)
+        await conn.close();
       return;
     }
 

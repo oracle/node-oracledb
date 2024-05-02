@@ -5786,18 +5786,35 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       297.1.13 insert a float32 vector with 65535 dimensions into a vector column of same dimensions
       297.1.14 insert a float64 typed array created from ArrayBuffer
     297.2 Sanity DMLs
-      297.2.1 insert a float32 typed array into tables from JSON DV
-      297.2.2 insert a 65535 dimension float32 typed array into tables from JSON DV
-      297.2.3 insert a 65536 dimension float32 typed array into tables from JSON DV
-      297.2.4 insert a float32 typed array into tables from JSON DV wrong dimension
-      297.2.5 update a float32 typed array into tables from JSON DV
-      297.2.6 delete a float32 typed array into tables from JSON DV
-      297.2.7 insert a float64 into tables from JSON DV
-      297.2.8 update a float64 into tables from JSON DV
-      297.2.9 delete a float64 into tables from JSON DV
-      297.2.10 insert a VectorInt8Col typed array into tables from JSON DV
-      297.2.11 update a VectorInt8Col typed array into tables from JSON DV
-      297.2.12 delete a VectorInt8Col typed array into tables from JSON DV
+      297.2.1 insert float32 vector data in table and views
+      297.2.2 insert float32 vector data with dimension 10
+      297.2.3 insert float64 vector data
+      297.2.4 insert fixed vector data
+      297.2.5 insert int8 vector data
+      297.2.6 insert int8 typed array to float64 vector column
+      297.2.7 insert int8 typed array to flex vector column
+      297.2.8 insert int8 typed array to float32 vector column
+      297.2.9 insert a float32 typed array into an int8 vector column
+      297.2.10 insert a float64 into an int8 vector column
+      297.2.11 insert vector as clob to Int8 column
+      297.2.12 insert clob with array of 65535 elements to a vector column
+      297.2.13 insert clob with array of less elements to a vector column
+      297.2.14 insert a float32 vector with 65535 dimensions into a vector column of same dimensions
+      297.2.15 insert a float32 vector with less dimensions into a vector column of same dimensions
+      297.2.16 insert a float64 typed array created from ArrayBuffer
+    297.3 Sanity DMLs
+      297.3.1 insert a float32 typed array into tables from JSON DV
+      297.3.2 insert a 65535 dimension float32 typed array into tables from JSON DV
+      297.3.3 insert a 65536 dimension float32 typed array into tables from JSON DV
+      297.3.4 insert a float32 typed array into tables from JSON DV wrong dimension
+      297.3.5 update a float32 typed array into tables from JSON DV
+      297.3.6 delete a float32 typed array into tables from JSON DV
+      297.3.7 insert a float64 into tables from JSON DV
+      297.3.8 update a float64 into tables from JSON DV
+      297.3.9 delete a float64 into tables from JSON DV
+      297.3.10 insert a VectorInt8Col typed array into tables from JSON DV
+      297.3.11 update a VectorInt8Col typed array into tables from JSON DV
+      297.3.12 delete a VectorInt8Col typed array into tables from JSON DV
 
   298. dataTypeVector4.js
     298.1 inserting and fetching vector using parallel execution

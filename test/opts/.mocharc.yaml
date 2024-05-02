@@ -279,6 +279,7 @@ spec:
   - test/dataTypeVector1.js
   - test/dataTypeVector2.js
   - test/dataTypeVector3.js
+  - test/dataTypeVector4.js
   - test/jsonDualityViews7.js
   - test/invalidNumber.js
   - test/bigInt.js

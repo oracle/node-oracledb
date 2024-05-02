@@ -51,7 +51,7 @@ describe('296. dataTypeVector3.js', function() {
     connection = await oracledb.getConnection(dbConfig);
 
     const sql = `
-        CREATE TABLE ${tableName} (
+        CREATE TABLE IF NOT EXISTS ${tableName} (
           id NUMBER,
           embedding VECTOR(3))
         `;
@@ -137,7 +137,7 @@ describe('296. dataTypeVector3.js', function() {
 
   it('296.3 calculate vector distances to a given embedding', async () => {
     const float64Array = new Float64Array([3, 1, 2]);
-    const expectedValues = [6, 33, 377443, 50];
+    const expectedValues = [0.2142857142857143, 0.11673988938389968, 0.3914785344302253, 1.7857142857142856];
 
     const result = await connection.execute(
       `SELECT vector_distance(embedding, :1) FROM ${tableName}`,
@@ -161,26 +161,28 @@ describe('296. dataTypeVector3.js', function() {
     );
 
     assert.deepStrictEqual(result.rows.length, 3);
-    assert.deepStrictEqual(result.rows[0], [[1, 2, 3], 6]);
-    assert.deepStrictEqual(result.rows[1], [[4, 5, 6], 33]);
-    assert.deepStrictEqual(result.rows[2], [[-1, -2, -3], 50]);
+    assert.deepStrictEqual(result.rows[0], [[4, 5, 6], 0.11673988938389968]);
+    assert.deepStrictEqual(result.rows[1], [[1, 2, 3], 0.2142857142857143]);
+    assert.deepStrictEqual(result.rows[2], [[42, 52, 613], 0.3914785344302253]);
   });
 
   it('296.5 find nearest neighbors with distance < 34 for a given embedding', async () => {
     const result = await connection.execute(
       `SELECT * FROM ${tableName}
-        WHERE vector_distance(embedding, vector('[3,1,2]', 3)) < 34`
+        WHERE vector_distance(embedding, vector('[3,1,2]', 3, float64)) < 34`
     );
-    assert.deepStrictEqual(result.rows.length, 2);
+    assert.deepStrictEqual(result.rows.length, 4);
     assert.deepStrictEqual(result.rows[0], [0, [1, 2, 3]]);
     assert.deepStrictEqual(result.rows[1], [1, [4, 5, 6]]);
+    assert.deepStrictEqual(result.rows[2], [2, [42, 52, 613]]);
+    assert.deepStrictEqual(result.rows[3], [3, [-1, -2, -3]]);
   });
 
   it('296.6 calculate cosine distances to a given embedding', async () => {
     const expectedValues = [0.2142857142857143, 0.11673988938389968, 0.3914785344302253, 1.7857142857142856];
 
     const result = await connection.execute(
-      `SELECT cosine_distance(embedding, vector('[3,1,2]', 3)) AS cosdistance FROM ${tableName}`
+      `SELECT cosine_distance(embedding, vector('[3,1,2]', 3, float64)) AS cosdistance FROM ${tableName}`
     );
 
     assert.deepStrictEqual(result.rows.length, expectedValues.length);
@@ -194,7 +196,7 @@ describe('296. dataTypeVector3.js', function() {
     const expectedValues = [11, 29, 1404, -11];
 
     const result = await connection.execute(
-      `SELECT inner_product(embedding, vector('[3,1,2]', 3))
+      `SELECT inner_product(embedding, vector('[3,1,2]', 3, float64))
         FROM ${tableName}`
     );
 

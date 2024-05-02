@@ -27,7 +27,8 @@
  *
  * DESCRIPTION
  *   Testing Vector Data Type with parallel execution
- *
+ *   The default vector distance has been changed to cosine, previously it was Euclidean.
+ * 
  *****************************************************************************/
 'use strict';
 
@@ -185,7 +186,7 @@ describe('298. dataTypeVector4.js', function() {
             `);
 
     assert.strictEqual(result.rows.length, 1);
-    assert.deepStrictEqual(result.rows, [[69.94999999999999]]);
+    assert.deepStrictEqual(result.rows, [[0.10298221668758012]]);
   }); // 298.4
 
   it('298.5 insert and select Max vector distance function', async function() {
@@ -215,7 +216,7 @@ describe('298. dataTypeVector4.js', function() {
             `);
 
     assert.strictEqual(result.rows.length, 1);
-    assert.deepStrictEqual(result.rows, [[197.07]]);
+    assert.deepStrictEqual(result.rows, [[0.28645724726349675]]);
   }); // 298.5
 
   it('298.6 sum vector distance function vector columns with parallel execution', async function() {
@@ -245,7 +246,7 @@ describe('298. dataTypeVector4.js', function() {
               `);
 
     assert.strictEqual(result.rows.length, 1);
-    assert.deepStrictEqual(result.rows, [[599]]);
+    assert.deepStrictEqual(result.rows, [[1]]);
   }); // 298.6
 
   it('298.7 average vector distance function vector columns with parallel execution', async function() {
@@ -275,7 +276,7 @@ describe('298. dataTypeVector4.js', function() {
               `);
 
     assert.strictEqual(result.rows.length, 1);
-    assert.deepStrictEqual(result.rows, [[149]]);
+    assert.deepStrictEqual(result.rows, [[0]]);
   }); // 298.7
 
   it('298.8 aggregate functions on vector columns vector columns with parallel execution', async function() {

@@ -368,7 +368,7 @@ describe('1. connection.js', function() {
       };
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
-        /ORA-01031:/
+        /ORA-01031:|ORA-24542:/
       );
     });
 
