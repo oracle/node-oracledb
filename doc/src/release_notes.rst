@@ -39,6 +39,9 @@ Common Changes
 
 Thin Mode Changes
 ++++++++++++++++++
+#)  Fixed issue with connecting to Oracle Database, when the full path of
+    the Node.js executable contains certain non-standard characters like '(' and ')'.
+    See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1664>`__.
 
 #)  Added support for easy connect string entries in tnsnames.ora
     See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1644>`__.
