@@ -75,6 +75,9 @@ Thin Mode Changes
 Thick Mode Changes
 +++++++++++++++++++
 
+#)  Fixed an issue with privileges that prevented the startup() function from
+    bringing up the database.
+
 #)  Tightened code to avoid possible unexpected runtime errors during token
     callback.
 

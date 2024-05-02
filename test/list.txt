@@ -24,6 +24,7 @@ Overview of node-oracledb functional tests
         1.7.3 Negative value - random constants
         1.7.4 Negative value - NaN
         1.7.5 gets ignored when acquiring a connection from Pool
+        1.7.6 negative test case SYSPRELIM & SYSASM
     1.8 Ping method
         1.8.1 ping() checks the connection is usable
         1.8.2 closed connection

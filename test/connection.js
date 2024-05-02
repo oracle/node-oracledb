@@ -362,6 +362,16 @@ describe('1. connection.js', function() {
       await pool.close(0);
     });
 
+    it('1.7.6 negative test case SYSPRELIM & SYSASM', async function() {
+      const credential = {...dbConfig,
+        privilege: oracledb.SYSASM | oracledb.SYSPRELIM
+      };
+      await assert.rejects(
+        async () => await oracledb.getConnection(credential),
+        /ORA-01031:/
+      );
+    });
+
   }); // 1.7
 
   describe('1.8 Ping method', function() {
