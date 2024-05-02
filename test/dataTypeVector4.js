@@ -335,7 +335,7 @@ describe('298. dataTypeVector4.js', function() {
           `, binds);
     }
 
-    await connection.execute(`delete /*+ parallel(4) */ from ${tableName} 
+    await connection.execute(`delete /*+ parallel(4) */ from ${tableName}
            where vector_distance(VectorCol, ${sampleVector}, euclidean) < 10`);
 
     const result = await connection.execute(`
@@ -373,7 +373,7 @@ describe('298. dataTypeVector4.js', function() {
           `, binds);
     }
 
-    await connection.execute(`delete /*+ no_parallel(4) */ from ${tableName} 
+    await connection.execute(`delete /*+ no_parallel(4) */ from ${tableName}
            where vector_distance(VectorCol, ${sampleVector}, euclidean) < 10`);
 
     const result = await connection.execute(`

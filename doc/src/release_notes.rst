@@ -58,6 +58,9 @@ Thin Mode Changes
 #)  Added support for usage with extension of Array.prototype methods
     See `Issue #1653 <https://github.com/oracle/node-oracledb/issues/1653>`__.
 
+#)  Fixed bug which threw an error due to the presence of duplicate cursors
+    with DRCP.
+
 Thick Mode Changes
 +++++++++++++++++++
 
