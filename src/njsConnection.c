@@ -513,7 +513,7 @@ static bool njsConnection_connectPostAsync(njsBaton *baton, napi_env env,
         conn->warningInfo = baton->warningInfo;
     }
 
-    // For Oracle Database 23c and Oracle Client 23c, the maximum field name
+    // For Oracle Database 23ai and Oracle Client 23ai, the maximum field name
     // size for the OSON object is 65535
     conn->versionInfo = baton->versionInfo;
     if (conn->versionInfo.versionNum >= 23
