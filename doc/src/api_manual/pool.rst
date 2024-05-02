@@ -536,11 +536,6 @@ Pool Methods
     as the maximum number of connections in the pool, or the statement cache
     size used by connections can be changed.
 
-    .. note::
-
-        This method is only supported in node-oracledb Thick mode. See
-        :ref:`enablingthick`.
-
     Properties are optional. Unspecified properties will leave those pool
     properties unchanged. The properties are processed in two stages. After
     any size change has been processed, reconfiguration on the other
@@ -587,19 +582,19 @@ Pool Methods
           - Description
         * - ``poolAttrs``
           - Object
-          - The ``oracledb.createPool()`` properties that can be changed with ``pool.reconfigure()`` are:
+          - The following ``oracledb.createPool()`` properties can be changed with ``pool.reconfigure()`` in both Thin and Thick modes unless otherwise specified:
 
             - :ref:`enableStatistics <createpoolpoolattrsstats>`
             - :ref:`poolIncrement <createpoolpoolattrspoolincrement>`
             - :ref:`poolMax <createpoolpoolattrspoolmax>`
-            - :ref:`poolMaxPerShard <createpoolpoolattrspoolmaxpershard>`
+            - :ref:`poolMaxPerShard <createpoolpoolattrspoolmaxpershard>` in only Thick mode
             - :ref:`poolMin <createpoolpoolattrspoolmin>`
             - :ref:`poolPingInterval <createpoolpoolattrspoolpinginterval>`
             - :ref:`poolTimeout <createpoolpoolattrspooltimeout>`
             - :ref:`queueMax <createpoolpoolattrsqueuemax>`
             - :ref:`queueRequests <createpoolpoolattrsqueuerequests>`
             - :ref:`queueTimeout <createpoolpoolattrsqueuetimeout>`
-            - :ref:`sodaMetaDataCache <createpoolpoolattrssodamdcache>`
+            - :ref:`sodaMetaDataCache <createpoolpoolattrssodamdcache>` in only Thick mode
             - :ref:`stmtCacheSize <createpoolpoolattrsstmtcachesize>`
 
             A ``resetStatistics`` property can also be set to *true*. This zeros the current pool statistics, with the exception of ``queueMax`` which is set to the current queue length. Statistics are also reset when statistics recording is turned on with the ``enableStatistics`` property.

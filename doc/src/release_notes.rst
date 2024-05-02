@@ -58,6 +58,8 @@ Thin Mode Changes
     errors were raised.
     See `Issue #1652 <https://github.com/oracle/node-oracledb/issues/1652>`__.
 
+#)  Added support for pool reconfiguration.
+
 #)  Added support for Oracle Database 23c
     :ref:`Implicit Connection Pooling <implicitpool>` in DRCP and PRCP.
 

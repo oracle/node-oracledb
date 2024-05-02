@@ -73,15 +73,11 @@ describe('255. poolReconfigure.js', function() {
     let pool;
 
     beforeEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       await pool.close(0);
     });
 
@@ -92,6 +88,7 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 2);
       } else {
+        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
@@ -121,6 +118,7 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 1);
       } else {
+        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
@@ -129,7 +127,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMin
       };
 
-      await pool.reconfigure (config);
+      await pool.reconfigure(config);
       assert.strictEqual(pool.poolMin, poolMin);
       assert.strictEqual(pool.poolMax, poolMaxOriginalVal);
       assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
@@ -147,7 +145,6 @@ describe('255. poolReconfigure.js', function() {
         const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
-
       assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal);
       assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal);
 
@@ -160,12 +157,13 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolMax, poolMax);
       assert.strictEqual(pool.poolMin, poolMinOriginalVal);
       assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-
       const connNew = await testsUtil.getPoolConnection(pool);
       assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal + 1);
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal + 1);
       } else {
+        await testsUtil.checkAndWait(100, 50, () =>
+          pool.connectionsOpen === poolMaxOriginalVal + poolIncrementOriginalVal);
         assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal + poolIncrementOriginalVal);
       }
 
@@ -186,6 +184,7 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 1);
       } else {
+        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
@@ -202,6 +201,7 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 1);
       } else {
+        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
@@ -217,6 +217,7 @@ describe('255. poolReconfigure.js', function() {
         const conn = await testsUtil.getPoolConnection(pool);
         conns.push(conn);
       }
+      await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
       assert.strictEqual(pool.connectionsInUse, poolMinOriginalVal);
       assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
 
@@ -235,6 +236,8 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
       } else {
+        await testsUtil.checkAndWait(100, 50, () =>
+          pool.connectionsOpen === poolMinOriginalVal + poolIncrement);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + poolIncrement);
       }
 
@@ -270,6 +273,8 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + 1);
       } else {
+        await testsUtil.checkAndWait(100, 50, () =>
+          pool.connectionsOpen === poolMinOriginalVal + poolIncrement);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal + poolIncrement);
       }
 
@@ -589,15 +594,11 @@ describe('255. poolReconfigure.js', function() {
     }
 
     beforeEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       await pool.close(0);
     });
 
@@ -624,6 +625,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.2.3 change maxPerShard', async function() {
+      if (oracledb.thin) this.skip();
+
       const poolMaxPerShard = 2 * pool.poolMaxPerShard;
       const config = {
         poolMaxPerShard: poolMaxPerShard
@@ -794,10 +797,12 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
       assert.strictEqual(poolStatistics.poolPingInterval, 60);
       assert.strictEqual(poolStatistics.poolTimeout, 60);
-      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      if (!oracledb.thin) {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
-      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -845,15 +850,11 @@ describe('255. poolReconfigure.js', function() {
     let pool;
 
     beforeEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       await pool.close(0);
     });
 
@@ -881,6 +882,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.3.3 change maxPerShard', async function() {
+      if (oracledb.thin) this.skip();
+
       // maxPerShard is supported only >= 18.3
       if (testsUtil.getClientVersion() < 1803000000) {
         this.skip();
@@ -897,6 +900,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.3.4 sodaMetaDataCache set to true', async function() {
+      if (oracledb.thin) this.skip();
+
       const config = {
         sodaMetaDataCache: true
       };
@@ -913,6 +918,8 @@ describe('255. poolReconfigure.js', function() {
     });
 
     it('255.3.5 sodaMetaDataCache set to false', async function() {
+      if (oracledb.thin) this.skip();
+
       const config = {
         sodaMetaDataCache: false
       };
@@ -935,15 +942,11 @@ describe('255. poolReconfigure.js', function() {
     let pool;
 
     beforeEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       await pool.close(0);
     });
 
@@ -961,6 +964,7 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 0);
       } else {
+        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
@@ -969,6 +973,7 @@ describe('255. poolReconfigure.js', function() {
       if (dbConfig.test.externalAuth) {
         assert.strictEqual(pool.connectionsOpen, 0);
       } else {
+        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
         assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
       }
 
@@ -1106,15 +1111,11 @@ describe('255. poolReconfigure.js', function() {
     };
 
     beforeEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       pool = await oracledb.createPool(poolConfig);
       checkOriginalPoolConfig(pool);
     });
 
     afterEach(async function() {
-      if (oracledb.thin)
-        return this.skip();
       await pool.close(0);
     });
 
@@ -1387,7 +1388,9 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolIncrement, poolIncrement);
       assert.strictEqual(pool.poolPingInterval, poolPingInterval);
       assert.strictEqual(pool.poolTimeout, poolTimeout);
-      assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      if (!oracledb.thin) {
+        assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      }
       assert.strictEqual(pool.queueMax, queueMax);
       assert.strictEqual(pool.queueTimeout, queueTimeout);
       assert.strictEqual(pool.stmtCacheSize, stmtCacheSize);
@@ -1428,7 +1431,9 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolIncrement, poolIncrement);
       assert.strictEqual(pool.poolPingInterval, poolPingInterval);
       assert.strictEqual(pool.poolTimeout, poolTimeout);
-      assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      if (!oracledb.thin) {
+        assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      }
       assert.strictEqual(pool.queueMax, queueMax);
       assert.strictEqual(pool.queueTimeout, queueTimeout);
       assert.strictEqual(pool.stmtCacheSize, stmtCacheSize);
@@ -1483,16 +1488,6 @@ describe('255. poolReconfigure.js', function() {
   });
 
   describe('255.6 Pool statistics', function() {
-    beforeEach(function() {
-      if (oracledb.thin)
-        return this.skip();
-    });
-
-    afterEach(function() {
-      if (oracledb.thin)
-        return this.skip();
-    });
-
     it('255.6.1 get pool statistics by setting _enableStats', async function() {
       let poolConfig = {
         ...dbConfig,
@@ -1578,10 +1573,12 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
       assert.strictEqual(poolStatistics.poolPingInterval, 60);
       assert.strictEqual(poolStatistics.poolTimeout, 60);
-      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      if (!oracledb.thin) {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
-      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -1674,10 +1671,12 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
       assert.strictEqual(poolStatistics.poolPingInterval, 60);
       assert.strictEqual(poolStatistics.poolTimeout, 60);
-      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      if (!oracledb.thin) {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
-      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (let i = 0; i < poolMaxOriginalVal; i++) {
@@ -1960,10 +1959,12 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
       assert.strictEqual(poolStatistics.poolPingInterval, 60);
       assert.strictEqual(poolStatistics.poolTimeout, 60);
-      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      if (!oracledb.thin) {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
-      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2058,10 +2059,12 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
       assert.strictEqual(poolStatistics.poolPingInterval, 60);
       assert.strictEqual(poolStatistics.poolTimeout, 60);
-      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      if (!oracledb.thin) {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
-      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2154,10 +2157,12 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
       assert.strictEqual(poolStatistics.poolPingInterval, 60);
       assert.strictEqual(poolStatistics.poolTimeout, 60);
-      assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+      if (!oracledb.thin) {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
-      assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
       assert.strictEqual(poolStatistics.threadPoolSize, undefined);
 
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {

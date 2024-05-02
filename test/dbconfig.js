@@ -67,6 +67,9 @@ if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
 if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
   const eauth = process.env.NODE_ORACLEDB_EXTERNALAUTH;
   if (eauth.toLowerCase() === 'true') {
+    if (oracledb.thin) {
+      throw new Error("Cannot use externalAuth with thin driver.");
+    }
     config.test.externalAuth = true;
   }
 }
