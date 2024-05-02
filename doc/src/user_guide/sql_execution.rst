@@ -899,6 +899,50 @@ string to a floating point number.
 See `examples/typehandlernum.js <https://github.com/oracle/node-oracledb/tree/
 main/examples/typehandlernum.js>`__ for a runnable example.
 
+.. _biginthandling:
+
+Fetching BigInt Numbers
++++++++++++++++++++++++
+
+BigInt is a numerical JavaScript data type to represent integer values that
+are larger than the range supported by the Number data type. BigInt values can
+be created by appending 'n' to the end of integer values or by calling the
+``BigInt()`` function. For example, 123n, -123n, 1_000_000_001n,
+9876543321n, or BigInt(9876543321). See :ref:`binddatatypenotes` for
+information on binding BigInt values.
+
+By default, BigInt numbers fetched from the database are returned as
+JavaScript numbers as shown below.
+
+.. code-block:: javascript
+
+    const sql = `SELECT id FROM employees WHERE id = :1`;
+    const binds = [ 98765432123456n ];
+    const result = await connection.execute(sql, binds);
+    console.log(result.rows[0]);
+
+This query prints ``98765432123456``.
+
+To reliably work with BigInt numbers, it is recommended to use a
+:ref:`fetch type handler <fetchtypehandler>`. The following fetch type handler
+can be used with the example above to return the correct BigInt value:
+
+.. code-block:: javascript
+
+    // Tells the driver to return the number as a BigInt value
+    const myfetchTypeHandler = function() {
+        return {
+            converter: (val) =>  val === null ? null : BigInt(val)
+        };
+    };
+    oracledb.fetchTypeHandler = myfetchTypeHandler;
+
+With this fetch type handler, the query would print ``98765432123456n``.
+
+Without a fetch type handler, fetching a very large or a very small BigInt
+number that is not supported by the application platform will result in
+truncation to the maximum and the minimum integer values respectively.
+
 .. _datehandling:
 
 Fetching Dates and Timestamps

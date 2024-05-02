@@ -175,6 +175,20 @@ zone, or to the time zone specified for TIMESTAMP WITH TIME ZONE columns.
 If later queried, they are returned in the session time zone. See
 :ref:`Fetching Date and Timestamps <datehandling>` for more information.
 
+The binding of BigInt values was introduced in node-oracledb 6.5. When binding
+a JavaScript BigInt value in an ``INSERT`` statement, the bind ``type`` used by
+default is ``oracledb.DB_TYPE_NUMBER``. For example:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+     `INSERT INTO employees (id) VALUES (:1)`,
+     [98765432123456n]
+    );
+
+For information on fetching BigInt numbers, see this
+:ref:`section <biginthandling>`.
+
 .. _outbind:
 
 OUT and IN OUT Bind Parameters

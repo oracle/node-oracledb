@@ -91,7 +91,7 @@ describe('300. bigInt.js', function() {
 
     it('300.2.2 use fetchTypeHandler to get BigInt value', async function() {
       const myFetchTypeHandler = function() {
-        return {converter: (val) => BigInt(val)};
+        return {converter: (val) => val === null ? null : BigInt(val)};
       };
 
       oracledb.fetchTypeHandler = myFetchTypeHandler;

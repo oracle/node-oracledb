@@ -897,6 +897,10 @@ Connection Methods
           - BINARY_INTEGER
           - ``oracledb.DB_TYPE_BINARY_INTEGER``
           - This combination is supported from node-oracledb 4.2. Only supported for PL/SQL binds.
+        * - BigInt
+          - NUMBER
+          - ``oracledb.DB_TYPE_NUMBER``
+          - This combination is supported from node-oracledb 6.5.
         * - Date
           - DATE
           - ``oracledb.DB_TYPE_DATE``
