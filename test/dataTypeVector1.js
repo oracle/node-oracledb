@@ -1193,7 +1193,7 @@ describe('294. dataTypeVector1.js', function() {
 
   it('294.47 handling of NULL vector value', async function() {
     const table = 'nodb_vectorDbTable1';
-    const sql = `CREATE TABLE IF NOT EXISTS 
+    const sql = `CREATE TABLE IF NOT EXISTS
     ${table} (
         IntCol     NUMBER,
         VectorFlex32Col vector(*, float32)
@@ -1898,4 +1898,3 @@ describe('294. dataTypeVector1.js', function() {
     }
   }); // 294.72
 });
-

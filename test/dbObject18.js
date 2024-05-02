@@ -260,17 +260,15 @@ describe('242. dbObject18.js', () => {
       sql = `
         CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
       `;
-      sql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(sql);
+      await testsUtil.createTable(conn, TABLE, sql);
 
     }); // before()
 
     after(async () => {
 
-      let sql = testsUtil.sqlDropTable(TABLE);
-      await conn.execute(sql);
+      await testsUtil.dropTable(conn, TABLE);
 
-      sql = testsUtil.sqlDropType(TEAM_T);
+      let sql = testsUtil.sqlDropType(TEAM_T);
       await conn.execute(sql);
 
       sql = testsUtil.sqlDropType(PLAYER_T);

@@ -4,6 +4,34 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev64v65:
+
+Upgrading from node-oracledb 6.4 to 6.5
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- The new :ref:`oracledb.JsonId <jsonid>` class represents JSON ID values
+  returned by SODA in Oracle Database 23ai and later in the ``_id`` attribute
+  of documents stored in native collections.
+
+- You can now pass BigInt values as binds to :meth:`connection.execute()` and
+  :meth:`connection.executeMany()`.
+
+- With the new :ref:`oracledb.DB_TYPE_VECTOR <oracledbconstantsdbtype>`
+  constant, you can now represent Oracle Database 23ai data type
+  :ref:`VECTOR <vectors>` with the ``vectorDimensions`` and ``vectorFormat``
+  :ref:`metadata <execmetadata>` information attributes.
+
+- In node-oracledb Thin mode, a subset of pool creation properties can be
+  changed without restarting the pool or application using the
+  :meth:`pool.reconfigure()` method.
+
+- In node-oracledb Thin mode, you can now use Oracle Database 23ai's
+  :ref:`Implicit Connection Pooling <implicitpool>` feature with Database
+  Resident Connection Pooling (DRCP) and Proxy Resident Connection Pooling
+  (PRCP).
+
 .. _upgradev63v64:
 
 Upgrading from node-oracledb 6.3 to 6.4
@@ -101,8 +129,8 @@ Upgrading from node-oracledb 6.2 to 6.3
   GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`_, and the schema name of the
   `SQL domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
   GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched
-  column. Annotations and SQL domains are supported from Oracle Database 23c
-  onwards. For node-oracledb Thick mode, Oracle Client 23c is also required.
+  column. Annotations and SQL domains are supported from Oracle Database 23ai
+  onwards. For node-oracledb Thick mode, Oracle Client 23ai is also required.
 
 - In node-oracledb Thin mode, ``SYS.XMLTYPE`` data can now be
   :ref:`fetched as strings <xmltype>`.

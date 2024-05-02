@@ -1380,4 +1380,3 @@ describe('297. jsonDualityViews7.js', function() {
     }); // 297.3.12
   });
 });
-

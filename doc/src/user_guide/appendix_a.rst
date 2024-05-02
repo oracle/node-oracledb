@@ -128,7 +128,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database Dedicated Servers, Shared Servers, and Database Resident Connection Pooling (DRCP) (see :ref:`drcp`)
       - Yes
       - Yes
-    * - Oracle Database 23c Implicit connection pooling for DRCP and PRCP (see :ref:`implicitpool`)
+    * - Oracle Database 23ai Implicit connection pooling for DRCP and PRCP (see :ref:`implicitpool`)
       - Yes
       - Yes
     * - Multitenant Databases
@@ -278,10 +278,10 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database 21c JSON data type (see :ref:`json21ctype`)
       - Yes
       - Yes
-    * - Oracle Database 23c JSON duality view
+    * - Oracle Database 23ai JSON duality view
       - Yes
       - Yes
-    * - Oracle Database 23c BOOLEAN data type (see :ref:`oracledbconstantsdbtype`)
+    * - Oracle Database 23ai BOOLEAN data type (see :ref:`oracledbconstantsdbtype`)
       - Yes
       - Yes
     * - ROWID, UROWID data types (see :ref:`oracledbconstantsdbtype`)
@@ -297,6 +297,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - Yes
       - Yes
     * - NCHAR, NVARCHAR2, NCLOB data types (see :ref:`oracledbconstantsdbtype`)
+      - Yes
+      - Yes
+    * - Oracle Database 23c VECTOR data type (see :ref:`oracledbconstantsdbtype`)
       - Yes
       - Yes
     * - Bind PL/SQL Boolean

@@ -219,8 +219,8 @@ describe('244.dataTypeJson.js', function() {
         [18, jsonVal18]
       ];
 
-      // Inserting TypedArrays is only allowed with Oracle Database 23c and
-      // Oracle Client 23c versions and above
+      // Inserting TypedArrays is only allowed with Oracle Database 23ai and
+      // Oracle Client 23ai versions and above
       if (isOracle_23_4) {
         binds.push([19, jsonVal19]);
         binds.push([20, jsonVal20]);

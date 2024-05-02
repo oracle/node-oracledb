@@ -49,7 +49,7 @@ To change from the default Thin mode to the Thick mode:
         clientOpts = { libDir: 'C:\\oracle\\instantclient_19_19' };
       } else if (process.platform === 'darwin' && process.arch === 'x64') {
         // macOS Intel
-        clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_8' };
+        clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_16' };
       }
       // else on other platforms like Linux the system library search path MUST always be
       // set before Node.js is started, for example with ldconfig or LD_LIBRARY_PATH.
@@ -117,7 +117,7 @@ On Windows, the alternative ways to enable Thick mode are:
   .. code-block:: javascript
 
         const oracledb = require('oracledb');
-        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_18'});
+        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_22'});
 
   If you use backslashes in the ``libDir`` string, you will need to double
   them.
@@ -168,7 +168,7 @@ On Windows, the alternative ways to enable Thick mode are:
   this variable before Node.js is executed, for example::
 
         REM mynode.bat
-        SET PATH=C:\oracle\instantclient_19_18;%PATH%
+        SET PATH=C:\oracle\instantclient_19_22;%PATH%
         node %*
 
   Invoke this batch file every time you want to run Node.js.
@@ -194,7 +194,7 @@ On macOS, the alternative ways to enable Thick mode are:
   .. code-block:: javascript
 
         const oracledb = require('oracledb');
-        oracledb.initOracleClient({libDir: process.env.HOME + '/Downloads/instantclient_19_8'});
+        oracledb.initOracleClient({libDir: process.env.HOME + '/Downloads/instantclient_19_16'});
 
   This directory should contain the libraries from an unzipped `Instant
   Client 'Basic' or 'Basic Light' <https://www.oracle.com/database/
@@ -214,7 +214,7 @@ On macOS, the alternative ways to enable Thick mode are:
   libraries from an unzipped `Instant Client 'Basic' or 'Basic Light'
   <https://www.oracle.com/database/technologies/instant-client.html>`__
   package. For example, use
-  ``ln -s ~/Downloads/instantclient_19_8/libclntsh.dylibnode_modules/oracledb/build/Release/``.
+  ``ln -s ~/Downloads/instantclient_19_16/libclntsh.dylibnode_modules/oracledb/build/Release/``.
 
   If the libraries are not found, the library search path such as set in
   ``DYLD_LIBRARY_PATH`` (note this variable does not propagate to sub-shells)
@@ -224,18 +224,18 @@ On macOS, the alternative ways to enable Thick mode are:
   in the ``node_modules/oracledb/build/Release`` directory where the
   ``oracledb*.node`` binary is. For example::
 
-        ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib node_modules/oracledb/build/Release
+        ln -s ~/Downloads/instantclient_19_16/libclntsh.dylib node_modules/oracledb/build/Release
 
   This can be added to your ``package.json`` files::
 
         "scripts": {
-            "postinstall": "ln -s $HOME/Downloads/instantclient_19_8/libclntsh.dylib $(npm root)/oracledb/build/Release"
+            "postinstall": "ln -s $HOME/Downloads/instantclient_19_16/libclntsh.dylib $(npm root)/oracledb/build/Release"
         },
 
   Instead of linking, you can also copy all the required OCI libraries,
   for example::
 
-        cp ~/Downloads/instantclient_19_8/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
+        cp ~/Downloads/instantclient_19_16/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
         cd node_modules/oracledb/build/Release/ && ln -s libclntsh.dylib.19.1 libclntsh.dylib
 
   With the libraries in place, your application can then enable Thick mode:
@@ -251,13 +251,13 @@ On macOS, the alternative ways to enable Thick mode are:
   it. For example::
 
         mkdir /usr/local/lib
-        ln -s ~/Downloads/instantclient_19_8/libclntsh.dylib /usr/local/lib
+        ln -s ~/Downloads/instantclient_19_16/libclntsh.dylib/usr/local/lib
 
   Instead of linking, you can also copy all the required OCI libraries,
   for example::
 
         mkdir /usr/local/lib
-        cp ~/Downloads/instantclient_19_8/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
+        cp ~/Downloads/instantclient_19_16/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
 
   With the libraries in place, your application can then enable Thick mode:
 

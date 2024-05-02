@@ -181,6 +181,11 @@ instead of ``result.metadata[0].fetchType == 2001``.
     * - ``oracledb.DB_TYPE_XMLTYPE``
       - 2032
       - XMLTYPE
+    * - ``oracledb.DB_TYPE_VECTOR``
+      - 2033
+      - VECTOR
+
+        .. versionadded:: 6.5
 
 Note that the values for these constants changed in node-oracledb 4.0.
 
@@ -863,6 +868,34 @@ Constants for two-phase commit (TPC) functions
     * - ``oracledb.TPC_END_SUSPEND``
       - 1048576
       - Suspend the TPC transaction.
+
+Vector Type Constants
+---------------------
+.. versionadded:: 6.5
+
+Constants for the :ref:`vectorFormat <execmetadata>` attribute.
+
+.. list-table-with-summary::  Vector Type Constants
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 10 10 30
+    :summary: The first column displays the name of the vector type constant
+     name. The second column displays the value of the constant. The third
+     column displays the description of the constant.
+
+    * - Constant Name
+      - Value
+      - Description
+    * - ``oracledb.VECTOR_FORMAT_FLOAT32``
+      - 2
+      - The storage format of each dimension value in the vector column is a 32-bit floating-point number.
+    * - ``VECTOR_FORMAT_FLOAT64``
+      - 3
+      - The storage format of each dimension value in the vector column is a 64-bit floating-point number.
+    * - ``VECTOR_FORMAT_INT8``
+      - 4
+      - The storage format of each dimension value in the vector column is an 8-bit signed integer.
 
 .. _oracledbproperties:
 

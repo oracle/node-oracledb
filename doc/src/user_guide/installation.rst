@@ -202,21 +202,22 @@ currently certified configurations, see Oracle Support's `Doc ID 207303.1
 <https://support.oracle.com/epmos/faces/DocumentDisplay?id=207303.1>`__.  In
 summary:
 
+- Oracle Client 23 can connect to Oracle Database 19 or later
 - Oracle Client 21 can connect to Oracle Database 12.1 or later
 - Oracle Client 19, 18, and 12.2 can connect to Oracle Database 11.2 or later
 - Oracle Client 12.1 can connect to Oracle Database 10.2 or later
 - Oracle Client 11.2 can connect to Oracle Database 9.2 or later
 
-Not all features are available in all versions or driver modes.  The
+Not all features are available in all versions or driver modes. Any attempt to
+use Oracle features that are not supported by a particular mode or client
+library/database combination will result in runtime errors.The
 node-oracledb attributes :attr:`oracledb.thin`, :attr:`pool.thin` and
 :attr:`connection.thin` can be used to see what mode a connection is in. In the
 Thick mode, the attribute :attr:`oracledb.oracleClientVersion` can be used to
 determine which Oracle Client version is in use. The attribute
 :attr:`connection.oracleServerVersionString` can be used to determine which
 Oracle Database version a connection is accessing.  These attributes can be
-used to adjust application feature usage appropriately. Any attempt to use
-Oracle features that are not supported by a particular mode or client
-library/database combination will result in runtime errors.
+used to adjust application feature usage appropriately.
 
 .. _prerequisites:
 
@@ -228,9 +229,9 @@ To use node-oracledb, you need:
 - Node.js 14.6 or later.
 
 - Access to an Oracle Database either local or remote, on-premises, or in the
-  Cloud. You will need to know the `database credentials
-  <https://www.youtube.com/ watch?v=WDJacg0NuLo>`__ and the :ref:`connection
-  string <connectionstrings>` for the database.
+  :ref:`Cloud <connectionadb>`. You will need to know the `database
+  credentials <https://www.youtube.com/ watch?v=WDJacg0NuLo>`__ and the
+  :ref:`connection string <connectionstrings>` for the database.
 
   Installing node-oracledb does not install or create a database.
 
@@ -247,8 +248,8 @@ To use node-oracledb, you need:
   - from those included in Oracle Database if Node.js is on the same machine as
     the database
 
-  Oracle Client libraries versions 21, 19, 18, 12, and 11.2 are supported where
-  available on Linux, Windows, and macOS. Oracle's standard
+  Oracle Client libraries versions 23, 21, 19, 18, 12, and 11.2 are supported
+  where available on Linux, Windows, and macOS. Oracle's standard
   client-server version interoperability allows connection to both older and
   newer databases.
 
@@ -347,7 +348,7 @@ By default, the node-oracledb driver is a pure JavaScript module that runs in a
 Thin mode connecting directly to Oracle Database so no further installation
 steps are required.  However, to use additional node-oracledb features
 available in :ref:`Thick mode <featuresummary>`, you need to install Oracle
-Client libraries.  Oracle Client versions 21, 19, 18, 12, and 11.2 are
+Client libraries.  Oracle Client versions 23, 21, 19, 18, 12, and 11.2 are
 supported. Thick mode uses a binary add-on installed with node-oracledb that
 loads these Oracle Client libraries.
 
@@ -392,9 +393,10 @@ you can use ``sudo -E`` on Linux.
         const oracledb = require('oracledb');
         oracledb.initOracleClient();
 
-On Linux, do not pass the ``libDir`` attribute in the function options: the
-Oracle Client libraries on Linux *must* be in the system library search path
-*before* the Node.js process starts.
+On Linux, do not pass the ``libDir`` attribute to
+:meth:`oracledb.initOracleClient()`. The Oracle Client libraries on Linux
+*must* be in the system library search path *before* the Node.js process
+starts.
 
 .. _instzip:
 
@@ -412,17 +414,23 @@ Follow these steps if your database is on a remote machine and either:
 
 To use node-oracledb Thick mode with Oracle Instant Client zip files:
 
-1. Download an Oracle 21, 19, 18, 12, or 11.2 "Basic" or "Basic Light" zip
+1. Download an Oracle 23, 21, 19, 18, 12, or 11.2 "Basic" or "Basic Light" zip
    file matching your architecture:
 
-   - `x86-64 64-bit <https://www.oracle.com/database/technologies/instant-
-     client/linux-x86-64-downloads.html>`__
+   - `Linux 64-bit (x86-64) <https://www.oracle.com/database/technologies/
+     instant-client/linux-x86-64-downloads.html>`__
 
-   - `ARM (aarch64) 64-bit <https://www.oracle.com/database/technologies/
-     instant-client/linux-arm-aarch64-downloads.html>`__
+   - `Linux ARM 64-bit (aarch64) <https://www.oracle.com/database/
+     technologies/instant-client/linux-arm-aarch64-downloads.html>`__
 
-   The latest Release Update of your chosen version is recommended. Oracle
-   Instant Client 21 will connect to Oracle Database 12.1 or later.
+   Oracle Instant Client 23ai will connect to Oracle Database 19 or later.
+   Oracle Instant Client 21c will connect to Oracle Database 12.1 or later.
+   Oracle Instant Client 19c will connect to Oracle Database 11.2 or later.
+
+   It is recommended to keep up to date with the latest Oracle Instant Client
+   release updates of your desired major version.  Oracle Database 23ai and 19c
+   are Long Term Support Releases whereas Oracle Database 21c is an Innovation
+   Release.
 
 2. Unzip the package into a directory accessible to your application, for
    example::
@@ -446,9 +454,10 @@ To use node-oracledb Thick mode with Oracle Instant Client zip files:
 
         apt-get install -y libaio1
 
-   On recent Linux versions such as Oracle Linux 8, you may also need to
-   install the ``libnsl`` package when using Oracle Instant Client 19. This
-   package is not needed from Instant Client 21 and later.
+   When using Oracle Instant Client 19 on recent Linux versions such as Oracle
+   Linux 8, you may need to manually install the ``libnsl`` package to make
+   ``libnsl.so`` available. This package is not needed from Oracle Instant
+   Client 21 and later.
 
 4. If there is no other Oracle software on the machine that will be impacted,
    then permanently add Instant Client to the run-time link path. For example,
@@ -494,30 +503,69 @@ node-oracledb RPMs from yum.oracle.com <instnoderpms>`.
 
 To use node-oracledb with Oracle Instant Client RPMs:
 
-1. Download an Oracle 21, 19, 18, 12, or 11.2 "Basic" or "Basic Light" RPM
+1. Download an Oracle 23, 21, 19, 18, 12, or 11.2 "Basic" or "Basic Light" RPM
    matching your architecture:
 
-  - `x86-64 64-bit <https://www.oracle.com/database/technologies/instant-
-    client/linux-x86-64-downloads.html>`__
-  - `ARM (aarch64) 64-bit <https://www.oracle.com/database/technologies/
-    instant-client/linux-arm-aarch64-downloads.html>`__
+   - `Linux 64-bit (x86-64) <https://www.oracle.com/database/technologies/
+     instant-client/linux-x86-64-downloads.html>`__
+   - `Linux ARM 64-bit (aarch64) <https://www.oracle.com/database/
+     technologies/instant-client/linux-arm-aarch64-downloads.html>`__
 
-  Oracle's yum server has convenient repositories:
+  Alternatively, Oracle's yum server has convenient repositories, see `Oracle
+  Database Instant Client for Oracle Linux
+  <https://yum.oracle.com/oracle-instant-client.html>`__ instructions. The
+  repositories are:
 
-  - `Instant Client 21 RPMs for Oracle Linux x86-64 8 <https://yum.oracle.com/
-    repo/OracleLinux/OL8/oracle/instantclient21/x86_64/index.html>`__,
-  - `Older Instant Client RPMs for Oracle Linux x86-64 8 <https://yum.oracle.
-    com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/index.html>`__
-  - `Instant Client 21 RPMs for Oracle Linux x86-64 7 <https://yum.oracle.com/
-    repo/OracleLinux/OL7/oracle/instantclient21/x86_64/index.html>`__
-  - `Older Instant Client RPMs for Oracle Linux x86-64 7
-    <https://yum.oracle.com/
-    repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html>`__
-  - `Instant Client RPMs for Oracle Linux ARM (aarch64) 8 <https://yum.oracle.
-    com/repo/OracleLinux/OL8/oracle/instantclient/aarch64/index.html>`__
+  - Oracle Linux 9 (x86-64)
 
-  The latest Release Update of your chosen version is recommended. Oracle Instant
-  Client 21 will connect to Oracle Database 12.1 or later.
+    - `Instant Client 23 for Oracle Linux 9 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL9/oracle/instantclient23/x86_64/index.html>`__
+
+    - `Instant Client 19 for Oracle Linux 9 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL9/oracle/instantclient/x86_64/index.html>`__
+
+  - Oracle Linux 8 (x86-64)
+
+    - `Instant Client 23 for Oracle Linux 8 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient23/x86_64/index.html>`__
+
+    - `Instant Client 21 for Oracle Linux 8 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient21/x86_64/index.html>`__
+
+    - `Instant Client 19 for Oracle Linux 8 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/index.html>`__
+
+  - Oracle Linux 8 (aarch64)
+
+    - `Instant Client 19 for Oracle Linux Arm 8 (aarch64)
+      <https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/aarch64/index.html>`__
+
+  - Oracle Linux 7 (x86-64)
+
+    - `Instant Client 21 for Oracle Linux 7 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient21/x86_64/index.html>`__
+
+    - `Instant Client 19 and 18 for Oracle Linux 7 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html>`__
+
+  - Oracle Linux 7 (aarch64)
+
+    - `Instant Client 19 for Oracle Linux Arm 7 (aarch64)
+      <https://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/aarch64/index.html>`__
+
+  - Oracle Linux 6 (x86-64)
+
+    - `Instant Client 18 for Oracle Linux 6 (x86-64)
+      <https://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html>`__
+
+   Oracle Instant Client 23ai will connect to Oracle Database 19 or later.
+   Oracle Instant Client 21c will connect to Oracle Database 12.1 or later.
+   Oracle Instant Client 19c will connect to Oracle Database 11.2 or later.
+
+   It is recommended to keep up to date with the latest Oracle Instant Client
+   release updates of your desired major version.  Oracle Database 23ai and 19c
+   are Long Term Support Releases whereas Oracle Database 21c is an Innovation
+   Release.
 
 2. Install the downloaded RPM with sudo or as the root user. For example::
 
@@ -537,9 +585,10 @@ To use node-oracledb with Oracle Instant Client RPMs:
    Yum automatically installs required dependencies, such as ``libaio``
    package.
 
-   On recent Linux versions such as Oracle Linux 8, you may need to manually
-   install the ``libnsl`` package when using Oracle Instant Client 19. This is
-   not needed from Oracle Instant Client 21 onward.
+   When using Oracle Instant Client 19 on recent Linux versions such as Oracle
+   Linux 8, you may need to manually install the ``libnsl`` package to make
+   ``libnsl.so`` available. This package is not needed from Oracle Instant
+   Client 21 onward.
 
 3. For Instant Client 19 RPMs, the system library search path is automatically
    configured during installation.
@@ -905,8 +954,8 @@ To use node-oracledb in Thick mode with Oracle Instant Client ZIP files:
    -client/winx64-64-downloads.html>`__.
 
 2. Unzip the ZIP file into a directory that is accessible to your application.
-   For example unzip ``instantclient-basic-windows.x64-19.18.0.0.0dbru.zip``
-   to ``C:\oracle\instantclient_19_18``.
+   For example unzip ``instantclient-basic-windows.x64-19.22.0.0.0dbru.zip``
+   to ``C:\oracle\instantclient_19_22``.
 
 3. Oracle Instant Client libraries require a Visual Studio redistributable
    with a 64-bit or 32-bit architecture to match Instant Client's architecture.

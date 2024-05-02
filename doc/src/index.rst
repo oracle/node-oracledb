@@ -9,7 +9,7 @@ for Node.js powers high performance Oracle Database applications.
 :ref:`release notes <releasenotes>`.
 
 This module is currently tested with Node.js 16, 18, and 20 against Oracle
-Database 23c, 21c, 19c, 12c, and 11gR2.
+Database 23ai, 21c, 19c, 12c, and 11gR2.
 
 You can use assistive technology products, such as screen readers, while you
 work with the node-oracledb documentation. You can also use the keyboard
@@ -35,6 +35,7 @@ User Guide
     user_guide/lob_data.rst
     user_guide/json_data_type.rst
     user_guide/xml_data_type.rst
+    user_guide/vector_data_type.rst
     user_guide/objects.rst
     user_guide/soda.rst
     user_guide/aq.rst

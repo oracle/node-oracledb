@@ -536,8 +536,8 @@ async function setUp(connection, tableName) {
 }
 
 async function clearUp(connection, tableName) {
-  await dropProc1(connection);
-  await dropTable(connection, tableName);
+  await connection.execute('DROP PROCEDURE nodb_rs2_get_emp');
+  await connection.execute('DROP TABLE ' + tableName + ' PURGE');
 }
 
 async function createTable(connection, tableName) {
@@ -561,10 +561,6 @@ async function createTable(connection, tableName) {
     "END; ";
 
   await connection.execute(sqlCreate);
-}
-
-async function dropTable(connection, tableName) {
-  await connection.execute('DROP TABLE ' + tableName + ' PURGE');
 }
 
 async function insertData(connection, tableName) {
@@ -593,8 +589,4 @@ async function createProc1(connection, tableName) {
     "  END; ";
 
   await connection.execute(sqlProc);
-}
-
-async function dropProc1(connection) {
-  await connection.execute('DROP PROCEDURE nodb_rs2_get_emp');
 }

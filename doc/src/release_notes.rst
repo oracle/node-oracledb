@@ -13,17 +13,20 @@ node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...
 Common Changes
 ++++++++++++++
 
+#)  Added comprehensive support for Oracle Database 23ai
+    :ref:`VECTOR <vectors>` data type.
+
 #)  Incorporated changes to use end of data request flag set with data packets
-    available in Oracle Database 23c to improve handling of the async reads.
+    available in Oracle Database 23ai to improve handling of the async reads.
 
 #)  Added class :ref:`oracledb.JsonId <jsonid>` to represent JSON ID values
     returned by SODA in Oracle Database 23.4 and later in the ``_id``
     attribute of documents stored in native collections.
 
-#)  Added support for an Oracle Database 23c JSON feature allowing for field
+#)  Added support for an Oracle Database 23ai JSON feature allowing for field
     names with more than 255 UTF-8 encoded bytes.
 
-#)  Added support for an Oracle Database 23c JSON feature improving JSON
+#)  Added support for an Oracle Database 23ai JSON feature improving JSON
     storage usage.
 
 #)  Updated the error thrown during pool reconfiguration from ``ORA-24413`` to
@@ -53,7 +56,7 @@ Thin Mode Changes
 #)  Added support for easy connect string entries in tnsnames.ora.
     See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1644>`__.
 
-#)  Added support for Oracle Database 23c feature that can improve the
+#)  Added support for Oracle Database 23ai feature that can improve the
     performance of connection creation by reducing the number of
     round trips required for all connections created.
 
@@ -67,7 +70,7 @@ Thin Mode Changes
 
 #)  Added support for :meth:`pool reconfiguration <pool.reconfigure()>`.
 
-#)  Added support for Oracle Database 23c
+#)  Added support for Oracle Database 23ai
     :ref:`Implicit Connection Pooling <implicitpool>` in Database Resident
     Connection Pooling (DRCP) and Proxy Resident Connection Pooling (PRCP).
 
@@ -385,7 +388,7 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for an Oracle Database 23c feature that can improve the
+#)  Added support for an Oracle Database 23ai feature that can improve the
     performance of connection creation by reducing the number of round trips
     required to create the second and subsequent connections to the same
     database.
@@ -397,14 +400,14 @@ Thin Mode Changes
 #)  Added new ``sslAllowWeakDNMatch`` connection attribute in :ref:`createPool()
     <createpoolpoolattrssslallowweak>` and :ref:`getConnection()
     <getconnectiondbattrssslallowweak>` methods and support for
-    ``SSL_WEAK_DN_MATCH`` (an Oracle Database 23c feature). If set, this
+    ``SSL_WEAK_DN_MATCH`` (an Oracle Database 23ai feature). If set, this
     enables ``sslServerDNMatch`` / ``SSL_SERVER_DN_MATCH`` to check the
     database server certificate (but not the listener) and enables the service
     name to be used for partial DN matching. The search order is: the host
     name, then the Subject Alternative Name (SAN), and then the service name.
 
 #)  Added support to include database error cause/action URLs (introduced from
-    Oracle Database 23c onwards) for ORA error messages.
+    Oracle Database 23ai onwards) for ORA error messages.
 
 #)  Added network connection optimization for multiple database hosts.
     If a host is found to be unreachable during connection, the host is added
@@ -440,7 +443,7 @@ Thin Mode Changes
     same certificate.
 
 #)  Fixed bug with duplicate data for queries that exceed 2016 columns (only
-    possible with Oracle Database 23c).
+    possible with Oracle Database 23ai).
 
 Thick Mode Changes
 ++++++++++++++++++
@@ -647,7 +650,7 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
     - Changed ``oracledb.DB_TYPE_*`` constants to be ``DbType`` objects
       instead of numbers.
 
-    - Added support for the Oracle Database 23c BOOLEAN SQL type.
+    - Added support for the Oracle Database 23ai BOOLEAN SQL type.
 
     - Fixed type used when fetching NCLOB as a string.
 

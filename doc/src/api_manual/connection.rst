@@ -1162,15 +1162,15 @@ Connection Methods
 
             Extended metadata is now always returned and includes the following information:
 
-            - ``annotations``: The `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object associated with the fetched column. If the column has no associated annotations, this property value is `undefined`. Annotations are supported from Oracle Database 23c onwards. If node-oracledb Thick mode is used, Oracle Client 23c is also required.
+            - ``annotations``: The `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object associated with the fetched column. If the column has no associated annotations, this property value is `undefined`. Annotations are supported from Oracle Database 23ai onwards. If node-oracledb Thick mode is used, Oracle Client 23ai is also required.
 
             - ``byteSize``: The database byte size. This is only set for ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR`` and ``oracledb.DB_TYPE_RAW`` column types.
             - ``dbType``: one of the :ref:`Oracle Database Type Constant <oracledbconstantsdbtype>` values.
             - ``dbTypeClass``: The class associated with the database type. This is only set if the database type is an object type.
             - ``dbTypeName``: The name of the database type, such as “NUMBER” or “VARCHAR2”. For object types, this will be the object name.
-            - ``domainName``: The name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a SQL domain, this property value is `undefined`. SQL domains are supported from Oracle Database 23c onwards. If node-oracledb Thick mode is used, Oracle Client 23c is also required.
+            - ``domainName``: The name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a SQL domain, this property value is `undefined`. SQL domains are supported from Oracle Database 23ai onwards. If node-oracledb Thick mode is used, Oracle Client 23ai is also required.
 
-            - ``domainSchema``: The schema name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a SQL domain, this property value is `undefined`. SQL domains are supported from Oracle Database 23c onwards. If node-oracledb Thick mode is used, Oracle Client 23c is also required.
+            - ``domainSchema``: The schema name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a SQL domain, this property value is `undefined`. SQL domains are supported from Oracle Database 23ai onwards. If node-oracledb Thick mode is used, Oracle Client 23ai is also required.
 
             - ``fetchType``: One of the :ref:`Node-oracledb Type Constant <oracledbconstantsnodbtype>` values.
             - ``isJson``: Indicates if the column is known to contain JSON data. This will be ``true`` for JSON columns (from Oracle Database 21c) and for LOB and VARCHAR2 columns where "IS JSON" constraint is enabled (from Oracle Database 19c). This property will be ``false`` for all the other columns. It will also be ``false`` for any column when Oracle Client 18c or earlier is used in Thick mode or the Oracle Database version is earlier than 19c.
@@ -1179,6 +1179,12 @@ Connection Methods
             - ``nullable``: Indicates whether ``NULL`` values are permitted for this column.
             - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ``, and ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` columns.
             - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` columns.
+            - ``vectorDimensions``: The number of dimensions of the vector column. If the column is not a vector column or allows for any number of dimensions, then the value of this property is *undefined*.
+            - ``vectorFormat``: The storage format of each dimension value in the vector column. If the column is not a vector column or allows for any storage format, then the value of this property is *undefined*.
+
+            .. versionchanged:: 6.5
+
+                The ``vectorDimensions`` and ``vectorFormat`` information attributes were added.
 
             .. versionchanged:: 6.4
 

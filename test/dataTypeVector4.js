@@ -27,8 +27,8 @@
  *
  * DESCRIPTION
  *   Testing Vector Data Type with parallel execution
- *   The default vector distance has been changed to cosine, previously it was Euclidean.
- * 
+ *   The default vector distance has been changed to cosine, previously it was
+ *   Euclidean.
  *****************************************************************************/
 'use strict';
 

@@ -41,7 +41,7 @@ const dbConfig = require('./dbconfig.js');
 
 describe('101.binding_defaultBindInout.js', function() {
 
-  var connection = null;
+  let connection = null;
   const executeSql = async function(sql) {
     await connection.execute(sql);
   };
@@ -57,7 +57,7 @@ describe('101.binding_defaultBindInout.js', function() {
 
   const doTest1 = async function(table_name, procName, dbColType, content, sequence) {
 
-    var bindconst = {
+    let bindconst = {
       i: sequence,
       c: content
     };

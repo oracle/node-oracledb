@@ -97,9 +97,9 @@ describe('292. passwordExpiryWarning.js', function() {
       connectString: dbConfig.connectString
     };
 
-    const isDB23c = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const conn = await oracledb.getConnection(credentials);
-    if (isDB23c) {
+    if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
       assert.strictEqual(conn.warning.errorNum, 28098);
     } else {
@@ -120,11 +120,11 @@ describe('292. passwordExpiryWarning.js', function() {
       poolTimeout: 60,
       homogeneous: true
     };
-    const isDB23c = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection();
     await testsUtil.sleep(1000);
-    if (isDB23c) {
+    if (isDB23ai) {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28098:"), true);
     } else {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28002:"), true);
@@ -147,13 +147,13 @@ describe('292. passwordExpiryWarning.js', function() {
       poolTimeout: 60,
       homogeneous: false
     };
-    const isDB23c = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection({
       user: userName,
       password: password
     });
-    if (isDB23c) {
+    if (isDB23ai) {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28098:"), true);
     } else {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28002:"), true);
@@ -195,10 +195,10 @@ describe('292. passwordExpiryWarning.js', function() {
       homogeneous: true
     };
 
-    const isDB23c = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection();
-    if (isDB23c) {
+    if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
     } else {
       assert.strictEqual(conn.warning.code, 'ORA-28002');
@@ -226,10 +226,10 @@ describe('292. passwordExpiryWarning.js', function() {
       homogeneous: true
     };
 
-    const isDB23c = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection();
-    if (isDB23c) {
+    if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
     } else {
       assert.strictEqual(conn.warning.code, 'ORA-28002');
@@ -257,9 +257,9 @@ describe('292. passwordExpiryWarning.js', function() {
       connectString: dbConfig.connectString
     };
 
-    const isDB23c = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const conn = await oracledb.getConnection(credentials);
-    if (isDB23c) {
+    if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
       assert.strictEqual(conn.warning.errorNum, 28098);
     } else {
