@@ -32,13 +32,13 @@
  *****************************************************************************/
 'use strict';
 
-let random = exports;
+const random = exports;
 module.exports = random;
 
-// generate a random string which length is 'length', with specialStr in it's head and tail
+// generate a random string which length is 'length', with specialStr in its head and tail
 random.getRandomString = function(length, specialStr) {
   let str = '';
-  let strLength = length - specialStr.length * 2;
+  const strLength = length - specialStr.length * 2;
   for (; str.length < strLength; str += Math.random().toString(36).slice(2));
   str = str.slice(0, strLength);
   str = specialStr + str + specialStr;
@@ -53,7 +53,7 @@ random.getRandomLengthString = function(length) {
 };
 
 random.getRandomNumArray = function(size) {
-  let numbers = new Array(size);
+  const numbers = new Array(size);
   for (let i = 0; i < numbers.length; i++) {
     numbers[i] = this.getRandomInt(1, 9999999);
   }
@@ -67,9 +67,9 @@ random.getRandomInt = function(min, max) {
 };
 
 random.getIntArray = function(N) {
-  let arr = Array.apply(null, Array(N));
+  const arr = Array.apply(null, Array(N));
   // The map() method creates a new array with the results of calling a provided function on every element in this array.
-  //   var new_array = arr.map(callback[, thisArg])
+  //   let new_array = arr.map(callback[, thisArg])
   // Parameters
   //  callback
   //     Function that produces an element of the new Array, taking three arguments:

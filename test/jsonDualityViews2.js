@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -46,6 +46,7 @@ describe('273. jsonDualityView2.js', function() {
     isRunnable = (!dbConfig.test.drcp);
     if (isRunnable) {
       isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+      isRunnable = isRunnable && dbConfig.test.DBA_PRIVILEGE;
     }
     if (!isRunnable || dbConfig.test.isCmanTdm) {
       this.skip();

@@ -133,7 +133,7 @@ describe('242. dbObject18.js', () => {
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.12
 
-    it('242.1.3 negative: set oracledb.dbObjectAsPojo to invalid value: string true', async () => {
+    it('242.1.13 negative: set oracledb.dbObjectAsPojo to invalid value: string true', async () => {
       await assert.rejects(
         async () => { //eslint-disable-line
           oracledb.dbObjectAsPojo = 'true';
@@ -267,12 +267,8 @@ describe('242. dbObject18.js', () => {
     after(async () => {
 
       await testsUtil.dropTable(conn, TABLE);
-
-      let sql = testsUtil.sqlDropType(TEAM_T);
-      await conn.execute(sql);
-
-      sql = testsUtil.sqlDropType(PLAYER_T);
-      await conn.execute(sql);
+      await testsUtil.dropType(conn, TEAM_T);
+      await testsUtil.dropType(conn, PLAYER_T);
 
       await conn.close();
 
@@ -343,15 +339,14 @@ describe('242. dbObject18.js', () => {
       sql = `
         CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
       `;
-      sql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(sql);
+      await testsUtil.createTable(conn, TABLE, sql);
 
     }); // before()
 
     after(async () => {
-      await conn.execute(testsUtil.sqlDropType(TEAM_T));
-      await conn.execute(testsUtil.sqlDropType(PLAYER_T));
-      await conn.execute(testsUtil.sqlDropTable(TABLE));
+      await testsUtil.dropTable(conn, TABLE);
+      await testsUtil.dropType(conn, TEAM_T);
+      await testsUtil.dropType(conn, PLAYER_T);
       await conn.close();
       oracledb.dbObjectAsPojo = false;
     }); // after()
@@ -463,21 +458,15 @@ describe('242. dbObject18.js', () => {
       sql = `
         CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
       `;
-      sql = testsUtil.sqlCreateTable(TABLE, sql);
-      await conn.execute(sql);
+      await testsUtil.createTable(conn, TABLE, sql);
 
     }); // before()
 
     after(async () => {
 
-      let sql = testsUtil.sqlDropTable(TABLE);
-      await conn.execute(sql);
-
-      sql = testsUtil.sqlDropType(TEAM_T);
-      await conn.execute(sql);
-
-      sql = testsUtil.sqlDropType(PLAYER_T);
-      await conn.execute(sql);
+      await testsUtil.dropTable(conn, TABLE);
+      await testsUtil.dropType(conn, TEAM_T);
+      await testsUtil.dropType(conn, PLAYER_T);
 
       await conn.close();
 

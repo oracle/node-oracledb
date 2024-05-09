@@ -4853,7 +4853,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         242.1.10 negative: set oracledb.dbObjectAsPojo to invalid value: null
         242.1.11 negative: set oracledb.dbObjectAsPojo to invalid value: 0
         242.1.12 negative: set oracledb.dbObjectAsPojo to invalid value: number
-        242.1.3 negative: set oracledb.dbObjectAsPojo to invalid value: string true
+        242.1.13 negative: set oracledb.dbObjectAsPojo to invalid value: string true
         242.1.14 negative: set oracledb.dbObjectAsPojo to invalid value: string false
         242.1.15 negative: set oracledb.dbObjectAsPojo to invalid value: undefined
         242.1.16 negative: set oracledb.dbObjectAsPojo to invalid value: NaN

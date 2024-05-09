@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -128,10 +128,10 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
-      await connection.execute(testsUtil.sqlDropTable(`employees`));
-      await connection.execute(testsUtil.sqlDropTable(`departments`));
-      await connection.execute(`drop view emp_ov`);
-      await connection.execute(`drop view dept_ov`);
+      await testsUtil.dropTable(connection, 'employees');
+      await testsUtil.dropTable(connection, 'departments');
+      await connection.execute(`drop view if exists emp_ov`);
+      await connection.execute(`drop view if exists dept_ov`);
       await connection.close();
     });
 
@@ -291,10 +291,10 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
-      await connection.execute(testsUtil.sqlDropTable(`employees`));
-      await connection.execute(testsUtil.sqlDropTable(`departments`));
-      await connection.execute(`drop view emp_ov`);
-      await connection.execute(`drop view dept_ov`);
+      await testsUtil.dropTable(connection, 'employees');
+      await testsUtil.dropTable(connection, 'departments');
+      await connection.execute(`drop view if exists emp_ov`);
+      await connection.execute(`drop view if exists dept_ov`);
       await connection.close();
     });
 
@@ -326,7 +326,7 @@ describe('272. jsonDualityView1.js', function() {
       await connection.execute(`INSERT INTO employees VALUES
             ( 101
             , 'New'
-          , 'Name'
+            , 'Name'
             , 10
             )`);
       query = `select * from emp_ov order by 1`;
@@ -454,9 +454,9 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
-      await connection.execute(testsUtil.sqlDropTable(`student_class`));
-      await connection.execute(testsUtil.sqlDropTable(`class`));
-      await connection.execute(testsUtil.sqlDropTable(`student`));
+      await testsUtil.dropTable(connection, 'student_class');
+      await testsUtil.dropTable(connection, 'class');
+      await testsUtil.dropTable(connection, 'student');
       await connection.close();
     });
 
@@ -755,7 +755,7 @@ describe('272. jsonDualityView1.js', function() {
                                   )`;
 
       before(async function() {
-        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm) {
+        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm || !dbConfig.test.DBA_PRIVILEGE) {
           this.skip();
         }
         const credential = {
@@ -773,7 +773,7 @@ describe('272. jsonDualityView1.js', function() {
       });
 
       after(async function() {
-        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm) {
+        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm || !dbConfig.test.DBA_PRIVILEGE) {
           return;
         }
         await connection.execute(`drop user ${user1} cascade`);

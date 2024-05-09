@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -52,13 +52,17 @@ describe('220. examineOwnedProperties.js', () => {
           "RATING" VARCHAR2(4000)
       )
     `;
-    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await testsUtil.createTable(conn, TABLE, sql);
   }); // before()
 
   after(async () => {
     const sql = `DROP TABLE ${TABLE} PURGE`;
     await conn.execute(sql);
+    if (Object.prototype.noop) {
+    // For 220.1, if test fails, ensure the noop function
+    // object gets destroyed, if created
+      delete Object.prototype.noop;
+    }
     await conn.close();
   }); // after()
 

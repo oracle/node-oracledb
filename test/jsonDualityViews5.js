@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -46,6 +46,7 @@ describe('276. jsonDualityView5.js', function() {
     isRunnable = (!dbConfig.test.drcp);
     if (isRunnable) {
       isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
+      isRunnable = isRunnable && dbConfig.test.DBA_PRIVILEGE;
     }
     if (!isRunnable || dbConfig.test.isCmanTdm) {
       this.skip();
@@ -100,9 +101,9 @@ describe('276. jsonDualityView5.js', function() {
   after(async function() {
     if (!isRunnable || dbConfig.test.isCmanTdm) return;
 
-    await connection.execute(testsUtil.sqlDropTable('student_class'));
-    await connection.execute(testsUtil.sqlDropTable('class'));
-    await connection.execute(testsUtil.sqlDropTable('student'));
+    await testsUtil.dropTable(connection, 'student_class');
+    await testsUtil.dropTable(connection, 'class');
+    await testsUtil.dropTable(connection, 'student');
     await connection.close();
 
     await dbaConn.execute(`drop user njs_jsonDv5 cascade`);

@@ -81,6 +81,7 @@ describe("150. fetchArraySize3.js", function() {
 
   after(async function() {
     await connection.close();
+    assert.strictEqual(oracledb.fetchArraySize, default_fetcArraySize);
   });
 
   describe("150.1 DML binding", function() {
