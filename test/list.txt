@@ -5832,7 +5832,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     298.10 no parallel delete operation on vector columns
 
   299. invalidNumber.js
-    299.1 throws error for invalid numbers
+    299.1 throws error for invalid numbers(largest exponent + 1)
+    299.2 throws error for invalid numbers(smallest exponent - 1)
 
   300. bigInt.js
     300.1 can bind bigInts

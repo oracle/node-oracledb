@@ -7,6 +7,15 @@ node-oracledb Release Notes
 
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
+node-oracledb `v6.5.1 <https://github.com/oracle/node-oracledb/compare/v6.5.0...v6.5.1>`__ (TBD)
+-------------------------------------------------------------------------------------------------------
+
+Thin Mode Changes
++++++++++++++++++
+
+#) Fixed exponent check condition for out-of-bounds number.
+   See `Issue #1659 <https://github.com/oracle/node-oracledb/issues/1659>`__.
+
 node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...v6.5.0>`__ (2 May 2024)
 -------------------------------------------------------------------------------------------------------
 

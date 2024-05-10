@@ -38,7 +38,7 @@ const testsUtil = require('./testsUtil.js');
 
 describe('299. invalidNumber.js', function() {
   let conn;
-  let tableName = 'nodb_num';
+  const tableName = 'nodb_num';
 
   before(async function() {
     conn = await oracledb.getConnection(dbConfig);
@@ -51,8 +51,8 @@ describe('299. invalidNumber.js', function() {
     await conn.close();
   });
 
-  it('299.1 throws error for invalid numbers', async () => {
-    const idv = 1e+131;
+  it('299.1 throws error for invalid numbers(largest exponent + 1)', async () => {
+    const idv = 1e+126;
     const sql = 'INSERT INTO nodb_num VALUES(:cid)';
     const binds = { cid: { val: idv, type: oracledb.NUMBER}};
     await assert.rejects(
@@ -60,5 +60,15 @@ describe('299. invalidNumber.js', function() {
       /NJS-115:/
     );
   }); // 299.1
+
+  it('299.2 throws error for invalid numbers(smallest exponent - 1)', async () => {
+    const idv = 1e-131;
+    const sql = 'INSERT INTO nodb_num VALUES(:cid)';
+    const binds = { cid: { val: idv, type: oracledb.NUMBER}};
+    await assert.rejects(
+      async () => await conn.execute(sql, binds),
+      /NJS-115:/
+    );
+  }); // 299.2
 
 });
