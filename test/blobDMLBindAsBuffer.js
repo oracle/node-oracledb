@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -429,7 +429,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       await checkInsertResult(id, content_2);
     }); // 82.2.1
 
-    it('82.2.2 update a cloumn with EMPTY_BLOB', async function() {
+    it('82.2.2 update a column with EMPTY_BLOB', async function() {
       const id = insertID++;
       const contentLength_1 = 50000;
       const specialStr_1 = "82.2.2";

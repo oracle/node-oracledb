@@ -187,7 +187,10 @@ instead of ``result.metadata[0].fetchType == 2001``.
 
         .. versionadded:: 6.5
 
-Note that the values for these constants changed in node-oracledb 4.0.
+.. versionchanged:: 4.0
+
+    The values of the constants were changed. This change is not applicable to
+    the constants introduced after node-oracledb 4.0.
 
 .. _oracledbconstantsnodbtype:
 
@@ -890,10 +893,10 @@ Constants for the :ref:`vectorFormat <execmetadata>` attribute.
     * - ``oracledb.VECTOR_FORMAT_FLOAT32``
       - 2
       - The storage format of each dimension value in the vector column is a 32-bit floating-point number.
-    * - ``VECTOR_FORMAT_FLOAT64``
+    * - ``oracledb.VECTOR_FORMAT_FLOAT64``
       - 3
       - The storage format of each dimension value in the vector column is a 64-bit floating-point number.
-    * - ``VECTOR_FORMAT_INT8``
+    * - ``oracledb.VECTOR_FORMAT_INT8``
       - 4
       - The storage format of each dimension value in the vector column is an 8-bit signed integer.
 

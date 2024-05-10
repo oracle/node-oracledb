@@ -1657,7 +1657,7 @@ Overview of node-oracledb functional tests
         81.1.19 works with bind in maxSize smaller than string length
      81.2 CLOB, UPDATE
         81.2.1 update EMPTY_CLOB column
-        81.2.2 update a cloumn with EMPTY_CLOB
+        81.2.2 update a column with EMPTY_CLOB
         81.2.3 update EMPTY_CLOB column with empty string
         81.2.4 update empty string column
         81.2.5 update a column with empty string
@@ -1685,7 +1685,7 @@ Overview of node-oracledb functional tests
         82.1.19 works with bind in maxSize smaller than buffer size
     82.2 BLOB, UPDATE
         82.2.1 update EMPTY_BLOB column
-        82.2.2 update a cloumn with EMPTY_BLOB
+        82.2.2 update a column with EMPTY_BLOB
         82.2.3 update EMPTY_BLOB column with empty buffer
         82.2.4 update empty buffer column
         82.2.5 update a column with empty buffer

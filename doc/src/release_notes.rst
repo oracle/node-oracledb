@@ -51,6 +51,12 @@ Common Changes
     See `PR #1572 <https://github.com/oracle/node-oracledb/pull/1572>`__
     (Slawomir Osoba).
 
+#)  Test case improvements and additions for the supported Oracle Database
+    23ai features.
+
+#)  Documentation updates and additions for the supported Oracle Database
+    23ai features.
+
 Thin Mode Changes
 ++++++++++++++++++
 

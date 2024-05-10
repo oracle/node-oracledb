@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -46,7 +46,8 @@ describe('287. sodaOpLock.js', () => {
     const clientVersion = testsUtil.getClientVersion();
 
     let isClientOK;
-    if (clientVersion < 2000000000) {
+    if (clientVersion < 2000000000 ||
+        (clientVersion >= 2100000000 && clientVersion < 2103000000)) {
       isClientOK = false;
     } else {
       isClientOK = true;

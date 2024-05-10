@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -42,11 +42,17 @@ describe('286. listIndexes.js', function() {
   let conn = null;
 
   before(async function() {
-    const runnable = await testsUtil.isSodaRunnable();
+    let runnable = await testsUtil.isSodaRunnable();
+    // For listIndexes, Oracle Client library version 19.13 (or later DBRU)
+    // or version 21.3 (or higher) is needed
+    runnable = runnable && (testsUtil.getClientVersion >= 1913000000 ||
+      (testsUtil.getClientVersion >= 2100000000 && testsUtil.getClientVersion >= 2103000000))
+    if (!oracledb.thin) {
+      await sodaUtil.cleanup();
+    }
     if (!runnable) {
       this.skip();
     }
-    await sodaUtil.cleanup();
     conn = await oracledb.getConnection(dbconfig);
   });
 
