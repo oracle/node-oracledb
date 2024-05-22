@@ -892,13 +892,13 @@ Constants for the :ref:`vectorFormat <execmetadata>` attribute.
       - Description
     * - ``oracledb.VECTOR_FORMAT_FLOAT32``
       - 2
-      - The storage format of each dimension value in the vector column is a 32-bit floating-point number.
+      - The storage format of each dimension value in the VECTOR column is a 32-bit floating-point number.
     * - ``oracledb.VECTOR_FORMAT_FLOAT64``
       - 3
-      - The storage format of each dimension value in the vector column is a 64-bit floating-point number.
+      - The storage format of each dimension value in the VECTOR column is a 64-bit floating-point number.
     * - ``oracledb.VECTOR_FORMAT_INT8``
       - 4
-      - The storage format of each dimension value in the vector column is an 8-bit signed integer.
+      - The storage format of each dimension value in the VECTOR column is an 8-bit signed integer.
 
 .. _oracledbproperties:
 

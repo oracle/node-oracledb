@@ -1179,8 +1179,8 @@ Connection Methods
             - ``nullable``: Indicates whether ``NULL`` values are permitted for this column.
             - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ``, and ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` columns.
             - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` columns.
-            - ``vectorDimensions``: The number of dimensions of the vector column. If the column is not a vector column or allows for any number of dimensions, then the value of this property is *undefined*.
-            - ``vectorFormat``: The storage format of each dimension value in the vector column. If the column is not a vector column or allows for any storage format, then the value of this property is *undefined*.
+            - ``vectorDimensions``: The number of dimensions of the VECTOR column. If the column is not a VECTOR column or allows for any number of dimensions, then the value of this property is *undefined*.
+            - ``vectorFormat``: The storage format of each dimension value in the VECTOR column. If the column is not a VECTOR column or allows for any storage format, then the value of this property is *undefined*.
 
             .. versionchanged:: 6.5
 
