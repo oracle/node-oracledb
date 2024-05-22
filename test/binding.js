@@ -1119,4 +1119,72 @@ describe('4. binding.js', function() {
       }
     });
   });
+
+  describe('4.15 binding different data types for same sql', function() {
+    let connection;
+    let sysDBAConn;
+    let sid;
+    const numIters = 40;
+
+    before(async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+      const dbaConfig = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectionString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA
+      };
+      sysDBAConn = await oracledb.getConnection(dbaConfig);
+      connection = await oracledb.getConnection(dbConfig);
+      sid = await testsUtil.getSid(connection);
+    });
+
+    after(async function() {
+      if (connection) {
+        await connection.close();
+      }
+      if (sysDBAConn) {
+        await sysDBAConn.close();
+      }
+    });
+
+    it('4.15.1 change bindtypes using bindByPosition for queries',
+      async function() {
+        const sql = 'SELECT :1 FROM DUAL';
+        const dt = new Date();
+        const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+        for (let i = 0; i < numIters; i++) {
+          let result = await connection.execute(sql, [1]);
+          assert.strictEqual(result.rows[0][0], 1);
+          result = await connection.execute(sql, [dt]);
+          assert.deepStrictEqual(result.rows[0][0], dt);
+          result = await connection.execute(sql, [2]);
+          assert.strictEqual(result.rows[0][0], 2);
+        }
+        const newOpenCount = await testsUtil.
+          getOpenCursorCount(sysDBAConn, sid);
+
+        // ensure cursors are not linearly opened as numIters causing leak.
+        assert(newOpenCount - openCount < 4);
+      });
+
+    it('4.15.2 change bindtypes using bindByName for queries',
+      async function() {
+        const sql = 'SELECT :x FROM DUAL';
+        const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+        const dt = new Date();
+        for (let i = 0; i < numIters; i++) {
+          let result = await connection.execute(sql, {x: 1});
+          assert.strictEqual(result.rows[0][0], 1);
+          result = await connection.execute(sql, {x: dt});
+          assert.deepStrictEqual(result.rows[0][0], dt);
+          result = await connection.execute(sql, {x: 2});
+          assert.strictEqual(result.rows[0][0], 2);
+        }
+        const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+
+        // ensure cursors are not linearly opened as numIters causing leak.
+        assert(newOpenCount - openCount < 4);
+      });
+  });
 });

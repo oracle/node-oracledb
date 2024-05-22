@@ -12,6 +12,9 @@ node-oracledb `v6.5.1 <https://github.com/oracle/node-oracledb/compare/v6.5.0...
 
 Thin Mode Changes
 +++++++++++++++++
+#) Fixed issue which throws the `ORA-00932` error, when the same SELECT SQL
+   statement is run for the second time with a different bind type.
+   See `Issue #1669 <https://github.com/oracle/node-oracledb/issues/1669>`__.
 
 #) Fixed exponent check condition for out-of-bounds number.
    See `Issue #1659 <https://github.com/oracle/node-oracledb/issues/1659>`__.

@@ -222,6 +222,7 @@ Overview of node-oracledb functional tests
         6.2.7 DELETE statement, single row matched, Object binding format
         6.2.8 DELETE statement, multiple rows matched, Array binding format
         6.2.9 Negative test - bind value and type mismatch
+        6.2.10 INSERT statement, check re-execute by changing the out bindtype
 
 7. autoCommit.js
     7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting
@@ -4804,6 +4805,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     239.4 implicit binding type
     239.5 check REF CURSOR round-trips with no prefetching
     239.6 check REF CURSOR round-trips with prefetching
+    239.7 check REF CURSOR bind with re-execute
 
 240. errorOffset.js
     240.1 checks the offset value of the error

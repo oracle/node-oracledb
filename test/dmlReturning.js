@@ -515,5 +515,29 @@ describe('6. dmlReturning.js', function() {
       // NJS-011: encountered bind value and type mismatch
     });
 
+    it('6.2.10 INSERT statement, check re-execute by changing the out bindtype', async function() {
+      let id = 50;
+      let sql = `INSERT INTO ${tableName} VALUES (${id}, TO_DATE('2015-01-11','YYYY-DD-MM'))
+      RETURNING num, content INTO :rnum, :rcontent`;
+      const dt = new Date('2015-11-01 00:00:00');
+      const bindVar =
+        {
+          rnum: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
+          rcontent: { type: oracledb.DATE, dir: oracledb.BIND_OUT }
+        };
+
+      // outbind as date.
+      let result = await connection.execute(sql, bindVar);
+      assert.strictEqual(result.outBinds.rcontent[0].getTime(), dt.getTime());
+
+      // Change outbind type to string
+      bindVar.rcontent.type = oracledb.STRING;
+      id = 51;
+      sql = `INSERT INTO ${tableName} VALUES (${id}, TO_DATE('2015-01-11','YYYY-DD-MM'))
+      RETURNING num, content INTO :rnum, :rcontent`;
+      result = await connection.execute(sql, bindVar);
+      assert.strictEqual(result.outBinds.rcontent[0], '01-NOV-15');
+    });
+
   }); // 6.2
 });

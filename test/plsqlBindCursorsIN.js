@@ -263,4 +263,36 @@ describe('239. plsqlBindCursorsIN.js', () => {
     ((oracledb.thin) ? assert.strictEqual(rt, 3) : assert.strictEqual(rt, 2));
   }); // 239.6
 
+
+  it('239.7 check REF CURSOR bind with re-execute ', async () => {
+    const refCursorOptions = {
+      resultSet: true,
+    };
+    let result = await conn.execute(sqlRefCursor, [], refCursorOptions);
+
+    const plsql = `begin ${procName1}(:bv); end;`;
+    await conn.execute(
+      plsql,
+      {
+        bv: {val: result.resultSet, type: oracledb.CURSOR, dir: oracledb.BIND_IN, maxSize: 10 }
+      }
+    );
+    result = await conn.execute(sqlRefCursor, [], refCursorOptions);
+
+    // Check Re-execute.
+    await conn.execute(
+      plsql,
+      {
+        bv: {val: result.resultSet, type: oracledb.CURSOR, dir: oracledb.BIND_IN, maxSize: 10 }
+      }
+    );
+
+    await result.resultSet.close();
+
+    const sqlQuery = `select * from ${tableName}`;
+    const queryResult = await conn.execute(sqlQuery);
+
+    assert.strictEqual(queryResult.rows.length, 3);
+  }); // 239.7
+
 });
