@@ -430,17 +430,39 @@ describe('55. resultSet2.js', function() {
     });
   }); // 55.9
 
-  describe('55.10 resultSet with unsupported data types', function() {
-    it('55.10.1 INTERVAL YEAR TO MONTH data type', async function() {
+  describe('55.10 use Resultset asyncIterator', function() {
+    before(async function() {
+      await setUp(connection, tableName);
+    });
+
+    after(async function() {
+      await clearUp(connection, tableName);
+    });
+
+    it('55.10.1 ', async function() {
+      const result = await connection.execute(
+        "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
+        [],
+        { resultSet: true });
+      const rs = result.resultSet;
+      for await (const row of rs) {
+        assert.strictEqual(row.length, 2);
+      }
+      await rs.close();
+    });
+  }); // 55.10
+
+  describe('55.11 Negative - resultSet with unsupported data types', function() {
+    it('55.11.1 INTERVAL YEAR TO MONTH data type', async function() {
       await assert.rejects(async () => {
         await connection.execute(
           "SELECT dummy, to_yminterval('1-3') FROM dual", [], { resultSet: true });
       }, /NJS-010:/);
     });
 
-  }); // 55.10
+  }); // 55.11
 
-  describe.skip('55.11 bind a cursor BIND_INOUT', function() {
+  describe.skip('55.12 bind a cursor BIND_INOUT', function() {
 
     before('prepare table nodb_rs2_emp', async function() {
       await setUp(connection, tableName);
@@ -450,7 +472,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.11.1 has not supported binding a cursor with BIND_INOUT', async function() {
+    it('55.12.1 has not supported binding a cursor with BIND_INOUT', async function() {
       const proc =
           "CREATE OR REPLACE PROCEDURE nodb_rs2_get_emp_inout (p_in IN NUMBER, p_out IN OUT SYS_REFCURSOR) \
              AS \
@@ -471,9 +493,9 @@ describe('55. resultSet2.js', function() {
       await connection.execute("DROP PROCEDURE nodb_rs2_get_emp_inout");
     });
 
-  }); // 55.11
+  }); // 55.12
 
-  describe('55.12 Invalid Ref Cursor', function() {
+  describe('55.13 Negative - Invalid Ref Cursor', function() {
     const proc =
       "CREATE OR REPLACE PROCEDURE get_invalid_refcur (p OUT SYS_REFCURSOR) " +
       "  AS " +
@@ -491,7 +513,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.12.1 ', async function() {
+    it('55.13.1 ', async function() {
       await assert.rejects(async () => {
         await connection.execute(
           "BEGIN get_invalid_refcur ( :p ); END; ",
@@ -500,28 +522,6 @@ describe('55. resultSet2.js', function() {
           });
       }, /NJS-107:/);
 
-    });
-  }); // 55.12
-
-  describe('55.13 use Resultset asyncIterator', function() {
-    before(async function() {
-      await setUp(connection, tableName);
-    });
-
-    after(async function() {
-      await clearUp(connection, tableName);
-    });
-
-    it('55.13.1 ', async function() {
-      const result = await connection.execute(
-        "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",
-        [],
-        { resultSet: true });
-      const rs = result.resultSet;
-      for await (const row of rs) {
-        assert.strictEqual(row.length, 2);
-      }
-      await rs.close();
     });
   }); // 55.13
 

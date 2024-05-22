@@ -38,7 +38,7 @@ Common Changes
 #)  Added support for an Oracle Database 23ai JSON feature improving JSON
     storage usage.
 
-#)  Updated the error thrown during pool reconfiguration from ``ORA-24413`` to
+#)  Updated error thrown during pool reconfiguration from ``ORA-24413`` to
     ``NJS-007`` when ``poolMax`` is *0*.
 
 #)  Error ``NJS-092`` is now thrown during
@@ -60,7 +60,7 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
-#)  Updated the ClientInfo terminal parameter to remove the hardcoded value.
+#)  Updated ClientInfo terminal parameter to remove the hardcoded value.
     See `Issue #1662 <https://github.com/oracle/node-oracledb/issues/1662>`__.
 
 #)  Fixed issue with connecting to Oracle Database, when the full path of
@@ -98,16 +98,16 @@ Thin Mode Changes
 Thick Mode Changes
 +++++++++++++++++++
 
-#)  Fixed an issue with privileges that prevented the
+#)  Fixed issue with privileges that prevented the
     :meth:`oracledb.startup()` method from bringing up the database.
 
 #)  Tightened code to avoid possible unexpected runtime errors during token
     callback.
 
-#)  Fixed an issue that caused unexpected behavior with SODA functions in
+#)  Fixed issue that caused unexpected behavior with SODA functions in
     some platforms.
 
-#)  Fixed the bug which inserted the invalid value `~`  into the database
+#)  Fixed bug which inserted the invalid value `~`  into the database
     if an unacceptable out-of-bounds number is bound to a DML statement. Now,
     numbers such as 1.0e+128, -1e128, and so on will throw an error
     ``NJS-115: value cannot be represented as an Oracle Database number``.
@@ -115,7 +115,7 @@ Thick Mode Changes
     precisions where `2.3` is returned as `2.300003`.
     See `Issue #1659 <https://github.com/oracle/node-oracledb/issues/1659>`__.
 
-#)  Fixed a regression that caused :meth:`~aqQueue.deqOne()` and
+#)  Fixed regression that caused :meth:`~aqQueue.deqOne()` and
     :meth:`~aqQueue.deqMany()` to return an invalid object in node-oracledb
     6.4 instead of undefined, which was returned in the previous releases.
     See `Issue #1656 <https://github.com/oracle/node-oracledb/issues/1656>`__.
@@ -188,7 +188,7 @@ Common Changes
 Thin Mode Changes
 ++++++++++++++++++
 
-#)  Fixed the intermittent error ``NJS-103`` which was seen while fetching
+#)  Fixed intermittent error ``NJS-103`` which was seen while fetching
     large number of CLOB columns whose metadata is split across multiple
     packets.
     `Issue #1642 <https://github.com/oracle/node-oracledb/issues/1642>`__.
@@ -367,7 +367,7 @@ Thick Mode Changes
     <enablingthick>` binary module.  `PR #1602
     <https://github.com/oracle/node-oracledb/pull/1602>`__ (Kwok Chun Man).
 
-#)  Fixed a segfault while populating a collection with a BLOB
+#)  Fixed segfault while populating a collection with a BLOB
     property. See `node-oracledb public Slack channel
     <https://node-oracledb.slack.com/ archives/CCM8AMSF7/p1694544451676639>`__.
 
@@ -516,7 +516,7 @@ Thin Mode Changes
     in the `V$CPOOL_STATS` view by default. This fix optimizes the use of DRCP
     connections.
 
-#)  Fixed the issue where dates with negative years are not inserted and
+#)  Fixed issue where dates with negative years are not inserted and
     fetched correctly.
 
 #)  Error handling and message improvements:

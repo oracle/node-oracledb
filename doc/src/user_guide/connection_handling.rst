@@ -2983,10 +2983,12 @@ applications more control over pooled server reuse.
 
 You should thoroughly test your application when using implicit connection
 pooling to ensure that the internal reuse of database servers does not cause
-any problems. For example, the connection `session id and serial number
-<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9F0DCAEA-A67E
--4183-89E7-B1555DC591CE>`__ may vary throughout the lifetime of the
-application connection as different servers may be used at different times.
+any problems. For example, any session state such as the connection `session
+id and serial number <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id
+=GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE>`__ will vary throughout the
+lifetime of the application connection because different servers may be used
+at different times. Another example is when using a statement boundary of
+*transaction*. In this scenario, any commit can invalidate open cursors.
 
 .. _privconn:
 

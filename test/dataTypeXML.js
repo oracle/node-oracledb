@@ -55,6 +55,9 @@ describe('181. dataTypeXML.js', function() {
 
   before('create table and insert a row', async function() {
 
+    // Storing XMLType column as clob is disallowed in Oracle ADB.
+    if (dbConfig.test.isCloudService) this.skip();
+
     const connection = await oracledb.getConnection(dbConfig);
 
     let sql =
@@ -93,6 +96,9 @@ describe('181. dataTypeXML.js', function() {
   }); // before
 
   after('drop table', async () => {
+
+    if (dbConfig.test.isCloudService) return;
+
     const connection = await oracledb.getConnection(dbConfig);
     const sql = "BEGIN EXECUTE IMMEDIATE 'DROP TABLE " + tableName + "'; " +
               "EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END;";
