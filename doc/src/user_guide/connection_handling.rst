@@ -2995,11 +2995,14 @@ at different times. Another example is when using a statement boundary of
 Privileged Connections
 ======================
 
-Database privileges such as ``SYSDBA`` can be obtained when using
-standalone connections. Use one of the :ref:`Privileged Connection
-Constants <oracledbconstantsprivilege>` with the connection
-:ref:`privilege <getconnectiondbattrsprivilege>` property, for
-example:
+Database privileges such as ``SYSDBA`` or ``SYSOPER`` can be associated with
+the user when creating standalone and pooled connections. You can use one of
+the :ref:`Privileged Connection Constants <oracledbconstantsprivilege>` as the
+database privilege for the user.
+
+For :ref:`standalone connections <standaloneconnection>`, you must set the
+:ref:`privilege <getconnectiondbattrsprivilege>` property in
+:meth:`oracledb.getConnection()` as shown in the example below:
 
 .. code-block:: javascript
 
@@ -3012,9 +3015,64 @@ example:
 
     console.log("I have power");
 
-Note that if node-oracledb is using the Oracle Client libraries located
-in the Oracle Database installation, that is on the same machine as the
-database and is not using Oracle Instant Client, then operating system
+For :ref:`pooled connections <connpooling>` with node-oracledb Thin mode, you
+must set the :ref:`privilege <createpoolpoolattrsprivilege>`,
+:ref:`user <createpoolpoolattrsuser>`, and
+:ref:`password <createpoolpoolattrspassword>` properties in
+:meth:`oracledb.createPool()`. For example:
+
+.. code-block:: javascript
+
+    const pool = await oracledb.createPool({
+        user          : "sys",
+        password      : "secret",
+        connectString : "localhost/orclpdb1",
+        privilege     : oracledb.SYSDBA
+        poolMin       : 2,
+        poolMax       : 10
+    });
+
+    const connection = await pool.getConnection();
+
+The ability to specify database privileges with pooled connections in Thin
+mode was introduced in node-oracledb 6.5.1.
+
+For node-oracledb Thick mode, privileged connections can only be created with
+a :ref:`heterogeneous pool <connpoolproxy>`. You must set the
+:ref:`homogeneous <createpoolpoolattrshomogeneous>` property to *false* in
+:meth:`oracledb.createPool()` to use a heterogeneous pool. You can then
+specify the :ref:`privilege <getconnectiondbattrsprivilege>`,
+:ref:`user <getconnectiondbattrsuser>`, and
+:ref:`password <getconnectiondbattrspassword>` properties in
+:meth:`pool.getConnection()`. For example:
+
+.. code-block:: javascript
+
+    const pool = await oracledb.createPool({
+        connectString : "localhost/orclpdb1",
+        homogeneous   : false,
+        poolMax       : 10
+    });
+
+    const connection = await pool.getConnection({
+        user          : "sys",
+        password      : "secret",
+        privilege     : oracledb.SYSDBA
+    })
+
+If you create a homogeneous pool with an invalid value specified in the
+:ref:`privilege <createpoolpoolattrsprivilege>` property of
+:meth:`oracledb.createPool()` in both node-oracledb Thin and Thick modes, then
+the following error is raised::
+
+    NJS-007: invalid value for "privilege" in parameter 1
+
+However, any valid ``privilege`` property value is ignored in node-oracledb
+Thick mode during homogeneous pool creation.
+
+Note that if node-oracledb Thick mode is using the Oracle Client libraries
+located in the Oracle Database installation, that is on the same machine as
+the database and is not using Oracle Instant Client, then operating system
 privileges may be used for authentication. In this case the password
 value is ignored. For example on Linux, membership of the operating
 system `dba <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=

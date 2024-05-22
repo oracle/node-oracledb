@@ -2213,6 +2213,18 @@ Oracledb Methods
             See :ref:`Connection Pool Cache <connpoolcache>` for details and examples.
 
             .. versionadded:: 1.11
+        * - ``privilege``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrsprivilege:
+
+            The privilege to use when establishing a connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. All privileges must be specified individually except for ``oracledb.SYSPRELIM``.
+
+            ``oracledb.SYSPRELIM`` is specified only for startup and shutdown calls and must be used in combination with ``SYSDBA`` (``oracledb.SYSDBA | oracledb.SYSPRELIM``) or ``SYSOPER`` (``oracledb.SYOPER | oracledb.SYSPRELIM``).
+
+            See :ref:`Privileged Connections <privconn>` for more information.
+
+            .. versionadded:: 6.5.1
         * - ``configDir``
           - String
           - Thin
@@ -3075,13 +3087,17 @@ Oracledb Methods
           - Both
           - .. _getconnectiondbattrsprivilege:
 
-            The privilege to use when establishing connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. Multiple privileges may be used by when required, for example ``oracledb.SYSDBA | oracledb.SYSPRELIM``.
+            The privilege to use when establishing connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. All privileges must be specified individually except for ``oracledb.SYSPRELIM``.
+
+            ``oracledb.SYSPRELIM`` is specified only for startup and shutdown calls and must be used in combination with ``SYSDBA`` (``oracledb.SYSDBA | oracledb.SYSPRELIM``) or ``SYSOPER`` (``oracledb.SYOPER | oracledb.SYSPRELIM``).
 
             See :ref:`Privileged Connections <privconn>` for more information.
 
-            Note only non-pooled connections can be privileged.
-
             .. versionadded:: 2.1
+
+            .. versionchanged:: 6.5.1
+
+              The database privilege can be specified for pooled connections.
         * - ``shardingKey``
           - Array
           - Thick

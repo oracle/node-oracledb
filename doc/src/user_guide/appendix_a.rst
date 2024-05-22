@@ -598,6 +598,12 @@ differs from the node-oracledb Thick mode in the following ways:
   The node-oracledb Thick mode does not support all the connection mode
   privileges.
 
+- In node-oracledb Thin mode, :ref:`privileged connections <privconn>` can be
+  created with homogeneous pools.
+
+  The node-oracledb Thick mode can only create privileged connections with
+  :ref:`heterogeneous pools <connpoolproxy>`.
+
 - In node-oracledb Thick mode, the worker threads can be increased by setting
   the environment variable ``UV_THREADPOOL_SIZE`` before starting Node.js. This
   is not applicable to the Thin mode since it does not use threads.
