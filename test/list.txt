@@ -23,7 +23,7 @@ Overview of node-oracledb functional tests
         1.7.2 Negative - invalid type, a String
         1.7.3 Negative value - random constants
         1.7.4 Negative value - NaN
-        1.7.5 gets ignored when acquiring a connection from Pool
+        1.7.5 Negative - throws error, when invalid privilege is provided for creating a Pool
         1.7.6 negative test case SYSPRELIM & SYSASM
     1.8 Ping method
         1.8.1 ping() checks the connection is usable
@@ -110,6 +110,13 @@ Overview of node-oracledb functional tests
         2.16.5 events override to false
         2.16.6 externalAuth override to false
         2.16.7 externalAuth override to true
+    2.17 Check execute same/different query with new/released session from pool
+        2.17.1 same query execution from new and released session
+        2.17.2 different query execution from new and released session
+    2.18 pool stats
+        2.18.1 driver mode in pool stats
+    2.19 DBA and Non-DBA user login with SYSDBA privilege
+        2.19.1 DBA user with SYSDBA privilege
 
   3. examples.js
     3.1 connect.js

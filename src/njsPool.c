@@ -352,6 +352,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_getConnection, 1, NULL)
     if (!njsUtils_getNamedPropertyString(env, args[0], "connectionClass",
             &baton->connectionClass, &baton->connectionClassLength))
         return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "privilege",
+            &baton->privilege))
+        return false;
     if (!njsUtils_getNamedPropertyString(env, args[0], "user", &baton->user,
             &baton->userLength))
         return false;
@@ -389,6 +392,8 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
     // populate connection creation parameters
     if (dpiContext_initConnCreateParams(baton->globals->context, &params) < 0)
         return njsBaton_setErrorDPI(baton);
+    if (baton->privilege)
+        params.authMode = (dpiAuthMode) baton->privilege;
     params.matchAnyTag = baton->matchAnyTag;
     params.connectionClass = baton->connectionClass;
     params.connectionClassLength = (uint32_t) baton->connectionClassLength;

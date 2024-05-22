@@ -10,6 +10,11 @@ For deprecated and desupported features, see :ref:`Deprecations and desupported 
 node-oracledb `v6.5.1 <https://github.com/oracle/node-oracledb/compare/v6.5.0...v6.5.1>`__ (TBD)
 -------------------------------------------------------------------------------------------------------
 
+Common Changes
+++++++++++++++
+
+#)  Test and documentation updates.
+
 Thin Mode Changes
 +++++++++++++++++
 #) Fixed issue which throws the `ORA-00932` error, when the same SELECT SQL
@@ -18,6 +23,18 @@ Thin Mode Changes
 
 #) Fixed exponent check condition for out-of-bounds number.
    See `Issue #1659 <https://github.com/oracle/node-oracledb/issues/1659>`__.
+
+#)  Fixed bug which threw an ``ORA-28009`` error when a pool is created with
+    SYSDBA privilege.
+    See `Issue #1657 <https://github.com/oracle/node-oracledb/issues/1657>`__.
+
+#)  Added internal code change to improve network packet handling.
+
+Thick Mode Changes
++++++++++++++++++++
+
+#)  Fixed bug that ignored the ``privilege`` parameter, when it was passed in
+    the ``pool.getConnection()`` call.
 
 node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...v6.5.0>`__ (2 May 2024)
 -------------------------------------------------------------------------------------------------------
@@ -628,7 +645,6 @@ Thin Mode Changes
 
     - Improved network packet handling.
 
-
 node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...v6.0.0>`__ (24 May 2023)
 --------------------------------------------------------------------------------------------------------
 
@@ -704,7 +720,6 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
     :ref:`accessToken <createpoolpoolattrsaccesstoken>` instead.
 
 #)  Test and documentation improvements.
-
 
 node-oracledb `v5.5.0 <https://github.com/oracle/node-oracledb/compare/v5.4.0...v5.5.0>`__ (7 Sep 2022)
 -------------------------------------------------------------------------------------------------------

@@ -1126,4 +1126,69 @@ describe('2. pool.js', function() {
     }); // 2.18.1
 
   }); // 2.18
+
+  describe('2.19 DBA and Non-DBA user login with SYSDBA privilege', function() {
+    it('2.19.1 DBA user with SYSDBA privilege', async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+
+      // Connection pool configuration with non dba username and password
+      const nondbaConfig = {
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA,
+        poolMin: 2,      // Minimum number of connections in the pool
+        poolMax: 10,     // Maximum number of connections in the pool
+        poolIncrement: 2 // Number of connections to add when needed
+      };
+
+      // Create connection pool non-dba user and password
+      const poolNormal = await oracledb.createPool(nondbaConfig);
+      assert.strictEqual(poolNormal.connectionsInUse, 0);
+      await poolNormal.close(0);
+
+      // Connection pool configuration with DBA user and password
+      let username = "", password = "", poolMin, poolIncr;
+      let priv, connConfig = {};
+      if (oracledb.thin) {
+        username = dbConfig.test.DBA_user;
+        password = dbConfig.test.DBA_password;
+        poolMin = 2;
+        poolIncr = 2;
+        priv = oracledb.SYSDBA;
+      }
+      const dbaConfig = {
+        user: username,
+        password: password,
+        connectString: dbConfig.connectString,
+        privilege: priv,
+        poolMin: poolMin,        // Minimum number of connections in the pool
+        poolMax: 10,             // Maximum number of connections in the pool
+        poolIncrement: poolIncr  // Number of connections to add when needed
+      };
+      if (!oracledb.thin) {
+        dbaConfig.homogeneous = false;
+        connConfig = {
+          privilege: oracledb.SYSDBA,
+          user: dbConfig.test.DBA_user,
+          password: dbConfig.test.DBA_password
+        };
+      }
+      const pool = await oracledb.createPool(dbaConfig);
+
+      // Get a connection from the pool
+      const connection = await pool.getConnection(connConfig);
+      assert.strictEqual(pool.connectionsInUse, 1);
+
+      connConfig.privilege = 100; // invalid value.
+      await assert.rejects(
+        async () => await pool.getConnection(connConfig),
+        /NJS-007: invalid value for "privilege" in parameter 1/
+      );
+
+      // Release the connection back to the pool
+      await connection.close();
+      await pool.close(0);
+    }); // 2.19.1
+  }); // 2.19
 });

@@ -353,13 +353,12 @@ describe('1. connection.js', function() {
       );
     });
 
-    it('1.7.5 gets ignored when acquiring a connection from Pool', async function() {
+    it('1.7.5 Negative - throws error, when invalid privilege is provided for creating a Pool', async function() {
       const credential = {...dbConfig, privilege: null, poolMin: 1};
-
-      const pool = await oracledb.createPool(credential);
-      const conn = await pool.getConnection();
-      await conn.release();
-      await pool.close(0);
+      await assert.rejects(
+        async () => await oracledb.createPool(credential),
+        /NJS-007:/
+      );
     });
 
     it('1.7.6 negative test case SYSPRELIM & SYSASM', async function() {
