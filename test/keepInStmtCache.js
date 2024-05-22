@@ -44,7 +44,7 @@ describe('258. keepInStmtCache.js', function() {
   let sid;
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE || dbConfig.test.implicitPool) {
       // Without DBA privilege, the test cannot get the current parse count!
       // So skip the tests
       this.skip();

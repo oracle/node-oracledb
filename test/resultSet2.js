@@ -216,6 +216,7 @@ describe('55. resultSet2.js', function() {
     });
 
     it('55.5.1 (1) get RS (2) modify data in that table and commit (3) check RS', async function() {
+      if (dbConfig.test.implicitPool) this.skip();
       let rowsCount = 0;
       const result = await connection.execute(
         "SELECT * FROM nodb_rs2_emp ORDER BY employees_id",

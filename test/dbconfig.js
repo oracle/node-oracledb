@@ -37,6 +37,7 @@
  *      If required:
  *      NODE_ORACLEDB_EXTERNALAUTH,
  *      NODE_ORACLEDB_PROXY_SESSION_USER, NODE_ORACLEDB_DRCP,
+ *      NODE_ORACLEDB_IMPLICIT_POOL
  *      NODE_ORACLEDB_WALLET_LOCATION, NODE_ORACLEDB_WALLET_PASSWORD
  *
  *****************************************************************************/
@@ -52,7 +53,8 @@ const config = {
     instantClientPath: '',
     isCloudService: false,
     isCmanTdm: false,
-    drcp: false
+    drcp: false,
+    implicitPool: false
   }
 };
 
@@ -76,6 +78,13 @@ if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
 
 if (process.env.NODE_ORACLEDB_DRCP) {
   config.test.drcp = (process.env.NODE_ORACLEDB_DRCP.toLowerCase() === 'true');
+}
+
+if (process.env.NODE_ORACLEDB_IMPLICIT_POOL) {
+  if (!process.env.NODE_ORACLEDB_DRCP)
+    throw new Error("For Implicit pooling tests, NODE_ORACLEDB_DRCP needs to be enabled! Set the Environment Variable NODE_ORACLEDB_DRCP");
+  else
+    config.test.implicitPool = (process.env.NODE_ORACLEDB_IMPLICIT_POOL.toLowerCase() === 'true');
 }
 
 if (process.env.NODE_ORACLEDB_USER) {

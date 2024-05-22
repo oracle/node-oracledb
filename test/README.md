@@ -112,6 +112,8 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_DRCP` provides an option for skipping the test run when DRCP is enabled. Setting this environment variable to `true` will skip certain test case runs due to DRCP restrictions.
 
+* `NODE_ORACLEDB_IMPLICIT_POOL` provides an option for skipping the test run when Implicit connection pooling is enabled. Setting this environment variable to `true` will skip certain test case runs due to Implicit connection pooling restrictions.
+
 * `NODE_ORACLEDB_DRIVER_MODE` provides an option to set the 'Thin' or 'Thick' modes of node-oracledb. Setting this environment variable to `thick` will enable Thick mode. Setting it to `thin` will retain the Thin mode. The default mode is Thin.
 
 * `NODE_ORACLEDB_WALLET_LOCATION` provides the local directory name for the wallets that may be required for mutual TLS (mTLS) connections, especially to Oracle Cloud Autonomous Databases optionally. The wallet location can also be provided as a part of the database connect string.

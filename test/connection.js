@@ -367,8 +367,9 @@ describe('1. connection.js', function() {
       };
       await assert.rejects(
         async () => await oracledb.getConnection(credential),
-        /ORA-01031:|ORA-24542:/
-      );
+        /ORA-01031:|ORA-24542:|ORA-56618:/
+        // ORA-56618: DRCP: PRELIM mode logon not allowed
+      ); /*ORA-56618: This error is thrown when DRCP and Implicit Connection Pooling is enabled*/
     });
 
   }); // 1.7

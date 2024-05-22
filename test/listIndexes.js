@@ -46,7 +46,7 @@ describe('286. listIndexes.js', function() {
     // For listIndexes, Oracle Client library version 19.13 (or later DBRU)
     // or version 21.3 (or higher) is needed
     runnable = runnable && (testsUtil.getClientVersion >= 1913000000 ||
-      (testsUtil.getClientVersion >= 2100000000 && testsUtil.getClientVersion >= 2103000000))
+      (testsUtil.getClientVersion >= 2100000000 && testsUtil.getClientVersion >= 2103000000));
     if (!oracledb.thin) {
       await sodaUtil.cleanup();
     }

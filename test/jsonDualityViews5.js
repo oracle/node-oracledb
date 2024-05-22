@@ -619,7 +619,7 @@ annotation or NOUPDATE annotation specified.*/
            {StudentClassId : scid,
             Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40895:/ /*ORA-40895: invalid SQL expression in JSON relational duality view (duplicate sub-object)*/
+      /ORA-44971:/ //ORA-44971: JSON relational duality view cannot have duplicate column 'STUDENT'.'STUID' specified.
     );
 
     await connection.execute(`
