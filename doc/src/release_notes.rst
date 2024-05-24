@@ -17,14 +17,14 @@ Common Changes
 
 Thin Mode Changes
 +++++++++++++++++
-#) Fixed issue which throws the `ORA-00932` error, when the same SELECT SQL
-   statement is run for the second time with a different bind type.
-   See `Issue #1669 <https://github.com/oracle/node-oracledb/issues/1669>`__.
+#)  Fixed issue that throws an ``ORA-00932`` error, when the same SELECT SQL
+    statement is run for the second time with a different bind type.
+    See `Issue #1669 <https://github.com/oracle/node-oracledb/issues/1669>`__.
 
-#) Fixed exponent check condition for out-of-bounds number.
-   See `Issue #1659 <https://github.com/oracle/node-oracledb/issues/1659>`__.
+#)  Fixed exponent check condition for out-of-bounds number.
+    See `Issue #1659 <https://github.com/oracle/node-oracledb/issues/1659>`__.
 
-#)  Fixed bug which threw an ``ORA-28009`` error when a pool is created with
+#)  Fixed bug that throws an ``ORA-28009`` error when a pool is created with
     SYSDBA privilege.
     See `Issue #1657 <https://github.com/oracle/node-oracledb/issues/1657>`__.
 
@@ -397,7 +397,7 @@ Thick Mode Changes
 #)  Added :meth:`sodaOperation.lock()` method to disable modification of SODA
     documents by other connections.
 
-#)  Fixed bug causing an 'ORA-21525' error with :ref:`DbObject Class
+#)  Fixed bug causing an ``ORA-21525`` error with :ref:`DbObject Class
     <dbobjectclass>` objects that have a NUMBER attribute with a scale of 0
     and precision less than, or equal, to 18.  `Issue #1594
     <https://github.com/oracle/node-oracledb/issues/1594>`__.
@@ -450,7 +450,7 @@ Thin Mode Changes
     will reorder the list of available hosts so that the hosts marked as down
     are at the end of the list.
 
-#)  Fixed bug that throws unexpected 'ORA-01002' and 'NJS-112' errors
+#)  Fixed bug that throws unexpected ``ORA-01002`` and ``NJS-112`` errors
     when LOB columns are fetched after table recreation.
     `Issue #1565 <https://github.com/oracle/node-oracledb/issues/1565>`__.
 
@@ -459,7 +459,7 @@ Thin Mode Changes
     now return 'undefined' in Thin mode instead of throwing an error.
     `Issue #1582 <https://github.com/oracle/node-oracledb/issues/1582>`__.
 
-#)  Fixed bug giving 'Unexpected message type' during connection
+#)  Fixed bug throwing 'Unexpected message type' error during connection
     authentication.
     `Issue #1589 <https://github.com/oracle/node-oracledb/issues/1589>`__.
 
@@ -514,8 +514,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Fixed bug that throws the NJS-111 internal error, on the second SELECT SQL
-    statement issued after the first SELECT SQL statement call on an empty
+#)  Fixed bug that throws an ``NJS-111`` internal error, on the second SELECT
+    SQL statement issued after the first SELECT SQL statement call on an empty
     table with LOBs.
 
 #)  Avoid throwing errors when calls to ``os.userInfo()`` fail.
@@ -529,7 +529,7 @@ Thin Mode Changes
     database response that spans multiple packets. This break could occur due
     to a server error, the session being killed or a call to ``breakExecution()``.
 
-#)  Fixed bug where NJS-112 is thrown intermittently with some connections.
+#)  Fixed bug where ``NJS-112`` is thrown intermittently with some connections.
 
 #)  Fixed bug where DRCP connections from the application-side connection pool
     cause the `NUM_MISSES` values to increase instead of the `NUM_HITS` values
