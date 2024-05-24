@@ -140,6 +140,12 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Bequeath connections
       - No
       - Yes
+    * - Lightweight Directory Access Protocol (LDAP) connections
+      - No
+      - Yes
+    * - Socket Secure (SOCKS) Proxy connections
+      - No
+      - No
     * - Password changing (see :meth:`connection.changePassword()`)
       - Yes
       - Yes
