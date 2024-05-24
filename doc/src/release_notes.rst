@@ -17,6 +17,7 @@ Common Changes
 
 Thin Mode Changes
 +++++++++++++++++
+
 #)  Fixed issue that throws an ``ORA-00932`` error, when the same SELECT SQL
     statement is run for the second time with a different bind type.
     See `Issue #1669 <https://github.com/oracle/node-oracledb/issues/1669>`__.
@@ -33,8 +34,8 @@ Thin Mode Changes
 Thick Mode Changes
 +++++++++++++++++++
 
-#)  Fixed bug that ignored the ``privilege`` parameter, when it was passed in
-    the ``pool.getConnection()`` call.
+#)  Fixed bug that ignored the ``privilege`` parameter when it was passed in
+    the :meth:`pool.getConnection()` call.
 
 node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...v6.5.0>`__ (2 May 2024)
 -------------------------------------------------------------------------------------------------------
