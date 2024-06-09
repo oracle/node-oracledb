@@ -176,8 +176,9 @@ describe('267. aq4.js', function() {
       { consumerName: "sub1" }
     );
 
-    const msg = await queue2.deqOne ();
+    const msg = await queue2.deqOne();
     assert.strictEqual(msg.payload.NAME, "scott");
+    assert.strictEqual(queue2.deqOptions.consumerName, "sub1");
     await conn.commit();
   }); // 267.2
 
@@ -275,6 +276,7 @@ describe('267. aq4.js', function() {
 
         const msg = await queue2.deqOne();
         assert.strictEqual(msg, null);
+        assert.strictEqual(queue2.deqOptions.consumerName, "sub3");
         await conn.commit();
       },
       /ORA-25242:/
@@ -322,6 +324,7 @@ describe('267. aq4.js', function() {
     );
     const msgs = await queue2.deqMany(5);
     assert.strictEqual(msgs.length, 4);
+    assert.strictEqual(queue2.deqOptions.consumerName, "sub1");
   }); // 267.9
 
 
@@ -348,6 +351,7 @@ describe('267. aq4.js', function() {
     );
     const msgs = await queue2.deqMany(5);
     assert.strictEqual(msgs.length, 0);
+    assert.strictEqual(queue2.deqOptions.consumerName, "abc");
   }); // 267.10
 
   it('267.11 recipient list with enqMany invalid datatype in dequeue', async () => {
@@ -367,5 +371,4 @@ describe('267. aq4.js', function() {
       /NJS-007:/
     );
   }); // 267.11
-
 });

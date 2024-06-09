@@ -4645,6 +4645,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.4 one message in enqMany/deqMany
     217.5 deqOne on empty queue
     217.6 deqMany on empty queue
+    217.7 get delay property
+    217.8 get deliveryMode property
+    217.9 get exceptionQueue property
+    217.10 get numAttempts attribute
 
 218. aq2.js
     218.1 examples/aqobject.js
@@ -4666,6 +4670,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     219.5 Negative - Set "maxMessages" argument to be 0
     219.6 Enqueue a Buffer
     219.7 enqMany() mixes enqueuing string and buffer
+    219.8 Get correlation property in deqOne
+    219.9 Get correlation property in deqOne by specifying same correlation ID
+    219.10 Negative - Get correlation property in dequeue by changing correlation ID
+    219.11 get correlation property in deqMany
+    219.12 Get priority attribute in deqOne
+    219.13 Get state attribute in deqOne
+    219.14 Verify state change on expiration
 
 220. examineOwnedProperties.js
     220.1 Only examine "owned" properties on objects
@@ -5559,21 +5570,23 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 285. aq8.js
     285.1 query by messages, payload as RAW Type
-        285.1.1 enqOne and deqOne by msgId as string in reverse order
-        285.1.2 query by msgId in enqMany and deqOne in reverse order
-        285.1.3 enqOne and deqOne by msgId as string in non-sequential order
-        285.1.4 query by msgId in enqMany and deqOne in non-sequential order
-        285.1.5 Negative - Invalid msgId in deqOptions
+      285.1.1 enqOne and deqOne by msgId as string in non-sequential order
+      285.1.2 query by msgId in enqMany and deqOne in non-sequential order
+      285.1.3 enqOne and deqOne by msgId as string in random order
+      285.1.4 query by msgId in enqMany and deqOne in random order
+      285.1.5 Negative - Invalid msgId in deqOptions
+      285.1.6 enqOne and deqOne by originalMsgId attribute as string in non-sequential order
+      285.1.7 query by originalMsgId in enqMany and deqOne in random order
     285.2 query by msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’
-        285.2.1 enqOne and deqOne Json val as array type in reverse order
-        285.2.2 enqOne and deqOne Json val as array type in non-sequential order
-        285.2.3 enqMany and deqOne Json val as array type in reverse order
-        285.2.4 enqMany and deqOne Json val as array type in non-sequential order
+      285.2.1 enqOne and deqOne Json val as array type in non-sequential order
+      285.2.2 enqOne and deqOne Json val as array type in random order
+      285.2.3 enqMany and deqOne Json val as array type in non-sequential order
+      285.2.4 enqMany and deqOne Json val as array type in random order
     285.3 query by msgId as Oracle Database Object AQ Messages
-        285.3.1 msgId in enqOne/deqOne in reverse order
-        285.3.2 msgId in enqOne/deqOne in non-sequential order
-        285.3.3 msgId in enqOne/deqOne in reverse order
-        285.3.4 msgId in enqOne/deqOne in non-sequential order
+      285.3.1 msgId in enqOne/deqOne in non-sequential order
+      285.3.2 msgId in enqOne/deqOne in random order
+      285.3.3 msgId in enqOne/deqOne in non-sequential order
+      285.3.4 msgId in enqOne/deqOne in random order
 
 286. listIndexes.js
     286.1 listIndexes before creating any indexes
@@ -5852,3 +5865,16 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       300.2.1 fetches the value as number(default)
       300.2.2 use fetchTypeHandler to get BigInt value
       300.2.3 fetches values greater than Number.MAX_SAFE_INTEGER correctly
+
+  301. aq9.js
+    301.1 Enqueue messages with transformation single user queue
+    301.2 Enqueue messages with transformation on multiple users
+    301.3 Enqueue and dequeue messages with transformation on single user queue
+    301.4 Enqueue and dequeue messages with transformation on multiple user queue
+
+  302. aq10.js
+    302.1 condition attribute in dequeue
+    302.2 Negative - wrong identifier in condition attribute
+
+  303. aq11.js
+    303.1 enqueue/dequeue with modes

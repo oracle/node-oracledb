@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -131,7 +131,6 @@ describe('283. aq7.js', function() {
       {payloadType: oracledb.DB_TYPE_JSON});
     Object.assign(queue4.deqOptions,
       {
-        //  consumerName: "sub1",
         navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
         wait: oracledb.AQ_DEQ_NO_WAIT
       }
@@ -146,6 +145,7 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[0].payload.empId, 101);
     assert.equal(msgs[1].payload.empId, 102);
     assert.equal(msgs[2].payload.empId, 103);
+    assert.strictEqual(queue4.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
   }); // 283.2
 
   it('283.3 Map JS object directly into JSON - enqOne/deqOne', async () => {
@@ -205,6 +205,7 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[0].payload.empCity, "City1");
     assert.equal(msgs[1].payload.empCity, "City2");
     assert.equal(msgs[2].payload.empCity, "City3");
+    assert.strictEqual(queue2.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
   }); // 283.4
 
   it('283.5 enqOne and deqOne Null & Boolean in JSON', async function() {
@@ -263,6 +264,7 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[0].payload.empCity, true);
     assert.equal(msgs[1].payload.empCity, false);
     assert.equal(msgs[2].payload.empCity, true);
+    assert.strictEqual(queue2.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
   }); // 283.6
 
   it('283.7 enqOne and deqOne with JSON val as array type', async function() {
@@ -311,6 +313,7 @@ describe('283. aq7.js', function() {
     assert.deepStrictEqual(msgs[0].payload.empName1, ["Employee #1", 101]);
     assert.deepStrictEqual(msgs[1].payload.empName2, ["Employee #2", 102]);
     assert.deepStrictEqual(msgs[2].payload.empName3, ["Employee #3", 103]);
+    assert.strictEqual(queue4.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
   }); // 283.8
 
   it('283.9 enqOne and deqOne JSON val as object type', async function() {
@@ -366,6 +369,7 @@ describe('283. aq7.js', function() {
       { "name": "Employee2", "age": 30, "city": "New York" });
     assert.deepStrictEqual(msgs[2].payload.empDetails3,
       { "name": "Employee3", "age": 28, "city": "New Land" });
+    assert.strictEqual(queue4.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
   }); // 283.10
 
   it('283.11 enqOne and deqOne CLOB value into a JSON key', async function() {

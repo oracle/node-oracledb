@@ -129,7 +129,7 @@ describe('217. aq1.js', function() {
     Object.assign(
       queue2.deqOptions,
       {
-        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explicit commit is required
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so that no explicit commit is required
         wait: 25                                       // seconds it will wait if there are no messages
       }
     );
@@ -204,4 +204,151 @@ describe('217. aq1.js', function() {
     assert.deepStrictEqual(messages, []);
   }); // 217.6
 
+  it('217.7 get delay property', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messageString = 'This is my other message';
+    const message = {
+      payload: messageString, // the message itself
+      delay: 5 // Delay the message by 5 seconds
+    };
+    const myMsg = await queue1.enqOne(message);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+    Object.assign(
+      queue2.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so that no explicit commit is required
+      }
+    );
+    queue2.deqOptions.delay = myMsg.delay;
+    const msg = await queue2.deqOne();
+    if (msg) {
+      assert.strictEqual(msg.payload.toString(), messageString);
+    }
+  }); // 217.7
+
+  it('217.8 get deliveryMode property', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue1.enqOptions.deliveryMode = 1; // Delivery mode when enqueuing messages
+
+    const messageString = 'This is my other message';
+    const message = {
+      payload: messageString // the message itself
+    };
+    const myMsg = await queue1.enqOne(message);
+
+    // Get the deliveryMode attribute in enqOptions
+    assert.strictEqual(queue1.enqOptions.deliveryMode, 1);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+    Object.assign(
+      queue2.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so that no explicit commit is required
+      }
+    );
+    queue2.deqOptions.deliveryMode = myMsg.deliveryMode;
+    const msg = await queue2.deqOne();
+    if (msg) {
+      assert.strictEqual(msg.payload.toString(), messageString);
+    }
+  }); // 217.8
+
+  it('217.9 get exceptionQueue property', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messageString = 'This is my other message';
+    const message = {
+      payload: messageString, // the message itself
+      exceptionQueue: "QueueName" // Name of the exception queue defined when the message was enqueued
+    };
+    const myMsg = await queue1.enqOne(message);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+    Object.assign(
+      queue2.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so that no explicit commit is required
+      }
+    );
+    queue2.deqOptions.exceptionQueue = myMsg.exceptionQueue;
+    const msg = await queue2.deqOne();
+    if (msg) {
+      assert.strictEqual(msg.payload.toString(), messageString);
+    }
+  }); // 217.9
+
+  it('217.10 set and get visibility attribute', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messageString = 'This is my other message';
+    const message = {
+      payload: messageString, // the message itself
+    };
+    await queue1.enqOne(message);
+    assert.strictEqual(queue1.enqOptions.visibility, oracledb.AQ_VISIBILITY_IMMEDIATE);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+    Object.assign(
+      queue2.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so that no explicit commit is required
+      }
+    );
+    const msg = await queue2.deqOne();
+    assert.strictEqual(queue2.deqOptions.visibility, oracledb.AQ_VISIBILITY_IMMEDIATE);
+    assert.strictEqual(msg.payload.toString(), messageString);
+  }); // 217.10
+
+  it('217.11 get numAttempts attribute', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messageString = 'This is my other message';
+    const message = {
+      payload: messageString, // the message itself
+    };
+    await queue1.enqOne(message);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+
+    /*1st dequeue*/
+    let msg = await queue2.deqOne();
+    if (msg) {
+      assert.strictEqual(msg.payload.toString(), messageString);
+    }
+    assert.strictEqual(msg.numAttempts, 0); // should be 0
+
+    /*rollback*/
+    await conn.rollback();
+
+    /*2nd dequeue attempt*/
+    msg = await queue2.deqOne();
+    assert.strictEqual(msg.numAttempts, 1); // should be 1
+  }); // 217.11
 });

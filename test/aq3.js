@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -189,4 +189,231 @@ describe('219. aq3.js', function() {
     }
   }); // 219.7
 
+  it('219.8 Get correlation property in deqOne', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    const messages = [
+      "Message 1",
+      {
+        correlation: "someId", // Allows a logical grouping of messages
+        payload: "Message 2"
+      }
+    ];
+    const myMsg  = await queue1.enqMany(messages);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+
+    let msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 1");
+
+    queue2.deqOptions.correlation = myMsg[1].correlation;
+    msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 2");
+    assert.strictEqual(queue2.deqOptions.correlation, myMsg[1].correlation);
+  }); // 219.8
+
+  it('219.9 Get correlation property in deqOne by specifying same correlation ID', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    const messages = [
+      "Message 1",
+      {
+        correlation: "someId",
+        payload: "Message 2"
+      },
+      {
+        correlation: "someId",
+        payload: "Message 3"
+      }
+    ];
+    const myMsg  = await queue1.enqMany(messages);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+
+    let msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 1");
+
+    queue2.deqOptions.correlation = myMsg[1].correlation;
+    msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 2");
+    assert.strictEqual(queue2.deqOptions.correlation, myMsg[1].correlation);
+
+    queue2.deqOptions.correlation = myMsg[2].correlation;
+    msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 3");
+    assert.strictEqual(queue2.deqOptions.correlation, myMsg[2].correlation);
+  }); // 219.9
+
+  it('219.10 Negative - Get correlation property in dequeue by changing correlation ID', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    const messages = [
+      "Message 1",
+      {
+        correlation: "someOtherID",
+        payload: "Message 2"
+      }
+    ];
+    const myMsg  = await queue1.enqMany(messages);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+
+    let msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 1");
+
+    queue2.deqOptions.correlation = myMsg[1].correlation;
+
+    await assert.rejects(
+      async () => await queue2.deqOne(),
+      /ORA-25241:/ /*
+                    ORA-25241: Cannot change correlation ID
+                    from 'someId' to 'two' without FIRST_MESSAGE option
+                   */
+    );
+    queue2.deqOptions.navigation = oracledb.AQ_DEQ_NAV_FIRST_MSG;
+    msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 2");
+    assert.strictEqual(queue2.deqOptions.correlation, myMsg[1].correlation);
+  }); // 219.10
+
+  it('219.11 get correlation property in deqMany', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messages = [
+      "Message 1",
+      {
+        correlation: "someOtherID",
+        payload: "Message 2"
+      },
+      {
+        correlation: "someOtherID",
+        payload: "Message 3"
+      },
+      "Message 4",
+      "Message 5",
+      "Message 6",
+      {
+        correlation: "someOtherID",
+        payload: "Message 7"
+      }
+    ];
+    const myMsg  = await queue1.enqMany(messages);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+    /*
+      Correlation identifier,
+      allows multiple messages queued with a user defined identifier to be dequeued together
+    */
+    queue2.deqOptions.correlation = myMsg[1].correlation;
+
+    let msg = await queue2.deqMany(4); // get at most 4 messages
+    assert.strictEqual(msg.length, 3);
+    assert.strictEqual(msg[0].payload.toString(), "Message 2");
+    assert.strictEqual(msg[1].payload.toString(), "Message 3");
+    assert.strictEqual(msg[2].payload.toString(), "Message 7");
+
+    /* Dequeue remaining messages */
+    const queue3 = await conn.getQueue(rawQueueName);
+    msg = await queue3.deqMany(4); // get at most 4 messages
+    assert.strictEqual(msg.length, 4);
+    assert.strictEqual(msg[0].payload.toString(), "Message 1");
+    assert.strictEqual(msg[1].payload.toString(), "Message 4");
+    assert.strictEqual(msg[2].payload.toString(), "Message 5");
+    assert.strictEqual(msg[3].payload.toString(), "Message 6");
+    assert.strictEqual(queue2.deqOptions.correlation, myMsg[1].correlation);
+  }); // 219.11
+
+  it('219.12 Get priority attribute in deqOne', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    const messages = [
+      {
+        priority: 2, // Priority of the message when it was enqueued
+        payload: "Message 1"
+      },
+      {
+        priority: 1, // Priority of the message when it was enqueued
+        payload: "Message 2"
+      }
+    ];
+    const myMsg  = await queue1.enqMany(messages);
+
+    /* Dequeue */
+    const queue2 = await conn.getQueue(rawQueueName);
+
+    queue2.deqOptions.priority = myMsg[0].priority;
+    let msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 1");
+
+    queue2.deqOptions.priority = myMsg[1].priority;
+    msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.toString(), "Message 2");
+  }); // 219.12
+
+  it('219.13 Get state attribute in deqOne', async () => {
+    /* Enqueue */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    const messageString = 'This is my test message';
+    const message = {
+      payload: messageString, // the message itself
+    };
+    await queue1.enqOne(message);
+
+    /* Dequeue and check state */
+    const queue2 = await conn.getQueue(rawQueueName);
+
+    const msg = await queue2.deqOne();
+    assert.strictEqual(msg.state, oracledb.AQ_MSG_STATE_READY); // Expect ready state
+    assert.strictEqual(msg.payload.toString(), messageString);
+  }); // 219.13
+
+  it('219.14 Verify state change on expiration', async () => {
+    /* Enqueue with expiration */
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messageString = 'This is an expiring message';
+    const message = {
+      expiration: 3, // seconds the message will remain in the queue if not dequeued
+      payload: messageString, // the message itself
+    };
+    const options = await queue1.enqOne(message);
+    assert.strictEqual(options.state, oracledb.AQ_MSG_STATE_READY);
+
+    await new Promise(resolve => setTimeout(resolve, 6000)); // Wait 6 seconds (longer than expiration)
+
+    /* Dequeue and check state */
+    const queue2 = await conn.getQueue(rawQueueName);
+    Object.assign(
+      queue2.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so no explicit commit is required
+        wait: 1                                       // seconds it will wait if there are no messages
+      }
+    );
+
+    const msg = await queue2.deqOne();
+    // Message might have expired (expected behavior).
+    assert.strictEqual(msg, undefined);
+    assert.strictEqual(queue2.deqOptions.wait, 1);
+  }); // 219.14
 });

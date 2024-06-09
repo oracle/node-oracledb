@@ -283,3 +283,6 @@ spec:
   - test/jsonDualityViews7.js
   - test/invalidNumber.js
   - test/bigInt.js
+  - test/aq9.js
+  - test/aq10.js
+  - test/aq11.js

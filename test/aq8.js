@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -27,7 +27,7 @@
  *
  * DESCRIPTION
  *   Test Oracle Advanced Queueing (AQ).
- *   Test cases for fetching items based on msgid in deqOne().
+ *   Test cases for fetching items based on the msgid and originalMsgId attributes while dequeuing.
  *
  *****************************************************************************/
 'use strict';
@@ -110,14 +110,19 @@ describe('285. aq8.js', function() {
       queue2.deqOptions.msgId = msg3.msgId;
       msg = await queue2.deqOne();
       assert(msg.payload.toString(), messageString3);
+      assert.deepStrictEqual(queue2.deqOptions.msgId, msg3.msgId);
 
       queue2.deqOptions.msgId = msg2.msgId;
       msg = await queue2.deqOne ();
       assert(msg.payload.toString(), messageString2);
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'),
+        msg2.msgId.toString('hex'));
 
       queue2.deqOptions.msgId = msg1.msgId;
       msg = await queue2.deqOne();
       assert(msg.payload.toString(), messageString1);
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'),
+        msg1.msgId.toString('hex'));
     }); // 285.1.1
 
     it('285.1.2 query by msgId in enqMany and deqOne in non-sequential order', async () => {
@@ -141,18 +146,26 @@ describe('285. aq8.js', function() {
       queue2.deqOptions.msgId = messages[3].msgId;
       let msg = await queue2.deqOne();
       assert(msg.payload.toString(), "This is my message 4");
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'),
+        messages[3].msgId.toString('hex'));
 
       queue2.deqOptions.msgId = messages[2].msgId;
       msg = await queue2.deqOne();
       assert(msg.payload.toString(), "This is my message 3");
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'),
+        messages[2].msgId.toString('hex'));
 
       queue2.deqOptions.msgId = messages[1].msgId;
       msg = await queue2.deqOne();
       assert(msg.payload.toString(), "This is my message 2");
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'),
+        messages[1].msgId.toString('hex'));
 
       queue2.deqOptions.msgId = messages[0].msgId;
       msg = await queue2.deqOne();
       assert(msg.payload.toString(), "This is my message 1");
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'),
+        messages[0].msgId.toString('hex'));
     }); // 285.1.2
 
     it('285.1.3 enqOne and deqOne by msgId as string in random order', async () => {
@@ -172,14 +185,17 @@ describe('285. aq8.js', function() {
       queue2.deqOptions.msgId = msg3.msgId;
       msg = await queue2.deqOne();
       assert(msg.payload.toString(), messageString3);
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'), msg3.msgId.toString('hex'));
 
       queue2.deqOptions.msgId = msg2.msgId;
       msg = await queue2.deqOne ();
       assert(msg.payload.toString(), messageString2);
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'), msg2.msgId.toString('hex'));
 
       queue2.deqOptions.msgId = msg1.msgId;
       msg = await queue2.deqOne();
       assert(msg.payload.toString(), messageString1);
+      assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'), msg1.msgId.toString('hex'));
     }); // 285.1.3
 
     it('285.1.4 query by msgId in enqMany and deqOne in random order', async () => {
@@ -230,6 +246,69 @@ describe('285. aq8.js', function() {
       );
 
     }); // 285.1.5
+
+    it('285.1.6 enqOne and deqOne by originalMsgId attribute as string in non-sequential order', async () => {
+      let msg;
+      const messageString1 = "This is my message 1",
+        messageString2 = "This is my message 2",
+        messageString3 = "This is my message 3";
+
+      // Enqueue
+      const queue1 = await conn.getQueue(rawQueueName);
+      const msg1 = await queue1.enqOne(messageString1);
+      const msg2 = await queue1.enqOne(messageString2);
+      const msg3 = await queue1.enqOne(messageString3);
+      await conn.commit ();
+
+      const queue2 = await conn.getQueue(rawQueueName);
+      queue2.deqOptions.originalMsgId = msg2.originalMsgId;
+      msg = await queue2.deqOne ();
+      assert(msg.payload.toString(), messageString2);
+
+      queue2.deqOptions.originalMsgId = msg3.originalMsgId;
+      msg = await queue2.deqOne();
+      assert(msg.payload.toString(), messageString3);
+
+      queue2.deqOptions.originalMsgId = msg1.originalMsgId;
+      msg = await queue2.deqOne();
+      assert(msg.payload.toString(), messageString1);
+    }); // 285.1.6
+
+    it('285.1.7 query by originalMsgId in enqMany and deqOne in random order', async () => {
+      const queue1 = await conn.getQueue(rawQueueName);
+      queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+      const messages1 = [
+        "This is my message 1",
+        "This is my message 2",
+        {
+          expiration: 10,
+          payload: "This is my message 3"
+        },
+        "This is my message 4"
+      ];
+
+      const messages = await queue1.enqMany(messages1);
+
+      /*Dequeue*/
+      const queue2 = await conn.getQueue(rawQueueName);
+      queue2.deqOptions.originalMsgId = messages[2].originalMsgId;
+      let msg = await queue2.deqOne();
+      assert(msg.payload.toString(), "This is my message 3");
+
+      queue2.deqOptions.originalMsgId = messages[3].originalMsgId;
+      msg = await queue2.deqOne();
+      assert(msg.payload.toString(), "This is my message 4");
+
+      queue2.deqOptions.originalMsgId = messages[0].originalMsgId;
+      msg = await queue2.deqOne();
+      assert(msg.payload.toString(), "This is my message 1");
+
+      queue2.deqOptions.originalMsgId = messages[1].originalMsgId;
+      msg = await queue2.deqOne();
+      assert(msg.payload.toString(), "This is my message 2");
+    }); // 285.1.7
+
   });
 
   describe('285.2 query by msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’', function() {
