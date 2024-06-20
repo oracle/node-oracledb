@@ -7,19 +7,24 @@ node-oracledb Release Notes
 
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
-node-oracledb `v6.6 <https://github.com/oracle/node-oracledb/compare/v6.5.1...v6.6>`__ (TBD)
+node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...v6.6.0>`__ (TBD)
 ---------------------------------------------------------------------------------------------------------
 
 Thin Mode Changes
 +++++++++++++++++
 
-#) Fixed bug which throws an error ``NJS-130`` when calling
+#) Fixed bug which throws a ``TypeError: objType.attributes is not iterable``
+   error when :ref:`DbObject Class <dbobjectclass>` instance contains an
+   attribute of type ``SYS.XMLTYPE``.
+
+#) Fixed bug which throws an ``NJS-130`` error when calling
    :meth:`connection.getDbObjectClass()` with an object type name containing
    ``%ROWTYPE``.
 
-#)  Fixed bug which throws an `NJS-112` error during fetching of JSON and
-    vector columns after table recreation. This is similar to the
-    fix provided for GitHub issue #1565.
+#)  Fixed bug which throws an ``NJS-112`` error during fetching of JSON and
+    vector columns after table recreation. This fix is similar to the one
+    provided for `Issue #1565 <https://github.com/oracle/node-oracledb/issues/
+    1565>`__.
 
 node-oracledb `v6.5.1 <https://github.com/oracle/node-oracledb/compare/v6.5.0...v6.5.1>`__ (23 May 2024)
 ---------------------------------------------------------------------------------------------------------

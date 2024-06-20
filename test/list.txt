@@ -5686,6 +5686,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         290.4.4 Verify table of VARCHAR2 with CHAR/BYTE specifier
     290.5 Associative Arrays fetch
         290.5.1 verify associative array outbinds
+    290.6 db Object tests with XML Value type
+        290.6.1 Verify XML value and metaData inside object
 
 291. dbSchema.js
     291.1 dbSchema and Annotations

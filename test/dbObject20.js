@@ -1218,4 +1218,55 @@ describe('290. dbObject20.js', () => {
     });
   });
 
+  (oracledb.thin ? describe : describe.skip)(`290.6 db Object tests with XML Value type`, () => {
+    let conn;
+    const TYPE1 = 'NODB_TEST_XMLTYPE';
+    const maxVarCharLen = 40;
+
+    before(async () => {
+      const sql = `CREATE TYPE ${TYPE1} FORCE AS OBJECT ( ID NUMBER,
+        XMLDATA sys.xmltype, NAME VARCHAR2(${maxVarCharLen}))`;
+      conn = await oracledb.getConnection(dbConfig);
+      await testsUtil.createType(conn, TYPE1, sql);
+    }); // before()
+
+    after(async () => {
+      if (conn) {
+        await testsUtil.dropType(conn, TYPE1);
+        await conn.close();
+      }
+    }); // after()
+
+    it('290.6.1 Verify XML value and metaData inside object', async () => {
+      const testXMLData =
+        '<Warehouse>\n  ' +
+        '<WarehouseId>1</WarehouseId>\n  ' +
+        '<WarehouseName>Melbourne, Australia</WarehouseName>\n  ' +
+        '<Building>Owned</Building>\n  ' +
+        '<Area>2020</Area>\n  ' +
+        '<Docks>1</Docks>\n  ' +
+        '<DockType>Rear load</DockType>\n  ' +
+        '<WaterAccess>false</WaterAccess>\n  ' +
+        '<RailAccess>N</RailAccess>\n  ' +
+        '<Parking>Garage</Parking>\n  ' +
+        '<VClearance>20</VClearance>\n' +
+        '</Warehouse>\n';
+      const numVal = 234;
+      const charVal = 'JOHN';
+      const expectedData = { "ID": numVal, "XMLDATA": testXMLData, "NAME": charVal };
+      const sql = `select ${TYPE1}(${expectedData.ID}, sys.xmltype('${expectedData.XMLDATA}'),
+      '${expectedData.NAME}') from dual`;
+
+      const result = await conn.execute(sql);
+      assert.strictEqual(JSON.stringify(result.rows[0][0]), JSON.stringify(expectedData));
+
+      // Validate metadata.
+      const xmlObjClass = result.metaData[0];
+      const pInObj = new xmlObjClass.dbTypeClass();
+      assert.strictEqual(pInObj.attributes.XMLDATA.type, oracledb.DB_TYPE_XMLTYPE);
+      assert.strictEqual(pInObj.attributes.ID.type, oracledb.DB_TYPE_NUMBER);
+      assert.strictEqual(pInObj.attributes.NAME.type, oracledb.DB_TYPE_VARCHAR);
+    });
+  });
+
 });
