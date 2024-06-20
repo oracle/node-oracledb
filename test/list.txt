@@ -4940,6 +4940,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         244.11.3 fetch JSON with relative offsets and shared fields, not values
     244.12 Verify auto-generated SODA document key
         244.12.1 Verify Json Id on select
+    244.13 Read JSON data on meta data change
+        244.13.1 table recreate - with oracledb.fetchAsString
+        244.13.2 table recreate - with fetchInfo oracledb.STRING
 
 245. fetchLobAsStrBuf.js
     245.1 CLOB,BLOB Insert
@@ -5775,6 +5778,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     294.70 typed arrays with undefined value
     294.71 typed arrays with null values
     294.72 inserting empty vector in Fixed and Flex vector columns
+    294.73 fetch VECTOR column as string with table recreate
 
 295. dataTypeVector2.js
     295.1 verify fetch information for older clients

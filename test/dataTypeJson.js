@@ -1026,4 +1026,98 @@ describe('244.dataTypeJson.js', function() {
 
   });  // 244.12
 
+  describe('244.13 Read JSON data on meta data change', function() {
+
+    const tableNameJSON = 'nodb_myjson_recreate';
+    let sequence = 1;
+    const sqlCreate = " CREATE TABLE " + tableNameJSON + " ( \n" +
+    " id         NUMBER, \n" +
+    " content    JSON \n" +
+    " )";
+
+    before('create table, insert data', async function() {
+      if (!isRunnable) {
+        this.skip();
+      }
+      await testsUtil.createTable(connection, tableNameJSON, sqlCreate);
+    }); // before()
+
+    after(async function() {
+      if (!isRunnable) {
+        this.skip();
+      }
+      oracledb.stmtCacheSize = default_stmtCacheSize;
+      oracledb.fetchAsString = [];
+      await testsUtil.dropTable(connection, tableNameJSON);
+    }); // after()
+
+    async function recreateTable() {
+      await testsUtil.dropTable(connection, tableNameJSON);
+      await testsUtil.createTable(connection, tableNameJSON, sqlCreate);
+    }
+
+    const testInsertAndFetch = async function(seq, jsonVal, resultStr, selectOpts) {
+      let sql = "insert into " + tableNameJSON + " ( id, content ) values (:i, :c)";
+      const binds = [
+        { val: seq, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
+        { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN }
+      ];
+
+      await connection.execute(sql, binds);
+      sql = "select content as C from " + tableNameJSON + " where id = " + seq;
+      const result = await connection.execute(sql, [], selectOpts);
+      assert.strictEqual(result.rows[0][0], resultStr);
+    };
+
+    it('244.13.1 table recreate - with oracledb.fetchAsString', async function() {
+      oracledb.fetchAsString = [ oracledb.DB_TYPE_JSON ];
+      const jsonVals = [{ "key5": "2018/11/01 18:30:00" }];
+      const resultStr = ["{\"key5\":\"2018/11/01 18:30:00\"}"];
+
+      // Add the JSON Field with Long Field Name to the JSON Values Array
+      // for Oracle DB 23.4 (and Oracle Client 23.4)
+      if (isOracle_23_4) {
+        const longFieldName = 'A'.repeat(1000);
+        const jsonVal = {};
+        jsonVal[longFieldName] = "2018/11/01 18:30:00";
+        jsonVals.push(jsonVal);
+        resultStr.push(`{"${longFieldName}":"2018/11/01 18:30:00"}`);
+      }
+
+      for (let i = 0; i < jsonVals.length; i++) {
+        await testInsertAndFetch(sequence, jsonVals[i], resultStr[i], {});
+        sequence++;
+      }
+
+      await recreateTable();
+      sequence = 1;
+
+      for (let i = 0; i < jsonVals.length; i++) {
+        await testInsertAndFetch(sequence, jsonVals[i], resultStr[i], {});
+        sequence++;
+      }
+
+    }); // 244.13.1
+
+    it('244.13.2 table recreate - with fetchInfo oracledb.STRING', async function() {
+      oracledb.fetchAsString = [];
+      const jsonVal = { "key5": "2018/11/01 18:30:00" };
+      const resultStr = "{\"key5\":\"2018/11/01 18:30:00\"}";
+
+      const options = {
+        fetchInfo: { C: { type: oracledb.STRING } }
+      };
+
+      // Test Insert and Fetch of JSON Data
+      await testInsertAndFetch(sequence, jsonVal, resultStr, options);
+      // Recreate the same table
+      await recreateTable();
+      // Test Insert and Fetch of JSON Data again
+      await testInsertAndFetch(sequence, jsonVal, resultStr, options);
+      sequence++;
+
+    }); // 244.13.2
+
+  }); // 244.13
+
 });

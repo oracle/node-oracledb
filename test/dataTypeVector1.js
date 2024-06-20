@@ -1897,4 +1897,52 @@ describe('294. dataTypeVector1.js', function() {
       );
     }
   }); // 294.72
+
+  it('294.73 fetch VECTOR column as string with table recreate', async function() {
+    oracledb.fetchTypeHandler = function() {
+      return {type: oracledb.STRING};
+    };
+
+    const table = 'nodb_vectorDbTable1';
+    const sqlCreate = `CREATE TABLE IF NOT EXISTS ${table} (
+        IntCol            NUMBER,
+        Vector64Col       vector(10, float64)
+        )`;
+    let plsqlCreate = testsUtil.sqlCreateTable(table, sqlCreate);
+    await connection.execute(plsqlCreate);
+
+    // Create a Float64Array
+    const float64Array = new Float64Array(
+      [-999999.12345, 987654.321, -12345.6789, 56789.0123,
+        -314159.2654, 291828.1828, -99999.9999, 43210.9876, -87654.321, 65432.1098]);
+
+    const sqlInsert = `INSERT INTO ${table} (IntCol, Vector64Col) VALUES(:id, :vec64)`;
+    const bindOpts = {
+      id: 2,
+      vec64: float64Array
+    };
+    await connection.execute(sqlInsert, bindOpts);
+
+    let result = await connection.execute(`SELECT Vector64Col FROM ${table}`);
+
+    // Convert the vector data returned as a string back to Float64Array
+    const resultFloat64Array1 = new Float64Array(JSON.parse(result.rows[0][0]));
+
+    assert.deepStrictEqual(resultFloat64Array1, float64Array);
+    await connection.execute(testsUtil.sqlDropTable(table));
+
+    // Recreate the table with same data and redo the fetch
+    plsqlCreate = testsUtil.sqlCreateTable(table, sqlCreate);
+    await connection.execute(plsqlCreate);
+    await connection.execute(sqlInsert, bindOpts);
+
+    result = await connection.execute(`SELECT Vector64Col FROM ${table}`);
+
+    // Convert the vector data returned as a string back to Float64Array
+    const resultFloat64Array2 = new Float64Array(JSON.parse(result.rows[0][0]));
+
+    assert.deepStrictEqual(resultFloat64Array2, float64Array);
+    await connection.execute(testsUtil.sqlDropTable(table));
+
+  }); // 294.73
 });
