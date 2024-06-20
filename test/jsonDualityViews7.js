@@ -78,12 +78,13 @@ describe('297. jsonDualityViews7.js', function() {
   describe('297.1 Base table having Vector datatype column', function() {
     const table_name = 'vector_base_table';
     before(async function() {
-      const sql = `create table ${table_name}(
-                  vec_id number,
-                  first varchar(128),
-                  con_col VECTOR,
-                  constraint vec_id_pk primary key (vec_id)
-                )`;
+      const sql = `
+        create table ${table_name}(
+          vec_id number,
+          first varchar(128),
+          con_col VECTOR,
+          constraint vec_id_pk primary key (vec_id)
+        )`;
 
       // create the vector table
       const plsql = testsUtil.sqlCreateTable(table_name, sql);
@@ -111,8 +112,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-      CREATE OR REPLACE JSON DUALITY VIEW jsondv1 as
-        ${table_name} @insert @update @delete{
+      CREATE OR REPLACE JSON DUALITY VIEW jsondv1 AS
+        ${table_name} @insert @update @delete {
           _id : vec_id,
           FIRST : first,
           CON_COL : con_col
@@ -131,11 +132,11 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-      CREATE OR REPLACE JSON DUALITY VIEW jsondv2 as
-        select json{
-        '_id' : a.vec_id,
-        'FIRST' : a.first,
-        'CON_COL' : a.con_col with(check)
+      CREATE OR REPLACE JSON DUALITY VIEW jsondv2 AS
+        SELECT JSON{
+          '_id' : a.vec_id,
+          'FIRST' : a.first,
+          'CON_COL' : a.con_col WITH (CHECK)
       } from ${table_name} a with (INSERT,UPDATE,DELETE)
       `);
 
@@ -151,8 +152,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-      CREATE OR REPLACE JSON DUALITY VIEW jsondv3 as
-        select json{*} from ${table_name} a with (INSERT,UPDATE,DELETE)
+        CREATE OR REPLACE JSON DUALITY VIEW jsondv3 as
+          select json{*} from ${table_name} a with (INSERT,UPDATE,DELETE)
       `);
 
       // Select data from the view
@@ -183,12 +184,12 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-      CREATE OR REPLACE JSON DUALITY VIEW jsondv as
-        ${table_name} @insert @update @delete{
-        _id : vec_id,
-        FIRST : first,
-        CON_COL : con_col
-      }`);
+        CREATE OR REPLACE JSON DUALITY VIEW jsondv as
+          ${table_name} @insert @update @delete {
+            _id : vec_id,
+            FIRST : first,
+            CON_COL : con_col
+          }`);
 
       await connection.execute(
         `insert into ${table_name} (vec_id, first, con_col) values (:1, :2, :3)`,
@@ -214,12 +215,12 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-      CREATE OR REPLACE JSON DUALITY VIEW jsondv as
-        ${table_name} @insert @update @delete{
-        _id : vec_id,
-        FIRST : first,
-        CON_COL : con_col
-      }`);
+        CREATE OR REPLACE JSON DUALITY VIEW jsondv AS
+          ${table_name} @insert @update @delete {
+            _id : vec_id,
+            FIRST : first,
+            CON_COL : con_col
+          }`);
 
       await connection.execute(
         `insert into ${table_name} (vec_id, first, con_col) values (:1, :2, :3)`,
@@ -244,9 +245,9 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-      update jsondv adv
-        set data = json_transform(data, set '$.CON_COL' = json('[1,2,3]'))
-        where adv.data."_id" = 2
+        UPDATE jsondv adv
+          SET data = json_transform(data, SET '$.CON_COL' = json('[1,2,3]'))
+          WHERE adv.data."_id" = 2
       `);
 
       // Select data from the view
@@ -261,9 +262,9 @@ describe('297. jsonDualityViews7.js', function() {
       // select from JSON relational duality view
       await assert.rejects(
         async () => await connection.execute(`
-        select * from jsondv adv where
-        json_value(data, '$.CON_COL' returning VECTOR) = '[1,2,3]'
-      `),
+          select * from jsondv adv where
+            json_value(data, '$.CON_COL' returning VECTOR) = '[1,2,3]'
+        `),
         /ORA-22848:/ // ORA-22848: cannot use VECTOR type as comparison key
       );
     }); // 297.1.8
@@ -274,12 +275,12 @@ describe('297. jsonDualityViews7.js', function() {
       // VECTOR COLUMN + FLEX COLUMN
       await assert.rejects(
         async () => await connection.execute(`
-        CREATE OR REPLACE JSON DUALITY VIEW jsondv as
-          ${table_name} @insert @update @delete{
-          _id : vec_id,
-          firstName : first,
-          con_col @flex
-          }
+          CREATE OR REPLACE JSON DUALITY VIEW jsondv AS
+            ${table_name} @insert @update @delete {
+              _id : vec_id,
+              firstName : first,
+              con_col @flex
+            }
         `),
         /ORA-42628:/ /* ORA-42628: Flexible column 'VECTOR.CON_COL' is not JSON(Object) data type in
                     * JSON-Relational duality View 'VECTORDV'.
@@ -291,27 +292,29 @@ describe('297. jsonDualityViews7.js', function() {
   describe('297.2 With multiple tables', function() {
 
     before(async function() {
-      let sql = `create table vector(
-        vec_id                  number,
-        VectorCol               vector,
-        VectorFixedCol          vector(2),
-        Vector32Col             vector(10, float32),
-        Vector64Col             vector(10, float64),
-        VectorInt8Col           vector(4, int8),
-        VectorFlexCol           vector(*, float32),
-        constraint pk_vector primary key (vec_id)
-     )`;
+      let sql = `
+        create table vector(
+          vec_id                  number,
+          VectorCol               vector,
+          VectorFixedCol          vector(2),
+          Vector32Col             vector(10, float32),
+          Vector64Col             vector(10, float64),
+          VectorInt8Col           vector(4, int8),
+          VectorFlexCol           vector(*, float32),
+          constraint pk_vector primary key (vec_id)
+       )`;
 
       // create the vector table
       let plsql = testsUtil.sqlCreateTable('vector', sql);
       await connection.execute(plsql);
 
-      sql = `create table vector_class (
-        vec_id number primary key,
-        vcid number,
-        clsid number,
-        constraint fk_vector_class1 foreign key (vec_id) references vector(vec_id)
-      )`;
+      sql = `
+        create table vector_class (
+          vec_id number primary key,
+          vcid number,
+          clsid number,
+          constraint fk_vector_class1 foreign key (vec_id) references vector(vec_id)
+        )`;
 
       // create the vector_class table
       plsql = testsUtil.sqlCreateTable('vector_class', sql);
@@ -347,8 +350,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: VectorCol,
@@ -386,8 +389,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: Vector32Col,
@@ -428,8 +431,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: Vector64Col,
@@ -462,16 +465,16 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
-          vector_id: vec_id,
-          vector_name: VectorFixedCol,
-          vector_class: vector_class @insert@update@delete {
-            vector_class_id: vcid,
-            vector_id: vec_id
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+          vector @insert@update@delete {
+            vector_id: vec_id,
+            vector_name: VectorFixedCol,
+            vector_class: vector_class @insert@update@delete {
+              vector_class_id: vcid,
+              vector_id: vec_id
+            }
           }
-        }
       `);
 
       // Select data from the view
@@ -499,8 +502,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: VectorInt8Col,
@@ -536,8 +539,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: Vector64Col,
@@ -573,8 +576,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: VectorFlexCol,
@@ -610,8 +613,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: Vector32Col,
@@ -647,8 +650,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: VectorInt8Col,
@@ -684,17 +687,17 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-         create or replace json relational duality view vector_ov
-         as
-         vector @insert@update@delete {
-           vector_id: vec_id,
-           vector_name: VectorInt8Col,
-           vector_class: vector_class @insert@update@delete {
-             vector_class_id: vcid,
-             vector_id: vec_id
-           }
-         }
-       `);
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+        vector @insert@update@delete {
+          vector_id: vec_id,
+          vector_name: VectorInt8Col,
+          vector_class: vector_class @insert@update@delete {
+            vector_class_id: vcid,
+            vector_id: vec_id
+          }
+        }
+      `);
 
       // Select data from the view
       const result = await connection.execute(`select * from vector_ov order by 1`);
@@ -728,17 +731,17 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-         create or replace json relational duality view vector_ov
-         as
-         vector @insert@update@delete {
-           vector_id: vec_id,
-           vector_name: VectorInt8Col,
-           vector_class: vector_class @insert@update@delete {
-             vector_class_id: vcid,
-             vector_id: vec_id
-           }
-         }
-       `);
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+          vector @insert@update@delete {
+            vector_id: vec_id,
+            vector_name: VectorInt8Col,
+            vector_class: vector_class @insert@update@delete {
+              vector_class_id: vcid,
+              vector_id: vec_id
+            }
+          }
+      `);
 
       // Select data from the view
       const result = await connection.execute(`select * from vector_ov order by 1`);
@@ -765,28 +768,29 @@ describe('297. jsonDualityViews7.js', function() {
          (vec_id, VectorCol) VALUES (:id, :clob)`,
         { id: 1,
           clob: lob
-        });
+        }
+      );
 
       lob.destroy();
-      await connection.execute(`
-         insert into vector_class values (1, 1, 1)
-       `);
+      await connection.execute(
+        `insert into vector_class values (1, 1, 1)`
+      );
 
       await connection.commit();
 
       // Create the JSON relational duality view
       await connection.execute(`
-         create or replace json relational duality view vector_ov
-         as
-         vector @insert@update@delete {
-           vector_id: vec_id,
-           vector_name: VectorCol,
-           vector_class: vector_class @insert@update@delete {
-             vector_class_id: vcid,
-             vector_id: vec_id
-           }
-         }
-       `);
+        create or replace json relational duality view vector_ov
+        as
+        vector @insert@update@delete {
+          vector_id: vec_id,
+          vector_name: VectorCol,
+          vector_class: vector_class @insert@update@delete {
+            vector_class_id: vcid,
+            vector_id: vec_id
+          }
+        }
+      `);
 
       // Select data from the view
       await assert.rejects(
@@ -821,17 +825,17 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-         create or replace json relational duality view vector_ov
-         as
-         vector @insert@update@delete {
-           vector_id: vec_id,
-           vector_name: VectorCol,
-           vector_class: vector_class @insert@update@delete {
-             vector_class_id: vcid,
-             vector_id: vec_id
-           }
-         }
-       `);
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+        vector @insert@update@delete {
+          vector_id: vec_id,
+          vector_name: VectorCol,
+          vector_class: vector_class @insert@update@delete {
+            vector_class_id: vcid,
+            vector_id: vec_id
+          }
+        }
+      `);
 
       // Select data from the view
       const result = await connection.execute(`select * from vector_ov order by 1`);
@@ -861,16 +865,16 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-         create or replace json relational duality view vector_ov
-         as
-         vector @insert@update@delete {
-           vector_id: vec_id,
-           vector_name: VectorFlexCol,
-           vector_class: vector_class @insert@update@delete {
-             vector_class_id: vcid,
-             vector_id: vec_id
-           }
-         }
+        create or replace json relational duality view vector_ov
+        as
+          vector @insert@update@delete {
+            vector_id: vec_id,
+            vector_name: VectorFlexCol,
+            vector_class: vector_class @insert@update@delete {
+              vector_class_id: vcid,
+              vector_id: vec_id
+            }
+          }
        `);
 
       await assert.rejects(
@@ -897,17 +901,17 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-         create or replace json relational duality view vector_ov
-         as
-         vector @insert@update@delete {
-           vector_id: vec_id,
-           vector_name: VectorFlexCol,
-           vector_class: vector_class @insert@update@delete {
-             vector_class_id: vcid,
-             vector_id: vec_id
-           }
-         }
-       `);
+        create or replace json relational duality view vector_ov
+        as
+          vector @insert@update@delete {
+            vector_id: vec_id,
+            vector_name: VectorFlexCol,
+            vector_class: vector_class @insert@update@delete {
+              vector_class_id: vcid,
+              vector_id: vec_id
+            }
+          }
+      `);
 
       // Select data from the view
       const result = await connection.execute(`select * from vector_ov order by 1`);
@@ -940,17 +944,17 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-         create or replace json relational duality view vector_ov
-         as
-         vector @insert@update@delete {
-           vector_id: vec_id,
-           vector_name: Vector64Col,
-           vector_class: vector_class @insert@update@delete {
-             vector_class_id: vcid,
-             vector_id: vec_id
-           }
-         }
-       `);
+        create or replace json relational duality view vector_ov
+        as
+          vector @insert@update@delete {
+            vector_id: vec_id,
+            vector_name: Vector64Col,
+            vector_class: vector_class @insert@update@delete {
+              vector_class_id: vcid,
+              vector_id: vec_id
+            }
+          }
+      `);
 
       // Select data from the view
       const result = await connection.execute(`select * from vector_ov order by 1`);
@@ -964,27 +968,29 @@ describe('297. jsonDualityViews7.js', function() {
 
   describe('297.3 Sanity DMLs', function() {
     before(async function() {
-      let sql = `create table vector(
-        vec_id                  number,
-        VectorCol               vector,
-        VectorFixedCol          vector(2),
-        Vector32Col             vector(10, float32),
-        Vector64Col             vector(10, float64),
-        VectorInt8Col           vector(4, int8),
-        VectorFlexCol           vector(*, *),
-        constraint pk_vector primary key (vec_id)
-     )`;
+      let sql = `
+        create table vector(
+          vec_id                  number,
+          VectorCol               vector,
+          VectorFixedCol          vector(2),
+          Vector32Col             vector(10, float32),
+          Vector64Col             vector(10, float64),
+          VectorInt8Col           vector(4, int8),
+          VectorFlexCol           vector(*, *),
+          constraint pk_vector primary key (vec_id)
+       )`;
 
       // create the vector table
       let plsql = testsUtil.sqlCreateTable('vector', sql);
       await connection.execute(plsql);
 
-      sql = `create table vector_class (
-        vec_id number primary key,
-        vcid number,
-        clsid number,
-        constraint fk_vector_class1 foreign key (vec_id) references vector(vec_id)
-      )`;
+      sql = `
+        create table vector_class (
+          vec_id number primary key,
+          vcid number,
+          clsid number,
+          constraint fk_vector_class1 foreign key (vec_id) references vector(vec_id)
+        )`;
 
       // create the vector_class table
       plsql = testsUtil.sqlCreateTable('vector_class', sql);
@@ -1006,8 +1012,8 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: VectorCol
@@ -1033,12 +1039,12 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
-          vector_id: vec_id,
-          vector_name: VectorFlexCol
-        }
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+          vector @insert@update@delete {
+            vector_id: vec_id,
+            vector_name: VectorFlexCol
+          }
       `);
 
       // insert data into vector table
@@ -1061,9 +1067,9 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+        VECTOR @INSERT@UPDATE@DELETE {
           vector_id: vec_id,
           vector_name: VectorFlexCol
         }
@@ -1086,9 +1092,9 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+        VECTOR @INSERT@UPDATE@DELETE {
           vector_id: vec_id,
           vector_name: Vector32Col
         }
@@ -1108,13 +1114,13 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
-          vector_id: vec_id,
-          vector_name: VectorCol
-        }
-      `);
+    create or replace json relational duality view vector_ov
+    as
+    vector @insert@update@delete {
+      vector_id: vec_id,
+      vector_name: VectorCol
+    }
+  `);
 
       // insert data into vector table
       const bv1 = {c: {dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_JSON, val: {"vector_id": 1, "vector_name": FloatArray} }};
@@ -1145,12 +1151,12 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
-          vector_id: vec_id,
-          vector_name: VectorCol
-        }
+    create or replace json relational duality view vector_ov
+    as
+      vector @insert@update@delete {
+        vector_id: vec_id,
+        vector_name: VectorCol
+      }
       `);
 
       // insert FloatArray1
@@ -1183,9 +1189,9 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+        VECTOR @INSERT@UPDATE@DELETE {
           vector_id: vec_id,
           vector_name: Vector64Col
         }
@@ -1211,13 +1217,13 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
-          vector_id: vec_id,
-          vector_name: Vector64Col
-        }
-      `);
+    create or replace json relational duality view vector_ov
+    as
+    vector @insert@update@delete {
+      vector_id: vec_id,
+      vector_name: Vector64Col
+    }
+  `);
 
       const bv1 = {c: {dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_JSON, val: {"vector_id": 1, "vector_name": float64Array} }};
       await connection.execute(`
@@ -1247,8 +1253,7 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: Vector64Col
@@ -1285,8 +1290,7 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: VectorInt8Col
@@ -1312,8 +1316,7 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov AS
         vector @insert@update@delete {
           vector_id: vec_id,
           vector_name: VectorInt8Col
@@ -1348,12 +1351,12 @@ describe('297. jsonDualityViews7.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-        create or replace json relational duality view vector_ov
-        as
-        vector @insert@update@delete {
-          vector_id: vec_id,
-          vector_name: VectorInt8Col
-        }
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW vector_ov
+        AS
+          vector @insert@update@delete {
+            vector_id: vec_id,
+            vector_name: VectorInt8Col
+          }
       `);
 
       // insert int8Arr

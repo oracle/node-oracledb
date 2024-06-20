@@ -136,22 +136,20 @@ describe('298. dataTypeVector4.js', function() {
   }); // 298.1
 
   it('298.2 insert data as select all elements', async function() {
-    await connection.execute(`insert /*+ parallel */ into ${tableName}
-            select intCol, Vector64Col from
-            ${tablecustom}
-            order by intCol`);
+    await connection.execute(`INSERT /*+ parallel */ INTO ${tableName}
+      SELECT intCol, Vector64Col FROM ${tablecustom}
+      ORDER BY intCol`);
 
-    const result = await connection.execute(`select * from ${tableName} parallel`);
+    const result = await connection.execute(`SELECT * FROM ${tableName} parallel`);
     assert.strictEqual(result.rows[0][0], 2);
     assert.deepStrictEqual(result.rows[0][1], [-999999.12345, 987654.321,
       -12345.6789, 56789.0123, -314159.2654]);
   }); // 298.2
 
   it('298.3 insert data as select all elements by setting degree of parallelism to 2', async function() {
-    await connection.execute(`insert /*+ parallel(2) */ into ${tableName}
-            select intCol, Vector64Col from
-            ${tablecustom}
-            order by intCol`);
+    await connection.execute(`INSERT /*+ parallel(2) */ INTO ${tableName}
+      SELECT intCol, Vector64Col FROM ${tablecustom}
+      ORDER BY intCol`);
 
     const result = await connection.execute(`select * from ${tableName} parallel`);
     assert.strictEqual(result.rows[0][0], 2);
@@ -176,14 +174,14 @@ describe('298. dataTypeVector4.js', function() {
         { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float64Array }
       ];
       await connection.execute(`
-            INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
-        `, binds);
+        INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
+      `, binds);
     }
 
     const result = await connection.execute(`
-                SELECT /*+ parallel(4) */ min(VECTOR_DISTANCE(VectorCol, ${sampleVector}))
-                FROM ${tableName}
-            `);
+      SELECT /*+ parallel(4) */ min(VECTOR_DISTANCE(VectorCol, ${sampleVector}))
+      FROM ${tableName}
+    `);
 
     assert.strictEqual(result.rows.length, 1);
     assert.deepStrictEqual(result.rows, [[0.10298221668758012]]);
@@ -206,14 +204,14 @@ describe('298. dataTypeVector4.js', function() {
         { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float64Array }
       ];
       await connection.execute(`
-            INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
-        `, binds);
+        INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
+      `, binds);
     }
 
     const result = await connection.execute(`
-                SELECT /*+ parallel(4) */ max(VECTOR_DISTANCE(VectorCol, ${sampleVector}))
-                FROM ${tableName}
-            `);
+      SELECT /*+ parallel(4) */ max(VECTOR_DISTANCE(VectorCol, ${sampleVector}))
+      FROM ${tableName}
+    `);
 
     assert.strictEqual(result.rows.length, 1);
     assert.deepStrictEqual(result.rows, [[0.28645724726349675]]);
@@ -236,14 +234,14 @@ describe('298. dataTypeVector4.js', function() {
         { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float64Array }
       ];
       await connection.execute(`
-              INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
-          `, binds);
+        INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
+      `, binds);
     }
 
     const result = await connection.execute(`
-                  SELECT /*+ parallel(4) */ ceil(sum(VECTOR_DISTANCE(VectorCol, ${sampleVector})))
-                  FROM ${tableName}
-              `);
+      SELECT /*+ parallel(4) */ ceil(sum(VECTOR_DISTANCE(VectorCol, ${sampleVector})))
+      FROM ${tableName}
+    `);
 
     assert.strictEqual(result.rows.length, 1);
     assert.deepStrictEqual(result.rows, [[1]]);
@@ -266,14 +264,14 @@ describe('298. dataTypeVector4.js', function() {
         { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float64Array }
       ];
       await connection.execute(`
-              INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
-          `, binds);
+        INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
+      `, binds);
     }
 
     const result = await connection.execute(`
-                  SELECT /*+ parallel(4) */ floor(avg(VECTOR_DISTANCE(VectorCol, ${sampleVector})))
-                  FROM ${tableName}
-              `);
+      SELECT /*+ parallel(4) */ floor(avg(VECTOR_DISTANCE(VectorCol, ${sampleVector})))
+      FROM ${tableName}
+    `);
 
     assert.strictEqual(result.rows.length, 1);
     assert.deepStrictEqual(result.rows, [[0]]);
@@ -336,20 +334,20 @@ describe('298. dataTypeVector4.js', function() {
           `, binds);
     }
 
-    await connection.execute(`delete /*+ parallel(4) */ from ${tableName}
-           where vector_distance(VectorCol, ${sampleVector}, euclidean) < 10`);
+    await connection.execute(`DELETE /*+ parallel(4) */ FROM ${tableName}
+      WHERE vector_distance(VectorCol, ${sampleVector}, euclidean) < 10`);
 
     const result = await connection.execute(`
-                   SELECT /*+ parallel(4) */ * FROM ${tableName}
-               `);
+      SELECT /*+ parallel(4) */ * FROM ${tableName}
+    `);
     assert.deepStrictEqual(result.rows, expected);
   }); // 298.9
 
   it('298.10 no parallel delete operation on vector columns', async function() {
     /*
         no_parallel :
-        This is a hint instructs the database to disable parallel execution
-        for this specific DELETE statement.
+        This hint instructs the database to disable parallel execution for
+        this specific DELETE statement.
     */
     const sampleVector = "VECTOR('[3.1, 4.2, 5.9, 6.5, 7.3, 2.1, 8.4, 9.7, 3.4, 2.2]', 10, FLOAT64)";
     const vectorsToinsert = [
@@ -370,16 +368,16 @@ describe('298. dataTypeVector4.js', function() {
         { dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_VECTOR, val: float64Array }
       ];
       await connection.execute(`
-              INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
-          `, binds);
+        INSERT /*+ parallel */ INTO ${tableName} (IntCol, VectorCol) VALUES (:1, :2)
+      `, binds);
     }
 
-    await connection.execute(`delete /*+ no_parallel(4) */ from ${tableName}
-           where vector_distance(VectorCol, ${sampleVector}, euclidean) < 10`);
+    await connection.execute(`DELETE /*+ no_parallel(4) */ FROM ${tableName}
+      WHERE vector_distance(VectorCol, ${sampleVector}, euclidean) < 10`);
 
     const result = await connection.execute(`
-                   SELECT * FROM ${tableName}
-               `);
+      SELECT * FROM ${tableName}
+    `);
     assert.deepStrictEqual(result.rows, expected);
   }); // 298.10
 });

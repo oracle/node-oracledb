@@ -38,52 +38,69 @@ const testsUtil = require('./testsUtil.js');
 
 describe('272. jsonDualityView1.js', function() {
 
-  let connection = null;
-  let isRunnable = false;
+  let isRunnable = false, dbaConn;
+  const dbaCredential = {
+    user: dbConfig.test.DBA_user,
+    password: dbConfig.test.DBA_password,
+    connectString: dbConfig.connectString,
+    privilege: oracledb.SYSDBA,
+  };
+  const pwd = testsUtil.generateRandomPassword();
 
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
     if (!isRunnable) {
       this.skip();
     }
+    dbaConn = await oracledb.getConnection(dbaCredential);
+
+    await dbaConn.execute(`CREATE USER njs_jsonDv1 IDENTIFIED BY ${pwd}`);
+    await dbaConn.execute(`GRANT CREATE SESSION, RESOURCE, CONNECT,
+              UNLIMITED TABLESPACE TO njs_jsonDv1`);
+  });
+
+  after(async function() {
+    if (!isRunnable) return;
+    await dbaConn.execute(`DROP USER njs_jsonDv1 CASCADE`);
+    await dbaConn.close();
   });
 
   describe('272.1 JSON Relational Duality View', function() {
+    let connection = null;
+    const createTableEmp = `CREATE TABLE employees (employee_id NUMBER(6)
+                              PRIMARY KEY, first_name VARCHAR2(4000),
+                              last_name VARCHAR2(4000), department_id  NUMBER(4))`;
 
-    const createTableEmp = `create table employees (employee_id NUMBER(6)
-                              primary key, first_name varchar2(4000),
-                              last_name varchar2(4000), department_id  NUMBER(4))`;
-
-    const createTableDept = `create table departments (department_id NUMBER(5)
-                              primary key, department_name VARCHAR2(30),
+    const createTableDept = `CREATE TABLE departments (department_id NUMBER(5)
+                              PRIMARY KEY, department_name VARCHAR2(30),
                               manager_id NUMBER(6))`;
 
 
     const alterTableEmp = `ALTER TABLE employees ADD
                             (CONSTRAINT emp_dept_fk FOREIGN KEY (department_id)
-                            REFERENCES departments)`;
+                              REFERENCES departments)`;
     const createEmpView = `CREATE or replace JSON relational duality VIEW EMP_OV
-                                AS
-                                select JSON {
-                                  'EMPLOYEE_ID' is emp.EMPLOYEE_ID,
-                                   'FIRST_NAME'  is emp.FIRST_NAME,
-                                    'LAST_NAME' is emp.last_name,
-                                    'department_info' is
-                                    (
-                                    select JSON
-                                      {
-                                         'DEPARTMENT_ID' is dept.department_id,
-                                          'departmentname' is dept.department_name WITH(UPDATE)
-                                          }
-                                          from departments dept WITH(UPDATE,CHECK ETAG)
-                                          where dept.department_id = emp.department_id
-                                        )
-                                        returning JSON}
-                                    from employees emp WITH(INSERT,UPDATE,DELETE)`;
+                            AS
+                              select JSON {
+                                'EMPLOYEE_ID' is emp.EMPLOYEE_ID,
+                                  'FIRST_NAME'  is emp.FIRST_NAME,
+                                  'LAST_NAME' is emp.last_name,
+                                  'department_info' is
+                                  (
+                                  select JSON
+                                    {
+                                      'DEPARTMENT_ID' is dept.department_id,
+                                      'departmentname' is dept.department_name WITH(UPDATE)
+                                    }
+                                    from departments dept WITH(UPDATE,CHECK ETAG)
+                                    where dept.department_id = emp.department_id
+                                  )
+                                returning JSON}
+                                from employees emp WITH(INSERT,UPDATE,DELETE)`;
 
     const createDeptView = `CREATE OR REPLACE JSON relational duality VIEW dept_ov
                                     AS
-                                    select JSON{
+                                    select JSON {
                                     'department_id' is dept.DEPARTMENT_ID,
                                     'department_name'  is dept.DEPARTMENT_NAME,
                                     'EMP_INFO' is
@@ -92,21 +109,24 @@ describe('272. jsonDualityView1.js', function() {
                                     (
                                     JSON
                                     {
-                                           'employee_id' is emp.employee_id,
-                                           'FIRST_NAME'  is emp.FIRST_NAME
+                                      'employee_id' is emp.employee_id,
+                                      'FIRST_NAME'  is emp.FIRST_NAME
                                     }
                                     )
-                                           from employees emp WITH (INSERT,UPDATE,DELETE)
-                                          where emp.department_id = dept.department_id
+                                        from employees emp WITH (INSERT,UPDATE,DELETE)
+                                      where emp.department_id = dept.department_id
                                     )
-                                          returning json
+                                      returning json
                                     }
                                     from departments dept WITH (INSERT,UPDATE,DELETE,CHECK ETAG)`;
 
     before(async function() {
-      connection = await oracledb.getConnection(dbConfig);
-      await connection.execute(createTableEmp);
-      await connection.execute(createTableDept);
+      connection = await oracledb.getConnection({user: 'njs_jsonDv1',
+        password: pwd,
+        connectString: dbConfig.connectString
+      });
+      await connection.execute(testsUtil.sqlCreateTable('employees', createTableEmp));
+      await connection.execute(testsUtil.sqlCreateTable('departments', createTableDept));
       await connection.execute(alterTableEmp);
       await connection.execute(createEmpView);
       await connection.execute(createDeptView);
@@ -130,24 +150,24 @@ describe('272. jsonDualityView1.js', function() {
     after(async function() {
       await testsUtil.dropTable(connection, 'employees');
       await testsUtil.dropTable(connection, 'departments');
-      await connection.execute(`drop view if exists emp_ov`);
-      await connection.execute(`drop view if exists dept_ov`);
+      await connection.execute(`DROP VIEW IF EXISTS emp_ov`);
+      await connection.execute(`DROP VIEW IF EXISTS dept_ov`);
       await connection.close();
     });
 
     it('272.1.1 fetch results', async function() {
-      const query = `select * from emp_ov order by 1`;
+      const query = `SELECT * from emp_ov ORDER BY 1`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].EMPLOYEE_ID, 100);
       assert.strictEqual(result.rows[0][0].FIRST_NAME, "Steven");
     });
 
     it('272.1.2 update query', async function() {
-      const queryUpdate = `update emp_ov set data = '{"EMPLOYEE_ID":100,"FIRST_NAME":"Lex","LAST_NAME":"De Haan",
+      const queryUpdate = `UPDATE emp_ov SET data = '{"EMPLOYEE_ID":100,"FIRST_NAME":"Lex","LAST_NAME":"De Haan",
       "department_info":{"DEPARTMENT_ID":10,"departmentname":"newdept"}}'
-                    where json_value(data,'$.EMPLOYEE_ID') = 100`;
+                    WHERE json_value(data,'$.EMPLOYEE_ID') = 100`;
       await connection.execute(queryUpdate);
-      const query = `select * from emp_ov order by 1`;
+      const query = `SELECT * from emp_ov ORDER BY 1`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].EMPLOYEE_ID, 100);
       assert.strictEqual(result.rows[0][0].FIRST_NAME, "Lex");
@@ -155,27 +175,27 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.1.3 insert query', async function() {
-      const queryInsert = `insert into emp_ov values ('{"EMPLOYEE_ID":105,"FIRST_NAME":"Lex",
+      const queryInsert = `INSERT INTO emp_ov VALUES ('{"EMPLOYEE_ID":105,"FIRST_NAME":"Lex",
       "LAST_NAME":"De Haan","department_info":{"DEPARTMENT_ID":10,"departmentname":"newdept"}}')`;
 
       await connection.execute(queryInsert);
-      const query = `select * from emp_ov order by 1`;
+      const query = `SELECT * from emp_ov ORDER BY 1`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[1][0].EMPLOYEE_ID, 105);
       assert.strictEqual(result.rows[1][0].department_info.departmentname, "newdept");
     });
 
     it('272.1.4 delete query', async function() {
-      const queryDelete = `delete from emp_ov where json_value(data,'$.EMPLOYEE_ID') = 105`;
+      const queryDelete = `DELETE FROM emp_ov WHERE json_value(data,'$.EMPLOYEE_ID') = 105`;
       await connection.execute(queryDelete);
-      const query = `select * from emp_ov order by 1`;
+      const query = `SELECT * from emp_ov ORDER BY 1`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows.length, 1);
     });
 
     it('272.1.5 dept view', async function() {
 
-      const query = `select * from dept_ov order by data`;
+      const query = `SELECT * from dept_ov ORDER BY data`;
       const result = await connection.execute(query);
 
       assert.strictEqual(result.rows[0][0].department_id, 10);
@@ -184,11 +204,11 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.1.6 insert query', async function() {
-      const queryInsert = `insert into dept_ov  values ('{"department_id":11,"department_name":"Sales",
+      const queryInsert = `INSERT INTO dept_ov  VALUES ('{"department_id":11,"department_name":"Sales",
       "EMP_INFO":[{"employee_id":101,"FIRST_NAME":"Steven"}]}')`;
 
       await connection.execute(queryInsert);
-      const query = `select * from dept_ov order by data`;
+      const query = `SELECT * from dept_ov ORDER BY data`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[1][0].department_id, 11);
       assert.strictEqual(result.rows[1][0].EMP_INFO[0].employee_id, 101);
@@ -196,10 +216,10 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.1.7 update query', async function() {
-      await connection.execute(`update dept_ov set data = '{"department_id":11,"department_name":"IT",
-        "EMP_INFO":[{"employee_id":101,"FIRST_NAME":"Steven"}]}' where json_value(data,'$.department_id') = 11`);
+      await connection.execute(`UPDATE dept_ov SET data = '{"department_id":11,"department_name":"IT",
+        "EMP_INFO":[{"employee_id":101,"FIRST_NAME":"Steven"}]}' WHERE json_value(data,'$.department_id') = 11`);
 
-      const query = `select * from dept_ov where json_value(data,'$.department_id') = 11`;
+      const query = `SELECT * from dept_ov WHERE json_value(data,'$.department_id') = 11`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].department_id, 11);
       assert.strictEqual(result.rows[0][0].department_name, "IT");
@@ -208,27 +228,27 @@ describe('272. jsonDualityView1.js', function() {
 
 
     it('272.1.8 delete query', async function() {
-      const queryDelete = `delete dept_ov d where d.data.department_id = 11`;
+      const queryDelete = `delete dept_ov d WHERE d.data.department_id = 11`;
       await connection.execute(queryDelete);
-      const query = `select * from dept_ov order by 1`;
+      const query = `SELECT * from dept_ov ORDER BY 1`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows.length, 1);
     });
 
     it('272.1.9 Insert query', async function() {
-      await connection.execute(`insert into dept_ov  values ('{"department_id":11,"department_name":"Sales",
+      await connection.execute(`INSERT INTO dept_ov  VALUES ('{"department_id":11,"department_name":"Sales",
         "EMP_INFO":[{"employee_id":106,"FIRST_NAME":"Steven"}]}')`);
-      const query = `select * from dept_ov order by data`;
+      const query = `SELECT * from dept_ov ORDER BY data`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[1][0].department_id, 11);
       assert.strictEqual(result.rows[1][0].EMP_INFO[0].employee_id, 106);
       assert.strictEqual(result.rows[1][0].EMP_INFO[0].FIRST_NAME, "Steven");
     });
 
-    it('272.1.10 Update query', async function() {
-      await connection.execute(`update dept_ov set data = '{"department_id":11,"department_name":"IT",
-        "EMP_INFO":[{"employee_id":106,"FIRST_NAME":"Steven"}]}' where json_value(data,'$.department_id') = 11`);
-      const query = `select * from dept_ov order by data`;
+    it('272.1.10 update query', async function() {
+      await connection.execute(`UPDATE dept_ov SET data = '{"department_id":11,"department_name":"IT",
+        "EMP_INFO":[{"employee_id":106,"FIRST_NAME":"Steven"}]}' WHERE json_value(data,'$.department_id') = 11`);
+      const query = `SELECT * from dept_ov ORDER BY data`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[1][0].department_id, 11);
       assert.strictEqual(result.rows[1][0].department_name, "IT");
@@ -240,16 +260,16 @@ describe('272. jsonDualityView1.js', function() {
   describe('272.2 run with DV using GraphQL ', function() {
     let connection = null;
     const createTableDept = `CREATE TABLE departments
-    ( department_id    NUMBER(5) primary key,
+    ( department_id    NUMBER(5) PRIMARY KEY,
       department_name  VARCHAR2(30),
       manager_id       NUMBER(6)
     )`;
 
     const createTableEmp = `CREATE TABLE employees
-        ( employee_id    NUMBER(6) primary key
-        , first_name VARCHAR2(4000)
-        , last_name      VARCHAR2(4000)
-        , department_id  NUMBER(4)
+        ( employee_id NUMBER(6) PRIMARY KEY,
+          first_name VARCHAR2(4000),
+          last_name  VARCHAR2(4000),
+          department_id  NUMBER(4)
         )`;
 
     const alterTableEmp = `ALTER TABLE employees ADD CONSTRAINT emp_dept_fk
@@ -272,7 +292,7 @@ describe('272. jsonDualityView1.js', function() {
                              AS
                             departments @insert @update @delete @nocheck {
                             department_id :  DEPARTMENT_ID,
-                            department_name  : DEPARTMENT_NAME,
+                            department_name : DEPARTMENT_NAME,
                             EMP_INFO : employees @insert @update @delete @nocheck
                             {
                                 employee_id : employee_id,
@@ -282,9 +302,12 @@ describe('272. jsonDualityView1.js', function() {
 
 
     before(async function() {
-      connection = await oracledb.getConnection(dbConfig);
-      await connection.execute(createTableEmp);
-      await connection.execute(createTableDept);
+      connection = await oracledb.getConnection({user: 'njs_jsonDv1',
+        password: pwd,
+        connectString: dbConfig.connectString
+      });
+      await connection.execute(testsUtil.sqlCreateTable('employees', createTableEmp));
+      await connection.execute(testsUtil.sqlCreateTable('departments', createTableDept));
       await connection.execute(alterTableEmp);
       await connection.execute(createEmpView);
       await connection.execute(createDeptView);
@@ -293,8 +316,8 @@ describe('272. jsonDualityView1.js', function() {
     after(async function() {
       await testsUtil.dropTable(connection, 'employees');
       await testsUtil.dropTable(connection, 'departments');
-      await connection.execute(`drop view if exists emp_ov`);
-      await connection.execute(`drop view if exists dept_ov`);
+      await connection.execute(`DROP VIEW IF EXISTS emp_ov`);
+      await connection.execute(`DROP VIEW IF EXISTS dept_ov`);
       await connection.close();
     });
 
@@ -307,7 +330,7 @@ describe('272. jsonDualityView1.js', function() {
             , 100
             )`);
 
-      query = `select * from dept_ov order by 1`;
+      query = `SELECT * from dept_ov ORDER BY 1`;
       result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].department_id, 10);
       assert.strictEqual(result.rows[0][0].department_name, "Administration");
@@ -318,7 +341,7 @@ describe('272. jsonDualityView1.js', function() {
             , 'King'
             , 10
             )`);
-      query = `select * from emp_ov order by 1`;
+      query = `SELECT * from emp_ov ORDER BY 1`;
       result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].EMPLOYEE_ID, 100);
       assert.strictEqual(result.rows[0][0].FIRST_NAME, "Steven");
@@ -329,7 +352,7 @@ describe('272. jsonDualityView1.js', function() {
             , 'Name'
             , 10
             )`);
-      query = `select * from emp_ov order by 1`;
+      query = `SELECT * from emp_ov ORDER BY 1`;
       result = await connection.execute(query);
       assert.strictEqual(result.rows[1][0].EMPLOYEE_ID, 101);
       assert.strictEqual(result.rows[1][0].FIRST_NAME, "New");
@@ -341,18 +364,18 @@ describe('272. jsonDualityView1.js', function() {
             , 10
             )`);
 
-      query = `select * from emp_ov order by 1`;
+      query = `SELECT * from emp_ov ORDER BY 1`;
       result = await connection.execute(query);
       assert.strictEqual(result.rows[2][0].EMPLOYEE_ID, 102);
       assert.strictEqual(result.rows[2][0].FIRST_NAME, "John");
     });
 
     it('272.2.2 update query', async function() {
-      const queryUpdate = `update emp_ov set data = '{"EMPLOYEE_ID":100,"FIRST_NAME":"new_name",
-      "LAST_NAME":"new_lastname","department_info":{"DEPARTMENT_ID":10,"departmentname":"Administration"}}'
-      where json_value(data,'$.EMPLOYEE_ID') = 100`;
+      const queryUpdate = `UPDATE emp_ov SET data = '{"EMPLOYEE_ID":100,"FIRST_NAME":"new_name",
+        "LAST_NAME":"new_lastname","department_info":{"DEPARTMENT_ID":10,"departmentname":"Administration"}}'
+        WHERE json_value(data,'$.EMPLOYEE_ID') = 100`;
       await connection.execute(queryUpdate);
-      const query = `select * from emp_ov order by 1`;
+      const query = `SELECT * from emp_ov ORDER BY 1`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].EMPLOYEE_ID, 100);
       assert.strictEqual(result.rows[0][0].FIRST_NAME, "new_name");
@@ -360,11 +383,11 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.2.3 insert query', async function() {
-      const queryInsert = `insert into emp_ov values ('{"EMPLOYEE_ID":105,"FIRST_NAME":"Lex",
+      const queryInsert = `INSERT INTO emp_ov VALUES ('{"EMPLOYEE_ID":105,"FIRST_NAME":"Lex",
       "LAST_NAME":"De Haan","department_info":{"DEPARTMENT_ID":10,"departmentname":"Administration"}}')`;
 
       await connection.execute(queryInsert);
-      const query = `select * from emp_ov order by 1`;
+      const query = `SELECT * from emp_ov ORDER BY 1`;
       const result = await connection.execute(query);
 
       assert.strictEqual(result.rows[3][0].EMPLOYEE_ID, 105);
@@ -373,18 +396,18 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.2.4 delete query', async function() {
-      const queryDelete = `delete from emp_ov where json_value(data,'$.EMPLOYEE_ID') = 105`;
-      let query = `select * from emp_ov order by 1`;
+      const queryDelete = `DELETE FROM emp_ov WHERE json_value(data,'$.EMPLOYEE_ID') = 105`;
+      let query = `SELECT * from emp_ov ORDER BY 1`;
       let result = await connection.execute(query);
       assert.strictEqual(result.rows.length, 4);
       await connection.execute(queryDelete);
-      query = `select * from emp_ov order by 1`;
+      query = `SELECT * from emp_ov ORDER BY 1`;
       result = await connection.execute(query);
       assert.strictEqual(result.rows.length, 3);
     });
 
     it('272.2.5 Primary key to FOREIGN key', async function() {
-      const query = `select * from dept_ov order by data`;
+      const query = `SELECT * from dept_ov ORDER BY data`;
       const result = await connection.execute(query);
 
       assert.strictEqual(result.rows[0][0].department_id, 10);
@@ -392,9 +415,9 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.2.6 Insert query', async function() {
-      await connection.execute(`insert into dept_ov  values ('{"department_id":11,"department_name":"Sales",
+      await connection.execute(`INSERT INTO dept_ov  VALUES ('{"department_id":11,"department_name":"Sales",
         "EMP_INFO":[{"employee_id":106,"FIRST_NAME":"Steven"}]}')`);
-      const query = `select * from dept_ov order by data`;
+      const query = `SELECT * from dept_ov ORDER BY data`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].department_id, 11);
       assert.strictEqual(result.rows[0][0].EMP_INFO[0].employee_id, 106);
@@ -403,20 +426,20 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.2.7 Update query', async function() {
-      await connection.execute(`update dept_ov set data = '{"department_id":11,"department_name":"IT",
-        "EMP_INFO":[{"employee_id":106,"FIRST_NAME":"Steven"}]}' where json_value(data,'$.department_id') = 11`);
-      const query = `select * from dept_ov order by data`;
+      await connection.execute(`UPDATE dept_ov SET data = '{"department_id":11,"department_name":"IT",
+        "EMP_INFO":[{"employee_id":106,"FIRST_NAME":"Steven"}]}' WHERE json_value(data,'$.department_id') = 11`);
+      const query = `SELECT * FROM dept_ov ORDER BY data`;
       const result = await connection.execute(query);
       assert.strictEqual(result.rows[0][0].department_id, 11);
       assert.strictEqual(result.rows[0][0].department_name, "IT");
     });
 
     it('272.2.8 Delete query', async function() {
-      let query = `select * from dept_ov order by data`;
+      let query = `SELECT * FROM dept_ov ORDER BY data`;
       let result = await connection.execute(query);
       assert.strictEqual(result.rows.length, 2);
-      await connection.execute(`delete dept_ov d where d.data.department_id = 11`);
-      query = `select * from dept_ov order by data`;
+      await connection.execute(`DELETE dept_ov d WHERE d.data.department_id = 11`);
+      query = `SELECT * FROM dept_ov ORDER BY data`;
       result = await connection.execute(query);
       assert.strictEqual(result.rows.length, 1);
     });
@@ -426,31 +449,34 @@ describe('272. jsonDualityView1.js', function() {
   describe('272.3 DDL tests with GRAPHQL for JSON Duality Views ', function() {
     let connection = null;
 
-    const createTableStudent = `create table student(
-                                stuid number,
-                                name varchar(128) default null,
-                                constraint pk_student primary key (stuid)
+    const createTableStudent = `CREATE TABLE student(
+                                stuid NUMBER,
+                                name VARCHAR(128) DEFAULT null,
+                                CONSTRAINT pk_student PRIMARY KEY (stuid)
                                 )`;
-    const createTableClass = `create table class(
-                                clsid number,
-                                name varchar2(128),
-                                constraint pk_class primary key (clsid)
+    const createTableClass = `CREATE TABLE class(
+                                clsid NUMBER,
+                                name VARCHAR2(128),
+                                CONSTRAINT pk_class PRIMARY KEY (clsid)
                                 )`;
 
-    const createTableStudentClass = `create table student_class (
-                                    scid number,
-                                    stuid number,
-                                    clsid number,
-                                    constraint pk_student_class primary key (scid),
-                                    constraint fk_student_class1 foreign key (stuid) references student(stuid),
-                                     constraint fk_student_class2 foreign key (clsid) references class(clsid)
-                                     )`;
+    const createTableStudentClass = `CREATE TABLE student_class (
+                                      scid NUMBER,
+                                      stuid NUMBER,
+                                      clsid NUMBER,
+                                      CONSTRAINT pk_student_class PRIMARY KEY (scid),
+                                      CONSTRAINT fk_student_class1 FOREIGN KEY (stuid) REFERENCES student(stuid),
+                                      CONSTRAINT fk_student_class2 FOREIGN KEY (clsid) REFERENCES class(clsid)
+                                    )`;
     before(async function() {
-      connection = await oracledb.getConnection(dbConfig);
+      connection = await oracledb.getConnection({user: 'njs_jsonDv1',
+        password: pwd,
+        connectString: dbConfig.connectString
+      });
 
-      await connection.execute(createTableStudent);
-      await connection.execute(createTableClass);
-      await connection.execute(createTableStudentClass);
+      await connection.execute(testsUtil.sqlCreateTable('student', createTableStudent));
+      await connection.execute(testsUtil.sqlCreateTable('class', createTableClass));
+      await connection.execute(testsUtil.sqlCreateTable('student_class', createTableStudentClass));
     });
 
     after(async function() {
@@ -461,17 +487,17 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.3.1 Insert query', async function() {
-      await connection.execute(`insert into student values (1, 'ABC')`);
-      await connection.execute(`insert into student values (2, 'LMN')`);
-      await connection.execute(`insert into student values (3, 'XYZ')`);
-      await connection.execute(`insert into class values (1, 'CS101')`);
-      await connection.execute(`insert into class values (2, 'CS403')`);
-      await connection.execute(`insert into class values (3, 'PSYCH223')`);
-      await connection.execute(`insert into student_class values (1, 1, 1)`);
-      await connection.execute(`insert into student_class values (2, 2, 2)`);
-      await connection.execute(`insert into student_class values (3, 2, 3)`);
-      await connection.execute(`insert into student_class values (4, 3, 1)`);
-      await connection.execute(`insert into student_class values (5, 3, 2)`);
+      await connection.execute(`INSERT INTO student VALUES (1, 'ABC')`);
+      await connection.execute(`INSERT INTO student VALUES (2, 'LMN')`);
+      await connection.execute(`INSERT INTO student VALUES (3, 'XYZ')`);
+      await connection.execute(`INSERT INTO class VALUES (1, 'CS101')`);
+      await connection.execute(`INSERT INTO class VALUES (2, 'CS403')`);
+      await connection.execute(`INSERT INTO class VALUES (3, 'PSYCH223')`);
+      await connection.execute(`INSERT INTO student_class VALUES (1, 1, 1)`);
+      await connection.execute(`INSERT INTO student_class VALUES (2, 2, 2)`);
+      await connection.execute(`INSERT INTO student_class VALUES (3, 2, 3)`);
+      await connection.execute(`INSERT INTO student_class VALUES (4, 3, 1)`);
+      await connection.execute(`INSERT INTO student_class VALUES (5, 3, 2)`);
     });
 
     it('272.3.2 View Name as graphql', async function() {
@@ -743,15 +769,15 @@ describe('272. jsonDualityView1.js', function() {
       const user1 = dbConfig.createUser();
       const user2 = dbConfig.createUser();
       const pwd = testsUtil.generateRandomPassword();
-      const createUser1 = `create user ${user1} identified by ${pwd}`;
-      const createUser2 = `create user ${user2} identified by ${pwd}`;
+      const createUser1 = `CREATE USER ${user1} IDENTIFIED BY ${pwd}`;
+      const createUser2 = `CREATE USER ${user2} IDENTIFIED BY ${pwd}`;
       const grantPriv1 = `grant create session, resource, connect, unlimited tablespace to ${user1}`;
       const grantPriv2 = `grant create session to ${user2}`;
 
-      const createTableStudent = `create table student(
-                                  stuid number,
-                                  name varchar(128) default null,
-                                  constraint pk_student primary key (stuid)
+      const createTableStudent = `CREATE TABLE student(
+                                  stuid NUMBER,
+                                  name VARCHAR(128) DEFAULT null,
+                                  CONSTRAINT pk_student PRIMARY KEY (stuid)
                                   )`;
 
       before(async function() {
@@ -776,8 +802,8 @@ describe('272. jsonDualityView1.js', function() {
         if (dbConfig.test.drcp || dbConfig.test.isCmanTdm || !dbConfig.test.DBA_PRIVILEGE) {
           return;
         }
-        await connection.execute(`drop user ${user1} cascade`);
-        await connection.execute(`drop user ${user2} cascade`);
+        await connection.execute(`DROP USER ${user1} CASCADE`);
+        await connection.execute(`DROP USER ${user2} CASCADE`);
         await connection.close();
       });
 
@@ -794,10 +820,10 @@ describe('272. jsonDualityView1.js', function() {
 
         await conn.execute(createTableStudent);
 
-        await conn.execute(`insert into student values (1, 'ABC')`);
-        await conn.execute(`insert into student values (2, 'LMN')`);
-        await conn.execute(`insert into student values (3, 'XYZ')`);
-        const query = `select * from student`;
+        await conn.execute(`INSERT INTO student VALUES (1, 'ABC')`);
+        await conn.execute(`INSERT INTO student VALUES (2, 'LMN')`);
+        await conn.execute(`INSERT INTO student VALUES (3, 'XYZ')`);
+        const query = `SELECT * from student`;
         const result = await conn.execute(query);
 
         assert(result.rows.length, 3);
@@ -815,7 +841,7 @@ describe('272. jsonDualityView1.js', function() {
         });
 
         await assert.rejects(
-          async () => await conn.execute(`select * from ${user1}.student_ov`),
+          async () => await conn.execute(`SELECT * from ${user1}.student_ov`),
           /ORA-00942:/ //ORA-00942: table or view does not exist
         );
         await conn.close();

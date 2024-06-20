@@ -5409,8 +5409,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         272.1.6 insert query
         272.1.7 update query
         272.1.8 delete query
-        272.1.9 Insert query
-        272.1.10 Update query
+        272.1.9 insert query
+        272.1.10 update query
     272.2 run with DV using GraphQL
         272.2.1 insert query
         272.2.2 update query
@@ -5452,21 +5452,21 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     273.5 Create a column name as NOINSERT and add NOINSERT tag to that column
     273.6 Specify DELETE, NODELETE both, BUG number : 34657745
     273.7 Repetitive tags
-    273.3 Verify view creation on different types of tables
-        273.3.1 View with Heap
-        273.3.2 View with IOT
-        273.3.3 View with Partitioned
-        273.3.4 View with cluster
-        273.3.5 View with GTT
-    273.4 Table and Views
-        273.4.1 Base table in one schema and View in another schema
-        273.4.2 Base table as schema_name__table_name
-        273.4.3 Base table with Unique Index on it
-        273.4.4 Base table with COMPOSITE Index on it
-        273.4.5 Base table with Function based index on it
-        273.4.6 Base table with bitmap index index on it
-    273.5 With Redaction on base tables
-        273.5.1 redaction enabled on a base table
+    273.8 Verify view creation on different types of tables
+        273.8.1 View with Heap
+        273.8.2 View with IOT
+        273.8.3 View with Partitioned Table
+        273.8.4 View with cluster
+        273.8.5 View with GTT
+    273.9 Table and Views
+        273.9.1 Base table in one schema and View in another schema
+        273.9.2 Base table as schema_name__table_name
+        273.9.3 Base table with Unique Index on it
+        273.9.4 Base table with COMPOSITE Index on it
+        273.9.5 Base table with Function based index on it
+        273.9.6 Base table with bitmap index index on it
+    273.10 With Redaction on base tables
+        273.10.1 redaction enabled on a base table
 
 274. jsonDualityViews3.js
     274.1 Define Columns of View with WITH READ WRITE or WITH READ ONLY annotations
@@ -5479,11 +5479,11 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     274.8 Create view on NULL columns empty columns
 
 275. jsonDualityViews4.js
-    275.1 Test create table, Column defaults
-    275.2 Test with Table and column constraints
-    275.3 Test with Virtual columns
-    275.4 Test with Column storage clause
-    275.5 Test with data dictonary
+    275.1 Test create table, column defaults
+    275.2 Test with table and column constraints
+    275.3 Test with virtual columns
+    275.4 Test with column storage clause
+    275.5 Test with data dictionary
     275.6 Test with dictionary views
     275.7 Json Duality view with GraphQL
         275.7.1 Create View using GraphQL
@@ -5684,6 +5684,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         290.4.2 Invalid Values for different datatypes
         290.4.3 Invalid Values for collection
         290.4.4 Verify table of VARCHAR2 with CHAR/BYTE specifier
+    290.5 Associative Arrays fetch
+        290.5.1 verify associative array outbinds
 
 291. dbSchema.js
     291.1 dbSchema and Annotations
@@ -5706,79 +5708,81 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     293.5 Warning from executeMany
 
 294. dataTypeVector1.js
-    294.1 binding a vector type with various numeric array types
-    294.2 binding a vector type with unsupported typed arrays
-    294.3 binding a vector type with null vector array types
-    294.4 binding a vector type with various number typed arrays
-    294.5 test update vector type into table
-    294.6 verify different vector constructors
-    294.7 insert 32 bit vector to 32 bit table
-    294.8 insert Int8 vector to Int8 vector column
-    294.9 insert int8 typed array to float64 vector column
-    294.10 insert int8arr typed array to flex vector column
-    294.11 insert int8arr typed array to float32 vector column
-    294.12 insert a float32 typed array into an int8 vector column
-    294.13 insert a float32 vector into an int8 column (negative)
-    294.14 insert a float64 typed array into an int8 vector column
-    294.15 insert float32 typed array to float64 vector column
-    294.16 insert float32 typed array to flex vector column
-    294.17 insert float64 typed array to float64 vector column
-    294.18 insert float64 typed array to float32 vector column
-    294.19 insert float64 typed array to flex vector column
-    294.20 insert vector with invalid size
-    294.21 insert double array to float32 vector column
-    294.22 test inserting vector with invalid values
-    294.23 insert float and double array into vector column of default storage (float32)
-    294.24 insert float and double array into vector column of default storage (float32)
-    294.25 insert an array into vector
-    294.26 insert float and double array into flex vector column
-    294.27 insert an array into vector
-    294.28 test returning vector as clob
-    294.29 test creating vector with clob
-    294.30 test vector_serialize
-    294.31 test create table as select
-    294.32 insert float64 typed array to float64 vector column
-    294.33 test Fetch Vector Column as string
-    294.34 test Fetch Vector Column as string using fetchInfo
-    294.35 test add drop rename vector column
-    294.36 test vector metadata verification
-    294.37 test transactional features on vector
-    294.38 test validate assm mssm on test vector table
-    294.39 Test fuzzing of vector datatype
-    294.40 test dml returning vector type
-    294.41 test inserting more dimensions than defined in flexible vector column
-    294.42 test executemany with positional args
-    294.43 handling of NULLs and default values for vector types
-    294.44 test ORDER BY and GROUP BY with vector types as negative test
-    294.45 selection of top vectors by Euclidean distance
-    294.46 test fetching vector Metadata
-    294.47 test handling of NULL vector value
-    294.48 insert a float32 vector with 8127 dimensions into a float32 flex column
-    294.49 insert a float32 vector with 65535 dimensions into a vector column of same dimensions
-    294.50 insert a float64 vector with 65535 dimensions into a float64 flex column
-    294.51 insert a float64 vector with 65533 dimensions to float32 vector
-    294.52 insert a float64 vector with 65535 dimensions to flex float32 vector
-    294.53 insert a int8 vector with 65533 dimensions to flex int8 coloumn
-    294.54 Insert using executeMany, update, delete and select vectors
-    294.55 insert clob with array of 65535 elements to a vector column
-    294.56 Insert vector as clob to Int8 column
-    294.57 Insert vector as clob to float64 column
-    294.58 Insert vector as clob to float32 column
-    294.59 insert a clob with 65535 elements to float64 vector column
-    294.60 insert and update vector as clob
-    291.61 insert a Float64 vector array with 65535 dimensions to Float32 vector column
-    291.62 test Procedure Call with Vector Type Parameters
-    294.63 test binding a vector with inf values (negative)
-    294.64 fetch JSON value with an embedded vector
-    294.65 bind JSON value with an embedded vector
-    294.66 with type Int16Array invalid typed arrays
-    294.67 typed arrays with strings
-    294.68 typed arrays with objects
-    294.69 typed arrays with boolean values
-    294.70 typed arrays with undefined value
-    294.71 typed arrays with null values
-    294.72 inserting empty vector in Fixed and Flex vector columns
-    294.73 fetch VECTOR column as string with table recreate
+    294.1 standard vector tests with a single table
+        294.1.1 binding a vector type with various numeric array types
+        294.1.2 binding a vector type with unsupported typed arrays
+        294.1.3 binding a vector type with null vector array types
+        294.1.4 binding a vector type with various number typed arrays
+        294.1.5 update vector type into table
+        294.1.6 verify different vector constructors
+        294.1.7 insert 32 bit vector to 32 bit table
+        294.1.8 insert Int8 vector to Int8 vector column
+        294.1.9 insert int8 typed array to float64 vector column
+        294.1.10 insert int8arr typed array to flex vector column
+        294.1.11 insert int8arr typed array to float32 vector column
+        294.1.12 insert a float32 typed array into an int8 vector column
+        294.1.13 insert a float32 vector into an int8 column (negative)
+        294.1.14 insert a float64 typed array into an int8 vector column
+        294.1.15 insert float32 typed array to float64 vector column
+        294.1.16 insert float32 typed array to flex vector column
+        294.1.17 insert float64 typed array to float64 vector column
+        294.1.18 insert float64 typed array to float32 vector column
+        294.1.19 insert float64 typed array to flex vector column
+        294.1.20 insert vector with invalid size
+        294.1.21 insert double array to float32 vector column
+        294.1.22 inserting vector with invalid values
+        294.1.23 insert float and double array into vector column of default storage (float32)
+        294.1.24 insert float and double array into vector column of default storage (float32)
+        294.1.25 insert an array into vector
+        294.1.26 insert float and double array into flex vector column
+        294.1.27 insert an array into vector
+        294.1.28 returning vector as clob
+        294.1.29 creating vector with clob
+        294.1.30 vector_serialize
+        294.1.31 create table as select
+        294.1.32 insert float64 typed array to float64 vector column
+        294.1.33 add drop rename vector column
+        294.1.34 vector metadata verification
+        294.1.35 transactional features on vector
+        294.1.36 validate assm mssm on vector table
+        294.1.37 Test fuzzing of vector datatype
+        294.1.38 dml returning vector type
+        294.1.39 inserting more dimensions than defined in flexible vector column
+        294.1.40 executeMany with positional args
+        294.1.41 handling of NULLs and default values for vector types
+        294.1.42 ORDER BY and GROUP BY with vector types as negative test
+        294.1.43 selection of top vectors by Euclidean distance
+        294.1.44 with type Int16Array invalid typed arrays
+        294.1.45 typed arrays with strings
+        294.1.46 typed arrays with objects
+        294.1.47 typed arrays with boolean values
+        294.1.48 typed arrays with undefined value
+        294.1.49 typed arrays with null values
+        294.1.50 inserting empty vector in Fixed and Flex vector columns
+    294.2 vector tests with tables with different types of VECTOR columns
+        294.2.1 fetch VECTOR Column as string
+        294.2.2 fetch VECTOR Column as string using fetchInfo
+        294.2.3 fetching vector metadata
+        294.2.4 handling of NULL vector value
+        294.2.5 insert a float32 vector with 8127 dimensions into a float32 flex column
+        294.2.6 insert a float32 vector with 65535 dimensions into a vector column of same dimensions
+        294.2.7 insert a float64 vector with 65535 dimensions into a float64 flex column
+        294.2.8 insert a float64 vector with 65533 dimensions to float32 vector
+        294.2.9 insert a float64 vector with 65535 dimensions to flex float32 vector
+        294.2.10 insert a int8 vector with 65533 dimensions to flex int8 column
+        294.2.11 insert using executeMany, update, delete and select vectors
+        294.2.12 insert clob with array of 65535 elements to a vector column
+        294.2.13 insert vector as clob to Int8 column
+        294.2.14 insert vector as clob to float64 column
+        294.2.15 insert vector as clob to float32 column
+        294.2.16 insert a clob with 65535 elements to float64 vector column
+        294.2.17 insert and update vector as clob
+        294.2.18 insert a Float64 vector array with 65535 dimensions to Float32 vector column
+        294.2.19 Procedure Call with Vector Type Parameters
+        294.2.20 binding a vector with inf values (negative)
+        294.2.21 fetch JSON value with an embedded vector
+        294.2.22 bind JSON value with an embedded vector
+        294.2.23 fetch VECTOR column as string with table recreate
 
 295. dataTypeVector2.js
     295.1 verify fetch information for older clients

@@ -70,33 +70,32 @@ describe('275. jsonDualityView4.js', function() {
     });
 
     // create the student table
-    await connection.execute(`
-      create table student(
-        stuid number,
-        name varchar(128) default null,
-        constraint pk_student primary key (stuid)
-      )
-    `);
+    const sqlCreateTableStudent = `CREATE TABLE student(
+      stuid NUMBER,
+      name VARCHAR(128) DEFAULT null,
+      CONSTRAINT pk_student PRIMARY KEY (stuid)
+      )`;
+    await connection.execute(testsUtil.sqlCreateTable('student', sqlCreateTableStudent));
+
     // create the class table
-    await connection.execute(`
-      create table class(
-        clsid number,
-        name varchar2(128),
-        constraint pk_class primary key (clsid)
-      )
-    `);
+    const sqlCreateTableClass = `CREATE TABLE class(
+      clsid NUMBER,
+      name VARCHAR2(128),
+      CONSTRAINT pk_class PRIMARY KEY (clsid)
+      )`;
+    await connection.execute(testsUtil.sqlCreateTable('class', sqlCreateTableClass));
 
     // create the student_class table
-    await connection.execute(`
-      create table student_class (
-        scid number,
-        stuid number,
-        clsid number,
-        constraint pk_student_class primary key (scid),
-        constraint fk_student_class1 foreign key (stuid) references student(stuid),
-        constraint fk_student_class2 foreign key (clsid) references class(clsid)
-      )
-    `);
+    const sqlCreateTableStudentClass = `
+      CREATE TABLE student_class (
+        scid NUMBER,
+        stuid NUMBER,
+        clsid NUMBER,
+        CONSTRAINT pk_student_class PRIMARY KEY (scid),
+        CONSTRAINT fk_student_class1 FOREIGN KEY (stuid) REFERENCES student(stuid),
+        CONSTRAINT fk_student_class2 FOREIGN KEY (clsid) REFERENCES class(clsid)
+      )`;
+    await connection.execute(testsUtil.sqlCreateTable('student_class', sqlCreateTableStudentClass));
   });
 
   after(async function() {
@@ -107,16 +106,16 @@ describe('275. jsonDualityView4.js', function() {
     await testsUtil.dropTable(connection, 'class');
 
     await connection.close();
-    await dbaConn.execute(`drop user njs_jsonDv4 cascade`);
+    await dbaConn.execute(`DROP USER njs_jsonDv4 CASCADE`);
 
     await dbaConn.close();
   });
 
-  it('275.1 Test create table, Column defaults', async function() {
+  it('275.1 Test create table, column defaults', async function() {
     // Create table
     await connection.execute(
       `CREATE TABLE Persons (
-        ID int NOT NULL primary key,
+        ID int NOT NULL PRIMARY KEY,
         LastName varchar(255) NOT NULL,
         FirstName varchar(255),
         City varchar(255) DEFAULT 'Mum'
@@ -138,24 +137,23 @@ describe('275. jsonDualityView4.js', function() {
     );
 
     // Drop table
-    await connection.execute('DROP TABLE Persons PURGE');
+    await connection.execute(testsUtil.sqlDropTable('Persons'));
   });
 
-  it('275.2 Test with Table and column constraints', async function() {
+  it('275.2 Test with table and column constraints', async function() {
     // CREATE TABLE query
-    await connection.execute(`
+    const sqlCreateTable = `
       CREATE TABLE Persons (
-     ID int NOT NULL PRIMARY KEY ,
-    LastName varchar(255) NOT NULL,
-     FirstName varchar(255),
-      CONSTRAINT ID_REL CHECK(ID>12)
-     )`);
+        ID int NOT NULL PRIMARY KEY ,
+        LastName varchar(255) NOT NULL,
+        FirstName varchar(255),
+        CONSTRAINT ID_REL CHECK(ID>12)
+      )`;
+    await connection.execute(testsUtil.sqlCreateTable('Persons', sqlCreateTable));
 
-    // INSERT data into the table
     await connection.execute(`
-      insert into persons values (13,'ABC','XYZ')`);
+      INSERT INTO persons VALUES (13,'ABC','XYZ')`);
 
-    // COMMIT the transaction
     await connection.execute(`COMMIT`);
 
     // CREATE JSON RELATIONAL DUALITY VIEW
@@ -186,16 +184,16 @@ describe('275. jsonDualityView4.js', function() {
     await connection.execute(`DROP TABLE IF EXISTS Persons`);
   });
 
-  it('275.3 Test with Virtual columns', async function() {
+  it('275.3 Test with virtual columns', async function() {
     // create table t1
-    await connection.execute(`
+    const sqlCreateTable = `
       CREATE TABLE t1 (
-        id number PRIMARY KEY,
-        product varchar2(50),
-        price number(10,2),
-        price_with_tax number(10,2) GENERATED ALWAYS AS (round(price*1.2,2)) VIRTUAL
-      )
-    `);
+        id NUMBER PRIMARY KEY,
+        product VARCHAR2(50),
+        price NUMBER(10,2),
+        price_with_tax NUMBER(10,2) GENERATED ALWAYS AS (round(price*1.2,2)) VIRTUAL
+        )`;
+    await connection.execute(testsUtil.sqlCreateTable('t1', sqlCreateTable));
 
     // insert some rows into t1
     await connection.execute(`
@@ -217,24 +215,24 @@ describe('275. jsonDualityView4.js', function() {
     );
 
     // drop the table
-    await connection.execute(`DROP TABLE t1 PURGE`);
+    await connection.execute(testsUtil.sqlDropTable(`t1`));
   });
 
   it('275.4 Test with Column storage clause', async function() {
-    // Create table with storage clause
-    await connection.execute(`
+    let sqlCreateTable = `
       CREATE TABLE divisions (
         div_no     NUMBER(2) PRIMARY KEY,
         div_name   VARCHAR2(14),
         location   VARCHAR2(13)
       )
       STORAGE ( INITIAL 8M MAXSIZE 1G )
-    `);
+    `;
+    // Create table with storage clause
+    await connection.execute(testsUtil.sqlCreateTable('divisions', sqlCreateTable));
 
     // Insert into table
     await connection.execute(`
-      INSERT INTO divisions
-      VALUES (12,'abc','mum')
+      INSERT INTO divisions VALUES (12,'abc','mum')
     `);
     await connection.commit();
 
@@ -246,19 +244,19 @@ describe('275. jsonDualityView4.js', function() {
 
     // In Parallel
     // Drop table and create again with parallel clause
-    await connection.execute(`DROP TABLE divisions PURGE`);
-    await connection.execute(`
+    await connection.execute(testsUtil.sqlDropTable('divisions'));
+    sqlCreateTable = `
       CREATE TABLE divisions (
         div_no     NUMBER(2) PRIMARY KEY,
         div_name   VARCHAR2(14),
         location   VARCHAR2(13)
       )
-    `);
+    `;
+    await connection.execute(testsUtil.sqlCreateTable('divisions', sqlCreateTable));
 
     // Insert into table
     await connection.execute(`
-      INSERT INTO divisions
-      VALUES (12,'abc','mum')
+      INSERT INTO divisions VALUES (12,'abc','mum')
     `);
     await connection.commit();
 
@@ -276,29 +274,27 @@ describe('275. jsonDualityView4.js', function() {
     // Explain plan for select query
     await connection.execute(`
       EXPLAIN PLAN FOR
-      SELECT /*+ parallel(divisions,4) */
-        JSON_VALUE(data, '$.DIV_NO'),
-        JSON_VALUE(data, '$.DIV_NAME')
-      FROM student_ov
+        SELECT /*+ parallel(divisions,4) */
+          JSON_VALUE(data, '$.DIV_NO'),
+          JSON_VALUE(data, '$.DIV_NAME')
+        FROM student_ov
     `);
-    await connection.execute(`DROP TABLE divisions PURGE`);
+    await connection.execute(testsUtil.sqlDropTable('divisions'));
   });
 
-  it('275.5 Test with data dictonary', async function() {
+  it('275.5 Test with data dictionary', async function() {
     // create JSON relational duality view
     await connection.execute(`
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-      AS
-      SELECT *
-      FROM Student
-      @INSERT @UPDATE @DELETE {
-        StudentId: stuid,
-        StudentName: name,
-        student_class @INSERT @UPDATE @DELETE {
-          StudentClassId : scid,
-          class  {ClassId: clsid, Name: name}
+      AS Student
+        @INSERT @UPDATE @DELETE {
+          StudentId: stuid,
+          StudentName: name,
+          student_class @INSERT @UPDATE @DELETE {
+            StudentClassId : scid,
+            class  {ClassId: clsid, Name: name}
+          }
         }
-      }
     `);
 
     // display user tables
@@ -337,26 +333,24 @@ describe('275. jsonDualityView4.js', function() {
       SELECT view_name, view_owner, ROOT_TABLE_NAME
       FROM DBA_JSON_DUALITY_VIEWS
       ORDER BY view_name`);
-    assert.strictEqual(result.rows.length, 4);
+    assert.strictEqual(result.rows.length, 1);
 
-    // Query 2: select VIEW_OWNER, VIEW_NAME, RELATIONSHIP from DBA_JSON_DUALITY_VIEW_TABS
+    // Query 2: select view_owner, view_name, relationship from DBA_JSON_DUALITY_VIEW_TABS
     result = await dbaConn.execute(`
-      SELECT VIEW_OWNER, VIEW_NAME, RELATIONSHIP
+      SELECT view_owner, view_name, relationship
       FROM DBA_JSON_DUALITY_VIEW_TABS
-      ORDER BY VIEW_OWNER`);
-    assert.strictEqual(result.rows.length, 11);
+      ORDER BY view_owner`);
+    assert.deepStrictEqual(result.rows, [["NJS_JSONDV4", "STUDENT_OV", null],
+      ["NJS_JSONDV4", "STUDENT_OV", "singleton"], ["NJS_JSONDV4", "STUDENT_OV", "nested"]]);
 
     // Query 3: select COLUMN_NAME,DATA_TYPE from DBA_JSON_DUALITY_VIEW_TAB_COLS
     result = await dbaConn.execute(`
       SELECT COLUMN_NAME, DATA_TYPE
       FROM DBA_JSON_DUALITY_VIEW_TAB_COLS
       ORDER BY COLUMN_NAME`);
-    /*
-      Due to the JSON duality views created in the earlier tests,
-      the SELECT query above will return 25 rows.
-    */
-    assert.strictEqual(result.rows.length, 25);
-    assert.deepStrictEqual(result.rows[0], [ 'CLSID', 'NUMBER' ]);
+
+    assert.deepStrictEqual(result.rows, [["CLSID", "NUMBER"], ["CLSID", "NUMBER"], ["NAME", "VARCHAR2"],
+      ["NAME", "VARCHAR2"], ["SCID", "NUMBER"], ["STUID", "NUMBER"], ["STUID", "NUMBER"]]);
   });
 
   describe('275.7 Json Duality view with GraphQL', function() {
@@ -364,41 +358,41 @@ describe('275. jsonDualityView4.js', function() {
     it('275.7.1 Create View using GraphQL', async function() {
       // insert data into the student table
       await connection.execute(`
-        insert into student values (1, 'ABC')
+        INSERT INTO student VALUES (1, 'ABC')
       `);
       await connection.execute(`
-        insert into student values (2, 'XYZ')
+        INSERT INTO student VALUES (2, 'XYZ')
       `);
       await connection.execute(`
-        insert into student values (3, 'C')
+        INSERT INTO student VALUES (3, 'C')
       `);
 
       // insert data into the class table
       await connection.execute(`
-        insert into class values (1, 'CS101')
+        INSERT INTO class VALUES (1, 'CS101')
       `);
       await connection.execute(`
-        insert into class values (2, 'CS403')
+        INSERT INTO class VALUES (2, 'CS403')
       `);
       await connection.execute(`
-        insert into class values (3, 'PSYCH223')
+        INSERT INTO class VALUES (3, 'PSYCH223')
       `);
 
       // insert data into the student_class table
       await connection.execute(`
-        insert into student_class values (1, 1, 1)
+        INSERT INTO student_class VALUES (1, 1, 1)
       `);
       await connection.execute(`
-        insert into student_class values (2, 2, 2)
+        INSERT INTO student_class VALUES (2, 2, 2)
       `);
       await connection.execute(`
-        insert into student_class values (3, 2, 3)
+        INSERT INTO student_class VALUES (3, 2, 3)
       `);
       await connection.execute(`
-        insert into student_class values (4, 3, 1)
+        INSERT INTO student_class VALUES (4, 3, 1)
       `);
       await connection.execute(`
-        insert into student_class values (5, 3, 2)
+        INSERT INTO student_class VALUES (5, 3, 2)
       `);
 
       // commit the transaction
@@ -407,13 +401,13 @@ describe('275. jsonDualityView4.js', function() {
       // create the student_ov view
       await connection.execute(`
         CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-        AS select * from
-        Student @INSERT @UPDATE @DELETE
+        AS Student
+           @INSERT @UPDATE @DELETE
         {
           StudentId: stuid, StudentName: name,
           student_class @INSERT @UPDATE @DELETE
             {StudentClassId : scid,
-              class   {ClassId: clsid, Name: name}}
+              class {ClassId: clsid, Name: name}}
         }
       `);
 
@@ -447,17 +441,20 @@ describe('275. jsonDualityView4.js', function() {
         AS customer { id, cust_info }
       `;
 
-      await connection.execute(createCustomerType);
-      await connection.execute(createCustomerTable);
+      await connection.execute(testsUtil.sqlCreateType('customer_typ', createCustomerType));
+      await connection.execute(testsUtil.sqlCreateTable('customer', createCustomerTable));
       await assert.rejects(
         async () => await connection.execute(createStudentOvView),
         /ORA-40893:/ //ORA-40893: Unsupported data type used in column
         //'CUST_INFO' of a JSON 189 Relational Duality View 'STUDENT_OV'.
       );
+      await connection.execute(testsUtil.sqlDropType('customer_typ'));
+      await connection.execute(testsUtil.sqlDropType('customer'));
     });
 
     it('275.8.2 XML datatype', async function() {
-      await connection.execute(`create table t(x number(5) primary key, y XMLType)`);
+      const sqlCreate = `CREATE TABLE t(x NUMBER(5) PRIMARY KEY, y XMLType)`;
+      await connection.execute(testsUtil.sqlCreateTable('t', sqlCreate));
       await assert.rejects(
         async () => await connection.execute(`CREATE OR REPLACE JSON
           RELATIONAL DUALITY VIEW xmltype_ov AS t{x y}`),
@@ -465,14 +462,13 @@ describe('275. jsonDualityView4.js', function() {
         //unsupported data type.
       );
 
-      await connection.execute(`drop table t PURGE`);
+      await connection.execute(testsUtil.sqlDropTable('t'));
     });
 
     it('275.8.3 JSON datatype', async function() {
-      // Query to create customer table with customer_typ object type column
-      await connection.execute(`drop table customer`);
+      // Query to create customer table with JSON column
       const createCustomerTable = `
-        create table customer (id NUMBER(20) PRIMARY KEY,dt json)
+        CREATE TABLE customer (id NUMBER(20) PRIMARY KEY,dt JSON)
       `;
 
       // Query to create student_ov view using JSON RELATIONAL DUALITY
@@ -481,43 +477,48 @@ describe('275. jsonDualityView4.js', function() {
          AS njs_jsonDv4.customer{id abc:customer @nest{dt}}
       `;
 
-      await connection.execute(createCustomerTable);
+      await connection.execute(testsUtil.sqlCreateTable('customer', createCustomerTable));
 
       //Insert into customer table
-      await connection.execute(`insert into customer values(1,'{"PONumber":1600}')`);
+      await connection.execute(`INSERT INTO customer VALUES(1,'{"PONumber":1600}')`);
       await connection.commit();
 
       async () => await connection.execute(createStudentOvView);
+
+      await connection.execute(testsUtil.sqlDropTable('customer'));
     });
 
     it('275.8.4 varray', async function() {
       await connection.execute(`CREATE OR REPLACE TYPE list_v IS VARRAY(2) OF VARCHAR2 (10)`);
-      await connection.execute(`create table varray_ov (id NUMBER(20) PRIMARY KEY,names list_v)`);
+      await connection.execute(`CREATE TABLE varray_ov (id NUMBER(20) PRIMARY KEY,names list_v)`);
       await assert.rejects(
         async () => await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW
            student_ov AS varray_ov{id names}`),
         /ORA-40893:/ //ORA-40893: Unsupported data type used in column 'NAMES' of a JSON Relational Duality View 'STUDENT_OV'
       );
-      //await connection.execute(`drop table varray_ov`);
+      await connection.execute(testsUtil.sqlDropType('list_v'));
+      await connection.execute(testsUtil.sqlDropTable('varray_ov'));
     });
   });
 
   describe('275.9 Test with different types of indexes', function() {
     it('275.9.1 Bitmap join index', async function() {
       // Create the 'emp' table
-      await connection.execute(`CREATE TABLE emp(
-            deptno NUMBER(5) PRIMARY KEY,
-            employee_id NUMBER,
-            name VARCHAR(20)
-          )`);
+      const sqlCreateTableEmp = `CREATE TABLE emp(
+        deptno NUMBER(5) PRIMARY KEY,
+        employee_id NUMBER,
+        name VARCHAR(20)
+      )`;
+      await connection.execute(testsUtil.sqlCreateTable('emp', sqlCreateTableEmp));
 
       // Create the 'dept' table
-      await connection.execute(`CREATE TABLE dept(
+      const sqlCreateTableDept = `CREATE TABLE dept(
         deptno NUMBER(5) PRIMARY KEY,
         dept_id NUMBER,
         dept_name VARCHAR(20),
         CONSTRAINT fk_dept FOREIGN KEY (deptno) REFERENCES emp(deptno)
-      )`);
+      )`;
+      await connection.execute(testsUtil.sqlCreateTable('dept', sqlCreateTableDept));
 
       // Insert data into the 'emp' table
       await connection.execute(`INSERT INTO emp VALUES(1, 10, 'Varshil')`);
@@ -538,8 +539,8 @@ describe('275. jsonDualityView4.js', function() {
 
       // Drop the 'emp' and 'dept' tables with the PURGE option
       await connection.execute(`drop view student_ov`);
-      await connection.execute(`drop table dept PURGE`);
-      await connection.execute(`drop table emp PURGE`);
+      await connection.execute(testsUtil.sqlDropTable('dept'));
+      await connection.execute(testsUtil.sqlDropTable('emp'));
     });
 
     it('275.9.2 Partitioned index', async function() {
@@ -586,19 +587,18 @@ describe('275. jsonDualityView4.js', function() {
       // Create the Global index 'IDX_LOC' on the 'sales' table
       const createIndex = `
       CREATE INDEX IDX_GLOB ON SALES (time_id)
-      GLOBAL PARTITION BY RANGE (time_id) (
-        PARTITION sales_q1_2006 VALUES LESS THAN (
-          TO_DATE('01-APR-2006','dd-MON-yyyy')
-        ),
-        PARTITION sales_q2_2006 VALUES LESS THAN (
-          TO_DATE('01-JUL-2006','dd-MON-yyyy')
-        ),
-        PARTITION sales_q3_2006 VALUES LESS THAN (
-          TO_DATE('01-OCT-2006','dd-MON-yyyy')
-        ),
-        PARTITION sales_q4_2006 VALUES LESS THAN (MAXVALUE)
-      )`;
-
+        GLOBAL PARTITION BY RANGE (time_id) (
+          PARTITION sales_q1_2006 VALUES LESS THAN (
+            TO_DATE('01-APR-2006','dd-MON-yyyy')
+          ),
+          PARTITION sales_q2_2006 VALUES LESS THAN (
+            TO_DATE('01-JUL-2006','dd-MON-yyyy')
+          ),
+          PARTITION sales_q3_2006 VALUES LESS THAN (
+            TO_DATE('01-OCT-2006','dd-MON-yyyy')
+          ),
+          PARTITION sales_q4_2006 VALUES LESS THAN (MAXVALUE)
+        )`;
       await connection.execute(`drop index idx_loc`);
       await connection.execute(createIndex);
 
@@ -629,7 +629,7 @@ describe('275. jsonDualityView4.js', function() {
       ON unq_idx_demo(a, b) compress 1`
       );
 
-      // Insert values
+      // Insert VALUES
       await connection.execute(`INSERT INTO unq_idx_demo(a, b) VALUES(1, 1)`
       );
 
@@ -641,7 +641,6 @@ describe('275. jsonDualityView4.js', function() {
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
       AS unq_idx_demo{a b}`
       );
-
     });
 
     it('275.10.2 NOCOMPRESS', async function() {
@@ -682,14 +681,14 @@ describe('275. jsonDualityView4.js', function() {
 
       await connection.execute(`
       CREATE TABLE a (
-        a1 NUMBER primary key
+        a1 NUMBER PRIMARY KEY
         CONSTRAINT ach CHECK (a1 > 0) ENABLE NOVALIDATE
       )
       PARALLEL
     `);
 
       await connection.execute(`
-      INSERT INTO a values (1)
+      INSERT INTO a VALUES (1)
     `);
 
       await connection.execute(`
@@ -762,61 +761,64 @@ describe('275. jsonDualityView4.js', function() {
         AS Student {StudentId: stuid, StudentName: name}
     `);
 
-      // select StudentId from student_ov ordered by ascending values
+      // select StudentId from student_ov ordered by ascending VALUES
       const result1 = await connection.execute(`
-      SELECT json_value(data, '$.StudentId' RETURNING NUMBER)
-      FROM student_ov
-      ORDER BY 1 ASC
-    `);
+        SELECT json_value(data, '$.StudentId' RETURNING NUMBER)
+        FROM student_ov
+        ORDER BY 1 ASC
+      `);
 
       assert.deepStrictEqual(result1.rows, [[1], [4], [8], [9], [12], [19], [81]]);
 
       // select StudentId from student_ov ordered by ascending values
       const result2 = await connection.execute(`
-      SELECT s.data.StudentId
-      FROM student_ov s
-      ORDER BY 1 ASC
-    `);
+        SELECT s.data.StudentId
+        FROM student_ov s
+        ORDER BY 1 ASC
+      `);
       assert.deepStrictEqual(result2.rows, [[1], [4], [8], [9], [12], [19], [81]]);
 
       // select StudentId from student_ov ordered by descending values
       const result3 = await connection.execute(`
-      SELECT json_value(data, '$.StudentId' RETURNING NUMBER)
-      FROM student_ov
-      ORDER BY 1 DESC
-    `);
+        SELECT json_value(data, '$.StudentId' RETURNING NUMBER)
+        FROM student_ov
+        ORDER BY 1 DESC
+      `);
       assert.deepStrictEqual(result3.rows, [[81], [19], [12], [9], [8], [4], [1]]);
 
       // select StudentId from student_ov ordered by descending values
       const result4 = await connection.execute(`
-      SELECT s.data.StudentId
-      FROM student_ov s
-      ORDER BY 1 DESC
-    `);
+        SELECT s.data.StudentId
+        FROM student_ov s
+        ORDER BY 1 DESC
+      `);
       assert.deepStrictEqual(result4.rows, [[81], [19], [12], [9], [8], [4], [1]]);
+    });
+
+    it('275.11.2 JSON RELATIONAL DUALITY VIEW: Ordering', async function() {
 
       // select StudentName from student_ov ordered by descending values
       const result5 = await connection.execute(`
-      SELECT json_value(data, '$.StudentName')
-      FROM student_ov
-      ORDER BY 1 DESC
-    `);
+          SELECT json_value(data, '$.StudentName')
+          FROM student_ov
+          ORDER BY 1 DESC
+        `);
       assert.deepStrictEqual(result5.rows, [['H'], ['F'], ['E'], ['D'], ['C'], ['B'], ['A']]);
 
       // select StudentName from student_ov ordered by descending values
       const result6 = await connection.execute(`
-      SELECT s.data.StudentName
-      FROM student_ov s
-      ORDER BY 1 DESC
-    `);
+          SELECT s.data.StudentName
+          FROM student_ov s
+          ORDER BY 1 DESC
+        `);
       assert.deepStrictEqual(result6.rows, [['H'], ['F'], ['E'], ['D'], ['C'], ['B'], ['A']]);
 
       // select StudentName and StudentId from student_ov ordered by StudentName descending and StudentId ascending
       const result7 = await connection.execute(`
-      SELECT json_value(data, '$.StudentName'), json_value(data, '$.StudentId')
-      FROM student_ov
-      ORDER BY data.StudentName DESC, json_value(data, '$.StudentId') ASC
-    `);
+          SELECT json_value(data, '$.StudentName'), json_value(data, '$.StudentId')
+          FROM student_ov
+          ORDER BY data.StudentName DESC, json_value(data, '$.StudentId') ASC
+        `);
       assert.deepStrictEqual(result7.rows, [['H', '19'], ['F', '4'], ['E', '8'], ['D', '12'], ['C', '81'], ['B', '9'], ['A', '1']]);
     });
   });

@@ -75,22 +75,23 @@ describe('277. jsonDualityView6.js', function() {
   describe('277.1 With tables and without constraints relationship', function() {
 
     before(async function() {
+
       // create the student table
       await connection.execute(`
-      create table student(
-        stuid number,
-        name varchar(128) default null,
-        constraint pk_student primary key (stuid)
-      )`);
+        create table student(
+          stuid number,
+          name varchar(128) default null,
+          constraint pk_student primary key (stuid)
+        )`);
 
       // create the student_class table
       await connection.execute(`
-      create table student_class (
-        stuid number primary key,
-        scid number,
-        clsid number,
-        constraint fk_student_class1 foreign key (stuid) references student(stuid)
-      )`);
+        create table student_class (
+          stuid number primary key,
+          scid number,
+          clsid number,
+          constraint fk_student_class1 foreign key (stuid) references student(stuid)
+        )`);
     });
 
     after(async function() {
@@ -122,16 +123,16 @@ describe('277. jsonDualityView6.js', function() {
 
       // Create the JSON relational duality view
       await connection.execute(`
-      create or replace json relational duality view student_ov
-      as
-      student @insert@update@delete {
-        student_id: stuid,
-        student_name: name,
-        student_class: student_class @insert@update@delete {
-          student_class_id: scid,
-          student_id: stuid
-        }
-      }
+        create or replace json relational duality view student_ov
+        as
+          student @insert@update@delete {
+            student_id: stuid,
+            student_name: name,
+            student_class: student_class @insert@update@delete {
+              student_class_id: scid,
+              student_id: stuid
+            }
+          }
       `);
 
       // Select data from the view
@@ -172,7 +173,8 @@ describe('277. jsonDualityView6.js', function() {
         AS
         Student @INSERT@UPDATE@DELETE
         {
-          _id: stuid, StudentName: name,
+          _id: stuid,
+          StudentName: name,
           StudentClass :
           student_class @INSERT@UPDATE@DELETE
           {
@@ -186,14 +188,14 @@ describe('277. jsonDualityView6.js', function() {
     it('277.1.3 With Invalid tags', async function() {
       await assert.rejects(
         async () => await connection.execute(`
-        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-          AS
-          Student @INSERT@UPDATE@DELETE
-          {
-          StudentId: stuid @DELETE  , StudentName: name ,
-          StudentClass :
-          [student_class @INSERT@UPDATE@DELETE
-             {StudentClassId : scid,StudentId:stuid }]}`),
+      CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
+        AS
+        Student @INSERT@UPDATE@DELETE
+        {
+        StudentId: stuid @DELETE  , StudentName: name ,
+        StudentClass :
+        [student_class @INSERT@UPDATE@DELETE
+           {StudentClassId : scid,StudentId:stuid }]}`),
         /ORA-24558:/ //ORA-24558: syntax error encountered in the input string
       );
 
@@ -203,10 +205,15 @@ describe('277. jsonDualityView6.js', function() {
           AS
           Student @INSERT@UPDATE@DELETE
           {
-          StudentId: stuid @INSERT  , StudentName: name ,
-          StudentClass :
-          student_class @INSERT@UPDATE@DELETE
-             {StudentClassId : scid,StudentId:stuid @INSERT}}`),
+              StudentId: stuid @INSERT  ,
+              StudentName: name ,
+              StudentClass :
+              student_class @INSERT@UPDATE@DELETE
+              {
+                StudentClassId : scid,
+                StudentId:stuid @INSERT
+              }
+          }`),
         /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
           conflicting annotations in the WITH clause.*/
       );
@@ -217,25 +224,32 @@ describe('277. jsonDualityView6.js', function() {
           AS
           Student @INSERT@UPDATE@DELETE
           {
-          StudentId: stuid , StudentName: name @DELETE,
-          StudentClass :
-          student_class @INSERT@UPDATE@DELETE
-             {StudentClassId : scid,StudentId:stuid}}`),
+            StudentId: stuid ,
+            StudentName: name @DELETE,
+            StudentClass :
+            student_class @INSERT@UPDATE@DELETE
+            {
+              StudentClassId : scid,
+              StudentId:stuid
+            }
+          }`),
         /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
           conflicting annotations in the WITH clause.*/
       );
     });
 
     describe('277.2 Queries(SNT,SNT+where clause)', function() {
-      before (async function() {
+      before(async function() {
         await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
         AS
         Student @INSERT@UPDATE@DELETE
         {
-          StudentId: stuid, StudentName: name,
+          StudentId: stuid,
+          StudentName: name,
           StudentClass :
           student_class @INSERT@UPDATE@DELETE
-            {StudentClassId : scid,StudentId:stuid}}`);
+            {StudentClassId : scid,StudentId:stuid}
+        }`);
       });
 
       it('277.2.1 With SNT', async function() {
@@ -297,23 +311,26 @@ describe('277. jsonDualityView6.js', function() {
       // create the student table
       await connection.execute(`
         create table student(
-        stuid number,
-        name varchar(128) default null,
-        constraint pk_student primary key (stuid))`);
+          stuid number,
+          name varchar(128) default null,
+          constraint pk_student primary key (stuid)
+        )`);
 
       // create the student_class table
       await connection.execute(`
         create table student_class (
-        scid number,
-        stuid number primary key,
-        clsid number,
-        constraint fk_student_class1 foreign key (stuid) references student(stuid))`);
+          scid number,
+          stuid number primary key,
+          clsid number,
+          constraint fk_student_class1 foreign key (stuid) references student(stuid)
+        )`);
 
       await connection.execute(`
         create table class(
-        clsid number PRIMARY KEY,
-        name varchar2(128),
-        constraint fk_class foreign key (clsid) references student_class(stuid))`);
+          clsid number PRIMARY KEY,
+          name varchar2(128),
+          constraint fk_class foreign key (clsid) references student_class(stuid)
+        )`);
     });
 
     after(async function() {
@@ -335,8 +352,8 @@ describe('277. jsonDualityView6.js', function() {
       await connection.commit();
 
       await connection.execute(`
-      CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-      AS
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
+        AS
         Student @INSERT@UPDATE@DELETE
         {
           StudentId: stuid,
@@ -354,7 +371,7 @@ describe('277. jsonDualityView6.js', function() {
                 }
             }
         }
-    `);
+      `);
 
       const result = await connection.execute(`select * from student_ov`);
       assert.strictEqual(result.rows.length, 3);
@@ -366,10 +383,16 @@ describe('277. jsonDualityView6.js', function() {
 
     it('277.3.2 Sanity DMLs', async function() {
       await connection.execute(`
-        insert into student_ov values ('{"StudentId":4,
-        "StudentName":"Abcd","StudentClass":[{"StudentClassId":1,
-        "StudentId":4,"Class":[{"ClassId":4,"Name":"CS102"}]}]}')
+        insert into student_ov values (
+          '{"StudentId":4,
+          "StudentName":"Abcd",
+          "StudentClass":[{"StudentClassId":1,
+          "StudentId":4,
+          "Class":[{"ClassId":4,
+          "Name":"CS102"}]}]}'
+        )
       `);
+
       await connection.execute(`
         update student_ov s set data =JSON_TRANSFORM(data,
         SET '$.StudentName'='Abcd123') where s.data.StudentId=4
@@ -382,11 +405,16 @@ describe('277. jsonDualityView6.js', function() {
           AS
           Student @INSERT@UPDATE@DELETE
         {
-          _id:student @nest {stuid}, StudentName: name,
+          _id:student @nest {stuid},
+          StudentName: name,
           StudentClass :
           student_class @INSERT@UPDATE@DELETE
-             {StudentClassId : scid,StudentId: stuid,
-              Class : class  {ClassId: clsid, Name: name}}}
+          {
+            StudentClassId : scid,
+            StudentId: stuid,
+            Class : class  {ClassId: clsid, Name: name}
+          }
+        }
       `);
 
       const result = await connection.execute(`select * from student_ov`);
@@ -398,42 +426,66 @@ describe('277. jsonDualityView6.js', function() {
     });
 
     it('277.3.3 with different keywords', async function() {
-      await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
+      await connection.execute(`
+        CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
           AS
           Student @INSERT@UPDATE@DELETE
         {
-          StudentId: stuid, StudentName: name,
+          StudentId: stuid,
+          StudentName: name,
           StudentClass :
-          student_class @INSERT@UPDATE@DELETE
-             {StudentClassId : scid,StudentId: stuid,
-              Class : class @INSERT@UPDATE@DELETE
-                {ClassId: clsid, Name: name}}}`);
-      await connection.execute(`insert into student values (4,'John')`);
-      await connection.execute(`insert into student values (5,'John')`);
+            student_class @INSERT@UPDATE@DELETE
+            {
+              StudentClassId : scid,
+              StudentId: stuid,
+              Class :
+                class @INSERT@UPDATE@DELETE
+                {
+                  ClassId: clsid,
+                  Name: name
+                }
+            }
+        }
+      `);
+      await connection.execute(`insert into student values (4, 'John')`);
+      await connection.execute(`insert into student values (5, 'John')`);
       await connection.commit();
 
       // Group by clause
-      await connection.execute(`select count(o.data.StudentId),
-                          o.data.StudentName from student_ov o
-                          group by o.data.StudentName
-                          order by count(o.data.StudentId) desc`);
+      await connection.execute(`
+        select count(o.data.StudentId),
+               o.data.StudentName
+        from student_ov o
+        group by o.data.StudentName
+        order by count(o.data.StudentId) desc
+      `);
 
-      await connection.execute(`select count(o.data.StudentId),o.data.StudentName from student_ov o
-                          where o.data.StudentId!=3
-                          group by o.data.StudentName
-                          order by count(o.data.StudentId) desc`);
+      await connection.execute(`
+        select count(o.data.StudentId),
+               o.data.StudentName
+        from student_ov o
+        where o.data.StudentId != 3
+        group by o.data.StudentName
+        order by count(o.data.StudentId) desc
+      `);
 
       // Having clause
-      await connection.execute(`select count(o.data.StudentId),o.data.StudentName from student_ov o
-                          group by o.data.StudentName
-                          having count(o.data.StudentId)>=2
-                          order by count(o.data.StudentId)`);
+      await connection.execute(`
+        select count(o.data.StudentId),
+               o.data.StudentName
+        from student_ov o
+        group by o.data.StudentName
+        having count(o.data.StudentId) >= 2
+        order by count(o.data.StudentId)
+      `);
 
       // "CREATE TABLE AS SELECT"
-      await connection.execute(`create table abc1
-                          as select *
-                          from student_ov o
-                          where json_value(data,'$.StudentId')=1`);
+      await connection.execute(`
+        create table abc1
+        as select *
+        from student_ov o
+        where json_value(data,'$.StudentId') = 1
+      `);
 
       let result = await connection.execute(`select * from abc1`);
 
@@ -442,10 +494,12 @@ describe('277. jsonDualityView6.js', function() {
       assert.strictEqual(result.rows[0][0].StudentName, "Ajit");
       assert.deepStrictEqual(result.rows[0][0].StudentClass, [{"StudentClassId": 1, "StudentId": 1,
         "Class": [{"ClassId": 1, "Name": "CS101"}]}]);
-      await connection.execute(`create table abc2
-                          as select json_value(data,'$.StudentId') col
-                          from student_ov o
-                          where json_value(data,'$.StudentId')=1`);
+      await connection.execute(`
+        create table abc2
+        as select json_value(data,'$.StudentId') col
+        from student_ov o
+        where json_value(data,'$.StudentId')=1
+      `);
 
       result = await connection.execute(`select * from abc2`);
       assert.strictEqual(result.rows[0][0], "1");

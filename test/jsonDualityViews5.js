@@ -76,6 +76,7 @@ describe('276. jsonDualityView5.js', function() {
         constraint pk_student primary key (stuid)
       )
     `);
+
     // create the class table
     await connection.execute(`
       create table class(
@@ -164,15 +165,18 @@ describe('276. jsonDualityView5.js', function() {
     // Execute the CREATE VIEW query
     await connection.execute(`
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-        AS
+      AS
         Student @INSERT @UPDATE @DELETE
       {
         StudentId: stuid,
         StudentName: name,
         StudentClass :
-        student_class @INSERT @UPDATE @DELETE
-           {StudentClassId : scid,
-      Class : class  {ClassId: clsid, Name: name}}}
+          student_class @INSERT @UPDATE @DELETE
+          {
+            StudentClassId : scid,
+            Class : class  {ClassId: clsid, Name: name}
+          }
+      }
     `);
   });
 

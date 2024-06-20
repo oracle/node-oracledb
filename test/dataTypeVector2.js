@@ -52,19 +52,19 @@ describe('295. dataTypeVector2.js', function() {
       && await testsUtil.isJsonMetaDataRunnable());
     if (!isRunnable) this.skip();
 
-    // Fetching vector column from old inst client will get
+    // Fetching vector column from old instant client will get
     // type as CLOB which will still be fetched as CLOB unless
     // this setting is made true explicitly.
     oracledb.future.oldJsonColumnAsObj = true;
 
-    const sql = `create table ${tableName} (
-      IntCol                  number(9) not null,
-      VectorCol               vector,
-      VectorFixedCol          vector(2),
-      Vector32Col             vector(10, float32),
-      Vector64Col             vector(10, float64),
-      VectorInt8Col           vector(4, int8),
-      VectorFlexCol           vector(*, *)
+    const sql = `CREATE TABLE ${tableName} (
+      IntCol                  NUMBER(9) not null,
+      VectorCol               VECTOR,
+      VectorFixedCol          VECTOR(2),
+      Vector32Col             VECTOR(10, float32),
+      Vector64Col             VECTOR(10, float64),
+      VectorInt8Col           VECTOR(4, int8),
+      VectorFlexCol           VECTOR(*, *)
       )`;
     const plsql = testsUtil.sqlCreateTable(tableName, sql);
     await connection.execute(plsql);
@@ -79,7 +79,7 @@ describe('295. dataTypeVector2.js', function() {
   });
 
   beforeEach(async function() {
-    await connection.execute(`truncate table ${tableName}`);
+    await connection.execute(`TRUNCATE TABLE ${tableName}`);
     oracledb.fetchTypeHandler = function(metadata) {
       if (metadata.dbType === oracledb.DB_TYPE_VECTOR) {
         const myConverter = (v) => {
@@ -104,7 +104,7 @@ describe('295. dataTypeVector2.js', function() {
       true], ["VECTOR64COL", "DB_TYPE_CLOB", true], ["VECTORINT8COL", "DB_TYPE_CLOB", true],
     ["VECTORFLEXCOL", "DB_TYPE_CLOB", true]];
 
-    const result = await connection.execute(`select * from ${tableName}`);
+    const result = await connection.execute(`SELECT * FROM ${tableName}`);
     const values = result.metaData.map(column => [
       column.name,
       column.dbType.name,
@@ -125,18 +125,16 @@ describe('295. dataTypeVector2.js', function() {
       [-5, 5, -10, 10, -15, 15, -20, 20, -25, 25],
     ];
 
-    await connection.execute(`delete from ${tableName}`);
+    await connection.execute(`DELETE FROM ${tableName}`);
     const sql = `
-      insert into ${tableName} values (
+      INSERT INTO ${tableName} VALUES(
         ${expected_data.map(d =>
-    (Array.isArray(d) ? `'${JSON.stringify(d)}'` : `'${d}'`)
-  ).join(',')}
-      )`;
+    (Array.isArray(d) ? `'${JSON.stringify(d)}'` : `'${d}'`)).join(',')})`;
 
     await connection.execute(sql);
     await connection.commit();
 
-    const result = await connection.execute(`select * from ${tableName}`);
+    const result = await connection.execute(`SELECT * FROM ${tableName}`);
     const fetched_data = result.rows[0];
     assert.deepStrictEqual(fetched_data, expected_data);
   });
@@ -152,18 +150,17 @@ describe('295. dataTypeVector2.js', function() {
       [-5, 5, -10, 10, -15, 15, -20, 20, -25, 25],
     ];
 
-    await connection.execute(`delete from ${tableName}`);
+    await connection.execute(`DELETE FROM ${tableName}`);
     const sql = `
-      insert into ${tableName} values (
+      INSERT INTO ${tableName} VALUES(
         ${expected_data.map(d =>
-    (Array.isArray(d) ? `'${JSON.stringify(d)}'` : `'${d}'`)
-  ).join(',')}
+    (Array.isArray(d) ? `'${JSON.stringify(d)}'` : `'${d}'`)).join(',')}
       )`;
 
     await connection.execute(sql);
     await connection.commit();
 
-    const result = await connection.execute(`select * from ${tableName}`);
+    const result = await connection.execute(`SELECT * FROM ${tableName}`);
     const fetched_data = result.rows[0];
     assert.deepStrictEqual(fetched_data, expected_data);
   });
@@ -179,18 +176,16 @@ describe('295. dataTypeVector2.js', function() {
       [-5, 5, -10, 10, -15, 15, -20, 20, -25, 25],
     ];
 
-    await connection.execute(`delete from ${tableName}`);
+    await connection.execute(`DELETE FROM ${tableName}`);
     const sql = `
-      insert into ${tableName} values (
+      INSERT INTO ${tableName} VALUES(
         ${expected_data.map(d =>
-    (Array.isArray(d) ? `'${JSON.stringify(d)}'` : `'${d}'`)
-  ).join(',')}
-      )`;
+    (Array.isArray(d) ? `'${JSON.stringify(d)}'` : `'${d}'`)).join(',')})`;
 
     await connection.execute(sql);
     await connection.commit();
 
-    const result = await connection.execute(`select * from ${tableName}`);
+    const result = await connection.execute(`SELECT * FROM ${tableName}`);
     const fetched_data = result.rows[0];
     assert.deepStrictEqual(fetched_data, expected_data);
   });
