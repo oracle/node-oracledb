@@ -13,6 +13,9 @@ node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...
 Thin Mode Changes
 +++++++++++++++++
 
+#) Added support to use IFILE parameter to embed custom
+   network  configuration files in the main tnsnames.ora file.
+
 #) Fixed bug which throws a ``TypeError: objType.attributes is not iterable``
    error when :ref:`DbObject Class <dbobjectclass>` instance contains an
    attribute of type ``SYS.XMLTYPE``.
