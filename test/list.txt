@@ -5882,3 +5882,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
   303. aq11.js
     303.1 enqueue/dequeue with modes
+
+  304. plsqlRowtype.js
+    304.1 %ROWTYPE
+    304.2 %ROWTYPE collection
