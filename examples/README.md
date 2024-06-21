@@ -106,6 +106,7 @@ File Name                                                 | Description
 [`plsqlproc.js`](plsqlproc.js)                            | How to call a PL/SQL procedure
 [`plsqlrecord.js`](plsqlrecord.js)                        | Shows binding of PL/SQL RECORDS
 [`plsqlvarrayrecord.js`](plsqlvarrayrecord.js)            | Shows binding a VARRAY of RECORD in PL/SQL
+[`plsqlrowtype.js`](plsqlrowtype.js)                      | Shows binding of PL/SQL %ROWTYPE object
 [`raw.js`](raw.js)                                        | Shows using a Buffer to insert and select a RAW
 [`refcursor.js`](refcursor.js)                            | Shows using a ResultSet to fetch rows from a REF CURSOR
 [`refcursortoquerystream.js`](refcursortoquerystream.js)  | Converts a REF CURSOR returned from `execute()` to a query stream.
@@ -134,3 +135,4 @@ File Name                                                 | Description
 [`vectortype2.js`](vectortype2.js)                        | Insert data into VECTOR columns and verify vector operations.
 [`version.js`](version.js)                                | Shows the node-oracledb version attributes
 [`webapp.js`](webapp.js)                                  | A simple web application using a connection pool
+[`xmltypeInDbObject.js`](xmltypeInDbObject.js)            | Work with XMLType data in DbObject (Thin mode only)

@@ -344,6 +344,8 @@ files affect connections and applications. The common files are:
       - Description
     * - ``tnsnames.ora``
       - Contains Oracle Net Service names and Oracle Net options for databases that can be connected to, see :ref:`Net Service Names for Connection Strings <tnsnames>`. This file is only needed for advanced configuration. Not needed if connection strings use the :ref:`Easy Connect syntax <easyconnect>`. The `Oracle Net documentation on tnsnames.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA>`__ has more information.
+
+        From version 6.6 onwards, node-oracledb recognizes the `IFILE <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F8AC6FC6-F456-481F-8997-3B0E906BB745>`__ parameter that is used in the ``tnsnames.ora`` file to embed custom network configuration files.
     * - ``sqlnet.ora``
       - A configuration file controlling the network transport behavior. For example it can set call timeouts for :ref:`high availability <connectionha>`, or be used to :ref:`encrypt network traffic <securenetwork>`, or be used to configure logging and tracing. The `Oracle Net documentation on sqlnet.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19423B71-3F6C-430F-84CC-18145CC2A818>`__ has more information.  Many settings can alternatively be specified using :ref:`Easy Connect syntax <easyconnect>`
 
@@ -502,6 +504,8 @@ explicitly specified or a default location will be used.  Do one of:
     installation, in ``$ORACLE_HOME/network/admin`` or
     ``$ORACLE_BASE_HOME/network/admin``.
 
+.. _oratzfile:
+
 Using the Optional Time Zone File
 ---------------------------------
 
@@ -527,11 +531,13 @@ time zones. By default the larger ``timezlrg_n.dat`` file is used. If
 you want to use the smaller ``timezone_n.dat`` file, then set the
 ``ORA_TZFILE`` environment variable to the name of the file without any
 directory prefix, for example ``export ORA_TZFILE=timezone_32.dat``.
-With Oracle Instant Client 12.2 or later, you can also use an external
-time zone file. Create a subdirectory ``oracore/zoneinfo`` under the
-Instant Client directory, and move the file into it. Then set
-``ORA_TZFILE`` to the file name, without any directory prefix. The
-``genezi -v`` utility will show the time zone file in use.
+From Oracle Instant Client 12.2, you can also use an external time zone
+file. Create a subdirectory ``oracore/zoneinfo`` under the Instant Client
+directory, and move the file into it. Then set ``ORA_TZFILE`` to the file
+name, without any directory prefix. The ``genezi -v`` utility will show
+the time zone file in use. With Oracle Instant Client 19.18 (or later), you
+can alternatively place the external time zone file in any directory and then
+set the ``ORA_TZFILE`` environment variable to the absolute path of the file.
 
 The Oracle Database documentation contains more information about time
 zone files, see `Choosing a Time Zone
@@ -575,7 +581,7 @@ like ``LD_LIBRARY_PATH`` must be set before Node.js starts.
     * - ``ORA_SDTZ``
       - The default session time zone, see :ref:`Fetching Dates and Timestamps <datehandling>`.
     * - ``ORA_TZFILE``
-      - The name of the Oracle time zone file to use. See the notes below.
+      - The name of the Oracle time zone file to use. See :ref:`oratzfile`.
     * - ``ORACLE_HOME``
       - The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
     * - ``NLS_LANG``

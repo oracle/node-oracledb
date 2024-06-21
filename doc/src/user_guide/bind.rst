@@ -489,7 +489,6 @@ This PL/SQL procedure can be called in node-oracledb using:
         cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
      },
      {
-        prefetchRows:   1000, // tune the internal getRow() data fetch performance
         fetchArraySize: 1000
      }
     );
@@ -515,7 +514,6 @@ number of rows:
         cursor: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
      },
      {
-        prefetchRows:   200, // tune the getRows() call
         fetchArraySize: 200
      }
     );

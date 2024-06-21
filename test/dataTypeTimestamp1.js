@@ -82,13 +82,13 @@ describe('33. dataTypeTimestamp1.js', function() {
       await  assist.verifyRefCursorWithFetchAsString(connection, tableName, dates);
     });
 
-  }); // end of 33.1 suite
+  }); // 33.1
 
   describe('33.2 stores null value correctly', function() {
     it('33.2.1 testing Null, Empty string and Undefined', async function() {
       await assist.verifyNullValues(connection, tableName);
     });
-  });
+  }); // 33.2
 
   describe('33.3 testing TIMESTAMP without TIME ZONE', function() {
     const timestamps = assist.TIMESTAMP_STRINGS;
@@ -124,6 +124,32 @@ describe('33. dataTypeTimestamp1.js', function() {
       assert(typeof result.outBinds.bv, "string");
     });
 
-  }); // end of 33.3 suite
+  }); // 33.3
 
+  describe('33.4 timestamp with time zone', () => {
+    const timezones = ['UTC', 'PST', 'IST', 'EST', 'GMT', 'JST', 'AEDT'];
+    const defaultORA_SDTZ = process.env.ORA_SDTZ;
+
+    after(function() {
+      if (!defaultORA_SDTZ && process.env.ORA_SDTZ)
+        delete process.env.ORA_SDTZ;
+      else process.env.ORA_SDTZ = defaultORA_SDTZ;
+    });
+
+    // This test checks for a bug when newer TZ files
+    // are missing in the IC package used for thick mode.
+    it('33.4.1 test with different session time zone', async () => {
+      for (const timezone of timezones) {
+        process.env.ORA_SDTZ = timezone;
+        const sql = `SELECT CURRENT_TIMESTAMP AS CT FROM DUAL`;
+        const binds = [];
+        const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+
+        const result = await connection.execute(sql, binds, options);
+        const timestamp = result.rows[0].CT;
+
+        assert(timestamp instanceof Date);
+      }
+    });
+  }); // 33.4
 });

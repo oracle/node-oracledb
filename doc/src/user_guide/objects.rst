@@ -672,6 +672,71 @@ The output shows the increased ship size:
 See `plsqlrecord.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/plsqlrecord.js>`__ for a runnable example.
 
+.. _plsqlrecordrowtype:
+
+PL/SQL Records with %ROWTYPE Attribute
+--------------------------------------
+
+PL/SQL RECORDS with `%ROWTYPE <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-4E0B9FE2-909D-444A-9B4A-E0243B7FCB99>`__ attribute can be
+bound for insertion and retrieval. This was introduced in node-oracledb 6.6.
+The following example uses the PL/SQL package ``MY_PKG`` and table ``STAFF``:
+
+.. code-block:: javascript
+
+    const stmts = [
+
+        `CREATE TABLE STAFF (ID NUMBER, NAME VARCHAR2(25))`,
+
+        `INSERT INTO STAFF VALUES (1, 'ADSA')`,
+
+        `CREATE OR REPLACE PACKAGE MY_PKG AS
+            TYPE STAFF_ARRAY IS TABLE OF STAFF%ROWTYPE
+            INDEX BY BINARY_INTEGER;
+            PROCEDURE prGetRecords(out_rec OUT MY_PKG.STAFF_ARRAY);
+        END MY_PKG;`,
+
+        `CREATE OR REPLACE PACKAGE BODY MY_PKG IS
+            PROCEDURE prGetRecords(out_rec OUT MY_PKG.STAFF_ARRAY)
+            IS
+                CURSOR c_STAFF IS
+                SELECT *
+                FROM STAFF;
+            BEGIN
+                OPEN c_STAFF;
+                FETCH c_STAFF BULK COLLECT INTO out_rec;
+                CLOSE c_STAFF;
+            END prGetRecords;
+         END MY_PKG;`
+    ];
+
+    for (const s of stmts) {
+      await conn.execute(s);
+    }
+
+You can pass the Oracle type name ``STAFF_ARRAY`` in the
+:meth:`connection.getDbObjectClass()` method. To retrieve a STAFF_ARRAY record
+back from the PL/SQL, the prototype object class is passed for the output
+``bind`` type:
+
+.. code-block:: javascript
+
+    const objClass = await conn.getDbObjectClass("MY_PKG.STAFF_ARRAY");
+    const result = await conn.execute(`CALL MY_PKG.prGetRecords(:out_rec)`,
+                    {out_rec: {type: objClass, dir: oracledb.BIND_OUT}});
+    for (const val of result.outBinds.out_rec) {
+      console.log("\nRow contents:");
+      console.log(val);
+    }
+
+This prints the following output::
+
+    Row contents:
+    [HR.STAFF%ROWTYPE] { ID: 1, NAME: 'ADSA' }
+
+See `plsqlrowtype.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/plsqlrowtype.js>`__ for a runnable example.
+
 .. _objexecmany:
 
 Inserting or Passing Multiple Objects of the Same Type
@@ -679,6 +744,67 @@ Inserting or Passing Multiple Objects of the Same Type
 
 You can use ``executeMany()`` with objects. See :ref:`Binding Objects with
 executeMany() <executemanyobjects>`.
+
+.. _objxmltype:
+
+Using XMLType Data in DbObjects
+===============================
+
+From version 6.6 onwards, you can use a :ref:`DbObject Class <dbobjectclass>`
+instance with an attribute of type ``SYS.XMLTYPE`` in node-oracledb Thin mode.
+
+Consider the following object ``NODB_XMLTYPE``:
+
+.. code-block:: sql
+
+    CREATE TYPE nodb_xmltype AS OBJECT (
+        XMLDATA sys.xmltype);
+
+The example below defines the XML data and queries this data from the
+``NODB_XMLTYPE`` object.
+
+.. code-block:: javascript
+
+    const XMLData =
+        '<Warehouse>\n  ' +
+        '<WarehouseId>1</WarehouseId>\n  ' +
+        '<WarehouseName>Melbourne, Australia</WarehouseName>\n  ' +
+        '<Building>Owned</Building>\n  ' +
+        '<Area>2020</Area>\n  ' +
+        '<Docks>1</Docks>\n  ' +
+        '<DockType>Rear load</DockType>\n  ' +
+        '</Warehouse>\n';
+    const sql = `SELECT nodb_xmltype(sys.xmltype('${XMLData}')) FROM dual`;
+    const result = await connection.execute(sql);
+    console.log('XML Data:\n', result.rows[0][0].XMLDATA);
+
+This query prints the XMLType data in the object ``nodb_xmltype``::
+
+    XML Data:
+        <Warehouse>
+        <WarehouseId>1</WarehouseId>
+        <WarehouseName>Melbourne, Australia</WarehouseName>
+        <Building>Owned</Building>
+        <Area>2020</Area>
+        <Docks>1</Docks>
+        <DockType>Rear load</DockType>
+        </Warehouse>
+
+To validate the metadata inside the object, you can use:
+
+.. code-block:: javascript
+
+    const xmlObjClass = result.metaData[0];
+    const pInObj = new xmlObjClass.dbTypeClass();
+    console.log('Data Type:\n', pInObj.attributes.XMLDATA.type);
+
+This prints an output such as::
+
+    Data Type:
+        [DbType DB_TYPE_XMLTYPE]
+
+See `xmltypeInDbObject.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/xmltypeInDbObject.js>`__ for a runnable example.
 
 .. _objectlimitations:
 
