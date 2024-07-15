@@ -13,6 +13,12 @@ node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for in-memory wallet by adding a new parameter ``walletContent``
+    of the type ``string`` which will let users pass the wallet content directly instead
+    of storing and reading it up from a file. 
+    `Issue #1671 <https://github.com/oracle/node-oracledb/issues/
+    1671>`__.
+    
 #)  Added support to use ``IFILE`` parameter to embed custom
     network configuration files in the :ref:`tnsnames.ora <tnsadmin>` file.
 
