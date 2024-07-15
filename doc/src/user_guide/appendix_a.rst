@@ -243,7 +243,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - No
       - Yes
     * - Two-phase Commit (TPC) (see :ref:`twopc`)
-      - No
+      - Yes
       - Yes
     * - REF CURSORs (see :ref:`refcursors`)
       - Yes

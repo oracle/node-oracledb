@@ -43,6 +43,8 @@ Thin Mode Changes
     provided for `Issue #1565 <https://github.com/oracle/node-oracledb/issues/
     1565>`__.
 
+#)  Added :ref:`Two-Phase Commits <tpc>` support.
+
 Thick Mode Changes
 +++++++++++++++++++
 

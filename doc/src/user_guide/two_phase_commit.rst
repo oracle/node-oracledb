@@ -9,11 +9,6 @@ support distributed transactions. See `Two-Phase Commit Mechanism
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8152084F-4760
 -4B89-A91C-9A84F81C23D1>`__ in the Oracle Database documentation.
 
-.. note::
-
-    In this release, TPC is only supported in node-oracledb Thick mode. See
-    :ref:`enablingthick`.
-
 Distributed transaction protocols attempt to keep multiple data sources
 consistent with one another by ensuring updates to the data sources
 participating in a distributed transaction are all performed, or none of

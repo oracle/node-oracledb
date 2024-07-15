@@ -315,22 +315,12 @@ The properties of a *Connection* object are listed below.
     This read/write attribute is a string that specifies the internal name
     that is used by the connection when logging two-phase commit transactions.
 
-    .. note::
-
-        This property can only be used in the node-oracledb Thick mode. See
-        :ref:`enablingthick`.
-
 .. attribute:: connection.tpcExternalName
 
     .. versionadded:: 5.3
 
     This read/write attribute is a string that specifies the external name
     that is used by the connection when logging two-phase commit transactions.
-
-    .. note::
-
-        This property can only be used in the node-oracledb Thick mode. See
-        :ref:`enablingthick`.
 
 .. attribute:: connection.transactionInProgress
 
@@ -2343,11 +2333,6 @@ Connection Methods
 
     See :ref:`Two-Phase Commits (TPC) <twopc>`.
 
-    .. note::
-
-        This method is only supported in node-oracledb Thick mode. See
-        :ref:`enablingthick`.
-
     The parameters of the ``connection.tpcBegin()`` method are:
 
     .. _tpcbegin:
@@ -2427,11 +2412,6 @@ Connection Methods
     ignored and ``tpcCommit()`` has the same behavior as a regular
     ``connection.commit()`` call.
 
-    .. note::
-
-        This method is only supported in node-oracledb Thick mode. See
-        :ref:`enablingthick`.
-
     Note: When using an external transaction manager with two-phase commits,
     :attr:`autocommitting <oracledb.autoCommit>` should be disabled.
 
@@ -2496,11 +2476,6 @@ Connection Methods
 
     If ``xid`` is not passed, the transaction identifier used by the
     previous ``connection.tpcBegin()`` call is used.
-
-    .. note::
-
-        This method is only supported in node-oracledb Thick mode. See
-        :ref:`enablingthick`.
 
     The parameters of the ``connection.tpcEnd()`` method are:
 
@@ -2623,11 +2598,6 @@ Connection Methods
 
     Returns a boolean indicating the transaction requires a commit.
 
-    .. note::
-
-        This method is only supported in node-oracledb Thick mode. See
-        :ref:`enablingthick`.
-
     After calling this function, no further activity should take place on
     this connection until either
     :meth:`connection.tpcCommit()` or
@@ -2699,11 +2669,6 @@ Connection Methods
     Returns an array of pending two-phase commit transaction identifiers
     (XIDs) suitable for use with :meth:`connection.tpcCommit()`
     or :meth:`connection.tpcRollback()`.
-
-    .. note::
-
-        This method is only supported in node-oracledb Thick mode. See
-        :ref:`enablingthick`.
 
     This function is a convenience wrapper that queries the view
     ``DBA_PENDING_TRANSACTIONS``. It requires SELECT privilege on that view.

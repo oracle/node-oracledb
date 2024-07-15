@@ -81,8 +81,6 @@ describe('259. tpc.js', function() {
             END;`;
 
     before(async function() {
-      if (oracledb.thin)
-        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
 
@@ -234,6 +232,9 @@ describe('259. tpc.js', function() {
     });
 
     it('259.2.8 negative tpcForget after tpcPrepare', async function() {
+      if (oracledb.thin) {
+        this.skip();
+      }
       const xid = {
         formatId: 3998,
         globalTransactionId: "txn3998",
@@ -258,6 +259,9 @@ describe('259. tpc.js', function() {
     });
 
     it('259.2.9 negative tpcForget without tpcPrepare', async function() {
+      if (oracledb.thin) {
+        this.skip();
+      }
       const xid = {
         formatId: 3999,
         globalTransactionId: "txn3999",
@@ -289,12 +293,14 @@ describe('259. tpc.js', function() {
       };
 
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
+      await conn.execute(`INSERT INTO TBL_259_2 VALUES (101, 'test#1')`);
       await conn.tpcPrepare(xid);
       const promise =  dbaConn.tpcRecover();
       const res = await Promise.resolve(promise);
       assert.strictEqual(res[0].formatId, 5000);
       assert.strictEqual(res[0].globalTransactionId, "txn5000");
       assert.strictEqual(res[0].branchQualifier, "branchId");
+      await conn.tpcCommit(res[0]);
     });
   });
 
@@ -313,8 +319,6 @@ describe('259. tpc.js', function() {
             END;`;
 
     before(async function() {
-      if (oracledb.thin)
-        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
     });
@@ -461,8 +465,6 @@ describe('259. tpc.js', function() {
     let conn = null;
 
     before(async function() {
-      if (oracledb.thin)
-        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
     });
 
@@ -487,6 +489,9 @@ describe('259. tpc.js', function() {
     });
 
     it('259.4.3 set and query ecid', async function() {
+      if (oracledb.thin) {
+        this.skip();
+      }
       const sql =  `SELECT USERNAME, SID, OSUSER, ECID FROM V$SESSION
           WHERE SID = :1`;
 
@@ -518,8 +523,6 @@ describe('259. tpc.js', function() {
             END;`;
 
     before(async function() {
-      if (oracledb.thin)
-        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
     });
@@ -586,8 +589,6 @@ describe('259. tpc.js', function() {
     };
 
     before(async function() {
-      if (oracledb.thin)
-        return this.skip();
       conn = await oracledb.getConnection(dbConfig);
     });
 
@@ -642,6 +643,42 @@ describe('259. tpc.js', function() {
       await assert.rejects(
         async () => await conn.tpcRollback(xid, "abc"),
         /NJS-009/
+      );
+    });
+  });
+
+  describe('259.7 XID parameters validation', function() {
+    let conn = null;
+    before(async function() {
+      conn = await oracledb.getConnection(dbConfig);
+    });
+
+    after (async function() {
+      if (conn)
+        await conn.close();
+    });
+
+    it('259.6.1 globalTransactionId size greater than 64', async function() {
+      const xid = {
+        formatId: 979797,
+        globalTransactionId: "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",
+        branchQualifier: "brancId1"
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60),
+        /NJS-153/
+      );
+    });
+
+    it('259.6.2 branchQualifier invalid number of arguments', async function() {
+      const xid = {
+        formatId: 979797,
+        globalTransactionId: "txn9999",
+        branchQualifier: "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"
+      };
+      await assert.rejects(
+        async () => await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60),
+        /NJS-154/
       );
     });
   });
