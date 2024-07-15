@@ -67,6 +67,7 @@ describe('259. tpc.js', function() {
 
   describe('259.2 TPC Functions', function() {
     let conn = null;
+    let dbaConn = null;
     const sql = `BEGIN
         DECLARE
             e_table_missing EXCEPTION;
@@ -84,12 +85,23 @@ describe('259. tpc.js', function() {
         return this.skip();
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
+
+      const dbaCredential = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA,
+      };
+      dbaConn = await oracledb.getConnection(dbaCredential);
     });
 
     after(async function() {
       if (conn) {
         conn.execute(`DROP TABLE TBL_259_2 PURGE`);
         await conn.close();
+      }
+      if (dbaConn) {
+        await dbaConn.close();
       }
     });
 
@@ -264,6 +276,25 @@ describe('259. tpc.js', function() {
         /ORA-24769:/ //ORA-24769: cannot forget an active transaction
       );
       await conn.tpcRollback(xid);
+    });
+
+    it('259.2.10 tpcRecover', async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE)
+        this.skip();
+
+      const xid = {
+        formatId: 5000,
+        globalTransactionId: "txn5000",
+        branchQualifier: "branchId"
+      };
+
+      await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
+      await conn.tpcPrepare(xid);
+      const promise =  dbaConn.tpcRecover();
+      const res = await Promise.resolve(promise);
+      assert.strictEqual(res[0].formatId, 5000);
+      assert.strictEqual(res[0].globalTransactionId, "txn5000");
+      assert.strictEqual(res[0].branchQualifier, "branchId");
     });
   });
 

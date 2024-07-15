@@ -29,6 +29,11 @@ Thin Mode Changes
     provided for `Issue #1565 <https://github.com/oracle/node-oracledb/issues/
     1565>`__.
 
+Thick Mode Changes
++++++++++++++++++++
+
+#)  Fixed bug that causes Two-Phase Commit `tpcRecover` execution to fail.
+
 node-oracledb `v6.5.1 <https://github.com/oracle/node-oracledb/compare/v6.5.0...v6.5.1>`__ (23 May 2024)
 ---------------------------------------------------------------------------------------------------------
 
