@@ -751,9 +751,8 @@ available in :ref:`Thick mode <featuresummary>`, you need to install Oracle
 Client libraries.  Thick mode uses a binary add-on installed with node-oracledb
 that loads these libraries.  This binary is available for macOS Intel only.
 
-Download the **Basic** 64-bit DMG from `Oracle Technology Network <https://www.
-oracle.com/database/technologies/instant-client/macos-intel-x86-downloads.
-html>`__.
+You can get the libraries from either the Oracle Instant Client **Basic** or
+**Basic Light** package.  The steps below show installing **Basic**.
 
 .. note::
 
@@ -766,44 +765,89 @@ html>`__.
         const oracledb = require('oracledb');
         oracledb.initOracleClient();
 
-Manual Installation
-+++++++++++++++++++
+Instant Client Scripted Installation on macOS ARM64
++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-1. In Finder, double click on the DMG to mount it.
+Instant Client installation can be scripted. Open a terminal window and run:
 
-2. Open a terminal window and run the install script in the mounted
-   package, for example::
-
-        $ /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru/install_ic.sh
-
-   This copies the contents to ``$HOME/Downloads/instantclient_19_8``.
-   Applications may not have access to the ``Downloads`` directory, so you
-   should move Instant Client somewhere convenient.
-
-3. In Finder, eject the mounted Instant Client package.
-
-4. Call :meth:`oracledb.initOracleClient()` to enable Thick mode, see
-   :ref:`oracleclientloadingmacos`.
-
-5. If you use the optional Oracle configuration files, see
-   :ref:`usingconfigfiles`.
-
-If you have multiple Instant Client DMG packages mounted, you only need
-to run ``install_ic.sh`` once. It will copy all mounted Instant Client
-DMG packages at the same time.
-
-Scripted Installation
-+++++++++++++++++++++
-
-Instant Client installation can alternatively be scripted, for example::
+.. code-block:: shell
 
     cd $HOME/Downloads
-    curl -O https://download.oracle.com/otn_software/mac/instantclient/198000/instantclient-basic-macos.x64-19.8.0.0.0dbru.dmg
-    hdiutil mount instantclient-basic-macos.x64-19.8.0.0.0dbru.dmg
-    /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru/install_ic.sh
-    hdiutil unmount /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru
+    curl -O https://download.oracle.com/otn_software/mac/instantclient/233023/instantclient-basic-macos.arm64-23.3.0.23.09.dmg
+    hdiutil mount instantclient-basic-macos.arm64-23.3.0.23.09.dmg
+    /Volumes/instantclient-basic-macos.arm64-23.3.0.23.09/install_ic.sh
+    hdiutil unmount /Volumes/instantclient-basic-macos.arm64-23.3.0.23.09
 
-The Instant Client directory will be ``$HOME/Downloads/instantclient_19_8``.
+Note you should use the latest DMG available.
+
+If you have multiple Instant Client DMG packages mounted, you only need to run
+``install_ic.sh`` once.  It will copy all mounted Instant Client DMG packages
+at the same time.
+
+The Instant Client directory will be like
+``$HOME/Downloads/instantclient_23_3``.  Applications may not have access to
+the ``Downloads`` directory, so you should move Instant Client somewhere
+convenient.
+
+Call :meth:`oracledb.initOracleClient()` to enable Thick mode, see
+:ref:`oracleclientloadingmacos`.
+
+If you use the optional Oracle configuration files, see
+:ref:`usingconfigfiles`.
+
+Instant Client Manual Installation on macOS ARM64
++++++++++++++++++++++++++++++++++++++++++++++++++
+
+1. Download the latest Instant Client **Basic** ARM64 package DMG from `Oracle
+   <https://www.oracle.com/database/technologies/instant-client/macos-arm64-
+   downloads.html>`__.
+
+2. Using Finder, double-click the DMG to mount it.
+
+3. Open a terminal window and run the install script in the mounted package,
+   for example if you downloaded version 23.3:
+
+    .. code-block:: shell
+
+        /Volumes/instantclient-basic-macos.arm64-23.3.0.23.09/install_ic.sh
+
+   The Instant Client directory will be like
+   ``$HOME/Downloads/instantclient_23_3``.  Applications may not have access to
+   the ``Downloads`` directory, so you should move Instant Client somewhere
+   convenient.
+
+4. Using Finder, eject the mounted Instant Client package.
+
+5. Call :meth:`oracledb.initOracleClient()` to enable Thick mode, see
+   :ref:`oracleclientloadingmacos`.
+
+6. If you use the optional Oracle configuration files, see
+   :ref:`usingconfigfiles`.
+
+If you have multiple Instant Client DMG packages mounted, you only need to run
+``install_ic.sh`` once.  It will copy all mounted Instant Client DMG packages
+at the same time.
+
+Instant Client Scripted Installation on macOS Intel x86-64
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Instant Client installation can be scripted. Open a terminal window and run:
+
+.. code-block:: shell
+
+    cd $HOME/Downloads
+    curl -O https://download.oracle.com/otn_software/mac/instantclient/1916000/instantclient-basic-macos.x64-19.16.0.0.0dbru.dmg
+    hdiutil mount instantclient-basic-macos.x64-19.16.0.0.0dbru.dmg
+    /Volumes/instantclient-basic-macos.x64-19.16.0.0.0dbru/install_ic.sh
+    hdiutil unmount /Volumes/instantclient-basic-macos.x64-19.16.0.0.0dbru
+
+Note you should use the latest DMG available.
+
+If you have multiple Instant Client DMG packages mounted, you only need to run
+``install_ic.sh`` once.  It will copy all mounted Instant Client DMG packages at
+the same time.
+
+The Instant Client directory will be ``$HOME/Downloads/instantclient_19_16``.
 Applications may not have access to the ``Downloads`` directory, so you should
 move Instant Client somewhere convenient.
 
@@ -812,6 +856,37 @@ Call :meth:`oracledb.initOracleClient()` to enable Thick mode, see
 
 If you use the optional Oracle configuration files, see
 :ref:`usingconfigfiles`.
+
+Instant Client Manual Installation on macOS Intel x86-64
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+1. Download the latest Instant Client **Basic** Intel 64-bit package DMG from
+   `Oracle <https://www.oracle.com/database/technologies/instant-client/macos-
+   intel-x86-downloads.html>`__.
+
+2. Using Finder, double-click the DMG to mount it.
+
+3. Open a terminal window and run the install script in the mounted package, for example:
+
+    .. code-block:: shell
+
+        /Volumes/instantclient-basic-macos.x64-19.16.0.0.0dbru/install_ic.sh
+
+   The Instant Client directory will be ``$HOME/Downloads/instantclient_19_16``.
+   Applications may not have access to the ``Downloads`` directory, so you
+   should move Instant Client somewhere convenient.
+
+4. Using Finder, eject the mounted Instant Client package.
+
+5. Call :meth:`oracledb.initOracleClient()` to enable Thick mode, see
+   :ref:`oracleclientloadingmacos`.
+
+6. If you use the optional Oracle configuration files, see
+   :ref:`usingconfigfiles`.
+
+If you have multiple Instant Client DMG packages mounted, you only need to run
+``install_ic.sh`` once.  It will copy all mounted Instant Client DMG packages at
+the same time.
 
 .. _windowsinstallation:
 

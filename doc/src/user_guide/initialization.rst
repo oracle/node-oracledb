@@ -194,7 +194,7 @@ On macOS, the alternative ways to enable Thick mode are:
   .. code-block:: javascript
 
         const oracledb = require('oracledb');
-        oracledb.initOracleClient({libDir: process.env.HOME + '/Downloads/instantclient_19_16'});
+        oracledb.initOracleClient({libDir: process.env.HOME + '/Downloads/instantclient_23_3'});
 
   This directory should contain the libraries from an unzipped `Instant
   Client 'Basic' or 'Basic Light' <https://www.oracle.com/database/
@@ -224,19 +224,13 @@ On macOS, the alternative ways to enable Thick mode are:
   in the ``node_modules/oracledb/build/Release`` directory where the
   ``oracledb*.node`` binary is. For example::
 
-        ln -s ~/Downloads/instantclient_19_16/libclntsh.dylib node_modules/oracledb/build/Release
+        ln -s ~/Downloads/instantclient_23_3/libclntsh.dylib node_modules/oracledb/build/Release
 
   This can be added to your ``package.json`` files::
 
         "scripts": {
             "postinstall": "ln -s $HOME/Downloads/instantclient_19_16/libclntsh.dylib $(npm root)/oracledb/build/Release"
         },
-
-  Instead of linking, you can also copy all the required OCI libraries,
-  for example::
-
-        cp ~/Downloads/instantclient_19_16/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} node_modules/oracledb/build/Release
-        cd node_modules/oracledb/build/Release/ && ln -s libclntsh.dylib.19.1 libclntsh.dylib
 
   With the libraries in place, your application can then enable Thick mode:
 
@@ -251,13 +245,7 @@ On macOS, the alternative ways to enable Thick mode are:
   it. For example::
 
         mkdir /usr/local/lib
-        ln -s ~/Downloads/instantclient_19_16/libclntsh.dylib/usr/local/lib
-
-  Instead of linking, you can also copy all the required OCI libraries,
-  for example::
-
-        mkdir /usr/local/lib
-        cp ~/Downloads/instantclient_19_16/{libclntsh.dylib.19.1,libclntshcore.dylib.19.1,libnnz19.dylib,libociei.dylib} /usr/local/lib/
+        ln -s ~/Downloads/instantclient_23_3/libclntsh.dylib /usr/local/lib
 
   With the libraries in place, your application can then enable Thick mode:
 
