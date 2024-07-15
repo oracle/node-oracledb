@@ -13,18 +13,22 @@ node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...
 Common Changes
 ++++++++++++++
 
-#)  Added support for Centralized Configuration Providers (Azure App Configuration Store and OCI
-    Object Storage).
-    Node-oracledb extracts configuration information from the the supported provider and uses it to
+#)  Added support for Centralized Configuration Providers (Azure App
+    Configuration Store and OCI Object Storage). Node-oracledb extracts
+    configuration information from the supported provider and uses it to
     connect to the database.
+
+#) Added support for ``oracledb.DB_TYPE_BFILE`` data type.
+
+#) Test and documentation updates.
 
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for in-memory wallet by adding a new parameter ``walletContent``
-    of the type ``string`` which will let users pass the wallet content directly instead
-    of storing and reading it up from a file. 
-    `Issue #1671 <https://github.com/oracle/node-oracledb/issues/
+#)  Added support for in-memory wallet by adding a new parameter
+    ``walletContent`` of type ``string`` that will allow users to pass the
+    wallet content directly instead of storing and reading it up from a file.
+    See `Issue #1671 <https://github.com/oracle/node-oracledb/issues/
     1671>`__.
     
 #)  Added support to use ``IFILE`` parameter to embed custom
@@ -48,7 +52,14 @@ Thin Mode Changes
 Thick Mode Changes
 +++++++++++++++++++
 
-#)  Fixed bug that causes Two-Phase Commit `tpcRecover` execution to fail.
+#)  Fixed bug that causes Two-Phase Commit :meth:`connection.tpcRecover()`
+    execution to fail.
+
+#)  Added binary for the macOS ARM64 platform.
+
+#)  Corrected memory leak when dequeuing messages with JSON payloads 
+   (`ODPI-C change
+    <https://github.com/oracle/odpi/commit/00b16209408ebc827a3a9b256cf9ad3f79e1ddc1>`__).
 
 node-oracledb `v6.5.1 <https://github.com/oracle/node-oracledb/compare/v6.5.0...v6.5.1>`__ (23 May 2024)
 ---------------------------------------------------------------------------------------------------------
@@ -57,8 +68,6 @@ Common Changes
 ++++++++++++++
 
 #)  Test and documentation updates.
-
-#) Added support for ``oracledb.DB_TYPE_BFILE`` data type.
 
 Thin Mode Changes
 +++++++++++++++++

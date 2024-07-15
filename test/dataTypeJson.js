@@ -232,7 +232,7 @@ describe('244.dataTypeJson.js', function() {
         binds.push([19, jsonVal19]);
         binds.push([20, jsonVal20]);
       }
-      if (testsUtil.isVectorBinaryRunnable) {
+      if (await testsUtil.isVectorBinaryRunnable()) {
         binds.push([21, jsonVal21]);
       }
       binds.forEach((element, index) => {
