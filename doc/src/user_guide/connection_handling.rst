@@ -3760,6 +3760,17 @@ connect as the ADMIN user using the ``cjdb1_high`` connection string:
         walletPassword: wp
     });
 
+Instead of storing and reading the content from the ``ewallet.pem`` file which
+is specified in the ``walletLocation`` property, you can use the
+:ref:`walletContent <getconnectiondbattrswalletcontent>` property to directly
+specify the security credentials required to establish a mutual TLS connection
+to Oracle Database. This property was introduced in node-oracledb 6.6 and can
+be used with the :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()` methods. The value of this property takes
+precedence and overrides the ``walletLocation`` property value of
+:meth:`oracledb.getConnection()`, or the ``WALLET_LOCATION`` parameter
+in the connection string.
+
 **In node-oracledb Thick Mode**
 
 For node-oracledb in Thick mode, only these files from the zip are needed:
@@ -3961,9 +3972,20 @@ example, using OpenSSL::
     openssl pkcs12 -in ewallet.p12 -out wallet.pem
 
 Once the PEM file has been created, you can use it by passing its directory
-location as the ``walletLocation`` parameter to :meth:`oracledb.getconnection()` or
-:meth:`oracledb.createPool()`. These methods also accept a ``walletPassword``
-parameter, which can be the passphrase that was specified when the above
+location as the ``walletLocation`` property to
+:meth:`oracledb.getconnection()` or :meth:`oracledb.createPool()`. Instead of
+storing and reading the content from the ``ewallet.pem`` file which is
+specified in the ``walletLocation`` property, you can use the
+``walletContent`` property to directly specify the security credentials
+required to establish a mutual TLS connection to Oracle Database. The
+``walletContent`` property was introduced in node-oracledb 6.6 and can be used
+with :meth:`~oracledb.getConnection()` and :meth:`~oracledb.createPool()`. The
+value of this property takes precedence and overrides the ``walletLocation``
+value set in :meth:`~oracledb.getConnection()` or
+:meth:`~oracledb.createPool()`, or the ``WALLET_LOCATION`` parameter in the
+connection string. The :meth:`~oracledb.getConnection()` and
+:meth:`~oracledb.createPool()` methods also accept a ``walletPassword``
+property, which can be the passphrase that was specified when the above
 openSSL command was run. See :ref:`connectionadbmtls`.
 
 .. _connmultiwallets:

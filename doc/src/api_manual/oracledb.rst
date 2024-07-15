@@ -2128,6 +2128,16 @@ Oracledb Methods
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``walletContent``
+          - String
+          - Thin
+          - .. _createpoolpoolattrswalletcontent:
+
+            The security credentials required to establish a mutual TLS (mTLS) connection to Oracle Database. This property can be used to directly specify the security credentials instead of storing and reading the credentials from the ``ewallet.pem`` file specified in the ``walletLocation`` property.
+
+            The value of the ``walletContent`` property overrides the ``walletLocation`` value and the ``WALLET_LOCATION`` parameter in the connection string.
+
+            .. versionadded:: 6.6
         * - ``edition``
           - String
           - Thick
@@ -2836,6 +2846,16 @@ Oracledb Methods
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``walletContent``
+          - String
+          - Thin
+          - .. _getconnectiondbattrswalletcontent:
+
+            The security credentials required to establish a mutual TLS (mTLS) connection to Oracle Database. This property can be used to directly specify the security credentials instead of storing and reading the credentials from the ``ewallet.pem`` file specified in the ``walletLocation`` property.
+
+            The value of the ``walletContent`` property overrides the ``walletLocation`` value and the ``WALLET_LOCATION`` parameter in the connection string.
+
+            .. versionadded:: 6.6
         * - ``edition``
           - String
           - Thick

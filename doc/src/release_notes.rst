@@ -18,9 +18,9 @@ Common Changes
     configuration information from the supported provider and uses it to
     connect to the database.
 
-#) Added support for ``oracledb.DB_TYPE_BFILE`` data type.
+#)  Added support for ``oracledb.DB_TYPE_BFILE`` data type.
 
-#) Test and documentation updates.
+#)  Test and documentation updates.
 
 Thin Mode Changes
 +++++++++++++++++
@@ -30,7 +30,7 @@ Thin Mode Changes
     wallet content directly instead of storing and reading it up from a file.
     See `Issue #1671 <https://github.com/oracle/node-oracledb/issues/
     1671>`__.
-    
+
 #)  Added support to use ``IFILE`` parameter to embed custom
     network configuration files in the :ref:`tnsnames.ora <tnsadmin>` file.
 
@@ -47,7 +47,7 @@ Thin Mode Changes
     provided for `Issue #1565 <https://github.com/oracle/node-oracledb/issues/
     1565>`__.
 
-#)  Added :ref:`Two-Phase Commits <tpc>` support.
+#)  Added :ref:`Two-Phase Commits <twopc>` support.
 
 Thick Mode Changes
 +++++++++++++++++++
@@ -57,9 +57,9 @@ Thick Mode Changes
 
 #)  Added binary for the macOS ARM64 platform.
 
-#)  Corrected memory leak when dequeuing messages with JSON payloads 
-   (`ODPI-C change
-    <https://github.com/oracle/odpi/commit/00b16209408ebc827a3a9b256cf9ad3f79e1ddc1>`__).
+#)  Corrected memory leak when dequeuing messages with JSON payloads
+    (`ODPI-C change <https://github.com/oracle/odpi/commit/
+    00b16209408ebc827a3a9b256cf9ad3f79e1ddc1>`__).
 
 node-oracledb `v6.5.1 <https://github.com/oracle/node-oracledb/compare/v6.5.0...v6.5.1>`__ (23 May 2024)
 ---------------------------------------------------------------------------------------------------------
