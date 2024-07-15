@@ -13,9 +13,9 @@ node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...
 Common Changes
 ++++++++++++++
 
-#)  Added support for Centralized Configuration Providers (Azure App Configuration Store and OCI 
+#)  Added support for Centralized Configuration Providers (Azure App Configuration Store and OCI
     Object Storage).
-    Node-oracledb extracts configuration information from the the supported provider and uses it to 
+    Node-oracledb extracts configuration information from the the supported provider and uses it to
     connect to the database.
 
 Thin Mode Changes
@@ -57,6 +57,8 @@ Common Changes
 ++++++++++++++
 
 #)  Test and documentation updates.
+
+#) Added support for ``oracledb.DB_TYPE_BFILE`` data type.
 
 Thin Mode Changes
 +++++++++++++++++

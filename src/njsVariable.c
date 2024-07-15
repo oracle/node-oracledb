@@ -84,6 +84,7 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
         case DPI_ORACLE_TYPE_CLOB:
         case DPI_ORACLE_TYPE_NCLOB:
         case DPI_ORACLE_TYPE_BLOB:
+        case DPI_ORACLE_TYPE_BFILE:
             var->nativeTypeNum = DPI_NATIVE_TYPE_LOB;
             break;
         case NJS_DATATYPE_BOOLEAN:
@@ -683,6 +684,7 @@ static bool njsVariable_processBuffer(njsVariable *var,
         case DPI_ORACLE_TYPE_CLOB:
         case DPI_ORACLE_TYPE_NCLOB:
         case DPI_ORACLE_TYPE_BLOB:
+        case DPI_ORACLE_TYPE_BFILE:
             NJS_FREE_AND_CLEAR(buffer->lobs);
             if (buffer->numElements == 0)
                 break;

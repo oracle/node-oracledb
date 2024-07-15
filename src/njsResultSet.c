@@ -344,6 +344,7 @@ static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
             case DPI_ORACLE_TYPE_CLOB:
             case DPI_ORACLE_TYPE_NCLOB:
             case DPI_ORACLE_TYPE_BLOB:
+            case DPI_ORACLE_TYPE_BFILE:
             case DPI_ORACLE_TYPE_OBJECT:
             case DPI_ORACLE_TYPE_NUMBER:
             case DPI_ORACLE_TYPE_NATIVE_INT:

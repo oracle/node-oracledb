@@ -36,21 +36,26 @@
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_close);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_getChunkSize);
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_getData);
+NJS_NAPI_METHOD_DECL_SYNC(njsLob_getDirFileName);
+NJS_NAPI_METHOD_DECL_ASYNC(njsLob_getFileExists);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_getLength);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_getPieceSize);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_getType);
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_read);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_setPieceSize);
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_write);
+NJS_NAPI_METHOD_DECL_SYNC(njsLob_setDirFileName);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsLob_closeAsync);
 static NJS_ASYNC_METHOD(njsLob_getDataAsync);
+static NJS_ASYNC_METHOD(njsLob_getFileExistsAsync);
 static NJS_ASYNC_METHOD(njsLob_readAsync);
 static NJS_ASYNC_METHOD(njsLob_writeAsync);
 
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsLob_getDataPostAsync);
+static NJS_ASYNC_POST_METHOD(njsLob_getFileExistsPostAsync);
 static NJS_ASYNC_POST_METHOD(njsLob_readPostAsync);
 
 // finalize
@@ -62,6 +67,10 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "getChunkSize", NULL, njsLob_getChunkSize, NULL, NULL, NULL,
             napi_default, NULL },
     { "getData", NULL, njsLob_getData, NULL, NULL, NULL, napi_default, NULL },
+    { "getDirFileName", NULL, njsLob_getDirFileName, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "fileExists", NULL, njsLob_getFileExists, NULL, NULL, NULL, napi_default,
+            NULL },
     { "getLength", NULL, njsLob_getLength, NULL, NULL, NULL, napi_default,
             NULL },
     { "getPieceSize", NULL, njsLob_getPieceSize, NULL, NULL, NULL,
@@ -70,6 +79,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "read", NULL, njsLob_read, NULL, NULL, NULL, napi_default, NULL },
     { "setPieceSize", NULL, njsLob_setPieceSize, NULL, NULL, NULL,
             napi_default, NULL },
+    {  "setDirFileName", NULL, njsLob_setDirFileName, NULL, NULL, NULL,
+            napi_default, NULL},
     { "write", NULL, njsLob_write, NULL, NULL, NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
@@ -235,7 +246,8 @@ static bool njsLob_getDataAsync(njsBaton *baton)
     }
 
     // determine size of buffer that is required
-    if (lob->dataType == NJS_DATATYPE_BLOB) {
+    if (lob->dataType == NJS_DATATYPE_BLOB ||
+            lob->dataType == NJS_DATATYPE_BFILE) {
         baton->bufferSize = len;
     } else if (dpiLob_getBufferSize(lob->handle, len,
             &baton->bufferSize) < 0) {
@@ -321,8 +333,11 @@ bool njsLob_new(njsModuleGlobals *globals, njsLobBuffer *buffer, napi_env env,
 //-----------------------------------------------------------------------------
 bool njsLob_populateBuffer(njsBaton *baton, njsLobBuffer *buffer)
 {
-    if (dpiLob_getChunkSize(buffer->handle, &buffer->chunkSize) < 0)
-        return njsBaton_setErrorDPI(baton);
+    if (buffer->dataType != DPI_ORACLE_TYPE_BFILE) {
+        if (dpiLob_getChunkSize(buffer->handle, &buffer->chunkSize) < 0)
+            return njsBaton_setErrorDPI(baton);
+    }
+
     if (dpiLob_getSize(buffer->handle, &buffer->length) < 0)
         return njsBaton_setErrorDPI(baton);
     return true;
@@ -402,6 +417,101 @@ static bool njsLob_readPostAsync(njsBaton *baton, napi_env env,
         NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, baton->bufferSize,
                 lob->bufferPtr, NULL, result))
     }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_getDirFileName()
+//  To obtain the directory alias and file name properties of BFILE lob object
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsLob_getDirFileName, 0, NULL)
+{
+    njsLob *lob = (njsLob *) callingInstance;
+    uint32_t dirNameLength, fileNameLength;
+    const char *dirName, *fileName;
+    napi_value temp;
+
+    if (dpiLob_getDirectoryAndFileName(lob->handle, &dirName, &dirNameLength,
+            &fileName, &fileNameLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+
+    // create result object
+    NJS_CHECK_NAPI(env, napi_create_object(env, returnValue))
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, dirName,
+        dirNameLength, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *returnValue,
+        "dirName", temp))
+    NJS_CHECK_NAPI(env, napi_create_string_utf8(env, fileName,
+        fileNameLength, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *returnValue,
+        "fileName", temp))
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_getFileExists()
+//   To get the file-existence status of BFILE.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_getFileExists, 0, NULL)
+{
+  return njsBaton_queueWork(baton, env, "fileExists",
+          njsLob_getFileExistsAsync, njsLob_getFileExistsPostAsync,
+          returnValue);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_getFileExists()
+//   Worker thread function for njsLob_getFileExists().
+//-----------------------------------------------------------------------------
+static bool njsLob_getFileExistsAsync(njsBaton *baton)
+{
+    njsLob *lob = (njsLob *) baton->callingInstance;
+    int exists;
+
+    if (dpiLob_getFileExists(lob->handle, &exists) < 0)
+        return njsBaton_setErrorDPI(baton);
+    baton->fileExists = (exists != 0) ? true : false;
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_getFileExistsPostAsync()
+//    To return whether the file exists (BFILE)
+//-----------------------------------------------------------------------------
+static bool njsLob_getFileExistsPostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, baton->fileExists, result))
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_setDirFileName()
+//   TO set the directory alias and file name property on BFILE lob object
+//----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsLob_setDirFileName, 1, NULL)
+{
+    njsLob *lob = (njsLob*) callingInstance;
+    size_t dirNameLength, fileNameLength;
+    char *dirName, *fileName;
+
+    if (!njsUtils_getNamedPropertyString(env, args[0], "dirName",
+            &dirName, &dirNameLength))
+        return false;
+    if (!njsUtils_getNamedPropertyString(env, args[0], "fileName",
+            &fileName, &fileNameLength))
+        return false;
+    if (dpiLob_setDirectoryAndFileName(lob->handle, dirName, dirNameLength,
+            fileName, fileNameLength) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
 
     return true;
 }

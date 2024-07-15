@@ -156,6 +156,7 @@
 #define NJS_DATATYPE_CLOB               DPI_ORACLE_TYPE_CLOB
 #define NJS_DATATYPE_NCLOB              DPI_ORACLE_TYPE_NCLOB
 #define NJS_DATATYPE_BLOB               DPI_ORACLE_TYPE_BLOB
+#define NJS_DATATYPE_BFILE              DPI_ORACLE_TYPE_BFILE
 #define NJS_DATATYPE_BOOLEAN            DPI_ORACLE_TYPE_BOOLEAN
 #define NJS_DATATYPE_OBJECT             DPI_ORACLE_TYPE_OBJECT
 #define NJS_DATATYPE_JSON               DPI_ORACLE_TYPE_JSON
@@ -434,6 +435,7 @@ struct njsBaton {
     bool keepInStmtCache;
     bool isJson;
     bool isOson;
+    bool fileExists;
 
     // LOB buffer (requires free only if string was used)
     uint64_t bufferSize;
