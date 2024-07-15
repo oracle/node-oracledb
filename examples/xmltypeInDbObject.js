@@ -64,7 +64,7 @@ async function run() {
   try {
     conn = await oracledb.getConnection(dbConfig);
 
-    const sqlTypeCreate = `CREATE TYPE ${TYPE1} FORCE AS OBJECT ( 
+    const sqlTypeCreate = `CREATE TYPE ${TYPE1} FORCE AS OBJECT (
       XMLDATA sys.xmltype)`;
     await conn.execute(sqlTypeCreate);
 
