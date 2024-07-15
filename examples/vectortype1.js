@@ -93,12 +93,19 @@ async function run() {
         VCOL8 VECTOR(4, int8),
         VCOL VECTOR(4),
         VCOLFlexDouble VECTOR(*, *),
-        VCOLFlexFloat VECTOR(*, *))`);
+        VCOLFlexFloat VECTOR(*, *),
+        VCOLBinary VECTOR(16, binary))`);
 
     const arr = [2345.67, 12.2, -23.4, -65.2];
     const float64arr = new Float64Array(arr);
     const float32arr = new Float32Array(arr);
     const int8arr = new Int8Array([126, 125, -126, -23]);
+
+    // 16 dimensions numbering from left/msb
+    // 1,1,1,1,0,0,0,0
+    // 1,1,0,0,1,0,0,0
+    const uInt8Arr = new Uint8Array([240, 200]);
+
     // Add both float32 and float64 range elements
     const arrFlexDouble = [2345.67, 12.666428727762776];
     // Add only float32 range elements
@@ -106,20 +113,22 @@ async function run() {
 
     console.log('Inserting Vector ');
     result = await connection.execute(`insert into ${tableName} values(:id, :vec32, :vec64, :vec8, :vec,
-        :vecFlexDouble, :vecFlexFloat)`,
+        :vecFlexDouble, :vecFlexFloat, :vecBinary)`,
     { id: 1,
       vec32: float32arr,
       vec64: float64arr,
       vec8: int8arr,
       vec: {type: oracledb.DB_TYPE_VECTOR, val: arr},
       vecFlexDouble: {type: oracledb.DB_TYPE_VECTOR, val: arrFlexDouble},
-      vecFlexFloat: {type: oracledb.DB_TYPE_VECTOR, val: arrFlexFloat32}
+      vecFlexFloat: {type: oracledb.DB_TYPE_VECTOR, val: arrFlexFloat32},
+      vecBinary: {type: oracledb.DB_TYPE_VECTOR, val: uInt8Arr}
     });
     console.log('Rows inserted: ' + result.rowsAffected);
 
     console.log('Query Results:');
     result = await connection.execute(
-      `select id, VCOL32, VCOL64, VCOL8, VCOL, VCOLFlexDouble, VCOLFlexFloat from ${tableName} ORDER BY id`);
+      `select id, VCOL32, VCOL64, VCOL8, VCOL, VCOLFlexDouble, VCOLFlexFloat, VCOLBinary
+       from ${tableName} ORDER BY id`);
     console.log("Query metadata:", result.metaData);
     console.log("Query rows:", result.rows);
     const vec32 = result.rows[0].VCOL32;
@@ -128,6 +137,7 @@ async function run() {
     const vec = result.rows[0].VCOL;
     const vecFlexDouble = result.rows[0].VCOLFLEXDOUBLE;
     const vecFlexFloat = result.rows[0].VCOLFLEXFLOAT;
+    const vecBinary = result.rows[0].VCOLBINARY;
 
     assert(vec32.constructor, Array);
     assert(vec64.constructor, Array);
@@ -135,6 +145,7 @@ async function run() {
     assert(vecFlexDouble.constructor, Array);
     assert(vecFlexFloat.constructor, Array);
     assert(vec8.constructor, Array);
+    assert(vecBinary.constructor, Array);
 
     // Reading vector as string.
     console.log("Fetch Vector Column as string");

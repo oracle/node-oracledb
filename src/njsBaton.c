@@ -859,6 +859,12 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
             type = napi_int8_array;
             elementLength = 1;
             break;
+        case DPI_VECTOR_FORMAT_BINARY:
+            type = napi_uint8_array;
+            elementLength = 1;
+            // dimensions for binary is assumed to be multiples of 8.
+            numElem = numElem / 8;
+            break;
         default:
             return njsBaton_setErrorUnsupportedVectorFormat
                             (baton, vectorInfo.format);

@@ -198,6 +198,13 @@ describe('244.dataTypeJson.js', function() {
         KeyInt8: new Int8Array([-123, 12, 123]),
         keyBuf: Buffer.from("A Raw")
       };
+      const jsonVal21 = {
+        KeyF32: new Float32Array([1, 2]),
+        KeyF64: new Float64Array([-992.1, 994.3]),
+        KeyInt8: new Int8Array([-123, 12, 123]),
+        KeyBinary: new Uint8Array([240, 120]),
+        keyBuf: Buffer.from("A Raw")
+      };
       const binds = [
         [1, jsonVal1],
         [2, jsonVal2],
@@ -224,6 +231,9 @@ describe('244.dataTypeJson.js', function() {
       if (isOracle_23_4) {
         binds.push([19, jsonVal19]);
         binds.push([20, jsonVal20]);
+      }
+      if (testsUtil.isVectorBinaryRunnable) {
+        binds.push([21, jsonVal21]);
       }
       binds.forEach((element, index) => {
         binds[index].push(connection.encodeOSON(element[1]));

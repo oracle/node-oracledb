@@ -812,6 +812,10 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
             case napi_int8_array:
                 vectorInfo.format = DPI_VECTOR_FORMAT_INT8;
                 break;
+            case napi_uint8_array:
+                vectorInfo.numDimensions = (uint32_t)numElem * 8;
+                vectorInfo.format = DPI_VECTOR_FORMAT_BINARY;
+                break;
             default:
                 break;
         }

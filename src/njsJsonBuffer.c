@@ -141,6 +141,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         napi_env env, napi_value value, njsBaton *baton)
 {
     napi_value temp, name, fieldNames, fieldValues, vectorVal, global;
+    napi_value uint8Val, uint8Proto, valProto;
     napi_valuetype valueType;
     napi_typedarray_type type;
     size_t tempBufferLength;
@@ -222,14 +223,24 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     // handle vectors
     NJS_CHECK_NAPI(env, napi_is_typedarray(env, value, &isTyped))
     if (isTyped) {
-        // check for type as buffer is a typedarray of type napi_uint8_array.
+        NJS_CHECK_NAPI(env, napi_get_global(env, &global))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, global, "Uint8Array",
+                &uint8Val))
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, uint8Val, "prototype",
+                &uint8Proto))
+        NJS_CHECK_NAPI(env, napi_get_prototype(env, value, &valProto))
+
+        // See if the value prototype matches with Uint8Array.
+        // The Buffer and JsonId return true for Uint8Array instance, so
+        // using prototype check to see if the value is instance of Uint8Array.
+        NJS_CHECK_NAPI(env, napi_strict_equals(env, uint8Proto, valProto,
+                &check))
         NJS_CHECK_NAPI(env, napi_get_typedarray_info(env, value, &type,
                 NULL, NULL, NULL, NULL))
         if ((type == napi_float64_array) || (type == napi_float32_array)
-                || (type == napi_int8_array)) {
+                || (type == napi_int8_array) || (check)) {
             node->oracleTypeNum = DPI_ORACLE_TYPE_VECTOR;
             node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-            NJS_CHECK_NAPI(env, napi_get_global(env, &global))
             NJS_CHECK_NAPI(env, napi_call_function(env, global,
                     baton->jsEncodeVectorFn, 1, &value, &vectorVal))
             NJS_CHECK_NAPI(env, napi_get_buffer_info(env, vectorVal,
