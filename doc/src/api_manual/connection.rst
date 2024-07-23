@@ -676,6 +676,7 @@ Connection Methods
         :class: wy-table-responsive
         :align: center
         :widths: 10 10 30
+        :width: 100%
         :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
 
         * - Parameter
@@ -842,7 +843,7 @@ Connection Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 10 20 30
+        :widths: 10 15 20 25
         :summary: The first column displays the Node.js Type. The second
          column displays the Database type. The third column displays the
          Bind type value. The fourth column displays the notes.
@@ -972,7 +973,7 @@ Connection Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 5 10 35
+        :widths: 10 10 30
         :summary: The first column displays the property. The second column
          displays the data type of the property. The third column displays
          the description of the property.
@@ -1511,7 +1512,8 @@ Connection Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 12 45
+        :widths: 10 10 30
+        :width: 100%
         :summary: The first column displays the parameter. The second column
          displays the data type of the parameter. The third column displays
          the description of the parameter.
@@ -1712,7 +1714,8 @@ Connection Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 15 40
+        :widths: 10 10 30
+        :width: 100%
         :summary: The first column displays the parameter. The second column
          displays the data type of the parameter. The third column displays
          the description of the parameter.
@@ -2257,6 +2260,7 @@ Connection Methods
         :class: wy-table-responsive
         :align: center
         :widths: 10 10 30
+        :width: 100%
         :summary: The first column displays the parameter. The second column
          displays the data type of the parameter. The third column displays
          the description of the parameter.
@@ -2814,6 +2818,7 @@ Connection Methods
         :class: wy-table-responsive
         :align: center
         :widths: 10 10 30
+        :width: 100%
         :summary: The first column displays the parameter. The second column
          displays the data type of the parameter. The third column displays the
          description of the parameter.

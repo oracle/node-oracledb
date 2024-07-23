@@ -4037,6 +4037,631 @@ containing the ``MY_WALLET_DIRECTORY`` option needs to be created::
     They contain important bug fixes for using multiple wallets in the one
     process.
 
+.. _configurationprovider:
+
+Connecting Using Centralized Configuration Providers
+====================================================
+
+Centralized Configuration Providers enable you to centrally store and manage
+the configuration information of your application in a single location on the
+cloud. These providers allow you to separately store the configuration
+information from the code of your application. The configuration information
+that can be stored in these providers includes connect descriptors, and
+database credentials such as user name and password. The database password can
+be stored separately in a secure vault which is a service offered by these
+providers. Also, you can store properties specific to node-oracledb in
+centralized configuration providers.
+
+Node-oracledb can securely look up the configuration information stored in the
+following configuration providers:
+
+- :ref:`Microsoft Azure App Configuration <azureappconfig>`
+- :ref:`Oracle Cloud Infrastructure (OCI) Object Storage <ociobjstorage>`
+
+Using the configuration information from these providers, node-oracledb can
+connect to Oracle Database. The centralized configuration provider support is
+available from node-oracledb 6.6 onwards in both Thin and Thick modes.
+
+The configuration from these providers can be used to create both
+:ref:`standalone connections <standaloneconnection>` and
+:ref:`connection pools <connpooling>`. For node-oracledb to be able to
+retrieve the Oracle Database connection information from a configuration
+provider, you must define the connection string in a specific format in the
+``connectString`` property of the :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()` methods. The connection string for these
+configuration providers must begin with ``config-<azure>`` or
+``config-<ociobject>``, contain the URL of the Azure App Configuration or the
+OCI Object Storage endpoints, and authentication details.
+
+.. _azureappconfig:
+
+Azure App Configuration Provider
+--------------------------------
+
+`Azure App Configuration <https://learn.microsoft.com/en-us/azure/azure-app-
+configuration/overview>`__ is a cloud-based service provided by Microsoft
+Azure that enables the central management of your application's configuration
+information. Your application must be registered with `Microsoft Entra ID
+<https://www.microsoft.com/en-in/security/business/identity-access/microsoft
+-entra-id>`__ (formerly Microsoft Azure Active Directory) and must have the
+required authorization permissions to access the Azure App Configuration
+provider.
+
+To use node-oracledb to retrieve the configuration information from Azure App
+Configuration, you must install the following libraries:
+
+- `App Configuration <https://www.npmjs.com/package/@azure/
+  app-configuration>`__ (azure/app-configuration)
+- `Azure AD token authentication <https://www.npmjs.com/package/@azure/
+  identity>`__ (azure/identity)
+- `Azure Key Vault <https://www.npmjs.com/package/@azure/keyvault-secrets>`__
+  (azure/keyvault-secrets) is optional and required only if a password is
+  stored in the vault
+
+Configuration information is stored as key-value pairs in Azure App
+Configuration. You must add the connect descriptor as a key under a prefix
+based on the requirements of your application. Optionally, you can add the
+database user name, password, and node-oracledb specific properties as
+keys. The database password can be stored securely as a secret using
+`Azure Key Vault <https://learn.microsoft.com/en-us/azure/key-vault/general/
+overview>`__. In Azure App Configuration, you can add the following keys under
+a prefix:
+
+- <prefix>connect_descriptor (required)
+- <prefix>user (optional)
+- <prefix>password (optional)
+- <prefix>node-oracledb (optional)
+
+The key ending with:
+
+- ``connect_descriptor`` stores the :ref:`connect descriptor <embedtns>`
+  as the value.
+- ``user`` stores the database user name as the value.
+- ``password`` stores the reference to the Azure Key Vault and Secret as
+  the value.
+- ``node-oracledb`` stores the values of the node-oracledb specific
+  properties. The properties that can be stored in Azure App Configuration
+  include ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``,
+  ``poolPingInterval``, ``poolPingTimeout``, ``stmtCacheSize``,
+  ``prefetchRows``, and ``lobPrefetch``.
+
+See `Oracle Net Service Administrator’s Guide <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-DBCA9021-F3E1-4B30-8F17-A98900299D73>`__ for
+more information.
+
+You must use a connection string containing the configuration provider values
+in node-oracledb to access the information stored in Azure App Configuration.
+The ``connectString`` property of :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()` should be a URL such as::
+
+    config-azure://<appconfigname>[?key=<prefix>&label=<value>&<option1>=<value1>&<option2>=<value2>…]
+
+The parameters of the connection string are detailed in the table below.
+
+.. list-table-with-summary:: Connection String Parameters for Azure App Configuration
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 15 15 25
+    :name: _connection_string_for_azure_app
+    :summary: The first row displays the name of the connection string parameter. The second row displays whether the connection string parameter is required or optional. The third row displays the description of the connection string parameter.
+
+    * - Parameter
+      - Required or Optional
+      - Description
+    * - ``config-azure``
+      - Required
+      - Indicates that the configuration provider is Azure App Configuration.
+    * - ``<appconfigname>``
+      - Required
+      - The URL of the App configuration endpoint.
+    * - ``key=<prefix>``
+      - Optional
+      - A key prefix to identify the connection. You can organize configuration information under a prefix as per application requirements.
+    * - ``label=<value>``
+      - Optional
+      - The Azure App Configuration label name.
+    * - ``<options>=<values>``
+      - Optional
+      - The Azure authentication method and corresponding authentication parameters to use when connecting to the Azure App Configuration provider. Each authentication method requires specific parameters to be set which is detailed in the :ref:`Azure Authentication Methods and Their Values <_azure_authentication_methods_and_values>` table.
+
+        You can specify one of the following authentication methods:
+
+        - **Default Azure Credential**: The authentication to Azure App Configuration is done as a service principal (using either a client secret or client certificate) or as a managed identity depending on which parameters are set. This authentication method also supports reading the parameters as environment variables. This is the default authentication method.
+        - **Service Principal with Client Secret**: The authentication to Azure App Configuration is done using the client secret.
+        - **Service Principal with Client Certificate**: The authentication to Azure App Configuration is done using the client certificate.
+        - **Managed Identity**: The authentication to Azure App Configuration is done using managed identity or managed user identity credentials.
+
+Depending on the specified authentication method, you must also set the
+corresponding authentication parameters in the ``option=value`` syntax of the
+connection string. The different authentication methods and their
+corresponding option values are listed in the table below.
+
+.. list-table-with-summary:: Azure Authentication Methods and Their Values
+    :header-rows: 1
+    :class: wy-table-responsive
+    :name: _azure_authentication_methods_and_values
+    :summary: The first row displays the authentication method. The second row displays the authentication option values. The third row displays the required parameters for the specified option value. The fourth row displays the optional parameters for the specified option value.
+
+    * - Authentication Method
+      - Authentication Option Values
+      - Required Parameters for This Option Value
+      - Optional Parameters for This Option Value
+    * - Default Azure Credential
+      - AZURE_DEFAULT (also used when the Authentication method is not set)
+      -
+      - AZURE_CLIENT_ID
+
+        AZURE_CLIENT_SECRET
+
+        AZURE_CLIENT_CERTIFICATE_PATH
+
+        AZURE_TENANT_ID
+
+        AZURE_MANAGED_IDENTITY_CLIENT_ID
+    * - Service Principal with client secret
+      - AZURE_SERVICE_PRINCIPAL
+      - AZURE_CLIENT_ID
+
+        AZURE_CLIENT_SECRET
+
+        AZURE_TENANT_ID
+      -
+    * - Service Principal with client certificate
+      - AZURE_SERVICE_PRINCIPAL
+      - AZURE_CLIENT_ID
+
+        AZURE_CLIENT_CERTIFICATE_PATH
+
+        AZURE_TENANT_ID
+      -
+    * - Managed Identity
+      - AZURE_MANAGED_IDENTITY
+      - AZURE_MANAGED_IDENTITY_CLIENT_ID - required only if user assigned
+      -
+
+Note that the Azure service principal with client certificate overrides Azure
+service principal with client secret.
+
+See `Authentication Parameters for Azure App Configuration Store <https://www.
+oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1EECAD82-6CE5-4F4F-A844-
+C75C7AA1F907>`__ for more information.
+
+.. _exampleazureappconfig:
+
+Using node-oracledb and Azure App Configuration
++++++++++++++++++++++++++++++++++++++++++++++++
+
+Consider the following table which lists sample configuration information defined
+in Azure App Configuration as key-value pairs. Note that the key-value pairs
+are defined under the same prefix ``test/`` as an example.
+
+.. list-table-with-summary::
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 30 70
+    :name: _azure_app_configuration_keys_and_values
+    :summary: The first row displays the name of the key defined in Azure App Configuration. The second row displays the value of the key defined in Azure App Configuration.
+
+    * - Azure App Configuration Key
+      - Value
+    * - test/connect_descriptor
+      - (description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.region.oraclecloud.com))(connect_data=(service_name=cdb1_pdb1)))
+    * - test/user
+      - scott
+    * - test/password
+      - {"uri":"https://mykeyvault.vault.azure.net/secrets/passwordsalescrm"}
+    * - test/node-oracledb
+      - {"stmtCacheSize":30, "prefetchRows":2, "poolMin":2, "poolMax":10}
+
+**Standalone Connections with Azure App Configuration**
+
+:ref:`Standalone connections <standaloneconnection>` can be created with the
+configuration information defined in Azure App Configuration. Using the
+connection string URL below, you can access the information that is stored
+in :ref:`Azure App Configuration <_azure_app_configuration_keys_and_values>`.
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-azure://aznetnamingappconfig.azconfig.io/?key=test/&azure_client_id=123-456&azure_client_secret=MYSECRET&azure_tenant_id=789-123"
+    });
+
+    const result = await connection.execute(`SELECT 1 FROM dual`);
+    console.log(result.rows[0][0]);
+
+Substitute your own values in the connection string to access your Azure App
+Configuration service.
+
+Node-oracledb retrieves the necessary connection information from Azure App
+Configuration and uses the values of the keys to create a standalone
+connection to Oracle Database. For example, the values of the node-oracledb
+connection properties will be the key values that were defined in the sample
+configuration information in this
+:ref:`table <_azure_app_configuration_keys_and_values>`:
+
+.. list-table-with-summary::
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 40 60
+    :name: _standalone_connection_properties_used
+    :summary: The first row displays the name of the node-oracledb connection property. The second row displays the value of the connection property.
+
+    * - Node-oracledb Connection Property
+      - Value
+    * - ``connectString``
+      - "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.region.oraclecloud.com))(connect_data=(service_name=cdb1_pdb1)))"
+    * - ``user``
+      - "scott"
+    * - ``password``
+      - "manager" (value of secret in URI - for demo purposes)
+    * - ``stmtCacheSize``
+      - 30
+    * - ``prefetchRows``
+      - 2
+
+**Connection Pools with Azure App Configuration**
+
+:ref:`Connection pools <connpooling>` can be created with the configuration
+information defined in Azure App Configuration. Using the connection string
+URL below, you can access the information that is stored in
+:ref:`Azure App Configuration <_azure_app_configuration_keys_and_values>`.
+
+.. code-block:: javascript
+
+    await oracledb.createPool({
+        connectString : "config-azure://aznetnamingappconfig.azconfig.io/?key=test/&azure_client_id=123-456&azure_client_secret=MYSECRET&azure_tenant_id=789-123"
+    });
+
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(`SELECT 1 FROM dual`);
+    console.log(result.rows[0][0]);
+
+Substitute your own values in the connection string to access your Azure App
+Configuration service.
+
+Node-oracledb retrieves the necessary connection information from Azure App
+Configuration and uses the values of the keys to create a connection pool to
+Oracle Database. For example, the values of the node-oracledb connection
+properties will be the key values that were defined in the
+sample configuration information in this
+:ref:`table <_azure_app_configuration_keys_and_values>`:
+
+.. list-table-with-summary::
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 40 60
+    :name: _connection_pool_properties_used
+    :summary: The first row displays the name of the node-oracledb connection property. The second row displays the value of the connection property.
+
+    * - Node-oracledb Connection Property
+      - Value
+    * - ``connectString``
+      - "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.region.oraclecloud.com))(connect_data=(service_name=cdb1_pdb1)))"
+    * - ``user``
+      - "scott"
+    * - ``password``
+      - "manager" (value of secret in URI - for demo purposes)
+    * - ``stmtCacheSize``
+      - 30
+    * - ``prefetchRows``
+      - 2
+    * - ``poolMin``
+      - 2
+    * - ``poolMax``
+      - 10
+
+**Precedence of Properties**
+
+If you have defined the values of ``user`` and ``password`` in both the
+application and Azure App Configuration, then the values defined in the
+application will have the higher precedence.
+
+If you are using Thin mode and have defined the node-oracledb specific
+properties in both the application and in Azure App Configuration, then the
+values defined in the configuration provider will have the higher precedence.
+
+If you are using Thick mode and have defined the node-oracledb properties in
+an ``oraaccess.xml`` file, Azure App Configuration, and the application, then
+the order of precedence from highest to lowest will be as follows:
+
+- ``oraaccess.xml`` file
+- Azure App Configuration
+- Application
+
+.. _ociobjstorage:
+
+OCI Object Storage Configuration Provider
+-----------------------------------------
+
+`Object Storage <https://docs.oracle.com/en-us/iaas/Content/Object/Concepts/
+objectstorageoverview.htm>`__ is a cloud-based service provided by Oracle
+Cloud Infrastructure (OCI) that enables the centralized storage and management
+of your application's configuration information. Ensure that you have the
+necessary authorization permissions to access OCI Object Storage.
+
+To use node-oracledb to retrieve the configuration information from OCI Object
+Storage, you must install the following:
+
+- `OCI Node.js Client for Common Utilities <https://www.npmjs.com/package/
+  oci-common>`__ (oci-common)
+- `OCI Node.js Client for ObjectStorage Service <https://www.npmjs.com/package/
+  oci-objectstorage>`__ (oci-objectstorage)
+- `OCI Node.js Client for Secrets Service <https://www.npmjs.com/package/oci-
+  secrets>`__ (oci-secrets) is optional and required only if a password is
+  stored in the vault. See `Managing Vault Secrets <https://docs.oracle.com/en
+  -us/iaas/Content/KeyManagement/Tasks/managingsecrets.htm>`__ for more
+  information.
+
+Configuration information is stored as a JSON file in OCI Object Storage. You
+must add the connect descriptor in the JSON file. Optionally, you can add the
+database user name, password, and node-oracledb specific properties in the
+JSON file. The database password can also be stored securely as a secret using
+`OCI Vault <https://docs.oracle.com/en-us/iaas/Content/KeyManagement/Tasks/
+managingsecrets.htm>`__. In OCI Object Storage, you can add the following
+sub-objects in the JSON file:
+
+- connect_descriptor (required)
+- user (optional)
+- password (optional)
+- node-oracledb (optional)
+
+Each sub-object is detailed below:
+
+- ``connect_descriptor`` is used to specify the :ref:`connect descriptor <embedtns>`
+  value.
+- ``user`` is used to specify the database user name as the value.
+- ``password`` is used to specify the reference to OCI Vault and secret as
+  the value.
+- ``node-oracledb`` is used to specify the values of the node-oracledb specific
+  properties. The properties that can be stored in OCI Object Storage include
+  ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``,
+  ``poolPingInterval``, ``poolPingTimeout``, ``stmtCacheSize``,
+  ``prefetchRows``, and ``lobPrefetch``.
+
+See `Oracle Net Service Administrator’s Guide <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-B43EA22D-5593-40B3-87FC-C70D6DAF780E>`__.
+
+You must use a connection string containing the configuration provider values
+in node-oracledb to access the information stored in OCI Object Storage. The
+``connectString`` property of :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()` should be a URL such as::
+
+    config-ociobject://<objectstorage-name>/n/<namespaceName>/b/<bucketName>/o/
+    <objectName>[/c/<networkServiceName>][?<option1>=<value1>&<option2>=<value2>...]
+
+The parameters of the connection string are detailed in the table below.
+
+.. list-table-with-summary:: Connection String Parameters for OCI Object Storage
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 15 15 25
+    :name: _connection_string_for_oci_object_storage
+    :summary: The first row displays the name of the connection string parameter. The second row displays whether the connection string parameter is required or optional. The third row displays the description of the connection string parameter.
+
+    * - Parameter
+      - Required or Optional
+      - Description
+    * - ``config-ociobject``
+      - Required
+      - Indicates that the configuration provider is OCI Object Storage.
+    * - ``<server-name>``
+      - Required
+      - The URL of OCI Object Storage endpoint.
+    * - ``<namespaceName>``
+      - Required
+      - The OCI Object Storage namespace where the JSON file is stored.
+    * - ``<bucketName>``
+      - Required
+      - The OCI Object Storage bucket name where the JSON file is stored.
+    * - ``<objectName>``
+      - Required
+      - The JSON file name.
+    * - ``<networkServiceName>``
+      - Optional
+      - The network service name or alias if the JSON file contains one or more network service names.
+    * - ``<options>`` and ``<values>``
+      - Optional
+      - The OCI Object Storage authentication method and corresponding authentication parameters to use when connecting to OCI Object Storage. Each authentication method requires specific parameters to be set which is detailed in the :ref:`table <_oci_authentication_methods>` below.
+
+        You can specify one of the following authentication methods in the connection string to access OCI Object Storage:
+
+        - **OCI API Key**: The authentication to OCI is done using API key-related values. This is the default authentication method.
+        - **OCI Instance Principal**: The authentication to OCI is done using VM instance credentials running on OCI.
+        - **OCI Resource Principal**: The authentication to OCI is done using OCI resource principals.
+
+        See `OCI Authentication Methods <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm>`__ for more information.
+
+Depending on the specified authentication method, you must also set the
+corresponding authentication parameters in the ``option=value`` syntax of the
+connection string. The different authentication methods and their
+corresponding option values are listed in the table below.
+
+.. list-table-with-summary:: OCI Authentication Methods and Their Values
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 10 10 10 10
+    :name: _oci_authentication_methods
+    :summary: The first row displays the authentication method. The second row displays the authentication option values. The third row displays the required parameters for the specified option value. The fourth row displays the optional parameters for the specified option value.
+
+    * - Authentication Method
+      - Authentication Option Values
+      - Optional Configuration
+      - Optional Parameters
+    * - API Key-Based Authentication
+      - OCI_DEFAULT (also used when the Authentication method is not set)
+      - (~/.oci/config),
+        (~/.oraclebmc/config), or
+        environment variable OCI_CONFIG_FILE
+      - OCI_PROFILE
+
+        OCI_TENANCY
+
+        OCI_USER
+
+        OCI_FINGERPRINT
+
+        OCI_KEY_FILE
+
+        OCI_PROFILE_PATH
+    * - Instance Principal Authentication
+      - OCI_INSTANCE_PRINCIPAL
+      -
+      -
+    * - Resource Principal Authentication
+      - OCI_RESOURCE_PRINCIPAL
+      -
+      -
+
+See `Authentication Parameters for OCI Object Storage <https://www.oracle.com/
+pls/topic/lookup?ctx=dblatest&id=GUID-EB94F084-0F3F-47B5-AD77-D111070F7E8D>`__
+for more information.
+
+.. _exampleociobjstorage:
+
+Using node-oracledb and OCI Object Storage
+++++++++++++++++++++++++++++++++++++++++++
+
+Consider the following sample configuration information is defined in a JSON
+file which is stored in OCI Object Storage::
+
+    {
+        "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+                (host=adb.region.oraclecloud.com))(connect_data=(service_name=cdb_pdb1))
+                (security=(ssl_server_dn_match=yes)))",
+
+        "user": "scott",
+        "password": {
+            "type": "ocivault",
+            "value": "ocid1.vaultsecret.my-secret-id",
+        },
+        "node-oracledb": {
+            "stmtCacheSize": 30,
+            "prefetchRows": 2
+            "poolMin": 2
+            "poolMax": 10
+        }
+    }
+
+**Standalone Connections with OCI Object Storage**
+
+:ref:`Standalone connections <standaloneconnection>` can be created with the
+configuration information defined in the JSON file that is stored in OCI
+Object Storage. Using the connection string URL below, you can access the
+information defined in the :ref:`JSON file <exampleociobjstorage>` above.
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-ociobject://abc.oraclecloud.com/n/abcnamespace/b/abcbucket/o/abcobject?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
+    });
+
+    const result = await connection.execute(`SELECT 1 FROM dual`);
+    console.log(result.rows[0][0]);
+
+Substitute your own values in the connection string to access your OCI Object
+Storage service.
+
+Node-oracledb retrieves the necessary connection information from OCI Object
+Storage and uses the values defined in the JSON file to create a standalone
+connection to Oracle Database. For example, the values of the node-oracledb
+connection properties will be the values that were defined in the
+:ref:`sample JSON file <exampleociobjstorage>`:
+
+.. list-table-with-summary::
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 40 60
+    :name: _standalone_connection_properties_used_oci_object_storage
+    :summary: The first row displays the name of the node-oracledb connection property. The second row displays the value of the connection property.
+
+    * - node-oracledb Connection Property
+      - Value
+    * - ``connectString``
+      - "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.region.oraclecloud.com))(connect_data=(service_name=cdb1_pdb1)))"
+    * - ``user``
+      - "scott"
+    * - ``password``
+      - "manager" (value of secret in URI - for demo purposes)
+    * - ``stmtCacheSize``
+      - 30
+    * - ``prefetchRows``
+      - 2
+
+**Connection Pools with OCI Object Storage**
+
+:ref:`Connection pools <connpooling>` can be created with the configuration
+information defined in the JSON file stored in OCI Object Storage. Using the
+connection string URL below, you can access the information defined in the
+:ref:`JSON file <exampleociobjstorage>` above.
+
+.. code-block:: javascript
+
+    await oracledb.createPool({
+        connectString : "config-ociobject://abc.oraclecloud.com/n/abcnamespace/b/abcbucket/o/abcobject?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
+    });
+
+    const connection = await oracledb.getConnection();
+    const result = await connection.execute(`SELECT 1 FROM dual`);
+    console.log(result.rows[0][0]);
+
+Substitute your own values in the connection string to access your OCI Object
+Storage service.
+
+Node-oracledb retrieves the necessary connection information from OCI Object
+Storage and uses the values defined in the JSON file to create a connection
+pool to Oracle Database. For example, the values of the node-oracledb
+connection properties will be the values that were defined in the
+:ref:`sample JSON file <exampleociobjstorage>`:
+
+.. list-table-with-summary::
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 40 60
+    :name: _connection_pool_properties_used_oci_object_storage
+    :summary: The first row displays the name of the node-oracledb connection property. The second row displays the value of the connection property.
+
+    * - node-oracledb Connection Property
+      - Value
+    * - ``connectString``
+      - "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.region.oraclecloud.com))(connect_data=(service_name=cdb1_pdb1)))"
+    * - ``user``
+      - "scott"
+    * - ``password``
+      - "manager" (value of secret in URI - for demo purposes)
+    * - ``stmtCacheSize``
+      - 30
+    * - ``prefetchRows``
+      - 2
+    * - ``poolMin``
+      - 2
+    * - ``poolMax``
+      - 10
+
+
+**Precedence of Properties**
+
+If you have defined the values of ``user`` and ``password`` in both the
+application and OCI Object Storage, then the values defined in the application
+will have the higher precedence.
+
+If you are using Thin mode and have defined the node-oracledb specific
+properties in both the application and in OCI Object Storage, then the values
+defined in the configuration provider will have the higher precedence.
+
+If you are using Thick mode and have defined these node-oracledb properties in
+an ``oraaccess.xml`` file, OCI Object Storage, and the application, then the order
+precedence from highest to lowest will be as follows:
+
+- ``oraaccess.xml`` file
+- OCI Object Storage
+- Application
+
 .. _sharding:
 
 Connecting to Sharded Databases

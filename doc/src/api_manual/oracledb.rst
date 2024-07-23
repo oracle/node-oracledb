@@ -36,18 +36,8 @@ Query ``outFormat`` Constants
 
 Constants for the query result :attr:`~oracledb.outFormat` option:
 
-.. list-table-with-summary::  Query outFormat Constants
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the query outformat
-     constant. The second column displays the value of the constant. The
-     third column displays the description of the constant.
+.. constants-table::  Query outFormat Constants
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.OUT_FORMAT_ARRAY``
       - 4001
       - Fetch each row as array of column values.
@@ -89,7 +79,8 @@ instead of ``result.metadata[0].fetchType == 2001``.
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
-    :widths: 10 10 30
+    :widths: 40 15 45
+    :width: 100%
     :summary: The first column displays the name of the Oracle Database type object. The second column displays the value of the database type object. The third column displays the database data type.
 
     * - DbType Object
@@ -204,7 +195,7 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
-    :widths: 10 10 10 30
+    :widths: 15 10 20 15
     :summary: The first column displays the name of the node-oracledb Type
      constant. The second column displays the value of the constant. The
      third column displays the DB_TYPE equivalent of the constant.
@@ -268,18 +259,8 @@ Constants for the ``dir`` property of ``execute()``
 These specify whether data values bound to SQL or PL/SQL bind parameters
 are passed into, or out from, the database:
 
-.. list-table-with-summary::  Execute Bind Direction Constants
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the Execute Bind Direction
-     constant. The second column displays the value of the constant. The
-     third column displays the description of the constant.
+.. constants-table::  Execute Bind Direction Constants
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.BIND_IN``
       - 3001
       - Direction for IN binds.
@@ -301,18 +282,8 @@ Constants for :meth:`~oracledb.getConnection()`
 These specify what privilege should be used by the connection that is
 being established.
 
-.. list-table-with-summary::  Privileged Connection Constants
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the Privileged
-     Connection constant. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Privileged Connection Constants
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SYSASM``
       - 32768
       - SYSASM privileges
@@ -347,18 +318,8 @@ SQL Statement Type Constants
 
 Constants for :meth:`connection.getStatementInfo()` properties.
 
-.. list-table-with-summary::  SQL Statement Type Constants
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the SQL Statement Type
-     constant. The second column displays the value of the constant. The
-     third column displays the description of the constant.
+.. constants-table::  SQL Statement Type Constants
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.STMT_TYPE_ALTER``
       - 7
       - ALTER
@@ -413,18 +374,8 @@ Subscription Constants
 Constants for the Continuous Query Notification (CQN)
 :ref:`message.type <consubscribeoptcallback>`.
 
-.. list-table-with-summary::  Subscription Constants for the CQN ``message.type`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     message.type property. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Subscription Constants for the CQN ``message.type`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SUBSCR_EVENT_TYPE_AQ``
       - 100
       - Advanced Queuing notifications are being used.
@@ -449,18 +400,8 @@ Constants for the Continuous Query Notification (CQN)
 
 Constant for the CQN :ref:`groupingClass <consubscribeoptgroupingclass>`.
 
-.. list-table-with-summary::  Subscription Constant for the CQN ``groupingClass`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     groupingClass property. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Subscription Constant for the CQN ``groupingClass`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SUBSCR_GROUPING_CLASS_TIME``
       - 1
       - Group notifications by time into a single notification
@@ -468,18 +409,8 @@ Constant for the CQN :ref:`groupingClass <consubscribeoptgroupingclass>`.
 
 Constants for the CQN :ref:`groupingType <consubscribeoptgroupingtype>`.
 
-.. list-table-with-summary::  Subscription Constants for the CQN ``groupingType`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     groupingType property. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Subscription Constants for the CQN ``groupingType`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SUBSCR_GROUPING_TYPE_LAST``
       - 2
       - The last notification in the group is sent.
@@ -489,18 +420,8 @@ Constants for the CQN :ref:`groupingType <consubscribeoptgroupingtype>`.
 
 Constants for the CQN :ref:`qos <consubscribeoptqos>` Quality of Service.
 
-.. list-table-with-summary::  Subscription Constants for the CQN ``qos`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the qos
-     property. The second column displays the value of the constant. The
-     third column displays the description of the constant.
+.. constants-table::  Subscription Constants for the CQN ``qos`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SUBSCR_QOS_BEST_EFFORT``
       - 16
       - When best effort filtering for query result set changes is acceptable. False positive notifications may be received. This behavior may be suitable for caching applications.
@@ -519,18 +440,8 @@ Constants for the CQN :ref:`qos <consubscribeoptqos>` Quality of Service.
 
 Constants for the CQN :ref:`namespace <consubscribeoptnamespace>`.
 
-.. list-table-with-summary::  Subscription Constants for the CQN ``namespace`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     namespace property. The second column displays the value of the constant.
-     The third column displays the description of the constant.
+.. constants-table::  Subscription Constants for the CQN ``namespace`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SUBSCR_NAMESPACE_AQ``
       - 1
       - For Advanced Queuing notifications.
@@ -549,18 +460,8 @@ for more details about attributes.
 
 Constants for :ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``mode``.
 
-.. list-table-with-summary::  Constants for the AqDeqOptions Class ``mode`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     mode property. The second column displays the value of the constant.
-     The third column displays the description of the constant.
+.. constants-table::  Constants for the AqDeqOptions Class ``mode`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.AQ_DEQ_MODE_BROWSE``
       - 1
       - Read a message without acquiring a lock.
@@ -577,18 +478,8 @@ Constants for :ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``mode``.
 Constants for :ref:`AqDeqOptions Class <aqdeqoptionsclass>`
 ``navigation``.
 
-.. list-table-with-summary::  Constants for the AqDeqOptions Class ``navigation`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     navigation property. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Constants for the AqDeqOptions Class ``navigation`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.AQ_DEQ_NAV_FIRST_MSG``
       - 1
       - Get the message at the head of queue.
@@ -601,18 +492,8 @@ Constants for :ref:`AqDeqOptions Class <aqdeqoptionsclass>`
 
 Constants for :ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``wait``.
 
-.. list-table-with-summary::  Constants for the AqDeqOptions Class ``wait`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the wait
-     property. The second column displays the value of the constant. The
-     third column displays the description of the constant.
+.. constants-table::  Constants for the AqDeqOptions Class ``wait`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.AQ_DEQ_NO_WAIT``
       - 0
       - Do not wait if no message is available.
@@ -623,18 +504,8 @@ Constants for :ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``wait``.
 Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>`
 ``deliveryMode``.
 
-.. list-table-with-summary::  Constants for the AqDeqOptions Class ``deliveryMode`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     deliveryMode property. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Constants for the AqDeqOptions Class ``deliveryMode`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.AQ_MSG_DELIV_MODE_PERSISTENT``
       - 1
       - Messages are persistent.
@@ -647,18 +518,8 @@ Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>`
 
 Constants for :ref:`AqMessage Class <aqmessageclass>` ``state``.
 
-.. list-table-with-summary::  Constants for the AqMessage Class ``state`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     state property. The second column displays the value of the constant.
-     The third column displays the description of the constant.
+.. constants-table::  Constants for the AqMessage Class ``state`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.AQ_MSG_STATE_READY``
       - 0
       - Consumers can dequeue messages that are in the READY state.
@@ -675,18 +536,8 @@ Constants for :ref:`AqMessage Class <aqmessageclass>` ``state``.
 Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>` and
 :ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``visibility``.
 
-.. list-table-with-summary::  Constants for the AqEnqOptions Class and AqDeqOptions Class ``visibility`` Property
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     visibility property. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Constants for the AqEnqOptions Class and AqDeqOptions Class ``visibility`` Property
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.AQ_VISIBILITY_IMMEDIATE``
       - 1
       - The message is not part of the current transaction. It constitutes a transaction on its own.
@@ -707,19 +558,9 @@ the :meth:`connection.subscribe()` method:
 - :ref:`operation <consubscribeoptcallback>` property in the
   :ref:`message <messageparam>` parameter
 
-.. list-table-with-summary::  Constants for the connection.subscribe() option
+.. constants-table::  Constants for the connection.subscribe() option
      ``operations`` and notification message ``operation`` Properties.
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     operations property. The second column displays the value of the
-     constant. The third column displays the description of the constant.
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.CQN_OPCODE_ALL_OPS``
       - 0
       - Default. Used to request notification of all operations.
@@ -749,18 +590,8 @@ Pool Status Constants
 
 Constants for the connection :attr:`pool.status` read-only attribute.
 
-.. list-table-with-summary::  Constants for the connection ``pool.status`` Attribute
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the constant for the
-     pool.status attribute. The second column displays the value of the
-     constant. The third column displays the description of the constant.
+.. constants-table::  Constants for the connection ``pool.status`` Attribute
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.POOL_STATUS_CLOSED``
       - 6002
       - The connection pool has been closed.
@@ -779,18 +610,8 @@ Constants for the connection :attr:`pool.status` read-only attribute.
 Simple Oracle Document Access (SODA) Constants
 ----------------------------------------------
 
-.. list-table-with-summary::  SODA Constant
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the SODA constant. The
-     second column displays the value of the constant. The third column
-     displays the description of the constant.
+.. constants-table::  SODA Constant
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SODA_COLL_MAP_MODE``
       - 5001
       - Indicate :meth:`sodaDatabase.createCollection()` should use an externally created table to store the collection.
@@ -805,18 +626,8 @@ Constants for shutting down the Oracle Database with
 
 .. versionadded:: 5.0
 
-.. list-table-with-summary::  Database Shutdown Constants
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the database shutdown
-     constant. The second column displays the value of the constant. The
-     third column displays the description of the constant.
+.. constants-table::  Database Shutdown Constants
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.SHUTDOWN_MODE_ABORT``
       - 4
       - All uncommitted transactions are terminated and not rolled back. This is the fastest way to shut down the database, but the next database start up may require instance recovery.
@@ -845,18 +656,8 @@ Two-Phase Commit Constants
 Constants for two-phase commit (TPC) functions
 :meth:`connection.tpcBegin()` and :meth:`connection.tpcEnd()`.
 
-.. list-table-with-summary::  Two-Phase Commit Constants
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the two-phase commit
-     constant name. The second column displays the value of the constant.
-     The third column displays the description of the constant.
+.. constants-table::  Two-Phase Commit Constants
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.TPC_BEGIN_JOIN``
       - 2
       - Join an existing two-phase commit (TPC) transaction.
@@ -883,18 +684,8 @@ Vector Type Constants
 
 Constants for the :ref:`vectorFormat <execmetadata>` attribute.
 
-.. list-table-with-summary::  Vector Type Constants
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the name of the vector type constant
-     name. The second column displays the value of the constant. The third
-     column displays the description of the constant.
+.. constants-table::  Vector Type Constants
 
-    * - Constant Name
-      - Value
-      - Description
     * - ``oracledb.VECTOR_FORMAT_FLOAT32``
       - 2
       - The storage format of each dimension value in the VECTOR column is a 32-bit floating-point number.
@@ -2034,7 +1825,7 @@ Oracledb Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 5 7 12 22
+        :widths: 13 7 12 18
         :summary: The first column, Property, displays the property. The second column, Type, displays the data type of the property. The third column, Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
 
         * - Property
@@ -2608,7 +2399,8 @@ Oracledb Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 55
+        :widths: 20 80
+        :width: 100%
         :summary: The first column displays the attribute. The second column
          displays the description of the attribute.
 
@@ -2769,7 +2561,7 @@ Oracledb Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 5 7 12 22
+        :widths: 12 7 12 19
         :summary: The first column, Property, displays the property. The second column, Type, displays the data type of the property. The third column, Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
 
         * - Property
@@ -3189,7 +2981,8 @@ Oracledb Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 55
+        :widths: 20 80
+        :width: 100%
         :summary: The first column displays the attribute. The second column
          displays the description of the attribute.
 

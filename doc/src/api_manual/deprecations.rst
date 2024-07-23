@@ -15,7 +15,7 @@ desupported features are listed first.
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
-    :widths: 10 25 20
+    :widths: 20 20 15
     :width: 100%
     :summary: The first column displays the deprecated API method, property, or constant. The second column displays the node-oracledb version in which the API method, property, or constant was deprecated or desupported. The third column displays the API property, method, or constant to use instead, if applicable.
 

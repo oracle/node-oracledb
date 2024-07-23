@@ -54,3 +54,9 @@ li div.highlight-default.notranslate, li div.highlight-shell.notranslate, li div
     font-size: 11pt;
     font-weight: bold;
 }
+
+/* Added code to override the default content width in ReadtheDocs and break long words */
+.wy-nav-content {
+    max-width: none;
+    word-break: break-word;
+}

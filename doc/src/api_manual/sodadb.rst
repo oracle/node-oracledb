@@ -337,6 +337,7 @@ SodaDatabase Methods
         :class: wy-table-responsive
         :align: center
         :widths: 10 10 40
+        :width: 100%
         :summary: The first column displays the parameter. The second column
          displays the data type of the parameter. The third column displays
          the description of the parameter.

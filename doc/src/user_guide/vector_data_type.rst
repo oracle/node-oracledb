@@ -215,7 +215,12 @@ BINARY format to define vectors. The BINARY format represents each dimension
 value as a binary value (0 or 1). Binary vectors require less memory storage.
 For example, a 16 dimensional vector with BINARY format requires only 2 bytes of
 storage while a 16 dimensional vector with INT8 format requires 16 bytes of
-storage. The BINARY vector support was introduced in node-oracledb 6.6.
+storage.
+
+Binary vectors require the database initialization parameter `COMPATIBLE
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A2E90F08-BC9F-
+4688-A9D0-4A948DD3F7A9>`__ to be set to 23.5.0.0.0 or greater on Oracle
+Database. The BINARY vector support was introduced in node-oracledb 6.6.
 
 Binary vectors are represented as 8-bit unsigned integers. For the BINARY
 format, you must define the number of dimensions as a multiple of 8. To create

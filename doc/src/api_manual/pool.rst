@@ -668,7 +668,8 @@ Pool Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 55
+        :widths: 15 35
+        :width: 100%
         :summary: The first column displays the name of the attribute. The
           second column displays the description of the attribute.
 

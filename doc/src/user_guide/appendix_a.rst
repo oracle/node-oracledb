@@ -284,7 +284,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database 21c JSON data type (see :ref:`json21ctype`)
       - Yes
       - Yes
-    * - Oracle Database 23ai JSON duality view
+    * - Oracle Database 23ai JSON-Relational Duality Views (see :ref:`jsondualityviews`)
       - Yes
       - Yes
     * - Oracle Database 23ai BOOLEAN data type (see :ref:`oracledbconstantsdbtype`)
