@@ -122,7 +122,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
       await testBigUROWID_update(null, 200, 200);
     });
 
-    it('115.2.2 update enpty string with urowid length > 500', async function() {
+    it('115.2.2 update empty string with urowid length > 500', async function() {
 
       await testBigUROWID_update("", 600, 500);
     });
@@ -344,6 +344,7 @@ describe('115. urowidDMLBindAsString2.js', function() {
       }
     }
     if (urowidLen <= 4000) {
+      console.log(result);
       assert.strictEqual(result.rowsAffected, 1);
     }
 

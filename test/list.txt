@@ -3092,7 +3092,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         115.1.3 works with maxSize < 200
     115.2 UPDATE
         115.2.1 update null with urowid length > 200
-        115.2.2 update enpty string with urowid length > 500
+        115.2.2 update empty string with urowid length > 500
         115.2.3 update with urowid length > 500
         115.2.4 works with maxSize < 200
     115.3 RETURNING INTO
@@ -5894,3 +5894,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
   304. plsqlRowtype.js
     304.1 %ROWTYPE
     304.2 %ROWTYPE collection
+
+  305. dataTypeVector5.js
+    305.1 tests with vector distance
+      305.1.1 SELECT query with standard vector distance
+      305.1.2 SELECT query with EUCLIDEAN vector distance
+      305.1.3 SELECT query with MANHATTAN vector distance
+      305.1.4 SELECT query with COSINE vector distance
+      305.1.5 SELECT query with DOT vector distance
+      305.1.6 SELECT query with HAMMING vector distance
+      305.1.7 SELECT query with EUCLIDEAN_SQUARED vector distance
+      305.1.8 Synonym test for vector distance
+      305.1.9 Negative test

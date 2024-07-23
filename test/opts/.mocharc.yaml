@@ -287,3 +287,4 @@ spec:
   - test/aq10.js
   - test/aq11.js
   - test/plsqlRowtype.js
+  - test/dataTypeVector5.js

@@ -84,13 +84,15 @@ describe('259. tpc.js', function() {
       conn = await oracledb.getConnection(dbConfig);
       await conn.execute(sql);
 
-      const dbaCredential = {
-        user: dbConfig.test.DBA_user,
-        password: dbConfig.test.DBA_password,
-        connectString: dbConfig.connectString,
-        privilege: oracledb.SYSDBA,
-      };
-      dbaConn = await oracledb.getConnection(dbaCredential);
+      if (dbConfig.test.DBA_PRIVILEGE) {
+        const dbaCredential = {
+          user: dbConfig.test.DBA_user,
+          password: dbConfig.test.DBA_password,
+          connectString: dbConfig.connectString,
+          privilege: oracledb.SYSDBA,
+        };
+        dbaConn = await oracledb.getConnection(dbaCredential);
+      }
     });
 
     after(async function() {
