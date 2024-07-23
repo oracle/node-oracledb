@@ -611,8 +611,8 @@ Connection Methods
     LOBs created with ``createLob()`` can be bound for IN, IN OUT and OUT
     binds.
 
-    See :ref:`Working with CLOB, NCLOB and BLOB Data <lobhandling>` and :ref:`LOB
-    Bind Parameters <lobbinds>` for more information.
+    See :ref:`Working with CLOB, NCLOB, BLOB and BFILE Data <lobhandling>` and
+    :ref:`LOB Bind Parameters <lobbinds>` for more information.
 
     The parameters of the ``connection.createLob()`` method are:
 
@@ -632,7 +632,7 @@ Connection Methods
           - Description
         * - ``type``
           - Number
-          - One of the constants :ref:`oracledb.CLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.BLOB <oracledbconstantsnodbtype>`, or :ref:`oracledb.NCLOB <oracledbconstantsnodbtype>` (or equivalent ``DB_TYPE_*`` constants).
+          - One of the constants :ref:`oracledb.CLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.BLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.NCLOB <oracledbconstantsnodbtype>`, or :ref:`oracledb.BFILE <oracledbconstantsnodbtype>` (or equivalent ``DB_TYPE_*`` constants).
 
     **Callback**:
 

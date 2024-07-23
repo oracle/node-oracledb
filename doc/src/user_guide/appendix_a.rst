@@ -156,7 +156,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - No
       - Yes
     * - SQL execution (see :ref:`sqlexecution`)
-      - Yes - Bind and fetch all types except BFILE
+      - Yes
       - Yes
     * - PL/SQL execution (see :ref:`plsqlexecution`)
       - Yes - For scalar types and collection types using array interface
@@ -297,8 +297,8 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - Yes
       - Yes - May need to fetch as CLOB
     * - BFILE data type
-      - No
-      - No
+      - Yes
+      - Yes
     * - TIMESTAMP WITH TIME ZONE data type (see :ref:`oracledbconstantsdbtype`)
       - Yes
       - Yes
@@ -734,7 +734,7 @@ when binding numeric values.
       - Yes
     * - BFILE
       - DB_TYPE_BFILE
-      - No
+      - Yes
     * - BLOB
       - DB_TYPE_BLOB
       - Yes

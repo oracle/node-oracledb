@@ -214,6 +214,10 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
       - Value
       - ``DbType`` Object Equivalent
       - Notes
+    * - ``oracledb.BFILE``
+      - 2020
+      - ``oracledb.DB_TYPE_BFILE``
+      -
     * - ``oracledb.BLOB``
       - 2019
       - ``oracledb.DB_TYPE_BLOB``
@@ -874,6 +878,7 @@ Constants for two-phase commit (TPC) functions
 
 Vector Type Constants
 ---------------------
+
 .. versionadded:: 6.5
 
 Constants for the :ref:`vectorFormat <execmetadata>` attribute.
@@ -899,6 +904,13 @@ Constants for the :ref:`vectorFormat <execmetadata>` attribute.
     * - ``oracledb.VECTOR_FORMAT_INT8``
       - 4
       - The storage format of each dimension value in the VECTOR column is an 8-bit signed integer.
+    * - ``oracledb.VECTOR_FORMAT_BINARY``
+      - 5
+      - The storage format of each dimension value in the VECTOR column is represented as a single bit. All the dimensions for the vector are stored as an array of 8-bit unsigned integers.
+
+.. versionchanged:: 6.6
+
+    The ``oracledb.VECTOR_FORMAT_BINARY`` constant was added.
 
 .. _oracledbproperties:
 

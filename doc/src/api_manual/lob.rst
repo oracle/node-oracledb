@@ -155,6 +155,46 @@ Lob Methods
         * - Error ``error``
           - This optional parameter is used for the error emitted in an ``error`` event.
 
+.. method:: lob.fileExists()
+
+    .. versionadded:: 6.6
+
+    **Promise**::
+
+        promise = fileExists();
+
+    Returns a boolean which indicates whether the file specified by the LOB
+    exists in the directory alias or not. This method returns *true* if the
+    file exists in the directory and *false* if it does not. If the directory
+    that this method is trying to access does not exist, then this method
+    returns an error. This method can only be used if the LOB type is BFILE.
+    For all other LOB types, this method returns the ``NJS-156: operation is
+    only supported on BFILE LOBs`` error.
+
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        fileExists(function(Error error, Boolean val));
+
+    The parameters of the callback function
+    ``function(Error error, Boolean val)`` are:
+
+    .. list-table-with-summary::
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 15 30
+        :summary: The first column displays the callback function parameter.
+          The second column displays the description of the parameter.
+
+        * - Callback Function Parameter
+          - Description
+        * - Error ``error``
+          - If ``fileExists()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+        * - Boolean ``val``
+          - Indicates whether the file exists in the directory. This parameter will be *true* if the file exists in the directory and *false* if it does not.
+
 .. method:: lob.getData()
 
     .. versionadded:: 4.0
@@ -241,3 +281,49 @@ Lob Methods
           - If ``getData()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - String ``data`` or Buffer ``data``
           - The value of the LOB.
+
+.. method:: lob.getDirFileName()
+
+    .. versionadded:: 6.6
+
+    .. code-block:: javascript
+
+        getDirFileName();
+
+    This synchronous method returns an object containing the directory alias
+    and file name of the LOB object. This method can only be used if the LOB
+    type is BFILE. For all other LOB types, this method returns the
+    ``NJS-156: operation is only supported on BFILE LOBs`` error.
+
+.. method:: lob.setDirFileName()
+
+    .. versionadded:: 6.6
+
+    .. code-block:: javascript
+
+        setDirFileName(Object dirFileName);
+
+    This synchronous method sets the directory alias and file name of the LOB.
+    This method can only be used if the LOB type is BFILE. For all other LOB
+    types, this method returns the ``NJS-156: operation is only supported on
+    BFILE LOBs`` error.
+
+    .. note::
+
+        This method can only be used in node-oracledb Thin mode.
+
+    The parameters of the ``lob.setDirFileName()`` method are:
+
+    .. list-table-with-summary:: lob.setDirFileName() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``dirFileName``
+          - Object
+          - This parameter contains the directory alias and file name of the BFILE type LOB.

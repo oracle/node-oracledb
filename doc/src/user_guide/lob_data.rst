@@ -1,16 +1,26 @@
 .. _lobhandling:
 
-*******************************
-Using CLOB, NCLOB and BLOB Data
-*******************************
+***************************************
+Using CLOB, NCLOB, BLOB, and BFILE Data
+***************************************
 
 Oracle Database uses LOB data types to store long objects. The CLOB type
 is used for character data and the BLOB type is used for binary data.
 NCLOB can hold character data in the database’s alternative `national
 character set <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
--AA8D783D-7337-4A61-BD7D-5DB580C46D9A>`__.
-In node-oracledb, LOBs can be represented by instances of the
-:ref:`Lob <lobclass>` class or as Strings and Buffers.
+-AA8D783D-7337-4A61-BD7D-5DB580C46D9A>`__. The `BFILE <https://www.oracle.com/
+pls/topic/lookup?ctx=dblatest&id=GUID-D4642C92-F343-4700-9F1F-486F82249FB8>`__
+type is used for referencing a file stored on the server operating system
+where Oracle Database is running, outside the database tablespace. The BFILE
+LOB type was introduced in node-oracledb 6.6.
+
+node-oracledb uses :ref:`oracledb.CLOB <oracledbconstantsdbtype>`,
+:ref:`oracledb.BLOB <oracledbconstantsdbtype>`,
+:ref:`oracledb.NCLOB <oracledbconstantsdbtype>`, and
+:ref:`oracledb.BFILE <oracledbconstantsdbtype>` to represent CLOB, BLOB,
+NCLOB, and BFILE data types respectively. In node-oracledb, LOBs can be
+represented by instances of the :ref:`Lob <lobclass>` class or as Strings and
+Buffers.
 
 There are runnable LOB examples in the GitHub
 `examples <https://github.com/oracle/node-oracledb/tree/main/examples>`__
@@ -24,6 +34,11 @@ Simple Insertion of LOBs
 Node.js String or Buffer types can be passed into PL/SQL blocks or
 inserted into the database by binding to LOB columns or PL/SQL
 parameters.
+
+.. _insertclobblob:
+
+Inserting CLOBs and BLOBs
+-------------------------
 
 Given the table:
 
@@ -99,13 +114,105 @@ Node.js or node-oracledb, it will need to be streamed to a
 :ref:`Lob <lobclass>`, as discussed in :ref:`Streaming
 Lobs <streamsandlobs>`.
 
+See :ref:`fetchinglob` for information on how to fetch CLOBs, BLOBs, and NCLOBs.
+
+.. _insertbfile:
+
+Inserting BFILEs
+----------------
+
+The data of `BFILE <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+GUID-D4642C92-F343-4700-9F1F-486F82249FB8>`__ type LOB is stored as files in a
+directory in the Oracle Database server. The column of type BFILE stores a
+reference to the file stored in the Oracle Database server file system.
+The BFILE column data cannot be updated from within your application since
+Oracle Database allows read-only access to the data stored in BFILE columns.
+
+Before using the BFILE data type, ensure that you have created a directory in
+the database server file system to store the file. Each BFILE object is
+associated with:
+
+- A DIRECTORY object which is an alias for the directory on the database
+  server file system that stores the file with BFILE data. For example, if
+  your server is running on a Linux machine, you can create a DIRECTORY object
+  by using:
+
+  .. code-block:: sql
+
+        CREATE OR REPLACE DIRECTORY MYBFILEDIR AS '/tmp/my-bfile-dir'
+
+  ``MYBFILEDIR`` is the directory alias.
+  ``/tmp/my-bfile-dir`` is the physical operating system directory in the
+  database server file system. It is a string containing the full path name of
+  the directory and follows the operating system rules.
+
+  This directory and alias are used in subsequent examples.
+- The file name of the physical file which is stored in the directory in the
+  database server file system. For example, ``MYBFILE.JPG``. The file in this
+  directory can be copied using operating system commands such as ``cp`` or
+  ``COPY``. This file name is used in subsequent examples.
+
+Ensure that you have the required access permissions to the directory. For
+Windows platform, ensure that you have set the Access Control Lists (ACL) or
+Discretionary Access Control List (DACL) correctly to access the file.
+
+The following table will be used in the subsequent examples to demonstrate
+using ``BFILE`` data with node-oracledb:
+
+.. code-block:: sql
+
+    CREATE TABLE bfile_table(
+        id NUMBER,
+        bfilecol BFILE
+    );
+
+To insert data of BFILE data type:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `INSERT INTO bfile_table VALUES (:id, BFILENAME(:BFILEDIR, :BFILENAME))`,
+        [101, "MYBFILEDIR", "MYBFILE.JPG"]);
+
+This example inserts a row in ``bfile_table`` with BFILE properties,
+directory alias ``MYBFILEDIR`` and file name ``MYBFILE.JPG``.
+
+Note that the content in the BFILE column cannot be updated. You can only
+update the properties such as directory alias and the file name. Once updated,
+the LOB object references the new file name specified. To update the file name
+to ``NEWBFILE.JPG``, you can use:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `UPDATE bfile_table SET bfilecol = BFILENAME("MYBFILEDIR", "NEWBFILE.JPG") WHERE id = :ID`,
+        [101]);
+
+In node-oracledb Thin mode, you can set the directory alias and file name
+using :meth:`lob.setDirFileName()`. For example:
+
+.. code-block:: javascript
+
+    const result = await conn.execute(`
+        SELECT bfilecol FROM bfile_table WHERE id = :id`, [101]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    lob.setDirFileName({dirName: "NEWALIASNAME", fileName: "NEWBFILENAME"});
+
+This will update the directory alias to ``NEWALIASNAME`` and file name to
+``NEWBFILENAME``.
+
+See :ref:`fetchbfile` for information on how to query a BFILE column.
+
 .. _queryinglobs:
 
 Simple LOB Queries and PL/SQL OUT Binds
 =======================================
 
-Querying LOBs
--------------
+.. _fetchinglob:
+
+Fetching CLOBs, BLOBs, and NCLOBs
+---------------------------------
 
 LOBs queried from the database that are shorter than 1 GB can be
 returned as Strings or Buffers by using
@@ -218,6 +325,48 @@ in Node.js or node-oracledb, it will need to be explicitly streamed to a
 :ref:`Lob <lobclass>`, as discussed in :ref:`Streaming
 Lobs <streamsandlobs>`. See :ref:`LOB Bind Parameters <lobbinds>` for
 size considerations regarding LOB binds.
+
+.. _fetchbfile:
+
+Fetching BFILEs
+---------------
+
+To query the BFILE column of ``bfile_table``, you can use:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+         `SELECT bfilecol FROM bfile_table WHERE id = :id`, [101]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    console.log("Directory Alias:", dirFile.dirName, "File Name:", dirFile.fileName);
+
+This prints the following output::
+
+    MYBFILEDIR, MYBFILE.JPG
+
+To query the metadata of a BFILE column, you can use:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(`SELECT bfilecol FROM bfile_table`);
+    console.log("Metadata:", result.metaData);
+
+This query prints the metadata for the ``bfilecol`` column and displays the
+dbType as ``DB_TYPE_BFILE``::
+
+    MetaData: [
+        {
+            name: 'BFILECOL',
+            dbType: [DbType DB_TYPE_BFILE],
+            nullable: false,
+            isJson: false,
+            isOson: false,
+            dbTypeName: 'BFILE',
+            fetchType: [DbType DB_TYPE_BFILE],
+            converter: [Function: converter]
+        },
+    ]
 
 .. _streamsandlobs:
 
