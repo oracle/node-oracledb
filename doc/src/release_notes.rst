@@ -13,6 +13,8 @@ node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...
 Common Changes
 ++++++++++++++
 
+#)  Added support for binary vector datatype (Oracle Database 23ai feature)
+
 #)  Added support for Centralized Configuration Providers (Azure App
     Configuration Store and OCI Object Storage). Node-oracledb extracts
     configuration information from the supported provider and uses it to

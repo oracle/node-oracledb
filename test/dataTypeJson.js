@@ -205,6 +205,7 @@ describe('244.dataTypeJson.js', function() {
         KeyBinary: new Uint8Array([240, 120]),
         keyBuf: Buffer.from("A Raw")
       };
+      const jsonVal22 = { "key22": [new Uint8Array([20, 10])]};
       const binds = [
         [1, jsonVal1],
         [2, jsonVal2],
@@ -234,6 +235,7 @@ describe('244.dataTypeJson.js', function() {
       }
       if (await testsUtil.isVectorBinaryRunnable()) {
         binds.push([21, jsonVal21]);
+        binds.push([22, jsonVal22]);
       }
       binds.forEach((element, index) => {
         binds[index].push(connection.encodeOSON(element[1]));
