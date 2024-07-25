@@ -334,8 +334,8 @@ describe('281. optimisticLock.js', function() {
     after(async function() {
       await testsUtil.dropTable(connection, 'employees');
       await testsUtil.dropTable(connection, 'departments');
-      await connection.execute(`DROP VIEW  emp_ov`);
-      await connection.execute(`DROP VIEW  dept_ov`);
+      await connection.execute(`DROP VIEW IF EXISTS emp_ov`);
+      await connection.execute(`DROP VIEW IF EXISTS dept_ov`);
       await connection.close();
     });
 

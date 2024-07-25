@@ -4,6 +4,37 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev65v66:
+
+Upgrading from node-oracledb 6.5 to 6.6
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- With the new :ref:`BINARY <binaryvectors>` vector format, the value
+  of each vector dimension can be represented as a single bit (0 or 1).
+
+- You can retrieve configuration information from two
+  :ref:`Centralized Configuration Providers <configurationprovider>`,
+  :ref:`Microsoft Azure App Configuration <azureappconfig>` and
+  :ref:`Oracle Cloud Infrastructure (OCI) Object Storage <ociobjstorage>`
+  and connect to Oracle Database.
+
+- You can use the new :ref:`oracledb.DB_TYPE_BFILE <oracledbconstantsdbtype>`
+  constant to represent Oracle Database 23ai data type
+  :ref:`BFILE <insertbfile>`.
+
+- In node-oracledb Thin mode, you can directly specify the security
+  credentials in the ``walletContent`` property of
+  :ref:`oracledb.createPool() <createpoolpoolattrswalletcontent>` and
+  :ref:`oracledb.getConnection() <getconnectiondbattrswalletcontent>`.
+
+- The support for ``IFILE`` parameter of :ref:`tnsnames.ora <tnsadmin>` file
+  allows you to embed custom network configuration files in node-oracledb Thin
+  mode.
+
+- You can now use :ref:`Two-Phase Commits <twopc>` in node-oracledb Thin mode.
+
 .. _upgradev64v65:
 
 Upgrading from node-oracledb 6.4 to 6.5

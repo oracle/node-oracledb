@@ -7,16 +7,18 @@ node-oracledb Release Notes
 
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
-node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...v6.6.0>`__ (TBD)
+node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...v6.6.0>`__ (25 Jul 2024)
 ---------------------------------------------------------------------------------------------------------
 
 Common Changes
 ++++++++++++++
 
-#)  Added support for binary vector datatype (Oracle Database 23ai feature)
+#)  Added support for Oracle Database 23ai
+    :ref:`BINARY vector format <binaryvectors>`.
 
-#)  Added support for Centralized Configuration Providers (Azure App
-    Configuration Store and OCI Object Storage). Node-oracledb extracts
+#)  Added support for
+    :ref:`Centralized Configuration Providers <configurationprovider>` (Azure
+    App Configuration Store and OCI Object Storage). Node-oracledb extracts
     configuration information from the supported provider and uses it to
     connect to the database.
 
@@ -27,9 +29,12 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for in-memory wallet by adding a new parameter
-    ``walletContent`` of type ``string`` that will allow users to pass the
-    wallet content directly instead of storing and reading it up from a file.
+#)  Added support for in-memory wallet by adding a new property
+    ``walletContent`` to
+    :ref:`oracledb.createPool() <createpoolpoolattrswalletcontent>`
+    and :ref:`oracledb.getConnection() <getconnectiondbattrswalletcontent>`
+    that will allow users to pass the wallet content directly instead of
+    storing and reading it up from a file.
     See `Issue #1671 <https://github.com/oracle/node-oracledb/issues/
     1671>`__.
 

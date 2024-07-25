@@ -39,10 +39,14 @@ const assist = require('./dataTypeAssist.js');
 
 describe('294. dataTypeVector1.js', function() {
   let connection = null, isRunnable = false, defaultFetchTypeHandler;
+  let isVectorBinaryRunnable = false;
 
   before('Get connection', async function() {
     isRunnable = await testsUtil.checkPrerequisites(2304000000, 2304000000);
     if (!isRunnable) this.skip();
+    if (await testsUtil.isVectorBinaryRunnable()) {
+      isVectorBinaryRunnable = true;
+    }
 
     defaultFetchTypeHandler = oracledb.fetchTypeHandler;
     connection = await oracledb.getConnection(dbConfig);
@@ -58,25 +62,43 @@ describe('294. dataTypeVector1.js', function() {
     const tableName = 'nodb_vectorDbTable';
 
     before('Create table', async function() {
-      const sql = `CREATE TABLE ${tableName} (
-        IntCol                  NUMBER(9) NOT NULL,
-        VectorCol               VECTOR,
-        VectorFixedCol          VECTOR(2),
-        Vector32Col             VECTOR(10, float32),
-        Vector64Col             VECTOR(10, float64),
-        VectorInt8Col           VECTOR(4, int8),
-        VectorBinaryCol         VECTOR(16, binary),
-        VectorFlexCol           VECTOR(*, *),
-        VectorFlex32Col         VECTOR(*, float32),
-        VectorFlex64Col         VECTOR(*, float64),
-        VectorFlex8Col          VECTOR(*, int8),
-        VectorFlexBinaryCol     VECTOR(*, binary)
-        )`;
+      let sql;
+      if (isVectorBinaryRunnable) {
+        sql = `CREATE TABLE ${tableName} (
+          IntCol                  NUMBER(9) NOT NULL,
+          VectorCol               VECTOR,
+          VectorFixedCol          VECTOR(2),
+          Vector32Col             VECTOR(10, float32),
+          Vector64Col             VECTOR(10, float64),
+          VectorInt8Col           VECTOR(4, int8),
+          VectorBinaryCol         VECTOR(16, binary),
+          VectorFlexCol           VECTOR(*, *),
+          VectorFlex32Col         VECTOR(*, float32),
+          VectorFlex64Col         VECTOR(*, float64),
+          VectorFlex8Col          VECTOR(*, int8),
+          VectorFlexBinaryCol     VECTOR(*, binary)
+          )`;
+      } else {
+        sql = `CREATE TABLE ${tableName} (
+          IntCol                  NUMBER(9) NOT NULL,
+          VectorCol               VECTOR,
+          VectorFixedCol          VECTOR(2),
+          Vector32Col             VECTOR(10, float32),
+          Vector64Col             VECTOR(10, float64),
+          VectorInt8Col           VECTOR(4, int8),
+          VectorFlexCol           VECTOR(*, *),
+          VectorFlex32Col         VECTOR(*, float32),
+          VectorFlex64Col         VECTOR(*, float64),
+          VectorFlex8Col          VECTOR(*, int8)
+          )`;
+      }
+
       const plsql = testsUtil.sqlCreateTable(tableName, sql);
       await connection.execute(plsql);
     });
 
     after('Release connection', async function() {
+      isVectorBinaryRunnable = false;
       await connection.execute(testsUtil.sqlDropTable(tableName));
     });
 
@@ -185,6 +207,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.4
 
     it('294.1.5 binding a binary vector type with various number typed arrays', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       const uInt8Arr1 = new Uint8Array([3, 4]);
       let binds = [
         { type: oracledb.DB_TYPE_VECTOR, val: uInt8Arr1 },
@@ -210,6 +234,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.5
 
     it('294.1.6 update binary vector type into table', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       const uInt8Arr1 = new Uint8Array([3, 4]);
       let binds = [
         { type: oracledb.DB_TYPE_VECTOR, val: uInt8Arr1 },
@@ -237,23 +263,25 @@ describe('294. dataTypeVector1.js', function() {
         `SELECT VECTOR('[34.6, 77.8]', 2, float32) FROM dual`,
         `SELECT VECTOR('[34.6, 77.8, -89.34]', 3, float32) FROM dual`,
         `SELECT TO_VECTOR('[34.6, 77.8]', 2, float32) FROM dual`,
-        `SELECT TO_VECTOR('[34.6, 77.8, -89.34]', 3, float32) FROM dual`,
-        `SELECT TO_VECTOR('[1]', 8, binary) FROM dual`
+        `SELECT TO_VECTOR('[34.6, 77.8, -89.34]', 3, float32) FROM dual`
       ];
+      if (isVectorBinaryRunnable)
+        statements.push(`SELECT TO_VECTOR('[1]', 8, binary) FROM dual`);
 
       /* eslint-disable no-loss-of-precision */
 
-      const expected_vectors = [
+      const expectedVectors = [
         [34.599998474121094, 77.80000305175781],
         [34.599998474121094, 77.80000305175781, -89.33999633789062],
         [34.599998474121094, 77.80000305175781],
-        [34.599998474121094, 77.80000305175781, -89.33999633789062],
-        [1]
+        [34.599998474121094, 77.80000305175781, -89.33999633789062]
       ];
+      if (isVectorBinaryRunnable)
+        expectedVectors.push([1]);
 
       for (let i = 0; i < statements.length; i++) {
         const result = await connection.execute(statements[i]);
-        assert.deepStrictEqual(result.rows[0][0], expected_vectors[i]);
+        assert.deepStrictEqual(result.rows[0][0], expectedVectors[i]);
       }
     }); // 294.1.7
 
@@ -354,6 +382,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.12
 
     it('294.1.13 insert a float32 vector into an Binary column (negative)', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // Create a Float32Array
       const float32Array = new Float32Array([-5, 4, -7, 6, 2, 3, 4, 5, 6, 7, 7, 10, 11, 12, 13, 16]);
 
@@ -434,6 +464,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.16
 
     it('294.1.17 insert a float32 typed array into an binary vector column', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // Create a Float32Array
       const float32Array = new Float32Array([-5, 4, -7, 6, 2, 3, 4, 5, 6, 7, 7, 10, 11, 12, 13, 16]);
 
@@ -526,6 +558,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.21
 
     it('294.1.22 insert a float64 typed array into an Binary vector column', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // Create a Float32Array
       const float64Array = new Float64Array([-5, 4, -7, 6, 2, 3, 4, 5, 6, 7, 7, 10, 11, 12, 13, 16]);
 
@@ -715,6 +749,7 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.30
 
     it('294.1.31 inserting vector binary with invalid values', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
 
       const sql = `INSERT INTO ${tableName} (IntCol, VectorBinaryCol)
         VALUES(2, :1)`;
@@ -1187,6 +1222,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.48
 
     it('294.1.49 dml returning vector binary type', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       const sql = `INSERT INTO ${tableName} (IntCol, VectorBinaryCol)
         VALUES(1, :value)
         RETURNING VectorBinaryCol INTO :vector_val`;
@@ -1253,6 +1290,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.51
 
     it('294.1.52 executeMany with positional args in vector binary flex column', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       const rows = [
         [1, [1, 2]],
         [2, [3, 4]],
@@ -1277,6 +1316,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.52
 
     it('294.1.53 handling of NULLs and default values for vector binary type', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // insert with default value
       await connection.execute(`
           INSERT INTO ${tableName} (IntCol) VALUES (1)
@@ -1305,6 +1346,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.53
 
     it('294.1.54 ORDER BY and GROUP BY with vector binary type as negative test', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       await assert.rejects(
         async () => await connection.execute(`SELECT VectorFlexBinaryCol, COUNT(*) as count
           FROM ${tableName}
@@ -1449,6 +1492,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.58
 
     it('294.1.59 typed arrays with strings', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // Create a Float32Array with strings
       const float32ArrayWithString = new Float32Array([1, 'invalid', 3, 4]);
 
@@ -1489,6 +1534,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.60
 
     it('294.1.61 typed arrays with boolean values', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // Create a uint8Arr with boolean values
       const uInt8Arr = new Uint8Array([true, false]);
       // Bind the uint8Arr using oracledb.DB_TYPE_VECTOR
@@ -1506,6 +1553,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.61
 
     it('294.1.62 typed arrays with undefined value in vector binary type column', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // Create a uint8Arr with undefined value
       const uInt8Arr = new Uint8Array([1, undefined]);
 
@@ -1524,6 +1573,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.1.62
 
     it('294.1.63 typed arrays with null values', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       // Create a Float32Array with null values
       const uInt8Arr = new Uint8Array([1, null]);
 
@@ -1806,7 +1857,9 @@ describe('294. dataTypeVector1.js', function() {
     it('294.2.3 fetching vector metadata', async function() {
       // Using the same table name as the previous test gives an error
       table = 'nodb_vectorDbTable2';
-      const sql = `CREATE TABLE IF NOT EXISTS ${table} (
+      let sql;
+      if (isVectorBinaryRunnable) {
+        sql = `CREATE TABLE IF NOT EXISTS ${table} (
           IntCol            NUMBER,
           VectorFixedCol    VECTOR(2),
           Vector32Col       VECTOR(10, float32),
@@ -1814,16 +1867,28 @@ describe('294. dataTypeVector1.js', function() {
           VectorInt8Col     VECTOR(4, int8),
           VectorBinaryCol   VECTOR(16, binary)
           )`;
+      } else {
+        sql = `CREATE TABLE IF NOT EXISTS ${table} (
+          IntCol            NUMBER,
+          VectorFixedCol    VECTOR(2),
+          Vector32Col       VECTOR(10, float32),
+          Vector64Col       VECTOR(10, float64),
+          VectorInt8Col     VECTOR(4, int8)
+          )`;
+      }
+
       const plsql = testsUtil.sqlCreateTable(table, sql);
       await connection.execute(plsql);
 
       const testValues = [
         { name: 'VectorFixedCol', dimensions: 2, format: undefined },
-        { name: 'VectorInt8Col', dimensions: 4, format: oracledb.VECTOR_FORMAT_INT8},
-        { name: 'Vector32Col', dimensions: 10, format: oracledb.VECTOR_FORMAT_FLOAT32},
-        { name: 'Vector64Col', dimensions: 10, format: oracledb.VECTOR_FORMAT_FLOAT64},
-        { name: 'VectorBinaryCol', dimensions: 16, format: oracledb.VECTOR_FORMAT_BINARY},
+        { name: 'VectorInt8Col', dimensions: 4, format: oracledb.VECTOR_FORMAT_INT8 },
+        { name: 'Vector32Col', dimensions: 10, format: oracledb.VECTOR_FORMAT_FLOAT32 },
+        { name: 'Vector64Col', dimensions: 10, format: oracledb.VECTOR_FORMAT_FLOAT64 },
       ];
+
+      if (isVectorBinaryRunnable)
+        testValues.push({ name: 'VectorBinaryCol', dimensions: 16, format: oracledb.VECTOR_FORMAT_BINARY });
 
       for (const { name, dimensions, format } of testValues) {
         const vectorData = name === 'VectorBinaryCol' ?
@@ -2016,6 +2081,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.2.10
 
     it('294.2.11 insert a uint8 vector with 65536 dimensions to flex binary column', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       table = 'nodb_vectorDbTable1';
       const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol         NUMBER,
@@ -2029,6 +2096,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.2.11
 
     it('294.2.12 insert a uint8 vector with max 65528 dimensions to flex binary column', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       const arr = Array(8191).fill(1);
       const vecUint8 = new Uint8Array(arr);
 
@@ -2054,6 +2123,8 @@ describe('294. dataTypeVector1.js', function() {
     }); // 294.2.12
 
     it('294.2.13 vector binary column with no multiple of eight dimensions', async function() {
+      if (!isVectorBinaryRunnable) this.skip();
+
       table = 'nodb_vectorDbTable1';
       const sql = `CREATE TABLE IF NOT EXISTS ${table} (
         IntCol         NUMBER,
