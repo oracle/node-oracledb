@@ -38,8 +38,8 @@ Thin Mode Changes
     See `Issue #1671 <https://github.com/oracle/node-oracledb/issues/
     1671>`__.
 
-#)  Added support to use ``IFILE`` parameter to embed custom
-    network configuration files in the :ref:`tnsnames.ora <tnsadmin>` file.
+#)  Added support to process :ref:`tnsnames.ora <tnsadmin>` files containing
+    ``IFILE`` directives.
 
 #)  Fixed bug which throws a ``TypeError: objType.attributes is not iterable``
     error when :ref:`DbObject Class <dbobjectclass>` instance contains an

@@ -29,9 +29,8 @@ Upgrading from node-oracledb 6.5 to 6.6
   :ref:`oracledb.createPool() <createpoolpoolattrswalletcontent>` and
   :ref:`oracledb.getConnection() <getconnectiondbattrswalletcontent>`.
 
-- The support for ``IFILE`` parameter of :ref:`tnsnames.ora <tnsadmin>` file
-  allows you to embed custom network configuration files in node-oracledb Thin
-  mode.
+- You can now process :ref:`tnsnames.ora <tnsadmin>` files containing ``IFILE``
+  directives.
 
 - You can now use :ref:`Two-Phase Commits <twopc>` in node-oracledb Thin mode.
 
