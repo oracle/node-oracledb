@@ -1,4 +1,6 @@
-# node-oracledb version 6.6.0
+# node-oracledb version 6.7.0-dev
+
++**This release is under development and information may be incomplete**
 
 The node-oracledb add-on for Node.js powers high performance Oracle Database
 applications.  Applications can be written in TypeScript, or directly in
