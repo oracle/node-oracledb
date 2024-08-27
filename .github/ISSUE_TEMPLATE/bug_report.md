@@ -6,6 +6,20 @@ labels: bug
 assignees: ''
 
 ---
+<!--
+
+Starting from node-oracledb 6.0 onwards, we have the 'Thin' and 'Thick' modes. 
+The Thin mode is written purely in JavaScript and does not require Oracle Client libraries to connect to Oracle Database. We have also made Thin mode as the default mode starting from node-oracledb 6.0. 
+The Thick mode requires Oracle Client libraries and works similar to node-oracledb 5.5 and earlier versions.
+
+Please see the following blogs to understand the  Thin and Thick modes in node-oracledb:
+
+[Node-oracledb 6.0](https://medium.com/oracledevs/usher-in-a-new-era-with-the-node-oracledb-6-0-pure-javascript-thin-driver-e10e2af693b2)
+
+[How do I choose between Thin and Thick modes](https://itnext.io/how-do-i-choose-between-thin-and-thick-modes-in-node-oracledb-6-0-c516d202a71f)
+
+-->
+
 
 <!--
 
