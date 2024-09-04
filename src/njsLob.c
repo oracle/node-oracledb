@@ -315,6 +315,9 @@ bool njsLob_new(njsModuleGlobals *globals, njsLobBuffer *buffer, napi_env env,
     lob->chunkSize = buffer->chunkSize;
     lob->pieceSize = buffer->chunkSize;
     lob->length = buffer->length;
+    if (lob->dataType == NJS_DATATYPE_BFILE) {
+        lob->dirtyLength = true;
+    }
 
     // store a reference to the calling object on the LOB
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *lobObj, "_parentObj",
@@ -336,10 +339,11 @@ bool njsLob_populateBuffer(njsBaton *baton, njsLobBuffer *buffer)
     if (buffer->dataType != DPI_ORACLE_TYPE_BFILE) {
         if (dpiLob_getChunkSize(buffer->handle, &buffer->chunkSize) < 0)
             return njsBaton_setErrorDPI(baton);
+
+        if (dpiLob_getSize(buffer->handle, &buffer->length) < 0)
+            return njsBaton_setErrorDPI(baton);
     }
 
-    if (dpiLob_getSize(buffer->handle, &buffer->length) < 0)
-        return njsBaton_setErrorDPI(baton);
     return true;
 }
 

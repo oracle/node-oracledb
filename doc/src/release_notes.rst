@@ -21,8 +21,11 @@ Thin Mode Changes
     See `Issue #1684 <https://github.com/oracle/node-oracledb/issues/
     1684>`__.
 
-Thick Mode Changes
-+++++++++++++++++++
+Thick Mode changes
+++++++++++++++++++
+
+#)  Fixed bug which throws ``ORA-22288`` error in certain scenarios when
+    querying ``BFILENAME()`` with outbinds.
 
 node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...v6.6.0>`__ (25 Jul 2024)
 ---------------------------------------------------------------------------------------------------------
