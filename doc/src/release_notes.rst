@@ -16,6 +16,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug that did not allow connection to Oracle Database 23ai instances
+    that have fast authentication disabled.
+
 #)  Fixed bug with statement cache which threw an `NJS-111` error when select
     SQL is run on CLOB columns fetched as string.
     See `Issue #1684 <https://github.com/oracle/node-oracledb/issues/
