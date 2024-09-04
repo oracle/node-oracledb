@@ -41,6 +41,7 @@ describe('275. jsonDualityView4.js', function() {
   let connection = null;
   let dbaConn = null;
   let isRunnable = false;
+  let isOracleDB_23_4;
 
   before(async function() {
     isRunnable = (!dbConfig.test.drcp);
@@ -50,6 +51,14 @@ describe('275. jsonDualityView4.js', function() {
     }
     if (!isRunnable || dbConfig.test.isCmanTdm) {
       this.skip();
+    }
+
+    // 23.4 requires the _id column for creating JSON Duality Views, which
+    // is not added in these tests. So check if the Oracle Database version
+    // is 23.4. This condition will be used for some tests to check, if the
+    // test should be skipped.
+    if (await testsUtil.getMajorDBVersion() === '23.4') {
+      isOracleDB_23_4 = true;
     }
 
     const dbaCredential = {
@@ -112,15 +121,17 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   it('275.1 Test create table, column defaults', async function() {
-    // Create table
-    await connection.execute(
-      `CREATE TABLE Persons (
-        ID int NOT NULL PRIMARY KEY,
-        LastName varchar(255) NOT NULL,
-        FirstName varchar(255),
-        City varchar(255) DEFAULT 'Mum'
-      )`
-    );
+    if (isOracleDB_23_4) this.skip();
+
+    // Create Persons table
+    const sqlCreateTable = `
+      CREATE TABLE Persons (
+      ID int NOT NULL PRIMARY KEY,
+      LastName varchar(255) NOT NULL,
+      FirstName varchar(255),
+      City varchar(255) DEFAULT ''Mum''
+    )`;
+    await connection.execute(testsUtil.sqlCreateTable('Persons', sqlCreateTable));
 
     // Insert data
     await connection.execute(
@@ -141,6 +152,8 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   it('275.2 Test with table and column constraints', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     // CREATE TABLE query
     const sqlCreateTable = `
       CREATE TABLE Persons (
@@ -191,7 +204,7 @@ describe('275. jsonDualityView4.js', function() {
         id NUMBER PRIMARY KEY,
         product VARCHAR2(50),
         price NUMBER(10,2),
-        price_with_tax NUMBER(10,2) GENERATED ALWAYS AS (round(price*1.2,2)) VIRTUAL
+        price_with_tax NUMBER(10,2) GENERATED ALWAYS AS (round(price*1.2, 2)) VIRTUAL
         )`;
     await connection.execute(testsUtil.sqlCreateTable('t1', sqlCreateTable));
 
@@ -210,7 +223,8 @@ describe('275. jsonDualityView4.js', function() {
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
       AS t1{id, product, price, price_with_tax}
     `),
-      /ORA-40945:/ // ORA-40945: Column 'PRICE_WITH_TAX' of table 'T1' cannot be selected in JSON
+      /ORA-40945:/
+      // ORA-40945: Column 'PRICE_WITH_TAX' of table 'T1' cannot be selected in JSON
       // relational duality view as it is virtual.
     );
 
@@ -219,6 +233,8 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   it('275.4 Test with Column storage clause', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     let sqlCreateTable = `
       CREATE TABLE divisions (
         div_no     NUMBER(2) PRIMARY KEY,
@@ -283,6 +299,8 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   it('275.5 Test with data dictionary', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     // create JSON relational duality view
     await connection.execute(`
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
@@ -328,6 +346,8 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   it('275.6 Test with dictionary views', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     // Query 1: select view_name,view_owner,ROOT_TABLE_NAME from DBA_JSON_DUALITY_VIEWS
     let result = await dbaConn.execute(`
       SELECT view_name, view_owner, ROOT_TABLE_NAME
@@ -356,6 +376,8 @@ describe('275. jsonDualityView4.js', function() {
   describe('275.7 Json Duality view with GraphQL', function() {
 
     it('275.7.1 Create View using GraphQL', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       // insert data into the student table
       await connection.execute(`
         INSERT INTO student VALUES (1, 'ABC')
@@ -490,7 +512,8 @@ describe('275. jsonDualityView4.js', function() {
 
     it('275.8.4 varray', async function() {
       await connection.execute(`CREATE OR REPLACE TYPE list_v IS VARRAY(2) OF VARCHAR2 (10)`);
-      await connection.execute(`CREATE TABLE varray_ov (id NUMBER(20) PRIMARY KEY,names list_v)`);
+      const sqlCreateTableVArray = `CREATE TABLE varray_ov (id NUMBER(20) PRIMARY KEY,names list_v)`;
+      await connection.execute(testsUtil.sqlCreateTable('varray_ov', sqlCreateTableVArray));
       await assert.rejects(
         async () => await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW
            student_ov AS varray_ov{id names}`),
@@ -502,6 +525,15 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   describe('275.9 Test with different types of indexes', function() {
+
+    before(function() {
+      if (isOracleDB_23_4) this.skip();
+    });
+
+    after(function() {
+      if (isOracleDB_23_4) return;
+    });
+
     it('275.9.1 Bitmap join index', async function() {
       // Create the 'emp' table
       const sqlCreateTableEmp = `CREATE TABLE emp(
@@ -544,6 +576,8 @@ describe('275. jsonDualityView4.js', function() {
     });
 
     it('275.9.2 Partitioned index', async function() {
+      await connection.execute(`DROP TABLE IF EXISTS sales`);
+
       // Create the 'sales' table with partitions
       await connection.execute(`CREATE TABLE sales
         (prod_id NUMBER(6) PRIMARY KEY
@@ -614,14 +648,25 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   describe('275.10 Tests with Attributes like COMPRESS, NOCOMPRESS, PARALLEL', function() {
+
+    before(function() {
+      if (isOracleDB_23_4) this.skip();
+    });
+
+    after(function() {
+      if (isOracleDB_23_4) return;
+    });
+
     it('275.10.1 COMPRESS', async function() {
 
       // Create table
-      await connection.execute(`
-      CREATE TABLE unq_idx_demo (
-        a NUMBER PRIMARY KEY,
-        b NUMBER
-      )`);
+      const sqlCreate = `
+        CREATE TABLE unq_idx_demo (
+          a NUMBER PRIMARY KEY,
+          b NUMBER
+        )
+      `;
+      await connection.execute(testsUtil.sqlCreateTable('unq_idx_demo', sqlCreate));
 
       // Create unique index
       await connection.execute(`
@@ -644,7 +689,7 @@ describe('275. jsonDualityView4.js', function() {
     });
 
     it('275.10.2 NOCOMPRESS', async function() {
-      await connection.execute(`DROP TABLE unq_idx_demo PURGE`);
+      await connection.execute(`DROP TABLE IF EXISTS unq_idx_demo PURGE`);
       // create table
       await connection.execute(
         `CREATE TABLE unq_idx_demo(
@@ -678,6 +723,7 @@ describe('275. jsonDualityView4.js', function() {
     });
 
     it('275.10.3 PARALLEL', async function() {
+      await connection.execute(`DROP TABLE IF EXISTS a`);
 
       await connection.execute(`
       CREATE TABLE a (
@@ -715,6 +761,15 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   describe('275.11 Tests with Views', function() {
+
+    before(function() {
+      if (isOracleDB_23_4) this.skip();
+    });
+
+    after(function() {
+      if (isOracleDB_23_4) return;
+    });
+
     it('275.11.1 Object view', async function() {
       await assert.rejects(
         async () => await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov of student
@@ -732,12 +787,12 @@ describe('275. jsonDualityView4.js', function() {
 
       // create table student
       await connection.execute(`
-      CREATE TABLE student (
-        stuid NUMBER,
-        name VARCHAR2(128) DEFAULT NULL,
-        CONSTRAINT pk_student PRIMARY KEY (stuid)
-      )
-    `);
+        CREATE TABLE student (
+          stuid NUMBER,
+          name VARCHAR2(128) DEFAULT NULL,
+          CONSTRAINT pk_student PRIMARY KEY(stuid)
+        )
+      `);
 
       // insert data into student table
       await connection.execute(`INSERT INTO student VALUES (1, 'A')`);

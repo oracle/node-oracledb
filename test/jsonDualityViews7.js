@@ -41,6 +41,7 @@ describe('297. jsonDualityViews7.js', function() {
   let connection = null;
   let dbaConn = null;
   let isRunnable = false;
+  let isOracleDB_23_4;
 
   const username = 'njs_jsonDv7';
 
@@ -48,6 +49,14 @@ describe('297. jsonDualityViews7.js', function() {
     isRunnable = await testsUtil.checkPrerequisites(2304000000, 2304000000);
     if (dbConfig.test.drcp || !(isRunnable && dbConfig.test.DBA_PRIVILEGE) || dbConfig.test.isCmanTdm) {
       this.skip();
+    }
+
+    // 23.4 requires the _id column for creating JSON Duality Views, which
+    // is not added in these tests. So check if the Oracle Database version
+    // is 23.4. This condition will be used for some tests to check, if the
+    // test should be skipped.
+    if (await testsUtil.getMajorDBVersion() === '23.4') {
+      isOracleDB_23_4 = true;
     }
 
     const dbaCredential = {
@@ -92,7 +101,7 @@ describe('297. jsonDualityViews7.js', function() {
     });
 
     after(async function() {
-      await connection.execute(`drop table ${table_name} PURGE`);
+      await connection.execute(testsUtil.sqlDropTable(`${table_name}`));
     });
 
     it('297.1.1 insert vector data in table and views', async function() {
@@ -148,6 +157,8 @@ describe('297. jsonDualityViews7.js', function() {
     }); // 297.1.2
 
     it('297.1.3 create duality View using json{*} syntax', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const arr = [1, 2, 3, 4, 6];
 
       // Create the JSON relational duality view
@@ -163,6 +174,8 @@ describe('297. jsonDualityViews7.js', function() {
     }); // 297.1.3
 
     it('297.1.4 create duality View using JSONIZE syntax', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const arr = [1, 2, 3, 4, 6];
 
       // Create the JSON relational duality view
@@ -292,6 +305,8 @@ describe('297. jsonDualityViews7.js', function() {
   describe('297.2 With multiple tables', function() {
 
     before(async function() {
+      if (isOracleDB_23_4) this.skip();
+
       let sql = `
         create table vector(
           vec_id                  number,
@@ -322,13 +337,15 @@ describe('297. jsonDualityViews7.js', function() {
     });
 
     after(async function() {
-      await connection.execute(`drop table vector_class PURGE`);
-      await connection.execute(`drop table vector PURGE`);
+      if (isOracleDB_23_4) return;
+
+      await connection.execute(testsUtil.sqlDropTable('vector_class'));
+      await connection.execute(testsUtil.sqlDropTable('vector'));
     });
 
     afterEach(async function() {
-      await connection.execute(`TRUNCATE TABLE vector_class`);
-      await connection.execute(`TRUNCATE TABLE vector`);
+      await connection.execute(`DELETE FROM vector_class`);
+      await connection.execute(`DELETE FROM vector`);
     });
 
     it('297.2.1 insert float32 vector data in table and views', async function() {
@@ -968,6 +985,8 @@ describe('297. jsonDualityViews7.js', function() {
 
   describe('297.3 Sanity DMLs', function() {
     before(async function() {
+      if (isOracleDB_23_4) this.skip();
+
       let sql = `
         create table vector(
           vec_id                  number,
@@ -978,7 +997,7 @@ describe('297. jsonDualityViews7.js', function() {
           VectorInt8Col           vector(4, int8),
           VectorFlexCol           vector(*, *),
           constraint pk_vector primary key (vec_id)
-       )`;
+      )`;
 
       // create the vector table
       let plsql = testsUtil.sqlCreateTable('vector', sql);
@@ -998,13 +1017,15 @@ describe('297. jsonDualityViews7.js', function() {
     });
 
     after(async function() {
-      await connection.execute(`drop table vector_class PURGE`);
-      await connection.execute(`drop table vector PURGE`);
+      if (isOracleDB_23_4) return;
+
+      await connection.execute(testsUtil.sqlDropTable('vector_class'));
+      await connection.execute(testsUtil.sqlDropTable('vector'));
     });
 
     afterEach(async function() {
-      await connection.execute(`TRUNCATE TABLE vector_class`);
-      await connection.execute(`TRUNCATE TABLE vector`);
+      await connection.execute(`DELETE FROM vector_class`);
+      await connection.execute(`DELETE FROM vector`);
     });
 
     it('297.3.1 insert a float32 typed array into tables from JSON DV', async function() {

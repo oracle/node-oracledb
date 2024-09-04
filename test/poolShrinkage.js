@@ -37,15 +37,12 @@ const dbConfig = require('./dbconfig.js');
 const testsUtil = require('../test/testsUtil.js');
 
 describe('279. Pool Shrinkage', function() {
-  function sleep(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
+
+  before(function() {
+    if (!oracledb.thin) this.skip();
+  });
 
   it('279.1 pool shrinkage during connection acquire always maintain min connection in pool', async function() {
-    if (!oracledb.thin) this.skip();
-
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 2,
@@ -55,7 +52,7 @@ describe('279. Pool Shrinkage', function() {
     });
     assert.ok(pool);
     await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
-    await sleep(1100);
+    await testsUtil.sleep(1100);
     const conn = await pool.getConnection();
     assert.strictEqual(pool.connectionsInUse, 1);
     await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 2);
@@ -64,7 +61,6 @@ describe('279. Pool Shrinkage', function() {
   });
 
   it('279.2 pool shrinkage during connection acquire when poolTimeout greater than 0', async function() {
-    if (!oracledb.thin) this.skip();
 
     const pool = await oracledb.createPool({
       ...dbConfig,
@@ -79,14 +75,13 @@ describe('279. Pool Shrinkage', function() {
     assert.strictEqual(pool.connectionsInUse, 1);
     assert.strictEqual(pool.connectionsOpen, 1);
     await conn1.close();
-    await sleep(1100);
+    await testsUtil.sleep(1100);
     assert.strictEqual(pool.connectionsOpen, 0);
     assert.strictEqual(pool.connectionsInUse, 0);
     await pool.close(0);
   });
 
   it('279.3 pool shrinkage during connection release when poolTimeout greater than 0', async function() {
-    if (!oracledb.thin) this.skip();
 
     const pool = await oracledb.createPool({
       ...dbConfig,
@@ -104,14 +99,14 @@ describe('279. Pool Shrinkage', function() {
     await conn.close();
     assert.strictEqual(pool.connectionsOpen, 2);
     assert.strictEqual(pool.connectionsInUse, 0);
-    await sleep(2000);
+    await testsUtil.sleep(2000);
     assert.strictEqual(pool.connectionsOpen, 0);
     assert.strictEqual(pool.connectionsInUse, 0);
     await pool.close(0);
   });
 
   it('279.4 pool shrinkage during connection release will wait for pool timeout time before emitting events', async function() {
-    if (!oracledb.thin) this.skip();
+
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 0,
@@ -130,7 +125,7 @@ describe('279. Pool Shrinkage', function() {
     await conn1.close();
     assert.strictEqual(pool.connectionsOpen, 3);
     assert.strictEqual(pool.connectionsInUse, 1);
-    await sleep(2000);
+    await testsUtil.sleep(2000);
     await conn2.close();
     assert.strictEqual(pool.connectionsOpen, 1);
     assert.strictEqual(pool.connectionsInUse, 0);
@@ -138,7 +133,7 @@ describe('279. Pool Shrinkage', function() {
   });
 
   it('279.5 pool shrinkage during connection release will wait for pool timeout time before emitting events while maintaining min connection', async function() {
-    if (!oracledb.thin) this.skip();
+
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 1,
@@ -158,15 +153,13 @@ describe('279. Pool Shrinkage', function() {
     assert.strictEqual(pool.connectionsOpen, 3);
     assert.strictEqual(pool.connectionsInUse, 1);
     await conn2.close();
-    await sleep(2000);
+    await testsUtil.sleep(2000);
     assert.strictEqual(pool.connectionsOpen, 1);
     assert.strictEqual(pool.connectionsInUse, 0);
     await pool.close(0);
   });
 
   it('279.6 pool shrinkage during connection release will not happen when poolTimeout equals to 0', async function() {
-    if (!oracledb.thin) this.skip();
-
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 0,
@@ -181,15 +174,13 @@ describe('279. Pool Shrinkage', function() {
     assert.strictEqual(pool.connectionsOpen, 3);
     assert.strictEqual(pool.connectionsInUse, 1);
     await conn.close();
-    await sleep(1100);
+    await testsUtil.sleep(1100);
     assert.strictEqual(pool.connectionsOpen, 3);
     assert.strictEqual(pool.connectionsInUse, 0);
     await pool.close(0);
   });
 
   it('279.7 pool shrinkage will not happen when poolTimeout is 0', async function() {
-    if (!oracledb.thin) this.skip();
-
     const pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 0,
@@ -203,11 +194,10 @@ describe('279. Pool Shrinkage', function() {
     await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 3);
     assert.strictEqual(pool.connectionsOpen, 3);
     assert.strictEqual(pool.connectionsInUse, 1);
-    await sleep(1100);
+    await testsUtil.sleep(1100);
     assert.strictEqual(pool.connectionsOpen, 3);
     assert.strictEqual(pool.connectionsInUse, 1);
     await conn.close();
     await pool.close(0);
   });
-
 });

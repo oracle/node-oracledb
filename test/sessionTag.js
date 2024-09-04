@@ -86,6 +86,7 @@ async function dropTable() {
 
   describe('184.1 Remote PL/SQL Callback', function() {
 
+    let pool;
     before(async function() {
       const conn = await oracledb.getConnection(dbConfig);
       let sql = "BEGIN \n" +
@@ -201,6 +202,16 @@ async function dropTable() {
       await dropTable();
     });
 
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
+
     it('184.1.1 Acquire connection without tag', async function() {
       const conn = await oracledb.getConnection({
         ...dbConfig,
@@ -212,7 +223,7 @@ async function dropTable() {
     });
 
     it('184.1.2 Acquire connection from pool without tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -221,11 +232,10 @@ async function dropTable() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.3 Acquire connection from pool with empty string tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -234,11 +244,10 @@ async function dropTable() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.4 Acquire connection from pool with valid tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -248,11 +257,10 @@ async function dropTable() {
       assert.strictEqual(res[0][1], null);
       assert.strictEqual(conn.tag, tag1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.5 Acquire connection from pool with error in callback', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.set_tag_callback",
       });
@@ -263,11 +271,10 @@ async function dropTable() {
         /ORA-02248/ // ORA-02248 invalid option for ALTER SESSION
       );
       assert.strictEqual(pool.connectionsOpen, 0);
-      await pool.close(0);
     });
 
     it('184.1.6 Acquire connection from pool twice with same tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -281,11 +288,10 @@ async function dropTable() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, tag1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.7 Acquire connection from pool twice with different tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -300,7 +306,6 @@ async function dropTable() {
       assert.strictEqual(res[0][1], null);
       assert.strictEqual(conn.tag, tag2);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.8 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
@@ -310,7 +315,7 @@ async function dropTable() {
       // new connection with tag2 will be created. This increases connection
       // open count and it causes inconsistency in expected result.
 
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -325,7 +330,6 @@ async function dropTable() {
       assert.strictEqual(res[0][1], tag1);
       assert.strictEqual(conn.tag, tag2);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
@@ -334,7 +338,7 @@ async function dropTable() {
       // new connection with tag2 will be created. This increases connection
       // open count and it causes inconsistency in expected result.
 
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -348,11 +352,10 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsInUse, 1);
       assert.strictEqual(conn.tag, tagMulti);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.10 Acquire connection from pool twice with empty string tag using matchAnyTag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -366,11 +369,10 @@ async function dropTable() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it.skip('184.1.11 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -386,11 +388,10 @@ async function dropTable() {
       assert.strictEqual(res[0][1], null);
       assert.strictEqual(conn.tag, tag1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.1.12 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
       });
@@ -405,14 +406,12 @@ async function dropTable() {
       assert.strictEqual(res.length, 0);
       assert.strictEqual(conn.tag, tag2);
       await conn.close();
-      await pool.close(0);
     });
   });
 
-
   describe('184.2 Local Javascript Callback', function() {
 
-    let callbackRequestedTag, callbackActualTag;
+    let callbackRequestedTag, callbackActualTag, pool;
 
     async function asyncTagFixup(conn, requestedTag, cb) {
       callbackRequestedTag = requestedTag;
@@ -464,6 +463,16 @@ async function dropTable() {
       resetTag();
     });
 
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
+
     it('184.2.1 Acquire connection without tag', async function() {
       const conn = await oracledb.getConnection({
         ...dbConfig,
@@ -475,7 +484,7 @@ async function dropTable() {
     });
 
     it('184.2.2 Acquire connection from pool without tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -483,11 +492,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, '');
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.3 Acquire connection from pool with empty string tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -497,11 +505,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, '');
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.4 Acquire connection from default pool with valid tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -511,11 +518,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.5 Acquire connection from pool with valid tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -523,11 +529,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.6 Acquire connection from pool with bad tag using async session callback', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: asyncTagFixup,
       });
@@ -540,11 +545,10 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(callbackRequestedTag, tagBad);
       assert.strictEqual(callbackActualTag, '');
-      await pool.close(0);
     });
 
     it('184.2.7 Acquire connection from pool with bad tag using sync session callback', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -557,11 +561,10 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(callbackRequestedTag, tagBad);
       assert.strictEqual(callbackActualTag, '');
-      await pool.close(0);
     });
 
     it('184.2.8 Acquire connection from pool twice with same tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -574,11 +577,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, null);
       assert.strictEqual(callbackActualTag, null);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.9 Acquire connection from pool twice with different tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -591,11 +593,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, tag2);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.10 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -608,11 +609,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, tag2);
       assert.strictEqual(callbackActualTag, tag1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.11 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: simpleTagFixup,
       });
@@ -627,11 +627,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, tagMulti);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.12 Acquire connection from pool twice with first connection\'s tag set to ""', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -645,11 +644,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.2.13 Acquire connection from pool twice with different tag after setting first connection\'s tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -663,11 +661,22 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, null);
       assert.strictEqual(callbackActualTag, null);
       await conn.close();
-      await pool.close(0);
     });
   });
 
   describe('184.3 Change connection\'s tag before the connection is closed', function() {
+
+    let pool;
+
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
 
     function tagFixup(conn, requestedTag, cb) {
       if (requestedTag)
@@ -676,7 +685,7 @@ async function dropTable() {
     }
 
     it('184.3.1 Setting connection\'s tag to undefined triggers error NJS-004', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -686,11 +695,10 @@ async function dropTable() {
         /NJS-004:/ //NJS-004: invalid value for property
       );
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.3.2 Setting connection\'s tag to random object triggers error NJS-004', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -700,11 +708,10 @@ async function dropTable() {
         /NJS-004:/ //NJS-004: invalid value for property
       );
       await conn.close();
-      await pool.close(0);
     });
 
     it.skip('184.3.3 Closing randomly tagged connection triggers error ORA-24488', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -718,13 +725,12 @@ async function dropTable() {
       );
       conn.tag = tag1;
       await conn.close();
-      await pool.close(0);
     });
   });
 
   describe('184.4 Dropping Session From Pool', function() {
 
-    let callbackRequestedTag, callbackActualTag;
+    let callbackRequestedTag, callbackActualTag, pool;
 
     function tagFixup(conn, requestedTag, cb) {
       callbackRequestedTag = requestedTag;
@@ -752,24 +758,26 @@ async function dropTable() {
     }
 
     async function checkConnValid(conn) {
-      try {
-        const res = await conn.execute("select * from dual");
-        return res.rows[0][0] === 'X';
-      } catch (err) {
-        return false;
-      }
-    }
-
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
+      const res = await conn.execute("select * from dual");
+      return res.rows[0][0] === 'X';
     }
 
     beforeEach(function() {
       resetTag();
     });
 
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
+
     it('184.4.1 Acquire connection from pool, close with tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
       });
@@ -779,22 +787,20 @@ async function dropTable() {
       await conn.close({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close(0);
     });
 
     it('184.4.2 Acquire connection from pool, drop session', async function() {
-      const pool = await oracledb.createPool(dbConfig);
+      pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection();
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close({drop: true});
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close(0);
     });
 
     it('184.4.3 Acquire connection from pool, drop session with tag', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
         poolPingInterval: 10,
@@ -805,12 +811,11 @@ async function dropTable() {
       await conn.close({tag: tag1, drop: true});
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close(0);
     });
 
     it('184.4.4 Acquire connection from pool, wait for pool ping to call session fixup', async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
         poolMax: 1,
@@ -822,7 +827,7 @@ async function dropTable() {
       await conn.close();
       await dropUserSession(res.rows[0][0]);
       resetTag();
-      await sleep(5000);
+      await testsUtil.sleep(5000);
       conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(await checkConnValid(conn), true);
       assert.strictEqual(pool.connectionsOpen, 1);
@@ -830,11 +835,10 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, tag1);
       assert.strictEqual(callbackActualTag, '');
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.4.5 Acquire connection from pool, wait for pool timeout to drop', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
         poolTimeout: 3,
@@ -842,13 +846,12 @@ async function dropTable() {
       const conn = await pool.getConnection({tag: tag1});
       await conn.close();
       resetTag();
-      await sleep(5000);
+      await testsUtil.sleep(5000);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close(0);
     });
 
     it('184.4.6 Drop connection from pool with poolMin=0', async function() {
-      const pool = await oracledb.createPool({
+      pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: tagFixup,
         poolMax: 1,
@@ -860,22 +863,20 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.4.7 Close connection from pool with {drop: false}', async function() {
-      const pool = await oracledb.createPool(dbConfig);
+      pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close({drop: false});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 0);
-      await pool.close(0);
     });
 
     it('184.4.8 Close connection from pool with {drop: randomObject}', async function() {
-      const pool = await oracledb.createPool(dbConfig);
+      pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -888,11 +889,10 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.4.9 Close connection from pool with {drop: 0}', async function() {
-      const pool = await oracledb.createPool(dbConfig);
+      pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -905,11 +905,10 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.4.10 Close connection from pool with empty object', async function() {
-      const pool = await oracledb.createPool(dbConfig);
+      pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -922,11 +921,10 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close(0);
     });
 
     it('184.4.11 Close connection from pool with {drop: random string}', async function() {
-      const pool = await oracledb.createPool(dbConfig);
+      pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection({tag: tag1});
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
@@ -939,8 +937,6 @@ async function dropTable() {
       assert.strictEqual(pool.connectionsOpen, 1);
       assert.strictEqual(pool.connectionsInUse, 1);
       await conn.close();
-      await pool.close(0);
     });
-
   });
 });

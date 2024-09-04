@@ -79,7 +79,7 @@ describe('295. dataTypeVector2.js', function() {
   });
 
   beforeEach(async function() {
-    await connection.execute(`TRUNCATE TABLE ${tableName}`);
+    await connection.execute(`DELETE FROM ${tableName}`);
     oracledb.fetchTypeHandler = function(metadata) {
       if (metadata.dbType === oracledb.DB_TYPE_VECTOR) {
         const myConverter = (v) => {

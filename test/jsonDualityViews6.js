@@ -41,11 +41,20 @@ describe('277. jsonDualityView6.js', function() {
   let connection = null;
   let dbaConn = null;
   let isRunnable = false;
+  let isOracleDB_23_4;
 
   before(async function() {
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
     if (dbConfig.test.drcp || !(isRunnable && dbConfig.test.DBA_PRIVILEGE) || dbConfig.test.isCmanTdm) {
       this.skip();
+    }
+
+    // 23.4 requires the _id column for creating JSON Duality Views, which
+    // is not added in these tests. So check if the Oracle Database version
+    // is 23.4. This condition will be used for some tests to check, if the
+    // test should be skipped.
+    if (await testsUtil.getMajorDBVersion() === '23.4') {
+      isOracleDB_23_4 = true;
     }
 
     const dbaCredential = {
@@ -77,29 +86,35 @@ describe('277. jsonDualityView6.js', function() {
     before(async function() {
 
       // create the student table
-      await connection.execute(`
+      const sqlCreateTableStudent = `
         create table student(
           stuid number,
           name varchar(128) default null,
           constraint pk_student primary key (stuid)
-        )`);
+        )
+      `;
+      await connection.execute(testsUtil.sqlCreateTable('student', sqlCreateTableStudent));
 
       // create the student_class table
-      await connection.execute(`
-        create table student_class (
+      const sqlCreateTableStudentClass = `
+        create table student_class(
           stuid number primary key,
           scid number,
           clsid number,
           constraint fk_student_class1 foreign key (stuid) references student(stuid)
-        )`);
+        )
+      `;
+      await connection.execute(testsUtil.sqlCreateTable('student_class', sqlCreateTableStudentClass));
     });
 
     after(async function() {
-      await connection.execute(`drop table student_class PURGE`);
-      await connection.execute(`drop table student PURGE`);
+      await connection.execute(testsUtil.sqlDropTable('student_class'));
+      await connection.execute(testsUtil.sqlDropTable('student'));
     });
 
     it('277.1.1 Insert data in table and views', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       await connection.execute(`
       insert into student values (1, 'Ajit')`);
 
@@ -147,6 +162,8 @@ describe('277. jsonDualityView6.js', function() {
     });
 
     it('277.1.2 Sanity DMLs', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       await connection.execute(`
       insert into student_ov values ('{"student_id":4,"student_name":"Abcd","student_class":[{"student_class_id":1,"student_id":4}]}')
     `);
@@ -240,6 +257,8 @@ describe('277. jsonDualityView6.js', function() {
 
     describe('277.2 Queries(SNT,SNT+where clause)', function() {
       before(async function() {
+        if (isOracleDB_23_4) this.skip();
+
         await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
         AS
         Student @INSERT@UPDATE@DELETE
@@ -308,35 +327,45 @@ describe('277. jsonDualityView6.js', function() {
 
   describe('277.3 PK-PK-FK', function() {
     before(async function() {
+      if (isOracleDB_23_4) this.skip();
+
       // create the student table
-      await connection.execute(`
+      const sqlCreateTableStudent = `
         create table student(
           stuid number,
           name varchar(128) default null,
-          constraint pk_student primary key (stuid)
-        )`);
+          constraint pk_student primary key(stuid)
+        )
+      `;
+      await connection.execute(testsUtil.sqlCreateTable('student', sqlCreateTableStudent));
 
       // create the student_class table
-      await connection.execute(`
-        create table student_class (
+      const sqlCreateTableStudentClass = `
+        create table student_class(
           scid number,
           stuid number primary key,
           clsid number,
           constraint fk_student_class1 foreign key (stuid) references student(stuid)
-        )`);
+        )
+      `;
+      await connection.execute(testsUtil.sqlCreateTable('student_class', sqlCreateTableStudentClass));
 
-      await connection.execute(`
+      // create the class table
+      const sqlCreateTableClass = `
         create table class(
           clsid number PRIMARY KEY,
           name varchar2(128),
           constraint fk_class foreign key (clsid) references student_class(stuid)
-        )`);
+        )
+      `;
+      await connection.execute(testsUtil.sqlCreateTable('class', sqlCreateTableClass));
     });
 
     after(async function() {
-      await connection.execute(`drop table class PURGE`);
-      await connection.execute(`drop table student_class PURGE`);
-      await connection.execute(`drop table student PURGE`);
+      if (isOracleDB_23_4) return;
+      await connection.execute(testsUtil.sqlDropTable('class'));
+      await connection.execute(testsUtil.sqlDropTable('student_class'));
+      await connection.execute(testsUtil.sqlDropTable('student'));
     });
 
     it('277.3.1 Insert data in table and views', async function() {

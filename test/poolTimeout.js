@@ -77,6 +77,7 @@ describe('269. Pool Timeout', function() {
       try {
         if (pool)
           await pool.close(0);
+        pool = null;
       } catch (err) {
         assert.deepStrictEqual(err, {});
       }
@@ -117,6 +118,7 @@ describe('269. Pool Timeout', function() {
       try {
         if (pool)
           await pool.close(0);
+        pool = null;
       } catch (err) {
         assert.deepStrictEqual(err, {});
       }
@@ -157,6 +159,7 @@ describe('269. Pool Timeout', function() {
       try {
         if (pool)
           await pool.close(0);
+        pool = null;
       } catch (err) {
         assert.deepStrictEqual(err, {});
       }
@@ -198,6 +201,7 @@ describe('269. Pool Timeout', function() {
       try {
         if (pool)
           await pool.close(0);
+        pool = null;
       } catch (err) {
         assert.deepStrictEqual(err, {});
       }

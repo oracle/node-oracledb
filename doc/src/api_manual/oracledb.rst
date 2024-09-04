@@ -208,27 +208,27 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
     * - ``oracledb.BFILE``
       - 2020
       - ``oracledb.DB_TYPE_BFILE``
-      -
+      - No relevant notes
     * - ``oracledb.BLOB``
       - 2019
       - ``oracledb.DB_TYPE_BLOB``
-      -
+      - No relevant notes
     * - ``oracledb.BUFFER``
       - 2006
       - ``oracledb.DB_TYPE_RAW``
-      -
+      - No relevant notes
     * - ``oracledb.CLOB``
       - 2017
       - ``oracledb.DB_TYPE_CLOB``
-      -
+      - No relevant notes
     * - ``oracledb.CURSOR``
       - 2021
       - ``oracledb.DB_TYPE_CURSOR``
-      -
+      - No relevant notes
     * - ``oracledb.DATE``
       - 2014
       - ``oracledb.DB_TYPE_TIMESTAMP_LTZ``
-      -
+      - No relevant notes
     * - ``oracledb.DEFAULT``
       - 0
       - NA
@@ -236,7 +236,7 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
     * - ``oracledb.NUMBER``
       - 2010
       - ``oracledb.DB_TYPE_NUMBER``
-      -
+      - No relevant notes
     * - ``oracledb.NCLOB``
       - 2018
       - ``oracledb.DB_TYPE_NCLOB``
@@ -244,7 +244,7 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
     * - ``oracledb.STRING``
       - 2001
       - ``oracledb.DB_TYPE_VARCHAR``
-      -
+      - No relevant notes
 
 .. _oracledbconstantsbinddir:
 

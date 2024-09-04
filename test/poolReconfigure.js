@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   255. poolReconfig.js
+ *   255. poolReconfigure.js
  *
  * DESCRIPTION
  *   Test cases to pool-reconfigure
@@ -78,7 +78,13 @@ describe('255. poolReconfigure.js', function() {
     });
 
     afterEach(async function() {
-      await pool.close(0);
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
     });
 
     it('255.1.1 Change poolMin - increase', async function() {
@@ -174,7 +180,6 @@ describe('255. poolReconfigure.js', function() {
       await connNew.close();
 
     });
-
 
     it('255.1.4 Change poolMax - decrease', async function() {
       if (dbConfig.test.drcp) this.skip();
@@ -567,8 +572,8 @@ describe('255. poolReconfigure.js', function() {
   });
 
   // Other properties: pingInterval/Timeout/maxPerShard/stmtCacheSize/
-  //  resetStatistics/queueMax/queueTimeout/maxSessionsPerShard/
-  //  sodaMetaDataCache
+  // resetStatistics/queueMax/queueTimeout/maxSessionsPerShard/
+  // sodaMetaDataCache
   describe('255.2 poolReconfigure - other properties', function() {
     let pool;
 
@@ -599,7 +604,13 @@ describe('255. poolReconfigure.js', function() {
     });
 
     afterEach(async function() {
-      await pool.close(0);
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
     });
 
     it('255.2.1 change poolPingInterval', async function() {
@@ -637,7 +648,19 @@ describe('255. poolReconfigure.js', function() {
       checkOriginalPoolConfig(pool);
     });
 
-    it('255.2.4 change stmtCacheSize', async function() {
+    it('255.2.4 maxPerShard in thin mode', async function() {
+      if (!oracledb.thin) this.skip();
+
+      const config = {
+        poolMaxPerShard: pool.poolMaxPerShard
+      };
+
+      await pool.reconfigure(config);
+      assert.strictEqual(pool.poolMaxPerShard, undefined);
+      checkOriginalPoolConfig(pool);
+    });
+
+    it('255.2.5 change stmtCacheSize', async function() {
       const stmtCacheSize = 2 * pool.stmtCacheSize;
       const config = {
         stmtCacheSize: stmtCacheSize
@@ -648,7 +671,7 @@ describe('255. poolReconfigure.js', function() {
       checkOriginalPoolConfig(pool);
     });
 
-    it('255.2.5 change resetStatistics with enableStatistics', async function() {
+    it('255.2.6 change resetStatistics with enableStatistics', async function() {
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -709,7 +732,7 @@ describe('255. poolReconfigure.js', function() {
 
     });
 
-    it('255.2.6 change resetStatistics', async function() {
+    it('255.2.7 change resetStatistics', async function() {
       const config = {
         resetStatistics: true
       };
@@ -717,7 +740,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.enableStatistics, enableStatisticsOriginalVal);
     });
 
-    it('255.2.7 getStatistics', async function() {
+    it('255.2.8 getStatistics', async function() {
       await pool.close(0);
 
       poolConfig = {
@@ -800,6 +823,9 @@ describe('255. poolReconfigure.js', function() {
       if (!oracledb.thin) {
         assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
         assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      } else {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, undefined);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, undefined);
       }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
@@ -809,10 +835,9 @@ describe('255. poolReconfigure.js', function() {
         const conn = conns[conIndex];
         await conn.close();
       }
-
     });
 
-    it('255.2.8 getStatistics - noneditable properties', async function() {
+    it('255.2.9 getStatistics - noneditable properties', async function() {
       await pool.close(0);
 
       poolConfig = {
@@ -843,7 +868,6 @@ describe('255. poolReconfigure.js', function() {
       // reconfigure for later use
       await pool.reconfigure({enableStatistics: false});
     });
-
   });
 
   describe('255.3 poolReconfigure JS layer properties', function() {
@@ -855,7 +879,13 @@ describe('255. poolReconfigure.js', function() {
     });
 
     afterEach(async function() {
-      await pool.close(0);
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
     });
 
     it('255.3.1 change queueMax', async function() {
@@ -899,7 +929,25 @@ describe('255. poolReconfigure.js', function() {
       checkOriginalPoolConfig(pool);
     });
 
-    it('255.3.4 sodaMetaDataCache set to true', async function() {
+    it('255.3.4 change maxPerShard in thin mode', async function() {
+      if (!oracledb.thin) this.skip();
+
+      // maxPerShard is supported only >= 18.3
+      if (testsUtil.getClientVersion() < 1803000000) {
+        this.skip();
+      }
+
+      const maxPerShard = 10;
+      const config = {
+        poolMaxPerShard: maxPerShard
+      };
+
+      await pool.reconfigure(config);
+      assert.strictEqual(pool.poolMaxPerShard, undefined);
+      checkOriginalPoolConfig(pool);
+    });
+
+    it('255.3.5 sodaMetaDataCache set to true', async function() {
       if (oracledb.thin) this.skip();
 
       const config = {
@@ -917,7 +965,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.sodaMetaDataCache, config.sodaMetaDataCache);
     });
 
-    it('255.3.5 sodaMetaDataCache set to false', async function() {
+    it('255.3.6 sodaMetaDataCache set to false', async function() {
       if (oracledb.thin) this.skip();
 
       const config = {
@@ -936,6 +984,24 @@ describe('255. poolReconfigure.js', function() {
       checkOriginalPoolConfig(pool);
     });
 
+    it('255.3.6 sodaMetaDataCache set to true in thin mode', async function() {
+      if (!oracledb.thin) this.skip();
+
+      const config = {
+        sodaMetaDataCache: false
+      };
+      // The SODA metadata cache is available with Oracle Client 21.3 and
+      // in 19 from 19.11
+      const clientVersion = testsUtil.getClientVersion();
+      if (clientVersion < 2103000000) {
+        if (clientVersion < 1911000000 || clientVersion >= 2000000000) {
+          this.skip();
+        }
+      }
+      await pool.reconfigure(config);
+      assert.strictEqual(pool.sodaMetaDataCache, undefined);
+      checkOriginalPoolConfig(pool);
+    });
   });
 
   describe('255.4 Pool properties NOT dynamically configurable, they will be ignored', function() {
@@ -947,7 +1013,13 @@ describe('255. poolReconfigure.js', function() {
     });
 
     afterEach(async function() {
-      await pool.close(0);
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
     });
 
     it('255.4.1 connectionsInUse', async function() {
@@ -1116,7 +1188,13 @@ describe('255. poolReconfigure.js', function() {
     });
 
     afterEach(async function() {
-      await pool.close(0);
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
     });
 
     it('255.5.1 passing empty config to pool.reconfigure', async function() {
@@ -1200,7 +1278,6 @@ describe('255. poolReconfigure.js', function() {
         async () => await pool.reconfigure({poolIncrement: "100"}),
         /NJS-007:/
       );
-
     });
 
     it('255.5.5 passing invalid enableStatistics to pool.reconfigure', async function() {
@@ -1240,7 +1317,6 @@ describe('255. poolReconfigure.js', function() {
         async () => await pool.reconfigure({poolPingInterval: "10"}),
         /NJS-007/
       );
-
     });
 
     it('255.5.7 passing invalid poolTimeout to pool.reconfigure', async function() {
@@ -1307,7 +1383,6 @@ describe('255. poolReconfigure.js', function() {
         async () => await pool.reconfigure({queueMax: "10"}),
         /NJS-007:/
       );
-
     });
 
     it('255.5.10 passing invalid queueTimeout to pool.reconfigure', async function() {
@@ -1330,7 +1405,6 @@ describe('255. poolReconfigure.js', function() {
         async () => await pool.reconfigure ({queueTimeout: "10"}),
         /NJS-007:/
       );
-
     });
 
     it('255.5.11 passing invalid stmtCacheSize to pool.reconfigure', async function() {
@@ -1390,6 +1464,8 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolTimeout, poolTimeout);
       if (!oracledb.thin) {
         assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      } else {
+        assert.strictEqual(pool.poolMaxPerShard, undefined);
       }
       assert.strictEqual(pool.queueMax, queueMax);
       assert.strictEqual(pool.queueTimeout, queueTimeout);
@@ -1433,6 +1509,8 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(pool.poolTimeout, poolTimeout);
       if (!oracledb.thin) {
         assert.strictEqual(pool.poolMaxPerShard, poolMaxPerShard);
+      } else {
+        assert.strictEqual(pool.poolMaxPerShard, undefined);
       }
       assert.strictEqual(pool.queueMax, queueMax);
       assert.strictEqual(pool.queueTimeout, queueTimeout);
@@ -1465,7 +1543,6 @@ describe('255. poolReconfigure.js', function() {
         /NJS-065:/
       );
       pool = await oracledb.createPool(poolConfig);
-
     });
 
     it('255.5.15 get statistics of a closed pool', async function() {
@@ -1480,14 +1557,31 @@ describe('255. poolReconfigure.js', function() {
         () => pool.getStatistics(),
         /NJS-065/
       );
-
       pool = await oracledb.createPool(poolConfig);
-
     });
-
   });
 
   describe('255.6 Pool statistics', function() {
+    let pool, pool1, pool2;
+
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+      if (pool1) {
+        await pool1.close(0);
+        pool1 = null;
+      }
+      if (pool2) {
+        await pool2.close(0);
+        pool2 = null;
+      }
+    });
+
     it('255.6.1 get pool statistics by setting _enableStats', async function() {
       let poolConfig = {
         ...dbConfig,
@@ -1498,7 +1592,7 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout: 5,
         _enableStats: false
       };
-      let pool = await oracledb.createPool(poolConfig);
+      pool = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool.poolAlias, "255.6.1.1");
 
       let conns = new Array();
@@ -1576,6 +1670,9 @@ describe('255. poolReconfigure.js', function() {
       if (!oracledb.thin) {
         assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
         assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      } else {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, undefined);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, undefined);
       }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
@@ -1585,7 +1682,6 @@ describe('255. poolReconfigure.js', function() {
         const conn = conns[conIndex];
         await conn.close();
       }
-      await pool.close(0);
     });
 
     it('255.6.2 get pool statistics by setting _enableStats', async function() {
@@ -1598,7 +1694,7 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout: 5,
         _enableStats: false
       };
-      const pool1 = await oracledb.createPool(poolConfig);
+      pool1 = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool1.poolAlias, "255.6.2.1");
 
       let conns = [];
@@ -1630,7 +1726,7 @@ describe('255. poolReconfigure.js', function() {
         _enableStats: true
       };
 
-      const pool2 = await oracledb.createPool(poolConfig);
+      pool2 = await oracledb.createPool(poolConfig);
 
       conns = new Array();
       for (let i = 0; i < poolMaxOriginalVal; i++) {
@@ -1674,6 +1770,9 @@ describe('255. poolReconfigure.js', function() {
       if (!oracledb.thin) {
         assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
         assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      } else {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, undefined);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, undefined);
       }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
@@ -1682,8 +1781,6 @@ describe('255. poolReconfigure.js', function() {
       for (let i = 0; i < poolMaxOriginalVal; i++) {
         await conns[i].close();
       }
-      await pool1.close(0);
-      await pool2.close(0);
     });
 
     it('255.6.3 set enableStatistics to true, _enableStats will be ignored', async function() {
@@ -1697,13 +1794,14 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics: true
       };
 
-      const pool1 = await oracledb.createPool(poolConfig);
+      pool1 = await oracledb.createPool(poolConfig);
 
       const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, true);
       assert.strictEqual(pool1.enableStatistics, true);
       assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
+      pool1 = null;
 
       const poolConfig2 = {
         ...dbConfig,
@@ -1715,13 +1813,11 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics: true
       };
 
-      const pool2 = await oracledb.createPool(poolConfig2);
+      pool2 = await oracledb.createPool(poolConfig2);
       const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, true);
       assert.strictEqual(pool2.enableStatistics, true);
       assert(poolStatistics2.gatheredDate > 0);
-      await pool2.close(0);
-
     });
 
     it('255.6.4 set enableStatistics to false, _enableStats will be used', async function() {
@@ -1735,13 +1831,14 @@ describe('255. poolReconfigure.js', function() {
         _enableStats: false
       };
 
-      const pool1 = await oracledb.createPool(poolConfig);
+      pool1 = await oracledb.createPool(poolConfig);
 
       const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, false);
       assert.strictEqual(pool1.enableStatistics, false);
       assert.strictEqual(poolStatistics1, null);
       await pool1.close(0);
+      pool1 = null;
 
       const poolConfig2 = {
         ...dbConfig,
@@ -1753,13 +1850,11 @@ describe('255. poolReconfigure.js', function() {
         _enableStats: true
       };
 
-      const pool2 = await oracledb.createPool(poolConfig2);
+      pool2 = await oracledb.createPool(poolConfig2);
       const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, true);
       assert.strictEqual(pool2.enableStatistics, true);
       assert(poolStatistics2.gatheredDate > 0);
-      await pool2.close(0);
-
     });
 
     it('255.6.5 set multiple enableStatistics', async function() {
@@ -1773,13 +1868,14 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : true //eslint-disable-line
       };
 
-      const pool1 = await oracledb.createPool(poolConfig);
+      pool1 = await oracledb.createPool(poolConfig);
 
       const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, true);
       assert.strictEqual(pool1.enableStatistics, true);
       assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
+      pool1 = null;
 
       const poolConfig2 = {
         ...dbConfig,
@@ -1791,12 +1887,13 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      const pool2 = await oracledb.createPool(poolConfig2);
+      pool2 = await oracledb.createPool(poolConfig2);
       const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, false);
       assert.strictEqual(pool2.enableStatistics, false);
       assert.strictEqual(poolStatistics2, null);
       await pool2.close(0);
+      pool2 = null;
 
       const poolConfig3 = {
         ...dbConfig,
@@ -1809,13 +1906,13 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      const pool3 = await oracledb.createPool(poolConfig3);
+      let pool3 = await oracledb.createPool(poolConfig3);
       const poolStatistics3 = pool3.getStatistics();
       assert.strictEqual(pool3._enableStats, false);
       assert.strictEqual(pool3.enableStatistics, false);
       assert.strictEqual(poolStatistics3, null);
-      await pool3.close(3);
-
+      await pool3.close(0);
+      pool3 = null;
     });
 
     it('255.6.6 set multiple _enableStats', async function() {
@@ -1829,13 +1926,14 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : true //eslint-disable-line
       };
 
-      const pool1 = await oracledb.createPool(poolConfig);
+      pool1 = await oracledb.createPool(poolConfig);
 
       const poolStatistics1 = pool1.getStatistics();
       assert.strictEqual(pool1._enableStats, true);
       assert.strictEqual(pool1.enableStatistics, true);
       assert(poolStatistics1.gatheredDate > 0);
       await pool1.close(0);
+      pool1 = null;
 
       const poolConfig2 = {
         ...dbConfig,
@@ -1847,12 +1945,13 @@ describe('255. poolReconfigure.js', function() {
         _enableStats     : false //eslint-disable-line
       };
 
-      const pool2 = await oracledb.createPool(poolConfig2);
+      pool2 = await oracledb.createPool(poolConfig2);
       const poolStatistics2 = pool2.getStatistics();
       assert.strictEqual(pool2._enableStats, false);
       assert.strictEqual(pool2.enableStatistics, false);
       assert.strictEqual(poolStatistics2, null);
       await pool2.close(0);
+      pool2 = null;
 
       const poolConfig3 = {
         ...dbConfig,
@@ -1865,13 +1964,13 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      const pool3 = await oracledb.createPool(poolConfig3);
+      let pool3 = await oracledb.createPool(poolConfig3);
       const poolStatistics3 = pool3.getStatistics();
       assert.strictEqual(pool3._enableStats, false);
       assert.strictEqual(pool3.enableStatistics, false);
       assert.strictEqual(poolStatistics3, null);
       await pool3.close(0);
-
+      pool3 = null;
     });
 
     it('255.6.7 get pool statistics by setting enableStatistics', async function() {
@@ -1884,7 +1983,7 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout: 5,
         enableStatistics: false
       };
-      let pool = await oracledb.createPool(poolConfig);
+      pool = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool.poolAlias, "255.6.7.1");
 
       let conns = new Array();
@@ -1909,6 +2008,7 @@ describe('255. poolReconfigure.js', function() {
 
       // Close the existing pool
       await pool.close(0);
+      pool = null;
 
       poolConfig = {
         ...dbConfig,
@@ -1962,6 +2062,9 @@ describe('255. poolReconfigure.js', function() {
       if (!oracledb.thin) {
         assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
         assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      } else {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, undefined);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, undefined);
       }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
@@ -1971,7 +2074,6 @@ describe('255. poolReconfigure.js', function() {
         const conn = conns[conIndex];
         await conn.close();
       }
-      await pool.close(0);
     });
 
     it('255.6.8 get pool statistics by setting enableStatistics', async function() {
@@ -1984,7 +2086,7 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout: 5,
         enableStatistics: false
       };
-      const pool1 = await oracledb.createPool(poolConfig);
+      pool1 = await oracledb.createPool(poolConfig);
       assert.strictEqual(pool1.poolAlias, "255.6.8.1");
 
       let conns = new Array();
@@ -2018,7 +2120,7 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics: true
       };
 
-      const pool2 = await oracledb.createPool(poolConfig);
+      pool2 = await oracledb.createPool(poolConfig);
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2062,6 +2164,9 @@ describe('255. poolReconfigure.js', function() {
       if (!oracledb.thin) {
         assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
         assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      } else {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, undefined);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, undefined);
       }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
@@ -2071,8 +2176,6 @@ describe('255. poolReconfigure.js', function() {
         const conn = conns[conIndex];
         await conn.close();
       }
-      await pool1.close(0);
-      await pool2.close(0);
     });
 
     it('255.6.9 get pool statistics by setting enableStatistics and _enableStats', async function() {
@@ -2085,7 +2188,7 @@ describe('255. poolReconfigure.js', function() {
         queueTimeout: 5,
         enableStatistics: false
       };
-      const pool1 = await oracledb.createPool(poolConfig);
+      pool1 = await oracledb.createPool(poolConfig);
       let conns = new Array();
       let conIndex;
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2117,7 +2220,7 @@ describe('255. poolReconfigure.js', function() {
         _enableStats: true
       };
 
-      const pool2 = await oracledb.createPool(poolConfig);
+      pool2 = await oracledb.createPool(poolConfig);
 
       conns = new Array();
       for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
@@ -2160,6 +2263,9 @@ describe('255. poolReconfigure.js', function() {
       if (!oracledb.thin) {
         assert.strictEqual(poolStatistics.poolMaxPerShard, 0);
         assert.strictEqual(poolStatistics.sodaMetaDataCache, false);
+      } else {
+        assert.strictEqual(poolStatistics.poolMaxPerShard, undefined);
+        assert.strictEqual(poolStatistics.sodaMetaDataCache, undefined);
       }
       assert.strictEqual(poolStatistics.sessionCallback, undefined);
       assert.strictEqual(poolStatistics.stmtCacheSize, 30);
@@ -2169,21 +2275,15 @@ describe('255. poolReconfigure.js', function() {
         const conn = conns[conIndex];
         await conn.close();
       }
-      await pool1.close(0);
-      await pool2.close(0);
     });
 
     it('255.6.10 logStatistics without enableStatistics', async function() {
-      const pool = await oracledb.createPool(dbConfig);
+      pool = await oracledb.createPool(dbConfig);
 
       assert.throws(
         () => pool.logStatistics(),
         /NJS-083:/
       );
-
-      await pool.close(0);
     });
-
   });
-
 });

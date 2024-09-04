@@ -38,7 +38,7 @@ const testsUtil = require('./testsUtil.js');
 
 describe('272. jsonDualityView1.js', function() {
 
-  let isRunnable = false, dbaConn;
+  let isRunnable = false, dbaConn, isOracleDB_23_4;
   const dbaCredential = {
     user: dbConfig.test.DBA_user,
     password: dbConfig.test.DBA_password,
@@ -56,11 +56,19 @@ describe('272. jsonDualityView1.js', function() {
     if (!isRunnable) {
       this.skip();
     }
-    dbaConn = await oracledb.getConnection(dbaCredential);
 
+    // 23.4 requires the _id column for creating JSON Duality Views, which
+    // is not added in these tests. So check if the Oracle Database version
+    // is 23.4. This condition will be used for some tests to check, if the
+    // test should be skipped.
+    if (await testsUtil.getMajorDBVersion() === '23.4') {
+      isOracleDB_23_4 = true;
+    }
+
+    dbaConn = await oracledb.getConnection(dbaCredential);
     await dbaConn.execute(`CREATE USER njs_jsonDv1 IDENTIFIED BY ${pwd}`);
     await dbaConn.execute(`GRANT CREATE SESSION, RESOURCE, CONNECT,
-              UNLIMITED TABLESPACE TO njs_jsonDv1`);
+      UNLIMITED TABLESPACE TO njs_jsonDv1`);
   });
 
   after(async function() {
@@ -79,10 +87,10 @@ describe('272. jsonDualityView1.js', function() {
                               PRIMARY KEY, department_name VARCHAR2(30),
                               manager_id NUMBER(6))`;
 
-
     const alterTableEmp = `ALTER TABLE employees ADD
                             (CONSTRAINT emp_dept_fk FOREIGN KEY (department_id)
                               REFERENCES departments)`;
+
     const createEmpView = `CREATE or replace JSON relational duality VIEW EMP_OV
                             AS
                               select JSON {
@@ -103,28 +111,30 @@ describe('272. jsonDualityView1.js', function() {
                                 from employees emp WITH(INSERT,UPDATE,DELETE)`;
 
     const createDeptView = `CREATE OR REPLACE JSON relational duality VIEW dept_ov
-                                    AS
-                                    select JSON {
-                                    'department_id' is dept.DEPARTMENT_ID,
-                                    'department_name'  is dept.DEPARTMENT_NAME,
-                                    'EMP_INFO' is
-                                   ( select
-                                  json_arrayagg
-                                    (
-                                    JSON
-                                    {
-                                      'employee_id' is emp.employee_id,
-                                      'FIRST_NAME'  is emp.FIRST_NAME
-                                    }
-                                    )
-                                        from employees emp WITH (INSERT,UPDATE,DELETE)
-                                      where emp.department_id = dept.department_id
-                                    )
-                                      returning json
-                                    }
-                                    from departments dept WITH (INSERT,UPDATE,DELETE,CHECK ETAG)`;
+                              AS
+                              select JSON {
+                              'department_id' is dept.DEPARTMENT_ID,
+                              'department_name'  is dept.DEPARTMENT_NAME,
+                              'EMP_INFO' is
+                              ( select
+                            json_arrayagg
+                              (
+                              JSON
+                              {
+                                'employee_id' is emp.employee_id,
+                                'FIRST_NAME'  is emp.FIRST_NAME
+                              }
+                              )
+                                  from employees emp WITH (INSERT,UPDATE,DELETE)
+                                where emp.department_id = dept.department_id
+                              )
+                                returning json
+                              }
+                              from departments dept WITH (INSERT,UPDATE,DELETE,CHECK ETAG)`;
 
     before(async function() {
+      if (isOracleDB_23_4) this.skip();
+
       connection = await oracledb.getConnection({user: 'njs_jsonDv1',
         password: pwd,
         connectString: dbConfig.connectString
@@ -152,6 +162,8 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
+      if (isOracleDB_23_4) return;
+
       await testsUtil.dropTable(connection, 'employees');
       await testsUtil.dropTable(connection, 'departments');
       await connection.execute(`DROP VIEW IF EXISTS emp_ov`);
@@ -306,6 +318,8 @@ describe('272. jsonDualityView1.js', function() {
 
 
     before(async function() {
+      if (isOracleDB_23_4) this.skip();
+
       connection = await oracledb.getConnection({user: 'njs_jsonDv1',
         password: pwd,
         connectString: dbConfig.connectString
@@ -318,6 +332,7 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     after(async function() {
+      if (isOracleDB_23_4) return;
       await testsUtil.dropTable(connection, 'employees');
       await testsUtil.dropTable(connection, 'departments');
       await connection.execute(`DROP VIEW IF EXISTS emp_ov`);
@@ -505,6 +520,8 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.3.2 View Name as graphql', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW graphql
                     AS
                     student @INSERT @UPDATE @DELETE
@@ -520,6 +537,8 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.3.3 Create view with @ directive', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
                     AS
                     student @INSERT
@@ -571,6 +590,8 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.3.6 Create view Primary key to Foreign key', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
                       AS
                      Student @INSERT @UPDATE @DELETE
@@ -583,6 +604,8 @@ describe('272. jsonDualityView1.js', function() {
     });
 
     it('272.3.7 Create view Foreign key to Primary key', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW studentclass_ov
                      AS
                      student_class
@@ -594,6 +617,8 @@ describe('272. jsonDualityView1.js', function() {
 
     describe('272.3.8 Create view with View Name as Mixed Case and Special Case', function() {
       it('272.3.8.1 single quotes for key names are not supported ', async function() {
+        if (isOracleDB_23_4) this.skip();
+
         const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
                         AS
                         student @INSERT @UPDATE @DELETE
@@ -629,6 +654,8 @@ describe('272. jsonDualityView1.js', function() {
       });
 
       it('272.3.8.3 Create view with View Name as Special Case ', async function() {
+        if (isOracleDB_23_4) this.skip();
+
         const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov@
                         AS
                         student @INSERT @UPDATE @DELETE
@@ -648,6 +675,8 @@ describe('272. jsonDualityView1.js', function() {
       });
 
       it('272.3.8.3 case 3 ', async function() {
+        if (isOracleDB_23_4) this.skip();
+
         const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
                         AS
                         student @INSERT @UPDATE @DELETE
@@ -664,6 +693,8 @@ describe('272. jsonDualityView1.js', function() {
       });
 
       it('272.3.8.4 single quotes for key names are not supported ', async function() {
+        if (isOracleDB_23_4) this.skip();
+
         const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
                         AS
                         student @INSERT @UPDATE @DELETE
@@ -682,9 +713,11 @@ describe('272. jsonDualityView1.js', function() {
 
     describe('272.3.9 View Name with Maximum possible string and maximum possible string +1 (128bytes)', function() {
       it('272.3.9.1 case 1 ', async function() {
-        const table_name = 'n4HHXUjvHxb3RiO0TECKFAhdXx0u7M9kwnh' +
+        if (isOracleDB_23_4) this.skip();
+
+        const viewName = 'n4HHXUjvHxb3RiO0TECKFAhdXx0u7M9kwnh' +
         'J7UT7KOcNwhx0kSHsrc0HaXwS0D154PTdsd4fT3aj7cGXAtAmqEvQvJPoQBqZ09sr1ZBsozd9X5QGHahJqCXX3kgyIgU7';
-        const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW ` + table_name +
+        const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW ` + viewName +
                    ` AS
                    student @INSERT @UPDATE @DELETE
                    {
@@ -697,13 +730,15 @@ describe('272. jsonDualityView1.js', function() {
                     }`;
 
         await connection.execute(query);
-        await connection.execute(`drop view ` + table_name);
+        await connection.execute(`DROP VIEW ` + viewName);
       });
 
       it('272.3.9.2 case 2 ', async function() {
-        const table_name = 'an4HHXUjvHxb3RiO0TECKFAhdXx0u7M9kwnh' +
+        if (isOracleDB_23_4) this.skip();
+
+        const viewName = 'an4HHXUjvHxb3RiO0TECKFAhdXx0u7M9kwnh' +
         'J7UT7KOcNwhx0kSHsrc0HaXwS0D154PTdsd4fT3aj7cGXAtAmqEvQvJPoQBqZ09sr1ZBsozd9X5QGHahJqCXX3kgyIgU7';
-        const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW ` + table_name +
+        const query = `CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW ` + viewName +
                    ` AS
                    student @INSERT @UPDATE @DELETE
                    {
@@ -724,31 +759,33 @@ describe('272. jsonDualityView1.js', function() {
     describe('272.3.10 View creation inside a PLSQL Block ', function() {
 
       it('272.3.10.1 Query with DBMS_SQL', async function() {
+        if (isOracleDB_23_4) this.skip();
 
         const query = `DECLARE
-         l_i_cursor_id INTEGER;
-         BEGIN
+          l_i_cursor_id INTEGER;
+          BEGIN
           l_i_cursor_id:=dbms_sql.open_cursor;
-           dbms_sql.parse(l_i_cursor_id, 'CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-         AS
+            dbms_sql.parse(l_i_cursor_id, 'CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
+          AS
           student @INSERT
             {
-           StudentId:stuid,
-           StudentName:name,
+            StudentId:stuid,
+            StudentName:name,
                   student_class @INSERT @UPDATE @DELETE
                       {StudentClassId:scid,
-                         class  @CHECK  {ClassId:clsid, Name:name}
+                          class  @CHECK  {ClassId:clsid, Name:name}
                         }
           }'
-           , dbms_sql.native);
-           dbms_sql.close_cursor(l_i_cursor_id);
-           END;
+            , dbms_sql.native);
+            dbms_sql.close_cursor(l_i_cursor_id);
+            END;
           `;
         await connection.execute(query);
 
       });
 
       it('272.3.10.2 Query with EXECUTE IMMEDIATE', async function() {
+        if (isOracleDB_23_4) this.skip();
 
         const query = `BEGIN
            EXECUTE IMMEDIATE 'CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
@@ -785,7 +822,8 @@ describe('272. jsonDualityView1.js', function() {
                                   )`;
 
       before(async function() {
-        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm || !dbConfig.test.DBA_PRIVILEGE) {
+        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm ||
+          !dbConfig.test.DBA_PRIVILEGE || isOracleDB_23_4) {
           this.skip();
         }
         const credential = {
@@ -803,7 +841,8 @@ describe('272. jsonDualityView1.js', function() {
       });
 
       after(async function() {
-        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm || !dbConfig.test.DBA_PRIVILEGE) {
+        if (dbConfig.test.drcp || dbConfig.test.isCmanTdm ||
+          !dbConfig.test.DBA_PRIVILEGE || isOracleDB_23_4) {
           return;
         }
         await connection.execute(`DROP USER ${user1} CASCADE`);
@@ -822,7 +861,7 @@ describe('272. jsonDualityView1.js', function() {
           connectString: dbConfig.connectString
         });
 
-        await conn.execute(createTableStudent);
+        await conn.execute(testsUtil.sqlCreateTable('student', createTableStudent));
 
         await conn.execute(`INSERT INTO student VALUES (1, 'ABC')`);
         await conn.execute(`INSERT INTO student VALUES (2, 'LMN')`);

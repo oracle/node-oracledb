@@ -141,5 +141,4 @@ describe('51. poolClose.js', function() {
     assert.strictEqual(pool.queueTimeout, 60000);
     assert.strictEqual(pool.stmtCacheSize, oracledb.stmtCacheSize);
   }); // 51.8
-
 });

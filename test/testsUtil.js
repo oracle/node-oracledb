@@ -230,7 +230,7 @@ testsUtil.isJsonMetaDataRunnable = async function() {
 
     await conn.close();
   } catch (error) {
-    console.log('Error in checking is JSON metadata prerequistes:\n', error);
+    console.log('Error in checking JSON metadata prerequisites:\n', error);
     throw error;
   }
 
@@ -282,6 +282,22 @@ testsUtil.getDBCompatibleVersion = async function() {
     await conn.close();
   }
   return compatibleVersion;
+};
+
+// Get the major version (e.g., '23.1') from the database server version string (e.g., `23.1.0.23.0`)
+testsUtil.getMajorDBVersion = async function() {
+  let connection, majorDBVersion;
+  try {
+    connection = await oracledb.getConnection(dbConfig);
+    const serverVersion = connection.oracleServerVersionString;
+    const match = serverVersion.match(/^\d+\.\d+/);
+    majorDBVersion = match[0];
+  } catch (e) {
+    console.error('Error in getting Database version:\n', e);
+  } finally {
+    await connection.close();
+  }
+  return majorDBVersion;
 };
 
 // Function versionStringCompare returns:

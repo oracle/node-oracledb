@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2022, Oracle and/or its affiliates.
+# Copyright (c) 2022, 2024, Oracle and/or its affiliates.
 #
 # This software is dual-licensed to you under the Universal Permissive License
 # (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
@@ -50,6 +50,28 @@ class ListTableWithSummary(tables.ListTable):
 
 
 class HTMLTranslator(sphinx.writers.html5.HTML5Translator):
+
+    def visit_paragraph(self, node):
+        text_to_hide = [
+            "No optional parameters for this option value",
+            "No required parameters for this option value",
+            "No optional configuration for this option value",
+            "No relevant notes"
+        ]
+        children = node.children
+        if len(children) == 1 and children[0].astext() in text_to_hide:
+            atts = {
+                "style": "clip: rect(1px, 1px, 1px, 1px);"
+                "clip-path: inset(50%);"
+                "height: 1px;"
+                "overflow: hidden;"
+                "position: absolute;"
+                "white-space: nowrap;"
+                "width: 1px;"
+            }
+            self.body.append(self.starttag(node, "p", "", **atts))
+        else:
+            super().visit_paragraph(node)
 
     def visit_table(self, node):
         if version.parse(sphinx.__version__) > version.parse('4.2.0'):

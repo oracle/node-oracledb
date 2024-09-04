@@ -41,6 +41,7 @@ describe('274 jsonDualityView3.js', function() {
   let connection = null;
   let dbaConn = null;
   let isRunnable = false;
+  let isOracleDB_23_4;
   const pwd = testsUtil.generateRandomPassword();
   before(async function() {
     isRunnable = (!dbConfig.test.drcp);
@@ -50,6 +51,14 @@ describe('274 jsonDualityView3.js', function() {
     }
     if (!isRunnable || dbConfig.test.isCmanTdm) {
       this.skip();
+    }
+
+    // 23.4 requires the _id column for creating JSON Duality Views, which
+    // is not added in these tests. So check if the Oracle Database version
+    // is 23.4. This condition will be used for some tests to check, if the
+    // test should be skipped.
+    if (await testsUtil.getMajorDBVersion() === '23.4') {
+      isOracleDB_23_4 = true;
     }
 
     const dbaCredential = {
@@ -82,6 +91,8 @@ describe('274 jsonDualityView3.js', function() {
   });
 
   it('274.1 Define Columns of View with WITH READ WRITE or WITH READ ONLY annotations', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     // create the student table
     const createTableStudent = `
       CREATE TABLE student(
@@ -177,6 +188,8 @@ describe('274 jsonDualityView3.js', function() {
   });
 
   it('274.3 Have columns of all scalar types, including FLOAT, TIMESTAMP, TIMESTAMP WITH TIME ZONE', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     //INTERVAL YEAR TO MONTH,INTERVAL DAY TO SECOND,BFILE, LONG, RAW etc in select query
 
     // create the stores table
@@ -230,6 +243,8 @@ describe('274 jsonDualityView3.js', function() {
   });
 
   it('274.5 Select over Invisible columns', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     // create the student1 table
     const createTableStudent1 = `
       CREATE TABLE student1 (
@@ -268,6 +283,8 @@ describe('274 jsonDualityView3.js', function() {
   });
 
   it('274.6 Add is (Ex: "deptno" IS d.department_id)', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     // create the student table
     const createTableStudent = `
       CREATE TABLE student(
@@ -316,6 +333,8 @@ describe('274 jsonDualityView3.js', function() {
   });
 
   it('274.8 Create view on NULL columns - empty columns', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     // create the student table
     const createTableStudent = `
       CREATE TABLE student(

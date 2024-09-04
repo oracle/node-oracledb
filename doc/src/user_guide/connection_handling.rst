@@ -4189,7 +4189,7 @@ corresponding option values are listed in the table below.
       - Optional Parameters for This Option Value
     * - Default Azure Credential
       - AZURE_DEFAULT (also used when the Authentication method is not set)
-      -
+      - No required parameters for this option value
       - AZURE_CLIENT_ID
 
         AZURE_CLIENT_SECRET
@@ -4206,7 +4206,7 @@ corresponding option values are listed in the table below.
         AZURE_CLIENT_SECRET
 
         AZURE_TENANT_ID
-      -
+      - No optional parameters for this option value
     * - Service Principal with client certificate
       - AZURE_SERVICE_PRINCIPAL
       - AZURE_CLIENT_ID
@@ -4214,11 +4214,11 @@ corresponding option values are listed in the table below.
         AZURE_CLIENT_CERTIFICATE_PATH
 
         AZURE_TENANT_ID
-      -
+      - No optional parameters for this option value
     * - Managed Identity
       - AZURE_MANAGED_IDENTITY
       - AZURE_MANAGED_IDENTITY_CLIENT_ID - required only if user assigned
-      -
+      - No optional parameters for this option value
 
 Note that the Azure service principal with client certificate overrides Azure
 service principal with client secret.
@@ -4509,12 +4509,12 @@ corresponding option values are listed in the table below.
         OCI_PROFILE_PATH
     * - Instance Principal Authentication
       - OCI_INSTANCE_PRINCIPAL
-      -
-      -
+      - No optional configuration for this option value
+      - No optional parameters for this option value
     * - Resource Principal Authentication
       - OCI_RESOURCE_PRINCIPAL
-      -
-      -
+      - No optional configuration for this option value
+      - No optional parameters for this option value
 
 See `Authentication Parameters for OCI Object Storage <https://www.oracle.com/
 pls/topic/lookup?ctx=dblatest&id=GUID-EB94F084-0F3F-47B5-AD77-D111070F7E8D>`__

@@ -230,7 +230,6 @@ describe("73. poolPing.js", function() {
       /NJS-007:/
     );
   }); // 73.22
-
 });
 
 describe('73_1 poolPingTimeout', function() {
@@ -239,6 +238,7 @@ describe('73_1 poolPingTimeout', function() {
   afterEach(async function() {
     if (pool) {
       await pool.close(0);
+      pool = null;
     }
   });
 

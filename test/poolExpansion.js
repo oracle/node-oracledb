@@ -38,6 +38,17 @@ const dbConfig = require('./dbconfig.js');
 const testUtil = require('../test/testsUtil.js');
 
 describe('278. Pool expansion', function() {
+  let pool;
+
+  afterEach(async function() {
+    // Ensure that pool is closed irrespective of any test failures.
+    // Not closing a pool impacts the poolCache, which may be used by later
+    // tests and lead to false test failures.
+    if (pool) {
+      await pool.close(0);
+      pool = null;
+    }
+  });
 
   function sleep(ms) {
     return new Promise((resolve) => {
@@ -49,7 +60,7 @@ describe('278. Pool expansion', function() {
     if (!oracledb.thin || dbConfig.test.drcp) this.skip();
     // thick driver is creating total connections exceeding poolMax
 
-    const pool = await oracledb.createPool({
+    pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 0,
       poolMax: 2,
@@ -64,13 +75,12 @@ describe('278. Pool expansion', function() {
     assert.strictEqual(pool.connectionsOpen, 2);
     assert.strictEqual(pool.connectionsInUse, 1);
     await conn.close();
-    await pool.close(0);
   });
 
   it('278.2 pool expansion not done on creating minimum connection', async function() {
     if (dbConfig.test.drcp) this.skip();
 
-    const pool = await oracledb.createPool({
+    pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 2,
       poolMax: 10,
@@ -85,13 +95,12 @@ describe('278. Pool expansion', function() {
     await sleep(1000);
     assert.strictEqual(pool.connectionsOpen, 2);
     assert.strictEqual(pool.connectionsInUse, 0);
-    await pool.close(0);
   });
 
   it('278.3 no pool expansion while acquiring connection already present in pool', async function() {
     if (dbConfig.test.drcp) this.skip();
 
-    const pool = await oracledb.createPool({
+    pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 2,
       poolMax: 10,
@@ -105,13 +114,12 @@ describe('278. Pool expansion', function() {
     assert.strictEqual(pool.connectionsOpen, 2);
     assert.strictEqual(pool.connectionsInUse, 1);
     await conn.close();
-    await pool.close(0);
   });
 
   it('278.4 pool connection count not crossing pool max limit on parallel execution', async function() {
     if (dbConfig.test.drcp) this.skip();
 
-    const pool = await oracledb.createPool({
+    pool = await oracledb.createPool({
       ...dbConfig,
       poolMin: 2,
       poolMax: 10,
@@ -136,6 +144,5 @@ describe('278. Pool expansion', function() {
     await conn1.close();
     await conn3.close();
     await conn2.close();
-    await pool.close(0);
   });
 });

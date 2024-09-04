@@ -60,35 +60,37 @@ describe('276. jsonDualityView5.js', function() {
     };
     const pwd = testsUtil.generateRandomPassword();
     dbaConn = await oracledb.getConnection(dbaCredential);
-    await dbaConn.execute(`create user njs_jsonDv5 identified by ${pwd}`);
-    await dbaConn.execute(`grant ctxapp, connect, resource,create session,create any table,
-    create view,CREATE MATERIALIZED VIEW,unlimited tablespace to njs_jsonDv5`);
+    await dbaConn.execute(`CREATE USER njs_jsonDv5 IDENTIFIED BY ${pwd}`);
+    await dbaConn.execute(`GRANT ctxapp, connect, resource, create session, create any table,
+    create view, CREATE MATERIALIZED VIEW, unlimited tablespace TO njs_jsonDv5`);
     connection = await oracledb.getConnection({user: 'njs_jsonDv5',
       password: pwd,
       connectString: dbConfig.connectString
     });
 
     // create the student table
-    await connection.execute(`
+    const sqlCreateTableStudent = `
       create table student(
         stuid number,
         name varchar(128) default null,
         constraint pk_student primary key (stuid)
       )
-    `);
+    `;
+    await connection.execute(testsUtil.sqlCreateTable('student', sqlCreateTableStudent));
 
     // create the class table
-    await connection.execute(`
+    const sqlCreateTableClass = `
       create table class(
         clsid number,
         name varchar2(128),
         constraint pk_class primary key (clsid)
       )
-    `);
+    `;
+    await connection.execute(testsUtil.sqlCreateTable('class', sqlCreateTableClass));
 
     // create the student_class table
-    await connection.execute(`
-      create table student_class (
+    const sqlCreateTableStudentClass = `
+      create table student_class(
         scid number,
         stuid number,
         clsid number,
@@ -96,19 +98,24 @@ describe('276. jsonDualityView5.js', function() {
         constraint fk_student_class1 foreign key (stuid) references student(stuid),
         constraint fk_student_class2 foreign key (clsid) references class(clsid)
       )
-    `);
+    `;
+    await connection.execute(testsUtil.sqlCreateTable('student_class', sqlCreateTableStudentClass));
   });
 
   after(async function() {
     if (!isRunnable || dbConfig.test.isCmanTdm) return;
 
-    await testsUtil.dropTable(connection, 'student_class');
-    await testsUtil.dropTable(connection, 'class');
-    await testsUtil.dropTable(connection, 'student');
-    await connection.close();
+    if (connection) {
+      await testsUtil.dropTable(connection, 'student_class');
+      await testsUtil.dropTable(connection, 'class');
+      await testsUtil.dropTable(connection, 'student');
+      await connection.close();
+    }
 
-    await dbaConn.execute(`drop user njs_jsonDv5 cascade`);
-    await dbaConn.close();
+    if (dbaConn) {
+      await dbaConn.execute(`DROP USER njs_jsonDv5 CASCADE`);
+      await dbaConn.close();
+    }
   });
 
   it('276.1 Insert data in table and views', async function() {
@@ -623,7 +630,9 @@ annotation or NOUPDATE annotation specified.*/
            {StudentClassId : scid,
             Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-44971:/ //ORA-44971: JSON relational duality view cannot have duplicate column 'STUDENT'.'STUID' specified.
+      /ORA-44971:|ORA-40895:/
+      //ORA-44971: JSON relational duality view cannot have duplicate column 'STUDENT'.'STUID' specified.
+      //ORA-40895: invalid SQL expression in JSON relational duality view (duplicate sub-object)
     );
 
     await connection.execute(`

@@ -396,6 +396,8 @@ describe('294. dataTypeVector1.js', function() {
   }); // 294.13
 
   it('294.14 insert uint8 typed array to float64 vector column', async function() {
+    if (!isVectorBinaryRunnable) this.skip();
+
     // Create an UInt8Array
     const uInt8Arr = new Uint8Array([3, 2, 3, 4, 5, 6, 3, 4, 5, 5]);
     // Bind the UInt8Array using oracledb.DB_TYPE_VECTOR
@@ -417,6 +419,8 @@ describe('294. dataTypeVector1.js', function() {
   }); // 294.14
 
   it('294.15 insert uint8arr typed array to flex vector column', async function() {
+    if (!isVectorBinaryRunnable) this.skip();
+
     // Create an UInt8Array
     const uInt8Arr = new Uint8Array([126, 125, -126, -23, 11, 12, -11, -12, 10, 10]);
 
@@ -434,6 +438,8 @@ describe('294. dataTypeVector1.js', function() {
   }); // 294.15
 
   it('294.16 insert uInt8arr typed array to float32 vector column', async function() {
+    if (!isVectorBinaryRunnable) this.skip();
+
     // Create an UInt8Array
     const Uint8arr = new Uint8Array([3]);
 

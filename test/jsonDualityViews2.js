@@ -41,6 +41,7 @@ describe('273. jsonDualityView2.js', function() {
   let connection = null;
   let dbaConn = null;
   let isRunnable = false;
+  let isOracleDB_23_4;
   const sqlCreateTableStudent = `CREATE TABLE student( \n` +
     `stuid NUMBER, \n` +
     `name VARCHAR(128) DEFAULT null, \n` +
@@ -55,6 +56,14 @@ describe('273. jsonDualityView2.js', function() {
     }
     if (!isRunnable) {
       this.skip();
+    }
+
+    // 23.4 requires the _id column for creating JSON Duality Views, which
+    // is not added in these tests. So check if the Oracle Database version
+    // is 23.4. This condition will be used for some tests to check, if the
+    // test should be skipped.
+    if (await testsUtil.getMajorDBVersion() === '23.4') {
+      isOracleDB_23_4 = true;
     }
 
     const dbaCredential = {
@@ -103,6 +112,8 @@ describe('273. jsonDualityView2.js', function() {
   });
 
   it('273.2 Base table name with various sizes (128)', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     const table = `hTKFRCNOJyYYvuyUvKsEWhfuObJBjBNnzLVuwqRfaqQA` +
       `dtXBKxOHeheawjKeezZbgmfJJRhovKkhtwTXXnTWYpojdeawBFuAxPNaDAPjxuRzdpzYcHYwYggVCQueeXiv`;
     const sqlCreate = `CREATE TABLE ${table}
@@ -152,6 +163,8 @@ describe('273. jsonDualityView2.js', function() {
   });
 
   it('273.5 Create a column name as NOINSERT and add NOINSERT tag to that column', async function() {
+    if (isOracleDB_23_4) this.skip();
+
     const sqlCreate = `CREATE TABLE student(
       stuid NUMBER,
       NOINSERT VARCHAR(128) DEFAULT null,
@@ -242,22 +255,30 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     it('273.8.1 View with Heap', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const sqlCreateTable = `CREATE TABLE t1 (c1 NUMBER PRIMARY KEY, c2 VARCHAR2(30)) ORGANIZATION HEAP`;
       await connection.execute(testsUtil.sqlCreateTable('t1', sqlCreateTable));
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW heap AS t1{c1,c2}`);
       await connection.execute(testsUtil.sqlDropTable(`t1`));
-      await connection.execute(`DROP VIEW heap`);
+      await connection.execute(`DROP VIEW IF EXISTS heap`);
     });
 
     it('273.8.2 View with IOT', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const sqlCreateTable = `CREATE TABLE my_iot (id INTEGER PRIMARY KEY, value VARCHAR2(50)) ORGANIZATION INDEX`;
       await connection.execute(testsUtil.sqlCreateTable('my_iot', sqlCreateTable));
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW iot AS my_iot{id,value}`);
       await connection.execute(testsUtil.sqlDropTable(`my_iot`));
-      await connection.execute(`DROP VIEW iot`);
+      await connection.execute(`DROP VIEW IF EXISTS iot`);
     });
 
     it('273.8.3 View with Partitioned Table', async function() {
+      if (isOracleDB_23_4) this.skip();
+
+      await connection.execute(`DROP TABLE IF EXISTS sales`);
+
       await connection.execute(`CREATE TABLE sales \n` +
         `( prod_id       NUMBER(6) PRIMARY KEY\n` +
           `, cust_id       NUMBER\n` +
@@ -275,7 +296,7 @@ describe('273. jsonDualityView2.js', function() {
         `)`);
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW partition AS sales{prod_id,cust_id}`);
       await connection.execute(testsUtil.sqlDropTable(`sales`));
-      await connection.execute(`DROP VIEW partition`);
+      await connection.execute(`DROP VIEW IF EXISTS partition`);
     });
 
     it('273.8.4 View with cluster', async function() {
@@ -299,13 +320,16 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     it('273.8.5 View with GTT', async function() {
+      if (isOracleDB_23_4) this.skip();
+
+      await connection.execute(`DROP TABLE IF EXISTS today_sales`);
       await connection.execute(`CREATE GLOBAL TEMPORARY TABLE today_sales(order_id NUMBER primary key)\n` +
                  `ON COMMIT PRESERVE ROWS`);
 
       await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW GTT\n` +
                    `AS today_sales{order_id}`);
       await connection.execute(testsUtil.sqlDropTable(`today_sales`));
-      await connection.execute(`DROP VIEW GTT`);
+      await connection.execute(`DROP VIEW IF EXISTS GTT`);
     });
   });
 
@@ -383,6 +407,8 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     it('273.9.3 Base table with Unique Index on it', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const sqlCreate = `
         CREATE TABLE unq_idx_demo(
           a NUMBER PRIMARY KEY,
@@ -407,6 +433,8 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     it('273.9.4 Base table with COMPOSITE Index on it', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const sqlCreateTable = `
         CREATE TABLE cmp_idx_demo(
           a NUMBER PRIMARY KEY,
@@ -432,6 +460,8 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     it('273.9.5 Base table with Function-based index on it', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const sqlCreateTable = `
         CREATE TABLE members (
           id NUMBER PRIMARY KEY,
@@ -453,6 +483,8 @@ describe('273. jsonDualityView2.js', function() {
     });
 
     it('273.9.6 Base table with bitmap index index on it', async function() {
+      if (isOracleDB_23_4) this.skip();
+
       const sqlCreateTable = `
         CREATE TABLE bitmap_index_demo (
           id INT GENERATED BY DEFAULT AS IDENTITY,

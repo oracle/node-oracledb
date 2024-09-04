@@ -52,7 +52,6 @@ describe('2. pool.js', function() {
       assert.strictEqual(pool.connectionsInUse, 0);
       await pool.close(0);
     });
-
   });
 
   describe('2.2 poolMin', function() {
@@ -111,20 +110,18 @@ describe('2. pool.js', function() {
       assert.strictEqual(pool.connectionsInUse, 0);
       await pool.close(0);
     });
-
   }); // 2.2
 
   describe('2.3 poolMax', function() {
     let pool;
-    let isPoolClosed = true;
 
     afterEach(async function() {
-    // Ensure that pool is closed irrespective of any test failures.
-    // Not closing a pool impacts the poolCache, which may be used by later
-    // tests and lead to false test failures.
-      if (!isPoolClosed && pool) {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
         await pool.close(0);
-        isPoolClosed = true;
+        pool = null;
       }
     });
 
@@ -180,7 +177,6 @@ describe('2. pool.js', function() {
         queueTimeout: 1
       };
       pool = await oracledb.createPool(config);
-      isPoolClosed = false;
       conns.push(await pool.getConnection());
       conns.push(await pool.getConnection());
       await assert.rejects(
@@ -199,10 +195,7 @@ describe('2. pool.js', function() {
           resolve();
         }, 2000);
       });
-      await pool.close(0);
-      isPoolClosed = true;
     });
-
   }); // 2.3
 
   describe('2.4 poolIncrement', function() {
@@ -260,7 +253,6 @@ describe('2. pool.js', function() {
       await conn4.close();
       await pool.close(0);
     });
-
   }); // 2.4
 
   describe('2.5 poolTimeout', function() {
@@ -304,7 +296,6 @@ describe('2. pool.js', function() {
         /NJS-007:/
       );
     });
-
   });
 
   describe('2.6 stmtCacheSize', function() {
@@ -348,34 +339,37 @@ describe('2. pool.js', function() {
         /NJS-007:/
       );
     });
-
   });
 
   describe('2.7 getConnection', function() {
-    let pool1;
-
-    beforeEach('get pool ready', async function() {
+    it('2.7.1 passes error in callback if called after pool is terminated and a callback is provided', async function() {
       const config = {...dbConfig,
         poolMin: 1,
         poolMax: 2,
         poolIncrement: 1,
         poolTimeout: 1
       };
-      pool1 = await oracledb.createPool(config);
-    });
-
-    it('2.7.1 passes error in callback if called after pool is terminated and a callback is provided', async function() {
+      const pool1 = await oracledb.createPool(config);
       await pool1.close();
       await assert.rejects(
         async () => await pool1.getConnection(),
         /NJS-065:/
       );
     });
-
   });
 
   describe('2.8 connection request queue', function() {
+    let pool;
 
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
     function getBlockingSql(secondsToBlock) {
       const blockingSql = '' +
         'declare \n' +
@@ -400,7 +394,7 @@ describe('2. pool.js', function() {
         poolIncrement: 1,
         poolTimeout: 1
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       const routine1 = async function() {
         const conn = await pool.getConnection();
         await conn.execute(getBlockingSql(3));
@@ -414,7 +408,6 @@ describe('2. pool.js', function() {
         await conn.close();
       };
       await Promise.all([routine1(), routine2()]);
-      await pool.close(0);
     });
 
     it('2.8.2 generates NJS-040 if request is queued and queueTimeout expires', async function() {
@@ -425,7 +418,7 @@ describe('2. pool.js', function() {
         poolTimeout: 1,
         queueTimeout: 2000 //2 seconds
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       const routine1 = async function() {
         const conn = await pool.getConnection();
         await conn.execute(getBlockingSql(4));
@@ -441,7 +434,6 @@ describe('2. pool.js', function() {
         );
       };
       await Promise.all([routine1(), routine2()]);
-      await pool.close(0);
     });
 
     it('2.8.3 generates NJS-076 if request exceeds queueMax', async function() {
@@ -452,7 +444,7 @@ describe('2. pool.js', function() {
         queueTimeout: 2000, // 2 seconds
         queueMax: 1
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       let conn1;
       const routine1 = async function() {
         conn1 = await pool.getConnection();
@@ -475,7 +467,6 @@ describe('2. pool.js', function() {
       await Promise.all([routine1(), routine2()]);
 
       await conn1.close();
-      await pool.close(0);
     });
 
     it('2.8.4 generates NJS-076 if request exceeds queueMax 0', async function() {
@@ -486,14 +477,13 @@ describe('2. pool.js', function() {
         queueTimeout: 5000, // 5 seconds
         queueMax: 0
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       const conn = await pool.getConnection();
       await assert.rejects(
         async () => await pool.getConnection(),
         /NJS-076:/
       );
       await conn.close();
-      await pool.close(0);
     });
 
     it('2.8.5 request queue never terminate for queueTimeout set to 0', async function() {
@@ -504,7 +494,7 @@ describe('2. pool.js', function() {
         poolTimeout: 1,
         queueTimeout: 0 // 0 seconds
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       const routine1 = async function() {
         const conn = await pool.getConnection();
         await conn.execute(getBlockingSql(3));
@@ -518,7 +508,6 @@ describe('2. pool.js', function() {
         await conn.close();
       };
       await Promise.all([routine1(), routine2()]);
-      await pool.close(0);
     });
 
     it('2.8.6 queueMax range check, queueMax -1', async function() {
@@ -528,10 +517,9 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
         queueMax: -1
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       const conn = await pool.getConnection();
       await conn.close();
-      await pool.close(0);
     });
 
     it('2.8.7 queueMax range check, queueMax -0.5 not an integer', async function() {
@@ -546,7 +534,6 @@ describe('2. pool.js', function() {
         /NJS-007:/
       );
     });
-
   });
 
   describe('2.9 _enableStats & _logStats functionality', function() {
@@ -569,7 +556,6 @@ describe('2. pool.js', function() {
         /NJS-065:/
       );
     });
-
   });
 
   describe('2.10 Close method', function() {
@@ -584,7 +570,6 @@ describe('2. pool.js', function() {
       const pool = await oracledb.createPool(config);
       await pool.close(0);
     });
-
   }); // 2.10
 
   describe('2.11 Invalid Credential', function() {
@@ -629,7 +614,6 @@ describe('2. pool.js', function() {
       const pool = await oracledb.createPool(config);
       await pool.close(0);
     });
-
   }); // 2.12
 
   describe('2.13 connectString & connectionString provided', function() {
@@ -646,10 +630,20 @@ describe('2. pool.js', function() {
         /NJS-075:/
       );
     });  // 2.13.1
-
-  });  // 2.13.1
+  });  // 2.13
 
   describe('2.14 username alias', function() {
+    let pool;
+
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
 
     it('2.14.1 allows username to be used as an alias for user', async function() {
       const config = {
@@ -660,8 +654,7 @@ describe('2. pool.js', function() {
         poolIncrement: 0
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
-      await pool.close(0);
+      pool = await oracledb.createPool(config);
     }); // 2.14.1
 
     it('2.14.2 both user and username specified', async function() {
@@ -688,12 +681,22 @@ describe('2. pool.js', function() {
         poolIncrement: 0
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
-      await pool.close(0);
+      pool = await oracledb.createPool(config);
     }); // 2.14.3
-
   }); // 2.14
+
   describe('2.15 creation time non editable properties', function() {
+    let pool;
+
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
 
     it('2.15.1 default edition value', async function() {
       const config = {
@@ -704,10 +707,9 @@ describe('2. pool.js', function() {
         poolIncrement: 0
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.edition, "");
-      await pool.close(0);
-    });   // 2.15.1
+    }); // 2.15.1
 
     it('2.15.2 ORA$BASE edition value', async function() {
       const config = {
@@ -719,10 +721,9 @@ describe('2. pool.js', function() {
         edition: "ORA$BASE"
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.edition, "ORA$BASE");
-      await pool.close(0);
-    });     // 2.15.2
+    }); // 2.15.2
 
     it('2.15.3 default value for events - false', async function() {
       const config = {
@@ -733,9 +734,8 @@ describe('2. pool.js', function() {
         poolIncrement: 0
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.events, false);
-      await pool.close(0);
     });  // 2.15.3
 
     it('2.15.4 events - false', async function() {
@@ -748,10 +748,9 @@ describe('2. pool.js', function() {
         events: false
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.events, false);
-      await pool.close(0);
-    });   // 2.15.4
+    }); // 2.15.4
 
     it('2.15.5 events - true', async function() {
       const config = {
@@ -763,9 +762,8 @@ describe('2. pool.js', function() {
         events: true
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.events, true);
-      await pool.close(0);
     });  // 2.15.5
 
     it('2.15.6 externalAuth - default false', async function() {
@@ -777,9 +775,8 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.externalAuth, false);
-      await pool.close(0);
     });  // 2.15.6
 
     it('2.15.7 externalAuth - true', async function() {
@@ -791,9 +788,8 @@ describe('2. pool.js', function() {
         externalAuth: true
       };
       if (!oracledb.thin) {
-        const pool = await oracledb.createPool(config);
+        pool = await oracledb.createPool(config);
         assert.strictEqual(pool.externalAuth, true);
-        await pool.close(0);
       } else {
         await assert.rejects(
           async () => await oracledb.createPool(config),
@@ -812,10 +808,9 @@ describe('2. pool.js', function() {
         externalAuth: false
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.externalAuth, false);
-      await pool.close(0);
-    });   // 2.15.8
+    }); // 2.15.8
 
     it('2.15.9 homogeneous - default true', async function() {
       const config = {
@@ -826,9 +821,8 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.homogeneous, true);
-      await pool.close(0);
     });  // 2.15.9
 
     it('2.15.10 homogeneous - true', async function() {
@@ -841,9 +835,8 @@ describe('2. pool.js', function() {
         homogeneous: true
       };
       delete config.user;
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.homogeneous, true);
-      await pool.close(0);
     });  // 2.15.10
 
     it('2.15.11 homogeneous - false', async function() {
@@ -857,9 +850,8 @@ describe('2. pool.js', function() {
       };
       delete config.user;
       if (!oracledb.thin) {
-        const pool = await oracledb.createPool(config);
+        pool = await oracledb.createPool(config);
         assert.strictEqual(pool.homogeneous, false);
-        await pool.close(0);
       } else {
         await assert.rejects(
           async () => await oracledb.createPool(config),
@@ -874,9 +866,8 @@ describe('2. pool.js', function() {
         poolMax: 1,
         poolIncrement: 0,
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.user, dbConfig.user);
-      await pool.close(0);
     });  // 2.15.12
 
     it('2.15.13 user name - undefined', async function() {
@@ -894,9 +885,8 @@ describe('2. pool.js', function() {
         externalAuth: true
       };
       if (!oracledb.thin) {
-        const pool = await oracledb.createPool(config);
+        pool = await oracledb.createPool(config);
         assert.strictEqual(pool.user, undefined);
-        await pool.close(0);
       } else {
         await assert.rejects(
           async () => await oracledb.createPool(config),
@@ -912,9 +902,8 @@ describe('2. pool.js', function() {
         poolMax: 1,
         poolIncrement: 0,
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.connectString, config.connectString);
-      await pool.close(0);
     });  // 2.15.14
 
     it('2.15.15 externalAuth - true and non-empty password', async function() {
@@ -943,11 +932,21 @@ describe('2. pool.js', function() {
         async () => await oracledb.createPool(config),
         /ORA-24415:|NJS-101:/
       );
-    });  // 2.15.16
-
-  });   // 2.15
+    }); // 2.15.16
+  }); // 2.15
 
   describe('2.16 Pool non-configurable properties global/local override', function() {
+    let pool;
+
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
 
     it('2.16.1 edition only globally set', async function() {
       const config = {
@@ -959,11 +958,10 @@ describe('2. pool.js', function() {
       };
       delete config.user;
       oracledb.edition = "ORA$BASE";
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       oracledb.edition = "";
       assert.strictEqual(pool.edition, "ORA$BASE");
-      await pool.close(0);
-    });    // 2.16.1
+    });  // 2.16.1
 
     it('2.16.2 edition override', async function() {
       const config = {
@@ -976,10 +974,9 @@ describe('2. pool.js', function() {
       };
       delete config.user;
       oracledb.edition = "";
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       assert.strictEqual(pool.edition, "ORA$BASE");
-      await pool.close(0);
-    });    // 2.16.2
+    });  // 2.16.2
 
     it('2.16.3 edition override to empty string', async function() {
       const config = {
@@ -992,109 +989,102 @@ describe('2. pool.js', function() {
       };
       delete config.user;
       oracledb.edition = "ORA$BASE";
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       oracledb.edition = "";
       assert.strictEqual(pool.edition, "");
-      await pool.close(0);
-    });    // 2.16.3
+    });  // 2.16.3
 
     it('2.16.4 events override to true', async function() {
       const origEvents = oracledb.events;
       oracledb.events = false;
-      try {
-        const config = {
-          ...dbConfig,
-          username: dbConfig.user,
-          poolMin: 1,
-          poolMax: 1,
-          poolIncrement: 0,
-          events: true
-        };
-        delete config.user;
-        const pool = await oracledb.createPool(config);
-        assert.strictEqual(pool.events, true);
-        await pool.close(0);
-      } finally {
-        oracledb.events = origEvents;
-      }
-    });    // 2.16.4
+      const config = {
+        ...dbConfig,
+        username: dbConfig.user,
+        poolMin: 1,
+        poolMax: 1,
+        poolIncrement: 0,
+        events: true
+      };
+      delete config.user;
+      pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.events, true);
+      oracledb.events = origEvents;
+    });  // 2.16.4
 
     it('2.16.5 events override to false', async function() {
       const origEvents = oracledb.events;
       oracledb.events = true;
-      try {
-        const config = {
-          ...dbConfig,
-          poolMin: 1,
-          poolMax: 1,
-          poolIncrement: 0,
-          events: false
-        };
-        const pool = await oracledb.createPool(config);
-        assert.strictEqual(pool.events, false);
-        await pool.close(0);
-      } finally {
-        oracledb.events = origEvents;
-      }
+      const config = {
+        ...dbConfig,
+        poolMin: 1,
+        poolMax: 1,
+        poolIncrement: 0,
+        events: false
+      };
+      pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.events, false);
+      oracledb.events = origEvents;
     });    // 2.16.5
 
     it('2.16.6 externalAuth override to false', async function() {
       const origExternalAuth = oracledb.externalAuth;
       oracledb.externalAuth = true;
-      try {
-        const config = {
-          ...dbConfig,
-          username: dbConfig.user,
-          poolMin: 1,
-          poolMax: 1,
-          poolIncrement: 0,
-          externalAuth: false
-        };
-        delete config.user;
-        const pool = await oracledb.createPool(config);
-        assert.strictEqual(pool.externalAuth, false);
-        await pool.close(0);
-      } finally {
-        oracledb.externalAuth = origExternalAuth;
-      }
-    });    // 2.16.6
+      const config = {
+        ...dbConfig,
+        username: dbConfig.user,
+        poolMin: 1,
+        poolMax: 1,
+        poolIncrement: 0,
+        externalAuth: false
+      };
+      delete config.user;
+      pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.externalAuth, false);
+      oracledb.externalAuth = origExternalAuth;
+    });  // 2.16.6
 
     it('2.16.7 externalAuth override to true', async function() {
       const origExternalAuth = oracledb.externalAuth;
       oracledb.externalAuth = false;
-      try {
-        const config = {
-          connectString: dbConfig.connectString,
-          walletPassword: dbConfig.walletPassword,
-          walletLocation: dbConfig.walletLocation,
-          poolMin: 1,
-          poolMax: 1,
-          poolIncrement: 0,
-          externalAuth: true
-        };
-        if (!oracledb.thin) {
-          const pool = await oracledb.createPool(config);
-          assert.strictEqual(pool.externalAuth, true);
-          await pool.close(0);
-        } else {
-          await assert.rejects(
-            async () => await oracledb.createPool(config),
-            /NJS-089:/
-          );
-        }
-      } finally {
-        oracledb.externalAuth = origExternalAuth;
+      const config = {
+        connectString: dbConfig.connectString,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation,
+        poolMin: 1,
+        poolMax: 1,
+        poolIncrement: 0,
+        externalAuth: true
+      };
+      if (!oracledb.thin) {
+        pool = await oracledb.createPool(config);
+        assert.strictEqual(pool.externalAuth, true);
+      } else {
+        await assert.rejects(
+          async () => await oracledb.createPool(config),
+          /NJS-089:/
+        );
       }
-    });    // 2.16.7
-
+      oracledb.externalAuth = origExternalAuth;
+    });  // 2.16.7
   });  // 2.16
 
   describe('2.17 Check execute same/different query with new/released session from pool', function() {
+    let pool;
+
+    afterEach(async function() {
+      // Ensure that pool is closed irrespective of any test failures.
+      // Not closing a pool impacts the poolCache, which may be used by later
+      // tests and lead to false test failures.
+      if (pool) {
+        await pool.close(0);
+        pool = null;
+      }
+    });
 
     it('2.17.1 same query execution from new and released session', async function() {
       const config = {...dbConfig
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       const conn1 = await pool.getConnection();
       const result1 = await conn1.execute("SELECT 1 FROM DUAL");
       assert(result1);
@@ -1105,13 +1095,12 @@ describe('2. pool.js', function() {
       assert(result2);
       assert.strictEqual(result2.rows[0][0], 1);
       await conn2.close();
-      await pool.close();
     });   // 2.17.1
 
     it('2.17.2 different query execution from new and released session', async function() {
       const config = {...dbConfig
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
       const conn1 = await pool.getConnection();
       const result1 = await conn1.execute("SELECT 1 FROM DUAL");
       assert(result1);
@@ -1122,7 +1111,6 @@ describe('2. pool.js', function() {
       assert(result2);
       assert.strictEqual(result2.rows[0][0], 2);
       await conn2.close();
-      await pool.close();
     });  // 2.17.2
 
   });   // 2.17
@@ -1138,7 +1126,6 @@ describe('2. pool.js', function() {
       assert.strictEqual(oracledb.thin, poolstatistics.thin);
       await pool.close();
     }); // 2.18.1
-
   }); // 2.18
 
   describe('2.19 DBA and Non-DBA user login with SYSDBA privilege', function() {

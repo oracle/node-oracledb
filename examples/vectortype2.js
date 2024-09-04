@@ -87,8 +87,8 @@ async function run() {
     let i = 0;
     const binds = [], num = 4;
     const expectedArrays = [
-      [1, 2, 3],
       [4, 5, 6],
+      [1, 2, 3],
       [42, 52, 613],
       [-1, -2, -3]
     ];
@@ -116,13 +116,14 @@ async function run() {
 
     // Calculate distance to a given embedding
     const vecQuery = new Float64Array([3, 1, 2]);
-    let expectedValues = [6, 33, 377443, 50];
+    let expectedValues = ['0.1167', '0.2143', '0.3915', '1.7857'];
     result = await connection.execute(
       `select vector_distance (embedding, :1) from ${tableName}`, [vecQuery]);
     console.log(`Distance from Input Embedding `, [3, 1, 2]);
     console.log(result.rows);
+    console.log(result.rows[0]['VECTOR_DISTANCE(EMBEDDING,:1)']);
     for (i = 0; i < num; i++) {
-      assert.deepStrictEqual(result.rows[i], {"VECTOR_DISTANCE(EMBEDDING,:1)": expectedValues[i]});
+      assert.deepStrictEqual(result.rows[i]['VECTOR_DISTANCE(EMBEDDING,:1)'].toFixed(4), expectedValues[i]);
     }
 
     // Calculate top 3 similarity search to a given embedding
@@ -133,35 +134,35 @@ async function run() {
     console.log(result.rows);
     assert.deepStrictEqual(result.rows[0].EMBEDDING, expectedArrays[0]);
     assert.deepStrictEqual(result.rows[1].EMBEDDING, expectedArrays[1]);
-    assert.deepStrictEqual(result.rows[2].EMBEDDING, expectedArrays[3]);
+    assert.deepStrictEqual(result.rows[2].EMBEDDING, expectedArrays[2]);
 
     // Nearest Neighbours (distance < 34) for a given embedding [3,1,2]
     // gives [1,2,3] and [4,5,6]
     console.log('Nearest Neighbours with distance < 34:');
     result = await connection.execute(
-      `select * from ${tableName} where vector_distance (embedding, vector('[3,1,2]', 3)) < 34 `);
+      `select * from ${tableName} where vector_distance (embedding, vector('[3,1,2]', 3, float64)) < 34 `);
     console.log(result.rows);
     assert.deepStrictEqual(result.rows[0].EMBEDDING, expectedArrays[0]);
     assert.deepStrictEqual(result.rows[1].EMBEDDING, expectedArrays[1]);
 
     // Cosine Distance
     result = await connection.execute(
-      `select cosine_distance (embedding, vector('[3,1,2]', 3)) as cosdistance from ${tableName}`);
-    expectedValues = [0.2142857142857143, 0.11673988938389968, 0.3914785344302253, 1.7857142857142856];
+      `select cosine_distance (embedding, vector('[3,1,2]', 3, float64)) as cosdistance from ${tableName}`);
+    expectedValues = ['0.1167', '0.2143',  '0.3915', '1.7857'];
     for (i = 0; i < num; i++) {
-      assert.deepStrictEqual(result.rows[i], {"COSDISTANCE": expectedValues[i]});
+      assert.deepStrictEqual(result.rows[i]['COSDISTANCE'].toFixed(4), expectedValues[i]);
     }
     console.log(`Cosine Distance from Input Embedding `, [3, 1, 2]);
     console.log(result.rows);
 
     // inner product
     result = await connection.execute(
-      `select inner_product (embedding, vector('[3,1,2]', 3)) from ${tableName}`);
+      `select inner_product (embedding, vector('[3,1,2]', 3, float64)) from ${tableName}`);
     console.log(`Inner product with Input Embedding `, [3, 1, 2]);
     console.log(result.rows);
-    expectedValues = [11, 29, 1404, -11];
+    expectedValues = [29, 11, 1404, -11];
     for (i = 0; i < num; i++) {
-      assert.deepStrictEqual(result.rows[i], {"INNER_PRODUCT(EMBEDDING,VECTOR('[3,1,2]',3))": expectedValues[i]});
+      assert.deepStrictEqual(result.rows[i], {"INNER_PRODUCT(EMBEDDING,VECTOR('[3,1,2]',3,FLOAT64))": expectedValues[i]});
     }
   } catch (err) {
     console.error(err);
