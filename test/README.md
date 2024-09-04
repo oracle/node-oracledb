@@ -124,6 +124,7 @@ Set the following environment variables to provide credentials for the test suit
 
 Note: the test suite requires the schema to have these privileges: CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER, and CREATE TYPE.
+Certain tests require CREATE DOMAIN, CREATE VIEW privileges as well.
 
 ### <a name="nodepath"></a> 1.5 Set NODE_PATH
 

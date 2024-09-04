@@ -242,17 +242,18 @@ testsUtil.isJsonMetaDataRunnable = async function() {
 
 testsUtil.isVectorBinaryRunnable = async function() {
   const clientVersion = testsUtil.getClientVersion();
-  let serverVersion;
+  let serverVersion, checkCompatible;
   try {
     const conn = await oracledb.getConnection(dbConfig);
     serverVersion = conn.oracleServerVersion;
+    checkCompatible = testsUtil.versionStringCompare(await testsUtil.getDBCompatibleVersion(), '23.5.0.0.0');
     await conn.close();
   } catch (error) {
     console.log('Error in checking VECTOR binary prerequisites:\n', error);
   }
 
   return (serverVersion >= 2305000000
-      && (oracledb.thin || clientVersion >= 2305000000));
+      && (oracledb.thin || clientVersion >= 2305000000) && (checkCompatible >= 0));
 };
 
 testsUtil.generateRandomPassword = function(length = 6) {

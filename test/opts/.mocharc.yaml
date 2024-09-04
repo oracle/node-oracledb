@@ -288,3 +288,4 @@ spec:
   - test/aq11.js
   - test/plsqlRowtype.js
   - test/dataTypeVector5.js
+  - test/dataTypeVector6.js

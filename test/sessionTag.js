@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -304,6 +304,12 @@ async function dropTable() {
     });
 
     it('184.1.8 Acquire connection from pool twice with different tag using matchAnyTag', async function() {
+      if (dbConfig.test.drcp)
+        this.skip();
+      // for DRCP, if connection with tag1 is still not available then
+      // new connection with tag2 will be created. This increases connection
+      // open count and it causes inconsistency in expected result.
+
       const pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
@@ -323,7 +329,11 @@ async function dropTable() {
     });
 
     it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
-      if (testsUtil.getClientVersion() < 1202000000) this.skip();
+      if (testsUtil.getClientVersion() < 1202000000 || dbConfig.test.drcp) this.skip();
+      // for DRCP, if connection with tag1 is still not available then
+      // new connection with tag2 will be created. This increases connection
+      // open count and it causes inconsistency in expected result.
+
       const pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.log_tag_callback",
