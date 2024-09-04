@@ -8,7 +8,21 @@ node-oracledb Release Notes
 For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
 
 node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...v6.7.0>`__ (TBD)
-------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed bug with statement cache which threw an `NJS-111` error when select
+    SQL is run on CLOB columns fetched as string.
+    See `Issue #1684 <https://github.com/oracle/node-oracledb/issues/
+    1684>`__.
+
+Thick Mode Changes
++++++++++++++++++++
 
 node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...v6.6.0>`__ (25 Jul 2024)
 ---------------------------------------------------------------------------------------------------------

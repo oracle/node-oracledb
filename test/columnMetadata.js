@@ -34,6 +34,8 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
+const random = require('./random.js');
 
 describe('9. columnMetadata.js', function() {
 
@@ -217,6 +219,11 @@ describe('9. columnMetadata.js', function() {
   });  // 9.2
 
   describe('9.3 Large number of columns', function() {
+    let columns_string;
+    const tableName = "nodb_large_columns";
+    const sqlSelect = "SELECT * FROM " + tableName;
+    const sqlDrop = testsUtil.sqlDropTable(tableName);
+
     function genColumns(size, dbType) {
       const  buffer = [];
       for (var  i = 0; i < size; i++) {
@@ -225,35 +232,23 @@ describe('9. columnMetadata.js', function() {
       return buffer.join();
     }
 
+    function generateCreateSql(cols) {
+      return `create table ${tableName}(${cols})`;
+    }
+
+    after(async function() {
+      oracledb.fetchAsString = [];
+      await connection.execute(sqlDrop);
+    });
+
     it('9.10 works with a large number of columns', async function() {
       const column_size = 300;
-      let columns_string = genColumns(column_size, " NUMBER");
-      const table_name = "nodb_large_columns";
-      const sqlSelect = "SELECT * FROM " + table_name;
-      const sqlDrop = "DROP TABLE " + table_name + " PURGE";
+      columns_string = genColumns(column_size, " NUMBER");
 
-      function generateProcedure() {
-        return "BEGIN \n" +
-               "    DECLARE \n" +
-               "        e_table_missing EXCEPTION; \n" +
-               "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
-               "    BEGIN \n" +
-               "        EXECUTE IMMEDIATE ('DROP TABLE nodb_large_columns PURGE'); \n" +
-               "    EXCEPTION \n" +
-               "        WHEN e_table_missing \n" +
-               "        THEN NULL; \n" +
-               "    END; \n" +
-               "    EXECUTE IMMEDIATE (' \n" +
-               "        CREATE TABLE nodb_large_columns ( \n" +
-               columns_string +
-               "        ) \n" +
-               "    '); \n" +
-               "END; ";
-      }
+      let plsql = testsUtil.sqlCreateTable(tableName, generateCreateSql(columns_string));
+      await connection.execute(plsql);
 
       // check NUMBER type column
-      await connection.execute(generateProcedure());
-
       // Dont cache statment as we re-run with different
       // column type with same table.
       let result = await connection.execute(sqlSelect, [],
@@ -265,11 +260,65 @@ describe('9. columnMetadata.js', function() {
 
       // check CLOB type (GH Issue 1642)
       columns_string = genColumns(column_size, " CLOB");
-      await connection.execute(generateProcedure());
+      plsql = testsUtil.sqlCreateTable(tableName, generateCreateSql(columns_string));
+      await connection.execute(plsql);
+      result = await connection.execute(sqlSelect, [], { keepInStmtCache: false });
+      for (let i = 0; i < column_size; i++) {
+        assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
+      }
+      await connection.execute(sqlDrop);
+    });
+
+    it('9.11 works with re-executes with multiple packet response', async function() {
+      const column_size = 50;
+      const numRows = 5;
+      oracledb.fetchAsString = [oracledb.CLOB];
+
+      // read table meta data (GH Issue 1684) without inserting any row.
+      columns_string = genColumns(column_size, " CLOB");
+      const plsql = testsUtil.sqlCreateTable(tableName, generateCreateSql(columns_string));
+      await connection.execute(plsql);
+      let result = await connection.execute(sqlSelect);
+      for (let i = 0; i < column_size; i++) {
+        assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
+      }
+
+      // Insert rows.
+      const len = 5 * 1024;
+      const specialStr = "9.11";
+      const clobStr = random.getRandomString(len, specialStr);
+      let bindNames = ':clob,';
+      bindNames = bindNames.repeat(column_size - 1);
+      bindNames = bindNames + ':clob';
+      const binds = new Array(numRows);
+      const values = new Array(column_size);
+      values.fill(clobStr, 0, column_size);
+      binds.fill(values, 0, numRows);
+      const sql = `INSERT INTO nodb_large_columns VALUES (${bindNames})`;
+      result = await connection.executeMany(sql, binds);
+
+      // Issue second select with rows in table.
       result = await connection.execute(sqlSelect);
       for (let i = 0; i < column_size; i++) {
         assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
       }
+      for (let i = 0; i < result.rows.length; i++) {
+        for (let j = 0; j < column_size; j++) {
+          assert.strictEqual(result.rows[i][j], clobStr);
+        }
+      }
+
+      // subsequent selects should also work fine.
+      result = await connection.execute(sqlSelect);
+      for (let i = 0; i < column_size; i++) {
+        assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
+      }
+      for (let i = 0; i < result.rows.length; i++) {
+        for (let j = 0; j < column_size; j++) {
+          assert.strictEqual(result.rows[i][j], clobStr);
+        }
+      }
+
       await connection.execute(sqlDrop);
     });
   }); // 9.3
