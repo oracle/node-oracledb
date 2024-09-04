@@ -115,6 +115,18 @@ describe('2. pool.js', function() {
   }); // 2.2
 
   describe('2.3 poolMax', function() {
+    let pool;
+    let isPoolClosed = true;
+
+    afterEach(async function() {
+    // Ensure that pool is closed irrespective of any test failures.
+    // Not closing a pool impacts the poolCache, which may be used by later
+    // tests and lead to false test failures.
+      if (!isPoolClosed && pool) {
+        await pool.close(0);
+        isPoolClosed = true;
+      }
+    });
 
     it('2.3.1 poolMax cannot be a negative value', async function() {
       const config = {...dbConfig,
@@ -167,7 +179,8 @@ describe('2. pool.js', function() {
         poolTimeout: 1,
         queueTimeout: 1
       };
-      const pool = await oracledb.createPool(config);
+      pool = await oracledb.createPool(config);
+      isPoolClosed = false;
       conns.push(await pool.getConnection());
       conns.push(await pool.getConnection());
       await assert.rejects(
@@ -187,6 +200,7 @@ describe('2. pool.js', function() {
         }, 2000);
       });
       await pool.close(0);
+      isPoolClosed = true;
     });
 
   }); // 2.3
