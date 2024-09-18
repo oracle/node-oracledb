@@ -70,6 +70,9 @@ describe('292. passwordExpiryWarning.js', function() {
     privilege: oracledb.SYSDBA
   };
 
+  let pool;
+  let conns = [];
+
   before(async function() {
     if (!dbConfig.test.DBA_PRIVILEGE || dbConfig.test.drcp) this.skip();
 
@@ -89,6 +92,16 @@ describe('292. passwordExpiryWarning.js', function() {
     await connAsDBA.close();
   });
 
+  afterEach(async function() {
+    for (const conn of conns) {
+      await conn.close();
+    }
+    conns = [];
+    if (pool) {
+      await pool.close(0);
+      pool = null;
+    }
+  });
 
   it('292.1 password expiry warning', async () => {
     const credentials = {
@@ -99,6 +112,7 @@ describe('292. passwordExpiryWarning.js', function() {
 
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const conn = await oracledb.getConnection(credentials);
+    conns.push(conn);
     if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
       assert.strictEqual(conn.warning.errorNum, 28098);
@@ -106,7 +120,6 @@ describe('292. passwordExpiryWarning.js', function() {
       assert.strictEqual(conn.warning.code, 'ORA-28002');
       assert.strictEqual(conn.warning.errorNum, 28002);
     }
-    await conn.close();
   }); // 292.1
 
   it('292.2 password expiry warning on a homogeneous pool', async () => {
@@ -121,16 +134,15 @@ describe('292. passwordExpiryWarning.js', function() {
       homogeneous: true
     };
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
-    const pool = await oracledb.createPool(credentials);
+    pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection();
+    conns.push(conn);
     await testsUtil.sleep(1000);
     if (isDB23ai) {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28098:"), true);
     } else {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28002:"), true);
     }
-    await conn.close();
-    await pool.close(0);
   }); // 292.2
 
   it('292.3 password expiry warning on a heterogeneous pool', async function() {
@@ -148,18 +160,17 @@ describe('292. passwordExpiryWarning.js', function() {
       homogeneous: false
     };
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
-    const pool = await oracledb.createPool(credentials);
+    pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection({
       user: userName,
       password: password
     });
+    conns.push(conn);
     if (isDB23ai) {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28098:"), true);
     } else {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28002:"), true);
     }
-    await conn.close();
-    await pool.close(0);
   }); // 292.3
 
   it('292.4 with poolMin=0 with regular user and password', async function() {
@@ -174,12 +185,10 @@ describe('292. passwordExpiryWarning.js', function() {
       homogeneous: true
     };
 
-    const pool = await oracledb.createPool(credentials);
+    pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection();
+    conns.push(conn);
     assert.strictEqual(conn.warning, undefined);
-
-    await conn.close();
-    await pool.close();
   }); //292.4
 
 
@@ -196,8 +205,9 @@ describe('292. passwordExpiryWarning.js', function() {
     };
 
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
-    const pool = await oracledb.createPool(credentials);
+    pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection();
+    conns.push(conn);
     if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
     } else {
@@ -205,13 +215,14 @@ describe('292. passwordExpiryWarning.js', function() {
     }
 
     await conn.close();
+    conns = [];
 
     // Check that the warning is cleared on the next connection
     const conn2 = await pool.getConnection();
+    conns.push(conn2);
     assert.strictEqual(conn2.warning, undefined);
     await conn2.close();
-
-    await pool.close();
+    conns =  [];
   }); // 292.5
 
   it('292.6 with poolMin=1 with password in grace time', async function() {
@@ -227,8 +238,9 @@ describe('292. passwordExpiryWarning.js', function() {
     };
 
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
-    const pool = await oracledb.createPool(credentials);
+    pool = await oracledb.createPool(credentials);
     const conn = await pool.getConnection();
+    conns.push(conn);
     if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
     } else {
@@ -236,13 +248,14 @@ describe('292. passwordExpiryWarning.js', function() {
     }
 
     await conn.close();
+    conns = [];
 
     // Check that the warning is cleared on the next connection
     const conn2 = await pool.getConnection();
+    conns.push(conn2);
     assert.strictEqual(conn2.warning, undefined);
     await conn2.close();
-
-    await pool.close();
+    conns = [];
   }); // 292.6
 
   it('292.7 no warning after password change on new connection', async () => {
@@ -259,6 +272,7 @@ describe('292. passwordExpiryWarning.js', function() {
 
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     const conn = await oracledb.getConnection(credentials);
+    conns.push(conn);
     if (isDB23ai) {
       assert.strictEqual(conn.warning.code, 'ORA-28098');
       assert.strictEqual(conn.warning.errorNum, 28098);
@@ -268,9 +282,8 @@ describe('292. passwordExpiryWarning.js', function() {
     }
     await conn.changePassword(userName, password, newPassword);
     const conn1 = await oracledb.getConnection(newCredentials);
+    conns.push(conn1);
     assert.strictEqual(conn1.warning, undefined);
-    await conn.close();
-    await conn1.close();
   }); // 292.7
 
 });

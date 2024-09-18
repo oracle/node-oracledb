@@ -41,14 +41,27 @@ describe('276. jsonDualityView5.js', function() {
   let connection = null;
   let dbaConn = null;
   let isRunnable = false;
+  let isOracleDB_23_4;
 
   before(async function() {
-    isRunnable = (!dbConfig.test.drcp);
+    // Skip these tests for DRCP and CMAN-TDM because the user has to be
+    // created and dropped, which leads to errors
+    isRunnable = (!dbConfig.test.drcp && !dbConfig.test.isCmanTdm);
+
     if (isRunnable) {
       isRunnable = await testsUtil.checkPrerequisites(2100000000, 2300000000);
       isRunnable = isRunnable && dbConfig.test.DBA_PRIVILEGE;
     }
-    if (!isRunnable || dbConfig.test.isCmanTdm) {
+
+    // 23.4 requires the _id column for creating JSON Duality Views, which
+    // is not added in these tests. So check if the Oracle Database version
+    // is 23.4. This condition will be used for some tests to check, if the
+    // test should be skipped.
+    if (await testsUtil.getMajorDBVersion() === '23.4') {
+      isOracleDB_23_4 = true;
+    }
+
+    if (!isRunnable || isOracleDB_23_4) {
       this.skip();
     }
 
@@ -103,7 +116,7 @@ describe('276. jsonDualityView5.js', function() {
   });
 
   after(async function() {
-    if (!isRunnable || dbConfig.test.isCmanTdm) return;
+    if (!isRunnable || isOracleDB_23_4) return;
 
     if (connection) {
       await testsUtil.dropTable(connection, 'student_class');
