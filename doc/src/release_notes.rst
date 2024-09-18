@@ -16,13 +16,17 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for fetching the list of network service names from 
-    tnsnames.ora using a new method, oracledb.getNetworkServiceNames()
+#)  Changed the password type parameter values from `vault-oci` and
+    `vault-azure` to `ocivault` and `azurevault` respectively for consistency
+    with other Oracle Database drivers.
+
+#)  Added method :meth:`oracledb.getNetworkServiceNames()` to support fetching
+    the list of network service names from the ``tnsnames.ora`` file.
 
 #)  Fixed bug that did not allow connection to Oracle Database 23ai instances
     that have fast authentication disabled.
 
-#)  Fixed bug with statement cache which threw an `NJS-111` error when select
+#)  Fixed bug with statement cache which threw an ``NJS-111`` error when select
     SQL is run on CLOB columns fetched as string.
     See `Issue #1684 <https://github.com/oracle/node-oracledb/issues/
     1684>`__.
