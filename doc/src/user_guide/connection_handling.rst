@@ -4088,15 +4088,13 @@ required authorization permissions to access the Azure App Configuration
 provider.
 
 To use node-oracledb to retrieve the configuration information from Azure App
-Configuration, you must install the following libraries:
-
-- `App Configuration <https://www.npmjs.com/package/@azure/
-  app-configuration>`__ (azure/app-configuration)
-- `Azure AD token authentication <https://www.npmjs.com/package/@azure/
-  identity>`__ (azure/identity)
-- `Azure Key Vault <https://www.npmjs.com/package/@azure/keyvault-secrets>`__
-  (azure/keyvault-secrets) is optional and required only if a password is
-  stored in the vault
+Configuration, you must install certain Microsoft Azure libraries which
+include `Azure App Configuration <https://www.npmjs.com/package/@azure/app-
+configuration>`__ and `Azure Identity <https://www.npmjs.com/package/@azure/
+identity>`__. Optionally, you must install `Azure Key Vault <https://www.
+npmjs.com/package/@azure/keyvault-secrets>`__ which is required only if a
+password is stored in the vault. For installation instructions of these
+libraries, see :ref:`azuremodules`.
 
 Configuration information is stored as key-value pairs in Azure App
 Configuration. You must add the connect descriptor as a key under a prefix
@@ -4384,17 +4382,13 @@ of your application's configuration information. Ensure that you have the
 necessary authorization permissions to access OCI Object Storage.
 
 To use node-oracledb to retrieve the configuration information from OCI Object
-Storage, you must install the following:
-
-- `OCI Node.js Client for Common Utilities <https://www.npmjs.com/package/
-  oci-common>`__ (oci-common)
-- `OCI Node.js Client for ObjectStorage Service <https://www.npmjs.com/package/
-  oci-objectstorage>`__ (oci-objectstorage)
-- `OCI Node.js Client for Secrets Service <https://www.npmjs.com/package/oci-
-  secrets>`__ (oci-secrets) is optional and required only if a password is
-  stored in the vault. See `Managing Vault Secrets <https://docs.oracle.com/en
-  -us/iaas/Content/KeyManagement/Tasks/managingsecrets.htm>`__ for more
-  information.
+Storage, you must install certain OCI libraries which include `OCI Node.js
+Client for Common Utilities <https://www.npmjs.com/package/oci-common>`__ and
+`OCI Node.js Client for ObjectStorage Service <https://www.npmjs.com/package/
+oci-objectstorage>`__. Optionally, you must install `OCI Node.js Client for
+Secrets Service <https://www.npmjs.com/package/oci-secrets>`__ which is
+required only if a password is stored in the vault. For installation
+instructions of these libraries, see :ref:`ocimodules`.
 
 Configuration information is stored as a JSON file in OCI Object Storage. You
 must add the connect descriptor in the JSON file. Optionally, you can add the

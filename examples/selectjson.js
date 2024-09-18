@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -87,7 +87,7 @@ async function run() {
         console.error(e);
     }
 
-    connection.execute(`CREATE TABLE no_purchaseorder (po_document JSON)`);
+    await connection.execute(`CREATE TABLE no_purchaseorder (po_document JSON)`);
 
     console.log('2. Inserting Data');
 

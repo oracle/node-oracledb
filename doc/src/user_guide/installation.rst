@@ -1644,3 +1644,74 @@ The output is like::
 
     { metaData: [ { name: 'D' } ],
       rows: [ { D: '24-Nov-2019 23:39' } ] }
+
+.. _configproviderlibraries:
+
+Installing Configuration Provider Modules for node-oracledb
+===========================================================
+
+To use node-oracledb with
+:ref:`centralized configuration providers <configurationprovider>`, you must
+install the necessary modules for your preferred configuration provider as
+detailed below.
+
+.. _azuremodules:
+
+Install Modules for Azure App Configuration Provider
+----------------------------------------------------
+
+For node-oracledb to work with Azure App Configuration Provider, you must
+install the following Microsoft Azure modules:
+
+1. Install the `Azure App Configuration <https://www.npmjs.com/package/@azure/
+   app-configuration>`__ module using::
+
+        npm install @azure/app-configuration
+
+2. Install the `Azure Identity <https://www.npmjs.com/package/
+   @azure/identity>`__ module using::
+
+        npm install @azure/identity
+
+   This library offers a variety of credential classes capable of acquiring
+   Microsoft Entra ID (formerly Azure Active Directory) token to authenticate
+   service requests.
+
+3. Optionally, you need to install the `Azure Key Vault <https://www.npmjs.
+   com/package/@azure/keyvault-secrets>`__ module if a password is stored in
+   the Azure Key vault. This can be done using::
+
+        npm install @azure/keyvault-secrets
+
+See :ref:`azureappconfig` for information on using this configuration provider
+with node-oracledb.
+
+.. _ocimodules:
+
+Install Modules for OCI Object Storage Configuration Provider
+-------------------------------------------------------------
+
+For node-oracledb to work with OCI Object Storage configuration provider, you
+must install the following OCI modules:
+
+1. Install the `OCI Node.js Client for Common Utilities <https://www.npmjs.
+   com/package/oci-common>`__ module using::
+
+        npm install oci-common
+
+2. Install the `OCI Node.js Client for ObjectStorage Service <https://www.
+   npmjs.com/package/oci-objectstorage>`__ module using::
+
+        npm install oci-objectstorage
+
+3. Optionally, you need to install the `OCI Node.js Client for Secrets Service
+   <https://www.npmjs.com/package/oci-secrets>`__ module if a password is
+   stored in the OCI vault. This can be done by using::
+
+        npm install oci-secrets
+
+   See `Managing Vault Secrets <https://docs.oracle.com/en-us/iaas/Content/
+   KeyManagement/Tasks/managingsecrets.htm>`__ for more information.
+
+See :ref:`ociobjstorage` for information on using this configuration provider
+with node-oracledb.

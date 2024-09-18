@@ -23,12 +23,12 @@
  * limitations under the License.
  *
  * NAME
- *   ociProviderSample.js
+ *   azureConfigProvider.js
  *
  * DESCRIPTION
- *   Sample program to connect to the database using DB connectstring, username and password
- *   which are fetched from the OCI Object Store using the connectstring which consists of
- *   required parameters to authenticate OCI Object Store.
+ *   Sample program to connect to the database using DB connect string,
+ *   username and password fetched from the Azure Configuration Providers
+ *   using the Azure Configuration Store URL.
  *
  *****************************************************************************/
 
@@ -62,10 +62,12 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
 console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 
 async function run() {
-  //replace xxxx with correct values of the parameter
+  // Replace the connect string with correct Azure Config Store URL
+  // Replace xxxx with the corresponding values of the authentication
+  // parameters
   let connection;
   const options = {
-    connectString: 'config-ociobject://test.us-phoenix-1.oraclecloud.com/n/testnamespace/b/testbucket/o/testobject?oci_tenancy=xxxx&oci_user=xxxx&oci_fingerprint=xxxx&oci_key_file=xxxx',
+    connectString: 'config-azure://testappconfig.azconfig.io/?key=testapp/testkey/&azure_client_id=xxxx&azure_client_certificate_path=xxxx&azure_tenant_id=xxxx'
   };
   try {
     // Get a non-pooled connection

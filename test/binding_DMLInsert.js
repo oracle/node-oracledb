@@ -103,7 +103,8 @@ describe('92.binding_DMLInsert.js', function() {
               await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
             },
             // ORA-01877: string is too long for internal buffer
-            /ORA-01877:/
+            // ORA-01866: the datetime class is invalid
+            /ORA-01877:|ORA-01866:/
           );
         }
         if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
