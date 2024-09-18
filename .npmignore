@@ -4,6 +4,7 @@
 .gitmodules
 .eslintrc
 .readthedocs.yaml
+.gitlab-ci.yml
 INSTALL.md
 CONTRIBUTING.md
 Makefile

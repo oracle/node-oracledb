@@ -237,6 +237,42 @@ dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA>`__.
         not be automatically located. The file's directory must be explicitly
         specified when connecting.
 
+You can retrieve the network service names that are defined in the
+:ref:`tnsnames.ora <tnsadmin>` file using
+:meth:`oracledb.getNetworkServiceNames()`. The directory that contains the
+``tnsnames.ora`` file can be specified in the ``configDir`` property of
+:meth:`~oracledb.getNetworkServiceNames()`. For example, if the
+``tnsnames.ora`` file is stored in the ``/opt/oracle/config`` directory and
+contains the following network service names::
+
+    sales =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = mymachine.example.com)(PORT = 1521))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = ORCL)
+        )
+      )
+
+    finance =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = mydbmachine.example.com)(PORT = 1521))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = ORCLPDB1)
+        )
+      )
+
+To retrieve the network service names from the above ``tnsnames.ora`` file,
+you can use:
+
+.. code-block:: javascript
+
+    const serviceNames = await oracledb.getNetworkServiceNames("/opt/oracle/config");
+    console.log(serviceNames);
+
+This prints ``['sales', 'finance']`` as the output.
+
 .. _notjdbc:
 
 JDBC and Oracle SQL Developer Connection Strings

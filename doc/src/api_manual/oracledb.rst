@@ -3039,6 +3039,44 @@ Oracledb Methods
         * - Connection ``connection``
           - The newly created connection. If ``getConnection()`` fails, connection will be NULL. See :ref:`Connection class <connectionclass>` for more details.
 
+.. method:: oracledb.getNetworkServiceNames()
+
+    .. versionadded:: 6.7
+
+    .. code-block:: javascript
+
+        promise = getNetworkServiceNames(String configDir);
+
+    Returns a list of network service names that is defined in the
+    :ref:`tnsnames.ora <tnsadmin>` file which is inside the directory that
+    is specified in the ``configDir`` property or the ``TNS_ADMIN``
+    environment variable if ``configDir`` is not specified. If a
+    ``tnsnames.ora`` file does not exist, then an exception is raised.
+
+    The parameters of the ``oracledb.getNetworkServiceNames()`` method are:
+
+    .. _getnetworkservicenameattrs:
+
+    .. list-table-with-summary:: oracledb.getNetworkServiceNames() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``configDir``
+          - String
+          - The directory in which the :ref:`tnsnames.ora <tnsadmin>` file resides.
+
+            If ``configDir`` is not specified, then the ``tnsnames.ora`` file is searched for in the directory specified in the ``TNS_ADMIN`` Oracle environment variable.
+
+    See :ref:`tnsnames`.
+
 .. method:: oracledb.getPool()
 
     .. code-block:: javascript
