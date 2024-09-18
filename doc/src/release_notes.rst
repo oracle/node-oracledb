@@ -16,6 +16,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for fetching the list of network service names from 
+    tnsnames.ora using a new method, oracledb.getNetworkServiceNames()
+
 #)  Fixed bug that did not allow connection to Oracle Database 23ai instances
     that have fast authentication disabled.
 
