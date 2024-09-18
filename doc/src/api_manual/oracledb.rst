@@ -2143,9 +2143,13 @@ Oracledb Methods
 
             The number of seconds to wait before making a new connection attempt.
 
-            The default value is *0*.
+            The default value is *1*.
 
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from 0 seconds to 1 second.
 
             .. versionadded:: 6.0
         * - ``connectTimeout``
@@ -2167,9 +2171,13 @@ Oracledb Methods
 
             The maximum number of seconds to wait to establish a connection to the database host.
 
-            The default value is *60.0*.
+            The default value is *20.0*.
 
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from 60.0 seconds to 20.0 seconds.
 
             .. versionadded:: 6.0
         * - ``expireTime``
@@ -2841,9 +2849,13 @@ Oracledb Methods
 
             The number of seconds to wait before making a new connection attempt.
 
-            The default value is *0*.
+            The default value is *1*.
 
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from 0 seconds to 1 second.
 
             .. versionadded:: 6.0
         * - ``connectTimeout``
@@ -2865,9 +2877,13 @@ Oracledb Methods
 
             The maximum number of seconds to wait to establish a connection to the database host.
 
-            The default value is *60.0*.
+            The default value is *20.0*.
 
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from 60.0 seconds to 20.0 seconds.
 
             .. versionadded:: 6.0
         * - ``expireTime``

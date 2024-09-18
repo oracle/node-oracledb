@@ -16,6 +16,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Changed default values of ``transportConnectTimeout`` and
+    ``retryDelay`` properties in :meth:`oracledb.getConnection()` and
+    :meth:`oracledb.createPool()` for consistency with other Oracle Database
+    drivers.
+
 #)  Changed the password type parameter values from `vault-oci` and
     `vault-azure` to `ocivault` and `azurevault` respectively for consistency
     with other Oracle Database drivers.
