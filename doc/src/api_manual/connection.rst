@@ -2154,6 +2154,10 @@ Connection Methods
           - An array of objects specifying the queries which were affected by the Query Change notification. This is only defined if the ``type`` key is the value :ref:`oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE <oracledbconstantssubscription>`.
 
             It contains the ``table`` key which is an array of objects identical to the objects created for Database Change Notification (see the ``tables`` property below).
+        * - ``regId``
+          - A JavaScript BigInt value which specifies a unique identifier that is returned during registration. This is the same value returned by the :ref:`result object's <consubscribecallback>` ``regId`` property.
+
+            .. versionadded:: 6.7
         * - ``registered``
           - A boolean indicating whether the subscription is registered with the database. Will be *false* if ``type`` is :ref:`oracledb.SUBSCR_EVENT_TYPE_DEREG <oracledbconstantssubscription>` or if the subscription was created with the :ref:`qos <consubscribeoptqos>` property set to :ref:`oracledb.SUBSCR_QOS_DEREG_NFY <oracledbconstantssubscription>`.
         * - ``tables``

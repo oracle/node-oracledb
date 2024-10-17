@@ -42,8 +42,9 @@ Thick Mode changes
 #)  Fixed bug which throws ``ORA-22288`` error in certain scenarios when
     querying ``BFILENAME()`` with outbinds.
 
-#)  Added registration id to the CQN subscription callback function's message
-    object parameter.
+#)  Added registration id (``regId`` property) to the
+    :ref:`message object parameter <messageparam>` of the CQN subscription
+    :ref:`callback <consubscribeoptcallback>` function.
     See `Issue #1692 <https://github.com/oracle/node-oracledb/issues/1692>`__.
 
 node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...v6.6.0>`__ (25 Jul 2024)
