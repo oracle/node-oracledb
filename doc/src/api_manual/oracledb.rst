@@ -821,6 +821,29 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.dbObjectAsPojo = false;
 
+.. attribute:: oracledb.driverName
+
+    .. versionadded:: 6.7
+
+    This property is a string that specifies the name of the driver used by
+    the client to connect to Oracle Database. This is equivalent to the value
+    in the ``CLIENT_DRIVER`` column of the ``V$SESSION_CONNECT_INFO`` view.
+
+    This property may be overridden when creating a
+    :meth:`standalone connection <oracledb.getConnection()>` or a
+    :meth:`connection pool <oracledb.createPool()>`.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thin mode.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.driverName = 'mydriver';
+
 .. attribute:: oracledb.edition
 
     .. versionadded:: 2.2
@@ -1177,6 +1200,29 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.lobPrefetchSize = 16384;
 
+.. attribute:: oracledb.machine
+
+    .. versionadded:: 6.7
+
+    This property is a string that specifies the name of the host machine
+    where the connection originates. This is equivalent to the value in the
+    ``MACHINE`` column of the ``V$SESSION`` view.
+
+    This property may be overridden when creating a
+    :meth:`standalone connection <oracledb.getConnection()>` or a
+    :meth:`connection pool <oracledb.createPool()>`.
+
+    .. note::
+
+        This property can only be used in the node-oracledb Thin mode.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.machine = 'mymachine';
+
 .. attribute:: oracledb.maxRows
 
     This property is the maximum number of rows that are fetched by a query
@@ -1265,6 +1311,29 @@ Each of the configuration properties is described below.
 
         const oracledb = require('oracledb');
         console.log("Oracle client library version is " + oracledb.oracleClientVersionString);
+
+.. attribute:: oracledb.osUser
+
+    .. versionadded:: 6.7
+
+    This property is a string that specifies the name of the operating system
+    user that initiates the database connection. This is equivalent to the
+    value in the ``OSUSER`` column of the ``V$SESSION`` view.
+
+    This property may be overridden when creating a
+    :meth:`standalone connection <oracledb.getConnection()>` or a
+    :meth:`connection pool <oracledb.createPool()>`.
+
+    .. note::
+
+        This method is only supported in node-oracledb Thin mode.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.osUser = 'myuser';
 
 .. attribute:: oracledb.outFormat
 
@@ -1592,6 +1661,29 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.prefetchRows = 2;
 
+.. attribute:: oracledb.program
+
+    .. versionadded:: 6.7
+
+    This property is a string that specifies the name of the program
+    connecting to the database. This is equivalent to the value in the
+    ``PROGRAM`` column of the ``V$SESSION`` view.
+
+    This property may be overridden when creating a
+    :meth:`standalone connection <oracledb.getConnection()>` or a
+    :meth:`connection pool <oracledb.createPool()>`.
+
+    .. note::
+
+        This method is only supported in node-oracledb Thin mode.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.program = 'myprogram';
+
 .. attribute:: oracledb.Promise
 
     **The ``oracledb.Promise`` property is no longer used in node-oracledb 5
@@ -1698,6 +1790,29 @@ Each of the configuration properties is described below.
 
         const oracledb = require('oracledb');
         oracledb.stmtCacheSize = 30;
+
+.. attribute:: oracledb.terminal
+
+    .. versionadded:: 6.7
+
+    This property is a string that specifies the name of the terminal from
+    where the connection originates. This is equivalent to the value in the
+    ``TERMINAL`` column of the ``V$SESSION`` view.
+
+    This property may be overridden when creating a
+    :meth:`standalone connection <oracledb.getConnection()>` or a
+    :meth:`connection pool <oracledb.createPool()>`.
+
+    .. note::
+
+        This method is only supported in node-oracledb Thin mode.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.terminal = 'myterminal';
 
 .. attribute:: oracledb.thin
 
@@ -1926,6 +2041,16 @@ Oracledb Methods
             .. versionadded:: 2.1
 
                 The alias ``connectionString``.
+        * - ``driverName``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsdrivername:
+
+            The name of the driver that is used by the client to connect to Oracle Database. This is equivalent to the value in the ``CLIENT_DRIVER`` column of the ``V$SESSION_CONNECT_INFO`` view.
+
+            This optional property overrides the :attr:`oracledb.driverName` property.
+
+            .. versionadded:: 6.7
         * - ``walletPassword``
           - String
           - Thin
@@ -2022,6 +2147,26 @@ Oracledb Methods
             See :ref:`Heterogeneous Connection Pools and Pool Proxy Authentication <connpoolproxy>` for details and examples.
 
             .. versionadded:: 2.3
+        * - ``machine``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsmachine:
+
+            The name of the host machine from where the connection originates. This is equivalent to the value in the ``MACHINE`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.machine` property.
+
+            .. versionadded:: 6.7
+        * - ``osUser``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsosuser:
+
+            The name of the operating system user that initiates the database connection. This is equivalent to the value in the ``OSUSER`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.osUser` property.
+
+            .. versionadded:: 6.7
         * - ``password``
           - String
           - Both
@@ -2053,6 +2198,16 @@ Oracledb Methods
             See :ref:`Privileged Connections <privconn>` for more information.
 
             .. versionadded:: 6.5.1
+        * - ``program``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsprogram:
+
+            The name of the program connecting to the database. This is equivalent to the value in the ``PROGRAM`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.program` property.
+
+            .. versionadded:: 6.7
         * - ``configDir``
           - String
           - Thin
@@ -2179,6 +2334,16 @@ Oracledb Methods
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``terminal``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsterminal:
+
+            The name of the terminal from where the connection originates. This is equivalent to the value in the ``TERMINAL`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.terminal` property.
+
+            .. versionadded:: 6.7
         * - ``transportConnectTimeout``
           - Number
           - Thin
@@ -2653,6 +2818,16 @@ Oracledb Methods
             .. versionadded:: 2.1
 
                 The alias ``connectionString``.
+        * - ``driverName``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsdrivername:
+
+            The name of the driver that is used by the client to connect to Oracle Database. This is equivalent to the value in the ``CLIENT_DRIVER`` column of the ``V$SESSION_CONNECT_INFO`` view.
+
+            This optional property overrides the :attr:`oracledb.driverName` property.
+
+            .. versionadded:: 6.7
         * - ``walletPassword``
           - String
           - Thin
@@ -2717,6 +2892,16 @@ Oracledb Methods
             The ``user`` (or ``username``) and ``password`` properties should not be set when ``externalAuth`` is *true*.
 
             Note prior to node-oracledb 0.5 this property was called ``isExternalAuth``.
+        * - ``machine``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsmachine:
+
+            The name of the host machine from where the connection originates. This is equivalent to the value in the ``MACHINE`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.machine` property.
+
+            .. versionadded:: 6.7
         * - ``matchAny``
           - Boolean
           - Thick
@@ -2741,12 +2926,32 @@ Oracledb Methods
             See :ref:`Changing Passwords and Connecting with an Expired Password <changingpassword>`.
 
             .. versionadded:: 2.2
+        * - ``osUser``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsosuser:
+
+            The name of the operating system user that initiates the database connection. This is equivalent to the value in the ``OSUSER`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.osUser` property.
+
+            .. versionadded:: 6.7
         * - ``poolAlias``
           - String
           - Both
           - .. _getconnectiondbattrspoolalias:
 
             Specifies which previously created pool in the :ref:`connection pool cache <connpoolcache>` to obtain the connection from. See :ref:`Pool Alias <getconnectionpoolalias>`.
+        * - ``program``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsprogram:
+
+            The name of the program connecting to the database. This is equivalent to the value in the ``PROGRAM`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.program` property.
+
+            .. versionadded:: 6.7
         * - ``configDir``
           - String
           - Thin
@@ -2885,6 +3090,16 @@ Oracledb Methods
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``terminal``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsterminal:
+
+            The name of the terminal from where the connection originates. This is equivalent to the value in the ``TERMINAL`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.terminal` property.
+
+            .. versionadded:: 6.7
         * - ``transportConnectTimeout``
           - Number
           - Thin

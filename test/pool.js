@@ -1192,4 +1192,246 @@ describe('2. pool.js', function() {
       await pool.close(0);
     }); // 2.19.1
   }); // 2.19
+
+  describe('2.20 settable parameters', function() {
+    it('2.20.1 Check parameters value after user update', async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) this.skip();
+
+      const dbaConfig = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA
+      };
+
+      // Set the parameters before pool creation
+      oracledb.driverName = 'mydriver';
+      oracledb.program = 'mypgm';
+      oracledb.terminal = 'myterm';
+      oracledb.machine = 'mymachine';
+      oracledb.osUser = 'myuser';
+
+      const pool = await oracledb.createPool(dbaConfig);
+      const conn = await pool.getConnection();
+      let res = await conn.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+
+      res = await conn.execute(`SELECT CLIENT_DRIVER
+        FROM V$SESSION_CONNECT_INFO
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+
+      // Set the parameters after pool creation
+      // it won't update existing parameters values
+      // for already creation pool
+      oracledb.driverName = 'mydriver1';
+      oracledb.program = 'mypgm1';
+      oracledb.terminal = 'myterm1';
+      oracledb.machine = 'mymachine1';
+      oracledb.osUser = 'myuser1';
+
+      res = await conn.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+
+      res = await conn.execute(`SELECT CLIENT_DRIVER
+        FROM V$SESSION_CONNECT_INFO
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+
+      const conn1 = await pool.getConnection();
+      res = await conn1.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+
+      // create another pool
+      // pool will be created using new parameters values
+      // any connection for new pool will have new settable
+      // parameters values
+
+      const pool1 = await oracledb.createPool(dbaConfig);
+      const conn2 = await pool1.getConnection();
+      res = await conn2.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
+
+      res = await conn2.execute(`SELECT CLIENT_DRIVER
+        FROM V$SESSION_CONNECT_INFO
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+
+      // pool1 and any new connection for pool1 still have initial values
+      const conn5 = await pool.getConnection();
+      res = await conn5.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+
+      res = await conn5.execute(`SELECT CLIENT_DRIVER
+        FROM V$SESSION_CONNECT_INFO
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+
+      dbaConfig.driverName = 'mydriver2';
+      dbaConfig.machine = 'mymachine2';
+      dbaConfig.terminal = 'myterm2';
+      dbaConfig.osUser = 'myuser2';
+      dbaConfig.program = 'mypgm2';
+
+      const pool2 = await oracledb.createPool(dbaConfig);
+      const conn3 = await pool2.getConnection();
+      res = await conn3.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine2');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser2');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm2');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm2');
+
+      res = await conn3.execute(`SELECT CLIENT_DRIVER
+        FROM V$SESSION_CONNECT_INFO
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver2');
+
+      const dbaConfig1 = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA,
+      };
+
+      const pool3 = await oracledb.createPool(dbaConfig1);
+      const conn4 = await pool3.getConnection();
+      // pool3 will take parameters values set globally
+      // in absence of settable parameters in it's own config.
+      res = await conn4.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
+
+      res = await conn4.execute(`SELECT CLIENT_DRIVER
+        FROM V$SESSION_CONNECT_INFO
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+
+      res = await conn2.execute(`SELECT machine, osuser, terminal, program
+        FROM v$session
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
+      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
+      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
+      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
+
+      res = await conn2.execute(`SELECT CLIENT_DRIVER
+        FROM V$SESSION_CONNECT_INFO
+        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+
+      await conn.close();
+      await conn1.close();
+      await conn2.close();
+      await conn3.close();
+      await conn4.close();
+      await conn5.close();
+      await pool.close(0);
+      await pool1.close(0);
+      await pool2.close(0);
+      await pool3.close(0);
+    }); // 2.20.1
+
+    it('2.20.2 negative - Check parameters value type', async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) this.skip();
+
+      const dbaConfig = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA,
+      };
+
+      dbaConfig.driverName = null;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.driverName = 1;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.machine = null;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.machine = 1;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.terminal = null;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.terminal = 1;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.program = null;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.program = 1;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.osUser = null;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+      dbaConfig.osUser = 1;
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig),
+        /NJS-004:/
+      );
+
+    }); // 2.20.2
+  }); // 2.20
 });

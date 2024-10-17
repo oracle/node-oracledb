@@ -47,6 +47,9 @@ Thin Mode Changes
     See `Issue #1684 <https://github.com/oracle/node-oracledb/issues/
     1684>`__.
 
+#)  Added new properties in `oracledb` that can enable users to customize and set session information,
+    making it easier to manage and monitor database interactions.
+
 Thick Mode changes
 ++++++++++++++++++
 
