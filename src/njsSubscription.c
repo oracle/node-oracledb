@@ -37,7 +37,7 @@ static NJS_NAPI_FINALIZE(njsSubscription_finalize);
 
 // other methods
 static bool njsSubscription_createMessage(napi_env env,
-        dpiSubscrMessage *message, napi_value *messageObj);
+        njsSubscription *subscr, napi_value *messageObj);
 static bool njsSubscription_createMessageQuery(napi_env env,
         dpiSubscrMessageQuery *query, napi_value *queryObj);
 static bool njsSubscription_createMessageRow(napi_env env,
@@ -58,10 +58,11 @@ static void njsSubscription_waitOnBarrier(njsSubscription *subscr);
 //   Create message that will be passed to the callback.
 //-----------------------------------------------------------------------------
 static bool njsSubscription_createMessage(napi_env env,
-        dpiSubscrMessage *message, napi_value *messageObj)
+        njsSubscription *subscr, napi_value *messageObj)
 {
     napi_value temp, array;
     uint32_t i;
+    dpiSubscrMessage *message = subscr->message;
 
     // create message object
     NJS_CHECK_NAPI(env, napi_create_object(env, messageObj))
@@ -90,6 +91,11 @@ static bool njsSubscription_createMessage(napi_env env,
     // set registered flag
     NJS_CHECK_NAPI(env, napi_get_boolean(env, message->registered, &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *messageObj, "registered",
+            temp))
+
+    // set registration id
+    NJS_CHECK_NAPI(env,  napi_create_bigint_uint64(env, subscr->regId, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *messageObj, "regId",
             temp))
 
     // set queue name
@@ -390,7 +396,7 @@ static bool njsSubscription_processNotificationHelper(napi_env env,
     NJS_CHECK_NAPI(env, napi_get_global(env, &global))
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, subscr->jsCallback,
             &callback))
-    if (!njsSubscription_createMessage(env, subscr->message, &message))
+    if (!njsSubscription_createMessage(env, subscr, &message))
         return false;
 
     // perform callback and clear any exception that occurs

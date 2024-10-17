@@ -79,6 +79,7 @@ function myCallback(message) {
   }
   console.log("Message database name:", message.dbName);
   console.log("Message transaction id:", message.txId);
+  console.log("Registration id:", Number(message.regId));
   console.log("Message queries:");
   for (let i = 0; i < message.queries.length; i++) {
     const query = message.queries[i];
