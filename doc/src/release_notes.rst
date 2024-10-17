@@ -13,13 +13,21 @@ node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...
 Common Changes
 ++++++++++++++
 
-Thin Mode Changes
-+++++++++++++++++
+#)  Added support to connect to Oracle Database using wallets stored in
+    Azure Key Vault and OCI Vault.
+
+#)  Added ability to cache the configuration information retrieved from
+    :ref:`Azure App Configuration <conninfocacheazure>` and
+    :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
+    providers.
+
+#)  Ensure that the password stored in OCI vault and retrieved
+    in base64-encoded format is decoded correctly.
 
 #)  Changed default values of ``transportConnectTimeout`` and
-    ``retryDelay`` properties in :meth:`oracledb.getConnection()` and
-    :meth:`oracledb.createPool()` for consistency with other Oracle Database
-    drivers.
+    ``retryDelay`` properties to *20* seconds and *1* second respectively in
+    :meth:`oracledb.getConnection()` and :meth:`oracledb.createPool()` for
+    consistency with other Oracle Database drivers.
 
 #)  Changed the password type parameter values from `vault-oci` and
     `vault-azure` to `ocivault` and `azurevault` respectively for consistency
@@ -27,6 +35,9 @@ Thin Mode Changes
 
 #)  Added method :meth:`oracledb.getNetworkServiceNames()` to support fetching
     the list of network service names from the ``tnsnames.ora`` file.
+
+Thin Mode Changes
++++++++++++++++++
 
 #)  Fixed bug that did not allow connection to Oracle Database 23ai instances
     that have fast authentication disabled.

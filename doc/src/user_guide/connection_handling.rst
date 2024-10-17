@@ -4406,6 +4406,22 @@ the order of precedence from highest to lowest will be as follows:
 - Azure App Configuration
 - Application
 
+.. _conninfocacheazure:
+
+Azure App Configuration Information Caching
++++++++++++++++++++++++++++++++++++++++++++
+
+Node-oracledb caches configuration information from Azure App Configuration by
+default. This allows you to reuse the cached configuration information which
+significantly reduces the number of round-trips to this configuration
+provider.
+
+You can use the :attr:`oracledb.configProviderCacheTimeout` property to set
+the amount of time for node-oracledb to cache the configuration retrieved from
+Azure App Configuration. Once the cache expires, node-oracledb refreshes the
+cache when configuration information from this configuration provider is
+required.
+
 .. _ociobjstorage:
 
 OCI Object Storage Configuration Provider
@@ -4691,6 +4707,21 @@ precedence from highest to lowest will be as follows:
 - ``oraaccess.xml`` file
 - OCI Object Storage
 - Application
+
+.. _conninfocacheoci:
+
+OCI Object Storage Configuration Information Caching
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Node-oracledb caches configuration information from OCI Object Storage by
+default. This allows you to reuse the cached configuration information which
+significantly reduces the number of round-trips to this configuration
+provider.
+
+You can use the :attr:`oracledb.configProviderCacheTimeout` property to set
+the amount of time for node-oracledb to cache the configuration retrieved from
+OCI Object Storage. Once the cache expires, node-oracledb refreshes the cache
+when configuration information from this configuration provider is required.
 
 .. _sharding:
 

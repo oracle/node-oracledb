@@ -297,17 +297,32 @@ describe('298. dataTypeVector4.js', function() {
           `, binds);
     }
 
-    await assert.rejects(
-      async () => await connection.execute(`
-                  SELECT /*+ parallel(4) */ sum(VectorCol)
-                  FROM ${tableName}
-              `),
-      /ORA-03001:|ORA-00722:/
-      /*
-                ORA-03001: unimplemented feature
-                ORA-00722: Feature "Vector aggregate functions"
-              */
-    );
+    const clientVersion = testsUtil.getClientVersion();
+    const serverVersion = connection.oracleServerVersion;
+
+    // Aggregate functions on vector columns is available from 23.6 onwards
+    if (serverVersion >= 2306000000 &&
+      (oracledb.thin || clientVersion >= 2306000000)) {
+      const result = await connection.execute(`
+      SELECT /*+ parallel(4) */ sum(VectorCol)
+      FROM ${tableName}
+      `);
+      // Get the sum of the vector arrays in a single array
+      const vectorSumArr = vectorsToinsert.reduce((acc, arr)=>acc.map((sum, i) => sum + arr[i]));
+      assert.deepStrictEqual(result.rows[0][0], vectorSumArr);
+    } else {
+      await assert.rejects(
+        async () => await connection.execute(`
+                    SELECT /*+ parallel(4) */ sum(VectorCol)
+                    FROM ${tableName}
+                `),
+        /ORA-03001:|ORA-00722:/
+        /*
+          ORA-03001: unimplemented feature
+          ORA-00722: Feature "Vector aggregate functions"
+        */
+      );
+    }
   }); // 298.8
 
   it('298.9 parallel delete operation on vector columns', async function() {

@@ -749,6 +749,21 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.autoCommit = false;
 
+.. attribute:: oracledb.configProviderCacheTimeout
+
+    This property is the number of seconds that node-oracledb keeps
+    the configuration information retrieved from a
+    :ref:`centralized configuration provider <configurationprovider>` cached.
+
+    The default value is *86400* seconds.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.configProviderCacheTimeout = 6;
+
 .. attribute:: oracledb.connectionClass
 
     The user-chosen Connection class value is a string which defines a
