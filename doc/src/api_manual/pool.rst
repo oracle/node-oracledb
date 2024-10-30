@@ -447,7 +447,7 @@ Pool Methods
           - Description
         * - ``poolAttrs``
           - Object
-          - This parameter can contain a ``tag`` property when :ref:`connection tagging <connpooltagging>` is in use. It can also contain :ref:`shardingKey <getconnectiondbattrsshardingkey>` and :ref:`superShardingKey <getconnectiondbattrssupershardingkey>` properties, when using :ref:`database sharding <sharding>`.
+          - This parameter can contain a ``tag`` property when :ref:`connection tagging <connpooltagging>` is in use. It can also contain :ref:`shardingKey <getconnectiondbattrsshardingkey>` and :ref:`superShardingKey <getconnectiondbattrssupershardingkey>` properties, when using :ref:`Oracle Globally Distributed Database <sharding>`.
 
             When getting connections from heterogeneous pools, this parameter can contain ``user`` (or ``username``) and ``password`` properties for true heterogeneous pool usage, or it can contain a ``user`` property when a pool proxy user is desired.
 

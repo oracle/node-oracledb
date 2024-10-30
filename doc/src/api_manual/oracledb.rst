@@ -1132,8 +1132,8 @@ Each of the configuration properties is described below.
       "VARCHAR2".
     - ``dbTypeClass``: The class associated with the database type. This is
       only set if ``dbType`` is ``oracledb.DB_TYPE_OBJECT``.
-    - ``domainName``: The name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
-    - ``domainSchema``: The schema name of the `SQL domain <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/create-domain.html#GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
+    - ``domainName``: The name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
+    - ``domainSchema``: The schema name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
     - ``isJson``: Indicates if the column is known to contain JSON data.
     - ``name``: The name of the column.
     - ``nullable``: Indicates whether ``NULL`` values are permitted for this
@@ -1450,8 +1450,8 @@ Each of the configuration properties is described below.
     connection has been released back to the pool. The pending connection
     request will consume one worker thread.
 
-    See :ref:`Connecting to Sharded Databases <sharding>` for more
-    information.
+    See :ref:`Connecting to Oracle Globally Distributed Database <sharding>`
+    for more information.
 
     .. note::
 
@@ -3173,7 +3173,7 @@ Oracledb Methods
           - Thick
           - .. _getconnectiondbattrsshardingkey:
 
-            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Sharded Databases <sharding>`.
+            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Oracle Globally Distributed Database <sharding>`.
 
             Array values may be of String type (mapping to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW). Multiple types may be used in the array. Sharding keys TIMESTAMP type are not supported.
 
@@ -3189,7 +3189,7 @@ Oracledb Methods
           - Thick
           - .. _getconnectiondbattrssupershardingkey:
 
-            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Sharded Databases <sharding>`.
+            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Oracle Globally Distributed Database <sharding>`.
 
             Array values may be of String type (mapping to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW). Multiple types may be used in the array. Sharding keys TIMESTAMP type are not supported.
 

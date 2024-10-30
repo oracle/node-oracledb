@@ -155,12 +155,13 @@ Upgrading from node-oracledb 6.2 to 6.3
   ``annotations``, ``domainName``, and ``domainSchema`` identifies the
   `annotations <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
   GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object, the name of the
-  `SQL domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
-  GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`_, and the schema name of the
-  `SQL domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
-  GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched
-  column. Annotations and SQL domains are supported from Oracle Database 23ai
-  onwards. For node-oracledb Thick mode, Oracle Client 23ai is also required.
+  `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+  id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`_, and the schema name of the
+  `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+  id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched
+  column. Annotations and data use case domains are supported from Oracle
+  Database 23ai onwards. For node-oracledb Thick mode, Oracle Client 23ai is
+  also required.
 
 - In node-oracledb Thin mode, ``SYS.XMLTYPE`` data can now be
   :ref:`fetched as strings <xmltype>`.

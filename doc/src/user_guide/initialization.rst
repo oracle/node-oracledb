@@ -492,46 +492,6 @@ explicitly specified or a default location will be used.  Do one of:
     installation, in ``$ORACLE_HOME/network/admin`` or
     ``$ORACLE_BASE_HOME/network/admin``.
 
-.. _oratzfile:
-
-Using the Optional Time Zone File
----------------------------------
-
-The name of the Oracle time zone file to use can be set in
-``ORA_TZFILE``.
-
-.. note::
-
-    The Oracle time zone file and ``ORA_TZFILE`` environment variable are only
-    used in the node-oracledb Thick mode.
-
-If node-oracledb is using Oracle Client libraries from an Oracle
-Database or full Oracle Client software installation, and you want to
-use a non-default time zone file, then set ``ORA_TZFILE`` to the file
-name with a directory prefix, for example:
-``export ORA_TZFILE=/opt/oracle/myconfig/timezone_31.dat``.
-
-Oracle Instant Client includes embedded small and big time zone ‘files’,
-for example ``timezone_32.dat`` and ``timezlrg_32.dat``. The versions
-can be shown by running the utility ``genezi -v`` located in the Instant
-Client directory. The small file contains only the most commonly used
-time zones. By default the larger ``timezlrg_n.dat`` file is used. If
-you want to use the smaller ``timezone_n.dat`` file, then set the
-``ORA_TZFILE`` environment variable to the name of the file without any
-directory prefix, for example ``export ORA_TZFILE=timezone_32.dat``.
-From Oracle Instant Client 12.2, you can also use an external time zone
-file. Create a subdirectory ``oracore/zoneinfo`` under the Instant Client
-directory, and move the file into it. Then set ``ORA_TZFILE`` to the file
-name, without any directory prefix. The ``genezi -v`` utility will show
-the time zone file in use. With Oracle Instant Client 19.18 (or later), you
-can alternatively place the external time zone file in any directory and then
-set the ``ORA_TZFILE`` environment variable to the absolute path of the file.
-
-The Oracle Database documentation contains more information about time
-zone files, see `Choosing a Time Zone
-File <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-805AB986-
-DE12-4FEA-AF56-5AABCD2132DF>`__.
-
 .. _environmentvariables:
 
 Oracle Environment Variables for node-oracledb Thick Mode

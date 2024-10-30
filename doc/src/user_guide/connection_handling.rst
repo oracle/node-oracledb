@@ -4725,22 +4725,29 @@ when configuration information from this configuration provider is required.
 
 .. _sharding:
 
-Connecting to Sharded Databases
-===============================
+Connecting to Oracle Globally Distributed Database
+==================================================
 
-`Oracle Sharding <https://www.oracle.com/database/technologies/high-
-availability/sharding.html>`__ can be used to horizontally partition data
-across independent databases. A database table can be split so each shard
+`Oracle Globally Distributed Database <https://www.oracle.com/database/
+distributed-database/>`__ is a feature of Oracle Database that lets you
+automatically distribute and replicate data across a pool of Oracle databases
+that share no hardware or software. It was previously known as Oracle
+Sharding. It allows a database table to be split so that each database
 contains a table with the same columns but a different subset of rows. These
-tables are known as sharded tables. Sharding is configured in Oracle Database,
-see the `Oracle Sharding <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
-id=SHARD>`__ manual. Sharding requires Oracle Database and client libraries 12.2,
-or later.
+tables are known as sharded tables. From the perspective of an application, a
+sharded table in Oracle Globally Distributed Database looks like a single
+table: the distribution of data across those shards is completely transparent
+to the application.
+
+Sharding is configured in Oracle Database, see the `Oracle Globally
+Distributed Database <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+SHARD>`__ manual. It requires Oracle Database and Oracle Client libraries
+12.2, or later.
 
 .. note::
 
-    In this release, sharding is only supported in the node-oracledb Thick
-    mode. See :ref:`enablingthick`.
+    In this release, Oracle Globally Distributed Database is only supported in
+    the node-oracledb Thick mode. See :ref:`enablingthick`.
 
 When a connection is opened in node-oracledb using
 :meth:`oracledb.getConnection()`, the
@@ -4768,11 +4775,11 @@ to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW).
 Multiple types may be used in each array. Sharding keys of TIMESTAMP type
 are not supported by node-oracledb.
 
-Examples to Connect to a Shard Based on the Sharding Key Type
--------------------------------------------------------------
+Examples to Connect to a Globally Distributed Database Based on the Sharding Key Type
+-------------------------------------------------------------------------------------
 
-The examples listed in this section show how to establish connections to a
-database shard based on the sharding key type.
+The examples listed in this section show how to establish connections to an
+Oracle Globally Distributed Database based on the sharding key type.
 
 **VARCHAR2**
 

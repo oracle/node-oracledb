@@ -80,7 +80,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Real Application Clusters (RAC) (see :ref:`connectionrac`)
       - Yes
       - Yes
-    * - Oracle Sharded Databases (see :ref:`sharding`)
+    * - Oracle Globally Distributed Database - previously known as Oracle Sharded Databases (see :ref:`sharding`)
       - No
       - Yes - No TIMESTAMP support
     * - Connection Pool Connection Load Balancing (CLB)

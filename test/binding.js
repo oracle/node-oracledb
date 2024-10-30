@@ -766,7 +766,7 @@ describe('4. binding.js', function() {
           await connection.execute(sql, {ROWID: 1});
         },
         //NJS-098: 1 positional bind values are required but 0 were provided
-        /ORA-01745:|NJS-098:/
+        /ORA-01745:/
       );
     });
 

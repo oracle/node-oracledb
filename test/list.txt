@@ -34,6 +34,27 @@ Overview of node-oracledb functional tests
         1.10.1 both user & username specified
         1.10.2 allows username to be used as an alias for user
         1.10.3 uses username alias to login with SYSDBA privilege
+    1.11 Invalid credentials
+        1.11.1 using bad connect string
+        1.11.2 using user
+        1.11.3 using invalid password
+    1.12 confirm an exception is raised after closing a connection
+        1.12.1 exception_on_close
+    1.13 unsupported year to month interval
+        1.13.1 test year to month interval not supported
+    1.14 unacceptable boundary values for number datatypes
+        1.14.1 unacceptable boundary numbers should get rejected
+    1.15 result after bad execute
+        1.15.1 subsequent executes should succeed after bad execute
+        1.15.2 result after bad execute
+    1.16 error on empty connectString with thin mode
+        1.16.1 connectString = ""
+        1.16.2 connectString undefined
+    1.17 Oracle Database instance name associated with the connection
+        1.17.1 connection parameter instanceName comparision with query result
+    1.18 settable parameters
+        1.18.1 negative - Check parameter value type
+        1.18.2 Check parameter values after user update
 
   2. pool.js
     2.1 default setting
@@ -102,7 +123,6 @@ Overview of node-oracledb functional tests
         2.15.12 user name
         2.15.13 user name - undefined
         2.15.14 connectString
-
     2.16 Pool non-configurable properties global/local override
         2.16.1 edition only globally set
         2.16.2 edition override
@@ -118,6 +138,9 @@ Overview of node-oracledb functional tests
         2.18.1 driver mode in pool stats
     2.19 DBA and Non-DBA user login with SYSDBA privilege
         2.19.1 DBA user with SYSDBA privilege
+    2.20 settable parameters
+       2.20.1 Check parameter values after user update
+       2.20.2 negative - Check parameter value types 
 
   3. examples.js
     3.1 connect.js

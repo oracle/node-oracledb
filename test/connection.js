@@ -574,9 +574,49 @@ describe('1. connection.js', function() {
   }); //1.17
 
   describe('1.18 settable parameters', function() {
-    it('1.18.1 negative - Check parameters value type', async function() {
+    const sqlSessionDetails = `SELECT machine, osuser, terminal, program
+      FROM v$session
+      WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`;
+    const sqlDriverName = `SELECT CLIENT_DRIVER FROM V$SESSION_CONNECT_INFO
+      WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`;
+    let origMachineName, origProgramName, origUserName, origTerminalName;
+    let origDriverName;
+    const dbaConfig = {
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA,
+    };
+
+    beforeEach(async function() {
+      let result;
       if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) this.skip();
 
+      const dbaConnection = await oracledb.getConnection(dbaConfig);
+      result = await dbaConnection.execute(sqlSessionDetails);
+      origMachineName = result.rows[0][0];
+      origUserName = result.rows[0][1];
+      origTerminalName = result.rows[0][2];
+      origProgramName = result.rows[0][3];
+
+      result = await dbaConnection.execute(sqlDriverName);
+      origDriverName = result.rows[0][0];
+
+      await dbaConnection.close();
+    });
+
+    afterEach(function() {
+      if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) return;
+
+      // Set the original parameters back
+      oracledb.driverName = origDriverName;
+      oracledb.program = origProgramName;
+      oracledb.terminal = origTerminalName;
+      oracledb.machine = origMachineName;
+      oracledb.osUser = origUserName;
+    });
+
+    it('1.18.1 negative - Check parameter value type', async function() {
       const dbaConfig = {
         user: dbConfig.test.DBA_user,
         password: dbConfig.test.DBA_password,
@@ -645,9 +685,7 @@ describe('1. connection.js', function() {
       );
     });
 
-    it('1.18.2 Check parameters value after user update', async function() {
-      if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) this.skip();
-
+    it('1.18.2 Check parameter values after user update', async function() {
       const dbaConfig = {
         user: dbConfig.test.DBA_user,
         password: dbConfig.test.DBA_password,
@@ -663,52 +701,40 @@ describe('1. connection.js', function() {
       oracledb.osUser = 'myuser';
       const conn = await oracledb.getConnection(dbaConfig);
 
-      let res = await conn.execute(`SELECT machine, osuser, terminal, program
-        FROM v$session
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      let res = await conn.execute(sqlSessionDetails);
       assert.deepStrictEqual(res.rows[0][0], 'mymachine');
       assert.deepStrictEqual(res.rows[0][1], 'myuser');
       assert.deepStrictEqual(res.rows[0][2], 'myterm');
       assert.deepStrictEqual(res.rows[0][3], 'mypgm');
 
-      res = await conn.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver');
 
       // Set the parameters again after connection creation.
-      // Already created connection parms won't get changed
+      // Connection params created already won't get changed.
       oracledb.driverName = 'mydriver1';
       oracledb.program = 'mypgm1';
       oracledb.terminal = 'myterm1';
       oracledb.machine = 'mymachine1';
       oracledb.osUser = 'myuser1';
 
-      res = await conn.execute(`SELECT machine, osuser, terminal, program
-        FROM v$session
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn.execute(sqlSessionDetails);
       assert.deepStrictEqual(res.rows[0][0], 'mymachine');
       assert.deepStrictEqual(res.rows[0][1], 'myuser');
       assert.deepStrictEqual(res.rows[0][2], 'myterm');
       assert.deepStrictEqual(res.rows[0][3], 'mypgm');
 
-      res = await conn.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver');
 
       const conn1 = await oracledb.getConnection(dbaConfig);
-      res = await conn1.execute(`SELECT machine, osuser, terminal, program
-        FROM v$session
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn1.execute(sqlSessionDetails);
       assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
       assert.deepStrictEqual(res.rows[0][1], 'myuser1');
       assert.deepStrictEqual(res.rows[0][2], 'myterm1');
       assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
 
-      res = await conn1.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn1.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
 
       dbaConfig.driverName = 'mydriver3';
@@ -718,57 +744,41 @@ describe('1. connection.js', function() {
       dbaConfig.program = 'mypgm3';
 
       const conn2 = await oracledb.getConnection(dbaConfig);
-      res = await conn2.execute(`SELECT machine, osuser, terminal, program
-        FROM v$session
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn2.execute(sqlSessionDetails);
       assert.deepStrictEqual(res.rows[0][0], 'mymachine3');
       assert.deepStrictEqual(res.rows[0][1], 'myuser3');
       assert.deepStrictEqual(res.rows[0][2], 'myterm3');
       assert.deepStrictEqual(res.rows[0][3], 'mypgm3');
 
-      res = await conn2.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn2.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
 
-      res = await conn2.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn2.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
 
-      // above change in config won't effect already existing connection
-      res = await conn1.execute(`SELECT machine, osuser, terminal, program
-        FROM v$session
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      // above change in config won't affect already existing connection
+      res = await conn1.execute(sqlSessionDetails);
       assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
       assert.deepStrictEqual(res.rows[0][1], 'myuser1');
       assert.deepStrictEqual(res.rows[0][2], 'myterm1');
       assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
 
-      res = await conn1.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn1.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
 
       // any new connection will have new set of params
       const conn3 = await oracledb.getConnection(dbaConfig);
-      res = await conn3.execute(`SELECT machine, osuser, terminal, program
-        FROM v$session
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn3.execute(sqlSessionDetails);
       assert.deepStrictEqual(res.rows[0][0], 'mymachine3');
       assert.deepStrictEqual(res.rows[0][1], 'myuser3');
       assert.deepStrictEqual(res.rows[0][2], 'myterm3');
       assert.deepStrictEqual(res.rows[0][3], 'mypgm3');
 
-      res = await conn3.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn3.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
 
       // above change in config won't effect already existing connection
-      res = await conn.execute(`SELECT CLIENT_DRIVER
-        FROM V$SESSION_CONNECT_INFO
-        WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`);
+      res = await conn.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver');
       await conn1.close();
       await conn.close();

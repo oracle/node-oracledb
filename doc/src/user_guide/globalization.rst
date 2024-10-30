@@ -53,6 +53,122 @@ Setting the Client Character Set
 
 In node-oracledb, the encoding used for all character data is AL32UTF8.
 
+.. _oratzfile:
+
+Time Zone Files
+===============
+
+This section is only applicable to node-oracledb Thick mode.
+
+Oracle Client libraries and Oracle Database use time zone files for date
+operations. The files are versioned, but do not always have to be the same
+version on the database and client. The name of the Oracle time zone file to
+use can be set in the ``ORA_TZFILE`` environment variable.
+
+Finding the Time Zone Files in Use
+----------------------------------
+
+You can find the time zone file used by the database itself by executing the
+following query:
+
+.. code-block:: sql
+
+    SQL> SELECT * FROM v$timezone_file;
+
+    FILENAME                VERSION     CON_ID
+    -------------------- ---------- ----------
+    timezlrg_43.dat              43          0
+
+The time zone files on the client side can be shown by running the utility
+``genezi -v``.  In Instant Client, this is in the Basic and Basic Light
+packages.  The output will be like::
+
+    $ genezi -v
+
+    . . .
+
+    TIMEZONE INFORMATION
+    --------------------
+    Operating in Instant Client mode.
+
+    Small timezone file = /opt/oracle/instantclient/oracore/zoneinfo/timezone_43.dat
+    Large timezone file = /opt/oracle/instantclient/oracore/zoneinfo/timezlrg_43.dat
+
+With Instant Client, the paths refer to a virtual file system in the Oracle
+libraries. These files are not present on the OS file system.
+
+The larger file ``timezlrg_<n>.dat`` contains all time zone information. This
+is the file used by default.  The smaller ``timezone_<n>.dat`` file contains
+only the most commonly used time zones. See `Time Zone Region Names <https://
+www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-21D14370-A707-4482-A3FE-
+9277263F292A>`__ for more information.
+
+The filenames shows the version of the time zone files, in this example it is
+version 43.
+
+The Oracle Database documentation contains more information about time zone
+files, see `Choosing a Time Zone File <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-805AB986-DE12-4FEA-AF56-5AABCD2132DF>`__.
+
+Changing the Oracle Client Time Zone File
+-----------------------------------------
+
+You can get updated time zone files from a full Oracle Database installation,
+or by downloading a patch from `Oracle Support <https://support.oracle.com/>`_.
+For use with Instant Client, unzip the patch and copy the necessary files:
+installing the patch itself will not work.
+
+**Using a New Time Zone File in Instant Client**
+
+From Oracle Instant Client 12.2, you can use an external time zone file,
+allowing you to update time zone information without updating the complete
+Instant Client installation. Changing the file in earlier versions of Instant
+Client is not possible.
+
+To change the time zone file, do one of the following:
+
+- Create a subdirectory ``oracore/zoneinfo`` under the Instant Client
+  directory and move the file into it.  Then set ``ORA_TZFILE`` to the file
+  name, without any absolute or relative directory prefix prefix.  For
+  example, if Instant Client is in ``/opt/oracle/instantclient``::
+
+    mkdir -p /opt/oracle/instantclient/oracore/zoneinfo
+    cp timezone_43.dat /opt/oracle/instantclient/oracore/zoneinfo/
+    export ORA_TZFILE=timezone_43.dat
+
+- Alternatively, from Oracle Instant Client 19.18 onwards, you can place the
+  external time zone file in any directory and then set the ``ORA_TZFILE``
+  environment variable to the absolute path of the file. For example::
+
+    mkdir -p /opt/oracle/myconfig
+    cp timezone_43.dat /opt/oracle/myconfig/
+    export ORA_TZFILE=/opt/oracle/myconfig/timezone_43.dat
+
+After installing a new client time zone file, run ``genezi -v`` again to check
+if it is readable.
+
+**Using the Embedded Small Time Zone File in Instant Client**
+
+By default, Instant Client uses its larger embedded ``timezlrg_<n>.dat`` file.
+If you want to use the smaller embedded ``timezone_<n>.dat`` file, then set the
+``ORA_TZFILE`` environment variable to the name of the file without any
+absolute or relative directory prefix. For example::
+
+    export ORA_TZFILE=timezone_43.dat
+
+**Using a New Time Zone File in a Full Oracle Client**
+
+If node-oracledb Thick mode is using Oracle Client libraries from a full
+Oracle Client software installation (such as installed with Oracle's GUI
+installer), and you want to use a non-default time zone file, then set
+``ORA_TZFILE`` to the file name with an absolute path directory prefix. For
+example::
+
+    export ORA_TZFILE=/opt/oracle/myconfig/timezone_43.dat
+
+This also works if node-oracledb Thick mode is using libraries from an Oracle
+Database installation.
+
 Setting the Client Locale
 =========================
 
