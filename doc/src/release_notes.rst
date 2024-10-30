@@ -50,6 +50,9 @@ Thin Mode Changes
 #)  Added new properties in `oracledb` that can enable users to customize and set session information,
     making it easier to manage and monitor database interactions.
 
+#)  Error ``NJS-125`` is now raised when an empty connect string is provided
+    for creating pools.
+
 Thick Mode changes
 ++++++++++++++++++
 

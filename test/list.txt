@@ -80,8 +80,9 @@ Overview of node-oracledb functional tests
         2.11.2 error occurs at getConnection() when poolMin is the default value 0
     2.12 connectionString alias
         2.12.1 allows connectionString to be used as an alias for connectString
-    2.13 connectString & connectionString provided
+    2.13 connect string
         2.13.1 both connectString & connectionString provided
+        2.13.2 Negative - empty connect string
     2.14 username alias
         2.14.1 allows username to be used as an alias for user
         2.14.2 both user and username specified

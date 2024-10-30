@@ -616,7 +616,7 @@ describe('2. pool.js', function() {
     });
   }); // 2.12
 
-  describe('2.13 connectString & connectionString provided', function() {
+  describe('2.13 connect string', function() {
 
     it('2.13.1 both connectString & connectionString provided', async function() {
       const config = {...dbConfig,
@@ -630,6 +630,21 @@ describe('2. pool.js', function() {
         /NJS-075:/
       );
     });  // 2.13.1
+
+    it('2.13.2 Negative - empty connect string', async function() {
+      const config = {...dbConfig,
+        connectString: dbConfig.connectString_does_not_exist,
+        poolMin: 1,
+        poolMax: 1,
+        poolIncrement: 0
+      };
+      await assert.rejects(
+        async () => await oracledb.createPool(config),
+        /ORA-01017:|NJS-125:/
+        // ORA-01017: invalid username/password; logon denied
+        // NJS-125: "connectString" cannot be empty or undefined. Bequeath connections are not supported in Thin mode
+      );
+    });  // 2.13.2
   });  // 2.13
 
   describe('2.14 username alias', function() {
