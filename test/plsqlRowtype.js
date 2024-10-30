@@ -37,7 +37,7 @@ const assert = require('assert');
 const testsUtil = require('./testsUtil.js');
 
 describe('304. plSqlRowType.js', function() {
-  let connection;
+  let connection, pool, sysDBAConn;
   const table = 'NODB_ROWTYPE';
   const typeName = `NODB_OBJ`;
   const stmts = [
@@ -136,6 +136,11 @@ describe('304. plSqlRowType.js', function() {
   };
 
   before(async function() {
+    pool = await oracledb.createPool({
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString,
+      poolMin: 1});
     connection = await oracledb.getConnection(dbConfig);
     await testsUtil.createType(connection, typeName, ObjSql);
     await testsUtil.createTable(connection, table, createTableSql);
@@ -156,6 +161,12 @@ describe('304. plSqlRowType.js', function() {
     await testsUtil.dropType(connection, typeName);
     await connection.execute(dropPackageSql);
     await connection.close();
+    if (sysDBAConn) {
+      await sysDBAConn.close();
+    }
+    if (pool) {
+      await pool.close(0);
+    }
   });
 
   it('304.1 %ROWTYPE', async function() {
@@ -171,5 +182,32 @@ describe('304. plSqlRowType.js', function() {
     const types = objClass.prototype.elementTypeClass.prototype.attributes;
     assert.deepStrictEqual(expectedTypes, types);
   }); // 304.2
+
+  it('304.3 %ROWTYPE object create and delete in a loop to check cursor leak', async function() {
+    if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+
+    const name = "NODB_ROWTYPE%ROWTYPE";
+    const iterations = 100;
+    const dbaConfig = {
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectionString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA
+    };
+    const connection = await pool.getConnection();
+    const sid = await testsUtil.getSid(connection);
+    await connection.close();
+    sysDBAConn = await oracledb.getConnection(dbaConfig);
+    const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+    for (let i = 0; i < iterations; i++) {
+      const connection = await pool.getConnection();
+      await connection.getDbObjectClass(name);
+      await connection.close();
+    }
+    const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+
+    // ensure cursors are not linearly opened as iterations causing leak.
+    assert(newOpenCount - openCount < 5);
+  }); // 304.3
 
 }); // 304

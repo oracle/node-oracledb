@@ -45,6 +45,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed cursor leak for dbobject binds using :meth:`connection.getDbObjectClass()`.
+    See `Issue #1694 <https://github.com/oracle/node-oracledb/issues/
+    1694>`__.
+
 #)  Fixed bug that did not allow connection to Oracle Database 23ai instances
     that have fast authentication disabled.
 

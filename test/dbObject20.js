@@ -1269,4 +1269,59 @@ describe('290. dbObject20.js', () => {
     });
   });
 
+  describe('290.7 Check cursor close behaviour', function() {
+    let pool, sysDBAConn, sid;
+    const TYPE1 = 'NODB_TYP_NODB_MASTER_ID_ARR';
+
+    before(async () => {
+      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+
+      const dbaConfig = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectionString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA
+      };
+      sysDBAConn = await oracledb.getConnection(dbaConfig);
+      pool = await oracledb.createPool({
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: dbConfig.connectString,
+        poolMin: 1});
+      const conn = await pool.getConnection();
+      const sql =
+        `CREATE OR REPLACE TYPE ${TYPE1} IS TABLE OF NUMBER`;
+      await testsUtil.createType(conn, TYPE1, sql);
+      sid = await testsUtil.getSid(conn);
+      await conn.close();
+    }); // before()
+
+    after(async () => {
+      if (sysDBAConn) {
+        await sysDBAConn.close();
+      }
+      if (pool) {
+        const conn = await pool.getConnection();
+        await testsUtil.dropType(conn, TYPE1);
+        await conn.close();
+        await pool.close(0);
+      }
+    }); // after()
+
+    // https://github.com/oracle/node-oracledb/issues/1694
+    it('290.7.1 create and delete DB object instance in a loop should not cause cursor leak ', async () => {
+      const iterations = 100;
+      const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+      for (let i = 0; i < iterations; i++) {
+        const connection = await pool.getConnection();
+        await connection.getDbObjectClass(TYPE1);
+        await connection.close();
+      }
+      const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+
+      // ensure cursors are not linearly opened as iterations causing leak.
+      assert(newOpenCount - openCount < 5);
+    });
+  });
+
 });

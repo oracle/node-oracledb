@@ -140,7 +140,7 @@ Overview of node-oracledb functional tests
         2.19.1 DBA user with SYSDBA privilege
     2.20 settable parameters
        2.20.1 Check parameter values after user update
-       2.20.2 negative - Check parameter value types 
+       2.20.2 negative - Check parameter value types
 
   3. examples.js
     3.1 connect.js
@@ -5734,6 +5734,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         290.5.1 verify associative array outbinds
     290.6 db Object tests with XML Value type
         290.6.1 Verify XML value and metaData inside object
+    290.7 Check cursor close behaviour
+        290.7.1 create and delete DB object instance in a loop should not cause cursor leak
 
 291. dbSchema.js
     291.1 dbSchema and Annotations
@@ -5913,6 +5915,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
   304. plsqlRowtype.js
     304.1 %ROWTYPE
     304.2 %ROWTYPE collection
+    304.3 %ROWTYPE object create and delete in a loop to check cursor leak
 
   305. dataTypeVector5.js
     305.1 tests with vector distance
