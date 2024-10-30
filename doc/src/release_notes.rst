@@ -56,6 +56,8 @@ Thin Mode Changes
 #)  Error ``NJS-125`` is now raised when an empty connect string is provided
     for creating pools.
 
+#) Provide additional error details when an invalid wallet is used.
+
 Thick Mode changes
 ++++++++++++++++++
 
