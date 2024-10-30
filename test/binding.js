@@ -765,7 +765,7 @@ describe('4. binding.js', function() {
         async () => {
           await connection.execute(sql, {ROWID: 1});
         },
-        //NJS-098: 1 positional bind values are required but 0 were provided
+        //ORA-01745: invalid host/bind variable name
         /ORA-01745:/
       );
     });

@@ -4082,9 +4082,9 @@ Centralized Configuration Providers enable you to centrally store and manage
 the configuration information of your application in a single location on the
 cloud. These providers allow you to separately store the configuration
 information from the code of your application. The configuration information
-that can be stored in these providers includes connect descriptors, and
-database credentials such as user name and password. The database password can
-be stored separately in a secure vault which is a service offered by these
+stored in these providers include connect descriptor, wallet, and database
+credential (user name and password) details. The database password and wallet
+can be stored separately in a secure vault service offered by the cloud
 providers. Also, you can store properties specific to node-oracledb in
 centralized configuration providers.
 
@@ -4129,21 +4129,22 @@ include `Azure App Configuration <https://www.npmjs.com/package/@azure/app-
 configuration>`__ and `Azure Identity <https://www.npmjs.com/package/@azure/
 identity>`__. Optionally, you must install `Azure Key Vault <https://www.
 npmjs.com/package/@azure/keyvault-secrets>`__ which is required only if a
-password is stored in the vault. For installation instructions of these
-libraries, see :ref:`azuremodules`.
+password or wallet is stored in the vault. For installation instructions of
+these libraries, see :ref:`azuremodules`.
 
 Configuration information is stored as key-value pairs in Azure App
 Configuration. You must add the connect descriptor as a key under a prefix
 based on the requirements of your application. Optionally, you can add the
-database user name, password, and node-oracledb specific properties as
-keys. The database password can be stored securely as a secret using
-`Azure Key Vault <https://learn.microsoft.com/en-us/azure/key-vault/general/
-overview>`__. In Azure App Configuration, you can add the following keys under
-a prefix:
+database user name, password, wallet location and node-oracledb specific
+properties as keys. The database password and wallet can be stored securely as
+a secret using `Azure Key Vault <https://learn.microsoft.com/en-us/azure/
+key-vault/general/overview>`__. In Azure App Configuration, you can add the
+following keys under a prefix:
 
 - <prefix>connect_descriptor (required)
 - <prefix>user (optional)
 - <prefix>password (optional)
+- <prefix>wallet_location (optional) - only node-oracledb Thin mode
 - <prefix>node-oracledb (optional)
 
 The key ending with:
@@ -4153,6 +4154,9 @@ The key ending with:
 - ``user`` stores the database user name as the value.
 - ``password`` stores the reference to the Azure Key Vault and Secret as
   the value.
+- ``wallet_location`` stores the reference to the Azure Key Vault and Secret
+  that contains the wallet as the value. This can only be used in
+  node-oracledb Thin mode.
 - ``node-oracledb`` stores the values of the node-oracledb specific
   properties. The properties that can be stored in Azure App Configuration
   include ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``,
@@ -4286,6 +4290,8 @@ are defined under the same prefix ``test/`` as an example.
       - scott
     * - test/password
       - {"uri":"https://mykeyvault.vault.azure.net/secrets/passwordsalescrm"}
+    * - test/wallet_location
+      - {"uri":"https://mykeyvault.vault.azure.net/secrets/walletsalescrm"}
     * - test/node-oracledb
       - {"stmtCacheSize":30, "prefetchRows":2, "poolMin":2, "poolMax":10}
 
@@ -4331,6 +4337,10 @@ configuration information in this
       - "scott"
     * - ``password``
       - "manager" (value of secret in URI - for demo purposes)
+    * - ``walletContent``
+      - <PEM wallet content> (value of secret in URI - for demo purposes)
+
+        This value can only be used in node-oracledb Thin mode.
     * - ``stmtCacheSize``
       - 30
     * - ``prefetchRows``
@@ -4379,6 +4389,10 @@ sample configuration information in this
       - "scott"
     * - ``password``
       - "manager" (value of secret in URI - for demo purposes)
+    * - ``walletContent``
+      - <PEM wallet content> (value of secret in URI - for demo purposes)
+
+        This value can only be used in node-oracledb Thin mode.
     * - ``stmtCacheSize``
       - 30
     * - ``prefetchRows``
@@ -4397,6 +4411,9 @@ application will have the higher precedence.
 If you are using Thin mode and have defined the node-oracledb specific
 properties in both the application and in Azure App Configuration, then the
 values defined in the configuration provider will have the higher precedence.
+If you have defined the ``walletContent`` property in the application and the
+``wallet_location`` key in Azure App Configuration, then the value defined in
+the configuration provider will have the higher precedence.
 
 If you are using Thick mode and have defined the node-oracledb properties in
 an ``oraaccess.xml`` file, Azure App Configuration, and the application, then
@@ -4444,15 +4461,16 @@ instructions of these libraries, see :ref:`ocimodules`.
 
 Configuration information is stored as a JSON file in OCI Object Storage. You
 must add the connect descriptor in the JSON file. Optionally, you can add the
-database user name, password, and node-oracledb specific properties in the
-JSON file. The database password can also be stored securely as a secret using
-`OCI Vault <https://docs.oracle.com/en-us/iaas/Content/KeyManagement/Tasks/
-managingsecrets.htm>`__. In OCI Object Storage, you can add the following
-sub-objects in the JSON file:
+database user name, password, wallet location, and node-oracledb specific
+properties in the JSON file. The database password and wallet can also be
+stored securely as a secret using `OCI Vault <https://docs.oracle.com/en-us/
+iaas/Content/KeyManagement/Tasks/managingsecrets.htm>`__. In OCI Object
+Storage, you can add the following sub-objects in the JSON file:
 
 - connect_descriptor (required)
 - user (optional)
 - password (optional)
+- wallet_location (optional) - only node-oracledb Thin mode
 - node-oracledb (optional)
 
 Each sub-object is detailed below:
@@ -4462,6 +4480,9 @@ Each sub-object is detailed below:
 - ``user`` is used to specify the database user name as the value.
 - ``password`` is used to specify the reference to OCI Vault and secret as
   the value.
+- ``wallet_location`` is used to specify the reference to the OCI Vault and
+  secret that contains the wallet as the value. This can only be used in
+  node-oracledb Thin mode.
 - ``node-oracledb`` is used to specify the values of the node-oracledb specific
   properties. The properties that can be stored in OCI Object Storage include
   ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``,
@@ -4582,12 +4603,16 @@ file which is stored in OCI Object Storage::
         "user": "scott",
         "password": {
             "type": "ocivault",
-            "value": "ocid1.vaultsecret.my-secret-id",
+            "value": "ocid1.vaultsecret.my-secret-id"
+        },
+        "wallet_location": {
+            "type": "ocivault",
+            "value": "ocid1.vaultwallet.my-wallet-id"
         },
         "node-oracledb": {
             "stmtCacheSize": 30,
-            "prefetchRows": 2
-            "poolMin": 2
+            "prefetchRows": 2,
+            "poolMin": 2,
             "poolMax": 10
         }
     }
@@ -4633,6 +4658,10 @@ connection properties will be the values that were defined in the
       - "scott"
     * - ``password``
       - "manager" (value of secret in URI - for demo purposes)
+    * - ``walletContent``
+      - <PEM wallet content> (value of secret in URI - for demo purposes)
+
+        This value can only be used in node-oracledb Thin mode.
     * - ``stmtCacheSize``
       - 30
     * - ``prefetchRows``
@@ -4680,6 +4709,10 @@ connection properties will be the values that were defined in the
       - "scott"
     * - ``password``
       - "manager" (value of secret in URI - for demo purposes)
+    * - ``walletContent``
+      - <PEM wallet content> (value of secret in URI - for demo purposes)
+
+        This value can only be used in node-oracledb Thin mode.
     * - ``stmtCacheSize``
       - 30
     * - ``prefetchRows``
@@ -4689,7 +4722,6 @@ connection properties will be the values that were defined in the
     * - ``poolMax``
       - 10
 
-
 **Precedence of Properties**
 
 If you have defined the values of ``user`` and ``password`` in both the
@@ -4698,7 +4730,10 @@ will have the higher precedence.
 
 If you are using Thin mode and have defined the node-oracledb specific
 properties in both the application and in OCI Object Storage, then the values
-defined in the configuration provider will have the higher precedence.
+defined in the configuration provider will have the higher precedence. If you
+have defined the ``walletContent`` property in the application and the
+``wallet_location`` key in Azure App Configuration, then the value defined in
+the configuration provider will have the higher precedence.
 
 If you are using Thick mode and have defined these node-oracledb properties in
 an ``oraaccess.xml`` file, OCI Object Storage, and the application, then the order

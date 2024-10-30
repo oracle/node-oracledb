@@ -208,6 +208,26 @@ Overview of node-oracledb functional tests
         4.8.1 binding out in Object & Array formats
         4.8.2 BIND_IN
         4.8.3 BIND_INOUT
+    4.9 different placeholders for bind name
+        4.9.1 test case sensitivity of quoted bind names
+        4.9.2 using a reserved keyword as a bind name
+        4.9.3 not using a bind name in execute statement
+    4.10 various quoted binds
+        4.10.1 various quoted bind names
+    4.11 PL/SQL block with null Binds
+        4.11.1 executing a null with bind values
+    4.12 binding in a cursor
+        4.12.1 test binding in a cursor
+    4.13 fetching supplemental and other characters
+        4.13.1 bind and fetch supplemental characters
+        4.13.2 bind and fetch Scandinavian/Nordic characters
+    4.14 binding large number of in and out binds
+        4.14.1 output binds in pl/sql (506ms)
+        4.14.2 output binds using bindByPosition in sql with returning clause
+        4.14.3 output binds using bindByName in sql with returning clause
+    4.15 binding different data types for same sql
+        4.15.1 change bindtypes using bindByPosition for queries
+        4.15.2 change bindtypes using bindByName for queries
 
 5. externalAuth.js
     5.1 tests that work both when DB has configured externalAuth and not configured
