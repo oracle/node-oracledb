@@ -609,11 +609,11 @@ describe('1. connection.js', function() {
       if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) return;
 
       // Set the original parameters back
-      oracledb.driverName = origDriverName;
-      oracledb.program = origProgramName;
-      oracledb.terminal = origTerminalName;
-      oracledb.machine = origMachineName;
-      oracledb.osUser = origUserName;
+      oracledb.driverName = origDriverName ?? "";
+      oracledb.program = origProgramName ?? "";
+      oracledb.terminal = origTerminalName ?? "";
+      oracledb.machine = origMachineName ?? "";
+      oracledb.osUser = origUserName ?? "";
     });
 
     it('1.18.1 negative - Check parameter value type', async function() {
@@ -627,61 +627,61 @@ describe('1. connection.js', function() {
       dbaConfig.driverName = null;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.driverName = 1;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.machine = null;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.machine = 1;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.terminal = null;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.terminal = 1;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.program = null;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.program = 1;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.osUser = null;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.osUser = 1;
       await assert.rejects(
         async () => await oracledb.getConnection(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
     });
 
@@ -780,6 +780,106 @@ describe('1. connection.js', function() {
       // above change in config won't effect already existing connection
       res = await conn.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+
+      // new connection with parameters value having invalid special character
+      // We check for parameters i.e. program, machine and osUser
+      dbaConfig.program = 'pg(m4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.program = 'pgm)4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.program = 'pgm4=';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.program = 'pgm4\\';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.program = '"pgm4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.program = 'pgm4"';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.osUser = '(myuser4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.osUser = 'myus)er4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.osUser = 'myus=er4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.osUser = 'myuser4\\';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.osUser = '"myuser4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.osUser = 'myuser4"';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.machine = '(machine4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.machine = ')machine4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.machine = 'machine4\\';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.machine = 'machine4=';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.machine = '"machine4';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      dbaConfig.machine = 'machine4"';
+      await assert.rejects(
+        async () => await oracledb.getConnection(dbaConfig),
+        /NJS-007:/
+      );
+      res = await conn3.execute(sqlDriverName);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
+
+      // above change in config won't effect already existing connection
+      res = await conn.execute(sqlDriverName);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+
       await conn1.close();
       await conn.close();
       await conn2.close();

@@ -1263,11 +1263,11 @@ describe('2. pool.js', function() {
       };
 
       // Set the parameters before pool creation
-      oracledb.driverName = 'mydriver';
-      oracledb.program = 'mypgm';
-      oracledb.terminal = 'myterm';
-      oracledb.machine = 'mymachine';
-      oracledb.osUser = 'myuser';
+      oracledb.driverName = 'mydriver' ?? "";
+      oracledb.program = 'mypgm' ?? "";
+      oracledb.terminal = 'myterm' ?? "";
+      oracledb.machine = 'mymachine' ?? "";
+      oracledb.osUser = 'myuser' ?? "";
 
       const pool = await oracledb.createPool(dbaConfig);
       const conn = await pool.getConnection();
@@ -1378,6 +1378,23 @@ describe('2. pool.js', function() {
       res = await conn2.execute(sqlDriverName);
       assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
 
+      dbaConfig1.program = "(machine)";
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig1),
+        /NJS-007:/
+      );
+
+      dbaConfig1.osUser = "(=osuser)";
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig1),
+        /NJS-007:/
+      );
+
+      dbaConfig1.osUser = "(=machine)";
+      await assert.rejects(
+        async () => await oracledb.createPool(dbaConfig1),
+        /NJS-007:/
+      );
       await conn.close();
       await conn1.close();
       await conn2.close();
@@ -1402,61 +1419,61 @@ describe('2. pool.js', function() {
       dbaConfig.driverName = null;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.driverName = 1;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.machine = null;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.machine = 1;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.terminal = null;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.terminal = 1;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.program = null;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.program = 1;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.osUser = null;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
       dbaConfig.osUser = 1;
       await assert.rejects(
         async () => await oracledb.createPool(dbaConfig),
-        /NJS-004:/
+        /NJS-007:/
       );
 
     }); // 2.20.2
