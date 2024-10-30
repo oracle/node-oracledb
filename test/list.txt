@@ -5933,3 +5933,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     306.24 fetch JSON value with an embedded vector
     306.25 bind JSON value with an embedded vector
     306.26 fetch VECTOR column as string with table recreate
+
+  307. traceCalls.js
+    307.1.1 getConnection default behaviour with no instance set
+    307.1.2 getConnection behaviour with a custom instance enabling trace
+    307.1.3 getConnection behaviour with a custom instance disabling trace
+    307.1.4 test getConnection fail behaviour with custom instance enabling trace
+    307.1.5 test getConnection fail behaviour with custom instance disabling trace

@@ -13,6 +13,9 @@ node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...
 Common Changes
 ++++++++++++++
 
+#)  Added support to enable tracing with the OpenTelemetry
+    module for Oracle Database being created in the OpenTelemetry project.
+
 #)  Added support to connect to Oracle Database using wallets stored in
     Azure Key Vault and OCI Vault.
 

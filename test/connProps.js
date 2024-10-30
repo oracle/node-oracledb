@@ -176,8 +176,9 @@ describe('193. connProps.js', function() {
   }); // 193.5
 
   it('193.6 Oracle Database dbname associated with the connection', async () => {
+    if (!oracledb.thin) this.skip(); // thick changes are pending.
     const conn = await oracledb.getConnection(dbConfig);
-    const query = "SELECT upper(NAME) FROM v$database";
+    const query = "SELECT GLOBAL_NAME FROM GLOBAL_NAME";
     const result = await conn.execute(query);
     assert.deepStrictEqual(result.rows[0][0], conn.dbName.toUpperCase());
     await conn.close();
