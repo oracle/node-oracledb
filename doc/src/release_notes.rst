@@ -72,6 +72,9 @@ Thin Mode Changes
 
 #) Provide additional error details when an invalid wallet is used.
 
+#)  Improved bind error message ``NJS-098`` with cleaner description that is
+    thrown for all bind mismatch scenarios.
+
 Thick Mode changes
 ++++++++++++++++++
 

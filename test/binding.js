@@ -777,8 +777,59 @@ describe('4. binding.js', function() {
           await connection.execute(sql);
         },
         //ORA-01008: not all variables bound
-        //NJS-098: 1 positional bind values are required but 0 were provided
+        //NJS-098: 1 bind placeholders were used in the SQL statement but 0 bind values were provided
         /ORA-01008:|NJS-098:/
+      );
+    });
+
+    it('4.9.4 not using a bind name in execute statement - repeated bind placeholders', async function() {
+      const sql = 'select :val, bind(:val) from dual';
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql);
+        },
+        //ORA-01008: not all variables bound
+        //NJS-098: 2 bind placeholders were used in the SQL statement but 0 bind values were provided
+        /ORA-01008:|NJS-098:/
+      );
+    });
+
+    it('4.9.5 mismatch of named binds - lower number of bind values', async function() {
+      const sql = 'select :val1, :val2 from dual';
+      const binds = {val1: 1};
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql, binds);
+        },
+        //ORA-01008: not all variables bound
+        //NJS-098: 2 bind placeholders were used in the SQL statement but 1 bind values were provided
+        /ORA-01008:|NJS-098:/
+      );
+    });
+
+    it('4.9.6 mismatch of named repeated binds - lower number of bind values', async function() {
+      const sql = 'select :val1, bind(:val1), :val2 from dual';
+      const binds = {val1: 1};
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql, binds);
+        },
+        //ORA-01008: not all variables bound
+        //NJS-098: 3 bind placeholders were used in the SQL statement but 1 bind values were provided
+        /ORA-01008:|NJS-098:/
+      );
+    });
+
+    it('4.9.7 mismatch of named binds - higher number of bind values', async function() {
+      const sql = 'select :val1 from dual';
+      const binds = {val1: 1, val2: 2};
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql, binds);
+        },
+        //ORA-01036: illegal variable name/number
+        //NJS-098: 1 bind placeholders were used in the SQL statement but 2 bind values were provided
+        /ORA-01036:|NJS-098:/
       );
     });
   }); // 4.9
@@ -1186,5 +1237,49 @@ describe('4. binding.js', function() {
         // ensure cursors are not linearly opened as numIters causing leak.
         assert(newOpenCount - openCount < 4);
       });
+  });
+
+  describe('4.16 positional binding', function() {
+    let connection = null;
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async function() {
+      await connection.close();
+    });
+
+    it('4.16.1 Matching bind values', async function() {
+      const sql = 'select :1, :2, :3 from dual';
+      const binds = [1, 2, 3];
+      const result = await connection.execute(sql, binds);
+      assert.strictEqual(result.rows[0][0], 1);
+      assert.strictEqual(result.rows[0][2], 3);
+    });
+
+    it('4.16.2 Negative - bind mismatch of zero bind values', async function() {
+      const sql = 'select :1, dump(:2) from dual';
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql);
+        },
+        //ORA-01008: not all variables bound
+        //NJS-098: 2 bind placeholders were used in the SQL statement but 0 bind values were provided
+        /ORA-01008:|NJS-098:/
+      );
+    });
+
+    it('4.16.3 Negative - bind mismatch of non-zero bind values', async function() {
+      const sql = 'select :1, dump(:2), :3 from dual';
+      const binds = [1];
+      await assert.rejects(
+        async () => {
+          await connection.execute(sql, binds);
+        },
+        //ORA-01008: not all variables bound
+        //NJS-098: 3 bind placeholders were used in the SQL statement but 1 bind values were provided
+        /ORA-01008:|NJS-098:/
+      );
+    });
   });
 });

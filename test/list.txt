@@ -212,6 +212,10 @@ Overview of node-oracledb functional tests
         4.9.1 test case sensitivity of quoted bind names
         4.9.2 using a reserved keyword as a bind name
         4.9.3 not using a bind name in execute statement
+        4.9.4 not using a bind name in execute statement - repeated bind placeholders
+        4.9.5 mismatch of named binds - lower number of bind values
+        4.9.6 mismatch of named repeated binds - lower number of bind values
+        4.9.7 mismatch of named binds - higher number of bind values
     4.10 various quoted binds
         4.10.1 various quoted bind names
     4.11 PL/SQL block with null Binds
@@ -228,6 +232,10 @@ Overview of node-oracledb functional tests
     4.15 binding different data types for same sql
         4.15.1 change bindtypes using bindByPosition for queries
         4.15.2 change bindtypes using bindByName for queries
+    4.16 positional binding
+        4.16.1 Matching bind values
+        4.16.2 Negative - bind mismatch of zero bind values
+        4.16.3 Negative - bind mismatch of non-zero bind values
 
 5. externalAuth.js
     5.1 tests that work both when DB has configured externalAuth and not configured
