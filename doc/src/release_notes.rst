@@ -76,8 +76,8 @@ Thin Mode Changes
     thrown for all bind mismatch scenarios.
 
 #)  Added new error message to handle the case when
-   :meth:`connection.executeMany()` is used with SELECT statement and WITH
-   SQL clause.
+    :meth:`connection.executeMany()` is used with SELECT statement and WITH
+    SQL clause.
 
 Thick Mode changes
 ++++++++++++++++++

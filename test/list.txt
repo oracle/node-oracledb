@@ -320,7 +320,7 @@ Overview of node-oracledb functional tests
     9.2 case sensitive
         9.2.1 works for tables whose column names were created case sensitively
     9.3 Large number of columns
-        9.10 works with a large number of columns
+        9.3.1 works with a large number of columns
     9.4 single character column
         9.4.1 works with column names consisting of single characters
     9.5 duplicate column alias
