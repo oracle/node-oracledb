@@ -42,6 +42,9 @@ Common Changes
 #)  Added method :meth:`oracledb.getNetworkServiceNames()` to support fetching
     the list of network service names from the ``tnsnames.ora`` file.
 
+#) Remove the 'Critical Dependency' warning from webpack builds.
+   See `Issue #1678 <https://github.com/oracle/node-oracledb/issues/1678>`__.
+
 Thin Mode Changes
 +++++++++++++++++
 
