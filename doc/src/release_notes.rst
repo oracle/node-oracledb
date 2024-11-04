@@ -13,34 +13,36 @@ node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...
 Common Changes
 ++++++++++++++
 
-#)  Added internal code changes to validate the updated OCI centralized
-    configuration provider URL syntax.
-
-#)  Added support to enable tracing with the OpenTelemetry
-    module for Oracle Database being created in the OpenTelemetry project.
-
-#)  Added support to connect to Oracle Database using wallets stored in
-    Azure Key Vault and OCI Vault.
-
-#)  Added ability to cache the configuration information retrieved from
-    :ref:`Azure App Configuration <conninfocacheazure>` and
-    :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
-    providers.
-
-#)  Ensure that the password stored in OCI vault and retrieved
-    in base64-encoded format is decoded correctly.
+#)  Added tracing functionality for OpenTelemetry support.
 
 #)  Changed default values of ``transportConnectTimeout`` and
     ``retryDelay`` properties to *20* seconds and *1* second respectively in
     :meth:`oracledb.getConnection()` and :meth:`oracledb.createPool()` for
     consistency with other Oracle Database drivers.
 
-#)  Changed the password type parameter values from `vault-oci` and
-    `vault-azure` to `ocivault` and `azurevault` respectively for consistency
-    with other Oracle Database drivers.
-
 #)  Added method :meth:`oracledb.getNetworkServiceNames()` to support fetching
     the list of network service names from the ``tnsnames.ora`` file.
+
+#) Improvements to Centralized Configuration Providers support:
+
+   - Added support to connect to Oracle Database via the centralized
+     configuration providers using wallets stored in Azure Key Vault and
+     OCI Vault.
+
+   - Added ability to cache the configuration information retrieved from
+     :ref:`Azure App Configuration <conninfocacheazure>` and
+     :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
+     providers.
+
+   - Ensure that the password stored in OCI vault and retrieved in
+     base64-encoded format is decoded correctly.
+
+   - Added internal code changes to validate the updated OCI centralized
+     configuration provider URL syntax.
+
+   - Changed the password type parameter values from `vault-oci` and
+     `vault-azure` to `ocivault` and `azurevault` respectively for consistency
+     with other Oracle Database drivers.
 
 #) Remove the 'Critical Dependency' warning from webpack builds.
    See `Issue #1678 <https://github.com/oracle/node-oracledb/issues/1678>`__.
@@ -54,14 +56,16 @@ Thin Mode Changes
 
 #)  Fixed bug that did not allow connection to Oracle Database 23ai instances
     that have fast authentication disabled.
+    See `Issue #1697<https://github.com/oracle/node-oracledb/issues/1697>`__.
 
 #)  Fixed bug with statement cache which threw an ``NJS-111`` error when select
     SQL is run on CLOB columns fetched as string.
     See `Issue #1684 <https://github.com/oracle/node-oracledb/issues/
     1684>`__.
 
-#)  Added new properties in `oracledb` that can enable users to customize and set session information,
-    making it easier to manage and monitor database interactions.
+#)  Added new properties in `oracledb` that can enable users to customize and
+    set session information, making it easier to manage and monitor database
+    interactions.
 
 #)  Error ``NJS-125`` is now raised when an empty connect string is provided
     for creating pools.
@@ -2375,7 +2379,7 @@ node-oracledb `v1.10.0 <https://github.com/oracle/node-oracledb/compare/v1.9.3..
 
 #)  Added GitHub Issue and Pull Request templates.
 
-#)  Some enhancements were made to the underlying DPI data access layer.
+#)  Some enhancements were made to the underlying ODPI data access layer.
     **These are not exposed to node-oracledb users.**
 
     - Allow SYSDBA connections
