@@ -4261,6 +4261,14 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     163.15 getting dmlrowcounts after executemany with dmlrowcounts=False
     163.16 executemany() with an invalid row
     163.17 calls PL/SQL, with round trip count check
+    163.18 Negative - executeMany with SELECT query, positional bind
+    163.19 Negative - executeMany with SELECT query, named bind
+    163.20 Negative - executeMany with WITH SQL clause, positional bind
+    163.21 Negative - executeMany with WITH SQL clause, named bind
+    163.22 Negative - executeMany with SELECT query, multiple positional binds
+    163.23 Negative - executeMany with WITH SQL clause and multiple positional binds
+    163.24 Negative - executeMany with SELECT query and invalid bind variable
+    163.25 Negative - executeMany with DDL - CREATE TABLE
 
 164. soda1.js
     164.1 getSodaDatabase() creates a sodaDatabase Object

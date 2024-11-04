@@ -44,8 +44,8 @@ Common Changes
      `vault-azure` to `ocivault` and `azurevault` respectively for consistency
      with other Oracle Database drivers.
 
-#) Remove the 'Critical Dependency' warning from webpack builds.
-   See `Issue #1678 <https://github.com/oracle/node-oracledb/issues/1678>`__.
+#)  Remove the 'Critical Dependency' warning from webpack builds.
+    See `Issue #1678 <https://github.com/oracle/node-oracledb/issues/1678>`__.
 
 Thin Mode Changes
 +++++++++++++++++
@@ -56,7 +56,7 @@ Thin Mode Changes
 
 #)  Fixed bug that did not allow connection to Oracle Database 23ai instances
     that have fast authentication disabled.
-    See `Issue #1697<https://github.com/oracle/node-oracledb/issues/1697>`__.
+    See `Issue #1697 <https://github.com/oracle/node-oracledb/issues/1697>`__.
 
 #)  Fixed bug with statement cache which threw an ``NJS-111`` error when select
     SQL is run on CLOB columns fetched as string.
@@ -70,10 +70,14 @@ Thin Mode Changes
 #)  Error ``NJS-125`` is now raised when an empty connect string is provided
     for creating pools.
 
-#) Provide additional error details when an invalid wallet is used.
+#)  Provide additional error details when an invalid wallet is used.
 
 #)  Improved bind error message ``NJS-098`` with cleaner description that is
     thrown for all bind mismatch scenarios.
+
+#)  Added new error message to handle the case when
+   :meth:`connection.executeMany()` is used with SELECT statement and WITH
+   SQL clause.
 
 Thick Mode changes
 ++++++++++++++++++

@@ -524,6 +524,149 @@ describe('163. executeMany1.js', function() {
     await doDropProc();
   }); // 163.17
 
+  it('163.18 Negative - executeMany with SELECT query, positional bind', async function() {
+
+    if (testsUtil.getClientVersion < 1201000200) {
+      return this.skip();
+    }
+
+    const sql = "SELECT :1 FROM DUAL";
+    const binds = [ [3] ];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1013: not supported
+      // Thin mode - NJS-157: executeMany() cannot be used with
+      // SELECT statement or WITH SQL clause
+      /DPI-1013:|NJS-157:/
+    );
+  }); // 163.18
+
+  it('163.19 Negative - executeMany with SELECT query, named bind', async function() {
+
+    if (testsUtil.getClientVersion < 1201000200) {
+      return this.skip();
+    }
+
+    const sql = "SELECT :num FROM DUAL";
+    const binds = [{ num: 3 }];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1013: not supported
+      // Thin mode - NJS-157: executeMany() cannot be used with
+      // SELECT statement or WITH SQL clause
+      /DPI-1013:|NJS-157:/
+    );
+  }); // 163.19
+
+  it('163.20 Negative - executeMany with WITH SQL clause, positional bind', async function() {
+
+    if (testsUtil.getClientVersion < 1201000200) {
+      return this.skip();
+    }
+
+    const sql =  "WITH data as (SELECT 1 as Num1, 2 as Num2 from dual) SELECT :1 from data";
+    const binds = [ [1] ];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1013: not supported
+      // Thin mode - NJS-157: executeMany() cannot be used with
+      // SELECT statement or WITH SQL clause
+      /DPI-1013:|NJS-157:/
+    );
+  }); // 163.20
+
+  it('163.21 Negative - executeMany with WITH SQL clause, named bind', async function() {
+
+    if (testsUtil.getClientVersion < 1201000200) {
+      return this.skip();
+    }
+
+    const sql = "WITH data as (SELECT 1 as Num1, 2 as Num2 from dual) SELECT :Num1 from data";
+    const binds = [ { Num1: 3 } ];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1013: not supported
+      // Thin mode - NJS-157: executeMany() cannot be used with
+      // SELECT statement or WITH SQL clause
+      /DPI-1013:|NJS-157:/
+    );
+  }); // 163.21
+
+  it('163.22 Negative - executeMany with SELECT query, multiple positional binds', async function() {
+
+    if (testsUtil.getClientVersion < 1201000200) {
+      return this.skip();
+    }
+
+    const sql = "SELECT :1, :2 FROM DUAL";
+    const binds = [ [1, 2] ];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1013: not supported
+      // Thin mode - NJS-157: executeMany() cannot be used with
+      // SELECT statement or WITH SQL clause
+      /DPI-1013:|NJS-157:/
+    );
+  }); // 163.22
+
+  it('163.23 Negative - executeMany with WITH SQL clause and multiple positional binds', async function() {
+
+    if (testsUtil.getClientVersion < 1201000200) {
+      return this.skip();
+    }
+
+    const sql = "WITH data as (SELECT 1 as Num1, 2 as Num2 from dual) SELECT :1, :2 FROM data";
+    const binds = [ [1, 2] ];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1013: not supported
+      // Thin mode - NJS-157: executeMany() cannot be used with
+      // SELECT statement or WITH SQL clause
+      /DPI-1013:|NJS-157:/
+    );
+  }); // 163.23
+
+  it('163.24 Negative - executeMany with SELECT query and invalid bind variable', async function() {
+
+    if (testsUtil.getClientVersion < 1201000200) {
+      return this.skip();
+    }
+
+    const sql = "SELECT :invalidBind FROM DUAL";
+    const binds = [ [3] ];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1013: not supported
+      // Thin mode - NJS-157: executeMany() cannot be used with
+      // SELECT statement or WITH SQL clause
+      /DPI-1013:|NJS-157:/
+    );
+  }); // 163.24
+
+  it('163.25 Negative - executeMany with DDL - CREATE TABLE', async function() {
+
+    // Does not throw the proper error in Thin mode yet
+    if (testsUtil.getClientVersion < 1201000200 || oracledb.thin) {
+      return this.skip();
+    }
+
+    const sql = "CREATE TABLE :tblname (:id NUMBER, :name VARCHAR2(30))";
+    const binds = [ ["tbl1", "ID", "NAME"] ];
+
+    await assert.rejects(
+      async () => await conn.executeMany(sql, binds),
+      // Thick mode - DPI-1059: bind variables are not supported in DDL statements
+      /DPI-1059:/
+    );
+  }); // 163.25
+
   const doCreateProc = async function() {
     const proc = "CREATE OR REPLACE PROCEDURE nodb_proc_em (a_num IN NUMBER, " +
                "    a_outnum OUT NUMBER, a_outstr OUT VARCHAR2) \n" +
