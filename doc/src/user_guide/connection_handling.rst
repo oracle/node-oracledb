@@ -4498,7 +4498,7 @@ in node-oracledb to access the information stored in OCI Object Storage. The
 :meth:`oracledb.createPool()` should be a URL such as::
 
     config-ociobject://<objectstorage-name>/n/<namespaceName>/b/<bucketName>/o/
-    <objectName>[/c/<networkServiceName>][?<option1>=<value1>&<option2>=<value2>...]
+    <objectName>[?key=<networkServiceName>&<option1>=<value1>&<option2>=<value2>...]
 
 The parameters of the connection string are detailed in the table below.
 
@@ -4515,7 +4515,7 @@ The parameters of the connection string are detailed in the table below.
     * - ``config-ociobject``
       - Required
       - Indicates that the configuration provider is OCI Object Storage.
-    * - ``<server-name>``
+    * - ``<objectstorage-name>``
       - Required
       - The URL of OCI Object Storage endpoint.
     * - ``<namespaceName>``
@@ -4527,7 +4527,7 @@ The parameters of the connection string are detailed in the table below.
     * - ``<objectName>``
       - Required
       - The JSON file name.
-    * - ``<networkServiceName>``
+    * - ``key=<networkServiceName>``
       - Optional
       - The network service name or alias if the JSON file contains one or more network service names.
     * - ``<options>`` and ``<values>``
