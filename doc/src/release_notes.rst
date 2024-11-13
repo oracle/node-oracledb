@@ -50,6 +50,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug that causes pooled connections to wait forever in certain heavy
+    workload scenarios.
+    See `Issue #1700 <https://github.com/oracle/node-oracledb/issues/
+    1700>`__.
+
 #)  Fixed cursor leak for dbobject binds using :meth:`connection.getDbObjectClass()`.
     See `Issue #1694 <https://github.com/oracle/node-oracledb/issues/
     1694>`__.
