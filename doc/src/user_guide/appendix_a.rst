@@ -413,14 +413,14 @@ See :ref:`tnsadmin` and :ref:`oraaccess` for more information.
 Connection Strings
 ++++++++++++++++++
 
-The node-oracledb Thin mode accepts connection strings in the same formats as
-the Oracle Client libraries used by Thick mode does, but not all Oracle Net
-keywords will be supported.
+Node-oracledb Thin mode accepts :ref:` Oracle Net Services connection strings
+<connectionstrings>` in the same formats as the Oracle Client libraries used by
+Thick mode does, but not all Oracle Net keywords will be supported.
 
 The following table lists the parameters that are recognized in Thin mode
-either in Easy Connect Strings or in Full Connect Descriptor Strings that are
-either explicitly passed or referred to by a ``tnsnames.ora`` alias.  All
-unrecognized parameters are ignored.
+either in :ref:`Easy Connect <easyconnect>` strings, or in
+:ref:`Connect Descriptors <embedtns>` that are either explicitly passed, or
+are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
 
 .. list-table-with-summary::  Oracle Net Keywords Supported in the node-oracledb Thin Mode
     :header-rows: 1

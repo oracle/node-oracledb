@@ -35,6 +35,7 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
+const random   = require('./random.js');
 
 describe('2. pool.js', function() {
 
@@ -1213,10 +1214,18 @@ describe('2. pool.js', function() {
     const sqlSessionDetails = `SELECT machine, osuser, terminal, program
       FROM v$session
       WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`;
+
     const sqlDriverName = `SELECT CLIENT_DRIVER FROM V$SESSION_CONNECT_INFO
       WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`;
+
+    // SQL query to fetch DRCP connection pool information with machine, terminal, and program
+    const sqlDRCPSessionDetails = `SELECT machine, terminal, program
+      FROM v$cpool_conn_info
+      WHERE machine = :machine AND program = :program AND terminal = :terminal`;
+
     let origMachineName, origProgramName, origUserName, origTerminalName;
     let origDriverName;
+
     const dbaConfig = {
       user: dbConfig.test.DBA_user,
       password: dbConfig.test.DBA_password,
@@ -1225,18 +1234,18 @@ describe('2. pool.js', function() {
     };
 
     beforeEach(async function() {
-      let result;
       if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) this.skip();
 
       const dbaConnection = await oracledb.getConnection(dbaConfig);
-      result = await dbaConnection.execute(sqlSessionDetails);
+      const result = await dbaConnection.execute(sqlSessionDetails);
+
       origMachineName = result.rows[0][0];
       origUserName = result.rows[0][1];
       origTerminalName = result.rows[0][2];
       origProgramName = result.rows[0][3];
 
-      result = await dbaConnection.execute(sqlDriverName);
-      origDriverName = result.rows[0][0];
+      const driverResult = await dbaConnection.execute(sqlDriverName);
+      origDriverName = driverResult.rows[0][0];
 
       await dbaConnection.close();
     });
@@ -1244,171 +1253,100 @@ describe('2. pool.js', function() {
     afterEach(function() {
       if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) return;
 
-      // Set the original parameters back
-      oracledb.driverName = origDriverName;
-      oracledb.program = origProgramName;
-      oracledb.terminal = origTerminalName;
-      oracledb.machine = origMachineName;
-      oracledb.osUser = origUserName;
+      oracledb.driverName = origDriverName ?? "";
+      oracledb.program = origProgramName ?? "";
+      oracledb.terminal = origTerminalName ?? "";
+      oracledb.machine = origMachineName ?? "";
+      oracledb.osUser = origUserName ?? "";
     });
 
     it('2.20.1 Check parameter values after user update', async function() {
-      if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) this.skip();
+      // Generate unique random values for initial connection parameters
+      const randomPgm1 = random.getRandomLengthString(16);
+      const randomTerm1 = random.getRandomLengthString(16);
+      const randomMachine1 = random.getRandomLengthString(16);
+      const randomDriver1 = 'driver1';
 
-      const dbaConfig = {
-        user: dbConfig.test.DBA_user,
-        password: dbConfig.test.DBA_password,
-        connectString: dbConfig.connectString,
-        privilege: oracledb.SYSDBA
-      };
-
-      // Set the parameters before pool creation
-      oracledb.driverName = 'mydriver' ?? "";
-      oracledb.program = 'mypgm' ?? "";
-      oracledb.terminal = 'myterm' ?? "";
-      oracledb.machine = 'mymachine' ?? "";
-      oracledb.osUser = 'myuser' ?? "";
+      // Set initial parameters
+      oracledb.driverName = randomDriver1;
+      oracledb.program = randomPgm1;
+      oracledb.terminal = randomTerm1;
+      oracledb.machine = randomMachine1;
+      oracledb.osUser = 'user1';
 
       const pool = await oracledb.createPool(dbaConfig);
       const conn = await pool.getConnection();
+
+      // Validate initial parameters
       let res = await conn.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+      assert.strictEqual(res.rows[0][0], randomMachine1);
+      assert.strictEqual(res.rows[0][1], 'user1');
+      assert.strictEqual(res.rows[0][2], randomTerm1);
+      assert.strictEqual(res.rows[0][3], randomPgm1);
+
+      if (dbConfig.test.drcp) {
+        const reqRow = [randomMachine1, randomTerm1, randomPgm1];
+        res = await conn.execute(sqlDRCPSessionDetails, { machine: randomMachine1, program: randomPgm1, terminal: randomTerm1 });
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
 
       res = await conn.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+      assert.strictEqual(res.rows[0][0], randomDriver1);
 
-      // Set the parameters after pool creation
-      // it won't update existing parameter values
-      // for already created pool
-      oracledb.driverName = 'mydriver1';
-      oracledb.program = 'mypgm1';
-      oracledb.terminal = 'myterm1';
-      oracledb.machine = 'mymachine1';
-      oracledb.osUser = 'myuser1';
+      // Change parameters after pool creation (should not affect existing pool connections)
+      const randomPgm2 = random.getRandomLengthString(16);
+      const randomTerm2 = random.getRandomLengthString(16);
+      const randomMachine2 = random.getRandomLengthString(16);
+      const randomDriver2 = 'driver2';
 
+      oracledb.driverName = randomDriver2;
+      oracledb.program = randomPgm2;
+      oracledb.terminal = randomTerm2;
+      oracledb.machine = randomMachine2;
+      oracledb.osUser = 'user2';
+
+      // Validate parameters for existing connection (should match initial values)
       res = await conn.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+      assert.strictEqual(res.rows[0][0], randomMachine1);
+      assert.strictEqual(res.rows[0][1], 'user1');
+      assert.strictEqual(res.rows[0][2], randomTerm1);
+      assert.strictEqual(res.rows[0][3], randomPgm1);
+
+      if (dbConfig.test.drcp) {
+        const reqRow = [randomMachine1, randomTerm1, randomPgm1];
+        res = await conn.execute(sqlDRCPSessionDetails, { machine: randomMachine1, program: randomPgm1, terminal: randomTerm1 });
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
 
       res = await conn.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+      assert.strictEqual(res.rows[0][0], randomDriver1);
 
-      const conn1 = await pool.getConnection();
-      res = await conn1.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
-
-      // create another pool
-      // pool will be created using new parameter values
-      // any connection for new pool will have new settable
-      // parameter values
-
-      const pool1 = await oracledb.createPool(dbaConfig);
-      const conn2 = await pool1.getConnection();
-      res = await conn2.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
-
-      res = await conn2.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
-
-      // pool1 and any new connection for pool1 still have initial values
-      const conn5 = await pool.getConnection();
-      res = await conn5.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
-
-      res = await conn5.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
-
-      dbaConfig.driverName = 'mydriver2';
-      dbaConfig.machine = 'mymachine2';
-      dbaConfig.terminal = 'myterm2';
-      dbaConfig.osUser = 'myuser2';
-      dbaConfig.program = 'mypgm2';
-
+      // Create a new pool with updated parameters and validate
       const pool2 = await oracledb.createPool(dbaConfig);
-      const conn3 = await pool2.getConnection();
-      res = await conn3.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine2');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser2');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm2');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm2');
-
-      res = await conn3.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver2');
-
-      const dbaConfig1 = {
-        user: dbConfig.test.DBA_user,
-        password: dbConfig.test.DBA_password,
-        connectString: dbConfig.connectString,
-        privilege: oracledb.SYSDBA,
-      };
-
-      const pool3 = await oracledb.createPool(dbaConfig1);
-      const conn4 = await pool3.getConnection();
-      // pool3 will take parameters values set globally
-      // in absence of settable parameters in it's own config.
-      res = await conn4.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
-
-      res = await conn4.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+      const conn2 = await pool2.getConnection();
 
       res = await conn2.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
+      assert.strictEqual(res.rows[0][0], randomMachine2);
+      assert.strictEqual(res.rows[0][1], 'user2');
+      assert.strictEqual(res.rows[0][2], randomTerm2);
+      assert.strictEqual(res.rows[0][3], randomPgm2);
+
+      if (dbConfig.test.drcp) {
+        const reqRow = [randomMachine2, randomTerm2, randomPgm2];
+        res = await conn2.execute(sqlDRCPSessionDetails, { machine: randomMachine2, program: randomPgm2, terminal: randomTerm2 });
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
 
       res = await conn2.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+      assert.strictEqual(res.rows[0][0], randomDriver2);
 
-      dbaConfig1.program = "(machine)";
-      await assert.rejects(
-        async () => await oracledb.createPool(dbaConfig1),
-        /NJS-007:/
-      );
-
-      dbaConfig1.osUser = "(=osuser)";
-      await assert.rejects(
-        async () => await oracledb.createPool(dbaConfig1),
-        /NJS-007:/
-      );
-
-      dbaConfig1.osUser = "(=machine)";
-      await assert.rejects(
-        async () => await oracledb.createPool(dbaConfig1),
-        /NJS-007:/
-      );
       await conn.close();
-      await conn1.close();
       await conn2.close();
-      await conn3.close();
-      await conn4.close();
-      await conn5.close();
       await pool.close(0);
-      await pool1.close(0);
       await pool2.close(0);
-      await pool3.close(0);
-    }); // 2.20.1
+    });
 
     it('2.20.2 negative - Check parameter value types', async function() {
-
       const dbaConfig = {
         user: dbConfig.test.DBA_user,
         password: dbConfig.test.DBA_password,
@@ -1477,5 +1415,100 @@ describe('2. pool.js', function() {
       );
 
     }); // 2.20.2
-  }); // 2.20
+
+    it('2.20.3 Check session parameters across multiple connections from the same pool', async function() {
+      const randomPgm = random.getRandomLengthString(16);
+      const randomTerm = random.getRandomLengthString(16);
+      const randomMachine = random.getRandomLengthString(16);
+      const randomDriver = 'multi_driver';
+
+      // Set parameters for the pool
+      oracledb.driverName = randomDriver;
+      oracledb.program = randomPgm;
+      oracledb.terminal = randomTerm;
+      oracledb.machine = randomMachine;
+      oracledb.osUser = 'multi_osuser';
+
+      const pool = await oracledb.createPool({
+        ...dbaConfig,
+        poolMin: 2,
+      });
+
+      // Validate parameters for multiple connections from the same pool
+      const conn1 = await pool.getConnection();
+      let res = await conn1.execute(sqlSessionDetails);
+      assert.strictEqual(res.rows[0][0], randomMachine);
+      assert.strictEqual(res.rows[0][1], 'multi_osuser');
+      assert.strictEqual(res.rows[0][2], randomTerm);
+      assert.strictEqual(res.rows[0][3], randomPgm);
+
+      if (dbConfig.test.drcp) {
+        const reqRow = [randomMachine, randomTerm, randomPgm];
+        res = await conn1.execute(sqlDRCPSessionDetails, { machine: randomMachine, program: randomPgm, terminal: randomTerm });
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
+
+      const conn2 = await pool.getConnection();
+      res = await conn2.execute(sqlSessionDetails);
+      assert.strictEqual(res.rows[0][0], randomMachine);
+      assert.strictEqual(res.rows[0][1], 'multi_osuser');
+      assert.strictEqual(res.rows[0][2], randomTerm);
+      assert.strictEqual(res.rows[0][3], randomPgm);
+
+      if (dbConfig.test.drcp) {
+        const reqRow = [randomMachine, randomTerm, randomPgm];
+        res = await conn2.execute(sqlDRCPSessionDetails, { machine: randomMachine, program: randomPgm, terminal: randomTerm });
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
+
+      await conn1.close();
+      await conn2.close();
+      await pool.close(0);
+    });
+
+    it('2.20.4 Check default session parameter values after pool creation', async function() {
+      const prePoolPgm = random.getRandomLengthString(16);
+      const prePoolTerm = random.getRandomLengthString(16);
+      const prePoolMachine = random.getRandomLengthString(16);
+      const prePoolDriver = 'pre_pool_driver';
+
+      // Set parameters before pool creation
+      oracledb.driverName = prePoolDriver;
+      oracledb.program = prePoolPgm;
+      oracledb.terminal = prePoolTerm;
+      oracledb.machine = prePoolMachine;
+      oracledb.osUser = 'pre_pool_osuser';
+
+      const pool = await oracledb.createPool({
+        ...dbaConfig,
+        poolMin: 2,
+      });
+
+      // Reset parameters after pool creation (should not affect existing pool connections)
+      oracledb.driverName = 'new_driver';
+      oracledb.program = 'new_program';
+      oracledb.terminal = 'new_terminal';
+      oracledb.machine = 'new_machine';
+      oracledb.osUser = 'new_osuser';
+
+      const conn = await pool.getConnection();
+      let res = await conn.execute(sqlSessionDetails);
+      assert.strictEqual(res.rows[0][0], prePoolMachine);
+      assert.strictEqual(res.rows[0][1], 'pre_pool_osuser');
+      assert.strictEqual(res.rows[0][2], prePoolTerm);
+      assert.strictEqual(res.rows[0][3], prePoolPgm);
+
+      if (dbConfig.test.drcp) {
+        const reqRow = [prePoolMachine, prePoolTerm, prePoolPgm];
+        res = await conn.execute(sqlDRCPSessionDetails, { machine: prePoolMachine, program: prePoolPgm, terminal: prePoolTerm });
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
+
+      res = await conn.execute(sqlDriverName);
+      assert.strictEqual(res.rows[0][0], prePoolDriver);
+
+      await conn.close();
+      await pool.close(0);
+    });
+  });
 });

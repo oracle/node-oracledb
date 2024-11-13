@@ -85,6 +85,23 @@ The properties of a *Connection* object are listed below.
         This property can only be used in the node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
+.. attribute:: connection.connectString
+
+    .. versionadded:: 6.7
+
+    This read-only property is a string that identifies the connect string
+    used to connect to Oracle Database.
+
+.. attribute:: connection.connectTraceConfig
+
+    .. versionadded:: 6.7
+
+    This read-only property is an object that returns connection related
+    information. The connection information returned by node-oracledb Thin
+    mode includes connectString, user, serviceName, instanceName, pdbName,
+    hostName, port, and protocol. The Thick mode returns connectString, user,
+    serviceName, instanceName, and pdbName.
+
 .. attribute:: connection.currentSchema
 
     .. versionadded:: 4.0
@@ -155,6 +172,17 @@ The properties of a *Connection* object are listed below.
         This property can only be used in the node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
+.. attribute:: connection.hostName
+
+    .. versionadded:: 6.7
+
+    This read-only property is a string that identifies the host name of
+    Oracle Database.
+
+    .. note::
+
+        This property can only be used in node-oracledb Thin mode.
+
 .. attribute:: connection.instanceName
 
     .. versionadded:: 6.1
@@ -216,6 +244,28 @@ The properties of a *Connection* object are listed below.
     will only be accurate if node-oracledb is also using Oracle Database 18,
     or later, client libraries. Otherwise it will show the base release such
     as “18.0.0.0.0” instead of “18.3.0.0.0”.
+
+.. attribute:: connection.port
+
+    .. versionadded:: 6.7
+
+    This read-only property is a number that identifies the port to which the
+    client is connected.
+
+    .. note::
+
+        This property can only be used in node-oracledb Thin mode.
+
+.. attribute:: connection.protocol
+
+    .. versionadded:: 6.7
+
+    This read-only property is a string which identifies the protocol used to
+    connect to Oracle Database.
+
+    .. note::
+
+        This property can only be used in node-oracledb Thin mode.
 
 .. attribute:: connection.serviceName
 
@@ -331,6 +381,13 @@ The properties of a *Connection* object are listed below.
     indicates that the specified connection has an active transaction. If the
     value is *False*, then the specified connection does not have an active
     transaction.
+
+.. attribute:: connection.user
+
+    .. versionadded:: 6.7
+
+    This read-only property is a string that identifies the user provided to
+    connect to Oracle Database.
 
 .. attribute:: connection.warning
 

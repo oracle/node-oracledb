@@ -303,9 +303,9 @@ Changing an existing application that currently uses :ref:`Thick mode
    been used, then set the ``configDir`` attribute of any
    :meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()` calls.
 
-5. If the application is connecting using a net service alias and is looking up
-   that alias in a ``tnsnames.ora`` file from a "default" location such as the
-   Instant Client ``network/admin/`` subdirectory, in
+5. If the application is connecting using a :ref:`TNS alias <tnsnames>` and is
+   looking up that alias in a ``tnsnames.ora`` file from a "default" location
+   such as the    Instant Client ``network/admin/`` subdirectory, in
    ``$ORACLE_HOME/network/admin/``, or in
    ``$ORACLE_BASE/homes/XYZ/network/admin/`` (in a read-only Oracle Database
    home), then the configuration file directory must now explicitly be set.

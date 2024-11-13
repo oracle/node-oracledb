@@ -34,6 +34,8 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const os = require('os');
+const random   = require('./random.js');
 
 describe('1. connection.js', function() {
 
@@ -574,13 +576,23 @@ describe('1. connection.js', function() {
   }); //1.17
 
   describe('1.18 settable parameters', function() {
+    // SQL query to fetch session details
     const sqlSessionDetails = `SELECT machine, osuser, terminal, program
       FROM v$session
       WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`;
+
+    // SQL query to fetch driver name
     const sqlDriverName = `SELECT CLIENT_DRIVER FROM V$SESSION_CONNECT_INFO
       WHERE sid = (SELECT sys_context('userenv', 'sid') FROM dual)`;
+
+    // SQL query to fetch DRCP connection pool information with machine, terminal, and program
+    const sqlDRCPSessionDetails = `SELECT machine, terminal, program
+      FROM v$cpool_conn_info
+      WHERE machine = :machine AND program = :program AND terminal = :terminal`;
+
     let origMachineName, origProgramName, origUserName, origTerminalName;
     let origDriverName;
+
     const dbaConfig = {
       user: dbConfig.test.DBA_user,
       password: dbConfig.test.DBA_password,
@@ -594,6 +606,8 @@ describe('1. connection.js', function() {
 
       const dbaConnection = await oracledb.getConnection(dbaConfig);
       result = await dbaConnection.execute(sqlSessionDetails);
+
+      // Capture original values from the session
       origMachineName = result.rows[0][0];
       origUserName = result.rows[0][1];
       origTerminalName = result.rows[0][2];
@@ -608,7 +622,7 @@ describe('1. connection.js', function() {
     afterEach(function() {
       if (!dbConfig.test.DBA_PRIVILEGE || !oracledb.thin) return;
 
-      // Set the original parameters back
+      // Reset oracledb parameters to original values
       oracledb.driverName = origDriverName ?? "";
       oracledb.program = origProgramName ?? "";
       oracledb.terminal = origTerminalName ?? "";
@@ -683,9 +697,112 @@ describe('1. connection.js', function() {
         async () => await oracledb.getConnection(dbaConfig),
         /NJS-007:/
       );
-    });
+    }); // 1.18.1
 
     it('1.18.2 Check parameter values after user update', async function() {
+      // Generate random values for the first connection
+      const randomPgm1 = random.getRandomLengthString(16);
+      const randomTerm1 = random.getRandomLengthString(16);
+      const randomMachine1 = random.getRandomLengthString(16);
+
+      // Set the parameters for the first connection
+      oracledb.driverName = 'mydriver';
+      oracledb.program = randomPgm1;
+      oracledb.terminal = randomTerm1;
+      oracledb.machine = randomMachine1;
+      oracledb.osUser = 'myuser';
+
+      const conn1 = await oracledb.getConnection(dbaConfig);
+
+      // Validate parameters for the first connection
+      let res = await conn1.execute(sqlSessionDetails);
+      assert.deepStrictEqual(res.rows[0][0], randomMachine1);
+      assert.deepStrictEqual(res.rows[0][1], 'myuser');
+      assert.deepStrictEqual(res.rows[0][2], randomTerm1);
+      assert.deepStrictEqual(res.rows[0][3], randomPgm1);
+
+      // Check DRCP session info for the first connection if enabled
+      if (dbConfig.test.drcp) {
+        const bindParams1 = { machine: randomMachine1, program: randomPgm1, terminal: randomTerm1 };
+        res = await conn1.execute(sqlDRCPSessionDetails, bindParams1);
+        const reqRow1 = [randomMachine1, randomTerm1, randomPgm1];
+        assert.deepStrictEqual(res.rows[0], reqRow1);
+      }
+
+      res = await conn1.execute(sqlDriverName);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+
+      // Generate random values for the second connection
+      const randomPgm2 = random.getRandomLengthString(16);
+      const randomTerm2 = random.getRandomLengthString(16);
+      const randomMachine2 = random.getRandomLengthString(16);
+
+      // Set new parameters for the second connection
+      oracledb.driverName = 'mydriver1';
+      oracledb.program = randomPgm2;
+      oracledb.terminal = randomTerm2;
+      oracledb.machine = randomMachine2;
+      oracledb.osUser = 'myuser1';
+
+      const conn2 = await oracledb.getConnection(dbaConfig);
+
+      // Validate parameters for the second connection
+      res = await conn2.execute(sqlSessionDetails);
+      assert.deepStrictEqual(res.rows[0][0], randomMachine2);
+      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
+      assert.deepStrictEqual(res.rows[0][2], randomTerm2);
+      assert.deepStrictEqual(res.rows[0][3], randomPgm2);
+
+      // Check DRCP session info for the second connection if enabled
+      if (dbConfig.test.drcp) {
+        const bindParams2 = { machine: randomMachine2, program: randomPgm2, terminal: randomTerm2 };
+        res = await conn2.execute(sqlDRCPSessionDetails, bindParams2);
+        const reqRow2 = [randomMachine2, randomTerm2, randomPgm2];
+        assert.deepStrictEqual(res.rows[0], reqRow2);
+      }
+
+      res = await conn2.execute(sqlDriverName);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+
+      // Generate random values for the third connection
+      const randomPgm3 = random.getRandomLengthString(16);
+      const randomTerm3 = random.getRandomLengthString(16);
+      const randomMachine3 = random.getRandomLengthString(16);
+
+      // Set new parameters for the third connection
+      oracledb.driverName = 'mydriver3';
+      oracledb.program = randomPgm3;
+      oracledb.terminal = randomTerm3;
+      oracledb.machine = randomMachine3;
+      oracledb.osUser = 'myuser3';
+
+      const conn3 = await oracledb.getConnection(dbaConfig);
+
+      // Validate parameters for the third connection
+      res = await conn3.execute(sqlSessionDetails);
+      assert.deepStrictEqual(res.rows[0][0], randomMachine3);
+      assert.deepStrictEqual(res.rows[0][1], 'myuser3');
+      assert.deepStrictEqual(res.rows[0][2], randomTerm3);
+      assert.deepStrictEqual(res.rows[0][3], randomPgm3);
+
+      // Check DRCP session info for the third connection if enabled
+      if (dbConfig.test.drcp) {
+        const bindParams3 = { machine: randomMachine3, program: randomPgm3, terminal: randomTerm3 };
+        res = await conn3.execute(sqlDRCPSessionDetails, bindParams3);
+        const reqRow3 = [randomMachine3, randomTerm3, randomPgm3];
+        assert.deepStrictEqual(res.rows[0], reqRow3);
+      }
+
+      res = await conn3.execute(sqlDriverName);
+      assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
+
+      // Cleanup
+      await conn1.close();
+      await conn2.close();
+      await conn3.close();
+    }); // 1.18.2
+
+    it('1.18.3 Check default values of session parameters without setting them', async function() {
       const dbaConfig = {
         user: dbConfig.test.DBA_user,
         password: dbConfig.test.DBA_password,
@@ -693,197 +810,95 @@ describe('1. connection.js', function() {
         privilege: oracledb.SYSDBA,
       };
 
-      // Set the parameters before connection creation
-      oracledb.driverName = 'mydriver';
-      oracledb.program = 'mypgm';
-      oracledb.terminal = 'myterm';
-      oracledb.machine = 'mymachine';
-      oracledb.osUser = 'myuser';
       const conn = await oracledb.getConnection(dbaConfig);
 
+      // Fetch values from v$session
       let res = await conn.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+      assert.strictEqual(res.rows[0][0], os.hostname());
+      assert.strictEqual(res.rows[0][1], os.userInfo().username);
+      assert.strictEqual(res.rows[0][2], 'unknown');
+      assert.strictEqual(res.rows[0][3], process.argv0);
+
+      if (dbConfig.test.drcp) {
+        const bindParams = {
+          machine: os.hostname(),
+          terminal: 'unknown',
+          program: process.argv0
+        };
+        res = await conn.execute(sqlDRCPSessionDetails, bindParams);
+        assert.deepStrictEqual(res.rows[0][0], os.hostname());
+        assert.deepStrictEqual(res.rows[0][1], 'unknown');
+        assert.deepStrictEqual(res.rows[0][2], process.argv0);
+      }
 
       res = await conn.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+      assert.strictEqual(res.rows[0][0], "node-oracledb : " + oracledb.versionString + " thn");
 
-      // Set the parameters again after connection creation.
-      // Connection params created already won't get changed.
-      oracledb.driverName = 'mydriver1';
-      oracledb.program = 'mypgm1';
-      oracledb.terminal = 'myterm1';
-      oracledb.machine = 'mymachine1';
-      oracledb.osUser = 'myuser1';
+      await conn.close();
+    }); // 1.18.3
 
-      res = await conn.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm');
+    it('1.18.4 Check parameter persistence across multiple connections', async function() {
+      // Generate two sets of unique random values for first and second connections
+      const randomPgm1 = random.getRandomLengthString(16);
+      const randomTerm1 = random.getRandomLengthString(16);
+      const randomMachine1 = random.getRandomLengthString(16);
+      const randomPgm2 = random.getRandomLengthString(16);
+      const randomTerm2 = random.getRandomLengthString(16);
+      const randomMachine2 = random.getRandomLengthString(16);
 
-      res = await conn.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+      // Set oracledb parameters to the first set of generated random values
+      oracledb.program = randomPgm1;
+      oracledb.terminal = randomTerm1;
+      oracledb.machine = randomMachine1;
 
+      // First connection and validation
       const conn1 = await oracledb.getConnection(dbaConfig);
-      res = await conn1.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
+      let res = await conn1.execute(sqlSessionDetails);
+      assert.strictEqual(res.rows[0][0], randomMachine1);
+      assert.strictEqual(res.rows[0][2], randomTerm1);
+      assert.strictEqual(res.rows[0][3], randomPgm1);
 
-      res = await conn1.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+      // Check DRCP session information if enabled
+      if (dbConfig.test.drcp) {
+        const bindParams = {
+          machine: randomMachine1,
+          program: randomPgm1,
+          terminal: randomTerm1
+        };
+        res = await conn1.execute(sqlDRCPSessionDetails, bindParams);
+        const reqRow = [randomMachine1, randomTerm1, randomPgm1];
 
-      dbaConfig.driverName = 'mydriver3';
-      dbaConfig.machine = 'mymachine3';
-      dbaConfig.terminal = 'myterm3';
-      dbaConfig.osUser = 'myuser3';
-      dbaConfig.program = 'mypgm3';
+        // Verify the DRCP session row exists
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
+      await conn1.close();
 
+      // Set oracledb parameters to the second set of generated random values
+      oracledb.program = randomPgm2;
+      oracledb.terminal = randomTerm2;
+      oracledb.machine = randomMachine2;
+
+      // Second connection and validation
       const conn2 = await oracledb.getConnection(dbaConfig);
       res = await conn2.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine3');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser3');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm3');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm3');
+      assert.strictEqual(res.rows[0][0], randomMachine2);
+      assert.strictEqual(res.rows[0][2], randomTerm2);
+      assert.strictEqual(res.rows[0][3], randomPgm2);
 
-      res = await conn2.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
+      // Verify DRCP session information with the second set of values if enabled
+      if (dbConfig.test.drcp) {
+        const bindParams = {
+          machine: randomMachine2,
+          program: randomPgm2,
+          terminal: randomTerm2
+        };
+        res = await conn2.execute(sqlDRCPSessionDetails, bindParams);
+        const reqRow = [randomMachine2, randomTerm2, randomPgm2];
+        // Confirm DRCP session row for second connection
+        assert.deepStrictEqual(res.rows[0], reqRow);
+      }
 
-      res = await conn2.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
-
-      // above change in config won't affect already existing connection
-      res = await conn1.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine1');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser1');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm1');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm1');
-
-      res = await conn1.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
-
-      // any new connection will have new set of params
-      const conn3 = await oracledb.getConnection(dbaConfig);
-      res = await conn3.execute(sqlSessionDetails);
-      assert.deepStrictEqual(res.rows[0][0], 'mymachine3');
-      assert.deepStrictEqual(res.rows[0][1], 'myuser3');
-      assert.deepStrictEqual(res.rows[0][2], 'myterm3');
-      assert.deepStrictEqual(res.rows[0][3], 'mypgm3');
-
-      res = await conn3.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
-
-      // above change in config won't effect already existing connection
-      res = await conn.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
-
-      // new connection with parameters value having invalid special character
-      // We check for parameters i.e. program, machine and osUser
-      dbaConfig.program = 'pg(m4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.program = 'pgm)4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.program = 'pgm4=';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.program = 'pgm4\\';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.program = '"pgm4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.program = 'pgm4"';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.osUser = '(myuser4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.osUser = 'myus)er4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.osUser = 'myus=er4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.osUser = 'myuser4\\';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.osUser = '"myuser4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.osUser = 'myuser4"';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.machine = '(machine4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.machine = ')machine4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.machine = 'machine4\\';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.machine = 'machine4=';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.machine = '"machine4';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      dbaConfig.machine = 'machine4"';
-      await assert.rejects(
-        async () => await oracledb.getConnection(dbaConfig),
-        /NJS-007:/
-      );
-      res = await conn3.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
-
-      // above change in config won't effect already existing connection
-      res = await conn.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver');
-
-      await conn1.close();
-      await conn.close();
       await conn2.close();
-      await conn3.close();
-    });
-  }); //1.18
+    }); // 1.18.4
+  }); // 1.18
 });

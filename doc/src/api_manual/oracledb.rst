@@ -2035,8 +2035,7 @@ Oracledb Methods
           - Both
           - .. _createpoolpoolattrsconnectstring:
 
-            The Oracle database instance used by connections in the pool. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle Database instance. See :ref:`Connection Strings
-            <connectionstrings>` for examples.
+            The Oracle database instance used by connections in the pool. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle Database instance. See :ref:`Oracle Net Services Connection String <connectionstrings>` for examples.
 
             .. versionadded:: 2.1
 
@@ -2811,7 +2810,7 @@ Oracledb Methods
           - Both
           - .. _getconnectiondbattrsconnectstring:
 
-            The Oracle database instance to connect to. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle database instance. See :ref:`Connection Strings <connectionstrings>` for examples.
+            The Oracle database instance to connect to. The string can be an Easy Connect string, or a Net Service Name from a ``tnsnames.ora`` file, or the name of a local Oracle database instance. See :ref:`Oracle Net Services Connection String <connectionstrings>` for examples.
 
             The two properties are aliases for each other. Use only one of the properties.
 
@@ -3686,3 +3685,212 @@ Global_Objects/Uint8Array>`__ and can be instantiated in the same way as an
 Uint8Array datatype object.
 
 .. versionadded:: 6.5
+
+.. _tracehandlerinterface:
+
+Oracledb TraceHandler Interface
+===============================
+
+The :ref:`TraceHandlerBase class <tracehandlerbaseclass>` acts as an
+interface which provides abstract methods that can be implemented by derived
+classes. The implemented methods can use the ``traceContext`` in/out parameter
+with OpenTelemetry.
+
+.. versionadded:: 6.7
+
+.. _tracehandlerbaseclass:
+
+TraceHandlerBase Class
+----------------------
+
+TraceHandlerBase Methods
+++++++++++++++++++++++++
+
+.. method:: traceHandlerBase.disable()
+
+    .. code-block:: javascript
+
+        disable();
+
+    Disables invoking the Abstract methods with traceContext data. Note that
+    this is a synchronous method.
+
+.. method:: traceHandlerBase.enable()
+
+    .. code-block:: javascript
+
+        enable();
+
+    Enables invoking the Abstract methods with traceContext data. Note that
+    this is a synchronous method.
+
+.. method:: traceHandlerBase.isEnabled()
+
+    .. code-block:: javascript
+
+        isEnabled();
+
+    Determines if the abstract methods will be invoked.
+
+.. method:: onEnterFn()
+
+    .. code-block:: javascript
+
+        onEnterFn([Object traceContext]);
+
+    This method is invoked before a public method passes the traceContext.
+    Note that this is a synchronous method.
+
+    .. _onenterfn:
+
+    .. list-table-with-summary:: onEnterFn() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``traceContext``
+          - Object
+          - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
+
+.. method:: onExitFn()
+
+    .. code-block:: javascript
+
+        onExitFn(Object traceContext);
+
+    This method is invoked after a public method completes passing the
+    traceContext. Note that this is a synchronous method.
+
+    .. _onexitfn:
+
+    .. list-table-with-summary:: onExitFn() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``traceContext``
+          - Object
+          - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
+
+.. method:: onBeginRoundTrip()
+
+    .. code-block:: javascript
+
+        onBeginRoundTrip([Object traceContext]);
+
+    Called when a round trip begins. OpenTelemetry will start a new span as a
+    child of the public API span.
+
+    .. _onbeginroundtrip:
+
+    .. list-table-with-summary:: onBeginRoundTrip() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``traceContext``
+          - Object
+          - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
+
+.. method:: onEndRoundTrip()
+
+    .. code-block:: javascript
+
+        onEndRoundTrip([Object traceContext]);
+
+    Called when a round trip ends. OpenTelemetry will end the span. The
+    traceContext object passed in :meth:`onBeginRoundTrip()` is also passed
+    in this method.
+
+    .. _onendroundtrip:
+
+    .. list-table-with-summary:: onEndRoundTrip() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``traceContext``
+          - Object
+          - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
+
+.. _tracehandler:
+
+TraceHandler Methods
+--------------------
+
+.. method:: oracledb.traceHandler.getTraceInstance()
+
+    .. code-block:: javascript
+
+        getTraceInstance();
+
+    Returns the user-defined instance implementing the TraceHandlerBase class.
+    Note that this is a synchronous method.
+
+.. method:: oracledb.traceHandler.isEnabled()
+
+    .. code-block:: javascript
+
+        isEnabled();
+
+    Checks if an instance implementing the
+    :ref:`TraceHandlerBase class <tracehandlerbaseclass>` is registered and if
+    the abstract methods will be invoked. Note that this is a synchronous
+    method.
+
+.. method:: oracledb.traceHandler.setTraceInstance()
+
+    .. code-block:: javascript
+
+        setTraceInstance([Object obj]);
+
+    Sets the user-defined implementation of the TraceHandlerBase class. Note
+    that this is a synchronous method.
+
+    The parameters of the ``oracledb.traceHandler.setTraceInstance()`` method are:
+
+    .. _settraceinstance:
+
+    .. list-table-with-summary:: oracledb.traceHandler.setTraceInstance() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``obj``
+          - Object
+          - The singleton object pointing to the traceHandler instance.

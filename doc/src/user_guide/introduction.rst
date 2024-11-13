@@ -13,7 +13,7 @@ build-rest-apis-for-nodejs-part-1>`__ or `GraphQL <https://blogs.oracle.
 com/opal/post/demo-graphql-with-oracle-database-and-node-oracledb>`__
 endpoints. Node-oracledb runs in Node.js, typically as a mid-tier application
 server or service. Node-oracledb applications will not run directly in a
-browser.
+browser. It is distributed under an open-source :ref:`license <license>`.
 
 The node-oracledb API is a generic Oracle Database access layer. Almost all the
 functionality described in this documentation is common across all current
@@ -22,14 +22,30 @@ that are in specific Oracle Database versions, editions, or require additional
 database options or packs.
 
 Node-oracledb is typically installed from the `npm registry <https://www.npmjs
-.com/package/oracledb>`__. See :ref:`installation` for more information.
+.com/package/oracledb>`__, `yarn <https://classic.yarnpkg.com/en/package/
+oracledb>`__, and `yum.oracle.com <https://yum.oracle.com/oracle-linux-nodejs
+.html>`__. See :ref:`installation` for more information. The source code is
+hosted at `github.com/oracle/node-oracledb <https://github.com/oracle/
+node-oracledb>`__.
 
-This node-oracledb release has been tested with Node.js 14, 16, 18 and 20 on
-Oracle Linux x86_64 (releases 7 and 8), Oracle Linux ARM (aarch64, release 8),
-Windows, and macOS.  Node-oracledb may run on other platforms, and with other
-Node.js versions, if they are `Node-API <https://nodejs.org/api/n-api.html>`__
-version 4 compatible. Previous versions of node-oracledb may work with older
-versions of Node.js.
+This module is currently tested with Node.js 16, 18, 20, 22, and 23 against
+Oracle Database 23ai, 21c, 19c, 12c, and 11gR2 on Oracle Linux x86_64
+(releases 7 and 8), Oracle Linux ARM (aarch64, release 8), Windows, and macOS.
+Node-oracledb may run on other platforms, and with other Node.js versions, if
+they are `Node-API <https://nodejs.org/api/n-api.html>`__ version 4
+compatible. Previous versions of node-oracledb may work with older versions of
+Node.js.
+
+Changes in node-oracledb releases can be found in the
+:ref:`release notes <releasenotes>`.
+
+Getting Started
+===============
+
+See :ref:`quickstart`.
+
+Runnable examples are in the `GitHub examples directory
+<https://github.com/oracle/node-oracledb/tree/main/examples>`__.
 
 .. _architecture:
 
@@ -117,13 +133,15 @@ Feature Highlights of node-oracledb
 
 The node-oracledb feature highlights are:
 
-- Easy installation from `npm <https://www.npmjs.com/package/oracledb>`__
+- Easy installation from `npm <https://www.npmjs.com/package/oracledb>`__ and
+  other repositories
 - Support for multiple Node.js later, and for multiple Oracle Database
   versions
 - Execution of SQL and PL/SQL statements, and access to
   :ref:`SODA <sodaoverview>` document-style access APIs.
-- Extensive Oracle data type support, including JSON, CLOB, and BLOB,
-  and binding of data types including Oracle Database objects and collections
+- Extensive Oracle data type support, including JSON, VECTOR, large objects
+  (``CLOB`` and ``BLOB``) and binding of data types including Oracle Database
+  objects and collections
 - Connection management, including connection pooling
 - Oracle Database High Availability features
 - Full use of Oracle Network Service infrastructure, including encrypted

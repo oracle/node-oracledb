@@ -45,7 +45,16 @@ describe('301. aq9.js', function() {
   const ORDER_TYP   = `${AQ_USER}.ORDER_TYP`;
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    const userConfig = {
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString
+    };
+    const initConn = await oracledb.getConnection(userConfig);
+    const dbVersion = initConn.oracleServerVersion;
+    await initConn.close();
+
+    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin || dbVersion < 1900000000) {
       isRunnable = false;
     }
 

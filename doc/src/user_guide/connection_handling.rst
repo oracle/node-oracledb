@@ -42,8 +42,12 @@ Standalone Connections
 Standalone connections are database connections that do not use a node-oracledb
 connection pool. They are useful for applications that use a single connection
 to a database. You can create connections by calling
-:meth:`oracledb.getConnection()` and passing a database username, the database
-password for that user, and a :ref:`connect string <connectionstrings>`.
+:meth:`oracledb.getConnection()` and passing:
+
+- A database username
+- The database password for that user
+- A :ref:`connect string <connectionstrings>`
+
 Node-oracledb also supports :ref:`external authentication <extauth>` and
 :ref:`token-based authentication <tokenbasedauthentication>` so passwords do
 not need to be in the application.
@@ -82,16 +86,19 @@ error handlers.
 
 .. _connectionstrings:
 
-Connection Strings
-==================
+Oracle Net Services Connection Strings
+======================================
 
-The ``connectString`` property for :meth:`oracledb.getConnection()` and
-:meth:`oracledb.createPool()` can be one of:
+The ``connectString`` property of :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()` is the Oracle Database Oracle Net Services
+Connection String (commonly abbreviated as "connection string") that
+identifies which database service to connect to. The ``connectString`` value
+can be one of Oracle Database's naming methods:
 
--  An :ref:`Easy Connect <easyconnect>` string
+-  An Oracle :ref:`Easy Connect <easyconnect>` string
 -  A :ref:`Connect Descriptor <embedtns>` string
--  A :ref:`Net Service Name <tnsnames>` from a local
-   :ref:`tnsnames.ora <tnsnames>` file or external naming service
+-  A :ref:`TNS Alias <tnsnames>` from a local :ref:`tnsnames.ora <tnsadmin>`
+   file or external naming service
 -  The SID of a local Oracle Database instance
 
 If a connect string is not specified, the empty string “” is used which
@@ -113,10 +120,12 @@ only one of the properties.
 Easy Connect Syntax for Connection Strings
 ------------------------------------------
 
-An Easy Connect string is often the simplest connection string to use. For
-example, to connect to the Oracle Database service ``orclpdb1`` that is
-running on the host ``mydbmachine.example.com`` with the default Oracle
-Database port 1521, use:
+An `Easy Connect <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+GUID-8C85D289-6AF3-41BC-848B-BF39D32648BA>`__ string is often the simplest
+connection string to use when creating connections and pools. For example, to
+connect to the Oracle Database service ``orclpdb1`` that is running on the
+host ``mydbmachine.example.com`` with the default Oracle Database port 1521,
+use:
 
 .. code-block:: javascript
 
@@ -150,13 +159,13 @@ are not passed to the database. See :ref:`Connection String Differences
 <diffconnstr>` for more information.
 
 If you are using node-oracledb Thick mode with Oracle Client 19c (or later),
-the latest `Easy Connect Plus <https://www.oracle.com/pls/topic/lookup?ctx=
+the latest `Easy Connect <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-8C85D289-6AF3-41BC-848B-BF39D32648BA>`__ syntax allows the
 use of multiple hosts or ports, along with optional entries for the wallet
 location, the distinguished name of the database server, and even lets some
 network configuration options be set. Oracle's `Technical Paper on Easy
 Connect Plus Syntax <https://download.oracle.com/ocomdocs/global/Oracle-Net-
-Easy-Connect-Plus.pdf>`__ discusses the syntax. The Easy Connect Plus syntax
+Easy-Connect-Plus.pdf>`__ discusses the syntax. The Easy Connect syntax
 means that :ref:`tnsnames.ora <tnsadmin>` or :ref:`sqlnet.ora <tnsadmin>`
 files are not needed for some further common connection scenarios.
 
@@ -169,18 +178,18 @@ dblatest&id=GUID-6140611A-83FC-4C9C-B31F-A41FC2A5B12D>`__ feature. The general
 recommendation for ``EXPIRE_TIME`` is to use a value that is slightly less
 than half of the termination period.
 
-Another common use case for Easy Connect Plus is to limit the amount of time
+Another common use case for Easy Connect is to limit the amount of time
 required to open a connection. For example, to return an error after 15 seconds
 if a connection cannot be established to the database, use
 ``"mydbmachine.example.com/orclpdb1?connect_timeout=15"``.
 
 .. _embedtns:
 
-Embedded Connect Descriptor Strings
------------------------------------
+Connect Descriptors
+-------------------
 
-Full Connect Descriptor strings can be embedded directly in node-oracledb
-applications:
+Connect Descriptors can be embedded directly in node-oracledb applications.
+For example:
 
 .. code-block:: javascript
 
@@ -192,12 +201,15 @@ applications:
 
 .. _tnsnames:
 
-Net Service Names for Connection Strings
-----------------------------------------
+TNS Aliases for Connection Strings
+----------------------------------
 
-Connect Descriptor strings are commonly stored in optional
+:ref:`Connect Descriptors <embedtns>` are commonly stored in optional
 :ref:`tnsnames.ora configuration files <tnsadmin>` and associated with
-a Net Service Name, for example::
+a TNS Alias. This alias can be used directly in the ``connectString``
+parameter of :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()`. For example, given a file
+``/opt/oracle/config/tnsnames.ora`` with the following content::
 
     sales =
       (DESCRIPTION =
@@ -208,10 +220,8 @@ a Net Service Name, for example::
         )
       )
 
-Net Service Names may also be defined in a directory server.
-
-Given a Net Service Name, node-oracledb Thin mode can connect using the
-following code:
+You can connect in node-oracledb Thin mode by passing the TNS Alias "sales"
+(case insensitive) as the ``connectString`` value using the following code:
 
 .. code-block:: javascript
 
@@ -224,8 +234,10 @@ following code:
 
 See :ref:`Optional Oracle Net Configuration <tnsadmin>` for more options on how
 node-oracledb locates the ``tnsnames.ora`` files. Note that in node-oracledb
-Thick mode, the configuration file must a default location or be set during
-initialization, not at connection time.
+Thick mode, the configuration file must be in a default location or be set
+during initialization, not at connection time.
+
+TNS Aliases may also be defined in a directory server.
 
 For general information on ``tnsnames.ora`` files, see the Oracle Net
 documentation on `tnsnames.ora <https://www.oracle.com/pls/topic/lookup?ctx=
@@ -237,13 +249,13 @@ dblatest&id=GUID-7F967CE5-5498-427C-9390-4A5C6767ADAA>`__.
         not be automatically located. The file's directory must be explicitly
         specified when connecting.
 
-You can retrieve the network service names that are defined in the
+You can retrieve the TNS Aliases that are defined in the
 :ref:`tnsnames.ora <tnsadmin>` file using
 :meth:`oracledb.getNetworkServiceNames()`. The directory that contains the
 ``tnsnames.ora`` file can be specified in the ``configDir`` property of
 :meth:`~oracledb.getNetworkServiceNames()`. For example, if the
 ``tnsnames.ora`` file is stored in the ``/opt/oracle/config`` directory and
-contains the following network service names::
+contains the following TNS Aliases::
 
     sales =
       (DESCRIPTION =
@@ -263,8 +275,7 @@ contains the following network service names::
         )
       )
 
-To retrieve the network service names from the above ``tnsnames.ora`` file,
-you can use:
+To retrieve the TNS Aliases from the above ``tnsnames.ora`` file, you can use:
 
 .. code-block:: javascript
 
@@ -278,7 +289,7 @@ This prints ``['sales', 'finance']`` as the output.
 JDBC and Oracle SQL Developer Connection Strings
 ------------------------------------------------
 
-The node-oracledb connection string syntax is different to Java JDBC and
+The node-oracledb connection string syntax is different from Java JDBC and
 the common Oracle SQL Developer syntax. If these JDBC connection strings
 reference a service name like::
 
@@ -297,6 +308,9 @@ then use Oracle’s Easy Connect syntax in node-oracledb:
         password      : mypw,  // mypw contains the hr schema password
         connectString : "mydbmachine.example.com:1521/orclpdb1"
     });
+
+You may need to remove JDBC-specific parameters from the connection string and
+use node-oracledb alternatives.
 
 Alternatively, if a JDBC connection string uses an old-style Oracle
 system identifier `SID <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&i
@@ -751,10 +765,11 @@ Pools <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7DFBA826
 pools. Having a fixed size will guarantee that the database can handle the
 upper pool size. For example, if a pool needs to grow but the database
 resources are limited, then ``pool.getConnection()`` may return errors such
-as *ORA-28547*. With a fixed pool size, this class of error will occur when
-the pool is created, allowing you to change the size before users access the
-application. With a dynamically growing pool, the error may occur much
-later after the pool has been in use for some time.
+as `ORA-28547 <https://docs.oracle.com/error-help/db/ora-28547/>`__. With a
+fixed pool size, this class of error will occur when the pool is created,
+allowing you to change the size before users access the application. With a
+dynamically growing pool, the error may occur much later after the pool has
+been in use for some time.
 
 The Real-World Performance Group also recommends keeping pool sizes
 small, as this may perform better than larger pools. Use
@@ -776,13 +791,14 @@ been created, so there is an initial time cost. However it can allow subsequent
 connection requests to be immediately satisfied. In this growth scenario, a
 ``poolIncrement`` of 0 is treated as 1.
 
-Make sure any firewall, `resource manager <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-2BEF5482-CF97-4A85-BD90-9195E41E74EF>`__
-or user profile `IDLE_TIME <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3>`__ does not expire
-idle connections, since this will require connections to be recreated which
-will impact performance and scalability. See :ref:`Preventing Premature
-Connection Closing <connectionpremclose>`.
+Connection pool health can be impacted by firewalls, `resource manager <https:
+//www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2BEF5482-CF97-4A85-BD90
+-9195E41E74EF>`__, or user profile `IDLE_TIME <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-ABC7AE4D-64A8-4EA9-857D-BEF7300B64C3>`__
+values. For best efficiency, ensure these do not expire idle connections since
+this will require connections to be recreated which will impact performance
+and scalability. See :ref:`Preventing Premature Connection Closing
+<connectionpremclose>`.
 
 .. _conpooldraining:
 
@@ -2404,8 +2420,8 @@ The connect descriptor parameter ``TOKEN_AUTH`` must be set to
 
 You can alternatively set ``TOKEN_AUTH`` and ``TOKEN_LOCATION`` in a
 :ref:`sqlnet.ora <tnsadmin>` file. The ``TOKEN_AUTH`` and
-``TOKEN_LOCATION`` values in a connection string take precedence over
-the ``sqlnet.ora`` settings.
+``TOKEN_LOCATION`` values in a :ref:`connection string <connectionstrings>`
+take precedence over the ``sqlnet.ora`` settings.
 
 See `Oracle Net Services documentation <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=NETRF>`__ for more information.
@@ -2757,8 +2773,8 @@ For example in a ``tnsnames.ora`` file:
 
 You can alternatively set ``TOKEN_AUTH`` and ``TOKEN_LOCATION`` in a
 :ref:`sqlnet.ora <tnsadmin>` file. The ``TOKEN_AUTH`` and
-``TOKEN_LOCATION`` values in a connection string take precedence over
-the ``sqlnet.ora`` settings.
+``TOKEN_LOCATION`` values in a :ref:`connection string <connectionstrings>`
+take precedence over the ``sqlnet.ora`` settings.
 
 See `Oracle Net Services documentation <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=NETRF>`__ for more information.
@@ -2848,8 +2864,8 @@ with node-oracledb’s local :ref:`connection pool <poolclass>`.
 
 Using node-oracledb Thin mode with Oracle Database 21c or later, you can
 specify the connection class and pool purity in an
-:ref:`Easy Connect String <easyconnect>` or a
-:ref:`Full Connect Descriptor string <embedtns>`. For node-oracledb Thick
+:ref:`Easy Connect string <easyconnect>` or a
+:ref:`Connect Descriptor <embedtns>`. For node-oracledb Thick
 mode, you require Oracle Database 21c (or later) and Oracle Client 19c (or
 later).
 
@@ -2989,7 +3005,7 @@ To use implicit connection pooling in node-oracledb with DRCP:
      boundary to release the connections back to the DRCP or PRCP pool.
 
    - Or the ``CONNECT_DATA`` section of the
-     :ref:`Connect Descriptor string <embedtns>` used in an Oracle Network
+     :ref:`Connect Descriptor <embedtns>` used in an Oracle Network
      configuration file such as :ref:`tnsnames.ora <tnsadmin>`. For example,
      to use implicit connection pooling with the *transaction* boundary::
 
@@ -3009,7 +3025,7 @@ To use implicit connection pooling in node-oracledb with DRCP:
 
    If you specify an invalid ``POOL_BOUNDARY`` in the
    :ref:`Easy Connect string <easyconnect>` or the
-   :ref:`Connect Descriptor string <embedtns>`, then the following error is
+   :ref:`Connect Descriptor <embedtns>`, then the following error is
    returned::
 
     ORA-24545: invalid value of POOL_BOUNDARY specified in connect string
@@ -3029,7 +3045,7 @@ To use implicit connection pooling in node-oracledb with DRCP:
             connectString : "mydbmachine.example.com:1521/orclpdb1:pooled?pool_boundary=statement&pool_connection_class=myapp"
         });
 
-   - Or the ``CONNECT_DATA`` section of the :ref:`Connect Descriptor string
+   - Or the ``CONNECT_DATA`` section of the :ref:`Connect Descriptor
      <embedtns>`. For example, to use a class name 'myapp'::
 
         tnsalias = (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=mymachine.example.com)
@@ -3041,7 +3057,7 @@ To use implicit connection pooling in node-oracledb with DRCP:
    type where you want session memory to be reused for connections.
 
    The pool purity can also optionally be changed by adding ``POOL_PURITY=NEW``
-   to the connection string or descriptor.
+   to the Easy Connect string or Connect Descriptor.
 
 Similar steps can be used with PRCP. For general information on PRCP, see the
 technical brief `CMAN-TDM — An Oracle Database connection proxy for scalable
@@ -3713,8 +3729,8 @@ ADB instance details:
    your application.
 
 Applications can connect to your Oracle ADB instance using the database
-credentials and the copied connect descriptor. For example, to connect to the
-Oracle ADB instance:
+credentials and the copied :ref:`Connect Descriptor <embedtns>`. For example,
+to connect to the Oracle ADB instance:
 
 For example:
 
@@ -3915,8 +3931,8 @@ The proxy settings can be passed during connection creation:
     });
 
 Alternatively, edit ``tnsnames.ora`` and add an ``HTTPS_PROXY`` proxy name and
-``HTTPS_PROXY_PORT`` port to the connect descriptor address list of any service
-name you plan to use, for example::
+``HTTPS_PROXY_PORT`` port to the :ref:`Connect Descriptor <embedtns>` address
+list of any service name you plan to use, for example::
 
     cjdb1_high = (description=
         (address=
@@ -3941,8 +3957,8 @@ Edit ``sqlnet.ora`` and add a line::
     SQLNET.USE_HTTPS_PROXY=on
 
 Edit ``tnsnames.ora`` and add an ``HTTPS_PROXY`` proxy name and
-``HTTPS_PROXY_PORT`` port to the connect descriptor address list of any
-service name you plan to use, for example::
+``HTTPS_PROXY_PORT`` port to the :ref:`Connect Descriptor <embedtns>` address
+list of any service name you plan to use, for example::
 
     cjdb1_high = (description=
       (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)
@@ -3955,8 +3971,7 @@ You can optionally use the :ref:`Easy Connect <easyconnect>` syntax to connect
 to Oracle Autonomous Database.  When using node-oracledb Thick mode this
 requires using Oracle Client libraries 19c or later.
 
-The mapping from a cloud ``tnsnames.ora`` entry to an Easy Connect Plus
-string is::
+The mapping from a cloud ``tnsnames.ora`` entry to an Easy Connect string is::
 
     protocol://host:port/service_name?wallet_location=/my/dir&retry_count=N&retry_delay=N
 
@@ -3982,7 +3997,7 @@ Then your applications can connect using the connection string:
 The ``walletLocation`` parameter needs to be set to the directory
 containing the ``cwallet.sso`` or ``ewallet.pem`` file from the wallet zip.
 The other wallet files, including ``tnsnames.ora``, are not needed when you
-use the Easy Connect Plus syntax.
+use the Easy Connect syntax.
 
 You can optionally add other Easy Connect parameters to the connection
 string, for example:
@@ -4069,9 +4084,8 @@ containing the ``MY_WALLET_DIRECTORY`` option needs to be created::
 
 .. note::
 
-    Use Oracle Client libraries 19.17, or later, or use Oracle Client 21c.
-    They contain important bug fixes for using multiple wallets in the one
-    process.
+    Use Oracle Client libraries 19.17 or later. They contain important bug
+    fixes for using multiple wallets in the one process.
 
 .. _configurationprovider:
 

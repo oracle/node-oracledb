@@ -1,15 +1,8 @@
-Welcome to node-oracledb's documentation!
-=========================================
+Welcome to node-oracledb's documentation
+========================================
 
 The `node-oracledb <https://www.npmjs.com/package/oracledb>`__ add-on
 for Node.js powers high performance Oracle Database applications.
-
-**node-oracledb** is distributed under an open-source :ref:`license
-<license>`. Changes in the node-oracledb releases can be found in the
-:ref:`release notes <releasenotes>`.
-
-This module is currently tested with Node.js 16, 18, and 20 against Oracle
-Database 23ai, 21c, 19c, 12c, and 11gR2.
 
 You can use assistive technology products, such as screen readers, while you
 work with the node-oracledb documentation. You can also use the keyboard

@@ -53,6 +53,14 @@ values.
     See :ref:`connectString <createpoolpoolattrsconnectstring>` parameter of
     :meth:`oracledb.createPool()`.
 
+.. attribute:: pool.connectTraceConfig
+
+    .. versionadded:: 6.7
+
+    This read-only property is an object that returns connection related
+    information. The connection information returned includes connectString,
+    user, poolMin, poolMax, and poolIncrement.
+
 .. attribute:: pool.edition
 
     This read-only property is a string which identifies the edition name

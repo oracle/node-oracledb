@@ -11,6 +11,9 @@ node-oracledb is said to be in 'Thick' mode and has :ref:`additional
 functionality <featuresummary>` available. See :ref:`thickarch` for the
 architecture diagram.
 
+All connections in an application use the same mode. See :ref:`vsessconinfo`
+to verify which mode is in use.
+
 .. _enablingthick:
 
 Enabling node-oracledb Thick Mode
@@ -18,80 +21,81 @@ Enabling node-oracledb Thick Mode
 
 To change from the default Thin mode to the Thick mode:
 
-- Oracle Client libraries must be available. These need to be installed
-  separately, see :ref:`installation`.
+1. Oracle Client libraries must be available to handle communication to your
+   database. These need to be installed separately, see :ref:`installation`.
 
-  Various versions of Oracle Client libraries can be used. They do not have to
-  match the version of Oracle Database.  Node-oracledb can use the Client
-  Libraries from:
+   Oracle Client libraries from one of the following can be used:
 
-  - an installation of `Oracle Instant Client
-    <https://www.oracle.com/database/technologies/instant-client.html>`__
+   - An `Oracle Instant Client <https://www.oracle.com/database/technologies/
+     instant-client.html>`__ Basic or Basic Light package. This is generally
+     the easiest if you do not already have Oracle software installed.
 
-  - or a full Oracle Client installation (installed by running the Oracle
-    Universal installer ``runInstaller``)
+   - A full Oracle Client installation (installed by running the Oracle
+     Universal installer ``runInstaller``).
 
-  - or an Oracle Database installation, if Node.js is running on the same
-    machine as the database
+   - An Oracle Database installation, if Node.js is running on the same
+     machine as the database.
 
-- Your application *must* call the synchronous function
-  :meth:`oracledb.initOracleClient()`, for example:
+   The Client library version does not always have to match the Oracle
+   Database version.
 
-  .. code-block:: javascript
+2. Your application *must* call the synchronous function
+   :meth:`oracledb.initOracleClient()` to load the client libraries. For
+   example:
 
-      const oracledb = require('oracledb');
+   .. code-block:: javascript
 
-      let clientOpts = {};
-      if (process.platform === 'win32') {
-        // Windows
-        // If you use backslashes in the libDir string, you will
-        // need to double them.
-        clientOpts = { libDir: 'C:\\oracle\\instantclient_19_19' };
-      } else if (process.platform === 'darwin' && process.arch === 'x64') {
-        // macOS Intel
-        clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_19_16' };
-      }
-      // else on other platforms like Linux the system library search path MUST always be
-      // set before Node.js is started, for example with ldconfig or LD_LIBRARY_PATH.
+       const oracledb = require('oracledb');
 
-      // enable node-oracledb Thick mode
-      oracledb.initOracleClient(clientOpts);
+       let clientOpts = {};
+       if (process.platform === 'win32') {
+         // Windows
+         // If you use backslashes in the libDir string, you will
+         // need to double them.
+         clientOpts = { libDir: 'C:\\oracle\\instantclient_23_5' };
+       } else if (process.platform === 'darwin' && process.arch === 'arm64') {
+         // macOS ARM64
+         clientOpts = { libDir: process.env.HOME + '/Downloads/instantclient_23_3' };
+       }
+       // else on other platforms like Linux the system library search path MUST always be
+       // set before Node.js is started, for example with ldconfig or LD_LIBRARY_PATH.
 
-  More details and options are shown in the later sections
-  :ref:`oracleclientloadingwindows`, :ref:`oracleclientloadingmacos`, and
-  :ref:`oracleclientloadinglinux`.
+       // enable node-oracledb Thick mode
+       oracledb.initOracleClient(clientOpts);
 
-All connections in an application use the same mode.
+More details and options are shown in the following sections:
 
-Once the Thick mode is enabled, you cannot go back to the Thin mode except by
-removing calls to :meth:`~oracledb.initOracleClient()` and restarting the
-application.
-
-See :ref:`vsessconinfo` to verify which mode is in use.
+- :ref:`oracleclientloadingwindows`
+- :ref:`oracleclientloadingmacos`
+- :ref:`oracleclientloadinglinux`
 
 **Notes on calling initOracleClient()**
 
 - The :meth:`~oracledb.initOracleClient()` function must be called before any
-  standalone connection or connection pool is created. If a connection or pool
+  :ref:`standalone connection <standaloneconnection>` or
+  :ref:`connection pool <connpooling>` is created. If a connection or pool
   is first created, then the Thick mode cannot be enabled.
 
 - If you call :meth:`~oracledb.initOracleClient()` with a ``libDir`` attribute,
   the Oracle Client libraries are loaded immediately from that directory. If
   you call :meth:`~oracledb.initOracleClient()` but do *not* set the ``libDir``
   attribute, the Oracle Client libraries are loaded immediately using the
-  search heuristics discussed in later sections.
+  search heuristics discussed in later sections. If you set ``libDir`` on
+  Linux and related platforms, you must still have configured the system
+  library search path to include that directory before starting Node.js.
+
+- Once the Thick mode is enabled, you cannot go back to the Thin mode except by
+  removing calls to :meth:`~oracledb.initOracleClient()` and restarting the
+  application.
 
 - If Oracle Client libraries cannot be loaded, then
   :meth:`~oracledb.initOracleClient()` will return an error
   ``DPI-1047: Cannot locate a 64-bit Oracle Client library``. To resolve
-  this, review the platform-specific instructions below. Alternatively,
-  remove the call to :meth:`~oracledb.initOracleClient()` and use
+  this, review the platform-specific instructions below or see
+  :ref:`troubleshooting DPI-1047 <dpi1047>`. Alternatively, remove the call to
+  :meth:`~oracledb.initOracleClient()` and use
   :ref:`Thin mode <changingthick>`. The features supported by Thin mode can
   be found in :ref:`featuresummary`.
-
-- If you set ``libDir`` on Linux and related platforms, you must still have
-  configured the system library search path to include that directory before
-  starting Node.js.
 
 - On any operating system, if you set ``libDir`` to the library directory of a
   full database or full client installation (such as from running
@@ -117,7 +121,7 @@ On Windows, the alternative ways to enable Thick mode are:
   .. code-block:: javascript
 
         const oracledb = require('oracledb');
-        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_19_22'});
+        oracledb.initOracleClient({libDir: 'C:\\oracle\\instantclient_23_5'});
 
   If you use backslashes in the ``libDir`` string, you will need to double
   them.
@@ -168,7 +172,7 @@ On Windows, the alternative ways to enable Thick mode are:
   this variable before Node.js is executed, for example::
 
         REM mynode.bat
-        SET PATH=C:\oracle\instantclient_19_22;%PATH%
+        SET PATH=C:\oracle\instantclient_23_5;%PATH%
         node %*
 
   Invoke this batch file every time you want to run Node.js.
@@ -214,7 +218,7 @@ On macOS, the alternative ways to enable Thick mode are:
   libraries from an unzipped `Instant Client 'Basic' or 'Basic Light'
   <https://www.oracle.com/database/technologies/instant-client.html>`__
   package. For example, use
-  ``ln -s ~/Downloads/instantclient_19_16/libclntsh.dylibnode_modules/oracledb/build/Release/``.
+  ``ln -s ~/Downloads/instantclient_23_3/libclntsh.dylibnode_modules/oracledb/build/Release/``.
 
   If the libraries are not found, the library search path such as set in
   ``DYLD_LIBRARY_PATH`` (note this variable does not propagate to sub-shells)
@@ -229,7 +233,7 @@ On macOS, the alternative ways to enable Thick mode are:
   This can be added to your ``package.json`` files::
 
         "scripts": {
-            "postinstall": "ln -s $HOME/Downloads/instantclient_19_16/libclntsh.dylib $(npm root)/oracledb/build/Release"
+            "postinstall": "ln -s $HOME/Downloads/instantclient_23_3/libclntsh.dylib $(npm root)/oracledb/build/Release"
         },
 
   With the libraries in place, your application can then enable Thick mode:
@@ -269,9 +273,11 @@ On Linux and related platforms, enable Thick mode by calling
 
 Oracle Client libraries are looked for in the operating system library
 search path, such as configured with ``ldconfig`` or set in the environment
-variable ``LD_LIBRARY_PATH``. On some UNIX platforms an OS specific
-equivalent, such as ``LIBPATH`` or ``SHLIB_PATH``, is used instead of
-``LD_LIBRARY_PATH``.
+variable ``LD_LIBRARY_PATH``. This must be configured *prior* to running the
+Node.js process. Web servers and other daemons commonly reset environment
+variables so using ``ldconfig`` is generally preferred instead. On some UNIX
+platforms, an OS specific equivalent such as ``LIBPATH`` or ``SHLIB_PATH`` is
+used instead of ``LD_LIBRARY_PATH``.
 
 If the libraries are not found in the system library search path, then
 libraries in ``$ORACLE_HOME/lib`` will be used. Note that the environment
@@ -482,11 +488,11 @@ explicitly specified or a default location will be used.  Do one of:
 
   - For Oracle Instant Client ZIP files, the ``network/admin`` subdirectory of
     Instant Client, for example
-    ``/opt/oracle/instantclient_19_11/network/admin``.
+    ``/opt/oracle/instantclient_23_5/network/admin``.
 
-  - For Oracle Instant RPMs, the ``network/admin`` subdirectory of Instant
-    Client, for example
-    ``/usr/lib/oracle/19.18/client64/lib/network/admin``.
+  - For Oracle Instant Client RPMs, the ``network/admin`` subdirectory of
+    Instant Client, for example
+    ``/usr/lib/oracle/23.5/client64/lib/network/admin``.
 
   - When using libraries from a local Oracle Database or full client
     installation, in ``$ORACLE_HOME/network/admin`` or
@@ -521,7 +527,7 @@ like ``LD_LIBRARY_PATH`` must be set before Node.js starts.
     * - Oracle Environment Variables
       - Purpose
     * - ``LD_LIBRARY_PATH``
-      - The library search path for Linux and some UNIX platforms. Set this to the directory containing the Oracle Client libraries, for example ``/opt/oracle/instantclient_19_18`` or ``$ORACLE_HOME/lib``. The variable needs to be set in the environment before Node.js is invoked. The variable is not needed if the libraries are located by an alternative method, such as from running ``ldconfig``. On some UNIX platforms an OS specific equivalent, such as ``LIBPATH`` or ``SHLIB_PATH`` is used instead of ``LD_LIBRARY_PATH``.
+      - The library search path for Linux and some UNIX platforms. Set this to the directory containing the Oracle Client libraries, for example ``/opt/oracle/instantclient_23_5`` or ``$ORACLE_HOME/lib``. The variable needs to be set in the environment before Node.js is invoked. The variable is not needed if the libraries are located by an alternative method, such as from running ``ldconfig``. On some UNIX platforms, an OS specific equivalent such as ``LIBPATH`` or ``SHLIB_PATH`` is used instead of ``LD_LIBRARY_PATH``.
     * - ``PATH``
       - The library search path for Windows should include the location where ``OCI.DLL`` is found. Not needed if you pass :ref:`libDir <odbinitoracleclientattrsopts>` when calling :meth:`oracledb.initOracleClient()`.
     * - ``TNS_ADMIN``
