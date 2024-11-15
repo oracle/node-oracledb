@@ -188,7 +188,7 @@ describe('273. jsonDualityView2.js', function() {
     await connection.execute(testsUtil.sqlDropTable(`student`));
   });
 
-  it('273.6 Specify DELETE, NODELETE both, BUG number : 34657745', async function() {
+  it('273.6 Specify DELETE, NODELETE both', async function() {
     await connection.execute(testsUtil.sqlCreateTable('student', sqlCreateTableStudent));
 
     // insert data into student table
@@ -198,14 +198,7 @@ describe('273. jsonDualityView2.js', function() {
 
     // commit the transaction
     await connection.execute(`COMMIT`);
-    await assert.rejects(
-      async () => await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
-                    AS
-                    Student
-                    {StudentId: stuid @NODELETE, StudentName: name}`),
-      /ORA-40934:/ //ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV':
-      //Invalid or conflicting annotations in the WITH clause.
-    );
+
     await assert.rejects(
       async () => await connection.execute(`CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
                     AS

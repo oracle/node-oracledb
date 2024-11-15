@@ -189,6 +189,8 @@ Output is::
       [ [ 'AAAmI9AAMAAAAnVAAB' ] ],
       [ [ 'AAAmI9AAMAAAAnVAAC' ] ] ]
 
+.. _plsqlexecutemany:
+
 Calling PL/SQL with ``executeMany()``
 =====================================
 

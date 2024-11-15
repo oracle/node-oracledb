@@ -215,8 +215,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
       Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'del' for the table 'STUDENT'
+      */
     );
 
     await assert.rejects(
@@ -232,8 +236,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
       Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'ins' for the table 'STUDENT'
+      */
     );
 
     await assert.rejects(
@@ -295,8 +303,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
       Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'nodelete' for the table 'STUDENT'
+      */
     );
 
     await assert.rejects(
@@ -328,8 +340,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
       Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'insert' for the table 'STUDENT'
+      */
     );
 
     await connection.execute(`
@@ -424,8 +440,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
       Class : class  {ClassId: clsid, Name: name @NOUPDATE @UPDATE}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'nodelete' for the table 'STUDENT'
+      */
     );
 
     await assert.rejects(
@@ -470,8 +490,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
       Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'readonly' for the table 'STUDENT'
+      */
     );
 
     await connection.execute(`
@@ -484,7 +508,7 @@ describe('276. jsonDualityView5.js', function() {
         StudentClass :
         student_class @insert@update@delete
            {StudentClassId : scid,
-      Class : class  {ClassId: clsid, Name: name}}}
+      Class : class  @insert@update {ClassId: clsid, Name: name}}}
     `);
 
     await connection.execute(`
@@ -508,8 +532,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
             Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'read' for the table 'STUDENT'
+      */
     );
 
     await assert.rejects(
@@ -541,8 +569,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
             Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'etag' for the table 'STUDENT'
+      */
     );
 
     await assert.rejects(
@@ -558,8 +590,12 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
             Class : class {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'checketag' for the table 'STUDENT'
+      */
     );
 
     await connection.execute(`
@@ -626,8 +662,12 @@ annotation or NOUPDATE annotation specified.*/
            {StudentClassId : scid,
             Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-                    conflicting annotations in the WITH clause */
+      // Server version < v26.1 will return ORA-40934
+      /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'nest' for the table 'STUDENT'
+      */
     );
 
     await assert.rejects(
@@ -667,7 +707,7 @@ annotation or NOUPDATE annotation specified.*/
         Student @insert@update@delete
       {
         StudentId: stuid,
-        StudentName : student @nest{NULL:name} ,
+        StudentName : student @nest{NULL:name},
         StudentClass :
         student_class @insert@update@delete
            {StudentClassId : scid,

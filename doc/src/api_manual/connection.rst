@@ -1350,7 +1350,12 @@ Connection Methods
             If all values in all records for a particular bind variable are null, the type of that bind is ``oracledb.STRING`` with a maximum size of 1.
 
             The maximum sizes of strings and buffers are determined by scanning all records unless a :ref:`bindDefs <executemanyoptbinddefs>` property is used. This property explicitly specifies the characteristics of each bind variable.
-        * - options
+        * - ``numIterations``
+          - Number
+          - .. _executemanynumiterations:
+
+            If there are no bind values, or values have previously been bound, then you can set the ``numIterations`` parameter to an integer value that specifies the number of iterations. See :ref:`plsqlexecutemany` for an example of using this parameter.
+        * - ``options``
           - Object
           - .. _executemanyoptions:
 

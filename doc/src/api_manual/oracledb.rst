@@ -3292,10 +3292,10 @@ Oracledb Methods
 
         promise = getNetworkServiceNames(String configDir);
 
-    Returns a list of network service names that is defined in the
-    :ref:`tnsnames.ora <tnsadmin>` file which is inside the directory that
-    is specified in the ``configDir`` property or the ``TNS_ADMIN``
-    environment variable if ``configDir`` is not specified. If a
+    Returns a list of TNS Aliases, also known as Network Service Names,
+    defined in the :ref:`tnsnames.ora <tnsadmin>` file which is inside the
+    directory that is specified in the ``configDir`` property or the
+    ``TNS_ADMIN`` environment variable if ``configDir`` is not specified. If a
     ``tnsnames.ora`` file does not exist, then an exception is raised.
 
     The parameters of the ``oracledb.getNetworkServiceNames()`` method are:

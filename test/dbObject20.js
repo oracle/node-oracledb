@@ -1273,7 +1273,7 @@ describe('290. dbObject20.js', () => {
     let pool, sysDBAConn, sid;
     const TYPE1 = 'NODB_TYP_NODB_MASTER_ID_ARR';
 
-    before(async () => {
+    before(async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
 
       const dbaConfig = {

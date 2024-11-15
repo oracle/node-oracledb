@@ -4,6 +4,38 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev66v67:
+
+Upgrading from node-oracledb 6.6 to 6.7
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- Using the new :meth:`oracledb.getNetworkServiceNames()` method, you can
+  fetch the list of TNS Aliases from the ``tnsnames.ora`` file.
+
+- With :ref:`Centralized Configuration Providers <configurationprovider>`, you
+  can now:
+
+  - Connect to Oracle Database using wallets stored in Azure Key Vault and OCI
+    vault.
+
+  - Cache the configuration information retrieved from
+    :ref:`Azure App Configuration <conninfocacheazure>` and
+    :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
+    providers.
+
+- In node-oracledb Thin mode, you can use the attributes
+  :attr:`oracledb.driverName`, :attr:`oracledb.machine`,
+  :attr:`oracledb.osUser`, :attr:`oracledb.program`, and
+  :attr:`oracledb.terminal` to set information about the driver name, machine
+  name, operating system user, program name, and terminal name respectively.
+
+- In node-oracledb Thick mode, the new ``regId`` property of the
+  :ref:`message object parameter <messageparam>` in the CQN subscription
+  :ref:`callback <consubscribeoptcallback>` function returns a unique
+  identifier during registration.
+
 .. _upgradev65v66:
 
 Upgrading from node-oracledb 6.5 to 6.6

@@ -221,7 +221,7 @@ describe('305. dataTypeVector5.js', function() {
         [`SELECT VECTOR_DISTANCE(VectorInt8Col1, VectorInt8Col2, EUCLIDEAN_SQUARED) from ${tableName}`, '10405.0000'],
         [`SELECT VECTOR_DISTANCE(VectorInt8Col1, VECTOR('[30, 40]', 2, INT8), EUCLIDEAN_SQUARED) from ${tableName}`, '16441.0000'],
         [`SELECT VECTOR_DISTANCE(Vector32Col1, Vector32Col2, EUCLIDEAN_SQUARED) from ${tableName}`, '11.9213'],
-        [`SELECT VECTOR_DISTANCE(Vector32Col1, VECTOR('[30, 40]', 2, FLOAT32), EUCLIDEAN_SQUARED) from ${tableName}`, '1778.7235'],
+        [`SELECT VECTOR_DISTANCE(Vector32Col1, VECTOR('[30, 40]', 2, FLOAT32), EUCLIDEAN_SQUARED) from ${tableName}`, '1778.7236'],
         [`SELECT VECTOR_DISTANCE(Vector64Col1, Vector64Col2, EUCLIDEAN_SQUARED) from ${tableName}`, '846400010320.4973'],
         [`SELECT VECTOR_DISTANCE(Vector64Col1, VECTOR('[30, 40]', 2, FLOAT64), EUCLIDEAN_SQUARED) from ${tableName}`, '864954547855.4663']
       ]);
@@ -251,7 +251,7 @@ describe('305. dataTypeVector5.js', function() {
             (VectorInt8Col1 <=> VectorInt8Col2) from ${tableName}
           `);
       assert.deepStrictEqual(result.rows[0].toString(),
-        '143,102.00489807128906,102.00489807128906,0.014268875122070312,-13545,13545,0.014268875122070312');
+        '143,102.00490184299969,102.00490184299969,0.014268875320571528,-13545,13545,0.014268875320571528');
 
       result = await connection.execute(`
             SELECT L1_DISTANCE(Vector32Col1, Vector32Col2),
@@ -263,8 +263,8 @@ describe('305. dataTypeVector5.js', function() {
             (Vector32Col1 <=> Vector32Col2) from ${tableName}
       `);
       assert.deepStrictEqual(result.rows[0],
-        [4.650000095367432, 3.452723741531372, 3.452723741531372, 0.05660730600357056,
-          -37.957801818847656, 37.95780015678406, 0.05660730600357056]);
+        [4.650000095367432, 3.4527236567155133, 3.4527236567155133, 0.056607300796886584,
+          -37.95780086517334, 37.95780086517334, 0.056607300796886584]);
 
       result = await connection.execute(`
             SELECT L1_DISTANCE(Vector64Col1, Vector64Col2),

@@ -1289,7 +1289,8 @@ describe('294. dataTypeVector1.js', function() {
   }); // 294.51
 
   it('294.52 executeMany with positional args in vector binary flex column', async function() {
-    if (!isVectorBinaryRunnable) this.skip();
+    const serverVersion = connection.oracleServerVersion;
+    if (serverVersion <= 2306000000 || !isVectorBinaryRunnable) this.skip();
 
     const rows = [
       [1, [1, 2]],

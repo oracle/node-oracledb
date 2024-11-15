@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -341,6 +341,9 @@ describe('115. urowidDMLBindAsString2.js', function() {
     } catch (err) {
       if (urowidLen > 4000) {
         assert.strictEqual(err.message, "ORA-01704: string literal too long");
+      } else {
+        // This is a test failure
+        throw err;
       }
     }
     if (urowidLen <= 4000) {

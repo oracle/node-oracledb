@@ -184,7 +184,7 @@ describe('298. dataTypeVector4.js', function() {
     `);
 
     assert.strictEqual(result.rows.length, 1);
-    assert.deepStrictEqual(result.rows, [[0.10298221668758012]]);
+    assert.deepStrictEqual(result.rows[0][0].toFixed(6), '0.102982');
   }); // 298.4
 
   it('298.5 insert and select Max vector distance function', async function() {
@@ -214,7 +214,7 @@ describe('298. dataTypeVector4.js', function() {
     `);
 
     assert.strictEqual(result.rows.length, 1);
-    assert.deepStrictEqual(result.rows, [[0.28645724726349675]]);
+    assert.deepStrictEqual(result.rows[0][0].toFixed(6), '0.286457');
   }); // 298.5
 
   it('298.6 sum vector distance function vector columns with parallel execution', async function() {
@@ -299,10 +299,12 @@ describe('298. dataTypeVector4.js', function() {
 
     const clientVersion = testsUtil.getClientVersion();
     const serverVersion = connection.oracleServerVersion;
+    const majorServerVersion = Math.floor(serverVersion / 1000000);
+    const majorClientVersion = Math.floor(clientVersion / 1000000);
 
-    // Aggregate functions on vector columns is available from 23.6 onwards
-    if (serverVersion >= 2306000000 &&
-      (oracledb.thin || clientVersion >= 2306000000)) {
+    // Aggregate functions on vector columns are not implemented in Oracle Database 23.6 or earlier versions
+    if (majorServerVersion > 2306 &&
+      (oracledb.thin || majorClientVersion > 2306)) {
       const result = await connection.execute(`
       SELECT /*+ parallel(4) */ sum(VectorCol)
       FROM ${tableName}

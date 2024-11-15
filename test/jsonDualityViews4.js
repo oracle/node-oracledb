@@ -353,7 +353,7 @@ describe('275. jsonDualityView4.js', function() {
       SELECT view_name, view_owner, ROOT_TABLE_NAME
       FROM DBA_JSON_DUALITY_VIEWS
       ORDER BY view_name`);
-    assert.strictEqual(result.rows.length, 1);
+    assert.strictEqual(result.rows[0].length, 3);
 
     // Query 2: select view_owner, view_name, relationship from DBA_JSON_DUALITY_VIEW_TABS
     result = await dbaConn.execute(`
@@ -368,9 +368,8 @@ describe('275. jsonDualityView4.js', function() {
       SELECT COLUMN_NAME, DATA_TYPE
       FROM DBA_JSON_DUALITY_VIEW_TAB_COLS
       ORDER BY COLUMN_NAME`);
-
-    assert.deepStrictEqual(result.rows, [["CLSID", "NUMBER"], ["CLSID", "NUMBER"], ["NAME", "VARCHAR2"],
-      ["NAME", "VARCHAR2"], ["SCID", "NUMBER"], ["STUID", "NUMBER"], ["STUID", "NUMBER"]]);
+    assert.deepStrictEqual(result.rows, [["CLSID", "NUMBER"], ["CLSID", "NUMBER"], ["NAME", "VARCHAR2"], ["NAME", "VARCHAR2"], ["SCID", "NUMBER"],
+      ["STUID", "NUMBER"], ["STUID", "NUMBER"]]);
   });
 
   describe('275.7 Json Duality view with GraphQL', function() {

@@ -105,7 +105,7 @@ describe('125. longDMLBind.js', function() {
       await test2(random.getRandomLengthString(65536), random.getRandomLengthString(size), size);
     });
 
-  }); // 125.3
+  }); // 125.2
 
   describe('125.3 RETURNING INTO', function() {
 
@@ -139,7 +139,7 @@ describe('125. longDMLBind.js', function() {
     };
     const result = await connection.execute(sql_query, bindVar);
     assert(result);
-    assert.equal(1, result.rowsAffected);
+    assert.equal(result.rowsAffected, 1);
   };
 
   const update = async function(content, maxsize) {
@@ -150,7 +150,7 @@ describe('125. longDMLBind.js', function() {
     };
     const result = await connection.execute(sql_query, bindVar);
     assert(result);
-    assert.equal(1, result.rowsAffected);
+    assert.equal(result.rowsAffected, 1);
   };
 
   const returning = async function(content) {

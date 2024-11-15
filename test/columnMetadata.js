@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -241,7 +241,7 @@ describe('9. columnMetadata.js', function() {
       await connection.execute(sqlDrop);
     });
 
-    it('9.10 works with a large number of columns', async function() {
+    it('9.3.1 works with a large number of columns', async function() {
       const column_size = 300;
       columns_string = genColumns(column_size, " NUMBER");
 
@@ -269,7 +269,7 @@ describe('9. columnMetadata.js', function() {
       await connection.execute(sqlDrop);
     });
 
-    it('9.11 works with re-executes with multiple packet response', async function() {
+    it('9.3.2 works with re-executes with multiple packet response', async function() {
       const column_size = 50;
       const numRows = 5;
       oracledb.fetchAsString = [oracledb.CLOB];

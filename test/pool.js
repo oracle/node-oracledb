@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1505,7 +1505,14 @@ describe('2. pool.js', function() {
       }
 
       res = await conn.execute(sqlDriverName);
-      assert.strictEqual(res.rows[0][0], prePoolDriver);
+      /*
+        In Oracle 12.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
+        can be set only upto 8 characters.
+      */
+      const serverVersion = conn.oracleServerVersion;
+      if (serverVersion < 1202000000)
+        assert.strictEqual(res.rows[0][0], "pre_pool");
+      else assert.strictEqual(res.rows[0][0], prePoolDriver);
 
       await conn.close();
       await pool.close(0);

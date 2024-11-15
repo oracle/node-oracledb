@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,7 +36,7 @@ const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
 describe('181. dataTypeXML.js', function() {
-
+  let conn;
   const tableName = "nodb_tab_xml";
   const testRowID = 1;
   const testXMLData =
@@ -58,7 +58,7 @@ describe('181. dataTypeXML.js', function() {
     // Storing XMLType column as clob is disallowed in Oracle ADB.
     if (dbConfig.test.isCloudService) this.skip();
 
-    const connection = await oracledb.getConnection(dbConfig);
+    const connCreate = await oracledb.getConnection(dbConfig);
 
     let sql =
       "BEGIN \n" +
@@ -79,19 +79,19 @@ describe('181. dataTypeXML.js', function() {
       "        ) XMLTYPE embedLOBXML STORE AS CLOB\n" +
       "    '); \n" +
       "END; ";
-    await connection.execute(sql);
-    await connection.commit();
-    await connection.close();
+    await connCreate.execute(sql);
+    await connCreate.commit();
+    await connCreate.close();
 
-    const conn = await oracledb.getConnection(dbConfig);
+    const connInsert = await oracledb.getConnection(dbConfig);
 
     sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
     const bindValues = { id: testRowID, bv: testXMLData };
-    const result = await conn.execute(sql, bindValues);
+    const result = await connInsert.execute(sql, bindValues);
     assert.strictEqual(result.rowsAffected, 1);
 
-    await conn.commit();
-    await conn.close();
+    await connInsert.commit();
+    await connInsert.close();
 
   }); // before
 
@@ -107,8 +107,15 @@ describe('181. dataTypeXML.js', function() {
     await connection.close();
   }); // after
 
+  beforeEach('create conn', async () => {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  afterEach('close conn', async () => {
+    await conn.close();
+  });
+
   it('181.1 basic case, insert XML data and query back', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sql = "select content from " + tableName + " where num = :id";
     const bindVar = { id: testRowID };
     const options = { outFormat: oracledb.OUT_FORMAT_OBJECT };
@@ -120,13 +127,9 @@ describe('181. dataTypeXML.js', function() {
       assert.strictEqual(result.metaData[0].dbType, oracledb.DB_TYPE_XMLTYPE);
       assert.strictEqual(result.metaData[0].fetchType, oracledb.DB_TYPE_XMLTYPE);
     }
-
-    await conn.close();
   }); // 181.1
 
   it('181.2 query XML data as CLOB', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-
     const sql = "select xmltype.getclobval(content) as mycontent from " + tableName + " where num = :id";
     const bindVar = { id: testRowID };
     const options = {
@@ -135,12 +138,9 @@ describe('181. dataTypeXML.js', function() {
     };
     const result = await conn.execute(sql, bindVar, options);
     assert.strictEqual(result.rows[0].MYCONTENT, testXMLData);
-
-    await conn.close();
   }); // 181.2
 
   it('181.3 another query as CLOB syntax', async function() {
-    const conn = await oracledb.getConnection(dbConfig);
     if (conn.oracleServerVersion < 1200000000) {
       await conn.close();
       this.skip();
@@ -155,13 +155,11 @@ describe('181. dataTypeXML.js', function() {
     };
     const result = await conn.execute(sql, bindVar, options);
     assert.strictEqual(result.rows[0].MYCONTENT, testXMLData);
-    await conn.close();
   }); // 181.3
 
   it('181.4 Negative - try to insert Null', async () => {
     const ID = 20;
     const XML = '';
-    const conn = await oracledb.getConnection(dbConfig);
 
     const sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
     const bindValues = { id: ID, bv: XML };
@@ -181,16 +179,18 @@ describe('181. dataTypeXML.js', function() {
     }
 
     await conn.commit();
-    await conn.close();
   }); // 181.4
 
-  it('181.5 inserts data that is larger than 4K', async () => {
+  it('181.5 inserts data that is larger than 4K', async function() {
+
+    // Insert of LONG data > 4K is not allowed in Oracle Database 12.1
+    // It throws an ORA-01461 error
+    if (conn.oracleServerVersion < 1202000000) this.skip();
+
     const ID = 50;
     const str = 'a'.repeat(31 * 1024);
     const head = '<data>', tail = '</data>\n';
     const xml = head.concat(str).concat(tail);
-
-    const conn = await oracledb.getConnection(dbConfig);
 
     let sql = "insert into " + tableName + " ( num, content ) values ( :id, XMLType(:bv) )";
     const bindValues = { id: ID, bv: xml };
@@ -211,7 +211,6 @@ describe('181. dataTypeXML.js', function() {
       assert.strictEqual(result.rows[0].OBJ, xml);
     }
     await conn.commit();
-    await conn.close();
   }); // 181.5
 
   it('181.6 Insert and Verify Embedded LOB locator inside XML', async () => {
@@ -222,7 +221,6 @@ describe('181. dataTypeXML.js', function() {
     const xml = head.concat(smallstr).concat(tail);
     const largexml = head.concat(largestr).concat(tail);
 
-    const conn = await oracledb.getConnection(dbConfig);
     const lob = await conn.createLob(oracledb.CLOB);
     await lob.write(largexml);
 
@@ -250,7 +248,6 @@ describe('181. dataTypeXML.js', function() {
       lob.destroy();
     });
     await conn.commit();
-    await conn.close();
   }); // 181.6
 
 });

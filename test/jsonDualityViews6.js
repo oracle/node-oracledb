@@ -231,8 +231,12 @@ describe('277. jsonDualityView6.js', function() {
                 StudentId:stuid @INSERT
               }
           }`),
-        /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-          conflicting annotations in the WITH clause.*/
+        // Server version < v26.1 will return ORA-40934
+        /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'insert' for the table 'STUDENT'
+      */
       );
 
       await assert.rejects(
@@ -250,8 +254,12 @@ describe('277. jsonDualityView6.js', function() {
               StudentId:stuid
             }
           }`),
-        /ORA-40934:/ /*ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or
-          conflicting annotations in the WITH clause.*/
+        // Server version < v26.1 will return ORA-40934
+        /ORA-40934|ORA-43411:/
+      /*
+        ORA-40934: Cannot create JSON Relational Duality View 'STUDENT_OV': Invalid or conflicting annotations for the JSON field.
+        ORA-43411: Invalid directive 'insert' for the table 'STUDENT'
+      */
       );
     });
 

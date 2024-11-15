@@ -5,7 +5,8 @@
 node-oracledb Release Notes
 ===========================
 
-For deprecated and desupported features, see :ref:`Deprecations and desupported features <deprecations>`.
+For deprecated and desupported features, see
+:ref:`Deprecations and desupported features <deprecations>`.
 
 node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...v6.7.0>`__ (TBD)
 ---------------------------------------------------------------------------------------------------------
@@ -13,7 +14,8 @@ node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...
 Common Changes
 ++++++++++++++
 
-#)  Added tracing functionality for OpenTelemetry support.
+#)  Added :ref:`tracing functionality <tracehandlerinterface>` for
+    OpenTelemetry support.
 
 #)  Changed default values of ``transportConnectTimeout`` and
     ``retryDelay`` properties to *20* seconds and *1* second respectively in
@@ -21,28 +23,28 @@ Common Changes
     consistency with other Oracle Database drivers.
 
 #)  Added method :meth:`oracledb.getNetworkServiceNames()` to support fetching
-    the list of network service names from the ``tnsnames.ora`` file.
+    the list of TNS Aliases from the ``tnsnames.ora`` file.
 
-#) Improvements to Centralized Configuration Providers support:
+#)  Improvements to Centralized Configuration Providers support:
 
-   - Added support to connect to Oracle Database via the centralized
-     configuration providers using wallets stored in Azure Key Vault and
-     OCI Vault.
+    - Added support to connect to Oracle Database via the centralized
+      configuration providers using wallets stored in Azure Key Vault and
+      OCI Vault.
 
-   - Added ability to cache the configuration information retrieved from
-     :ref:`Azure App Configuration <conninfocacheazure>` and
-     :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
-     providers.
+    - Added ability to cache the configuration information retrieved from
+      :ref:`Azure App Configuration <conninfocacheazure>` and
+      :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
+      providers.
 
-   - Ensure that the password stored in OCI vault and retrieved in
-     base64-encoded format is decoded correctly.
+    - Ensure that the password stored in OCI vault and retrieved in
+      base64-encoded format is decoded correctly.
 
-   - Added internal code changes to validate the updated OCI centralized
-     configuration provider URL syntax.
+    - Added internal code changes to validate the updated OCI centralized
+      configuration provider URL syntax.
 
-   - Changed the password type parameter values from `vault-oci` and
-     `vault-azure` to `ocivault` and `azurevault` respectively for consistency
-     with other Oracle Database drivers.
+    - Changed the password type parameter values from `vault-oci` and
+      `vault-azure` to `ocivault` and `azurevault` respectively for consistency
+      with other Oracle Database drivers.
 
 #)  Remove the 'Critical Dependency' warning from webpack builds.
     See `Issue #1678 <https://github.com/oracle/node-oracledb/issues/1678>`__.

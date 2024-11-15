@@ -46,8 +46,8 @@ author = 'Oracle'
 # from the other)
 #
 # The short X.Y version.
-version = '6.6'
-release = '6.6.0'
+version = '6.7'
+release = '6.7.0'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

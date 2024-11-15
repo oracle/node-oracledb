@@ -159,21 +159,23 @@ node-oracledb.
 
 Node-oracledb applications that call PL/SQL can step through that PL/SQL code
 using JDWP in a debugger. This allows Node.js and PL/SQL code to be debugged
-in the same debugger environment. You can enable PL/SQL debugging in the
-node-oracledb modes as follows:
+in the same debugger environment. You can enable PL/SQL debugging in
+node-oracledb as follows:
 
-- If you are using node-oracledb Thick mode, set the ``ORA_DEBUG_JDWP``
+- In node-oracledb Thin or Thick modes, set the ``ORA_DEBUG_JDWP``
   environment variable to `host=hostname;port=portnum` indicating where the
   PL/SQL debugger is running. Then run the application.
 
-- In node-oracledb Thin mode, you can additionally set the connection
+- In node-oracledb Thin mode, you can alternatively set the connection
   parameter ``debugJdwp`` during connection. This variable defaults to the
   value of the ``ORA_DEBUG_JDWP`` environment variable.
 
-See `DBMS_DEBUG_JDWP <https://docs.oracle.com/en/database/oracle/oracle-
-database/19/arpls/DBMS_DEBUG_JDWP.html>`_ and `Debugging PL/SQL from ASP.NET
-and Visual Studio <http://cshay.blogspot.com/2006/10/debugging-plsql-from-
-aspnet-and-visual.html>`_.
+See the documentation on `DBMS_DEBUG_JDWP <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-AFF566A0-9E90-4218-B5C6-A74C3BF1CE14>`_, the video
+`PL/SQL debugging with Visual Studio and Visual Studio Code <https://www.
+youtube.com/watch?v=wk-3hLe30kk>`_, and the blog post `Debugging PL/SQL with
+Visual Studio Code (and more) <https://medium.com/oracledevs/debugging-pl-sql-
+with-visual-studio-code-and-more-45631f3952cf>`_.
 
 .. _tracingsql:
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -762,7 +762,14 @@ describe('1. connection.js', function() {
       }
 
       res = await conn2.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
+      /*
+        In Oracle 12.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
+        can be set only upto 8 characters.
+      */
+      let serverVersion = conn2.oracleServerVersion;
+      if (serverVersion < 1202000000)
+        assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+      else assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
 
       // Generate random values for the third connection
       const randomPgm3 = random.getRandomLengthString(16);
@@ -794,7 +801,14 @@ describe('1. connection.js', function() {
       }
 
       res = await conn3.execute(sqlDriverName);
-      assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
+      /*
+        In Oracle 12.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
+        can be set only upto 8 characters.
+      */
+      serverVersion = conn2.oracleServerVersion;
+      if (serverVersion < 1202000000)
+        assert.deepStrictEqual(res.rows[0][0], 'mydriver');
+      else assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
 
       // Cleanup
       await conn1.close();
@@ -817,7 +831,9 @@ describe('1. connection.js', function() {
       assert.strictEqual(res.rows[0][0], os.hostname());
       assert.strictEqual(res.rows[0][1], os.userInfo().username);
       assert.strictEqual(res.rows[0][2], 'unknown');
-      assert.strictEqual(res.rows[0][3], process.argv0);
+      // Whitespaces, ( and ) are replaced by ? for the program name
+      // in V$SESSION
+      assert.strictEqual(res.rows[0][3], process.argv0.replace(/[\s()]/g, '?'));
 
       if (dbConfig.test.drcp) {
         const bindParams = {
@@ -828,11 +844,20 @@ describe('1. connection.js', function() {
         res = await conn.execute(sqlDRCPSessionDetails, bindParams);
         assert.deepStrictEqual(res.rows[0][0], os.hostname());
         assert.deepStrictEqual(res.rows[0][1], 'unknown');
-        assert.deepStrictEqual(res.rows[0][2], process.argv0);
+        // Whitespaces, ( and ) are replaced by ? for the program name
+        // in V$SESSION
+        assert.deepStrictEqual(res.rows[0][2], process.argv0.replace(/[\s()]/g, '?'));
       }
 
       res = await conn.execute(sqlDriverName);
-      assert.strictEqual(res.rows[0][0], "node-oracledb : " + oracledb.versionString + " thn");
+      /*
+        In Oracle 12.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
+        can be set only upto 8 characters.
+      */
+      const serverVersion = conn.oracleServerVersion;
+      if (serverVersion < 1202000000)
+        assert.strictEqual(res.rows[0][0], "node-ora");
+      else assert.strictEqual(res.rows[0][0], "node-oracledb : " + oracledb.versionString + " thn");
 
       await conn.close();
     }); // 1.18.3

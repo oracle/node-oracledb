@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -143,7 +143,7 @@ describe('113. dataTypeUrowid.js', function() {
         const resultVal = rows[i].CONTENT;
         assert(resultVal);
       }
-      return fetchRowsFromRS(rs);
+      return await fetchRowsFromRS(rs);
     } else {
       await rs.close();
     }
@@ -185,7 +185,7 @@ describe('113. dataTypeUrowid.js', function() {
         assert(typeof resultVal, "string");
         await verifyFetchValues(connection, rsrows[i].NUM, rsrows[i].CONTENT, tableName);
       }
-      return fetchRowsFromRS_fetchas(rs);
+      return await fetchRowsFromRS_fetchas(rs);
     } else {
       await rs.close();
     }
