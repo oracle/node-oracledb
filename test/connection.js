@@ -826,27 +826,27 @@ describe('1. connection.js', function() {
 
       const conn = await oracledb.getConnection(dbaConfig);
 
+      // Whitespaces, comma, ( and ) are replaced by ? for the program name
+      // in V$SESSION
+      const sanitizedProgName = process.argv0.replace(/[\s(),]/g, '?');
+
       // Fetch values from v$session
       let res = await conn.execute(sqlSessionDetails);
       assert.strictEqual(res.rows[0][0], os.hostname());
       assert.strictEqual(res.rows[0][1], os.userInfo().username);
       assert.strictEqual(res.rows[0][2], 'unknown');
-      // Whitespaces, ( and ) are replaced by ? for the program name
-      // in V$SESSION
-      assert.strictEqual(res.rows[0][3], process.argv0.replace(/[\s()]/g, '?'));
+      assert.strictEqual(res.rows[0][3], sanitizedProgName);
 
       if (dbConfig.test.drcp) {
         const bindParams = {
           machine: os.hostname(),
           terminal: 'unknown',
-          program: process.argv0
+          program: sanitizedProgName
         };
         res = await conn.execute(sqlDRCPSessionDetails, bindParams);
         assert.deepStrictEqual(res.rows[0][0], os.hostname());
         assert.deepStrictEqual(res.rows[0][1], 'unknown');
-        // Whitespaces, ( and ) are replaced by ? for the program name
-        // in V$SESSION
-        assert.deepStrictEqual(res.rows[0][2], process.argv0.replace(/[\s()]/g, '?'));
+        assert.deepStrictEqual(res.rows[0][2], sanitizedProgName);
       }
 
       res = await conn.execute(sqlDriverName);
