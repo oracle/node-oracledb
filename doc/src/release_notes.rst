@@ -14,6 +14,9 @@ node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...
 Common Changes
 ++++++++++++++
 
+#)  Fixed SyntaxError with Bun runtime.
+    See `Issue #1707 <https://github.com/oracle/node-oracledb/issues/1707>`__.
+
 #)  Fixed bug that may cause runtime issues in some JavaScript frameworks.
     See `Issue #1706 <https://github.com/oracle/node-oracledb/issues/1706>`__.
 
