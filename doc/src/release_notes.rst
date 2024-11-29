@@ -8,6 +8,16 @@ node-oracledb Release Notes
 For deprecated and desupported features, see
 :ref:`Deprecations and desupported features <deprecations>`.
 
+node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...v6.7.1>`__ (TBD)
+---------------------------------------------------------------------------------------------------------
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed bug that may cause runtime issues in some JavaScript frameworks.
+    See `Issue #1706 <https://github.com/oracle/node-oracledb/issues/1706>`__.
+
+
 node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...v6.7.0>`__ (18 Nov 2024)
 ---------------------------------------------------------------------------------------------------------
 
