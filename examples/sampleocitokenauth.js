@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -20,8 +20,7 @@
  *
  * DESCRIPTION
  *   Shows connection pooling with OAuth 2.0 token based authentication to
- *   Oracle Autonomous Database from OCI-SDK. It shows how to create a
- *   connection pool.
+ *   Oracle Autonomous Database from OCI-SDK.
  *
  *   For more information refer to
  *   https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html
@@ -30,10 +29,10 @@
  * PREREQUISITES
  *   - node-oracledb 6.3 or later.
  *
- *   - While using Thick mode,
+ *   - While using Thick mode:
  *     Oracle Client libraries 19.14 (or later), or 21.5 (or later).
  *
- *   - Package OCI-SDK. See, https://www.npmjs.com/package/oci-sdk
+ *   - The OCI-SDK package. See https://www.npmjs.com/package/oci-sdk
  *
  *   - Set these environment variables (see the code explanation):
  *     NODE_ORACLEDB_PROFILE
@@ -57,17 +56,16 @@ let accessTokenData;
 if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
 
   // Thick mode requires Oracle Client or Oracle Instant Client libraries.
-  // On Windows and macOS Intel you can specify the directory containing the
+  // On Windows and macOS you can specify the directory containing the
   // libraries at runtime or before Node.js starts.  On other platforms (where
   // Oracle libraries are available) the system library search path must always
   // include the Oracle library path before Node.js starts.  If the search path
   // is not correct, you will get a DPI-1047 error.  See the node-oracledb
   // installation documentation.
   let clientOpts = {};
-  // On Windows and macOS Intel platforms, set the environment
-  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
-  if (process.platform === 'win32' ||
-      (process.platform === 'darwin' && process.arch === 'x64')) {
+  // On Windows and macOS platforms, set the environment variable
+  // NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || process.platform === 'darwin') {
     clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
@@ -131,7 +129,7 @@ async function getToken(accessTokenConfig) {
 
 async function callbackfn(refresh, accessTokenConfig) {
   // When refresh is true, then the token is invalid or expired.
-  //  So the application must get a new token and store it in cache.
+  // So the application must get a new token and store it in cache.
   // When refresh is false, then the token is valid and not expired
   // but the cache is empty. So the application must get a new token
   // and store it in cache.
@@ -145,7 +143,7 @@ async function callbackfn(refresh, accessTokenConfig) {
 
 async function run() {
   // Configuration for token based authentication:
-  //   accessToken:         The initial token values
+  //   accessToken:         The initial token value
   //   externalAuth:        Must be set to true for token based authentication
   //   homogeneous:         Must be set to true for token based authentication
   //   connectString:       The NODE_ORACLEDB_CONNECTIONSTRING environment

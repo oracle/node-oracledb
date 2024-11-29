@@ -44,16 +44,16 @@ const oracledb = require('oracledb');
 if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
 
   // Thick mode requires Oracle Client or Oracle Instant Client libraries.
-  // On Windows and macOS Intel you can specify the directory containing the
+  // On Windows and macOS you can specify the directory containing the
   // libraries at runtime or before Node.js starts.  On other platforms (where
   // Oracle libraries are available) the system library search path must always
   // include the Oracle library path before Node.js starts.  If the search path
   // is not correct, you will get a DPI-1047 error.  See the node-oracledb
   // installation documentation.
   let clientOpts = {};
-  // On Windows and macOS Intel platforms, set the environment
-  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
-  if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+  // On Windows and macOS platforms, set the environment variable
+  // NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || process.platform === 'darwin') {
     clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode

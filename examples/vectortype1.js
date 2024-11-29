@@ -48,9 +48,9 @@ const tableName = 'testvectornodejs1';
 
 if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   let clientOpts = {};
-  // On Windows and macOS Intel platforms, set the environment
-  // variable NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
-  if (process.platform === 'win32' || (process.platform === 'darwin' && process.arch === 'x64')) {
+  // On Windows and macOS platforms, set the environment variable
+  // NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || process.platform === 'darwin') {
     clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
   }
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
