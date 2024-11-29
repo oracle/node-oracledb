@@ -751,9 +751,18 @@ assist.createSchemaString = function(size) {
   return schema_prefix + buffer.toString() + schema_prefix;
 };
 
-
 assist.compare2Buffers = function(originalBuf, compareBuf) {
-  return originalBuf.equals(compareBuf);
+  if (originalBuf.length !== compareBuf.length) {
+    return false;
+  }
+
+  for (let i = 0; i < originalBuf.length; i++) {
+    if (originalBuf[i] !== compareBuf[i]) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 assist.setUp = async function(connection, tableName, array) {

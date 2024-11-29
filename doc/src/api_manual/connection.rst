@@ -2312,7 +2312,7 @@ Connection Methods
     :ref:`privilege <getconnectiondbattrsprivilege>` set to
     :ref:`oracledb.SYSPRELIM <oracledbconstantsprivilege>`, along with
     either :ref:`oracledb.SYSDBA <oracledbconstantsprivilege>` or
-    :ref:`oracledb.SYSOPER <oracledbconstantsprivilege>`. For example
+    :ref:`oracledb.SYSOPER <oracledbconstantsprivilege>`. For example,
     ``oracledb.SYSDBA | oracledb.SYSPRELIM``.
 
     See :ref:`Database Start Up and Shut Down <startupshutdown>`.
@@ -2356,15 +2356,15 @@ Connection Methods
         * - ``force``
           - Shuts down a running database using :ref:`oracledb.SHUTDOWN_MODE_ABORT <oracledbconstantsshutdown>` before restarting the database instance. The next database start up may require instance recovery.
 
-            The default for ``force`` is *false*.
-        * - ``pfile``
-          - After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.
-
             The default is *false*.
-        * - ``restrict``
+        * - ``pfile``
           - The path and filename for a local text file containing `Oracle Database initialization parameters <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8BAD86FC-27C5-4103-8151-AC5BADF274E3>`__.
 
             If ``pfile`` is not set, then the database server-side parameter file is used.
+        * - ``restrict``
+          - After the database is started, access is restricted to users who have the CREATE_SESSION and RESTRICTED SESSION privileges.
+
+            The default is *false*.
 
     **Callback**:
 

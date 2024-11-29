@@ -11,8 +11,8 @@ For deprecated and desupported features, see
 node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...v6.7.1>`__ (TBD)
 ---------------------------------------------------------------------------------------------------------
 
-Thin Mode Changes
-+++++++++++++++++
+Common Changes
+++++++++++++++
 
 #)  Fixed bug that may cause runtime issues in some JavaScript frameworks.
     See `Issue #1706 <https://github.com/oracle/node-oracledb/issues/1706>`__.

@@ -1,0 +1,14 @@
+timeout: false
+max-old-space-size: 4096
+reporter: spec
+ui: bdd
+spec:
+  - test/ext/release-check-tests/edge-max-cases/blobDMLBindLargeData.js
+  - test/ext/release-check-tests/edge-max-cases/blobPLSQLBindAsBufferMaxSize.js
+  - test/ext/release-check-tests/edge-max-cases/blobPLSQLBindLargeData.js
+  - test/ext/release-check-tests/edge-max-cases/clobDMLBindLargeData.js
+  - test/ext/release-check-tests/edge-max-cases/clobPLSQLBindAsStringMaxSize.js
+  - test/ext/release-check-tests/edge-max-cases/clobPLSQLBindLargeData.js
+  - test/ext/release-check-tests/edge-max-cases/longDMLBind.js
+  - test/ext/release-check-tests/edge-max-cases/longrawDMLBind.js
+  - test/ext/release-check-tests/edge-max-cases/cleanup.js

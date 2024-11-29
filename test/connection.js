@@ -763,11 +763,11 @@ describe('1. connection.js', function() {
 
       res = await conn2.execute(sqlDriverName);
       /*
-        In Oracle 12.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
+        In Oracle 12.1.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
         can be set only upto 8 characters.
       */
       let serverVersion = conn2.oracleServerVersion;
-      if (serverVersion < 1202000000)
+      if (serverVersion < 1201000200)
         assert.deepStrictEqual(res.rows[0][0], 'mydriver');
       else assert.deepStrictEqual(res.rows[0][0], 'mydriver1');
 
@@ -802,11 +802,11 @@ describe('1. connection.js', function() {
 
       res = await conn3.execute(sqlDriverName);
       /*
-        In Oracle 12.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
+        In Oracle 12.1.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
         can be set only upto 8 characters.
       */
       serverVersion = conn2.oracleServerVersion;
-      if (serverVersion < 1202000000)
+      if (serverVersion < 1201000200)
         assert.deepStrictEqual(res.rows[0][0], 'mydriver');
       else assert.deepStrictEqual(res.rows[0][0], 'mydriver3');
 
@@ -851,11 +851,11 @@ describe('1. connection.js', function() {
 
       res = await conn.execute(sqlDriverName);
       /*
-        In Oracle 12.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
+        In Oracle 12.1.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
         can be set only upto 8 characters.
       */
       const serverVersion = conn.oracleServerVersion;
-      if (serverVersion < 1202000000)
+      if (serverVersion < 1201000200)
         assert.strictEqual(res.rows[0][0], "node-ora");
       else assert.strictEqual(res.rows[0][0], "node-oracledb : " + oracledb.versionString + " thn");
 

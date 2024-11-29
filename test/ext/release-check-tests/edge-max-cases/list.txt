@@ -1,0 +1,133 @@
+Overview of node-oracledb functional edge-max-cases tests
+
+1.blobDMLBindLargeData.js
+    1.1 BLOB, INSERT/SELECT
+        1.1.1 BIND_IN & BIND_OUT a 1GB txt file
+        1.1.2 BIND_IN & BIND_OUT a 2GB txt file
+        1.1.3 BIND_IN & BIND_OUT a 4GB txt file
+        1.1.4 BIND_IN & BIND_OUT a 10MB txt file
+        1.1.5 BIND_IN & BIND_OUT a 20MB txt file
+        1.1.6 BIND_IN & BIND_OUT a 50MB txt file
+
+2.blobPLSQLBindAsBufferMaxSize.js
+    2.1 BLOB, PLSQL, BIND_IN
+        2.1.1 works with Buffer size 64k - 1
+        2.1.2 works with Buffer size 64k
+        2.1.3 works with Buffer size 64k + 1
+      - 2.1.4 works with Buffer size 1GB
+        2.1.5 set maxSize size to 1GB + 1
+        2.1.6 set maxSize size to 4GB - 1
+        2.1.7 set maxSize size to 2GB - 1
+        2.1.8 works with Buffer size 10MB + 1
+        2.1.9 works with Buffer size 20MB + 1
+        2.1.10 works with Buffer size 50MB
+    2.2 BLOB, PLSQL, BIND_OUT
+        2.2.1 works with Buffer size 64k - 1
+        2.2.2 works with Buffer size 64k
+        2.2.3 works with Buffer size 64k + 1
+        2.2.4 set maxSize to 1GB + 1
+        2.2.5 set maxSize to 2GB + 1
+        2.2.6 set maxSize to 4GB - 1
+        2.2.7 works with Buffer size 10MB + 1
+        2.2.8 works with Buffer size 50MB + 1
+        2.2.9 works with Buffer size 100MB + 1
+
+3.blobPLSQLBindLargeData.js
+    3.1 BLOB, PLSQL, BIND_IN
+        3.1.1 PLSQL, BIND_IN a 1GB txt file
+        3.1.2 PLSQL, BIND_IN a 2GB txt file
+        3.1.3 PLSQL, BIND_IN a 2GB-1 txt file
+        3.1.4 PLSQL, BIND_IN a 4GB txt file
+        3.1.5 PLSQL, BIND_IN a 10MB txt file
+        3.1.6 PLSQL, BIND_IN a 20MB txt file
+        3.1.7 PLSQL, BIND_IN a 50MB txt file
+    3.2 BLOB, PLSQL, BIND_OUT
+        3.2.1 PLSQL, BIND_OUT, 1GB BLOB
+        3.2.2 PLSQL, BIND_OUT, 2GB BLOB
+        3.2.3 PLSQL, BIND_OUT, 2GB - 1 BLOB
+        3.2.4 PLSQL, BIND_OUT, 4GB BLOB
+        3.2.4 PLSQL, BIND_OUT, 10MB BLOB
+        3.2.5 PLSQL, BIND_OUT, 20MB BLOB
+        3.2.6 PLSQL, BIND_OUT, 50MB BLOB
+
+4.clobDMLBindLargeData.js
+    4.1 CLOB, INSERT/SELECT
+        4.1.1 BIND_IN & BIND_OUT a 1GB txt file
+        4.1.2 BIND_IN & BIND_OUT a 2GB txt file
+        4.1.3 BIND_IN & BIND_OUT a 4GB txt file
+        4.1.4 BIND_IN & BIND_OUT a 10MB txt file
+        4.1.5 BIND_IN & BIND_OUT a 20MB txt file
+        4.1.6 BIND_IN & BIND_OUT a 50MB txt file
+
+5.clobPLSQLBindAsStringMaxSize.js
+    5.1 CLOB, PLSQL, BIND_IN
+        5.1.1 works with String size 64k - 1
+        5.1.2 works with String size 64k
+        5.1.3 works with String size 64k + 1
+        5.1.4 works with String size 128MB
+        5.1.5 works with String size (256 - 16) MB
+        5.1.6 set maxSize to 64k + 1
+        5.1.7 set maxSize to 1GB + 1
+        5.1.8 set maxSize to 2GB + 1
+        5.1.9 set maxSize to 4GB + 1
+        5.1.10 works with String size 10MB
+        5.1.11 works with String size 20MB
+        5.1.12 works with String size 50MB
+    5.2 CLOB, PLSQL, BIND_OUT
+        5.2.1 works with String size 64k - 1
+        5.2.2 works with String size 64k
+        5.2.3 works with String size 64k + 1
+        5.2.4 set maxSize to 64k + 1
+        5.2.5 set maxSize to 1GB + 1
+        5.2.6 set maxSize to 2GB + 1
+        5.2.7 set maxSize to 4GB - 1
+        5.2.7 Negative: set maxSize to 4GB
+        5.2.8 works with String size 10MB
+        5.2.9 works with String size 20MB
+        5.2.10 works with String size 50MB
+
+6.clobPLSQLBindLargeData.js
+    6.1 CLOB, PLSQL, BIND_IN
+        6.1.1 PLSQL, BIND_IN a 1GB txt file
+        6.1.2 PLSQL, BIND_IN a 2GB txt file
+        6.1.3 PLSQL, BIND_IN a 2GB-1 txt file
+        6.1.4 PLSQL, BIND_IN a 4GB txt file
+        6.1.5 PLSQL, BIND_IN a 10MB txt file
+        6.1.6 PLSQL, BIND_IN a 20MB txt file
+        6.1.7 PLSQL, BIND_IN a 50MB txt file
+    6.2 CLOB, PLSQL, BIND_OUT
+        6.2.1 PLSQL, BIND_OUT, 1GB CLOB
+        6.2.2 PLSQL, BIND_OUT, 2GB CLOB
+        6.2.3 PLSQL, BIND_OUT, 2GB-1 CLOB
+        6.2.4 PLSQL, BIND_OUT, 4GB CLOB
+        6.2.5 PLSQL, BIND_OUT, 10MB CLOB
+        6.2.6 PLSQL, BIND_OUT, 20MB CLOB
+        6.2.7 PLSQL, BIND_OUT, 50MB CLOB
+
+7. longDMLBind.js
+    7.1 INSERT and SELECT
+        7.1.1 works with data size 1MB + 1
+        7.1.2 works with data size 10MB + 1
+        7.1.3 works with data size 50MB + 1
+        7.1.4 works with data size 128MB + 1
+        7.1.5 works with data size 256MB - 16
+    7.2 UPDATE
+        7.2.1 works with data size 1MB + 1
+        7.2.2 works with data size 10MB + 1
+        7.2.3 works with data size 50MB + 1
+        7.2.4 works with data size 128MB + 1
+        7.2.5 works with data size 256MB - 16
+
+8. longrawDMLBind.js
+    8.1 INSERT and SELECT
+        8.1.1 works with data size 1MB + 1
+        8.1.2 works with data size 10MB + 1
+        8.1.3 works with data size 50MB + 1
+        8.1.4 works with data size 128MB + 1
+        8.1.5 works with data size 256MB - 16
+    8.2 UPDATE
+        8.2.1 works with data size 1MB + 1
+        8.2.2 works with data size 10MB + 1
+        8.2.3 works with data size 50MB + 1
+        8.2.4 works with data size 128MB + 1
+        8.2.5 works with data size 256MB - 16

@@ -1,0 +1,7 @@
+timeout: false
+max-old-space-size: 4096
+reporter: spec
+ui: bdd
+spec:
+  - test/ext/release-check-tests/extended-character-set/clobDMLReturningSingleRowAsString.js
+  - test/ext/release-check-tests/extended-character-set/blobDMLReturningSingleRowAsBuffer.js
