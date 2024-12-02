@@ -20,6 +20,11 @@ Common Changes
 #)  Fixed bug that may cause runtime issues in some JavaScript frameworks.
     See `Issue #1706 <https://github.com/oracle/node-oracledb/issues/1706>`__.
 
+Thin Mode Changes
++++++++++++++++++
+
+#) Fixed bug that fails to throw an error, when fetching data greater
+   than the ``maxSize`` property of outbinds in Oracle Database 12.1. 
 
 node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...v6.7.0>`__ (18 Nov 2024)
 ---------------------------------------------------------------------------------------------------------
