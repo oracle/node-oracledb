@@ -33,7 +33,7 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const dbConfig = require('../../../dbconfig.js');
+const dbConfig = require('../../dbconfig.js');
 
 describe('276. deadConnDetection.js', function() {
 

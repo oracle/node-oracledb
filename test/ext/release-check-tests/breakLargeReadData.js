@@ -37,9 +37,9 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const dbConfig = require('../../../dbconfig.js');
-const testsUtil = require('../../../testsUtil.js');
-const random = require('../../../random.js');
+const dbConfig = require('../../dbconfig.js');
+const testsUtil = require('../../testsUtil.js');
+const random = require('../../random.js');
 const assert = require('assert');
 
 describe('279.1 simulate break while reading Multiple packets', function() {

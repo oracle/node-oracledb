@@ -92,7 +92,7 @@ Overview of node-oracledb functional tests
         2.8.5 request queue never terminate for queueTimeout set to 0
         2.8.6 queueMax range check, queueMax -1
         2.8.7 queueMax range check, queueMax -0.5 not an integer
-    2.9 _enableStats & _logStats functionality
+    2.9 enableStatistics & logStatistics functionality
         2.9.1 does not work after the pool has been terminated
     2.10 Close method
         2.10.1 close can be used as an alternative to release

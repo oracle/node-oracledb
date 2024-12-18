@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 Oracle and/or its affiliates. */
+/* Copyright (c) 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,11 +35,11 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const dbConfig = require('../../../dbconfig.js');
-const testsUtil = require('../../../testsUtil.js');
+const dbConfig = require('../../dbconfig.js');
+const testsUtil = require('../../testsUtil.js');
 
 async function run() {
-  // sql-template-tag doesnt allow require.
+  // sql-template-tag doesn't allow require.
   const sqlTemplate = await import('sql-template-tag');
   const sql = sqlTemplate.default;
 
@@ -48,8 +48,7 @@ async function run() {
   const connection = await oracledb.getConnection(dbConfig);
 
   // Setup
-  const createQuery =
-            `CREATE TABLE ${TABLE} (ID NUMBER, NAME VARCHAR2(50))`;
+  const createQuery = `CREATE TABLE ${TABLE} (ID NUMBER, NAME VARCHAR2(50))`;
   let query = testsUtil.sqlCreateTable(TABLE, createQuery);
   await connection.execute(query);
 
@@ -93,31 +92,31 @@ async function run() {
   console.log("Query metadata:", result.metaData);
   console.log("Query rows:", result.rows);
   /*
-         * REUTRNING INTO Clause doesn't work
-         * DML insert with RETURNING INTO clause doesn't work as positional binds in 'INTO'
-         * clause are treated as inbinds
-         * const dmlinsert = sql`insert into emp values(2, 'JONHN1') RETURNING EMPID, EMPNAME into ${id}, ${id}`;
-         * console.log(dmlinsert);
-         */
+    * RETURNING INTO clause doesn't work
+    * DML insert with RETURNING INTO clause doesn't work as positional binds in 'INTO'
+    * clause are treated as inbinds
+    * const dmlInsert = sql`insert into emp values(2, 'JONHN1') RETURNING EMPID, EMPNAME into ${id}, ${id}`;
+    * console.log(dmlInsert);
+  */
 
   /* DML bulk insert doesn't work
-           const binds = [
-            [13, "Test 1"],
-            [13, "Test 2"],
-            [14, "Test 3"],
-            [15, "Test 4"],
-            [15, "Test 5 "]
-           ];
+      const binds = [
+      [13, "Test 1"],
+      [13, "Test 2"],
+      [14, "Test 3"],
+      [15, "Test 4"],
+      [15, "Test 5 "]
+      ];
 
-           options = {
-            autoCommit: true,
-            bindDefs: [
-                { type: oracledb.NUMBER },
-                { type: oracledb.STRING, maxSize: 15 }
-            ]
-            };
-            const dml = sql`INSERT INTO emp VALUES ${bulk(binds)} `;
-        */
+      options = {
+      autoCommit: true,
+      bindDefs: [
+          { type: oracledb.NUMBER },
+          { type: oracledb.STRING, maxSize: 15 }
+      ]
+      };
+      const dml = sql`INSERT INTO emp VALUES ${bulk(binds)} `;
+  */
 
   if (connection) {
     await testsUtil.dropTable(connection, TABLE);

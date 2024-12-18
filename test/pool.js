@@ -537,7 +537,7 @@ describe('2. pool.js', function() {
     });
   });
 
-  describe('2.9 _enableStats & _logStats functionality', function() {
+  describe('2.9 enableStatistics & logStatistics functionality', function() {
 
     it('2.9.1 does not work after the pool has been terminated', async function() {
       const config = {...dbConfig,
@@ -545,7 +545,7 @@ describe('2. pool.js', function() {
         poolMax: 1,
         poolIncrement: 1,
         poolTimeout: 1,
-        _enableStats: true
+        enableStatistics: true
       };
       const pool = await oracledb.createPool(config);
       const conn = await pool.getConnection();
@@ -553,7 +553,7 @@ describe('2. pool.js', function() {
       await conn.close();
       await pool.close(0);
       assert.throws(
-        () => pool._logStats(),
+        () => pool.logStatistics(),
         /NJS-065:/
       );
     });

@@ -37,8 +37,8 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbConfig  = require('../../../dbconfig.js');
-const testsUtil = require('../../../testsUtil.js');
+const dbConfig  = require('../../dbconfig.js');
+const testsUtil = require('../../testsUtil.js');
 
 describe('308. bfileTestType.js', function() {
   let conn, dbaConn;

@@ -23,6 +23,9 @@ Common Changes
 #)  Fixed bug that may cause runtime issues in some JavaScript frameworks.
     See `Issue #1706 <https://github.com/oracle/node-oracledb/issues/1706>`__.
 
+#)  Added test cases with an extended test suite, more examples and
+    documentation improvements.
+
 Thin Mode Changes
 +++++++++++++++++
 
@@ -96,6 +99,8 @@ Common Changes
 
 #)  Remove the 'Critical Dependency' warning from webpack builds.
     See `Issue #1678 <https://github.com/oracle/node-oracledb/issues/1678>`__.
+
+#)  Test and documentation updates.
 
 Thin Mode Changes
 +++++++++++++++++

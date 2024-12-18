@@ -31,8 +31,8 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const dbConfig = require('../../../dbconfig.js');
-const random = require('../../../random.js');
+const dbConfig = require('../../dbconfig.js');
+const random = require('../../random.js');
 
 describe('brk.js', function() {
   this.timeout(100000);

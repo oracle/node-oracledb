@@ -32,7 +32,7 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const dbConfig = require('../../../dbconfig.js');
+const dbConfig = require('../../dbconfig.js');
 
 describe('throwErrorInRelease.js', function() {
   it('Github issue 562', async function() {
@@ -75,7 +75,7 @@ describe('throwErrorInRelease.js', function() {
     }
 
     // Log pool statistics and verify results
-    await pool._logStats();
+    await pool.logStatistics();
 
     // Assert that the obtained and released counters are equal
     assert.strictEqual(counters.obtained, counters.released);

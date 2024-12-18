@@ -43,7 +43,7 @@
 Error.stackTraceLimit = 50;
 
 const oracledb = require('oracledb');
-const dbConfig = require('../../../dbconfig.js');
+const dbConfig = require('../../dbconfig.js');
 
 async function createCloseConns(num) {
   const promises = [];

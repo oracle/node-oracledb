@@ -51,9 +51,9 @@
 
 const assert  = require('assert');
 const oracledb  = require('oracledb');
-const dbConfig  = require('../../../dbconfig.js');
-const testsUtil  = require('../../../testsUtil.js');
-const random  = require('../../../random.js');
+const dbConfig  = require('../../dbconfig.js');
+const testsUtil  = require('../../testsUtil.js');
+const random  = require('../../random.js');
 
 describe('1. vectorDatabaseLink.js', function() {
   if (!process.env.NODE_ORACLEDB_CONNECTIONSTRING1) {
