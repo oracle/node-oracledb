@@ -23,6 +23,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#) Fixed issue which stopped applications from connecting to Oracle Database
+   with distinct TNS aliases from more than one tnsnames.ora file.
+    
 #) Fixed bug that fails to throw an error, when fetching data greater
    than the ``maxSize`` property of outbinds in Oracle Database 12.1. 
 
