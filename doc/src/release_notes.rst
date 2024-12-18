@@ -44,6 +44,12 @@ Thin Mode Changes
     provided in the connect string.
     See `Issue #1673 <https://github.com/oracle/node-oracledb/issues/1673>`__.
 
+#)  Fixed bug with associative arrays indexed by integers that did not sort
+    the index properly.
+
+#)  Fixed bug with associative arrays indexed by integers that caused the
+    :meth:`dbObject.getPrevIndex()` method to change the array order.
+
 node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...v6.7.0>`__ (18 Nov 2024)
 ---------------------------------------------------------------------------------------------------------
 

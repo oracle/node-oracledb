@@ -1181,8 +1181,9 @@ describe('290. dbObject20.js', () => {
               FUNCTION F1  RETURN ${TYPE1} IS
               R ${TYPE1};
               BEGIN
-                R(2):=22;
                 R(5):=55;
+                R(2):=22;
+                R(10):=120;
                 RETURN R;
               END ;
               END ${PKG1} ;`;
@@ -1199,9 +1200,9 @@ describe('290. dbObject20.js', () => {
       }
     }); // after()
 
-    it('290.5.1 verify associative array outbinds ', async () => {
+    it('290.5.1 verify associative array outbinds', async () => {
       // verify pls array of integers
-      const inDataobj = {2: 22, 5: 55};
+      const inDataobj = {5: 55, 2: 22, 10: 120};
       const result = await conn.execute(
         `BEGIN
           :ret := ${PKG1}.f1;
@@ -1215,6 +1216,34 @@ describe('290. dbObject20.js', () => {
       const res = result.outBinds.ret;
       const outMap = res.toMap();
       assert.deepStrictEqual(JSON.stringify(Object.fromEntries(outMap)), JSON.stringify(inDataobj));
+
+      // Check if you are able to access the indexes, keys and values across
+      // associative arrays in proper order
+      const firstIndex = res.getFirstIndex();
+      assert.strictEqual(firstIndex, 2);
+      assert.strictEqual(res.getPrevIndex(firstIndex), undefined);
+      const nextIndex = res.getNextIndex(firstIndex);
+      assert.strictEqual(nextIndex, 5);
+      assert.strictEqual(res.getPrevIndex(nextIndex), firstIndex);
+      const lastIndex = res.getLastIndex();
+      assert.strictEqual(lastIndex, 10);
+      assert.strictEqual(res.getNextIndex(lastIndex), undefined);
+
+      // Ensure the order of the keys are not changed!
+      assert.strictEqual(res.getNextIndex(firstIndex), 5);
+
+      // Use an index that does not exist. The previous and the next index
+      // should still be returned
+      assert.strictEqual(res.getPrevIndex(4), 2);
+      assert.strictEqual(res.getPrevIndex(1), undefined);
+      assert.strictEqual(res.getNextIndex(7), 10);
+      assert.strictEqual(res.getNextIndex(11), undefined);
+
+      // Check a few other properties
+      assert.strictEqual(res.hasElement(2), true);
+      assert.strictEqual(res.hasElement(12), false);
+      assert.deepStrictEqual(res.getKeys(), Object.keys(inDataobj).map(Number));
+      assert.deepStrictEqual(res.getValues(), Object.values(inDataobj).map(Number));
     });
   });
 

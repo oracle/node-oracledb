@@ -153,9 +153,19 @@ it is to convert that DbObject to and from a JavaScript object.
 
     Returns the next index value for later use to obtain a value.
 
+    If the passed-in ``index`` parameter is not found in the :ref:`associative
+    array collection types indexed by integers <indexbyplsinteger>`, then this
+    method returns the next available higher index found in the associative
+    array.
+
 .. method:: dbObject.getPrevIndex(Number index)
 
     Returns the previous index for later use to obtain the value.
+
+    If the passed-in ``index`` parameter is not found in the :ref:`associative
+    array collection types indexed by integers <indexbyplsinteger>`, then this
+    method returns the next available lower index found in the associative
+    array.
 
 .. method:: dbObject.hasElement(Number index)
 
