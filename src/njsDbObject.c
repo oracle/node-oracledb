@@ -110,6 +110,8 @@ static bool njsDbObjectType_populateTypeInfo(njsDataTypeInfo *info,
         njsBaton *baton, napi_env env, dpiDataTypeInfo *sourceInfo);
 static bool njsDbObject_wrap(napi_env env, napi_value value,
         njsDbObject **obj);
+static napi_value njsDbObjectType_refCleanup(napi_env env,
+        napi_callback_info info);
 
 
 //-----------------------------------------------------------------------------
@@ -188,6 +190,7 @@ static void njsDbObject_finalize(napi_env env, void *finalizeData,
         dpiObject_release(obj->handle);
         obj->handle = NULL;
     }
+    obj->type = NULL;
     free(obj);
 }
 
@@ -877,6 +880,21 @@ static void njsDbObjectType_finalize(napi_env env, void *finalizeData,
     free(type);
 }
 
+//-----------------------------------------------------------------------------
+// njsDbObjectType_refCleanup()
+//   Invoked when njsDbObjectType reference count needs to be decremented.
+//   This is required for the clean up of obj type reference created
+//   in njsDbObjectType_populate.
+//-----------------------------------------------------------------------------
+static napi_value njsDbObjectType_refCleanup(napi_env env,
+        napi_callback_info info)
+{
+    njsDbObjectType *type;
+
+    napi_get_cb_info(env, info, NULL, NULL, NULL, (void**) &type);
+    NJS_DELETE_REF_AND_CLEAR(type->jsDbObjectType);
+    return NULL;
+}
 
 //-----------------------------------------------------------------------------
 // njsDbObjectType_populate()
@@ -995,6 +1013,11 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
     NJS_CHECK_NAPI(env, napi_set_named_property(env, jsObjectType,
             "isCollection", temp))
 
+    // cleanup function
+    NJS_CHECK_NAPI(env, napi_create_function(env, "refCleanup", NAPI_AUTO_LENGTH,
+            njsDbObjectType_refCleanup, objType, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, jsObjectType, "refCleanup",
+             temp))
     return true;
 }
 
