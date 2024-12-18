@@ -300,6 +300,7 @@ static bool njsPool_createPostAsync(njsBaton *baton, napi_env env,
     baton->dpiPoolHandle = NULL;
 
     // perform other initializations
+    pool->externalAuth = baton->externalAuth;
     pool->poolMax = baton->poolMax;
     pool->poolMaxPerShard = baton->poolMaxPerShard;
     pool->poolMin = baton->poolMin;
@@ -399,6 +400,7 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
     params.connectionClassLength = (uint32_t) baton->connectionClassLength;
     params.tag = baton->tag;
     params.tagLength = (uint32_t) baton->tagLength;
+    params.externalAuth = pool->externalAuth;
 
     // Sharding
     params.shardingKeyColumns = baton->shardingKeyColumns;

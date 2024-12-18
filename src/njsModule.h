@@ -578,7 +578,8 @@ struct njsPool {
     uint32_t stmtCacheSize;
     int32_t poolPingInterval;
     int32_t poolPingTimeout;
-    bool  sodaMetadataCache;
+    bool sodaMetadataCache;
+    bool externalAuth;
     njsTokenCallback *accessTokenCallback;
     dpiErrorInfo warningInfo;
 };

@@ -14,6 +14,9 @@ node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...
 Common Changes
 ++++++++++++++
 
+#)  Fixed the issue causing segmentation fault while getting connection from 
+    pool for external authentication.
+
 #)  Fixed SyntaxError with Bun runtime.
     See `Issue #1707 <https://github.com/oracle/node-oracledb/issues/1707>`__.
 
