@@ -884,14 +884,13 @@ describe('290. dbObject20.js', () => {
 
       const sqlStmts = [
         {
-          type: TYPE1, sql: `CREATE TYPE ${TYPE1} FORCE AS OBJECT ( LINE_ID NUMBER,
+          type: TYPE1, sql: `CREATE TYPE ${TYPE1} FORCE AS OBJECT (LINE_ID NUMBER,
               LINE_STR VARCHAR2(${maxVarCharLen}), LINE_FIXED_CHAR CHAR(${maxVarCharLen}),
               LINE_NSTR NVARCHAR2(${maxVarNCharLen}), LINE_FIXED_NSTR NCHAR(${maxVarNCharLen}),
               LINE_ID2 FLOAT, rawAttr RAW(${maxVarRawLen}))`
         },
         {
-          type: TYPE2, sql: `CREATE TYPE ${TYPE2} FORCE AS TABLE OF
-              ${TYPE1}`
+          type: TYPE2, sql: `CREATE TYPE ${TYPE2} FORCE AS TABLE OF ${TYPE1}`
         },
         { type: TYPE3, sql: `CREATE TYPE ${TYPE3} FORCE AS OBJECT (HEADER_ID NUMBER(5,2), TBL ${TYPE2})` },
         {

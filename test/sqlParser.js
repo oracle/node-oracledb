@@ -149,4 +149,14 @@ describe('289. sqlParser.js', function() {
     const info = await conn.getStatementInfo(sql);
     assert.deepStrictEqual(info.bindNames, ['TEST']);
   }); // 289.11
+
+  it('289.12 Negative - invalid quoted string bind names', async () => {
+    const sql = `SELECT
+      :a,
+      q'{This contains ' and " and : just fine} FROM DUAL`;
+    await assert.rejects(
+      async () => await conn.getStatementInfo(sql),
+      /ORA-01756:/ // ORA-01756: quoted string not properly terminated
+    );
+  }); // 289.12
 });

@@ -17,11 +17,14 @@
  * NAME
  *   6. flexible-api-03.js
  *
- * DESCRIPTION
- *   Check the startup options.
+   * DESCRIPTION
+ *   The flexible API of oracledb.shutdown(). Requires Oracle Database 12.1
+ *   or later and node-oracledb Thick mode. Ensure that your connect string
+ *   points to the CDB$ROOT database instance.
  *
  * Environment Variables:
- *    NODE_ORACLEDB_PFILE: Configuration file pointing to initialization parameters for an Oracle database instance.
+ *    NODE_ORACLEDB_PFILE: Configuration file pointing to initialization
+ *    parameters for an Oracle Database instance.
  *
  * Note: Default pfile location is $ORACLE_HOME/dbs/init<SID>.ora
  *****************************************************************************/
@@ -61,6 +64,10 @@ describe('6. flexible-api-03.js', () => {
 
     // Check if the connect string points to the CDB root
     const conn = await oracledb.getConnection(connAttr);
+    if (conn.oracleServerVersion < 1201020000) {
+      await conn.close();
+      this.skip();
+    }
 
     // Query to confirm the session is connected to the CDB root
     const result = await conn.execute("SELECT SYS_CONTEXT('USERENV', 'CON_NAME') AS CON_NAME FROM DUAL");

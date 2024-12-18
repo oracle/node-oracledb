@@ -293,7 +293,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
     obj = result.rows[0][1];
     const arr = obj.getValues ();
     assert.deepStrictEqual(arr, [ 'One', 'Two', 'four' ]);
-  });
+  }); // 197.9
 
   it('197.10 Insert into table and use setElement()', async () => {
     let sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
@@ -310,7 +310,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
     obj = result.rows[0][1];
     const arr = obj.getValues ();
     assert.deepStrictEqual(arr, [ 'One', 'Two', '3', 'Four' ]);
-  });
+  }); // 197.10
 
   it('197.11 Insert into table and use trim()', async () => {
     let sql = `INSERT INTO NODB_TEST197_TAB VALUES ( :id, :v )`;
@@ -327,6 +327,18 @@ describe('197. dbObjectsNestedTable.js', ()  => {
     obj = result.rows[0][1];
     const arr = obj.getValues ();
     assert.deepStrictEqual(arr, [ 'One', 'Two' ]);
-  });
+  }); // 197.11
+
+  it('197.12 Negative - use setElement() on an out-of-range index', async () => {
+    const objClass = await connection.getDbObjectClass ("NODB_TEST197_TYP");
+    const obj = new objClass ([ "One", "Two", "Three", "Four" ]);
+    assert.throws(() => obj.setElement (4, "Five"), /NJS-131:/);
+  }); // 197.12
+
+  it('197.13 Negative - use getElement() on an out-of-range index', async () => {
+    const objClass = await connection.getDbObjectClass ("NODB_TEST197_TYP");
+    const obj = new objClass ([ "One", "Two", "Three", "Four" ]);
+    assert.throws(() => obj.getElement (4), /NJS-132:/);
+  }); // 197.13
 
 });

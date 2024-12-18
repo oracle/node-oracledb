@@ -18,10 +18,12 @@
  *   2. flexible-api-01.js
  *
  * DESCRIPTION
- *   The flexible API of oracledb.shutdown().
+ *   The flexible API of oracledb.shutdown(). Requires Oracle Database 12.1
+ *   or later and node-oracledb Thick mode.
  *
  * Environment Variables:
- *    NODE_ORACLEDB_PFILE: Configuration file pointing to initialization parameters for an Oracle database instance.
+ *    NODE_ORACLEDB_PFILE: Configuration file pointing to initialization
+ *    parameters for an Oracle Database instance.
  *
  *****************************************************************************/
 
@@ -33,6 +35,9 @@ const dbconfig = require('../../dbconfig.js');
 const testsUtil = require('../../testsUtil.js');
 
 describe('2. flexible-api-01.js', () => {
+
+  let containerName, switchCDBRootReqd;
+  let isPDB;
 
   before(async function() {
     if (oracledb.thin) {
@@ -52,15 +57,25 @@ describe('2. flexible-api-01.js', () => {
     };
 
     const conn = await oracledb.getConnection(dbaConfig);
+    if (conn.oracleServerVersion < 1201020000) {
+      await conn.close();
+      this.skip();
+    }
 
     // Query to confirm the session is connected to the CDB root
     const result = await conn.execute("SELECT SYS_CONTEXT('USERENV', 'CON_NAME') AS CON_NAME FROM DUAL");
-    const containerName = result.rows[0][0];
+    containerName = result.rows[0][0];
+
+    // Query to check if the current container is a PDB or a CDB
+    const pdbQryRes = await conn.execute("SELECT CASE SYS_CONTEXT('USERENV', 'CON_ID')\
+      WHEN '1' THEN 'CDB' ELSE 'PDB' END\
+      AS cdb_or_pdb FROM DUAL"
+    );
+    isPDB = (pdbQryRes.rows[0][0] === 'CDB') ? false : true;
 
     if (containerName !== 'CDB$ROOT') {
-      console.log(`Skipping test. The connect string does not point to CDB$ROOT but to ${containerName}`);
-      await conn.close();
-      this.skip();
+      console.log(`The connect string does not point to CDB$ROOT but to ${containerName}`);
+      switchCDBRootReqd = true;
     }
     await conn.close();
   });
@@ -74,12 +89,13 @@ describe('2. flexible-api-01.js', () => {
       privilege: oracledb.SYSDBA
     };
 
-    const shutdownMode = oracledb.SHUTDOWN_MODE_IMMEDIATE;
-
     // (1) Shutdown
     let conn = await oracledb.getConnection(dbaConfig);
-    await conn.execute("ALTER SESSION SET CONTAINER=CDB$ROOT"); // Ensure operations target the CDB root
-    await conn.shutdown(shutdownMode); // Immediate shutdown
+
+    // Switch to CDB ROOT, if required
+    if (switchCDBRootReqd)
+      await conn.execute("ALTER SESSION SET CONTAINER=CDB$ROOT"); // Ensure operations target the CDB root
+    await conn.shutdown(oracledb.SHUTDOWN_MODE_IMMEDIATE); // Immediate shutdown
     await conn.execute("ALTER DATABASE CLOSE");
     await conn.execute("ALTER DATABASE DISMOUNT");
     await conn.shutdown(oracledb.SHUTDOWN_MODE_FINAL); // Final shutdown
@@ -118,6 +134,10 @@ describe('2. flexible-api-01.js', () => {
     conn = await oracledb.getConnection(dbaConfig);
     await conn.execute("ALTER DATABASE MOUNT"); // Mount the database
     await conn.execute("ALTER DATABASE OPEN"); // Open the database
+    const con = await conn.execute("SELECT SYS_CONTEXT('USERENV', 'CON_NAME') AS CON_NAME FROM DUAL");
+    const curContainer = con.rows[0][0];
+    if ((curContainer != containerName) && isPDB)
+      await conn.execute(`ALTER PLUGGABLE DATABASE ${containerName} OPEN`); // Open the original DB also
     await conn.close();
 
     // (5) Verify the DB instance is up

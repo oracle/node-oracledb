@@ -39,7 +39,7 @@ const assert    = require('assert');
 const sodaUtil  = require('./sodaUtil.js');
 
 describe('286. listIndexes.js', function() {
-  let conn = null;
+  let conn;
 
   before(async function() {
     let runnable = await testsUtil.isSodaRunnable();
@@ -54,13 +54,16 @@ describe('286. listIndexes.js', function() {
       this.skip();
     }
     conn = await oracledb.getConnection(dbconfig);
-  });
+    if (conn.oracleServerVersion < 1800000000) {
+      this.skip();
+    }
+  }); // before
 
   after(async function() {
     if (conn) {
-      await conn.close ();
+      await conn.close();
     }
-  });    // after
+  }); // after
 
   it('286.1 listIndexes before creating any indexes', async () => {
     const soda = conn.getSodaDatabase();

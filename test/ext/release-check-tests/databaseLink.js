@@ -335,7 +335,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         varchar2Data: "Hello, Node-oracledb!"
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, varchar2Col) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, varchar2Col)
                               VALUES (5, :varchar2Data)`, data);
 
       // Commit the transaction
@@ -354,7 +354,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         dateData: date // Current date/time
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, dateCol) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, dateCol)
                               VALUES (6, :dateData)`, data);
 
       // Commit the transaction
@@ -371,7 +371,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         charData: 'randomText'
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, charCol) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, charCol)
                               VALUES (7, :charData)`, data);
 
       // Commit the transaction
@@ -388,7 +388,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         float2Data: 123.456789012
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, float2Col) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, float2Col)
                               VALUES (8, :float2Data)`, data);
 
       // Commit the transaction
@@ -405,7 +405,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         floatData: 789.123
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, floatCol) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, floatCol)
                               VALUES (9, :floatData)`, data);
 
       // Commit the transaction
@@ -422,7 +422,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         longData: 'This is a long string.'
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, longCol) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, longCol)
                               VALUES (10, :longData)`, data);
 
       // Commit the transaction
@@ -439,7 +439,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         ncharData: 'WXYZ.'
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, ncharCol) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, ncharCol)
                               VALUES (11, :ncharData)`, data);
 
       // Commit the transaction
@@ -456,7 +456,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         nvarchar2Data: 'Hello, NVARCHAR2'
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, nvarchar2Col) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, nvarchar2Col)
                               VALUES (12, :nvarchar2Data)`, data);
 
       // Commit the transaction
@@ -476,7 +476,7 @@ describe('1. vectorDatabaseLink.js', function() {
       const data = {
         varchar2Data: bigStr
       };
-      await connection.execute(`INSERT INTO ${tableName} (intCol, varchar2Col) 
+      await connection.execute(`INSERT INTO ${tableName} (intCol, varchar2Col)
                               VALUES (13, :varchar2Data)`, data);
 
       // Commit the transaction

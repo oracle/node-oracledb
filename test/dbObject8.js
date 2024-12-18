@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -118,7 +118,6 @@ describe('207. dbObject8.js', () => {
     farm2.HARVEST = new HarvestType(['carrots', 'peas']);
     farm2.HARVEST.trim(1);             // whoops! no peas
     farm2.HARVEST.append('tomatoes');  // extend the collection
-    // console.log(farm2.HARVEST.getValues());
     crops[1] = farm2.HARVEST.getValues();
     assert.deepStrictEqual(crops[1], [ 'carrots', 'tomatoes' ]);
 

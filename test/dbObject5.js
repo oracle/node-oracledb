@@ -42,7 +42,7 @@ describe('204. dbObject5.js', () => {
   const TABLE  = 'NODB_TAB_OBJ4';
 
   const proc1 =
-    `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is 
+    `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is
       begin
         open p_cur for
           SELECT

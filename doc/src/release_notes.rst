@@ -14,9 +14,6 @@ node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...
 Common Changes
 ++++++++++++++
 
-#)  Fixed the issue causing segmentation fault while getting connection from
-    pool for external authentication.
-
 #)  Fixed SyntaxError with Bun runtime.
     See `Issue #1707 <https://github.com/oracle/node-oracledb/issues/1707>`__.
 
@@ -53,11 +50,15 @@ Thin Mode Changes
 #)  Fixed bug with associative arrays indexed by integers that caused the
     :meth:`dbObject.getPrevIndex()` method to change the array order.
 
-Thick Mode changes
+Thick Mode Changes
 ++++++++++++++++++
 
-#)  Fixed Memory leak while running PL/SQL function returning Objects in a loop.
+#)  Fixed memory leak while running PL/SQL function returning database objects
+    in a loop.
     See `Issue #1711 <https://github.com/oracle/node-oracledb/issues/1711>`__.
+
+#)  Fixed segmentation fault issue when getting connection from the pool for
+    external authentication.
 
 node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...v6.7.0>`__ (18 Nov 2024)
 ---------------------------------------------------------------------------------------------------------
