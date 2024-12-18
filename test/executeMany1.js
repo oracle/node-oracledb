@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -221,7 +221,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.6 shows dmlRowCounts', async function() {
 
-    if ((testsUtil.getClientVersion < 1201000200)
+    if ((testsUtil.getClientVersion() < 1201000200)
       || (conn.oracleServerVersion < 1201000200)) {
       return this.skip();
     }
@@ -241,7 +241,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.7 shows batchErrors behavior', async function() {
 
-    if ((testsUtil.getClientVersion < 1201000200)
+    if ((testsUtil.getClientVersion() < 1201000200)
       || (conn.oracleServerVersion < 1201000200)) {
       return this.skip();
     }
@@ -283,7 +283,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.8 Negative - batchErrors with non-DML statement', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -309,7 +309,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.9 if batchErrors is disabled', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -346,7 +346,7 @@ describe('163. executeMany1.js', function() {
   }); // 163.9
 
   it('163.10 Negative -  dmlRowCounts with non-DML statement', async function() {
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -526,7 +526,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.18 Negative - executeMany with SELECT query, positional bind', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -544,7 +544,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.19 Negative - executeMany with SELECT query, named bind', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -562,7 +562,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.20 Negative - executeMany with WITH SQL clause, positional bind', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -580,7 +580,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.21 Negative - executeMany with WITH SQL clause, named bind', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -598,7 +598,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.22 Negative - executeMany with SELECT query, multiple positional binds', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -616,7 +616,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.23 Negative - executeMany with WITH SQL clause and multiple positional binds', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -634,7 +634,7 @@ describe('163. executeMany1.js', function() {
 
   it('163.24 Negative - executeMany with SELECT query and invalid bind variable', async function() {
 
-    if (testsUtil.getClientVersion < 1201000200) {
+    if (testsUtil.getClientVersion() < 1201000200) {
       return this.skip();
     }
 
@@ -653,7 +653,7 @@ describe('163. executeMany1.js', function() {
   it('163.25 Negative - executeMany with DDL - CREATE TABLE', async function() {
 
     // Does not throw the proper error in Thin mode yet
-    if (testsUtil.getClientVersion < 1201000200 || oracledb.thin) {
+    if (testsUtil.getClientVersion() < 1201000200 || oracledb.thin) {
       return this.skip();
     }
 
