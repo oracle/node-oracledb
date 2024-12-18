@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -54,11 +54,12 @@ describe('179. soda11.js', () => {
     let conn, collection;
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const sd = conn.getSodaDatabase();
 
       const t_tablename = "myTableName";
       const t_metadata = {
-        "schemaName": dbConfig.user.toUpperCase(),
+        "schemaName": schema,
         "tableName": t_tablename,
         "keyColumn":
                       {
@@ -181,10 +182,11 @@ describe('179. soda11.js', () => {
     let collection1;
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const sd = conn.getSodaDatabase();
 
       const t_metadata1 = {
-        "schemaName": dbConfig.user.toUpperCase(),
+        "schemaName": schema,
         "tableName": "nodb_tab_179_3",
         "keyColumn":
                        {
@@ -280,10 +282,11 @@ describe('179. soda11.js', () => {
     let conn;
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_4';
       const testMetaData = {
-        "schemaName": dbConfig.user.toUpperCase(),
+        "schemaName": schema,
         "tableName": collectionName,
         "keyColumn":
                        {
@@ -356,10 +359,11 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_5';
       const testMetaData = {
-        "schemaName": dbConfig.user.toUpperCase(),
+        "schemaName": schema,
         "tableName": collectionName,
         "keyColumn":
                        {
@@ -424,10 +428,11 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_6';
       const testMetaData = {
-        "schemaName": dbConfig.user.toUpperCase(),
+        "schemaName": schema,
         "tableName": collectionName,
         "keyColumn":
                      {
@@ -503,10 +508,11 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_7';
       const testMetaData = {
-        "schemaName": dbConfig.user.toUpperCase(),
+        "schemaName": schema,
         "tableName": collectionName,
         "keyColumn":
                      {
@@ -577,10 +583,11 @@ describe('179. soda11.js', () => {
     let conn, coll;
     try {
       conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const sd = conn.getSodaDatabase();
       const collectionName = 'soda_test_179_8';
       const testMetaData = {
-        "schemaName": dbConfig.user.toUpperCase(),
+        "schemaName": schema,
         "tableName": collectionName,
         "keyColumn":
                      {
@@ -639,5 +646,4 @@ describe('179. soda11.js', () => {
       }
     }
   }); // 179.8
-
 });

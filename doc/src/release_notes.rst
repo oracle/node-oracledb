@@ -23,11 +23,23 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#) Fixed issue which stopped applications from connecting to Oracle Database
-   with distinct TNS aliases from more than one tnsnames.ora file.
-    
-#) Fixed bug that fails to throw an error, when fetching data greater
-   than the ``maxSize`` property of outbinds in Oracle Database 12.1. 
+#)  Fixed issue which stopped applications from connecting to Oracle Database
+    with distinct TNS aliases from more than one
+    :ref:`tnsnames.ora <tnsadmin>` file.
+
+#)  Fixed bug that fails to throw an error, when fetching data greater
+    than the :ref:`maxSize <executebindparammaxsize>` property of outbinds in
+    Oracle Database 12.1.
+
+#)  Fixed bug that throws incorrect error message when invalid ``retryCount``
+    parameter is specified in the connect string.
+
+#)  Throw error in case of TLS initialization failure when resend response
+    network packets are received.
+
+#)  Added new error message, when invalid or unresolvable host name is
+    provided in the connect string.
+    See `Issue #1673 <https://github.com/oracle/node-oracledb/issues/1673>`__.
 
 node-oracledb `v6.7.0 <https://github.com/oracle/node-oracledb/compare/v6.6.0...v6.7.0>`__ (18 Nov 2024)
 ---------------------------------------------------------------------------------------------------------

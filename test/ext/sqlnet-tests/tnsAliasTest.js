@@ -35,6 +35,8 @@
     fs.write() alias_name with the corresponding value in the file.
     Try Catch the connection to the address and check the error message
     whether its searching in the desired location for the alias.
+    NODE_ORACLEDB_CONNECTION_STRING: Should be a Full TNS Connect Descriptor
+    or an Easy Connect string. It cannot be a TNS Alias.
 
  *****************************************************************************/
 'use strict';

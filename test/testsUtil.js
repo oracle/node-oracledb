@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -352,6 +352,13 @@ testsUtil.getSid = async function(conn) {
   const sql = `select sys_context('userenv','sid') from dual`;
   const result = await conn.execute(sql);
   return result.rows[0][0];  // session id
+};
+
+
+testsUtil.getUser = async function(conn) {
+  const sql = `SELECT USER FROM DUAL`;
+  const result = await conn.execute(sql);
+  return result.rows[0][0];
 };
 
 testsUtil.getRoundTripCount = async function(sid) {

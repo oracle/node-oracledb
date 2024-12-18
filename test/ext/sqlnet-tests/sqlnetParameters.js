@@ -40,11 +40,11 @@ const assert   = require('assert');
 
 describe('1. sqlnetParameters.js', function() {
   let connection = null;
-  const connect_string = dbConfig.connectString;
-  const connect_timeout = connect_string.match(/CONNECT_TIMEOUT = (\d+)/) ? null : connect_string.match(/CONNECT_TIMEOUT = (\d+)/)[1];
-  const port = connect_string.match(/PORT=(\d+)/) ? null : connect_string.match(/PORT=(\d+)/)[1];
-  const host = connect_string.match(/HOST=([a-zA-Z0-9.-]+)/) ? null : connect_string.match(/HOST=([a-zA-Z0-9.-]+)/)[1];
-  const serviceName = connect_string.match(/SERVICE_NAME = ([a-zA-Z0-9._-]+)/)[1];
+  const connectString = dbConfig.connectString;
+  const connectTimeout = connectString.match(/CONNECT_TIMEOUT = (\d+)/) ? null : connectString.match(/CONNECT_TIMEOUT = (\d+)/)[1];
+  const port = connectString.match(/PORT=(\d+)/) ? null : connectString.match(/PORT=(\d+)/)[1];
+  const host = connectString.match(/HOST=([a-zA-Z0-9.-]+)/) ? null : connectString.match(/HOST=([a-zA-Z0-9.-]+)/)[1];
+  const serviceName = connectString.match(/SERVICE_NAME = ([a-zA-Z0-9._-]+)/)[1];
   const serverCertDN = process.env.NODE_ORACLEDB_SERVER_CERT_DN;
 
   const script =
@@ -136,7 +136,7 @@ describe('1. sqlnetParameters.js', function() {
 
   it('1.4 CONNECT_TIMEOUT parameter with current session to sleep for a 10 seconds', async function() {
     const config = {...dbConfig};
-    config.connectString = '(DESCRIPTION=(CONNECT_TIMEOUT =' + connect_timeout + ')'
+    config.connectString = '(DESCRIPTION=(CONNECT_TIMEOUT =' + connectTimeout + ')'
         + '(ADDRESS_LIST =(LOAD_BALANCE = ON)(ADDRESS = (PROTOCOL=TCPS)'
         + '(HOST=' + host + ')(PORT=' + port + ')))'
         + '(CONNECT_DATA = (SERVICE_NAME = ' + serviceName + '))'

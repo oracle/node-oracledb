@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -98,7 +98,7 @@ describe('211. dbObject12.js', function() {
     };
     const result1 = await conn.execute(CALL, binds);
     let out = result1.outBinds.outbv;
-    const expect = `[object ${dbConfig.user.toUpperCase()}.${PKG}.${TYPE}]`;
+    const expect = `[object ${await testsUtil.getUser(conn)}.${PKG}.${TYPE}]`;
     assert.strictEqual(out.toString(), expect);
     assert.strictEqual(out.NAME, obj1.NAME);
     assert.strictEqual(out.POS, (obj1.POS * 2));

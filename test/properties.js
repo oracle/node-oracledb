@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,6 +36,7 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('58. properties.js', function() {
 
@@ -750,7 +751,8 @@ describe('58. properties.js', function() {
       );
     });
 
-    it('58.3.8 currentSchema', function() {
+    it('58.3.8 currentSchema', async function() {
+      const schema = await testsUtil.getUser(connection);
       const t = connection.currentSchema;
       assert.strictEqual(t, '');
 
@@ -763,7 +765,7 @@ describe('58. properties.js', function() {
 
       assert.doesNotThrow(
         function() {
-          connection.currentSchema = dbConfig.user;
+          connection.currentSchema = schema;
         }
       );
     });
@@ -807,6 +809,5 @@ describe('58. properties.js', function() {
       );
       await resultSet.close();
     });
-
   }); // 58.4
 });

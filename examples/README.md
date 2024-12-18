@@ -65,7 +65,7 @@ File Name                                                 | Description
 [`aqraw.js`](aqraw.js)                                    | Basic Oracle Advanced Queuing (AQ) example passing text messages
 [`aqutil.js`](aqutil.js)                                  | Common file to setup the user credentials for all the Advanced Queuing (AQ) examples.
 [`blobhttp.js`](blobhttp.js)                              | Simple web app that streams an image
-[`azureConfigProvider.js`](azureConfigProvider.js)        | Show how to connect to an Oracle Database using Azure Configuration Providers
+[`azureConfigProvider.js`](azureConfigProvider.js)        | Show how to connect to Oracle Database using Azure Configuration Provider
 [`calltimeout.js`](calltimeout.js)                        | Shows how to cancel a SQL statement if it doesn't complete in a specified time
 [`connect.js`](connect.js)                                | Basic example for creating a standalone (non-pooled) connection
 [`connectionpool.js`](connectionpool.js)                  | Basic example creating a pool of connections
@@ -102,7 +102,8 @@ File Name                                                 | Description
 [`lobstream2.js`](lobstream2.js)                          | Shows using Stream data events to fetch a CLOB
 [`lowercasecolumns.js`](lowercasecolumns.js)              | Shows how a type handler can convert column names to lower case
 [`metadata.js`](metadata.js)                              | Shows the metadata available after executing SELECT statements
-[`ociConfigProvider.js`](ociConfigProvider.js)            | Show how to connect to an Oracle Database using OCI Configuration Providers
+[`ociConfigProvider.js`](ociConfigProvider.js)            | Show how to connect to Oracle Database using OCI Config Provider
+[`ociConfigProviderPool.js`](ociConfigProviderPool.js)    | Show how to connect with custom pool settings to Oracle Database using OCI Config Provider
 [`plsqlarray.js`](plsqlarray.js)                          | Examples of binding PL/SQL "INDEX BY" tables
 [`plsqlfunc.js`](plsqlfunc.js)                            | How to call a PL/SQL function
 [`plsqlproc.js`](plsqlproc.js)                            | How to call a PL/SQL procedure

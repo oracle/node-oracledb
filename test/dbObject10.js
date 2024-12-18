@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -104,8 +104,9 @@ describe('209. dbObject10.js', () => {
   it('209.2 By default, JavaScript Object toString() returns "[object type]"', async () => {
     const result = await conn.execute(`SELECT contact FROM ${TABLE}`);
     const dbObj = result.rows[0][0];
+    const user = await testsUtil.getUser(conn);
 
-    let expect = `[object ${dbConfig.user.toUpperCase()}.${TYPE}]`;
+    let expect = `[object ${user}.${TYPE}]`;
     assert.strictEqual(dbObj.toString(), expect);
 
     expect = '[object Object]';
@@ -115,8 +116,8 @@ describe('209. dbObject10.js', () => {
   it('209.3 The Object literal and JSON.stringify()', async () => {
     const result = await conn.execute(`SELECT contact FROM ${TABLE}`);
     const dbObj = result.rows[0][0];
+    const schema = await testsUtil.getUser(conn);
 
-    const schema = dbConfig.user.toUpperCase();
     let expect = `x[${schema}.NODB_PERSON_TYP] { IDNO: 65, FIRST_NAME: 'Verna',  LAST_NAME: 'Mills',  EMAIL: 'vmills@example.com', PHONE: '1-650-555-0125' }`;
     expect = expect.trim().replace(/[\s\n\r]/g, '');
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -59,9 +59,10 @@ describe('180. externalProxyAuth.js', function() {
 
     it('180.1.1 Non-Pool Connect: Username-Password Auth', async function() {
       const conn = await oracledb.getConnection(dbConfig);
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
       assert.strictEqual(proxy_user, null);
-      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, schema);
       await conn.close();
     });
 
@@ -73,9 +74,10 @@ describe('180. externalProxyAuth.js', function() {
         connectString: dbConfig.connectString,
         externalAuth: true
       });
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
       assert.strictEqual(proxy_user, null);
-      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, schema);
       await conn.close();
     });
 
@@ -87,8 +89,9 @@ describe('180. externalProxyAuth.js', function() {
         ...dbConfig,
         user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
       });
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(proxy_user, schema);
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
     });
@@ -102,8 +105,9 @@ describe('180. externalProxyAuth.js', function() {
         user: `[${dbConfig.test.proxySessionUser}]`,
         externalAuth: true,
       });
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(proxy_user, schema);
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
     });
@@ -148,9 +152,10 @@ describe('180. externalProxyAuth.js', function() {
     it('180.2.1 Pooled Connect: Username-Password Auth', async function() {
       const pool = await oracledb.createPool(dbConfig);
       const conn = await pool.getConnection();
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
       assert.strictEqual(proxy_user, null);
-      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, schema);
       await conn.close();
       await pool.close(0);
     });
@@ -164,9 +169,10 @@ describe('180. externalProxyAuth.js', function() {
         externalAuth: true,
       });
       const conn = await pool.getConnection();
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
       assert.strictEqual(proxy_user, null);
-      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(session_user, schema);
       await conn.close();
       await pool.close(0);
     });
@@ -180,8 +186,9 @@ describe('180. externalProxyAuth.js', function() {
         user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
       });
       const conn = await pool.getConnection();
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(proxy_user, schema);
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
       await pool.close(0);
@@ -196,8 +203,9 @@ describe('180. externalProxyAuth.js', function() {
         homogeneous: false,
       });
       const conn = await pool.getConnection({ "user": dbConfig.test.proxySessionUser });
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(proxy_user, schema);
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
       await pool.close(0);
@@ -261,8 +269,9 @@ describe('180. externalProxyAuth.js', function() {
         externalAuth: true,
       });
       const conn = await pool.getConnection({user: `[${dbConfig.test.proxySessionUser}]`});
+      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
+      assert.strictEqual(proxy_user, schema);
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
       await pool.close(0);
@@ -284,7 +293,5 @@ describe('180. externalProxyAuth.js', function() {
       );
       await pool.close(0);
     });
-
   });
-
 });

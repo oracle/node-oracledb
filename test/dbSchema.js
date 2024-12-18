@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -91,13 +91,11 @@ describe('291. dbSchema.js', function() {
       assert.strictEqual(result.metaData[0].domainName, undefined);
       assert.strictEqual(result.metaData[0].annotations, undefined);
       assert.strictEqual(result.metaData[1].domainSchema,
-        dbConfig.user.toUpperCase());
+        await testsUtil.getUser(connection));
       assert.strictEqual(result.metaData[1].domainName,
         DOMAIN_NAME);
       assert.deepStrictEqual(result.metaData[1].annotations,
         expectedAnnotations);
     }); // 291.1.1
-
   }); // 291.1
-
 });

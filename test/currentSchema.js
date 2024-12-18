@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -54,7 +54,7 @@ describe('191. currentSchema.js', function() {
       const conn = await oracledb.getConnection(dbConfig);
       assert.strictEqual(conn.currentSchema, '');
 
-      const schema = dbConfig.user;
+      const schema = await testsUtil.getUser(conn);
       conn.currentSchema = schema;
       assert.strictEqual(conn.currentSchema, schema);
 
@@ -70,7 +70,7 @@ describe('191. currentSchema.js', function() {
     try {
       const conn = await oracledb.getConnection(dbConfig);
 
-      const schema = dbConfig.user.toUpperCase();
+      const schema = await testsUtil.getUser(conn);
       const query = "ALTER SESSION SET CURRENT_SCHEMA = " + schema;
       await conn.execute(query);
       assert.strictEqual(conn.currentSchema, schema);
@@ -101,5 +101,4 @@ describe('191. currentSchema.js', function() {
 
     await conn.close();
   }); // 191.3
-
 });

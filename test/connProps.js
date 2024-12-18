@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -57,10 +57,13 @@ describe('193. connProps.js', function() {
         privilege: oracledb.SYSDBA,
       };
       const dbaConnection = await oracledb.getConnection(dbaConfig);
+      const conn = await oracledb.getConnection(dbConfig);
 
-      const sql = `GRANT SELECT ANY DICTIONARY TO ${dbConfig.user}`;
+      const user = await testsUtil.getUser(conn);
+      const sql = `GRANT SELECT ANY DICTIONARY TO ${user}`;
       await dbaConnection.execute(sql);
 
+      await conn.close();
       await dbaConnection.close();
     }
   }); // before()

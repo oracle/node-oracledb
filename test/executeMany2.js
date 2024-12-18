@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,12 +38,13 @@
 const oracledb = require('oracledb');
 const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('172. executeMany2.js', function() {
 
   it('172.1 Negative - incorrect parameters', async () => {
-    const schema = dbConfig.user.toUpperCase();
     const conn = await oracledb.getConnection(dbConfig);
+    const schema = await testsUtil.getUser(conn);
     await conn.execute(
       `BEGIN EXECUTE IMMEDIATE 'DROP TABLE "${schema}"."NODB_TAB_SALES"'; EXCEPTION WHEN OTHERS THEN IF SQLCODE <> -942 THEN RAISE; END IF; END; `
     );
@@ -168,6 +169,5 @@ describe('172. executeMany2.js', function() {
       // NJS-005: invalid value for parameter 2
       await conn.close();
     }); // 172.2.6
-
   }); // 172.2
 });

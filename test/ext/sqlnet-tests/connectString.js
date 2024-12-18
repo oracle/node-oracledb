@@ -138,4 +138,42 @@ describe('1. Connect string checks', function() {
       }
     });
   });
+
+  describe('5.BUILD A PROPER CONNECT STRING AND CONNECT', function() {
+
+    it('5.1 Simple connect string', async function() {
+      const conn = await oracledb.getConnection({
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: '(DESCRIPTION=(ADDRESS=(PROTOCOL=' + protocol + ')(HOST=' + host + ')(PORT =' + port + '))(CONNECT_DATA =(SERVICE_NAME =' + svcName + ')))',
+      });
+      const res = await conn.execute('SELECT 1+1 FROM DUAL');
+      assert.strictEqual(res.rows[0][0], 2);
+      await conn.close();
+    });
+
+    it('5.2 Simple connect string with retry_count and retry_delay parameters', async function() {
+      const conn = await oracledb.getConnection({
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: '(DESCRIPTION=(RETRY_COUNT=20)(RETRY_DELAY=3)(ADDRESS=(PROTOCOL=' + protocol + ')(HOST=' + host + ')(PORT =' + port + '))(CONNECT_DATA =(SERVICE_NAME =' + svcName + ')))',
+      });
+      const res = await conn.execute('SELECT 1+1 FROM DUAL');
+      assert.strictEqual(res.rows[0][0], 2);
+      await conn.close();
+    });
+
+    it('5.3 Simple connect string with invalid retry_count parameter', async function() {
+      const conn = await oracledb.getConnection({
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: '(DESCRIPTION=(RETRY_COUNT=10XY)(RETRY_DELAY=3)(ADDRESS=(PROTOCOL=' + protocol + ')(HOST=' + host + ')(PORT =' + port + '))(CONNECT_DATA =(SERVICE_NAME =' + svcName + ')))',
+      });
+      // The connect should still happen.
+      // The default value of retryCount (0) is taken in this case.
+      const res = await conn.execute('SELECT 1+1 FROM DUAL');
+      assert.strictEqual(res.rows[0][0], 2);
+      await conn.close();
+    });
+  });
 });
