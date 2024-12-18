@@ -71,9 +71,13 @@ describe('1. connection.js', function() {
           '); \
       END; ";
 
+    const commentSQL = "COMMENT ON TABLE nodb_conn_dept1 IS \
+      'This is a table with information about various departments'";
+
     before(async function() {
       connection = await oracledb.getConnection(dbConfig);
       await connection.execute(script);
+      await connection.execute(commentSQL);
     });
 
     after(async function() {

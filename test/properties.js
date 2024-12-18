@@ -658,7 +658,7 @@ describe('58. properties.js', function() {
       assert.equal(connection.clientId, null);
 
       assert.equal(typeof connection.stmtCacheSize, 'number');
-      assert.ok(connection.stmtCacheSize > 0);
+      assert(connection.stmtCacheSize > 0);
     });
 
     it('58.3.2 stmtCacheSize (read-only)', function() {
@@ -768,6 +768,25 @@ describe('58. properties.js', function() {
           connection.currentSchema = schema;
         }
       );
+    });
+
+    it('58.3.9 callTimeout', function() {
+      // An exception will occur if node-oracledb Thick mode is not using
+      // Oracle Client library version 18.1 or later.
+      if (testsUtil.getClientVersion < 1801000000) this.skip();
+
+      const origCallTimeout = connection.callTimeout;
+      assert.strictEqual(typeof origCallTimeout, 'number');
+
+      assert.doesNotThrow(
+        function() {
+          connection.callTimeout = 2000; // set Call Timeout to 2s
+        }
+      );
+
+      //Reset connection callTimeout to original value
+      connection.callTimeout = origCallTimeout;
+      assert.strictEqual(connection.callTimeout, origCallTimeout);
     });
 
   }); // 58.3

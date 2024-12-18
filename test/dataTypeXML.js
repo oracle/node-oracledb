@@ -157,7 +157,7 @@ describe('181. dataTypeXML.js', function() {
     assert.strictEqual(result.rows[0].MYCONTENT, testXMLData);
   }); // 181.3
 
-  it('181.4 Negative - try to insert Null', async () => {
+  it('181.4 Negative - try to insert empty XML', async () => {
     const ID = 20;
     const XML = '';
 

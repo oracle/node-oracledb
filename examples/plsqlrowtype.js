@@ -64,6 +64,8 @@ async function run() {
   let conn;
   const table = 'STAFF';
   const stmts = [
+    `DROP TABLE ${table} PURGE`,
+
     `CREATE TABLE ${table} (ID NUMBER, NAME VARCHAR2(25), AGE NUMBER(3) INVISIBLE)`,
 
     `INSERT INTO ${table} VALUES (1, 'ADSA')`,
@@ -91,10 +93,17 @@ async function run() {
   try {
     conn = await oracledb.getConnection(dbConfig);
     for (const s of stmts) {
-      await conn.execute(s);
+      try {
+        await conn.execute(s);
+      } catch (e) {
+        if (e.errorNum != 942)
+          console.error(e);
+      }
     }
     const objClass = await conn.getDbObjectClass("FOO_TEST.FOO_TMP_ARRAY");
-    const result = await conn.execute(`CALL FOO_TEST.prGetRecords(:out_rec)`, {out_rec: {type: objClass, dir: oracledb.BIND_OUT}});
+    const result = await conn.execute(`CALL FOO_TEST.prGetRecords(:out_rec)`,
+      { out_rec: { type: objClass, dir: oracledb.BIND_OUT } });
+
     for (const val of result.outBinds.out_rec) {
       console.log("\nRow contents:");
       console.log(val);

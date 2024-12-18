@@ -83,7 +83,7 @@ describe('188. fetchRawAsString.js', function() {
       `    e_table_missing EXCEPTION; \n` +
       `    PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n` +
       `    BEGIN \n` +
-      `      EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE' ); \n` +
+      `      EXECUTE IMMEDIATE ('DROP TABLE ${tableName} PURGE'); \n` +
       `    EXCEPTION \n` +
       `      WHEN e_table_missing \n` +
       `      THEN NULL; \n` +

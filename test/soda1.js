@@ -149,6 +149,10 @@ describe('164. soda1.js', () => {
       const content = element.getContent();
       assert.strictEqual(content.name, myContent.name);
       assert.strictEqual(content.address.city, myContent.address.city);
+      const version = element.version;
+      assert.strictEqual(typeof version, 'string');
+      assert.notStrictEqual(version, null);
+      assert.notStrictEqual(version, undefined);
     });
 
     await conn.commit();
@@ -242,6 +246,7 @@ describe('164. soda1.js', () => {
     // Fetch the document back
     const doc2 = await collection.find().key(myKey).getOne();
     const content2 = doc2.getContent(); // A JavaScript object
+    const content2Buffer = Buffer.from(JSON.stringify(content2), 'utf-8'); // Buffer
     testsUtil.removeID(content1);
     testsUtil.removeID(content2);
     assert.deepStrictEqual(content2, content1);
@@ -249,6 +254,9 @@ describe('164. soda1.js', () => {
     const content3 = testsUtil.removeID(doc2.getContentAsString()); // A JSON string
 
     assert.strictEqual(JSON.stringify(content2), content3);
+
+    const content3Buffer = doc2.getContentAsBuffer(); // get content as buffer
+    assert.deepStrictEqual(content2Buffer, content3Buffer);
 
     // Replace document contents
     const content4 = { name: "Matilda", address: {city: "Sydney"} };

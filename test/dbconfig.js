@@ -60,6 +60,14 @@ const config = {
 
 let counter = 0;
 
+if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
+  config.test.mode = 'thick';
+  console.log("Thick mode selected");
+  oracledb.initOracleClient({ libDir: config.test.instantClientPath });
+} else {
+  console.log("Thin mode selected");
+}
+
 if (process.env.NODE_ORACLEDB_CONNECTIONSTRING) {
   config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING;
 } else {
@@ -146,14 +154,6 @@ if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
 
 if (process.env.NODE_ORACLEDB_CLIENT_LIB_DIR) {
   config.test.instantClientPath = process.env.NODE_ORACLEDB_CLIENT_LIB_DIR;
-}
-
-if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
-  config.test.mode = 'thick';
-  console.log("Thick mode selected");
-  oracledb.initOracleClient({ libDir: config.test.instantClientPath });
-} else {
-  console.log("Thin mode selected");
 }
 
 config.createUser = () => {

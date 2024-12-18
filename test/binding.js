@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -71,8 +71,6 @@ describe('4. binding.js', function() {
         [
           { type: oracledb.STRING, dir: oracledb.BIND_OUT }
         ]);
-
-      // console.log(result);
 
       assert.deepStrictEqual(result.outBinds, ['abcdef']);
       await connection.execute("DROP PROCEDURE nodb_bindproc1");
@@ -276,7 +274,8 @@ describe('4. binding.js', function() {
         {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 )into :3', rowsAffected: 1, resultVal: [[3]]},
         {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id + 2 + 5)into :3', rowsAffected: 1, resultVal: [[8]]},
         {sql: 'insert into nodb_binding1 (id, name) values (:1, :2) returning ( id * 2 )into :3', rowsAffected: 1, resultVal: [[2]]},
-        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)returning ( id * 2 )into :3', rowsAffected: 1, resultVal: [[2]]}
+        {sql: 'insert into nodb_binding1 (id, name) values (:1, :2)returning ( id * 2 )into :3', rowsAffected: 1, resultVal: [[2]]},
+        {sql: 'insert into nodb_binding1 (id, name) values (: 1, : 2)returning ( id * 2 )into :3', rowsAffected: 1, resultVal: [[2]]}
       ];
       for (const sqlObj of sqlStrings) {
         const result = await connection.execute(sqlObj.sql, bindsOutNumber);

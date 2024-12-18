@@ -41,22 +41,22 @@ describe('304. plSqlRowType.js', function() {
   const table = 'NODB_ROWTYPE';
   const typeName = `NODB_OBJ`;
   const stmts = [
-    `CREATE OR REPLACE PACKAGE  FOO_TEST AS
-       TYPE  NODB_ROWTYPE_ARRAY IS TABLE OF NODB_ROWTYPE%ROWTYPE
+    `CREATE OR REPLACE PACKAGE FOO_TEST AS
+       TYPE ${table}_ARRAY IS TABLE OF ${table}%ROWTYPE
        INDEX BY BINARY_INTEGER;
-       PROCEDURE prGetRecords(out_rec OUT FOO_TEST.NODB_ROWTYPE_ARRAY);
+       PROCEDURE prGetRecords(out_rec OUT FOO_TEST.${table}_ARRAY);
      END FOO_TEST;`,
 
     `CREATE OR REPLACE PACKAGE BODY FOO_TEST IS
-       PROCEDURE prGetRecords(out_rec OUT FOO_TEST.NODB_ROWTYPE_ARRAY)
+       PROCEDURE prGetRecords(out_rec OUT FOO_TEST.${table}_ARRAY)
        IS
-         CURSOR c_NODB_ROWTYPE IS
+         CURSOR c_${table} IS
          SELECT *
-         FROM NODB_ROWTYPE;
+         FROM ${table};
        BEGIN
-         OPEN c_NODB_ROWTYPE;
-         FETCH c_NODB_ROWTYPE BULK COLLECT INTO out_rec;
-         CLOSE c_NODB_ROWTYPE;
+         OPEN c_${table};
+         FETCH c_${table} BULK COLLECT INTO out_rec;
+         CLOSE c_${table};
        END prGetRecords;
      END FOO_TEST;`
   ];
@@ -67,147 +67,204 @@ describe('304. plSqlRowType.js', function() {
     CREATE OR REPLACE TYPE ${typeName} AS OBJECT (
       id NUMBER,
       name NVARCHAR2(30)
-      );`;
+    );`;
 
+  describe('304.1 check %ROWTYPE objects', function() {
 
-  const createTableSql = `CREATE TABLE ${table}(
-    NUMBERVALUE NUMBER(12),
-    STRINGVALUE VARCHAR2(2),
-    FIXEDCHARVALUE CHAR(10),
-    NSTRINGVALUE NVARCHAR2(60),
-    NFIXEDCHARVALUE NCHAR(10),
-    RAWVALUE RAW(15),
-    INTVALUE INTEGER,
-    SMALLINTVALUE SMALLINT,
-    REALVALUE REAL,
-    DOUBLEPRECISIONVALUE DOUBLE PRECISION,
-    FLOATVALUE FLOAT,
-    BINARYFLOATVALUE BINARY_FLOAT,
-    BINARYDOUBLEVALUE BINARY_DOUBLE,
-    DATEVALUE DATE,
-    TIMESTAMPVALUE TIMESTAMP,
-    TIMESTAMPTZVALUE TIMESTAMP WITH TIME ZONE,
-    TIMESTAMPLTZVALUE TIMESTAMP WITH LOCAL TIME ZONE,
-    CLOBVALUE CLOB,
-    NCLOBVALUE NCLOB,
-    BLOBVALUE BLOB,
-    OBJECTVALUE NODB_OBJ,
-    INVISIBLEVALUE NUMBER INVISIBLE)`;
+    const createTableSql = `CREATE TABLE ${table} (
+      NUMBERVALUE NUMBER(12),
+      STRINGVALUE VARCHAR2(2),
+      FIXEDCHARVALUE CHAR(10),
+      NSTRINGVALUE NVARCHAR2(60),
+      NFIXEDCHARVALUE NCHAR(10),
+      RAWVALUE RAW(15),
+      INTVALUE INTEGER,
+      SMALLINTVALUE SMALLINT,
+      REALVALUE REAL,
+      DOUBLEPRECISIONVALUE DOUBLE PRECISION,
+      FLOATVALUE FLOAT,
+      BINARYFLOATVALUE BINARY_FLOAT,
+      BINARYDOUBLEVALUE BINARY_DOUBLE,
+      DATEVALUE DATE,
+      TIMESTAMPVALUE TIMESTAMP,
+      TIMESTAMPTZVALUE TIMESTAMP WITH TIME ZONE,
+      TIMESTAMPLTZVALUE TIMESTAMP WITH LOCAL TIME ZONE,
+      CLOBVALUE CLOB,
+      NCLOBVALUE NCLOB,
+      BLOBVALUE BLOB,
+      OBJECTVALUE NODB_OBJ,
+      INVISIBLEVALUE NUMBER INVISIBLE)`;
 
-  let expectedTypes = {
-    NUMBERVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-    STRINGVALUE: { type: oracledb.DB_TYPE_VARCHAR, typeName: 'VARCHAR2' },
-    FIXEDCHARVALUE: { type: oracledb.DB_TYPE_CHAR, typeName: 'CHAR' },
-    NSTRINGVALUE: { type: oracledb.DB_TYPE_NVARCHAR, typeName: 'NVARCHAR2' },
-    NFIXEDCHARVALUE: { type: oracledb.DB_TYPE_NCHAR, typeName: 'NCHAR' },
-    RAWVALUE: { type: oracledb.DB_TYPE_RAW, typeName: 'RAW' },
-    INTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-    SMALLINTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-    REALVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-    DOUBLEPRECISIONVALUE: {
-      type: oracledb.DB_TYPE_NUMBER,
-      typeName: 'NUMBER'
-    },
-    FLOATVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-    BINARYFLOATVALUE: {
-      type: oracledb.DB_TYPE_BINARY_FLOAT,
-      typeName: 'BINARY_FLOAT'
-    },
-    BINARYDOUBLEVALUE: {
-      type: oracledb.DB_TYPE_BINARY_DOUBLE,
-      typeName: 'BINARY_DOUBLE'
-    },
-    DATEVALUE: { type: oracledb.DB_TYPE_DATE, typeName: 'DATE' },
-    TIMESTAMPVALUE: {
-      type: oracledb.DB_TYPE_TIMESTAMP,
-      typeName: 'TIMESTAMP'
-    },
-    TIMESTAMPTZVALUE: {
-      type: oracledb.DB_TYPE_TIMESTAMP_TZ,
-      typeName: 'TIMESTAMP WITH TIME ZONE'
-    },
-    TIMESTAMPLTZVALUE: {
-      type: oracledb.DB_TYPE_TIMESTAMP_LTZ,
-      typeName: 'TIMESTAMP WITH LOCAL TIME ZONE'
-    },
-    CLOBVALUE: { type: oracledb.DB_TYPE_CLOB, typeName: 'CLOB' },
-    NCLOBVALUE: { type: oracledb.DB_TYPE_NCLOB, typeName: 'NCLOB' },
-    BLOBVALUE: { type: oracledb.DB_TYPE_BLOB, typeName: 'BLOB' },
-  };
-
-  before(async function() {
-    pool = await oracledb.createPool({
-      user: dbConfig.user,
-      password: dbConfig.password,
-      connectString: dbConfig.connectString,
-      poolMin: 1});
-    connection = await oracledb.getConnection(dbConfig);
-    await testsUtil.createType(connection, typeName, ObjSql);
-    await testsUtil.createTable(connection, table, createTableSql);
-    for (const s of stmts) {
-      await connection.execute(s);
-    }
-    const objType = await connection.getDbObjectClass("NODB_OBJ");
-    const OBJECTVALUE = {
-      type: oracledb.DB_TYPE_OBJECT,
-      typeName: objType.prototype.fqn,
-      typeClass: objType
+    let expectedTypes = {
+      NUMBERVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
+      STRINGVALUE: { type: oracledb.DB_TYPE_VARCHAR, typeName: 'VARCHAR2' },
+      FIXEDCHARVALUE: { type: oracledb.DB_TYPE_CHAR, typeName: 'CHAR' },
+      NSTRINGVALUE: { type: oracledb.DB_TYPE_NVARCHAR, typeName: 'NVARCHAR2' },
+      NFIXEDCHARVALUE: { type: oracledb.DB_TYPE_NCHAR, typeName: 'NCHAR' },
+      RAWVALUE: { type: oracledb.DB_TYPE_RAW, typeName: 'RAW' },
+      INTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
+      SMALLINTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
+      REALVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
+      DOUBLEPRECISIONVALUE: {
+        type: oracledb.DB_TYPE_NUMBER,
+        typeName: 'NUMBER'
+      },
+      FLOATVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
+      BINARYFLOATVALUE: {
+        type: oracledb.DB_TYPE_BINARY_FLOAT,
+        typeName: 'BINARY_FLOAT'
+      },
+      BINARYDOUBLEVALUE: {
+        type: oracledb.DB_TYPE_BINARY_DOUBLE,
+        typeName: 'BINARY_DOUBLE'
+      },
+      DATEVALUE: { type: oracledb.DB_TYPE_DATE, typeName: 'DATE' },
+      TIMESTAMPVALUE: {
+        type: oracledb.DB_TYPE_TIMESTAMP,
+        typeName: 'TIMESTAMP'
+      },
+      TIMESTAMPTZVALUE: {
+        type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+        typeName: 'TIMESTAMP WITH TIME ZONE'
+      },
+      TIMESTAMPLTZVALUE: {
+        type: oracledb.DB_TYPE_TIMESTAMP_LTZ,
+        typeName: 'TIMESTAMP WITH LOCAL TIME ZONE'
+      },
+      CLOBVALUE: { type: oracledb.DB_TYPE_CLOB, typeName: 'CLOB' },
+      NCLOBVALUE: { type: oracledb.DB_TYPE_NCLOB, typeName: 'NCLOB' },
+      BLOBVALUE: { type: oracledb.DB_TYPE_BLOB, typeName: 'BLOB' },
     };
-    expectedTypes = {...expectedTypes, OBJECTVALUE };
-  });
 
-  after(async function() {
-    await testsUtil.dropTable(connection, table);
-    await testsUtil.dropType(connection, typeName);
-    await connection.execute(dropPackageSql);
-    await connection.close();
-    if (sysDBAConn) {
-      await sysDBAConn.close();
-    }
-    if (pool) {
-      await pool.close(0);
-    }
-  });
+    before(async function() {
+      pool = await oracledb.createPool({
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: dbConfig.connectString,
+        poolMin: 1});
+      connection = await oracledb.getConnection(dbConfig);
+      await testsUtil.createType(connection, typeName, ObjSql);
+      await testsUtil.createTable(connection, table, createTableSql);
+      for (const s of stmts) {
+        await connection.execute(s);
+      }
+      const objType = await connection.getDbObjectClass(`${typeName}`);
+      const OBJECTVALUE = {
+        type: oracledb.DB_TYPE_OBJECT,
+        typeName: objType.prototype.fqn,
+        typeClass: objType
+      };
+      expectedTypes = {...expectedTypes, OBJECTVALUE };
+    });
 
-  it('304.1 %ROWTYPE', async function() {
-    const name = "NODB_ROWTYPE%ROWTYPE";
-    const objClass = await connection.getDbObjectClass(name);
-    const types = objClass.prototype.attributes;
-    assert.deepStrictEqual(expectedTypes, types);
+    after(async function() {
+      await testsUtil.dropTable(connection, table);
+      await testsUtil.dropType(connection, typeName);
+      await connection.execute(dropPackageSql);
+      await connection.close();
+      if (sysDBAConn) {
+        await sysDBAConn.close();
+        sysDBAConn = null;
+      }
+      if (pool) {
+        await pool.close(0);
+      }
+    });
+
+    it('304.1.1 %ROWTYPE', async function() {
+      const name = 'NODB_ROWTYPE%ROWTYPE';
+      const objClass = await connection.getDbObjectClass(name);
+      const types = objClass.prototype.attributes;
+      assert.deepStrictEqual(expectedTypes, types);
+    }); // 304.1.1
+
+    it('304.1.2 %ROWTYPE collection', async function() {
+      const name = 'FOO_TEST.NODB_ROWTYPE_ARRAY';
+      const objClass = await connection.getDbObjectClass(name);
+      const types = objClass.prototype.elementTypeClass.prototype.attributes;
+      assert.deepStrictEqual(expectedTypes, types);
+    }); // 304.1.2
+
+    it('304.1.3 %ROWTYPE object create and delete in a loop to check cursor leak', async function() {
+      if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+
+      const name = 'NODB_ROWTYPE%ROWTYPE';
+      const iterations = 100;
+      const dbaConfig = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectionString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA
+      };
+      const connection = await pool.getConnection();
+      const sid = await testsUtil.getSid(connection);
+      await connection.close();
+      sysDBAConn = await oracledb.getConnection(dbaConfig);
+      const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+      for (let i = 0; i < iterations; i++) {
+        const connection = await pool.getConnection();
+        await connection.getDbObjectClass(name);
+        await connection.close();
+      }
+      const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+
+      // ensure cursors are not linearly opened as iterations causing leak.
+      assert(newOpenCount - openCount < 5);
+    }); // 304.1.3
   }); // 304.1
 
-  it('304.2 %ROWTYPE collection', async function() {
-    const name = "FOO_TEST.NODB_ROWTYPE_ARRAY";
-    const objClass = await connection.getDbObjectClass(name);
-    const types = objClass.prototype.elementTypeClass.prototype.attributes;
-    assert.deepStrictEqual(expectedTypes, types);
-  }); // 304.2
+  describe('304.2 bind %ROWTYPE objects in SQL statement', function() {
 
-  it('304.3 %ROWTYPE object create and delete in a loop to check cursor leak', async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
+    const createTableSql = `CREATE TABLE ${table} (
+      ID NUMBER,
+      NAME VARCHAR2(25),
+      AGE NUMBER(3) INVISIBLE)`;
 
-    const name = "NODB_ROWTYPE%ROWTYPE";
-    const iterations = 100;
-    const dbaConfig = {
-      user: dbConfig.test.DBA_user,
-      password: dbConfig.test.DBA_password,
-      connectionString: dbConfig.connectString,
-      privilege: oracledb.SYSDBA
-    };
-    const connection = await pool.getConnection();
-    const sid = await testsUtil.getSid(connection);
-    await connection.close();
-    sysDBAConn = await oracledb.getConnection(dbaConfig);
-    const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
-    for (let i = 0; i < iterations; i++) {
-      const connection = await pool.getConnection();
-      await connection.getDbObjectClass(name);
+    before(async function() {
+      pool = await oracledb.createPool({
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: dbConfig.connectString,
+        poolMin: 1});
+      connection = await oracledb.getConnection(dbConfig);
+      await testsUtil.createTable(connection, table, createTableSql);
+      for (const s of stmts) {
+        await connection.execute(s);
+      }
+
+      // Insert a row
+      await connection.execute(`INSERT INTO ${table} VALUES (1, 'ADSA')`);
+    });
+
+    after(async function() {
+      await testsUtil.dropTable(connection, table);
+      await connection.execute(dropPackageSql);
       await connection.close();
-    }
-    const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+      if (sysDBAConn) {
+        await sysDBAConn.close();
+      }
+      if (pool) {
+        await pool.close(0);
+      }
+    });
 
-    // ensure cursors are not linearly opened as iterations causing leak.
-    assert(newOpenCount - openCount < 5);
-  }); // 304.3
+    it('304.2.1 execute PL/SQL with %ROWTYPE object data', async function() {
+      const name = 'FOO_TEST.NODB_ROWTYPE_ARRAY';
+      const objClass = await connection.getDbObjectClass(name);
+      const result = await connection.execute(`CALL FOO_TEST.prGetRecords(:out_rec)`,
+        { out_rec: { type: objClass, dir: oracledb.BIND_OUT } });
+
+      const valArr = [];
+      for (const val of result.outBinds.out_rec) {
+        valArr.push(val);
+      }
+      assert.strictEqual(valArr[0]['ID'], 1);
+      assert.strictEqual(valArr[0]['NAME'], 'ADSA');
+
+      assert.strictEqual(objClass.prototype.elementTypeClass.prototype.attributes.ID.typeName, 'NUMBER');
+      assert.strictEqual(objClass.prototype.elementTypeClass.prototype.attributes.NAME.typeName, 'VARCHAR2');
+    }); // 304.2.1
+
+  }); // 304.2
 
 }); // 304

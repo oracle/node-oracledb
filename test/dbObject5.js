@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -26,7 +26,7 @@
  *   204. dbObject5.js
  *
  * DESCRIPTION
- *   Test the Oracle data type Object on TIMESTAMP WITH LOCAL TIME ZONE.
+ *   Test the Oracle data type Object on DATE.
  *
  *****************************************************************************/
 'use strict';
@@ -42,7 +42,8 @@ describe('204. dbObject5.js', () => {
   const TABLE  = 'NODB_TAB_OBJ4';
 
   const proc1 =
-    `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is      begin
+    `create or replace procedure nodb_getDataCursor1(p_cur out sys_refcursor) is 
+      begin
         open p_cur for
           SELECT
             * FROM

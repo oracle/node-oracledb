@@ -975,6 +975,7 @@ Overview of node-oracledb functional tests
         58.3.6 oracleServerVersion (read-only)
         58.3.7 oracleServerVersionString (read-only)
         58.3.8 currentSchema
+        58.3.9 callTimeout
     58.4 ResultSet Class
         58.4.1 metaData (read-only)
 
@@ -4455,7 +4456,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     181.1 basic case, insert XML data and query back
     181.2 query XML data as CLOB
     181.3 another query as CLOB syntax
-    181.4 Negative - try to insert Null
+    181.4 Negative - try to insert Empty XML
 
 184. sessionTag.js
     184.1 Remote PL/SQL Callback
@@ -5930,9 +5931,12 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     303.1 enqueue/dequeue with modes
 
   304. plsqlRowtype.js
-    304.1 %ROWTYPE
-    304.2 %ROWTYPE collection
-    304.3 %ROWTYPE object create and delete in a loop to check cursor leak
+    304.1 check %ROWTYPE objects
+      304.1.1 %ROWTYPE
+      304.1.2 %ROWTYPE collection
+      304.1.3 %ROWTYPE object create and delete in a loop to check cursor leak
+    304.2 bind %ROWTYPE objects in SQL statement
+      304.2.1 execute PL/SQL with %ROWTYPE object data
 
   305. dataTypeVector5.js
     305.1 tests with vector distance

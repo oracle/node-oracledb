@@ -126,6 +126,10 @@ async function run() {
     content = doc.getContentAsString();              // A JSON string
     console.log('Retrieved SODA document as a string:');
     console.log(content);
+    content = doc.getContentAsBuffer();              // A Buffer
+    console.log('Retrieved SODA document as a buffer:');
+    console.log(content);
+    console.log('SODA Document Version:', doc.version);
 
     // Replace document contents
     content = {name: "Matilda", address: {city: "Sydney"}};
