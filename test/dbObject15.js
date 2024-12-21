@@ -62,7 +62,7 @@ describe('214. dbObject15.js', () => {
     await conn.execute(plsql);
 
     plsql = `
-      CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
+      CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(5) OF ${PLAYER_T};
     `;
     await conn.execute(plsql);
 
@@ -102,14 +102,21 @@ describe('214. dbObject15.js', () => {
     }
   }); // 214.2
 
-  it('214.3 Negative - delete the collection element directly', function() {
+  it('214.3 Negative - cannot add more than maximum number of elements', function() {
+    assert.throws(
+      () => FrisbeeTeam.append({SHIRTNUMBER: 9, NAME: 'Diogo'}),
+      /NJS-131:/
+    );
+  }); // 214.3
+
+  it('214.4 Negative - Cannot delete the VARRAY collection element directly', function() {
     assert.throws(
       () => delete FrisbeeTeam[1],
       /NJS-133:/
     );
-  }); // 214.3
+  }); // 214.4
 
-  it('214.4 Negative - collection.deleteElement()', function() {
+  it('214.5 Negative - collection.deleteElement()', function() {
     assert.throws(
       function() {
         const firstIndex = FrisbeeTeam.getFirstIndex();
@@ -117,5 +124,5 @@ describe('214. dbObject15.js', () => {
       },
       /NJS-133:/
     );
-  }); // 214.4
+  }); // 214.5
 });
