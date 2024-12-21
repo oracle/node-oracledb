@@ -127,7 +127,10 @@ it is to convert that DbObject to and from a JavaScript object.
 
 .. method:: dbObject.append(value)
 
-    Adds the given value to the end of the collection.
+    Adds the given value to the end of the collection. If no elements exist
+    in the collection, this creates an element at index 0. Otherwise, it
+    creates an element at the index position immediately following the highest
+    index available in the collection.
 
 .. method:: dbObject.deleteElement(Number index)
 
@@ -135,7 +138,8 @@ it is to convert that DbObject to and from a JavaScript object.
 
 .. method:: dbObject.getElement(Number index)
 
-    Returns the value associated with the given index.
+    Returns the value associated with the given index. If no element exists at
+    that index, an exception is raised.
 
 .. method:: dbObject.getFirstIndex()
 
@@ -151,7 +155,9 @@ it is to convert that DbObject to and from a JavaScript object.
 
 .. method:: dbObject.getNextIndex(Number index)
 
-    Returns the next index value for later use to obtain a value.
+    Returns the next index value for later use to obtain a value. If there
+    are no elements in the collection following the specified index, it
+    returns *undefined*.
 
     If the passed-in ``index`` parameter is not found in the :ref:`associative
     array collection types indexed by integers <indexbyplsinteger>`, then this
@@ -160,7 +166,9 @@ it is to convert that DbObject to and from a JavaScript object.
 
 .. method:: dbObject.getPrevIndex(Number index)
 
-    Returns the previous index for later use to obtain the value.
+    Returns the previous index for later use to obtain the value. If there
+    are no elements in the collection preceding the specified index, it
+    returns *undefined*.
 
     If the passed-in ``index`` parameter is not found in the :ref:`associative
     array collection types indexed by integers <indexbyplsinteger>`, then this
