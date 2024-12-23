@@ -47,8 +47,8 @@ describe('9.jsonDMLBindLargeData.js', function() {
 
   before(async function() {
     const credential = {
-      user: process.env.NODE_ORACLEDB_DBA_USER || "sys",
-      password: process.env.NODE_ORACLEDB_DBA_PASSWORD || "knl_test7",
+      user: process.env.NODE_ORACLEDB_DBA_USER,
+      password: process.env.NODE_ORACLEDB_DBA_PASSWORD,
       connectString: dbconfig.connectString,
       privilege: oracledb.SYSDBA
     };

@@ -61,8 +61,8 @@ describe('10.jsonPLSQLBindLargeData.js', function() {
 
   before(async function() {
     const credential = {
-      user: "sys",
-      password: "knl_test7",
+      user: process.env.NODE_ORACLEDB_DBA_USER,
+      password: process.env.NODE_ORACLEDB_DBA_PASSWORD,
       connectString: dbconfig.connectString,
       privilege: oracledb.SYSDBA
     };

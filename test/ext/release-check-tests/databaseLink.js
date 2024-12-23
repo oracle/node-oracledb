@@ -29,7 +29,7 @@
  *   DML operations on different DataTypes with database link
  *
  *   Grant Link Creation (sysdba):
- *      CONNECT sys/knl_test7@<db_alias1> AS SYSDBA  -- Connect as sysdba on database alias 1
+ *      CONNECT sys/<dba_password>@<db_alias1> AS SYSDBA  -- Connect as sysdba on database alias 1
  *      GRANT CREATE PUBLIC DATABASE LINK TO scott;
  *   Connect as User (e.g. scott/tiger):
  *      CONNECT scott/tiger@<db_alias1>  -- Connect as regular user on alias 1
@@ -38,7 +38,7 @@
  *   Set the Environment Variable NODE_ORACLEDB_CONNECTIONSTRING1
  *
  *   Connect as sysdba (different database alias):
- *      CONNECT sys/knl_test7@<db_alias2> AS SYSDBA  -- Connect as sysdba on database alias 2
+ *      CONNECT sys/<dba_password>@<db_alias2> AS SYSDBA  -- Connect as sysdba on database alias 2
  *   Create Database Link:
  *      CREATE DATABASE LINK link_name  -- Replace with desired name
  *      CONNECT TO scott IDENTIFIED BY tiger

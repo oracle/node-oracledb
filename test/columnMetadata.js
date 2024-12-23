@@ -166,7 +166,7 @@ describe('9. columnMetadata.js', function() {
       assert.strictEqual(result.rows[0][0], 'Finance');
     }); // 9.1.8
 
-    it('9.1.9 works with a SQL WITH statement', async function() {
+    it('9.1.9 SQL WITH statement', async function() {
       const sqlWith = "WITH nodb_dep AS " +
                   "(SELECT * FROM nodb_cmd WHERE location_id < 2000) " +
                   "SELECT * FROM nodb_dep WHERE department_id > 50 ORDER BY department_id";
@@ -186,35 +186,73 @@ describe('9. columnMetadata.js', function() {
       assert.strictEqual(result.metaData[2].name, 'MANAGER_ID');
       assert.strictEqual(result.metaData[3].name, 'LOCATION_ID');
       await result.resultSet.close();
-    });
-  }); // 9.1
+    }); // 9.1.10
+
+    it('9.1.11 column aliases in SELECT', async function() {
+      const result = await connection.execute(`SELECT department_id AS dep_id, department_name AS dep_name FROM nodb_cmd`);
+      assert.strictEqual(result.metaData[0].name, 'DEP_ID');
+      assert.strictEqual(result.metaData[1].name, 'DEP_NAME');
+    }); // 9.1.11
+
+    it('9.1.12 expressions in SELECT', async function() {
+      const result = await connection.execute(`SELECT department_id + 1 AS dep_increment, UPPER(department_name) AS dep_upper FROM nodb_cmd`);
+      assert.strictEqual(result.metaData[0].name, 'DEP_INCREMENT');
+      assert.strictEqual(result.metaData[1].name, 'DEP_UPPER');
+    }); // 9.1.12
+
+    it('9.1.13 retrieves metaData for columns from subqueries', async function() {
+      const result = await connection.execute(`
+        SELECT subq.department_name, subq.manager_id
+        FROM (SELECT department_name, manager_id FROM nodb_cmd WHERE location_id = 1500) subq`);
+      assert.strictEqual(result.metaData[0].name, 'DEPARTMENT_NAME');
+      assert.strictEqual(result.metaData[1].name, 'MANAGER_ID');
+    }); // 9.1.13
+
+    it('9.1.14 UNION queries', async function() {
+      const result = await connection.execute(`
+        SELECT department_id, department_name FROM nodb_cmd
+        UNION
+        SELECT 100 AS department_id, 'Finance' AS department_name FROM dual`);
+      assert.strictEqual(result.metaData[0].name, 'DEPARTMENT_ID');
+      assert.strictEqual(result.metaData[1].name, 'DEPARTMENT_NAME');
+    }); // 9.1.14
+
+    it('9.1.15 JOINs', async function() {
+      const result = await connection.execute(`
+        SELECT a.department_id, a.department_name, b.location_id
+        FROM nodb_cmd a
+        JOIN nodb_cmd b ON a.department_id = b.department_id`);
+      assert.strictEqual(result.metaData[0].name, 'DEPARTMENT_ID');
+      assert.strictEqual(result.metaData[1].name, 'DEPARTMENT_NAME');
+      assert.strictEqual(result.metaData[2].name, 'LOCATION_ID');
+    }); // 9.1.15
+
+    it('9.1.16 nested function calls in column names', async function() {
+      const result = await connection.execute(`
+        SELECT 
+          UPPER(department_name) AS upper_dept_name, 
+          LOWER(TRIM(department_name)) AS lower_dept_name 
+        FROM nodb_cmd
+      `);
+
+      assert.strictEqual(result.metaData[0].name, 'UPPER_DEPT_NAME');
+      assert.strictEqual(result.metaData[1].name, 'LOWER_DEPT_NAME');
+    }); // 9.1.16
+  });
 
   describe('9.2 case sensitive', function() {
     it('9.2.1 works for tables whose column names were created case sensitively', async function() {
-      const proc = "BEGIN \n" +
-                   "    DECLARE \n" +
-                   "        e_table_missing EXCEPTION; \n" +
-                   "        PRAGMA EXCEPTION_INIT(e_table_missing, -00942);\n " +
-                   "    BEGIN \n" +
-                   "        EXECUTE IMMEDIATE ('DROP TABLE nodb_casesensitive PURGE'); \n" +
-                   "    EXCEPTION \n" +
-                   "        WHEN e_table_missing \n" +
-                   "        THEN NULL; \n" +
-                   "    END; \n" +
-                   "    EXECUTE IMMEDIATE (' \n" +
-                   "        CREATE TABLE nodb_casesensitive ( \n" +
-                   "            id NUMBER,  \n" +
-                   '           "nAme" VARCHAR2(20) \n' +
-                   "        ) \n" +
-                   "    '); \n" +
-                   "END; ";
-
-      await connection.execute(proc);
+      const tableName = "nodb_casesensitive";
+      const sql = ` CREATE TABLE ${tableName} (
+                    id NUMBER,
+                    "nAme" VARCHAR2(20))`;
+      const plsql = testsUtil.sqlCreateTable(tableName, sql);
+      await connection.execute(plsql);
       const result = await connection.execute("SELECT * FROM nodb_casesensitive");
       assert.strictEqual(result.rows.length, 0);
       assert.strictEqual(result.metaData[0].name, 'ID');
       assert.strictEqual(result.metaData[1].name, 'nAme');
-      await connection.execute("DROP TABLE nodb_casesensitive PURGE");
+      await connection.execute(testsUtil.sqlDropTable(tableName));
     });
   });  // 9.2
 
@@ -222,7 +260,6 @@ describe('9. columnMetadata.js', function() {
     let columns_string;
     const tableName = "nodb_large_columns";
     const sqlSelect = "SELECT * FROM " + tableName;
-    const sqlDrop = testsUtil.sqlDropTable(tableName);
 
     function genColumns(size, dbType) {
       const  buffer = [];
@@ -238,10 +275,13 @@ describe('9. columnMetadata.js', function() {
 
     after(async function() {
       oracledb.fetchAsString = [];
-      await connection.execute(sqlDrop);
+      await connection.execute(testsUtil.sqlDropTable(tableName));
     });
 
-    it('9.3.1 works with a large number of columns', async function() {
+    it('9.3.1 large number of columns', async function() {
+      if (await testsUtil.cmanTdmCheck()) {
+        this.skip('Test skipped because CMAN TDM is enabled.');
+      }
       const column_size = 300;
       columns_string = genColumns(column_size, " NUMBER");
 
@@ -256,7 +296,7 @@ describe('9. columnMetadata.js', function() {
       for (let i = 0; i < column_size; i++) {
         assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
       }
-      await connection.execute(sqlDrop);
+      await connection.execute(testsUtil.sqlDropTable(tableName));
 
       // check CLOB type (GH Issue 1642)
       columns_string = genColumns(column_size, " CLOB");
@@ -266,10 +306,13 @@ describe('9. columnMetadata.js', function() {
       for (let i = 0; i < column_size; i++) {
         assert.strictEqual(result.metaData[i].name, 'COLUMN_' + i);
       }
-      await connection.execute(sqlDrop);
+      await connection.execute(testsUtil.sqlDropTable(tableName));
     });
 
-    it('9.3.2 works with re-executes with multiple packet response', async function() {
+    it('9.3.2 re-executes with multiple packet response', async function() {
+      if (await testsUtil.cmanTdmCheck()) {
+        this.skip('Test skipped because CMAN TDM is enabled.');
+      }
       const column_size = 50;
       const numRows = 5;
       oracledb.fetchAsString = [oracledb.CLOB];
@@ -319,40 +362,30 @@ describe('9. columnMetadata.js', function() {
         }
       }
 
-      await connection.execute(sqlDrop);
+      await connection.execute(testsUtil.sqlDropTable(tableName));
     });
   }); // 9.3
 
   describe('9.4 single character column', function() {
 
-    it('9.4.1 works with column names consisting of single characters', async function() {
+    it('9.4.1 column names consisting of single characters', async function() {
       const tableName = "nodb_single_char";
-      const sqlCreate =
-        "BEGIN \n" +
-        "   DECLARE \n" +
-        "       e_table_missing EXCEPTION; \n" +
-        "       PRAGMA EXCEPTION_INIT(e_table_missing, -00942); \n" +
-        "   BEGIN \n" +
-        "       EXECUTE IMMEDIATE ('DROP TABLE " + tableName + " PURGE'); \n" +
-        "   EXCEPTION \n" +
-        "       WHEN e_table_missing \n" +
-        "       THEN NULL; \n" +
-        "   END; \n" +
-        "   EXECUTE IMMEDIATE (' \n" +
-        "       CREATE TABLE " + tableName + " ( \n" +
-        "           a VARCHAR2(20),  \n" +
-        '           b VARCHAR2(20) \n' +
-        "       ) \n" +
-        "   '); \n" +
-        "END; \n";
-      const sqlSelect = "SELECT * FROM " + tableName;
-      const sqlDrop = "DROP TABLE " + tableName + " PURGE";
 
-      await connection.execute(sqlCreate);
+      const sql = `
+        CREATE TABLE ${tableName} (
+          a VARCHAR2(20),
+          b VARCHAR2(20)
+        )
+      `;
+      const sqlSelect = "SELECT * FROM " + tableName;
+
+      const plsql = testsUtil.sqlCreateTable(tableName, sql);
+      await connection.execute(plsql);
       const result = await connection.execute(sqlSelect);
       assert.strictEqual(result.metaData[0].name, 'A');
       assert.strictEqual(result.metaData[1].name, 'B');
-      await connection.execute(sqlDrop);
+
+      await connection.execute(testsUtil.sqlDropTable(tableName));
     });
   }); // 9.4
 
@@ -362,6 +395,127 @@ describe('9. columnMetadata.js', function() {
       const result = await connection.execute("SELECT 1 a, 'abc' a FROM dual");
       assert.strictEqual(result.metaData[0].name, 'A');
       assert.strictEqual(result.metaData[1].name, 'A_1');
+    });
+  });
+
+  describe('9.6 testing metaData with various column data types', function() {
+    const tableName = "nodb_data_types";
+
+    before('create table with various data types', async function() {
+      const proc = `
+        BEGIN
+          EXECUTE IMMEDIATE '
+            CREATE TABLE ${tableName} (
+              c1 NUMBER,
+              c2 VARCHAR2(100),
+              c3 DATE,
+              c4 TIMESTAMP,
+              c5 CLOB,
+              c6 BLOB
+            )';
+          EXECUTE IMMEDIATE 'INSERT INTO ${tableName} VALUES (1, ''Test String'', SYSDATE, SYSTIMESTAMP, ''CLOB Test'', UTL_RAW.CAST_TO_RAW(''BLOB Test''))';
+        END;`;
+
+      await connection.execute(proc);
+    });
+
+    after('drop the table', async function() {
+      await connection.execute(testsUtil.sqlDropTable(tableName));
+    });
+
+    it('9.6.1 verifies column metaData for various data types', async function() {
+      const result = await connection.execute(`SELECT * FROM ${tableName}`);
+      const expectedMetaData = [
+        { name: 'C1', type: oracledb.DB_TYPE_NUMBER },
+        { name: 'C2', type: oracledb.DB_TYPE_VARCHAR },
+        { name: 'C3', type: oracledb.DB_TYPE_DATE },
+        { name: 'C4', type: oracledb.DB_TYPE_TIMESTAMP },
+        { name: 'C5', type: oracledb.DB_TYPE_CLOB },
+        { name: 'C6', type: oracledb.DB_TYPE_BLOB }
+      ];
+
+      assert.strictEqual(result.rows.length, 1);
+      assert.strictEqual(result.metaData.length, 6);
+
+      result.metaData.forEach((col, index) => {
+        assert.strictEqual(col.name, expectedMetaData[index].name);
+        assert.strictEqual(col.dbType, expectedMetaData[index].type);
+      });
+    });
+  });
+
+  describe('9.7 Complex Column Metadata Scenarios', function() {
+    it('9.7.1 columns with special characters in names', async function() {
+      const tableName = "nodb_special_chars";
+      const sql = `
+        CREATE TABLE ${tableName} (
+          "column.with.dots" NUMBER,
+          "column-with-hyphens" VARCHAR2(50),
+          "column_with_underscores" DATE
+        )
+      `;
+
+      const plsql = testsUtil.sqlCreateTable(tableName, sql);
+      await connection.execute(plsql);
+
+      const result = await connection.execute(`SELECT * FROM ${tableName}`);
+      assert.strictEqual(result.metaData[0].name, 'column.with.dots');
+      assert.strictEqual(result.metaData[1].name, 'column-with-hyphens');
+      assert.strictEqual(result.metaData[2].name, 'column_with_underscores');
+      await connection.execute(testsUtil.sqlDropTable(tableName));
+    });
+
+    it('9.7.3 columns with very long names', async function() {
+      // Skip the test for database versions <= 12.1.0.2.0 due to the 30-character limit on column names.
+      if (connection.oracleServerVersion <= 1201000200) this.skip();
+
+      const tableName = "nodb_very_long_column_names";
+      const sql = `
+        CREATE TABLE ${tableName} (
+          very_very_very_very_very_very_very_very_very_long_column_name_1 NUMBER,
+          very_very_very_very_very_very_very_very_very_long_column_name_2 VARCHAR2(100)
+        )
+      `;
+
+      const plsql = testsUtil.sqlCreateTable(tableName, sql);
+      await connection.execute(plsql);
+
+      const result = await connection.execute(`SELECT * FROM ${tableName}`);
+      assert.strictEqual(result.metaData[0].name, 'VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_LONG_COLUMN_NAME_1');
+      assert.strictEqual(result.metaData[1].name, 'VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_VERY_LONG_COLUMN_NAME_2');
+
+      await connection.execute(testsUtil.sqlDropTable(tableName));
+    });
+  });
+
+  describe('9.8 Metadata Type Precision and Scale', function() {
+    it('9.8.1 should provide precision and scale for numeric columns', async function() {
+      const tableName = "nodb_numeric_precision";
+      const sql = `
+        CREATE TABLE ${tableName} (
+          decimal_col DECIMAL(10,2),
+          number_col NUMBER(5,3),
+          float_col FLOAT
+        )
+      `;
+
+      const plsql = testsUtil.sqlCreateTable(tableName, sql);
+      await connection.execute(plsql);
+
+      const result = await connection.execute(`SELECT * FROM ${tableName}`);
+
+      // Check precision and scale for DECIMAL column
+      assert.strictEqual(result.metaData[0].precision, 10);
+      assert.strictEqual(result.metaData[0].scale, 2);
+
+      // Check precision and scale for NUMBER column
+      assert.strictEqual(result.metaData[1].precision, 5);
+      assert.strictEqual(result.metaData[1].scale, 3);
+
+      // Float columns might have different characteristics
+      assert(result.metaData[2].precision !== undefined);
+
+      await connection.execute(testsUtil.sqlDropTable(tableName));
     });
   });
 });

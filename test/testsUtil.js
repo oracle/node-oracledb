@@ -614,3 +614,12 @@ testsUtil.getDBCharSet = async function(conn) {
   );
   return res.rows[0][0];
 };
+
+// This function skips tests that are not supported by Oracle Connection Manager
+// in Traffic Director mode. Used in Mocha test runs.
+testsUtil.cmanTdmCheck = async function() {
+  const connection = await oracledb.getConnection(dbConfig);
+  const result = await connection.execute(`select sys_context('USERENV','PROXY_USER') from dual`);
+  await connection.close();
+  return (!process.env.NODE_ORACLEDB_PROXY_SESSION_USER && result.rows[0][0] != null);
+};

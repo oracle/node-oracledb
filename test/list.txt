@@ -315,17 +315,30 @@ Overview of node-oracledb functional tests
         9.1.6 works when a query returns no rows
         9.1.7 only works for SELECT statement, does not work for INSERT
         9.1.8 only works for SELECT statement, does not work for UPDATE
-        9.1.9 works with a SQL WITH statement
+        9.1.9 SQL WITH statement
         9.1.10 displays metaData correctly with result set
+        9.1.11 column aliases in SELECT
+        9.1.12 expressions in SELECT
+        9.1.13 retrieves metaData for columns from subqueries
+        9.1.14 UNION queries
+        9.1.15 JOINs
+        9.1.16 nested function calls in column names
     9.2 case sensitive
         9.2.1 works for tables whose column names were created case sensitively
     9.3 Large number of columns
-        9.3.1 works with a large number of columns
-        9.3.2 works with re-executes with multiple packet response
+        9.3.1 large number of columns
+        9.3.2 re-executes with multiple packet response
     9.4 single character column
-        9.4.1 works with column names consisting of single characters
+        9.4.1 column names consisting of single characters
     9.5 duplicate column alias
         9.5.1 works when using duplicate column alias
+    9.6 testing metaData with various column data types
+        9.6.1 verifies column metaData for various data types
+    9.7 Complex Column Metadata Scenarios
+        9.7.1 columns with special characters in names
+        9.7.3 columns with very long names
+    9.8 Metadata Type Precision and Scale
+        9.8.1 should provide precision and scale for numeric columns
 
 10. nullColumnValues.js
     10.1 a simple query for null value
