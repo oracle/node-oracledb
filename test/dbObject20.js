@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1243,6 +1243,8 @@ describe('290. dbObject20.js', () => {
       assert.strictEqual(res.hasElement(12), false);
       assert.deepStrictEqual(res.getKeys(), Object.keys(inDataobj).map(Number));
       assert.deepStrictEqual(res.getValues(), Object.values(inDataobj).map(Number));
+      res.deleteElement(2);
+      assert.strictEqual(res.hasElement(2), false);
     });
   });
 

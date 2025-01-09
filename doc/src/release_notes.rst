@@ -8,6 +8,18 @@ node-oracledb Release Notes
 For deprecated and desupported features, see
 :ref:`Deprecations and desupported features <deprecations>`.
 
+node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.8.0>`__ (TBD)
+---------------------------------------------------------------------------------------------------------
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed error message in ``NJS-131`` to provide the correct range of the
+    database object collection types.
+
+#)  Fixed bug with :meth:`dbObject.deleteElement()` which did not update the
+    keys of associative arrays when an element was deleted.
+
 node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...v6.7.1>`__ (23 Dec 2024)
 ---------------------------------------------------------------------------------------------------------
 
