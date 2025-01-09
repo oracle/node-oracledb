@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -115,12 +115,13 @@ describe('212. dbObject13.js', function() {
       }
     };
     const result = await conn.execute(CALL, binds);
+    assert.strictEqual(result.outBinds.outbv.length, players.length);
 
-    for (let i = 0, out = result.outBinds.outbv; i < players.length; i++) {
-      assert.strictEqual(out[i].NAME, players[i].NAME);
-      assert.strictEqual(out[i].POSITION, players[i].POSITION);
-      assert.strictEqual(out[i].SHIRTNUMBER, players[i].SHIRTNUMBER);
-      assert.strictEqual(out[i].ADDRESS, players[i].ADDRESS);
+    for (let i = 0; i < players.length; i++) {
+      assert.strictEqual(result.outBinds.outbv[i].NAME, players[i].NAME);
+      assert.strictEqual(result.outBinds.outbv[i].POSITION, players[i].POSITION);
+      assert.strictEqual(result.outBinds.outbv[i].SHIRTNUMBER, players[i].SHIRTNUMBER);
+      assert.strictEqual(result.outBinds.outbv[i].ADDRESS, players[i].ADDRESS);
     }
   }); // 212.1
 

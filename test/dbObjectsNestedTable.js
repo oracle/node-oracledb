@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -78,7 +78,7 @@ describe('197. dbObjectsNestedTable.js', ()  => {
       obj = result.rows[0][1];
 
       const arr = obj.getValues ();
-      assert.equal (arr.length, 3);
+      assert.equal (arr.length, obj.length);
 
       assert.strictEqual (arr[0], "Shipping");
       assert.strictEqual (arr[1], "Finance");

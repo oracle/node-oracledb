@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -86,6 +86,7 @@ describe('214. dbObject15.js', () => {
       assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
       assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
     }
+    assert.equal(FrisbeeTeam.length, 5);
   }); // 214.1
 
   it('214.2 Setter() - access collection element directly', function() {

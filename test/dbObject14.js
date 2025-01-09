@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -216,6 +216,7 @@ describe('213.2 Object Collection with BLOB fields', () => {
       { ID: null }
     ];
     const bufTypeCollection = new bufTypeCollectionClass(bufArray);
+    assert.strictEqual(bufTypeCollection.length, bufArray.length);
 
     // insert data into table
     let sql = `BEGIN ${TEST_PROC}(:buff_collection); END;`;

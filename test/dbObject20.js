@@ -1215,6 +1215,7 @@ describe('290. dbObject20.js', () => {
       const res = result.outBinds.ret;
       const outMap = res.toMap();
       assert.deepStrictEqual(JSON.stringify(Object.fromEntries(outMap)), JSON.stringify(inDataobj));
+      assert.equal(res.length, 3);
 
       // Check if you are able to access the indexes, keys and values across
       // associative arrays in proper order

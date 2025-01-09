@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -175,6 +175,7 @@ async function run() {
     );
     console.log("Binds returned:");
     console.log(result.outBinds);
+    console.log("No.of beaches:", result.outBinds.beach_out.length);
 
     //
     // PL/SQL array bind IN OUT parameters:
@@ -200,6 +201,7 @@ async function run() {
     );
     console.log("Binds returned:");
     console.log(result.outBinds);
+    console.log("No.of beaches:", result.outBinds.beach_inout.length);
 
   } catch (err) {
     console.error(err);

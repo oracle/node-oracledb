@@ -11,6 +11,12 @@ For deprecated and desupported features, see
 node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.8.0>`__ (TBD)
 ---------------------------------------------------------------------------------------------------------
 
+Common Changes
+++++++++++++++
+
+#)  Fixed :attr:`~dbObject.length` property for the database object
+    collection types, which was broken from node-oracledb 6.0.
+
 Thin Mode Changes
 +++++++++++++++++
 

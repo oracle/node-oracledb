@@ -118,6 +118,7 @@ describe('207. dbObject8.js', () => {
     farm2.HARVEST = new HarvestType(['carrots', 'peas']);
     farm2.HARVEST.trim(1);             // whoops! no peas
     farm2.HARVEST.append('tomatoes');  // extend the collection
+    assert.strictEqual(farm2.HARVEST.length, 2);
     crops[1] = farm2.HARVEST.getValues();
     assert.deepStrictEqual(crops[1], [ 'carrots', 'tomatoes' ]);
 

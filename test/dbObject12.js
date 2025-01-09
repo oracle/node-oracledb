@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -128,7 +128,7 @@ describe('211. dbObject12.js', function() {
     assert.strictEqual(out.POS, (obj3.POS * 2));
     assert.strictEqual(out.FORCE, (obj3.POS * -2));
 
-    // Batch exeuction with executeMany()
+    // Batch execution with executeMany()
     const obj4 = [
       { NAME: 'Train', POS: 78 },
       { NAME: 'Bike', POS: 83 },

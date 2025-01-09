@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -113,6 +113,7 @@ describe('200. dbObject1.js', () => {
       };
       const objClass = await conn.getDbObjectClass(TYPE);
       const testObj = new objClass(objData);
+      assert.equal(testObj.length, undefined);
       const seq = 101;
 
       let result = await conn.execute(sql, [seq, testObj]);
@@ -439,7 +440,7 @@ describe('200. dbObject1.js', () => {
 
       const result = await runPlSQL(sql, TYPE_SMALL_PRECISION);
       assert.strictEqual(result.outBinds.arg.TESTNUMBER, retVal);
-    }); // 202.2.1
+    }); // 200.2.1
 
     it('200.2.2 using Large Precision', async () => {
       const retVal = 560;
@@ -448,7 +449,7 @@ describe('200. dbObject1.js', () => {
 
       const result = await runPlSQL(sql, TYPE_LARGE_PRECISION);
       assert.strictEqual(result.outBinds.arg.TESTNUMBER, retVal);
-    }); // 202.2.2
+    }); // 200.2.2
   });
 
   describe('200.3 Binary Float property', function() {
@@ -496,7 +497,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_FLOAT} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTFLOAT, 123.44999694824219);
-    }); // 202.3.1
+    }); // 200.3.1
 
     it('200.3.2 insert an object with a negative float value', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_FLOAT);
@@ -512,7 +513,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_FLOAT} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTFLOAT, -987.6500244140625);
-    }); // 202.3.2
+    }); // 200.3.2
 
     it('200.3.3 insert an object with null float value', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_FLOAT);
@@ -528,7 +529,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_FLOAT} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTFLOAT, null);
-    }); // 202.3.3
+    }); // 200.3.3
 
     it('200.3.4 handle extreme float values (Infinity)', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_FLOAT);
@@ -544,7 +545,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_FLOAT} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTFLOAT, Infinity);
-    }); // 202.3.4
+    }); // 200.3.4
 
     it('200.3.5 handle extreme float values (-Infinity)', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_FLOAT);
@@ -560,7 +561,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_FLOAT} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTFLOAT, -Infinity);
-    }); // 202.3.5
+    }); // 200.3.5
 
     it('200.3.6 handle NaN (Not-a-Number)', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_FLOAT);
@@ -576,7 +577,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_FLOAT} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.ok(Number.isNaN(fetchedResult.rows[0][1].TESTFLOAT));
-    }); // 202.3.6
+    }); // 200.3.6
 
     it('200.3.7 handle undefined and default values', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_FLOAT);
@@ -610,7 +611,7 @@ describe('200. dbObject1.js', () => {
       const fetchedResultEmpty = await conn.execute(queryEmpty, [idEmpty]);
 
       assert.strictEqual(fetchedResultEmpty.rows[0][1].TESTFLOAT, null);
-    }); // 202.3.7
+    }); // 200.3.7
   });
 
   describe('200.4 Binary Double property', function() {
@@ -658,7 +659,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_DOUBLE} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTDOUBLE, 123456.7890123);
-    }); // 202.4.
+    }); // 200.4.1
 
     it('200.4.2 insert an object with a negative double value', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_DOUBLE);
@@ -674,7 +675,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_DOUBLE} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTDOUBLE, -987654.321);
-    }); // 202.4.2
+    }); // 200.4.2
 
     it('200.4.3 insert an object with null double value', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_DOUBLE);
@@ -690,7 +691,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_DOUBLE} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTDOUBLE, null);
-    }); // 202.4.3
+    }); // 200.4.3
 
     it('200.4.4 handle extreme double values (Infinity)', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_DOUBLE);
@@ -706,7 +707,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_DOUBLE} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTDOUBLE, Infinity);
-    }); // 202.4.4
+    }); // 200.4.4
 
     it('200.4.5 handle extreme double values (-Infinity)', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_DOUBLE);
@@ -722,7 +723,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_DOUBLE} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.strictEqual(fetchedResult.rows[0][1].TESTDOUBLE, -Infinity);
-    }); // 202.4.5
+    }); // 200.4.5
 
     it('200.4.6 handle NaN (Not-a-Number)', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_DOUBLE);
@@ -738,7 +739,7 @@ describe('200. dbObject1.js', () => {
       const query = `SELECT * FROM ${TABLE_BINARY_DOUBLE} WHERE ID = :id`;
       const fetchedResult = await conn.execute(query, [id]);
       assert.ok(Number.isNaN(fetchedResult.rows[0][1].TESTDOUBLE));
-    }); // 202.4.6
+    }); // 200.4.6
 
     it('200.4.7 test very large and very small double values', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_DOUBLE);
@@ -763,7 +764,7 @@ describe('200. dbObject1.js', () => {
         const fetchedResult = await conn.execute(query, [id]);
         assert.strictEqual(fetchedResult.rows[0][1].TESTDOUBLE, testValues[i]);
       }
-    }); // 202.4.7
+    }); // 200.4.7
 
     it('200.4.8 create an object with multiple attributes including binary_double', async () => {
       const TYPE_MULTI_DOUBLE = 'NODB_TYP_OBJ_MULTI_DOUBLE';
@@ -811,7 +812,7 @@ describe('200. dbObject1.js', () => {
         await conn.execute(testsUtil.sqlDropTable(TABLE_MULTI_DOUBLE));
         await conn.execute(`DROP TYPE ${TYPE_MULTI_DOUBLE}`);
       }
-    }); // 202.4.8
+    }); // 200.4.8
 
     it('200.4.9 handle undefined and default values', async () => {
       const objClass = await conn.getDbObjectClass(TYPE_BINARY_DOUBLE);
@@ -845,6 +846,6 @@ describe('200. dbObject1.js', () => {
       const fetchedResultEmpty = await conn.execute(queryEmpty, [idEmpty]);
 
       assert.strictEqual(fetchedResultEmpty.rows[0][1].TESTDOUBLE, null);
-    }); // 202.4.8
-  }); // 202.4
+    }); // 200.4.8
+  }); // 200.4
 });
