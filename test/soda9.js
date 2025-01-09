@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -154,6 +154,115 @@ describe('177. soda9.js', () => {
 
     await conn.commit();
     await conn.close();
-
   }); // 177.5
+
+  it('177.6 update a document and verify content', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_6");
+
+    const inContent = { id: 3000, name: "John", office: "New York" };
+    const doc = await collection.insertOneAndGet(inContent);
+
+    // Update the document
+    const updatedContent = { id: 3000, name: "John", office: "Los Angeles" };
+    await collection.find().key(doc.key).replaceOne(updatedContent);
+
+    // Verify the updated content
+    const outDocuments = await collection.find().getDocuments();
+    const outContent = outDocuments[0].getContent();
+    testsUtil.removeID(outContent);
+    testsUtil.removeID(updatedContent);
+    assert.deepStrictEqual(outContent, updatedContent);
+
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 177.6
+
+  it('177.7 retrieve document metadata', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_7");
+
+    const inContent = { id: 4000, name: "Anna", office: "London" };
+    const doc = await collection.insertOneAndGet(inContent);
+
+    // Retrieve metadata
+    const key = doc.key; // Document key
+    assert(key);
+
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 177.7
+
+  it('177.8 negative test: replace a non-existent document', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_8");
+
+    const nonExistentKey = "12345";
+    const newContent = { id: 5000, name: "Mike", office: "Tokyo" };
+
+    // Attempt to replace a non-existent document
+    const result = await collection.find().key(nonExistentKey).replaceOne(newContent);
+    assert.strictEqual(result.replaced, false);
+
+    await conn.commit();
+    // Drop the collection and ensure it succeeds
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 177.8
+
+  it('177.9 insert multiple documents and verify retrieval', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_9");
+
+    const documents = [
+      { id: 6000, name: "Steve", office: "Berlin" },
+      { id: 6001, name: "Laura", office: "Madrid" },
+      { id: 6002, name: "Tom", office: "Rome" }
+    ];
+
+    // Insert multiple documents
+    for (const doc of documents) {
+      await collection.insertOne(doc);
+    }
+
+    // Retrieve documents
+    const outDocuments = await collection.find().getDocuments();
+    const outContents = outDocuments.map(doc => {
+      const content = doc.getContent();
+      delete content._id; // Remove auto-generated ID
+      return content;
+    });
+
+    testsUtil.removeID(documents);
+    assert.deepStrictEqual(outContents, documents);
+
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 177.9
+
+  it('177.10 verify collection drop when empty', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const collection = await soda.createCollection("soda_test_177_10");
+
+    // Verify collection is empty
+    const count = await collection.find().count();
+    assert.strictEqual(count.count, 0);
+
+    // Drop collection
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 177.10
 });

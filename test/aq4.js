@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -327,7 +327,6 @@ describe('267. aq4.js', function() {
     assert.strictEqual(queue2.deqOptions.consumerName, "sub1");
   }); // 267.9
 
-
   it('267.10 recipient list with enqMany non-existent in dequeue', async () => {
     const msgList = [];
 
@@ -371,4 +370,32 @@ describe('267. aq4.js', function() {
       /NJS-007:/
     );
   }); // 267.11
+
+  it('267.12 Enqueue with duplicate recipients', async () => {
+    const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const message = new queue1.payloadTypeClass(addrData);
+
+    await assert.rejects(
+      async () =>  await queue1.enqOne({
+        payload: message,
+        recipients: ["sub1", "sub1", "sub2"]
+      }),
+      /ORA-25232:/ // ORA-25232: duplicate recipients specified for message
+    );
+  }); // 267.12
+
+  it('267.13 Enqueue with special characters in recipient name', async () => {
+    const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const message = new queue1.payloadTypeClass(addrData);
+
+    await assert.rejects(
+      async () => {
+        await queue1.enqOne({
+          payload: message,
+          recipients: ["sub@#1"]
+        });
+      },
+      /ORA-24047:/ // ORA-24047: invalid agent name sub@#1, agent name should be of the form NAME
+    );
+  }); // 267.13
 });

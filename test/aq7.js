@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -396,4 +396,125 @@ describe('283. aq7.js', function() {
 
     assert.deepStrictEqual(msg.payload, jsonDoc);
   }); // 283.11
+
+  it('283.12 enqOne/deqOne with empty JSON object/array', async () => {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    // Test empty object
+    await queue.enqOne({
+      payload: {}
+    });
+    await conn.commit();
+
+    let msg = await queue.deqOne();
+    assert.deepStrictEqual(msg.payload, {});
+
+    // Test empty array
+    await queue.enqOne({
+      payload: []
+    });
+    await conn.commit();
+
+    msg = await queue.deqOne();
+    assert.deepStrictEqual(msg.payload, []);
+  }); // 283.12
+
+  it('283.13 JSON with deeply nested structure', async () => {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    const deeplyNested = {
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              level5: {
+                data: "Deep data",
+                array: [1, 2, [3, 4, [5, 6]]]
+              }
+            }
+          }
+        }
+      }
+    };
+
+    await queue.enqOne({
+      payload: deeplyNested
+    });
+    await conn.commit();
+
+    const msg = await queue.deqOne();
+    assert.deepStrictEqual(msg.payload, deeplyNested);
+  });  // 283.13
+
+  it('283.14 concurrent enqueue/dequeue operations', async () => {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    const numMessages = 10;
+    const messages = Array.from({ length: numMessages }, (_, i) => ({
+      payload: { id: i, data: `Message ${i}` }
+    }));
+
+    // Enqueue messages concurrently
+    await Promise.all(messages.map(msg => queue.enqOne(msg)));
+    await conn.commit();
+
+    // Dequeue messages concurrently
+    const results = await Promise.all(
+      Array(numMessages).fill().map(() => queue.deqOne())
+    );
+    await conn.commit();
+
+    // Verify all messages were received
+    const receivedIds = new Set(results.map(msg => msg.payload.id));
+    assert.strictEqual(receivedIds.size, numMessages);
+  }); // 283.14
+
+  it('283.15 JSON with special characters and Unicode', async () => {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    const specialData = {
+      specialChars: "!@#$%^&*()_+{}[]|\\:;\"'<>,.?/~`",
+      unicode: "Hello, 世界! привет มир 안녕하세요",
+      multiline: "Line 1\nLine 2\rLine 3\r\nLine 4",
+      whitespace: "\t\n\r\f\v"
+    };
+
+    await queue.enqOne({
+      payload: specialData
+    });
+    await conn.commit();
+
+    const msg = await queue.deqOne();
+    assert.deepStrictEqual(msg.payload, specialData);
+  }); // 283.15
+
+  it('283.16 large JSON payload size limits', async () => {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    // Create a large JSON object
+    const largeData = {
+      array: Array(10000).fill().map((_, i) => ({
+        id: i,
+        data: "x".repeat(100)
+      }))
+    };
+
+    await queue.enqOne({
+      payload: largeData
+    });
+    await conn.commit();
+
+    const msg = await queue.deqOne();
+    assert.deepStrictEqual(msg.payload, largeData);
+  }); // 283.16
 });

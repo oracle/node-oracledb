@@ -2906,7 +2906,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     107.4 WHERE
         107.4.1 can bind in WHERE clause
 
-
 108. rowidProcedureBindAsString_bindin.js
     108.1 PROCEDURE BIND_IN as rowid
         108.1.1 works with null
@@ -4322,6 +4321,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     167.14 openCollection() basic case 2
     167.15 the returned value is null if the requested collection does not exist
     167.16 the requested collection name is case sensitive
+    167.17 getCollectionNames() with both limit and startsWith options
+    167.18 startsWith with special characters
+    167.19 getCollectionNames() with very large limit
+    167.20 getCollectionNames() with whitespace patterns
+    167.21 openCollection() with non-string collection names
+    167.22 getCollectionNames() with very specific startsWith pattern
+    167.23 test collection name with maximum length
 
 168. soda4.js
     168.1 insertOneAndGet() fetches attributes without content
@@ -4425,6 +4431,11 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     177.3 insertOneAndGet() with a document content
     177.4 insertOneAndGet() with a document
     177.5 createDocument() followd by getContent() i.e. without being inserted
+    177.6 update a document and verify content
+    177.7 retrieve document metadata
+    177.8 negative test: replace a non-existent document
+    177.9 insert multiple documents and verify retrieval
+    177.10 verify collection drop when empty
 
 178. soda10.js
     178.1 insertMany() with newSodaDocumentArray
@@ -4668,11 +4679,11 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 201. dbObject2.js
     201.1 insert an object with timestamp attributes
-    ???.? directly insert timestamp data
-    201.2 insert null values for timestamp attribute
-    201.3 insert undefined values for timestamp attribute
-    201.4 insert an empty JSON for timestamp attribute
-    201.5 call procedure with 2 OUT binds of DbObject
+    201.2 directly insert timestamp data
+    201.3 insert null values for timestamp attribute (3222ms)
+    201.4 insert undefined values for timestamp attribute (1261ms)
+    201.5 insert an empty JSON for timestamp attribute (1262ms)
+    201.6 call procedure with 2 OUT binds of DbObject (2626ms)
 
 202. dbObject3.js
     202.1 insert an object with TSZ type attributes
@@ -4755,6 +4766,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.8 get deliveryMode property
     217.9 get exceptionQueue property
     217.10 get numAttempts attribute
+    217.11 get numAttempts attribute
+    217.12 test priority attribute in enqueue
+    217.13 test correlation
+    217.14 test message ordering in transaction group
+    217.15 test dequeue with wait timeout
+    217.16 test buffer message payload - 32KB
+    217.17 test large buffer message payload - 1MB
 
 218. aq2.js
     218.1 examples/aqobject.js
@@ -4767,6 +4785,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     218.8 enqMany() with DB object array
     218.9 enqMany() with DB object array as payload
     218.10 enqMany() with JavaScript objects as payload
+    218.11 Negative - enqOne with empty payload
+    218.12 Enqueue and Dequeue with non-ASCII characters
+    218.13 Enqueue and Dequeue with large payloads
+    218.14 Negative - Dequeue from an unstarted queue
 
 219. aq3.js
     219.1 The read-only property "name" of AqQueue Class
@@ -4861,6 +4883,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     230.2 insertOne() and save()
     230.3 Negative - client assigned keys are necessary
     230.4 Negative - save without arguments
+    230.5 save() with multiple updates for the same key
+    230.6 save() with different key column types 
 
 231. soda13.js
     231.1 example case
@@ -4921,6 +4945,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     238.3 Negative - call fetchArraySize() without parameter
     238.4 fetchArraySize is 0
     238.5 Negative - fetchArraySize is a negative value
+    238.6 fetchArraySize set to 1
+    238.7 fetchArraySize default behavior
+    238.8 fetchArraySize with very large value
 
 239. plsqlBindCursorsIN.js
     239.1 disable prefetchRows by setting it to be 0
@@ -5452,6 +5479,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     267.9 recipient list with enqMany
     267.10 recipient list with enqMany non-existent in dequeue
     267.11 recipient list with enqMany invalid datatype in dequeue
+    267.12 Enqueue with duplicate recipients
+    267.13 Enqueue with special characters in recipient name
 
 268. procAndFuncs.js
     268.1 calling stored procedures
@@ -5648,7 +5677,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     280.5 Parallel Enabled Pipelined Table Functions
 
 281. aq5.js
-    281.1 subscribe dequeue messages
+    281.1 Basic AQ Subscription and Message Handling
+        281.1.1 subscribe dequeue messages
+    281.2 Advanced AQ Features and Options
+        281.2.1 test message order and consumer name
+        281.2.2 test dequeue with timeout
+        281.2.3 test dequeue with correlation ID
+        281.2.4 test visibility option
 
 282. aq6.js
     282.1 msgId in QUEUE_PAYLOAD_TYPE as ‘RAW’
@@ -5673,9 +5708,16 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     283.9 enqOne and deqOne JSON val as object type
     283.10 enqMany and deqMany with JSON val as object type
     283.11 enqOne and deqOne CLOB value into a JSON key
+    283.12 enqOne/deqOne with empty JSON object/array
+    283.13 JSON with deeply nested structure
+    283.14 concurrent enqueue/dequeue operations
+    283.15 JSON with special characters and Unicode
+    283.16 large JSON payload size limits
 
 284. errorUrl.js
     284.1 checks for error URL in ORA error message
+    284.2 checks error URL in invalid table name error
+    284.3 checks error URL in syntax error
 
 285. aq8.js
     285.1 query by messages, payload as RAW Type

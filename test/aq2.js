@@ -354,4 +354,90 @@ describe('218. aq2.js', function() {
       assert.strictEqual(addrArray[3].ADDRESS, messages[3].payload.ADDRESS);
     }
   }); // 218.10
+
+  it('218.11 Negative - enqOne with empty payload', async () => {
+    const queue = await conn.getQueue(objQueueName, { payloadType: objType });
+    await assert.rejects(
+      async () => {
+        await queue.enqOne();
+      },
+      /NJS-009:/ // NJS-009: invalid number of parameters
+    );
+  }); // 218.11
+
+  it('218.12 Enqueue and Dequeue with non-ASCII characters', async () => {
+    const addrData = {
+      NAME: "Jörg",
+      ADDRESS: "Grüner Weg 5, 12345 München, Germany"
+    };
+
+    // Enqueue
+    const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const message = new queue1.payloadTypeClass(addrData);
+    await queue1.enqOne(message);
+    await conn.commit();
+
+    // Dequeue
+    const queue2 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const msg = await queue2.deqOne();
+    await conn.commit();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.NAME, addrData.NAME);
+    assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+  }); // 218.12
+
+  it('218.13 Enqueue and Dequeue with large payloads', async () => {
+    const largeAddress = "A".repeat(50); // 50 characters
+    const addrData = {
+      NAME: "LargeData",
+      ADDRESS: largeAddress
+    };
+
+    // Enqueue
+    const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const message = new queue1.payloadTypeClass(addrData);
+    await queue1.enqOne(message);
+    await conn.commit();
+
+    // Dequeue
+    const queue2 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const msg = await queue2.deqOne();
+    await conn.commit();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.NAME, addrData.NAME);
+    assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+  }); // 218.13
+
+  it('218.14 Negative - Dequeue from an unstarted queue', async () => {
+    // Create but do not start a new queue
+    const unstartedQueueName = "NODB_UNSTARTED_QUEUE";
+    await conn.execute(`
+      BEGIN
+        DBMS_AQADM.CREATE_QUEUE(
+          QUEUE_NAME         => '${AQ_USER}.${unstartedQueueName}',
+          QUEUE_TABLE        => '${AQ_USER}.${objTable}'
+        );
+      END;
+    `);
+
+    const queue = await conn.getQueue(unstartedQueueName, { payloadType: objType });
+
+    await assert.rejects(
+      async () => {
+        await queue.deqOne();
+      },
+      /ORA-25226:/ // ORA-25226: dequeue failed, queue NODB_SCHEMA_AQTEST2.NODB_UNSTARTED_QUEUE is not enabled for dequeue
+    );
+
+    // Cleanup
+    await conn.execute(`
+      BEGIN
+        DBMS_AQADM.DROP_QUEUE(
+          QUEUE_NAME         => '${AQ_USER}.${unstartedQueueName}'
+        );
+      END;
+    `);
+  }); // 218.14
 });

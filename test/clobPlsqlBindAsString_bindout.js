@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -574,26 +574,28 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
         /NJS-016:/
       );
 
-      const sid = await testsUtil.getSid(connection);
-      const dbaConfig = {
-        user: dbConfig.test.DBA_user,
-        password: dbConfig.test.DBA_password,
-        connectionString: dbConfig.connectString,
-        privilege: oracledb.SYSDBA
-      };
-      sysDBAConn = await oracledb.getConnection(dbaConfig);
-      const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+      if (!(await testsUtil.cmanTdmCheck())) {
+        const sid = await testsUtil.getSid(connection);
+        const dbaConfig = {
+          user: dbConfig.test.DBA_user,
+          password: dbConfig.test.DBA_password,
+          connectionString: dbConfig.connectString,
+          privilege: oracledb.SYSDBA
+        };
+        sysDBAConn = await oracledb.getConnection(dbaConfig);
+        const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
 
-      // Running in loop should not result in opening more than 1 cursor
-      // additionally on server.
-      for (let i = 0; i < 15; i++) {
-        await assert.rejects(
-          async () => await connection.execute(sqlRun, bindVar),
-          /NJS-016:/
-        );
+        // Running in loop should not result in opening more than 1 cursor
+        // additionally on server.
+        for (let i = 0; i < 15; i++) {
+          await assert.rejects(
+            async () => await connection.execute(sqlRun, bindVar),
+            /NJS-016:/
+          );
+        }
+        const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+        assert.strictEqual(newOpenCount - openCount, 1);
       }
-      const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
-      assert.strictEqual(newOpenCount - openCount, 1);
     }); // 75.1.29
 
   }); // 75.1
@@ -964,7 +966,6 @@ describe('75. clobPlsqlBindAsString_bindout.js', function() {
       resultVal = result.outBinds.c2;
       compareResultStrAndOriginal(resultVal, clobStr_2, specialStr_2);
     }); // 75.3.3
-
   }); // 75.3
-
 });
+

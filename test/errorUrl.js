@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -64,4 +64,27 @@ describe('284. errorUrl.js', function() {
     );
   }); // 284.1
 
+  it('284.2 checks error URL in invalid table name error', async () => {
+    const url = /https:\/\/docs.oracle.com\/error-help\/db\/ora-00942\//;
+    const oraError = /ORA-00942: table or view does not exist/;
+
+    await assert.rejects(
+      async () => await conn.execute('SELECT * FROM NONEXISTENT_TABLE'),
+      (err) => {
+        return url.test(err.message) || oraError.test(err.message);
+      }
+    );
+  }); // 284.2
+
+  it('284.3 checks error URL in syntax error', async () => {
+    const url = /https:\/\/docs.oracle.com\/error-help\/db\/ora-00923\//;
+    const oraError = /ORA-00923: FROM keyword not found where expected/;
+
+    await assert.rejects(
+      async () => await conn.execute('SELECT * DUAL'),
+      (err) => {
+        return url.test(err.message) || oraError.test(err.message);
+      }
+    );
+  }); // 284.3
 });

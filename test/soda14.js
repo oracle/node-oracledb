@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -125,4 +125,21 @@ describe('238. soda14.js', () => {
       /NJS-005:/
     );
   }); // 238.5
+
+  it('238.6 fetchArraySize set to 1', async () => {
+    const SIZE = 1;
+    const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
+    assert.strictEqual(docs.length, DocSize);
+  }); // 238.6
+
+  it('238.7 fetchArraySize default behavior', async () => {
+    const docs = await coll.find().getDocuments(); // Without setting fetchArraySize
+    assert.strictEqual(docs.length, DocSize);
+  }); // 238.7
+
+  it('238.8 fetchArraySize with very large value', async () => {
+    const SIZE = 1000000; // Extremely large value
+    const docs = await coll.find().fetchArraySize(SIZE).getDocuments();
+    assert.strictEqual(docs.length, DocSize);
+  }); // 238.8
 });

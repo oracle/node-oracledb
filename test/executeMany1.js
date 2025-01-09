@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -493,7 +493,7 @@ describe('163. executeMany1.js', function() {
   }); // 163.16
 
   it('163.17 calls PL/SQL, with round trip count check', async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE) {
+    if (!dbConfig.test.DBA_PRIVILEGE || (await testsUtil.cmanTdmCheck())) {
       this.skip();
     }
     await doCreateProc();
@@ -765,3 +765,4 @@ describe('163. executeMany1.js', function() {
   }; // dropParentChildTables()
 
 });
+

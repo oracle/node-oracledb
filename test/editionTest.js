@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -34,6 +34,7 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 const timestamp = +new Date();
 const edition1 = "edition_1_" + timestamp;
@@ -65,7 +66,7 @@ describe('160. editionTest.js', function() {
   before(async function() {
 
     let isRunnable = Boolean(!oracledb.thin && dbConfig.test.DBA_PRIVILEGE
-      && !dbConfig.test.drcp);
+      && !dbConfig.test.drcp && !(await testsUtil.cmanTdmCheck()));
     if (isRunnable) {
       const connection = await oracledb.getConnection(dbConfig);
       if (connection.oracleServerVersion < 1202000100) {
@@ -603,3 +604,4 @@ describe('160. editionTest.js', function() {
   }); // 160.25
 
 });
+

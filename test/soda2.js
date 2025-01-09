@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -171,4 +171,184 @@ describe('165. soda2.js', () => {
 
   }); // 165.5
 
+  it('165.6 test multiple collections with same connection', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const sd = conn.getSodaDatabase();
+
+    const collections = [
+      "soda_test_165_6_1",
+      "soda_test_165_6_2",
+      "soda_test_165_6_3"
+    ];
+
+    // Create multiple collections
+    const createdCollections = await Promise.all(
+      collections.map(name => sd.createCollection(name))
+    );
+
+    // Verify all collections exist
+    const collNames = await sd.getCollectionNames();
+    assert.strictEqual(collNames.length, collections.length);
+    collections.forEach(name => {
+      assert(collNames.includes(name));
+    });
+
+    // Cleanup
+    await Promise.all(
+      createdCollections.map(coll => coll.drop())
+    );
+    await conn.close();
+  });
+
+  it('165.7 test collection creation with metadata', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const sd = conn.getSodaDatabase();
+
+    const collName = "soda_test_165_7";
+    const metadata = {
+      "schemaName": "SODA_TEST",
+      "tableName": "SODA_TEST_165_7",
+      "keyColumn": {
+        "name": "ID",
+        "sqlType": "VARCHAR2",
+        "maxLength": 255,
+        "assignmentMethod": "UUID"
+      },
+      "contentColumn": {
+        "name": "JSON_DOCUMENT",
+        "sqlType": "BLOB",
+        "compress": "NONE",
+        "cache": true,
+        "encrypt": "NONE",
+        "validation": "STANDARD"
+      },
+      "versionColumn": {
+        "name": "VERSION",
+        "method": "UUID"
+      },
+      "lastModifiedColumn": {
+        "name": "LAST_MODIFIED"
+      },
+      "creationTimeColumn": {
+        "name": "CREATED_ON"
+      }
+    };
+
+    const collection = await sd.createCollection(collName, { metadata });
+
+    // Verify collection exists
+    const cNames = await sd.getCollectionNames();
+    assert(cNames.includes(collName));
+
+    await collection.drop();
+    await conn.close();
+  });
+
+  it('165.8 test concurrent operations on different collections', async () => {
+    const pool = await oracledb.createPool(dbConfig);
+    const collections = ["soda_test_165_8_1", "soda_test_165_8_2"];
+
+    // Create collections
+    const conn = await pool.getConnection();
+    const sd = conn.getSodaDatabase();
+    await Promise.all(
+      collections.map(name => sd.createCollection(name))
+    );
+    await conn.close();
+
+    // Perform concurrent operations
+    const operations = [];
+    for (let i = 0; i < 10; i++) {
+      operations.push(
+        insertIntoCollection(pool, collections[0], { data: `doc1_${i}` }),
+        insertIntoCollection(pool, collections[1], { data: `doc2_${i}` })
+      );
+    }
+
+    await Promise.all(operations);
+
+    // Verify results
+    const verifyConn = await pool.getConnection();
+    const verifySd = verifyConn.getSodaDatabase();
+
+    for (const collName of collections) {
+      const coll = await verifySd.openCollection(collName);
+      const documents = await coll.find().getDocuments();
+      assert.strictEqual(documents.length, 10);
+      await coll.drop();
+    }
+
+    await verifyConn.close();
+    await pool.close();
+
+    async function insertIntoCollection(pool, collName, content) {
+      const conn = await pool.getConnection();
+      const soda = conn.getSodaDatabase();
+      const collection = await soda.openCollection(collName);
+      await collection.insertOne(content);
+      await conn.commit();
+      await conn.close();
+    }
+  });
+
+  it('165.9 test collection name with special characters', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const sd = conn.getSodaDatabase();
+
+    const specialNames = [
+      "SODA_test_165_9$",
+      "SODA_test_165_9#",
+      "SODA_test_165_9@"
+    ];
+
+    for (const name of specialNames) {
+      const collection = await sd.createCollection(name);
+      await collection.drop();
+    }
+
+    await conn.close();
+  });
+
+  it('165.10 test collection creation with custom storage options', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const sd = conn.getSodaDatabase();
+
+    const collName = "soda_test_165_10";
+    const metadata = {
+      "storage": {
+        "tablespace": "USERS",
+        "logging": true,
+        "table": {
+          "compressFor": "BASIC",
+          "cacheTable": true
+        }
+      }
+    };
+
+    const collection = await sd.createCollection(collName, { metadata });
+    assert(collection);
+
+    await collection.drop();
+    await conn.close();
+  });
+
+  it('165.11 test collection with maximum name length', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const sd = conn.getSodaDatabase();
+
+    // Create collection name with maximum allowed length
+    const maxLengthName = "A".repeat(128);
+    const collection = await sd.createCollection(maxLengthName);
+    assert(collection);
+
+    // Create collection with name longer than maximum
+    const tooLongName = "A".repeat(129);
+    await assert.rejects(
+      async () => await sd.createCollection(tooLongName),
+      /ORA-40674:/  // ORA-40674: Length of table or column name metadata value cannot exceed 128 bytes.
+    );
+
+    await collection.drop();
+    await conn.close();
+  }); // 165.11
 });

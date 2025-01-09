@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -53,7 +53,7 @@ describe('161. changePassword.js', function() {
   }
 
   before (async function() {
-    if (dbConfig.test.drcp || !dbConfig.test.DBA_PRIVILEGE) this.skip();
+    if (dbConfig.test.drcp || !dbConfig.test.DBA_PRIVILEGE || (await testsUtil.cmanTdmCheck())) this.skip();
     sql = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_user_missing EXCEPTION; \n" +
@@ -78,7 +78,7 @@ describe('161. changePassword.js', function() {
   }); // before
 
   after(async function() {
-    if (dbConfig.test.DBA_PRIVILEGE && !dbConfig.test.drcp) {
+    if (dbConfig.test.DBA_PRIVILEGE && !dbConfig.test.drcp && !(await testsUtil.cmanTdmCheck())) {
       sql = "DROP USER " + myUser + " CASCADE";
       dbaConn = await oracledb.getConnection(DBA_config);
       await dbaConn.execute(sql);
@@ -847,3 +847,4 @@ describe('161. changePassword.js', function() {
     }); // 161.12.11
   });
 });
+

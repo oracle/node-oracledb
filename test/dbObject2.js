@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -105,7 +105,7 @@ describe('201. dbObject2.js', () => {
     await conn.close();
   }); // after()
 
-  it.skip('201.1 insert an object with timestamp attributes', async () => {
+  it('201.1 insert an object with timestamp attributes', async () => {
     let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
     const date1 = new Date (1986, 8, 18, 12, 14, 27, 0);
@@ -125,14 +125,11 @@ describe('201. dbObject2.js', () => {
     sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
     result = await conn.execute(sql);
 
-    // console.log('Queried data', result.rows[0][1]['ENTRY'].getTime());
-    // console.log('Inserted data', date1.getTime());
-
-    //assert.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
-    //assert.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
+    assert.strictEqual(result.rows[0][1]['ENTRY'].getTime(), date1.getTime());
+    assert.strictEqual(result.rows[0][1]['EXIT'].getTime(), date2.getTime());
   }); // 201.1
 
-  it.skip('directly insert timestamp data', async () => {
+  it('201.2 directly insert timestamp data', async () => {
     const tabName = 'nodb_tmp';
     let sql =
     `CREATE TABLE ${tabName} (
@@ -149,15 +146,13 @@ describe('201. dbObject2.js', () => {
 
     sql = `SELECT * FROM ${tabName}`;
     result = await conn.execute(sql);
-    console.log('Queried data', result.rows[0][1].getTime());
-    console.log('Inserted data', date1.getTime());
 
-
+    assert.strictEqual(result.rows[0][1].getTime(), date1.getTime());
     sql = `DROP TABLE ${tabName} PURGE`;
     await conn.execute(sql);
-  });
+  }); // 201.2
 
-  it('201.2 insert null values for timestamp attribute', async () => {
+  it('201.3 insert null values for timestamp attribute', async () => {
     const seq = 102;
     let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
@@ -177,9 +172,9 @@ describe('201. dbObject2.js', () => {
 
     assert.strictEqual(result.rows[0][1]['ENTRY'], null);
     assert.strictEqual(result.rows[0][1]['EXIT'], null);
-  }); // 201.2
+  }); // 201.3
 
-  it('201.3 insert undefined values for timestamp attribute', async () => {
+  it('201.4 insert undefined values for timestamp attribute', async () => {
     const seq = 103;
     let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
@@ -199,9 +194,9 @@ describe('201. dbObject2.js', () => {
 
     assert.strictEqual(result.rows[0][1]['ENTRY'], null);
     assert.strictEqual(result.rows[0][1]['EXIT'], null);
-  }); // 201.3
+  }); // 201.4
 
-  it('201.4 insert an empty JSON for timestamp attribute', async () => {
+  it('201.5 insert an empty JSON for timestamp attribute', async () => {
     const seq = 104;
     let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
 
@@ -217,9 +212,9 @@ describe('201. dbObject2.js', () => {
 
     assert.strictEqual(result.rows[0][1]['ENTRY'], null);
     assert.strictEqual(result.rows[0][1]['EXIT'], null);
-  }); // 201.4
+  }); // 201.5
 
-  it('201.5 call procedure with 2 OUT binds of DbObject', async function() {
+  it('201.6 call procedure with 2 OUT binds of DbObject', async function() {
     await conn.execute(proc1);
     await conn.execute(proc2);
     await conn.execute(proc3);
@@ -234,12 +229,11 @@ describe('201. dbObject2.js', () => {
     );
 
     let resultSet = await result.outBinds.p_cur1.getRows();
-    assert.equal(resultSet.length, 3);
+    assert.equal(resultSet.length, 4);
     result.outBinds.p_cur1.close();
 
     resultSet = await result.outBinds.p_cur2.getRows();
-    assert.equal(resultSet.length, 3);
+    assert.equal(resultSet.length, 4);
     result.outBinds.p_cur2.close();
-  }); // 201.5;
-
+  }); // 201.6;
 });

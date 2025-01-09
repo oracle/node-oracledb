@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -351,4 +351,145 @@ describe('217. aq1.js', function() {
     msg = await queue2.deqOne();
     assert.strictEqual(msg.numAttempts, 1); // should be 1
   }); // 217.11
+
+  it('217.12 test priority attribute in enqueue', async () => {
+    const q = await conn.getQueue(rawQueueName);
+    q.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    q.deqOptions.wait = 0; // Don't wait if queue is empty
+    q.deqOptions.mode = oracledb.AQ_DEQ_MODE_REMOVE;
+
+    // Dequeue all remaining messages
+    let msg;
+    do {
+      msg = await q.deqOne();
+    } while (msg);
+
+    await conn.commit();
+
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messages = [
+      {
+        payload: "High Priority Message",
+        priority: 7
+      },
+      {
+        payload: "Low Priority Message",
+        priority: 1
+      }
+    ];
+
+    await queue.enqMany(messages);
+
+    // Dequeue should return high priority message first
+    const deqQueue = await conn.getQueue(rawQueueName);
+    deqQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const msg1 = await deqQueue.deqOne();
+    const msg2 = await deqQueue.deqOne();
+
+    assert.strictEqual(msg1.payload.toString(), "High Priority Message");
+    assert.strictEqual(msg2.payload.toString(), "Low Priority Message");
+  }); // 217.12
+
+  it('217.13 test correlation', async () => {
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const correlationId = "TEST_CORR_001";
+    const message = {
+      payload: "Correlated Message",
+      correlation: correlationId
+    };
+
+    await queue.enqOne(message);
+
+    const deqQueue = await conn.getQueue(rawQueueName);
+    deqQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    deqQueue.deqOptions.correlation = correlationId;
+
+    const msg = await deqQueue.deqOne();
+
+    // Access correlationId directly from the dequeued message object
+    assert.strictEqual(msg.correlation, correlationId);
+    assert.strictEqual(msg.payload.toString(), "Correlated Message");
+  }); // 217.13
+
+  it('217.14 test message ordering in transaction group', async () => {
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_ON_COMMIT;
+
+    // Enqueue messages in a single transaction
+    const messages = [
+      "First Message",
+      "Second Message",
+      "Third Message"
+    ];
+
+    await queue.enqMany(messages);
+    await conn.commit();
+
+    // Dequeue messages - they should come in the same order
+    const deqQueue = await conn.getQueue(rawQueueName);
+    deqQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_ON_COMMIT;
+
+    const msg1 = await deqQueue.deqOne();
+    const msg2 = await deqQueue.deqOne();
+    const msg3 = await deqQueue.deqOne();
+    await conn.commit();
+
+    assert.strictEqual(msg1.payload.toString(), "First Message");
+    assert.strictEqual(msg2.payload.toString(), "Second Message");
+    assert.strictEqual(msg3.payload.toString(), "Third Message");
+  }); // 217.14
+
+  it('217.15 test dequeue with wait timeout', async () => {
+    const queue = await conn.getQueue(rawQueueName);
+    queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue.deqOptions.wait = 2; // 2 second timeout
+
+    const startTime = Date.now();
+    const msg = await queue.deqOne();
+    const endTime = Date.now();
+
+    assert.strictEqual(msg, undefined);
+    assert(endTime - startTime >= 2000, "Dequeue should wait for at least 2 seconds");
+  }); // 217.15
+
+  it('217.16 test buffer message payload - 32KB', async () => {
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    // Create a medium-sized message (32KB)
+    const largeMessage = Buffer.alloc(32 * 1024, 'x');
+    await queue.enqOne(largeMessage);
+
+    const deqQueue = await conn.getQueue(rawQueueName);
+    deqQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const msg = await deqQueue.deqOne();
+    assert.strictEqual(msg.payload.length, largeMessage.length);
+    assert.strictEqual(msg.payload.toString(), largeMessage.toString());
+  }); // 217.16
+
+  it('217.17 test large buffer message payload - 1MB', async function() {
+    // 1 MB message does not work in Oracle Databases 19c or earlier
+    if (await conn.oracleServerVersion < 2304000000)
+      this.skip();
+
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    // Create a large message (1MB)
+    const largeMessage = Buffer.alloc(1024 * 1024, 'x');
+    await queue.enqOne(largeMessage);
+
+    const deqQueue = await conn.getQueue(rawQueueName);
+    deqQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const msg = await deqQueue.deqOne();
+    assert.strictEqual(msg.payload.length, largeMessage.length);
+    assert.strictEqual(msg.payload.toString(), largeMessage.toString());
+  }); // 217.17
 });

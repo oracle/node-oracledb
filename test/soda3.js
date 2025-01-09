@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -188,4 +188,134 @@ describe('167. soda3.js', () => {
     assert.strictEqual(coll, undefined);
   });
 
+  it('167.17 getCollectionNames() with both limit and startsWith options', async () => {
+    const options = {
+      limit: 2,
+      startsWith: "chris"
+    };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, 2);
+    assert.deepStrictEqual(cNames, ['chris_1', 'chris_2']);
+  });
+
+  it('167.18 startsWith with special characters', async () => {
+    // First create some collections with special characters
+    const specialCollections = [
+      "test$collection_1",
+      "test@collection_2",
+      "test#collection_3"
+    ];
+
+    const newCollections = await Promise.all(
+      specialCollections.map(name => sd.createCollection(name))
+    );
+
+    const options = { startsWith: "test" };
+    const cNames = await sd.getCollectionNames(options);
+
+    // Verify all test collections are found
+    specialCollections.forEach(name => {
+      assert(cNames.includes(name));
+    });
+
+    // Cleanup
+    await Promise.all(newCollections.map(coll => coll.drop()));
+  });
+
+  it('167.19 getCollectionNames() with very large limit', async () => {
+    const options = { limit: Number.MAX_SAFE_INTEGER };
+    const cNames = await sd.getCollectionNames(options);
+    assert.strictEqual(cNames.length, t_collectionNames.length);
+    assert.deepStrictEqual(cNames, t_collectionNames.sort());
+  });
+
+  it('167.20 getCollectionNames() with whitespace patterns', async () => {
+    // Create collections with whitespace
+    const whitespaceCollections = [
+      " leading_space",
+      "trailing_space ",
+      " both_sides ",
+      "multiple  spaces"
+    ];
+
+    const newCollections = await Promise.all(
+      whitespaceCollections.map(name => sd.createCollection(name))
+    );
+
+    // Test different whitespace patterns
+    const patterns = [' ', 'trailing', 'multiple'];
+    for (const pattern of patterns) {
+      const options = { startsWith: pattern };
+      const cNames = await sd.getCollectionNames(options);
+      assert(cNames.length > 0);
+    }
+
+    // Cleanup
+    await Promise.all(newCollections.map(coll => coll.drop()));
+  });
+
+  it('167.21 openCollection() with non-string collection names', async () => {
+    const invalidNames = [
+      123,
+      true,
+      {},
+      [],
+      null,
+      undefined
+    ];
+
+    for (const name of invalidNames) {
+      await assert.rejects(
+        async () => await sd.openCollection(name),
+        /NJS-005:/  // NJS-005: invalid value for parameter 1
+      );
+    }
+  });
+
+  it('167.22 getCollectionNames() with very specific startsWith pattern', async () => {
+    // Create collections with numeric suffixes
+    const numericCollections = [
+      "test_1",
+      "test_2",
+      "test_10",
+      "test_20",
+      "test_100"
+    ];
+
+    const newCollections = await Promise.all(
+      numericCollections.map(name => sd.createCollection(name))
+    );
+
+    const options = { startsWith: "test_" };
+    const cNames = await sd.getCollectionNames(options);
+
+    // Verify numeric suffix order
+    const sortedNames = numericCollections.sort();
+    assert.deepStrictEqual(
+      cNames.filter(name => name.startsWith("test_")),
+      sortedNames
+    );
+
+    // Cleanup
+    await Promise.all(newCollections.map(coll => coll.drop()));
+  });
+
+  it('167.23 test collection name with maximum length', async () => {
+    // Create collection with maximum allowed length name
+    const maxLengthName = "A".repeat(128);
+    const maxCollection = await sd.createCollection(maxLengthName);
+
+    // Verify it can be found with getCollectionNames
+    const options = { startsWith: "A" };
+    const cNames = await sd.getCollectionNames(options);
+    assert(cNames.includes(maxLengthName));
+
+    // Verify it can be opened
+    const openedColl = await sd.openCollection(maxLengthName);
+    assert(openedColl);
+    assert.strictEqual(openedColl.name, maxLengthName);
+
+    // Cleanup
+    await maxCollection.drop();
+  });
 });

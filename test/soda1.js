@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -399,4 +399,22 @@ describe('164. soda1.js', () => {
     await conn.close();
   }); // 164.12
 
+  it('164.13 Create a collection with custom metadata', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const sd = conn.getSodaDatabase();
+
+    const customMetadata = {
+      "keyColumn": { "name": "ID" },
+      "contentColumn": { "name": "JSON_DOCUMENT" },
+      "versionColumn": { "name": "VERSION", "method": "UUID" },
+      "creationTimeColumn": { "name": "CREATED_ON" },
+      "lastModifiedColumn": { "name": "LAST_MODIFIED" }
+    };
+
+    const collection = await sd.createCollection('soda_test_164_18', { metaData: customMetadata });
+    assert(collection);
+
+    await collection.drop();
+    await conn.close();
+  }); // 164.13
 });

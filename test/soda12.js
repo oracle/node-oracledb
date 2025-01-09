@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -58,46 +58,40 @@ describe('230. soda12.js', () => {
     await sodaUtil.cleanup();
   }); // before()
 
-  function getMetadata(tableName) {
-    const metadata = {
-      "tableName": tableName,
-      "keyColumn":
-      {
-        "name": "ID",
-        "sqlType": "NUMBER",
-        "assignmentMethod": "CLIENT"
+  function getMetadata(tableName, assignmentMethod = "CLIENT", keyColumnType = "NUMBER") {
+    return {
+      tableName: tableName,
+      keyColumn: {
+        name: "ID",
+        sqlType: keyColumnType,
+        assignmentMethod: assignmentMethod
       },
-      "contentColumn":
-      {
-        "name": "JSON_DOCUMENT",
-        "sqlType": "BLOB",
-        "compress": "NONE",
-        "cache": true,
-        "encrypt": "NONE",
-        "validation": "STANDARD"
+      contentColumn: {
+        name: "JSON_DOCUMENT",
+        sqlType: "BLOB",
+        compress: "NONE",
+        cache: true,
+        encrypt: "NONE",
+        validation: "STANDARD"
       },
-      "versionColumn":
-      {
-        "name": "VERSION",
-        "method": "SHA256"
+      versionColumn: {
+        name: "VERSION",
+        method: "SHA256"
       },
-      "lastModifiedColumn":
-      {
-        "name": "LAST_MODIFIED"
+      lastModifiedColumn: {
+        name: "LAST_MODIFIED"
       },
-      "creationTimeColumn":
-      {
-        "name": "CREATED_ON"
+      creationTimeColumn: {
+        name: "CREATED_ON"
       },
-      "readOnly": false
+      readOnly: false
     };
-    return metadata;
   }
 
   it('230.1 example case', async () => {
 
     const TABLE = "soda_test_230_1";
-    const metadata = await getMetadata(TABLE);
+    const metadata = getMetadata(TABLE);
 
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
@@ -155,7 +149,7 @@ describe('230. soda12.js', () => {
   it('230.2 insertOne() and save()', async () => {
 
     const TABLE = "soda_test_230_2";
-    const metadata = await getMetadata(TABLE);
+    const metadata = getMetadata(TABLE);
 
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
@@ -193,7 +187,7 @@ describe('230. soda12.js', () => {
   it('230.3 Negative - client assigned keys are necessary', async () => {
 
     const TABLE = "soda_test_230_3";
-    const metadata = await getMetadata(TABLE);
+    const metadata = getMetadata(TABLE);
 
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
@@ -227,7 +221,7 @@ describe('230. soda12.js', () => {
   it('230.4 Negative - save without arguments', async () => {
 
     const TABLE = "soda_test_230_4";
-    const metadata = await getMetadata(TABLE);
+    const metadata = getMetadata(TABLE);
 
     const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
@@ -255,4 +249,69 @@ describe('230. soda12.js', () => {
     await conn.close();
 
   }); // 230.4
+
+  it('230.5 save() with multiple updates for the same key', async () => {
+
+    const TABLE = "soda_test_230_5";
+    const metadata = getMetadata(TABLE);
+
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE, { metaData: metadata });
+
+    const content1 = { id: 1, name: "Alice", office: "New York" };
+    const doc1 = soda.createDocument(content1, { key: "101" });
+    await coll.save(doc1);
+
+    // Update the same key with new content
+    const content2 = { id: 1, name: "Alice", office: "Boston" };
+    const doc2 = soda.createDocument(content2, { key: "101" });
+    await coll.save(doc2);
+
+    // Verify the final content for the key
+    const docs = await coll.find().getDocuments();
+    assert.strictEqual(docs.length, 1);
+    assert.strictEqual(docs[0].key, "101");
+    assert.deepStrictEqual(docs[0].getContent(), content2);
+
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 230.5
+
+  it('230.6 save() with different key column types', async () => {
+    const TABLE = "soda_test_230_8";
+    const metadata = getMetadata(TABLE, "CLIENT", "VARCHAR2");
+
+    const conn = await oracledb.getConnection(dbConfig);
+    const soda = conn.getSodaDatabase();
+    const coll = await soda.createCollection(TABLE, { metaData: metadata });
+
+    // Test with various key formats
+    const testCases = [
+      { key: "ABC123", content: { data: "test1" } },
+      { key: "user_001", content: { data: "test2" } },
+      { key: "12345", content: { data: "test3" } }
+    ];
+
+    for (const testCase of testCases) {
+      const doc = soda.createDocument(testCase.content, { key: testCase.key });
+      await coll.save(doc);
+    }
+    await conn.commit();
+
+    // Verify all documents were saved correctly
+    const docs = await coll.find().getDocuments();
+    assert.strictEqual(docs.length, testCases.length);
+    for (let i = 0; i < docs.length; i++) {
+      assert.strictEqual(docs[i].key, testCases[i].key);
+      assert.deepStrictEqual(docs[i].getContent(), testCases[i].content);
+    }
+
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
+    await conn.close();
+  }); // 230.6
 });
