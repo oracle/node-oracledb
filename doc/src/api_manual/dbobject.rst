@@ -89,7 +89,7 @@ The properties of a DbObject object are listed below.
 
     This read-only property is a number. When :attr:`dbObject.isCollection` is
     *true*, this will have the number of elements in the collection. It is
-    undefined for non-collections.
+    *undefined* for non-collections.
 
 .. attribute:: dbObject.name
 
