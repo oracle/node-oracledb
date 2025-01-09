@@ -20,6 +20,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for setting the :attr:`~oracledb.edition` when connecting to
+    the database.
+
 #)  Fixed error message in ``NJS-131`` to provide the correct range of the
     database object collection types.
 

@@ -853,17 +853,16 @@ Each of the configuration properties is described below.
 
     See :ref:`Edition-Based Redefinition <ebr>` for more information.
 
-    .. note::
-
-        This property can only be used in the node-oracledb Thick mode. See
-        :ref:`enablingthick`.
-
     **Example**
 
     .. code-block:: javascript
 
         const oracledb = require('oracledb');
         oracledb.edition = 'ed_2';
+
+    .. versionchanged:: 6.8
+
+        Support for this property was added in node-oracledb Thin mode.
 
 .. attribute:: oracledb.errorOnConcurrentExecute
 

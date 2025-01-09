@@ -153,7 +153,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - Yes - Out-of-Band (OOB) Connection Breaks not supported
       - Yes
     * - Edition Based Redefinition (EBR) (see :ref:`ebr`)
-      - No
+      - Yes
       - Yes
     * - SQL execution (see :ref:`sqlexecution`)
       - Yes

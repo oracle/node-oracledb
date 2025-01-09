@@ -213,15 +213,15 @@ updated and tested while production users are still accessing the
 original version. Once every user has begun using the objects in the new
 edition, the old objects can be dropped.
 
-.. note::
-
-    In this release, Edition-Based Redefinition is only supported in the
-    node-oracledb Thick mode. See :ref:`enablingthick`.
-
 To choose the edition, node-oracledb applications can set
 :attr:`oracledb.edition` globally, or specify a value
 when :ref:`creating a pool <createpoolpoolattrsedition>` or a
-:ref:`standalone connection <getconnectiondbattrsedition>`.
+:ref:`standalone connection <getconnectiondbattrsedition>`. You can also set
+the edition by using the ``ORA_EDITION`` environment variable. The edition
+value set as part of the connection parameters in
+:meth:`oracledb.createPool()` or :meth:`oracledb.getConnection()` takes
+precedence over the values specified in the :attr:`oracledb.edition` property
+or the ``ORA_EDITION`` environment variable.
 
 The example below shows how a PL/SQL function ``DISCOUNT`` can be
 created with two different implementations. The initial procedure is
