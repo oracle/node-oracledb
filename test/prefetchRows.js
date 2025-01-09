@@ -541,4 +541,3 @@ describe("147. prefetchRows.js", function() {
     });
   });
 });
-

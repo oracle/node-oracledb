@@ -30,8 +30,8 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "devDependencies": {
-    "mocha": "10.2.0",
-    "eslint": "8.15.0"
+    "eslint": "8.15.0",
+    "mocha": "10.2.0"
   },
   "scripts": {
     "test": "mocha --config test/opts/.mocharc.yaml",

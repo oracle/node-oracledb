@@ -30,8 +30,6 @@
  *   simplifying data management, while absent "_id" fields get generated
  *   unique "_id" keys upon write.
  *
- *   Refer: https://confluence.oraclecorp.com/confluence/x/kyQxpgE
- *
  *****************************************************************************/
 'use strict';
 

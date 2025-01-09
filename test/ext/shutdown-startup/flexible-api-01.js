@@ -57,7 +57,7 @@ describe('2. flexible-api-01.js', () => {
     };
 
     const conn = await oracledb.getConnection(dbaConfig);
-    if (conn.oracleServerVersion < 1201020000) {
+    if (conn.oracleServerVersion < 1201000200) {
       await conn.close();
       this.skip();
     }
