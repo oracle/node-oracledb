@@ -76,6 +76,7 @@ File Name                                                 | Description
 [`dbconfig.js`](dbconfig.js)                              | Common file used by examples for setting connection credentials
 [`dbmsoutputgetline.js`](dbmsoutputgetline.js)            | Show fetching DBMS_OUTPUT by binding buffers
 [`dbmsoutputpipe.js`](dbmsoutputpipe.js)                  | Show fetching DBMS_OUTPUT by using a pipelined table
+[`dbobjassocarray.js`](dbobjassocarray.js)                | Tests Associative Array-type dbObjects indexed by integer
 [`demodrop.js`](demodrop.js)                              | Drops the schema objects created by the examples
 [`demosetup.js`](demosetup.js)                            | Used to create common schema objects for the examples
 [`dmlrupd.js`](dmlrupd.js)                                | Example of DML RETURNING where multiple rows are matched

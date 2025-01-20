@@ -114,6 +114,13 @@ describe('200. dbObject1.js', () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       const testObj = new objClass(objData);
       assert.equal(testObj.length, undefined);
+
+      // Test if copy object works fine
+      const testObjCopy = testObj.copy();
+      assert.strictEqual(JSON.stringify(testObj), JSON.stringify(testObjCopy));
+      assert.equal(testObj.ID, testObjCopy.ID);
+      assert.equal(testObj.NAME, testObjCopy.NAME);
+
       const seq = 101;
 
       let result = await conn.execute(sql, [seq, testObj]);

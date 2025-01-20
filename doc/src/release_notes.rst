@@ -22,6 +22,9 @@ Common Changes
 #)  Added support for returning maximum identifier length allowed by the
     database using the new property :attr:`connection.maxIdentifierLength`.
 
+#)  Added :meth:`~dbObject.copy` method to create a deep copy of database
+    objects.
+
 Thin Mode Changes
 +++++++++++++++++
 

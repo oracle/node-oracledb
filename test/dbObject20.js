@@ -321,6 +321,23 @@ describe('290. dbObject20.js', () => {
       assert.equal(resultSet.length, 3);
       result.outBinds.p_cur2.close();
     }); // 290.1.8
+
+    it('290.1.9 copy an object with numeric/string values in NCHAR datatype', async () => {
+      const objData = {
+        ID: 201,
+        NAME: 'ABC'
+      };
+      const objClass = await conn.getDbObjectClass(TYPE);
+      const testObj = new objClass(objData);
+
+      const newObj = testObj.copy();
+      assert.strictEqual(newObj.ID, testObj.ID);
+      assert.strictEqual(newObj.NAME, testObj.NAME);
+
+      newObj.ID = 202;
+      assert.strictEqual(newObj.ID, 202);
+      assert.strictEqual(testObj.ID, 201);
+    }); // 290.1.9
   });
 
   describe('290.2 db Object tests with NVARCHAR2 datatype', () => {
@@ -873,6 +890,8 @@ describe('290. dbObject20.js', () => {
     const TYPE5 = 'NODB_TEST_VARCHAR_CHAR';
     const TYPE6 = 'NODB_TEST_VARCHAR_BYTE';
 
+    const TYPE7 = 'NODB_TEST_TBL_TBL'; // 2 levels of nesting
+
     const maxVarCharLen = 4;
     const maxVarNCharLen = 4;
     const maxVarRawLen = 10;
@@ -901,6 +920,9 @@ describe('290. dbObject20.js', () => {
         },
         {
           type: TYPE6, sql: `CREATE OR REPLACE TYPE ${TYPE6} IS TABLE OF VARCHAR2 (${maxVarChar2ByteLen} BYTE)`
+        },
+        {
+          type: TYPE7, sql: `CREATE OR REPLACE TYPE ${TYPE7} IS TABLE OF ${TYPE2}`
         }
       ];
 
@@ -912,6 +934,7 @@ describe('290. dbObject20.js', () => {
 
     after(async () => {
       if (conn) {
+        await testsUtil.dropType(conn, TYPE7);
         await testsUtil.dropType(conn, TYPE6);
         await testsUtil.dropType(conn, TYPE5);
         await testsUtil.dropType(conn, TYPE4);
@@ -922,11 +945,11 @@ describe('290. dbObject20.js', () => {
       }
     }); // after()
 
-    it('290.4.1 Invalid Values for nested property string ', async () => {
+    it('290.4.1 Invalid Values for nested property with collection', async () => {
       //prepare data.
       const expectedTBLEntries = [
         {
-          LINE_ID: 9999.231412342, // precision and scale of attributes inside object are ignored .
+          LINE_ID: 9999.231412342, // precision and scale of attributes inside object are ignored
           LINE_STR: "1".repeat(maxVarCharLen),
           LINE_FIXED_CHAR: "1".repeat(maxVarCharLen),
           LINE_NSTR: "Э".repeat(maxVarNCharLen),
@@ -946,15 +969,29 @@ describe('290. dbObject20.js', () => {
       ];
       const data = {
         HEADER_ID: 1,
-        TBL: [
-          expectedTBLEntries[0],
-          expectedTBLEntries[1]
-        ]
+        TBL: expectedTBLEntries
       };
       const pInClass = await conn.getDbObjectClass(TYPE3);
       const pOutClass = await conn.getDbObjectClass(TYPE3);
       const pInObj = new pInClass(data);
       const pOutObj = new pOutClass({}); //out obj inited as empty one
+
+      const pInObjCopy = pInObj.copy();
+      assert.strictEqual(JSON.stringify(pInObj), JSON.stringify(pInObjCopy));
+      assert.strictEqual(pInObjCopy.HEADER_ID, pInObj.HEADER_ID);
+      assert.strictEqual(pInObjCopy.TBL.length, pInObj.TBL.length);
+
+      // Delete the 2nd element in the collection of the copied object.
+      // Ensure that original object data is untouched.
+      pInObjCopy.TBL.deleteElement(1);
+      // The length doesn't change when deletions occur.
+      // So, we use the map size here.
+      assert.strictEqual(pInObjCopy.TBL.toMap().size, 1);
+      assert.strictEqual(pInObj.TBL.length, 2);
+
+      pInObjCopy.TBL[0].LINE_ID = 1000;
+      assert.strictEqual(pInObjCopy.TBL[0].LINE_ID, 1000);
+      assert.strictEqual(pInObj.TBL[0].LINE_ID, 9999.231412342);
 
       // create Procedure.
       const PROC = 'nodb_proc_test2029041';
@@ -1159,6 +1196,76 @@ describe('290. dbObject20.js', () => {
         /NJS-143:/
       );
     }); // 290.4.4
+
+    it('290.4.5 Multiple levels of nesting with collections', async function() {
+      // Multiple levels of nesting work in Thin mode only for now.
+      if (!oracledb.thin) this.skip();
+
+      //prepare data.
+      const expectedSubTBL1Entries = [
+        {
+          LINE_ID: 9999.231412342, // precision and scale of attributes inside object are ignored
+          LINE_STR: "1".repeat(maxVarCharLen),
+          LINE_FIXED_CHAR: "1".repeat(maxVarCharLen),
+          LINE_NSTR: "Э".repeat(maxVarNCharLen),
+          LINE_FIXED_NSTR: "Э".repeat(maxVarNCharLen),
+          LINE_ID2: -8,
+          RAWATTR: Buffer.from("A".repeat(maxVarRawLen))
+        },
+        {
+          LINE_ID: -8,
+          LINE_STR: "1".repeat(maxVarCharLen),
+          LINE_FIXED_CHAR: "1".repeat(maxVarCharLen),
+          LINE_NSTR: "Ő".repeat(maxVarNCharLen),
+          LINE_FIXED_NSTR: "Ő".repeat(maxVarNCharLen),
+          LINE_ID2: -1234,
+          RAWATTR: Buffer.from("B".repeat(maxVarRawLen))
+        }
+      ];
+
+      const expectedSubTBL2Entries = [
+        {
+          LINE_ID: 900.2314142, // precision and scale of attributes inside object are ignored
+          LINE_STR: "2".repeat(maxVarCharLen),
+          LINE_FIXED_CHAR: "2".repeat(maxVarCharLen),
+          LINE_NSTR: "Э".repeat(maxVarNCharLen),
+          LINE_FIXED_NSTR: "Э".repeat(maxVarNCharLen),
+          LINE_ID2: -14,
+          RAWATTR: Buffer.from("B".repeat(maxVarRawLen))
+        },
+        {
+          LINE_ID: -6,
+          LINE_STR: "3".repeat(maxVarCharLen),
+          LINE_FIXED_CHAR: "3".repeat(maxVarCharLen),
+          LINE_NSTR: "Ő".repeat(maxVarNCharLen),
+          LINE_FIXED_NSTR: "Ő".repeat(maxVarNCharLen),
+          LINE_ID2: -134,
+          RAWATTR: Buffer.from("C".repeat(maxVarRawLen))
+        }
+      ];
+      const data = [
+        expectedSubTBL1Entries,
+        expectedSubTBL2Entries
+      ];
+      const pInClass = await conn.getDbObjectClass(TYPE7);
+      const pInObj = new pInClass(data);
+
+      const pInObjCopy = pInObj.copy();
+      assert.strictEqual(JSON.stringify(pInObj), JSON.stringify(pInObjCopy));
+      assert.strictEqual(pInObjCopy.length, pInObj.length);
+
+      // Delete the 2nd element in the copied object.
+      // Ensure that original object data is untouched.
+      pInObjCopy.deleteElement(1);
+      // The length doesn't change when deletions occur.
+      // So, we use the map size here.
+      assert.strictEqual(pInObjCopy.toMap().size, 1);
+      assert.strictEqual(pInObj.length, 2);
+
+      pInObjCopy[0][0].LINE_ID = 1000;
+      assert.strictEqual(pInObjCopy[0][0].LINE_ID, 1000);
+      assert.strictEqual(pInObj[0][0].LINE_ID, 9999.231412342);
+    }); // 290.4.5
 
   });
 

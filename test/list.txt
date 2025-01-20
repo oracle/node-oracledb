@@ -4744,11 +4744,15 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     213.1 examples/selectvarray.js
 
 214. dbObject15.js
-    214.1 Getter() - access collection elements directly
-    214.2 Setter() - access collection element directly
-    214.3 Negative - cannot add more than maximum number of elements
-    214.4 Negative - delete the collection element directly
-    214.5 Negative - collection.deleteElement()
+    214.1 VARRAY DbObject collection type
+        214.1.1 Getter() - access collection elements directly
+        214.1.2 Setter() - access collection element directly
+        214.1.3 Negative - cannot add more than maximum number of elements
+        214.1.4 Negative - delete the collection element directly
+        214.1.5 Negative - collection.deleteElement()
+    214.2 Copy function with VARRAY DbObject collection type
+        214.2.1 Copy collection into another object and check all methods and properties
+        214.2.2 Update collection and then copy it and check all methods and properties
 
 215. dbObject16.js
     215.1 Collection of DATE, named Oracle type binds
@@ -5830,10 +5834,11 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         290.3.9 insert an object with buffer value with size 10
         290.3.10 insert an object with buffer value with size 100
     290.4 db Object tests with Invalid values to attributes
-        290.4.1 Invalid Values for nested property string
+        290.4.1 Invalid Values for nested property with collection
         290.4.2 Invalid Values for different datatypes
         290.4.3 Invalid Values for collection
         290.4.4 Verify table of VARCHAR2 with CHAR/BYTE specifier
+        290.4.5 Multiple levels of nesting with collections
     290.5 Associative Arrays fetch
         290.5.1 verify associative array outbinds
     290.6 db Object tests with XML Value type

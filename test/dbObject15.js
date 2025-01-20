@@ -34,6 +34,7 @@
 const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('214. dbObject15.js', () => {
 
@@ -50,80 +51,182 @@ describe('214. dbObject15.js', () => {
     { SHIRTNUMBER: 14, NAME: 'Emmet' }
   ];
 
-  before(async () => {
-    conn = await oracledb.getConnection(dbConfig);
+  describe('214.1 VARRAY DbObject collection type', function() {
 
-    let plsql = `
-      CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
-        shirtnumber NUMBER,
-        name        VARCHAR2(20)
+    before(async () => {
+      conn = await oracledb.getConnection(dbConfig);
+
+      let plsql = `
+        CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
+          shirtnumber NUMBER,
+          name        VARCHAR2(20)
+        );
+      `;
+      await conn.execute(plsql);
+
+      plsql = `
+        CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(5) OF ${PLAYER_T};
+      `;
+      await conn.execute(plsql);
+
+      const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
+      FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
+    }); // before()
+
+    after(async () => {
+      let sql = `DROP TYPE ${TEAM_T} FORCE`;
+      await conn.execute(sql);
+
+      sql = `DROP TYPE ${PLAYER_T} FORCE`;
+      await conn.execute(sql);
+
+      await conn.close();
+      conn = null;
+    }); // after()
+
+    it('214.1.1 Getter() - access collection elements directly', function() {
+      for (let i = 0, element; i < FrisbeePlayers.length; i++) {
+        element = FrisbeeTeam[i];
+        assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+        assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
+      }
+      assert.equal(FrisbeeTeam.length, 5);
+    }); // 214.1.1
+
+    it('214.1.2 Setter() - access collection element directly', function() {
+      const substitute = {SHIRTNUMBER: 15, NAME: 'Chris'};
+      FrisbeeTeam[0] = substitute;
+      assert.strictEqual(FrisbeeTeam[0].SHIRTNUMBER, substitute.SHIRTNUMBER);
+      assert.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
+
+      // Verify that the other elements are not impacted
+      for (let i = 1, element; i < FrisbeePlayers.length; i++) {
+        element = FrisbeeTeam[i];
+        assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
+        assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
+      }
+    }); // 214.1.2
+
+    it('214.1.3 Negative - cannot add more than maximum number of elements', function() {
+      assert.throws(
+        () => FrisbeeTeam.append({SHIRTNUMBER: 9, NAME: 'Diogo'}),
+        /NJS-131:/
       );
-    `;
-    await conn.execute(plsql);
+    }); // 214.1.3
 
-    plsql = `
-      CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(5) OF ${PLAYER_T};
-    `;
-    await conn.execute(plsql);
+    it('214.1.4 Negative - cannot delete the VARRAY collection element directly', function() {
+      assert.throws(
+        () => delete FrisbeeTeam[1],
+        /NJS-133:/
+      );
+    }); // 214.1.4
 
-    const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
-    FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
-  }); // before()
-
-  after(async () => {
-    let sql = `DROP TYPE ${TEAM_T} FORCE`;
-    await conn.execute(sql);
-
-    sql = `DROP TYPE ${PLAYER_T} FORCE`;
-    await conn.execute(sql);
-
-    await conn.close();
-  }); // after()
-
-  it('214.1 Getter() - access collection elements directly', function() {
-    for (let i = 0, element; i < FrisbeePlayers.length; i++) {
-      element = FrisbeeTeam[i];
-      assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-      assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
-    }
-    assert.equal(FrisbeeTeam.length, 5);
+    it('214.1.5 Negative - collection.deleteElement()', function() {
+      assert.throws(
+        function() {
+          const firstIndex = FrisbeeTeam.getFirstIndex();
+          FrisbeeTeam.deleteElement(firstIndex);
+        },
+        /NJS-133:/
+      );
+    }); // 214.1.5
   }); // 214.1
 
-  it('214.2 Setter() - access collection element directly', function() {
-    const substitute = {SHIRTNUMBER: 15, NAME: 'Chris'};
-    FrisbeeTeam[0] = substitute;
-    assert.strictEqual(FrisbeeTeam[0].SHIRTNUMBER, substitute.SHIRTNUMBER);
-    assert.strictEqual(FrisbeeTeam[0].NAME, substitute.NAME);
+  describe('214.2 Copy function with VARRAY DbObject collection type', function() {
+    let isRunnable = true;
+    before(async function() {
+      // Skip the copy tests for varrays for Oracle  Client libraries <= 12.1
+      // as the contents are not copied correctly.
+      if (testsUtil.getClientVersion() < 1202000000) {
+        isRunnable = false;
+        this.skip();
+      }
 
-    // Verify that the other elements are not impacted
-    for (let i = 1, element; i < FrisbeePlayers.length; i++) {
-      element = FrisbeeTeam[i];
-      assert.strictEqual(element.SHIRTNUMBER, FrisbeePlayers[i].SHIRTNUMBER);
-      assert.strictEqual(element.NAME, FrisbeePlayers[i].NAME);
-    }
+      conn = await oracledb.getConnection(dbConfig);
+
+      let plsql = `
+        CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
+          shirtnumber NUMBER,
+          name        VARCHAR2(20)
+        );
+      `;
+      await conn.execute(plsql);
+
+      plsql = `
+        CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
+      `;
+      await conn.execute(plsql);
+
+      const TeamTypeClass = await conn.getDbObjectClass(TEAM_T);
+      FrisbeeTeam = new TeamTypeClass(FrisbeePlayers);
+    }); // before()
+
+    after(async () => {
+      if (!isRunnable) return;
+
+      let sql = `DROP TYPE ${TEAM_T} FORCE`;
+      await conn.execute(sql);
+
+      sql = `DROP TYPE ${PLAYER_T} FORCE`;
+      await conn.execute(sql);
+
+      await conn.close();
+    }); // after()
+
+    it('214.2.1 Copy collection into another object and check all methods and properties', function() {
+      const FrisbeeTeam2 = FrisbeeTeam.copy();
+      assert.strictEqual(JSON.stringify(FrisbeeTeam), JSON.stringify(FrisbeeTeam2));
+
+      for (let i = 0; i < FrisbeePlayers.length; i++) {
+        assert.strictEqual(FrisbeeTeam2[i].SHIRTNUMBER, FrisbeeTeam[i].SHIRTNUMBER);
+        assert.strictEqual(FrisbeeTeam2[i].NAME, FrisbeeTeam[i].NAME);
+      }
+      assert.strictEqual(FrisbeeTeam.length, FrisbeePlayers.length);
+      assert.strictEqual(FrisbeeTeam2.length, FrisbeeTeam.length);
+
+      // Try removing the 1st player from the copied 'FrisbeeTeam' object
+      // Will throw NJS-133 error as elements of VARRAY cannot be deleted
+      assert.throws(
+        function() {
+          FrisbeeTeam2.deleteElement(FrisbeeTeam2.getFirstIndex());
+        },
+        /NJS-133:/
+      );
+      FrisbeeTeam2.append({SHIRTNUMBER: 9, NAME: 'Diogo'});
+      assert.strictEqual(FrisbeeTeam2[FrisbeePlayers.length].SHIRTNUMBER, 9);
+      assert.strictEqual(FrisbeeTeam2[FrisbeePlayers.length].NAME, 'Diogo');
+
+      // Ensure that old object length does not change!
+      assert.strictEqual(FrisbeeTeam2.length, FrisbeeTeam.length + 1);
+
+    }); // 214.2.1
+
+    it('214.2.2 Update collection and then copy it and check all methods and properties', function() {
+      FrisbeeTeam.append({SHIRTNUMBER: 9, NAME: 'Diogo'});
+      assert.strictEqual(FrisbeeTeam[FrisbeePlayers.length].SHIRTNUMBER, 9);
+      assert.strictEqual(FrisbeeTeam[FrisbeePlayers.length].NAME, 'Diogo');
+
+      // check if the copy method works correctly after append
+      const FrisbeeTeam2 = FrisbeeTeam.copy();
+      assert.strictEqual(JSON.stringify(FrisbeeTeam), JSON.stringify(FrisbeeTeam2));
+
+      for (let i = 0; i < FrisbeeTeam.length; i++) {
+        assert.strictEqual(FrisbeeTeam2[i].SHIRTNUMBER, FrisbeeTeam[i].SHIRTNUMBER);
+        assert.strictEqual(FrisbeeTeam2[i].NAME, FrisbeeTeam[i].NAME);
+      }
+      assert.strictEqual(FrisbeeTeam2.length, FrisbeeTeam.length);
+      assert.strictEqual(FrisbeeTeam.length, FrisbeePlayers.length + 1);
+
+      // Try removing the 1st player from the copied 'FrisbeeTeam' object
+      // Will throw NJS-133 error as elements of VARRAY cannot be deleted
+      assert.throws(
+        function() {
+          FrisbeeTeam2.deleteElement(FrisbeeTeam2.getFirstIndex());
+        },
+        /NJS-133:/
+      );
+
+    }); // 214.2.2
   }); // 214.2
 
-  it('214.3 Negative - cannot add more than maximum number of elements', function() {
-    assert.throws(
-      () => FrisbeeTeam.append({SHIRTNUMBER: 9, NAME: 'Diogo'}),
-      /NJS-131:/
-    );
-  }); // 214.3
-
-  it('214.4 Negative - Cannot delete the VARRAY collection element directly', function() {
-    assert.throws(
-      () => delete FrisbeeTeam[1],
-      /NJS-133:/
-    );
-  }); // 214.4
-
-  it('214.5 Negative - collection.deleteElement()', function() {
-    assert.throws(
-      function() {
-        const firstIndex = FrisbeeTeam.getFirstIndex();
-        FrisbeeTeam.deleteElement(firstIndex);
-      },
-      /NJS-133:/
-    );
-  }); // 214.5
 });
