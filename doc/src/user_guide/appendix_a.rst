@@ -197,10 +197,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Continuous Query Notification (CQN) (see :ref:`cqn`)
       - No
       - Yes
-    * - Advanced Queuing (AQ) (see :ref:`aq`)
-      - No
-      - Yes
-    * - AQ: Transactional Event Queue (TxEventQ)
+    * - Oracle Transactional Event Queue (TxEventQ) and classic Advanced Queuing (AQ) (see :ref:`aq`)
       - No
       - Yes
     * - Call timeouts (see :attr:`connection.callTimeout`)

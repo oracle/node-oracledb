@@ -67,6 +67,8 @@ AqQueue Properties
           - An integer value that defines the position in the queue of the message that is to be dequeued. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_NAV_FIRST_MSG <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_MSG <oracledbconstantsaq>`.
         * - ``transformation``
           - A String that defines the transformation that will take place on messages when they are dequeued.
+
+            This attribute is not supported in Transactional Event Queues (TxEventQ).
         * - ``visibility``
           - An integer value that defines whether the dequeue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
         * - ``wait``
@@ -109,6 +111,8 @@ AqQueue Properties
         * - ``transformation``
           - String
           - Defines the transformation that will take place when messages are enqueued.
+
+            This attribute is not supported in Transactional Event Queues (TxEventQ).
         * - ``visibility``
           - Integer
           - Defines whether the enqueue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.

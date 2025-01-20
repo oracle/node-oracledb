@@ -1,42 +1,73 @@
 .. _aq:
 
-**********************************
-Using Oracle Advanced Queuing (AQ)
-**********************************
+************************************************************
+Using Oracle Transactional Event Queues and Advanced Queuing
+************************************************************
 
-Oracle Advanced Queuing allows applications to use producer-consumer
-message passing. Queuing is highly configurable and scalable, providing
-a great way to distribute workloads. Messages can be queued by multiple
-producers. Different consumers can filter messages. Messages can also be
-transformed or propagated to queues in other databases. Oracle AQ is
-available in all editions of the database, and has interfaces in many
-languages, allowing different applications to communicate. For more
-details about AQ and its options, refer to the `Oracle Advanced Queuing
-User’s Guide <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=ADQUE>`__.
+`Oracle Transactional Event Queues and Advanced Queuing <https://www.oracle.
+com/pls/topic/lookup?ctx=dblatest&id=ADQUE>`__ are highly configurable and
+scalable messaging features of Oracle Database, providing a great way to
+distribute workloads. They allow applications to use producer-consumer message
+passing. Messages can be queued by multiple producers. Different consumers can
+filter messages. Messages can also be transformed or propagated to queues in
+other databases. Oracle Transactional Event Queues (TxEventQ) and Advanced
+Queuing (AQ) "Classic" queues have interfaces in many languages, allowing
+different applications to communicate. Both TxEventQ and AQ queues support
+sending and receiving of various payloads, such as RAW values, JSON, JMS, and
+objects. TxEventQ queues use a highly optimized implementation of Advanced
+Queuing. They were previously called AQ Sharded Queues.
 
 .. note::
 
-    In this release, Oracle AQ is only supported in node-oracledb Thick mode.
-    See :ref:`enablingthick`.
+    In this release, TxEventQ and AQ classic queues are only supported in
+    node-oracledb Thick mode. See :ref:`enablingthick`.
 
-Node-oracledb APIs for AQ were introduced in node-oracledb 4.0. With
-earlier versions, use AQ’s PL/SQL interface.
+The same node-oracledb APIs are used for TxEventQ and AQ classic queues and
+were introduced in node-oracledb 4.0. With earlier versions, use AQ’s PL/SQL
+interface.
 
-Oracle Advanced Queues are represented in node-oracledb by several
-classes. A single top level :ref:`AqQueue object <aqqueueclass>` in
+Both TxEventQ and AQ classic queues are represented in node-oracledb by
+several classes. A single top level :ref:`AqQueue object <aqqueueclass>` in
 node-oracledb contains :attr:`aqQueue.deqOptions` and
 :attr:`aqQueue.enqOptions` object properties which can be used
-to change queue behavior. A single AqQueue object can be used for
-enqueuing, or dequeuing, or both at the same time.
+to change queue behavior. TxEventQ queues do not support the
+``transformation`` attribute of :attr:`aqQueue.enqOptions` and
+:attr:`aqQueue.deqOptions` properties, and
+:ref:`Recipient Lists <aqrecipientlists>`. A single AqQueue object can be
+used for enqueuing, or dequeuing, or both at the same time.
 
 Messages are enqueued by passing them to an enqueue method directly, or
 by wrapping them in a :meth:`JavaScript object <aqQueue.enqOne()>`. Dequeued
 messages are returned as an :ref:`AqMessage object <aqmessageclass>`.
 
-The following examples show how to enqueue and dequeue messages in
-node-oracledb. Before using a queue in node-oracledb, it must be created
-in the database using the DBMS_AQADM PL/SQL package. For these examples,
+There are differences in the payload types supported by TxEventQ and AQ
+classic queues as detailed below.
+
+**Classic Advanced Queuing (AQ) Support**
+
+- RAW, named Oracle objects, and JMS payloads are supported.
+
+- The JSON payload requires Oracle Client libraries 21c (or later) and Oracle
+  Database 21c (or later).
+
+There are examples of AQ Classic Queues in the `GitHub examples
+<https://github.com/oracle/node-oracledb/tree/main/examples>`__ directory.
+
+**Transactional Event Queue (TxEventQ) Support**
+
+- RAW and named Oracle object payloads are supported for single and array
+  message enqueuing and dequeuing when using Oracle Client 19c (or later) and
+  connected to Oracle Database 19c (or later).
+
+- JMS payloads are supported for single and array message enqueuing and
+  dequeuing when using Oracle Client 19c (or later) and Oracle Database 23ai.
+
+- JSON payloads are supported for single message enqueuing and dequeuing when
+  using Oracle Client libraries 21c (or later) and Oracle Database 21c (or
+  later). Array enqueuing and dequeuing is not supported for JSON payloads.
+
+Before using a queue in node-oracledb, it must be created in the database
+using the DBMS_AQADM PL/SQL package. For these examples,
 create a new Oracle user ``demoqueue`` with permission to create and use
 queues. Connect in SQL*Plus as SYSDBA and run:
 
@@ -55,8 +86,8 @@ When you have finished testing, remove the DEMOQUEUE schema.
 Sending Simple AQ Messages
 ==========================
 
-You can use AQ to send RAW payloads by using a String or Buffer as the
-message.
+You can use TxEventQ and classic AQ queues to send RAW payloads by using a
+String or Buffer as the message.
 
 Before enqueuing and dequeuing messages, you need to create and start queues
 in Oracle Database. For example, to create a queue for simple messaging, use
@@ -90,6 +121,16 @@ You can also explicitly set the :ref:`payloadType <getqueueoptions>`
 attribute to ``oracledb.DB_TYPE_RAW`` in :meth:`connection.getQueue()`::
 
     connection.getQueue(queueName, { payloadType: oracledb.DB_TYPE_RAW });
+
+To create a Transactional Event Queue for RAW payloads:
+
+.. code-block:: sql
+
+    BEGIN
+        DBMS_AQADM.CREATE_SHARDED_QUEUE('RAW_SHQ', QUEUE_PAYLOAD_TYPE=>'RAW');
+        DBMS_AQADM.START_QUEUE('RAW_SHQ');
+    END;
+    /
 
 To enqueue a single, simple message, run:
 
@@ -170,12 +211,12 @@ This will print an identifier like::
 Sending Oracle Database JSON AQ Messages
 ========================================
 
-Starting from Oracle Database 21c, Advanced Queuing supports the JSON
-payloads. To use this payload type, the Oracle Client libraries must also be
-version 21 or later.
+Starting from Oracle Database 21c, Transactional Event Queues (TxEventQ) and
+classic Advanced Queuing (AQ) support JSON payloads. To use this payload type,
+Oracle Client libraries must also be version 21 or later.
 
-You can use AQ to send JSON payloads by using a JavaScript object as the
-message.
+You can use TxEventQ and classic AQ to send JSON payloads by using a
+JavaScript object as the message.
 
 Before enqueuing and dequeuing messages, you need to create and start queues
 in Oracle Database. For example, to create a queue suitable for sending JSON
@@ -650,6 +691,9 @@ This prints::
     5. empName : Employee #3
     6. empId : 103
 
+Transactional event queues do not support array enqueuing and dequeuing for
+JSON payloads.
+
 .. _aqnotifications:
 
 Advanced Queuing Notifications
@@ -699,11 +743,12 @@ database must be able to connect back to node-oracledb.
 Recipient Lists
 ===============
 
-A list of recipient names can be associated with a message at the time a
-message is enqueued. This allows a limited set of recipients to dequeue
-each message. The recipient list associated with the message overrides
-the queue subscriber list, if there is one. The recipient names need not
-be in the subscriber list but can be, if desired.
+AQ Classic Queues support Recipient Lists. A list of recipient names can be
+associated with a message at the time a message is enqueued. This allows a
+limited set of recipients to dequeue each message. The recipient list
+associated with the message overrides the queue subscriber list, if there is
+one. The recipient names need not be in the subscriber list but can be, if
+desired.
 
 To dequeue a message, the ``consumerName`` attribute can be set to one
 of the recipient names. The original message recipient list is not
