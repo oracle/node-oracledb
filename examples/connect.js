@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -70,8 +70,11 @@ async function run() {
   try {
     // Get a non-pooled connection
     connection = await oracledb.getConnection(dbConfig);
-
     console.log('Connection was successful!');
+
+    // Check some connection properties
+    console.log('Maximum Open Cursors:', connection.maxOpenCursors);
+    console.log('Maximum Identifier Length:', connection.maxIdentifierLength);
 
   } catch (err) {
     console.error(err);

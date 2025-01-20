@@ -4615,6 +4615,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     193.8 maximum cursors that can be opened on a connection
     193.9 transactionInProgress = false on a connection for query
     193.10 transactionInProgress = true on a connection
+    193.11 maximum identifier length
 
 196. getDataOfLob.js
     196.1 getData() works on CLOB

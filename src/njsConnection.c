@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2024, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -49,6 +49,7 @@ NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getExternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInstanceName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getMaxOpenCursors);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getMaxIdentifierLength);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersion);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersionString);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getQueue);
@@ -156,6 +157,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "getInternalName", NULL, njsConnection_getInternalName, NULL, NULL, NULL,
             napi_default, NULL },
     { "getMaxOpenCursors", NULL, njsConnection_getMaxOpenCursors, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "getMaxIdentifierLength", NULL, njsConnection_getMaxIdentifierLength, NULL, NULL,
             NULL, napi_default, NULL },
     { "getOracleServerVersion", NULL, njsConnection_getOracleServerVersion,
             NULL, NULL, NULL, napi_default, NULL },
@@ -1232,6 +1235,29 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getMaxOpenCursors, 0, NULL)
             return njsUtils_throwErrorDPI(env, globals);
         NJS_CHECK_NAPI(env, napi_create_uint32(env, maxOpenCursors,
                 returnValue))
+    }
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsConnection_getMaxIdentifierLength()
+//   Get accessor of "maxIdentifierLength" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getMaxIdentifierLength, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    dpiConnInfo connInfo;
+
+    if (conn->handle) {
+        if (dpiConn_getInfo(conn->handle, &connInfo) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        // The check below is made, because Oracle Client does not return the
+        // max identifier length reliably when using Oracle Client
+        // 12.1 (or lower) to connect to Oracle Database 12.2 (or higher).
+        // See https://github.com/oracle/python-oracledb/issues/395
+        if (connInfo.maxIdentifierLength != 0)
+            NJS_CHECK_NAPI(env, napi_create_uint32(env, connInfo.maxIdentifierLength,
+                    returnValue))
     }
     return true;
 }

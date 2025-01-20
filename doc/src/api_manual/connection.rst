@@ -191,6 +191,20 @@ The properties of a *Connection* object are listed below.
     associated with the connection. It returns the same value as the SQL expression
     ``sys_context('userenv', 'instance_name')``.
 
+.. attribute:: connection.maxIdentifierLength
+
+    .. versionadded:: 6.8
+
+    This read-only attribute specifies the maximum database identifier length
+    in bytes supported by the database to which the connection has been
+    established.  See `Database Object Naming Rules
+    <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+    id=GUID-75337742-67FD-4EC0-985F-741C93D918DA>`__. The value may be
+    *undefined*, *30*, or *128*. The value *undefined* indicates the size
+    cannot be reliably determined by node-oracledb, which occurs when using
+    Oracle Client libraries 12.1 (or older) to connect to Oracle Database
+    12.2, or later.
+
 .. attribute:: connection.maxOpenCursors
 
     .. versionadded:: 6.3

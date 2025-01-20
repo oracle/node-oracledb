@@ -35,7 +35,7 @@ root_doc = master_doc = 'index'
 
 # General substitutions.
 project = 'node-oracledb'
-copyright = u'2015, 2024, Oracle and/or its affiliates'
+copyright = u'2015, 2025, Oracle and/or its affiliates'
 author = 'Oracle'
 
 # The default replacements for |version| and |release|, also used in various

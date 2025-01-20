@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -235,4 +235,11 @@ describe('193. connProps.js', function() {
     await conn.execute(`DROP TABLE ${TABLE} PURGE`);
     await conn.close();
   }); // 193.10
+
+  it('193.11 maximum identifier length', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    if (conn.maxIdentifierLength)
+      assert.strictEqual(typeof conn.maxIdentifierLength, "number");
+    await conn.close();
+  }); // 193.11
 });
