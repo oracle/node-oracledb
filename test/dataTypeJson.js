@@ -217,7 +217,7 @@ describe('244.dataTypeJson.js', function() {
         "key23": [new oracledb.SparseVector(
           {
             values: new Float64Array([-992.1, 994.3]),
-            indices: new Uint8Array([0, 2]),
+            indices: new Uint32Array([0, 2]),
             numDimensions: 4
           })]
       };

@@ -166,7 +166,7 @@ async function run() {
       /ORA-51803:/
     );
 
-    const sparseQueryVec = new oracledb.SparseVector({ values: queryVector, indices: [2, 4], numDimensions: 4 });
+    const sparseQueryVec = new oracledb.SparseVector({ values: queryVector, indices: [2, 3], numDimensions: 4 });
     console.log('vector distance with Query ', queryVector);
     console.log(await connection.execute(`select vector_distance (sparseF64, :1) from ${tableName}`, [sparseQueryVec]));
 
