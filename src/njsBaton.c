@@ -822,6 +822,10 @@ bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
             baton->globals->jsJsonIdConstructor, &baton->jsJsonIdConstructor))
 
+    // acquire the SparseVector constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsSparseVectorConstructor, &baton->jsSparseVectorConstructor))
+
     return true;
 }
 
@@ -837,14 +841,22 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
     size_t byteLength = 0;
     const size_t bufferOffset = 0;
     void *destData = NULL;
+    void *destDataIndices = NULL;
     napi_typedarray_type type = napi_int8_array;
     size_t numElem = 0;
-    napi_value arrBuf;
+    napi_value arrBuf, arrBufIndices;
+    napi_value valueArray, indexArray, numDims;
+    napi_value retSparseObject;
 
     if (dpiVector_getValue(vector, &vectorInfo) < 0) {
         return njsBaton_setErrorDPI(baton);
     }
-    numElem = vectorInfo.numDimensions;
+    if (vectorInfo.numSparseValues) {
+        // For sparse number of non-zero elements.
+        numElem = vectorInfo.numSparseValues;
+    } else {
+        numElem = vectorInfo.numDimensions;
+    }
 
     switch(vectorInfo.format) {
         case DPI_VECTOR_FORMAT_FLOAT64:
@@ -869,12 +881,38 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
             return njsBaton_setErrorUnsupportedVectorFormat
                             (baton, vectorInfo.format);
     }
-    byteLength = elementLength * numElem;
-    NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, byteLength, 
-            &destData, &arrBuf))
-    NJS_CHECK_NAPI(env, napi_create_typedarray(
-            env, type, numElem, arrBuf, bufferOffset, value))
-    memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+    if (vectorInfo.numSparseValues) {
+        // Create values property.
+        byteLength = elementLength * numElem;
+        NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, byteLength,
+                &destData, &arrBuf))
+        memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+        NJS_CHECK_NAPI(env, napi_create_typedarray(env, type,
+                numElem, arrBuf, bufferOffset, &valueArray))
+
+        //Create indices property.
+        NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, 4 * numElem,
+                &destDataIndices, &arrBufIndices))
+        memcpy(destDataIndices, vectorInfo.sparseIndices, 4 * numElem);
+        NJS_CHECK_NAPI(env, napi_create_typedarray(env, napi_uint32_array,
+                numElem, arrBufIndices, bufferOffset, &indexArray))
+
+        // Create an object with values, indices and numDimensions properties
+        NJS_CHECK_NAPI(env, napi_create_object(env, &retSparseObject))
+        NJS_CHECK_NAPI(env, napi_create_uint32(env, vectorInfo.numDimensions, &numDims))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, retSparseObject, "numDimensions", numDims));
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, retSparseObject, "values", valueArray))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, retSparseObject, "indices", indexArray))
+        NJS_CHECK_NAPI(env, napi_new_instance(env, baton->jsSparseVectorConstructor, 1,
+                &retSparseObject, value))
+    } else {
+        byteLength = elementLength * numElem;
+        NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, byteLength,
+                &destData, &arrBuf))
+        memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+        NJS_CHECK_NAPI(env, napi_create_typedarray(env, type, numElem, arrBuf,
+                bufferOffset, value))
+    }
     return true;
 }
 

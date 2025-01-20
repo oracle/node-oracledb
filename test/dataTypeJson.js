@@ -42,6 +42,7 @@ describe('244.dataTypeJson.js', function() {
   let connection;
   let isRunnable = false;
   let isOracle_23_4 = false;
+  let isOracle_23_6 = false;
   const tableName = "nodb_json";
 
   const jsonVals = assist.jsonValues;
@@ -58,6 +59,11 @@ describe('244.dataTypeJson.js', function() {
     // for vector and long field names support
     isOracle_23_4 = connection.oracleServerVersion >= 2304000000
       && (oracledb.thin || oracledb.oracleClientVersion >= 2304000000);
+
+    // Check if we are running the latest Oracle Server and Client versions
+    // for Sparse vector
+    isOracle_23_6 = connection.oracleServerVersion >= 2306000000
+      && (oracledb.thin || oracledb.oracleClientVersion >= 2306000000);
 
     if (!isRunnable) {
       this.skip();
@@ -206,6 +212,15 @@ describe('244.dataTypeJson.js', function() {
         keyBuf: Buffer.from("A Raw")
       };
       const jsonVal22 = { "key22": [new Uint8Array([20, 10])]};
+      const sparseRowEntry = 23;
+      const jsonVal23 = {
+        "key23": [new oracledb.SparseVector(
+          {
+            values: new Float64Array([-992.1, 994.3]),
+            indices: new Uint8Array([0, 2]),
+            numDimensions: 4
+          })]
+      };
       const binds = [
         [1, jsonVal1],
         [2, jsonVal2],
@@ -237,6 +252,9 @@ describe('244.dataTypeJson.js', function() {
         binds.push([21, jsonVal21]);
         binds.push([22, jsonVal22]);
       }
+      if (isOracle_23_6) {
+        binds.push([23, jsonVal23]);
+      }
       binds.forEach((element, index) => {
         binds[index].push(connection.encodeOSON(element[1]));
       });
@@ -251,14 +269,26 @@ describe('244.dataTypeJson.js', function() {
       };
       let result = await connection.executeMany(sql, binds, options);
       assert.strictEqual(result.rowsAffected, binds.length);
-      sql = "SELECT * FROM " + tableName + " ORDER BY id";
+      sql = `SELECT * FROM ${tableName} where id < ${sparseRowEntry} ORDER BY id`;
       result = await connection.execute(sql);
-      const retRows = result.rows;
+      let retRows = result.rows;
       retRows.forEach((element, index) => {
         assert.deepStrictEqual(binds[index][1], connection.decodeOSON(element[2]));
         assert.deepStrictEqual(binds[index][0], element[0]);
         assert.deepStrictEqual(binds[index][1], element[1]);
       });
+      if (isOracle_23_6) {
+        sql = `SELECT * FROM ${tableName} where id >= ${sparseRowEntry} ORDER BY id`;
+        result = await connection.execute(sql);
+        retRows = result.rows;
+        retRows.forEach((element, index) => {
+          const sparseData = connection.decodeOSON(element[2]);
+          const sparseBindsIndex = index + sparseRowEntry - 1;
+          assert.deepStrictEqual(JSON.stringify(binds[sparseBindsIndex][1]), JSON.stringify(sparseData));
+          assert.deepStrictEqual(binds[sparseBindsIndex][0], element[0]);
+          assert.deepStrictEqual(JSON.stringify(binds[sparseBindsIndex][1]), JSON.stringify(element[1]));
+        });
+      }
     }); // 244.3.1
 
   }); // 244.3

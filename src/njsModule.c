@@ -127,6 +127,7 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsDecodeVectorFn);
     NJS_DELETE_REF_AND_CLEAR(globals->jsEncodeVectorFn);
     NJS_DELETE_REF_AND_CLEAR(globals->jsJsonIdConstructor);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsSparseVectorConstructor);
     free(globals);
 }
 
@@ -194,6 +195,12 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
             &temp))
     NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
                 &globals->jsJsonIdConstructor))
+
+    // get the SparseVector class
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings, "_SparseVector",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+                &globals->jsSparseVectorConstructor))
 
     // store a reference to the _makeDate() function
     NJS_CHECK_NAPI(env, napi_get_named_property(env, settings,

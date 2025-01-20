@@ -475,6 +475,7 @@ struct njsBaton {
     napi_value jsDecodeVectorFn;
     napi_value jsEncodeVectorFn;
     napi_value jsJsonIdConstructor;
+    napi_value jsSparseVectorConstructor;
 
     // calling object value (used for setting a reference on created objects)
     napi_value jsCallingObj;
@@ -565,6 +566,7 @@ struct njsModuleGlobals {
     napi_ref jsDecodeVectorFn;
     napi_ref jsEncodeVectorFn;
     napi_ref jsJsonIdConstructor;
+    napi_ref jsSparseVectorConstructor;
 };
 
 // data for class Pool exposed to JS.

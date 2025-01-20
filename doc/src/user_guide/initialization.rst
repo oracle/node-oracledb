@@ -500,51 +500,56 @@ explicitly specified or a default location will be used.  Do one of:
 
 .. _environmentvariables:
 
-Oracle Environment Variables for node-oracledb Thick Mode
-=========================================================
+Oracle Environment Variables for node-oracledb
+==============================================
 
-Some common environment variables that influence node-oracledb in Thick mode
-are shown below. The variables that may be needed depend on how Node.js is
-installed, how you connect to the database, and what optional settings are
-desired. It is recommended to set Oracle variables in the environment before
-invoking Node.js, however they may also be set in application code as long as
-they are set before node-oracledb is first used. System environment variables
-like ``LD_LIBRARY_PATH`` must be set before Node.js starts.
+Some common environment variables that influence node-oracledb are shown
+below. The variables that may be needed depend on how Node.js is installed,
+how you connect to the database, and what optional settings are desired. It is
+recommended to set Oracle variables in the environment before invoking
+Node.js, however they may also be set in application code as long as they are
+set before node-oracledb is first used. System environment variables like
+``LD_LIBRARY_PATH`` must be set before Node.js starts.
 
-.. note::
-
-    The variables listed below are only supported in the node-oracledb Thick
-    mode, with the exception of the ``TNS_ADMIN`` and ``ORA_SDTZ`` which
-    are also supported in the node-oracledb Thin mode.
-
-.. list-table-with-summary:: Common Oracle Environment Variables
+.. list-table-with-summary:: Common Oracle Environment Variables supported by node-oracledb
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
-    :widths: 20 30
-    :summary: The first column displays the common Oracle Environment Variable. The second column, Purpose, describes what the environment variable is used for.
+    :widths: 20 40 10
+    :name: _oracle_environment_variables
+    :summary: The first column displays the common Oracle Environment Variable. The second column, Purpose, describes what the environment variable is used for. The third column displays whether the environment variable can be used in the node-oracledb Thin mode, Thick mode, or both modes.
 
     * - Oracle Environment Variables
       - Purpose
+      - Node-oracledb Mode
     * - ``LD_LIBRARY_PATH``
       - The library search path for Linux and some UNIX platforms. Set this to the directory containing the Oracle Client libraries, for example ``/opt/oracle/instantclient_23_5`` or ``$ORACLE_HOME/lib``. The variable needs to be set in the environment before Node.js is invoked. The variable is not needed if the libraries are located by an alternative method, such as from running ``ldconfig``. On some UNIX platforms, an OS specific equivalent such as ``LIBPATH`` or ``SHLIB_PATH`` is used instead of ``LD_LIBRARY_PATH``.
-    * - ``PATH``
-      - The library search path for Windows should include the location where ``OCI.DLL`` is found. Not needed if you pass :ref:`libDir <odbinitoracleclientattrsopts>` when calling :meth:`oracledb.initOracleClient()`.
-    * - ``TNS_ADMIN``
-      - The location of the optional :ref:`Oracle Net configuration files <tnsadmin>` and :ref:`Oracle Client configuration files <oraaccess>`, including ``tnsnames.ora``, ``sqlnet.ora``, and ``oraaccess.xml``, if they are not in a default location. The :ref:`configDir <odbinitoracleclientattrsopts>` value in a call to :meth:`oracledb.initOracleClient()` overrides ``TNS_ADMIN``.
-    * - ``ORA_SDTZ``
-      - The default session time zone, see :ref:`Fetching Dates and Timestamps <datehandling>`.
-    * - ``ORA_TZFILE``
-      - The name of the Oracle time zone file to use. See :ref:`oratzfile`.
-    * - ``ORACLE_HOME``
-      - The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
+      - Thick
+    * - ``NLS_DATE_FORMAT``, ``NLS_TIMESTAMP_FORMAT``
+      - See :ref:`Fetching Numbers and Dates as String <fetchasstringhandling>`. The variables are ignored if ``NLS_LANG`` is not set.
+      - Thick
     * - ``NLS_LANG``
       - Determines the ‘national language support’ globalization options for node-oracledb. If not set, a default value will be chosen by Oracle.
         Note that node-oracledb will always uses the AL32UTF8 character set. See :ref:`Globalization and National Language Support (NLS) <nls>`.
-    * - ``NLS_DATE_FORMAT``, ``NLS_TIMESTAMP_FORMAT``
-      - See :ref:`Fetching Numbers and Dates as String <fetchasstringhandling>`. The variables are ignored if ``NLS_LANG`` is not set.
+      - Thick
     * - ``NLS_NUMERIC_CHARACTERS``
       - See :ref:`Fetching Numbers and Dates as String <fetchasstringhandling>`. The variables are ignored if ``NLS_LANG`` is not set.
+      - Thick
+    * - ``ORA_SDTZ``
+      - The default session time zone, see :ref:`Fetching Dates and Timestamps <datehandling>`.
+      - Both
+    * - ``ORA_TZFILE``
+      - The name of the Oracle time zone file to use. See :ref:`oratzfile`.
+      - Thick
+    * - ``ORACLE_HOME``
+      - The directory containing the Oracle Database software. This directory must be accessible by the Node.js process. This variable should *not* be set if node-oracledb uses Oracle Instant Client.
+      - Thick
+    * - ``PATH``
+      - The library search path for Windows should include the location where ``OCI.DLL`` is found. Not needed if you pass :ref:`libDir <odbinitoracleclientattrsopts>` when calling :meth:`oracledb.initOracleClient()`.
+      - Thick
+    * - ``TNS_ADMIN``
+      - The location of the optional :ref:`Oracle Net configuration files <tnsadmin>` and :ref:`Oracle Client configuration files <oraaccess>`, including ``tnsnames.ora``, ``sqlnet.ora``, and ``oraaccess.xml``, if they are not in a default location. The :ref:`configDir <odbinitoracleclientattrsopts>` value in a call to :meth:`oracledb.initOracleClient()` overrides ``TNS_ADMIN``.
+      - Both
 
 Scripts for Setting the Default Environment in a Database Installation
 ----------------------------------------------------------------------

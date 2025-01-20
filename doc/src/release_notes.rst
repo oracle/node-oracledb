@@ -14,6 +14,8 @@ node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...
 Common Changes
 ++++++++++++++
 
+#)  Added support for Oracle Database 23ai sparse vectors.
+
 #)  Fixed :attr:`~dbObject.length` property for the database object
     collection types, which was broken from node-oracledb 6.0.
 

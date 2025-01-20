@@ -40,6 +40,11 @@ static bool njsVariable_processBufferJS(njsVariable *var,
         njsVariableBuffer *buffer, napi_env env, njsBaton *baton);
 static bool njsVariable_setFromString(njsVariable *var, uint32_t pos,
         napi_env env, napi_value value, njsBaton *baton);
+static bool njsVariable_updateVectorInfoFromTypeInfo(napi_env env,
+        napi_value value, bool isIndices, njsBaton *baton,
+                dpiVectorInfo *vectorInfo);
+static bool njsVariable_getVectorInfo(napi_env env, napi_value value,
+        njsBaton *baton, dpiVectorInfo *vectorInfo);
 
 
 //-----------------------------------------------------------------------------
@@ -255,6 +260,7 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
     napi_value temp;
     napi_value annObject, key, value;
     uint32_t i;
+    bool isSparse = false;
 
     // create object to store metadata on
     NJS_CHECK_NAPI(env, napi_create_object(env, metadata))
@@ -365,6 +371,12 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
             NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
                     "vectorFormat", temp))
         }
+        if ((var->vectorFlags & DPI_VECTOR_FLAGS_SPARSE)) {
+            isSparse = true;
+        }
+        NJS_CHECK_NAPI(env, napi_get_boolean(env, isSparse, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+                "isSparseVector", temp))
     }
 
     return true;
@@ -746,6 +758,101 @@ static bool njsVariable_processBufferJS(njsVariable *var,
     return true;
 }
 
+//-----------------------------------------------------------------------------
+// njsVariable_updateVectorInfoFromTypeInfo()
+//   Updates vectorInfo out parameter by reading the
+// type information.
+//-----------------------------------------------------------------------------
+static bool njsVariable_updateVectorInfoFromTypeInfo(napi_env env,
+        napi_value value, bool isIndices, njsBaton *baton,
+                dpiVectorInfo *vectorInfo)
+{
+    napi_typedarray_type type;
+    void *rawdata = NULL;
+    size_t numElem = 0;
+
+    // typed arrays are sent
+    NJS_CHECK_NAPI(env, napi_get_typedarray_info(env, value, &type,
+            &numElem, &rawdata, NULL, NULL))
+    if (!isIndices) {
+        switch (type) {
+            case napi_float64_array:
+                vectorInfo->format = DPI_VECTOR_FORMAT_FLOAT64;
+                break;
+            case napi_float32_array:
+                vectorInfo->format = DPI_VECTOR_FORMAT_FLOAT32;
+                break;
+            case napi_int8_array:
+                vectorInfo->format = DPI_VECTOR_FORMAT_INT8;
+                break;
+            case napi_uint8_array:
+                numElem = numElem * 8;
+                vectorInfo->format = DPI_VECTOR_FORMAT_BINARY;
+                break;
+            default:
+                break;
+        }
+        vectorInfo->dimensions.asPtr = rawdata;
+        vectorInfo->numDimensions = (uint32_t)numElem; // number of dimensions.
+    } else {
+        vectorInfo->numSparseValues = (uint32_t)numElem; // non zero count.
+        vectorInfo->sparseIndices = rawdata;
+    }
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsVariable_getVectorInfo()
+//   Updates the output parameter, vectorInfo from given input vector, value.
+//-----------------------------------------------------------------------------
+static bool njsVariable_getVectorInfo(napi_env env, napi_value value,
+    njsBaton *baton, dpiVectorInfo *vectorInfo)
+{
+    napi_value temp;
+    bool isSparse = false;
+    bool status = false;
+
+    NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+            baton->jsSparseVectorConstructor, &isSparse))
+    if (isSparse)
+    {
+        // get indices
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "_indices",
+                &temp))
+        status = njsVariable_updateVectorInfoFromTypeInfo(env, temp, true,
+                baton, vectorInfo);
+        if (!status) {
+            return status;
+        }
+
+        // get values
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "_values",
+                &temp))
+        status = njsVariable_updateVectorInfoFromTypeInfo(env, temp, false,
+                baton, vectorInfo);
+        if (!status) {
+            return status;
+        }
+
+        // get numDimensions
+        uint32_t numDim;
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, value,
+                "_numDimensions", &temp))
+        NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &numDim))
+        vectorInfo->numDimensions = numDim;
+    } else {
+        status = njsVariable_updateVectorInfoFromTypeInfo(env, value, false,
+                baton, vectorInfo);
+        if (!status) {
+            return status;
+        }
+        vectorInfo->sparseIndices = NULL;
+        vectorInfo->numSparseValues = 0;
+    }
+
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 // njsVariable_setScalarValue()
@@ -767,9 +874,6 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     void *buffer;
     njsLob *lob;
     bool check;
-    napi_typedarray_type type;
-    void *rawdata = NULL;
-    size_t numElem = 0;
     napi_value numStr;
 
     // initialization
@@ -798,30 +902,11 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
         return true;
     }
 
-    // Handle vectors
+    // Handle vectors.
     if (var->varTypeNum == DPI_ORACLE_TYPE_VECTOR) {
-        // only typed arrays are sent
-        NJS_CHECK_NAPI(env, napi_get_typedarray_info(env, value, &type,
-                &numElem, &rawdata, NULL, NULL))
-        vectorInfo.numDimensions = (uint32_t)numElem;
-        switch (type) {
-            case napi_float64_array:
-                vectorInfo.format = DPI_VECTOR_FORMAT_FLOAT64;
-                break;
-            case napi_float32_array:
-                vectorInfo.format = DPI_VECTOR_FORMAT_FLOAT32;
-                break;
-            case napi_int8_array:
-                vectorInfo.format = DPI_VECTOR_FORMAT_INT8;
-                break;
-            case napi_uint8_array:
-                vectorInfo.numDimensions = (uint32_t)numElem * 8;
-                vectorInfo.format = DPI_VECTOR_FORMAT_BINARY;
-                break;
-            default:
-                break;
+        if (!njsVariable_getVectorInfo(env, value, baton, &vectorInfo)) {
+            return false;
         }
-        vectorInfo.dimensions.asPtr = rawdata;
         if (dpiVector_setValue(data->value.asVector, &vectorInfo) < 0) {
             return njsBaton_setErrorDPI(baton);
         }
