@@ -28,6 +28,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for External Authentication using Transport Layer Security(TLS).
+
 #)  Fixed issue that does not throw Authentication error for FastAuth
     when invalid token is used with external authentication.
 

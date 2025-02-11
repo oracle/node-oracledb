@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -27,6 +27,9 @@
  *
  * DESCRIPTION
  *   Test external proxy authentication.
+ *   Create a database user based on the client certificate's DN.
+ *   e.g., create user ssluser identified externally as 'CN=client’
+ *   Set NODE_ORACLEDB_PROXY_SESSION_USER to the newly created user.
  *
  *****************************************************************************/
 'use strict';
@@ -72,7 +75,9 @@ describe('180. externalProxyAuth.js', function() {
       }
       const conn = await oracledb.getConnection({
         connectString: dbConfig.connectString,
-        externalAuth: true
+        externalAuth: true,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation
       });
       const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
@@ -87,11 +92,11 @@ describe('180. externalProxyAuth.js', function() {
       }
       const conn = await oracledb.getConnection({
         ...dbConfig,
-        user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
+        user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`
       });
-      const schema = await testsUtil.getUser(conn);
+
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, schema);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
     });
@@ -100,15 +105,29 @@ describe('180. externalProxyAuth.js', function() {
       if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
+
+      const dbaConn = await oracledb.getConnection({
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation,
+        privilege: oracledb.SYSDBA
+      });
+      await dbaConn.execute(`alter user ${dbConfig.user} grant connect through ${dbConfig.test.proxySessionUser}`);
+      await dbaConn.close();
+
       const conn = await oracledb.getConnection({
         connectString: dbConfig.connectString,
-        user: `[${dbConfig.test.proxySessionUser}]`,
+        user: `[${dbConfig.user}]`,
         externalAuth: true,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation
       });
-      const schema = await testsUtil.getUser(conn);
+
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, schema);
-      assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
+      assert.strictEqual(proxy_user, dbConfig.test.proxySessionUser.toUpperCase());
+      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
       await conn.close();
     });
 
@@ -122,6 +141,8 @@ describe('180. externalProxyAuth.js', function() {
             connectString: dbConfig.connectString,
             user: dbConfig.test.proxySessionUser,
             externalAuth: true,
+            walletPassword: dbConfig.walletPassword,
+            walletLocation: dbConfig.walletLocation
           });
         },
         /NJS-140:/
@@ -139,6 +160,8 @@ describe('180. externalProxyAuth.js', function() {
             connectString: dbConfig.connectString,
             user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
             externalAuth: true,
+            walletPassword: dbConfig.walletPassword,
+            walletLocation: dbConfig.walletLocation
           });
         },
         /NJS-140:/
@@ -167,6 +190,8 @@ describe('180. externalProxyAuth.js', function() {
       const pool = await oracledb.createPool({
         connectString: dbConfig.connectString,
         externalAuth: true,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation
       });
       const conn = await pool.getConnection();
       const schema = await testsUtil.getUser(conn);
@@ -186,9 +211,8 @@ describe('180. externalProxyAuth.js', function() {
         user: `${dbConfig.user}[${dbConfig.test.proxySessionUser}]`,
       });
       const conn = await pool.getConnection();
-      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, schema);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
       await pool.close(0);
@@ -203,16 +227,15 @@ describe('180. externalProxyAuth.js', function() {
         homogeneous: false,
       });
       const conn = await pool.getConnection({ "user": dbConfig.test.proxySessionUser });
-      const schema = await testsUtil.getUser(conn);
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, schema);
+      assert.strictEqual(proxy_user, dbConfig.user.toUpperCase());
       assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
       await conn.close();
       await pool.close(0);
     });
 
     it('180.2.5 Pooled Connect: Username-Password Auth with proxy when acquire connection', async function() {
-      if (!oracledb.thin || !dbConfig.test.proxySessionUser) {
+      if (oracledb.thin || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
       const pool = await oracledb.createPool({
@@ -238,6 +261,8 @@ describe('180. externalProxyAuth.js', function() {
             connectString: dbConfig.connectString,
             user: `[${dbConfig.test.proxySessionUser}]`,
             externalAuth: true,
+            walletPassword: dbConfig.walletPassword,
+            walletLocation: dbConfig.walletLocation
           });
         },
         /NJS-136:/
@@ -254,6 +279,8 @@ describe('180. externalProxyAuth.js', function() {
             connectString: dbConfig.connectString,
             user: dbConfig.test.proxySessionUser,
             externalAuth: true,
+            walletPassword: dbConfig.walletPassword,
+            walletLocation: dbConfig.walletLocation
           });
         },
         /NJS-136:/
@@ -261,18 +288,21 @@ describe('180. externalProxyAuth.js', function() {
     });
 
     it('180.2.8 Pooled Connect: External Auth with proxy when acquire connection', async function() {
-      if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
+      // Currently, heterogeneous pools are not supported for thin mode.
+      if (oracledb.thin || !dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
+
       const pool = await oracledb.createPool({
         connectString: dbConfig.connectString,
         externalAuth: true,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation
       });
-      const conn = await pool.getConnection({user: `[${dbConfig.test.proxySessionUser}]`});
-      const schema = await testsUtil.getUser(conn);
+      const conn = await pool.getConnection({user: `[${dbConfig.user.toUpperCase()}]`});
       const [proxy_user, session_user] = await ShowUserInfo(conn);
-      assert.strictEqual(proxy_user, schema);
-      assert.strictEqual(session_user, dbConfig.test.proxySessionUser.toUpperCase());
+      assert.strictEqual(proxy_user, dbConfig.test.proxySessionUser.toUpperCase());
+      assert.strictEqual(session_user, dbConfig.user.toUpperCase());
       await conn.close();
       await pool.close(0);
     });
@@ -284,6 +314,8 @@ describe('180. externalProxyAuth.js', function() {
       const pool = await oracledb.createPool({
         connectString: dbConfig.connectString,
         externalAuth: true,
+        walletPassword: dbConfig.walletPassword,
+        walletLocation: dbConfig.walletLocation
       });
       await assert.rejects(
         async () => {

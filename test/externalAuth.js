@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,7 +40,7 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
-(!oracledb.thin ? describe : describe.skip)('5. externalAuth.js', function() {
+describe('5. externalAuth.js', function() {
 
   describe('5.1 tests that work both when DB has configured externalAuth and not configured', function() {
 
@@ -51,7 +51,9 @@ const dbConfig = require('./dbconfig.js');
           externalAuth: false,
           user: dbConfig.user,
           password: dbConfig.password,
-          connectString: dbConfig.connectString
+          connectString: dbConfig.connectString,
+          walletPassword: dbConfig.walletPassword,
+          walletLocation: dbConfig.walletLocation
         }
       );
       const result = await connection.execute("select (7+8) from dual");
@@ -70,7 +72,9 @@ const dbConfig = require('./dbconfig.js');
               externalAuth: true,
               user: dbConfig.user,
               password: dbConfig.password,
-              connectString: dbConfig.connectString
+              connectString: dbConfig.connectString,
+              walletPassword: dbConfig.walletPassword,
+              walletLocation: dbConfig.walletLocation
             }
           );
         },
@@ -88,7 +92,9 @@ const dbConfig = require('./dbconfig.js');
             {
               externalAuth: true,
               user: "[ invalid_user ]",
-              connectString: dbConfig.connectString
+              connectString: dbConfig.connectString,
+              walletPassword: dbConfig.walletPassword,
+              walletLocation: dbConfig.walletLocation
             }
           );
         },
@@ -105,7 +111,9 @@ const dbConfig = require('./dbconfig.js');
             {
               externalAuth: true,
               password: dbConfig.password,
-              connectString: dbConfig.connectString
+              connectString: dbConfig.connectString,
+              walletPassword: dbConfig.walletPassword,
+              walletLocation: dbConfig.walletLocation
             }
           );
         },
@@ -121,7 +129,9 @@ const dbConfig = require('./dbconfig.js');
           externalAuth: false,
           user: dbConfig.user,
           password: dbConfig.password,
-          connectString: dbConfig.connectString
+          connectString: dbConfig.connectString,
+          walletPassword: dbConfig.walletPassword,
+          walletLocation: dbConfig.walletLocation
         }
       );
       const connection = await pool.getConnection();
@@ -141,7 +151,9 @@ const dbConfig = require('./dbconfig.js');
               externalAuth: true,
               user: dbConfig.user,
               password: dbConfig.password,
-              connectString: dbConfig.connectString
+              connectString: dbConfig.connectString,
+              walletPassword: dbConfig.walletPassword,
+              walletLocation: dbConfig.walletLocation
             }
           );
         },
@@ -158,7 +170,9 @@ const dbConfig = require('./dbconfig.js');
             {
               externalAuth: true,
               user: dbConfig.user,
-              connectString: dbConfig.connectString
+              connectString: dbConfig.connectString,
+              walletPassword: dbConfig.walletPassword,
+              walletLocation: dbConfig.walletLocation
             }
           );
         },
@@ -175,7 +189,9 @@ const dbConfig = require('./dbconfig.js');
             {
               externalAuth: true,
               password: dbConfig.password,
-              connectString: dbConfig.connectString
+              connectString: dbConfig.connectString,
+              walletPassword: dbConfig.walletPassword,
+              walletLocation: dbConfig.walletLocation
             }
           );
         },
@@ -198,7 +214,9 @@ const dbConfig = require('./dbconfig.js');
       const connection = await oracledb.getConnection(
         {
           externalAuth: true,
-          connectString: dbConfig.connectString
+          connectString: dbConfig.connectString,
+          walletPassword: dbConfig.walletPassword,
+          walletLocation: dbConfig.walletLocation
         }
       );
       const result = await connection.execute("select (7+8) from dual");
@@ -212,7 +230,9 @@ const dbConfig = require('./dbconfig.js');
       const pool = await oracledb.createPool(
         {
           externalAuth: true,
-          connectString: dbConfig.connectString
+          connectString: dbConfig.connectString,
+          walletPassword: dbConfig.walletPassword,
+          walletLocation: dbConfig.walletLocation
         }
       );
       // verify poolMin value
@@ -231,7 +251,9 @@ const dbConfig = require('./dbconfig.js');
         const connection = await oracledb.getConnection(
           {
             externalAuth: true,
-            connectString: dbConfig.connectString
+            connectString: dbConfig.connectString,
+            walletPassword: dbConfig.walletPassword,
+            walletLocation: dbConfig.walletLocation
           }
         );
         return {num: id, inst: connection};
@@ -265,7 +287,9 @@ const dbConfig = require('./dbconfig.js');
         const pool = await oracledb.createPool(
           {
             externalAuth: true,
-            connectString: dbConfig.connectString
+            connectString: dbConfig.connectString,
+            walletPassword: dbConfig.walletPassword,
+            walletLocation: dbConfig.walletLocation
           }
         );
         return {num: id, inst: pool};
@@ -300,6 +324,8 @@ const dbConfig = require('./dbconfig.js');
         {
           externalAuth: true,
           connectString: dbConfig.connectString,
+          walletPassword: dbConfig.walletPassword,
+          walletLocation: dbConfig.walletLocation,
           poolMin: 5,
           poolMax: 20,
           poolIncrement: 2
@@ -316,6 +342,8 @@ const dbConfig = require('./dbconfig.js');
         {
           externalAuth: true,
           connectString: dbConfig.connectString,
+          walletPassword: dbConfig.walletPassword,
+          walletLocation: dbConfig.walletLocation,
           poolMin: 5,
           poolMax: 20,
           poolIncrement: 2
@@ -330,7 +358,5 @@ const dbConfig = require('./dbconfig.js');
       await conn2.close();
       await pool.close();
     }); // 5.2.6
-
   }); // 5.2
-
 });

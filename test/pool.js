@@ -796,7 +796,7 @@ describe('2. pool.js', function() {
       assert.strictEqual(pool.externalAuth, false);
     });  // 2.15.6
 
-    it('2.15.7 externalAuth - true', async function() {
+    (!oracledb.thin ? it : it.skip)('2.15.7 externalAuth - true', async function() {
       const config = {
         connectString: dbConfig.connectString,
         poolMin: 1,
@@ -804,16 +804,9 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
         externalAuth: true
       };
-      if (!oracledb.thin) {
-        pool = await oracledb.createPool(config);
-        assert.strictEqual(pool.externalAuth, true);
-      } else {
-        await assert.rejects(
-          async () => await oracledb.createPool(config),
-          /NJS-089:/
-        );
-      }
-    });  // 2.15.7
+      pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.externalAuth, true);
+    }); // 2.15.7
 
     it('2.15.8 externalAuth - false', async function() {
       const config = {
@@ -887,7 +880,7 @@ describe('2. pool.js', function() {
       assert.strictEqual(pool.user, dbConfig.user);
     });  // 2.15.12
 
-    it('2.15.13 user name - undefined', async function() {
+    (!oracledb.thin ? it : it.skip)('2.15.13 user name - undefined', async function() {
       // NOTE: An heterogeneous pool is created for testing property with
       // externalAuth is set to false, the username/password are required
       // while calling getConnection().  In this case, connections are NOT
@@ -901,15 +894,8 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
         externalAuth: true
       };
-      if (!oracledb.thin) {
-        pool = await oracledb.createPool(config);
-        assert.strictEqual(pool.user, undefined);
-      } else {
-        await assert.rejects(
-          async () => await oracledb.createPool(config),
-          /NJS-089:/
-        );
-      }
+      pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.user, undefined);
     });  // 2.15.13
 
     it('2.15.14 connectString', async function() {
@@ -1060,7 +1046,7 @@ describe('2. pool.js', function() {
       oracledb.externalAuth = origExternalAuth;
     });  // 2.16.6
 
-    it('2.16.7 externalAuth override to true', async function() {
+    (!oracledb.thin ? it : it.skip)('2.16.7 externalAuth override to true', async function() {
       const origExternalAuth = oracledb.externalAuth;
       oracledb.externalAuth = false;
       const config = {
@@ -1072,15 +1058,8 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
         externalAuth: true
       };
-      if (!oracledb.thin) {
-        pool = await oracledb.createPool(config);
-        assert.strictEqual(pool.externalAuth, true);
-      } else {
-        await assert.rejects(
-          async () => await oracledb.createPool(config),
-          /NJS-089:/
-        );
-      }
+      pool = await oracledb.createPool(config);
+      assert.strictEqual(pool.externalAuth, true);
       oracledb.externalAuth = origExternalAuth;
     });  // 2.16.7
   });  // 2.16
