@@ -233,7 +233,7 @@ bool njsUtils_genericThrowError(napi_env env, const char *fileName,
         if (!errorMessage)
             errorMessage = "no error message";
         (void) snprintf(internalError, sizeof(internalError),
-                "internal error in file %s, line %d (%s)", fileName, lineNum,
+                " %sin file %s, line %d (%s)", NJS_ERR_INTERNAL, fileName, lineNum,
                 errorMessage);
         napi_throw_error(env, NULL, internalError);
     }

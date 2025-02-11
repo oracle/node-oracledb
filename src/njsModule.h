@@ -172,6 +172,8 @@
     "NJS-078: unsupported data type %d in JSON value"
 #define NJS_ERR_VECTOR_FORMAT_NOT_SUPPORTED \
     "NJS-144: VECTOR format %d is not supported"
+#define NJS_ERR_INTERNAL \
+    "NJS-106: internal error: "
 
 // pool statuses
 #define NJS_POOL_STATUS_OPEN            6000

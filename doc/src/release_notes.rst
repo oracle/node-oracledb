@@ -31,8 +31,8 @@ Thin Mode Changes
 #)  Fixed issue that does not throw Authentication error for FastAuth
     when invalid token is used with external authentication.
 
-#)  Added connection optimization feature which uses Server Name Indication (SNI)
-    extension of the TLS protocol. 
+#)  Added connection optimization feature which uses
+    Server Name Indication (SNI) extension of the TLS protocol.
  
 #)  Added support for setting the :attr:`~oracledb.edition` when connecting to
     the database.
@@ -42,6 +42,11 @@ Thin Mode Changes
 
 #)  Fixed bug with :meth:`dbObject.deleteElement()` which did not update the
     keys of associative arrays when an element was deleted.
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Internal error handling improvements.
 
 node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...v6.7.1>`__ (23 Dec 2024)
 ---------------------------------------------------------------------------------------------------------
