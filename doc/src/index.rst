@@ -27,6 +27,7 @@ User Guide
     user_guide/tuning.rst
     user_guide/lob_data.rst
     user_guide/json_data_type.rst
+    user_guide/interval_data_type.rst
     user_guide/xml_data_type.rst
     user_guide/vector_data_type.rst
     user_guide/objects.rst

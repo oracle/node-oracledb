@@ -119,9 +119,13 @@ instead of ``result.metadata[0].fetchType == 2001``.
     * - ``oracledb.DB_TYPE_INTERVAL_DS``
       - 2015
       - INTERVAL DAY TO SECOND
+
+        .. versionadded:: 6.8
     * - ``oracledb.DB_TYPE_INTERVAL_YM``
       - 2016
       - INTERVAL YEAR TO MONTH
+
+        .. versionadded:: 6.8
     * - ``oracledb.DB_TYPE_JSON``
       - 2027
       - JSON
@@ -3744,6 +3748,45 @@ node-oracledb, allowing use of new features.
 
         BLOB columns with the ``IS JSON FORMAT OSON`` check constraint enabled
         can now be fetched as JSON type columns when this property is set.
+
+.. _intervalymclass:
+
+Oracledb IntervalYM Class
+=========================
+
+Objects of this class are returned for columns of type INTERVAL YEAR TO MONTH
+and can be passed to variables of type :ref:`oracledb.DB_TYPE_INTERVAL_YM
+<oracledbconstantsdbtype>` The class contains two optional integer attributes,
+``years`` and ``months``. These attributes can be set by a passed-in
+JavaScript object containing these attributes.
+
+If no JavaScript object is passed in or if these attributes are not defined in
+the passed-in JavaScript object, they are set to *0* by default.
+
+If these attribute values are not integers, then the ``NJS-007`` error is
+thrown when the object is being created.
+
+.. versionadded:: 6.8
+
+.. _intervaldsclass:
+
+Oracledb IntervalDS Class
+=========================
+
+Objects of this class are returned for columns of type INTERVAL DAY TO SECOND
+and can be passed to variables of type :ref:`oracledb.DB_TYPE_INTERVAL_DS
+<oracledbconstantsdbtype>` The class contains five optional integer
+attributes, ``days``, ``hours``, ``minutes``, ``seconds``, and ``fseconds``
+(fractional seconds denoted in nanoseconds). These attributes can be set by a
+passed-in JavaScript object containing these attributes.
+
+If no JavaScript object is passed in or if these attributes are not defined in
+the passed-in JavaScript object, they are set to *0* by default.
+
+If these attribute values are not integers, then the ``NJS-007`` error is
+thrown when the object is being created.
+
+.. versionadded:: 6.8
 
 .. _jsonid:
 

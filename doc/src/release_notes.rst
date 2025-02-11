@@ -21,6 +21,10 @@ Common Changes
 
 #)  Added support for Oracle Database 23ai sparse vectors.
 
+#)  Added support for :ref:`interval year-to-month <intervalyeartomonth>` and
+    :ref:`interval day-to-second <intervaldaytosecond>` database column types.
+    See `Issue #929 <https://github.com/oracle/node-oracledb/issues/929>`__.
+
 #)  Fixed :attr:`~dbObject.length` property for the database object
     collection types, which was broken from node-oracledb 6.0.
 

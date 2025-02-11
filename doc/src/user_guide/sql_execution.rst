@@ -811,8 +811,7 @@ used to change the default mapping, or override a global mapping, for
 individual columns.
 
 Data types in ``SELECT`` statements that are unsupported give an error
-*NJS-010: unsupported data type in select list*. These include INTERVAL,
-BFILE, and XMLType types.
+*NJS-010: unsupported data type in select list*.
 
 Details are in the following sections.
 
@@ -954,8 +953,6 @@ ZONE columns are fetched as absolute dates.  Note that JavaScript Date has
 millisecond precision. Therefore, timestamps will lose any sub-millisecond
 fractional part when fetched.
 
-Oracle INTERVAL types are not supported.
-
 .. versionchanged:: 6.0
 
     Oracle Database DATE and TIMESTAMP types are now returned as JavaScript
@@ -1038,6 +1035,13 @@ For more information on time zones, see Oracle Support’s `Timestamps &
 time zones - Frequently Asked Questions, Doc ID 340512.1
 <https://support.oracle.com/epmos/faces/DocumentDisplay?id=340512.1>`__.
 
+.. _intervalhandling:
+
+Fetching Intervals
+++++++++++++++++++
+
+See :ref:`intervaltype`.
+
 .. _fetchasstringhandling:
 
 Fetching Numbers and Dates as String
@@ -1049,7 +1053,11 @@ columns <queryinglobs>`) queried by an application to be fetched as
 strings instead of in native format. Allowing data to be fetched as
 strings helps avoid situations where using JavaScript types can lead to
 numeric precision loss, or where date conversion is unwanted. This
-method can be used for CLOBs up to 1 GB in length.
+method can be used for CLOBs up to 1 GB in length. The
+:ref:`INTERVAL data types <intervalhandling>` cannot be fetched as strings
+using :attr:`~oracledb.fetchAsString`. You can use
+:ref:`fetch type handlers <fetchtypehandler>` to fetch interval data types as
+strings.
 
 For example, to force all dates and numbers used by queries in an
 application to be fetched as strings:

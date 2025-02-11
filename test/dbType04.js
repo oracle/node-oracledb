@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -521,38 +521,38 @@ describe('241. dbType04.js', function() {
     // NJS-011: encountered bind value and type mismatch
   }); // 241.24
 
-  it('241.25 Negative - query INTERVAL YEAR TO MONTH', async () => {
+  it('241.25 query INTERVAL YEAR TO MONTH', async () => {
     const jsonId = 25;
-    const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_yminterval('+5-9')))`;
-    const binds = [ jsonId ];
+    const intervalYMBindVar = {
+      dir: oracledb.BIND_IN,
+      type: oracledb.DB_TYPE_INTERVAL_YM,
+      val: new oracledb.IntervalYM({ years: 5, months: 9 })
+    };
+    const sqlOne = `insert into ${TABLE} values (:1, json_scalar(:2))`;
+    const binds = [ jsonId, intervalYMBindVar ];
     const result1 = await conn.execute(sqlOne, binds);
     assert.strictEqual(result1.rowsAffected, 1);
 
     const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-    await assert.rejects(
-      async () => {
-        await conn.execute(sqlTwo);
-      },
-      /NJS-078/
-    );
-    // NJS-078: unsupported data type 2016 in JSON value
+    const result = await conn.execute(sqlTwo);
+    assert.deepStrictEqual(result.rows[0][1], intervalYMBindVar.val);
   }); // 241.25
 
-  it('241.26 Negative - query INTERVAL DAY TO SECOND', async () => {
+  it('241.26 query INTERVAL DAY TO SECOND', async () => {
     const jsonId = 26;
-    const sqlOne = `insert into ${TABLE} values (:1, json_scalar(to_dsinterval('P25DT8H25M')))`;
-    const binds = [ jsonId ];
+    const intervalDSBindVar = {
+      dir: oracledb.BIND_IN,
+      type: oracledb.DB_TYPE_INTERVAL_DS,
+      val: new oracledb.IntervalDS({ days: 5, seconds: 12, fseconds: 123789 })
+    };
+    const sqlOne = `insert into ${TABLE} values (:1, json_scalar(:2))`;
+    const binds = [ jsonId, intervalDSBindVar ];
     const result1 = await conn.execute(sqlOne, binds);
     assert.strictEqual(result1.rowsAffected, 1);
 
     const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-    await assert.rejects(
-      async () => {
-        await conn.execute(sqlTwo);
-      },
-      /NJS-078/
-    );
-    // NJS-078: unsupported data type 2016 in JSON value
+    const result = await conn.execute(sqlTwo);
+    assert.deepStrictEqual(result.rows[0][1], intervalDSBindVar.val);
   }); // 241.26
 
 });

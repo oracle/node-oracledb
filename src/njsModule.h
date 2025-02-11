@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2024, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -478,6 +478,8 @@ struct njsBaton {
     napi_value jsEncodeVectorFn;
     napi_value jsJsonIdConstructor;
     napi_value jsSparseVectorConstructor;
+    napi_value jsIntervalYMConstructor;
+    napi_value jsIntervalDSConstructor;
 
     // calling object value (used for setting a reference on created objects)
     napi_value jsCallingObj;
@@ -569,6 +571,8 @@ struct njsModuleGlobals {
     napi_ref jsEncodeVectorFn;
     napi_ref jsJsonIdConstructor;
     napi_ref jsSparseVectorConstructor;
+    napi_ref jsIntervalYMConstructor;
+    napi_ref jsIntervalDSConstructor;
 };
 
 // data for class Pool exposed to JS.
@@ -787,6 +791,10 @@ bool njsBaton_setErrorDPI(njsBaton *baton);
 bool njsBaton_setJsValues(njsBaton *baton, napi_env env);
 bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
         napi_env env, napi_value *value);
+bool njsBaton_getIntervalYM(njsBaton *baton, dpiIntervalYM *data, napi_env env,
+        napi_value *value);
+bool njsBaton_getIntervalDS(njsBaton *baton, dpiIntervalDS *data, napi_env env,
+        napi_value *value);
 bool njsBaton_setErrorUnsupportedVectorFormat(njsBaton *baton,
         uint8_t format);
 
@@ -942,6 +950,10 @@ bool njsUtils_throwUnsupportedDataType(napi_env env, uint32_t oracleTypeNum,
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
         napi_value *callingObj, const njsClassDef *classDef, void **instance);
+bool njsUtils_setIntervalYM(napi_env env, napi_value value,
+        dpiIntervalYM *data);
+bool njsUtils_setIntervalDS(napi_env env, napi_value value,
+        dpiIntervalDS *data);
 
 
 //-----------------------------------------------------------------------------

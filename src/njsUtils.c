@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -809,5 +809,51 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
                     (void**) instance))
         }
     }
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsUtils_setIntervalYM()
+//   Set the value of the interval year-to-month(YM) value from a JavaScript
+// IntervalYM object. It includes the "year" and "month" properties. At this
+// point it is assumed that the property values are intergers.
+//-----------------------------------------------------------------------------
+bool njsUtils_setIntervalYM(napi_env env, napi_value value,
+        dpiIntervalYM *data)
+{
+    napi_value temp;
+
+    // set years and months
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "years", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->years))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "months", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->months))
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsUtils_setIntervalDS()
+//   Set the value of the interval day-to-second(DS) value from a JavaScript
+// IntervalYM object. It includes the "days", "hours", "minutes", "seconds"
+// and "fseconds" (fractional seconds denoted in ns) properties. At this
+// point it is assumed that the property values are intergers.
+//-----------------------------------------------------------------------------
+bool njsUtils_setIntervalDS(napi_env env, napi_value value,
+        dpiIntervalDS *data)
+{
+    napi_value temp;
+
+    // set day and time units
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "days", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->days))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "hours", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->hours))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "minutes", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->minutes))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "seconds", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->seconds))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "fseconds",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->fseconds))
     return true;
 }

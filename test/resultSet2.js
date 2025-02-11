@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -453,12 +453,31 @@ describe('55. resultSet2.js', function() {
     });
   }); // 55.10
 
-  describe('55.11 Negative - resultSet with unsupported data types', function() {
+  describe('55.11 resultSet with Interval data types', function() {
     it('55.11.1 INTERVAL YEAR TO MONTH data type', async function() {
-      await assert.rejects(async () => {
-        await connection.execute(
-          "SELECT dummy, to_yminterval('1-3') FROM dual", [], { resultSet: true });
-      }, /NJS-010:/);
+      const result = await connection.execute(
+        "SELECT dummy, to_yminterval('1-3') FROM dual", [], { resultSet: true });
+      const rs = result.resultSet;
+      for await (const row of rs) {
+        assert(row[1] instanceof oracledb.IntervalYM);
+        assert.strictEqual(row[1].years, 1);
+        assert.strictEqual(row[1].months, 3);
+      }
+      await rs.close();
+    });
+    it('55.11.2 INTERVAL DAY TO SECOND data type', async function() {
+      const result = await connection.execute(
+        "SELECT dummy, to_dsinterval('5 08:30:00') FROM dual", [], { resultSet: true });
+      const rs = result.resultSet;
+      for await (const row of rs) {
+        assert(row[1] instanceof oracledb.IntervalDS);
+        assert.strictEqual(row[1].days, 5);
+        assert.strictEqual(row[1].hours, 8);
+        assert.strictEqual(row[1].minutes, 30);
+        assert.strictEqual(row[1].seconds, 0);
+        assert.strictEqual(row[1].fseconds, 0);
+      }
+      await rs.close();
     });
 
   }); // 55.11

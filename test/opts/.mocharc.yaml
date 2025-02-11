@@ -292,3 +292,5 @@ spec:
   - test/inBandNotification.js
   - test/dataTypeVector7.js
   - test/dataTypeVector8.js
+  - test/dataTypeIntervalYM.js
+  - test/dataTypeIntervalDS.js

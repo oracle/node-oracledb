@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2024, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -487,6 +487,12 @@ bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
             NJS_CHECK_NAPI(env, napi_get_boolean(env, node->value->asBoolean,
                     value))
             return true;
+        case DPI_ORACLE_TYPE_INTERVAL_YM:
+            return njsBaton_getIntervalYM(baton, &(node->value->asIntervalYM),
+                env, value);
+        case DPI_ORACLE_TYPE_INTERVAL_DS:
+            return njsBaton_getIntervalDS(baton, &(node->value->asIntervalDS),
+                env, value);
         case DPI_ORACLE_TYPE_VECTOR:
             NJS_CHECK_NAPI(env, napi_get_global(env, &global))
             NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
@@ -826,6 +832,14 @@ bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
             baton->globals->jsSparseVectorConstructor, &baton->jsSparseVectorConstructor))
 
+    // acquire the IntervalYM constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsIntervalYMConstructor, &baton->jsIntervalYMConstructor))
+
+    // acquire the IntervalDS constructor
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            baton->globals->jsIntervalDSConstructor, &baton->jsIntervalDSConstructor))
+
     return true;
 }
 
@@ -913,6 +927,63 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
         NJS_CHECK_NAPI(env, napi_create_typedarray(env, type, numElem, arrBuf,
                 bufferOffset, value))
     }
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsBaton_getIntervalYM()
+//   Returns the appropriate IntervalYM JavaScript object for the Interval
+// year-to-month type. At this point it is known that the Javascript
+// attributes are integers and that the variable can support it.
+//-----------------------------------------------------------------------------
+bool njsBaton_getIntervalYM(njsBaton *baton, dpiIntervalYM *data, napi_env env,
+        napi_value *value)
+{
+    napi_value temp, intervalYMTempObj;
+
+    NJS_CHECK_NAPI(env, napi_create_object(env, &intervalYMTempObj))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, data->years, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalYMTempObj,
+            "years", temp))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, data->months, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalYMTempObj,
+            "months", temp))
+    NJS_CHECK_NAPI(env, napi_new_instance(env,
+            baton->jsIntervalYMConstructor, 1, &intervalYMTempObj, value))
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsBaton_getIntervalDS()
+//   Returns the appropriate IntervalDS JavaScript object for the Interval
+// day-to-second type. At this point it is known that the Javascript
+// attributes are integers and that the variable can support it.
+//-----------------------------------------------------------------------------
+bool njsBaton_getIntervalDS(njsBaton *baton, dpiIntervalDS *data, napi_env env,
+        napi_value *value)
+{
+    napi_value temp, intervalDSTempObj;
+
+    NJS_CHECK_NAPI(env, napi_create_object(env, &intervalDSTempObj))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, data->days, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
+            "days", temp))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, data->hours, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
+            "hours", temp))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, data->minutes, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
+            "minutes", temp))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, data->seconds, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
+            "seconds", temp))
+    NJS_CHECK_NAPI(env, napi_create_int32(env, data->fseconds, &temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
+            "fseconds", temp))
+    NJS_CHECK_NAPI(env, napi_new_instance(env,
+            baton->jsIntervalDSConstructor, 1, &intervalDSTempObj, value))
+
     return true;
 }
 

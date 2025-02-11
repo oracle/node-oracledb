@@ -1,4 +1,4 @@
-// Copyright (c) 2020, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2020, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -279,6 +279,26 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         node->value->asBytes.ptr = tempBuffer;
         node->value->asBytes.length = (uint32_t) tempBufferLength;
         return true;
+    }
+
+    // handle interval datatypes
+    NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+            baton->jsIntervalYMConstructor, &check))
+    if (check) {
+        node->oracleTypeNum = DPI_ORACLE_TYPE_INTERVAL_YM;
+        node->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_YM;
+
+        return njsUtils_setIntervalYM(env, value,
+            &(node->value->asIntervalYM));
+    }
+    NJS_CHECK_NAPI(env, napi_instanceof(env, value,
+            baton->jsIntervalDSConstructor, &check))
+    if (check) {
+        node->oracleTypeNum = DPI_ORACLE_TYPE_INTERVAL_DS;
+        node->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_DS;
+
+        return njsUtils_setIntervalDS(env, value,
+            &(node->value->asIntervalDS));
     }
 
     // all other objects have been transformed to an object containing the

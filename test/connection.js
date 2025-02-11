@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -486,15 +486,32 @@ describe('1. connection.js', function() {
     });
   }); //1.12
 
-  describe('1.13 unsupported year to month interval', function() {
+  describe('1.13 interval datatypes - basic SELECT', function() {
+    let connection;
+    afterEach (async function() {
+      if (connection) {
+        await  connection.close();
+        connection = null;
+      }
+    });
 
-    it('1.13.1 test year to month interval not supported', async function() {
-      const connection = await oracledb.getConnection(dbConfig);
-      await assert.rejects(
-        async () => await connection.execute("select INTERVAL '10-2' YEAR TO MONTH from dual"),
-        /NJS-010:/ //NJS-010: unsupported data type 2016 in column 1
-      );
-      await connection.release();
+    it('1.13.1 year to month interval basic case', async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute("select INTERVAL '10-2' YEAR TO MONTH from dual");
+      assert(result.rows[0][0] instanceof oracledb.IntervalYM);
+      assert.strictEqual(result.rows[0][0].years, 10);
+      assert.strictEqual(result.rows[0][0].months, 2);
+    });
+
+    it('1.13.2 day to second interval basic case', async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      const result = await connection.execute("select INTERVAL '11 10:09:08.555' DAY TO SECOND from dual");
+      assert(result.rows[0][0] instanceof oracledb.IntervalDS);
+      assert.strictEqual(result.rows[0][0].days, 11);
+      assert.strictEqual(result.rows[0][0].hours, 10);
+      assert.strictEqual(result.rows[0][0].minutes, 9);
+      assert.strictEqual(result.rows[0][0].seconds, 8);
+      assert.strictEqual(result.rows[0][0].fseconds, 555 * (10 ** 6)); // convert to nanoseconds
     });
   }); //1.13
 

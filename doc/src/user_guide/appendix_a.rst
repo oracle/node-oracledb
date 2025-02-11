@@ -267,11 +267,11 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - Yes - Only read and write operations supported
       - Yes - Only read operations supported
     * - INTERVAL DAY TO SECOND data type (see :ref:`oracledbconstantsdbtype`)
-      - No
-      - No
+      - Yes
+      - Yes
     * - INTERVAL YEAR TO MONTH data type (see :ref:`oracledbconstantsdbtype`)
-      - No
-      - No
+      - Yes
+      - Yes
     * - Simple Oracle Document Access (SODA) (see :ref:`SODA <sodaoverview>`)
       - No
       - Yes
@@ -721,11 +721,11 @@ when binding numeric values.
       - DB_TYPE_TIMESTAMP_LTZ
       - Yes
     * - INTERVAL YEAR TO MONTH
-      - Not supported
-      - No
+      - DB_TYPE_INTERVAL_YM
+      - Yes
     * - INTERVAL DAY TO SECOND
-      - Not supported
-      - No
+      - DB_TYPE_INTERVAL_DS
+      - Yes
     * - RAW
       - DB_TYPE_RAW
       - Yes

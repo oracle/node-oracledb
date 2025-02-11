@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -355,6 +355,8 @@ static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
             case DPI_ORACLE_TYPE_JSON:
             case DPI_ORACLE_TYPE_BOOLEAN:
             case DPI_ORACLE_TYPE_VECTOR:
+            case DPI_ORACLE_TYPE_INTERVAL_YM:
+            case DPI_ORACLE_TYPE_INTERVAL_DS:
                 break;
             default:
                 return njsUtils_throwUnsupportedDataType(env, var->varTypeNum,

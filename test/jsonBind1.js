@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -465,15 +465,11 @@ describe('253. jsonBind1.js', function() {
 
     it('253.2.10 INTERVAL YEAR TO MONTH type', async () => {
       const sql = `INSERT into ` + tableName + ` VALUES (JSON_OBJECT( key 'key1' value json_scalar(to_yminterval(:b)) RETURNING JSON))`;
+      await conn.execute(sql, ['5-9']);
+      result = await conn.execute(rsSelect);
       if (testsUtil.getClientVersion() >= 2100000000) {
-        await conn.execute(sql, ['5-9']);
-        await assert.rejects(
-          async () => await conn.execute(rsSelect),
-          /NJS-078/
-        );//NJS-078: unsupported data type 2016 in JSON value
+        assert.deepStrictEqual(result.rows[0].OBJ_DATA.key1, new oracledb.IntervalYM({ years: 5, months: 9 }));
       } else {
-        await conn.execute(sql, ['5-9']);
-        result = await conn.execute(rsSelect);
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
         assert.strictEqual(j.key1, "P5Y9M");
@@ -482,15 +478,12 @@ describe('253. jsonBind1.js', function() {
 
     it('253.2.11 INTERVAL DAY TO SECOND type', async function() {
       const sql = `INSERT into ` + tableName + ` VALUES (JSON_OBJECT( key 'key1' value json_scalar(to_dsinterval(:b)) RETURNING JSON))`;
+      await conn.execute(sql, ['11 10:09:08']);
+      result = await conn.execute(rsSelect);
       if (testsUtil.getClientVersion() >= 2100000000) {
-        await conn.execute(sql, ['11 10:09:08']);
-        await assert.rejects(
-          async () => await conn.execute(rsSelect),
-          /NJS-078/
-        );//NJS-078: unsupported data type 2015 in JSON value
+        assert.deepStrictEqual(result.rows[0].OBJ_DATA.key1,
+          new oracledb.IntervalDS({ days: 11, hours: 10, minutes: 9, seconds: 8, fseconds: 0 }));
       } else {
-        await conn.execute(sql, ['11 10:09:08']);
-        result = await conn.execute(rsSelect);
         const d = await result.rows[0].OBJ_DATA.getData();
         j = JSON.parse(d);
         assert.strictEqual(j.key1, "P11DT10H9M8S");

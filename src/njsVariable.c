@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2024, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -109,6 +109,12 @@ bool njsVariable_createBuffer(njsVariable *var, njsConnection *conn,
             break;
         case DPI_ORACLE_TYPE_VECTOR:
             var->nativeTypeNum = DPI_NATIVE_TYPE_VECTOR;
+            break;
+        case DPI_ORACLE_TYPE_INTERVAL_YM:
+            var->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_YM;
+            break;
+        case DPI_ORACLE_TYPE_INTERVAL_DS:
+            var->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_DS;
             break;
     }
 
@@ -492,6 +498,10 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
         case DPI_NATIVE_TYPE_VECTOR:
             return njsBaton_getVectorValue(baton, data->value.asVector,
                     env, value);
+        case DPI_NATIVE_TYPE_INTERVAL_YM:
+            return njsBaton_getIntervalYM(baton, &(data->value.asIntervalYM), env, value);
+        case DPI_NATIVE_TYPE_INTERVAL_DS:
+            return njsBaton_getIntervalDS(baton, &(data->value.asIntervalDS), env, value);
         default:
             break;
     }
@@ -911,6 +921,18 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
             return njsBaton_setErrorDPI(baton);
         }
         return true;
+    }
+
+    // handle interval year-to-month(YM)
+    if (var->varTypeNum == DPI_ORACLE_TYPE_INTERVAL_YM) {
+        return njsUtils_setIntervalYM(env, value,
+            &(data->value.asIntervalYM));
+    }
+
+    // handle interval day-to-second(DS)
+    if (var->varTypeNum == DPI_ORACLE_TYPE_INTERVAL_DS) {
+        return njsUtils_setIntervalDS(env, value,
+            &(data->value.asIntervalDS));
     }
 
     // handle binding numbers

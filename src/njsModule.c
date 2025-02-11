@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -128,6 +128,8 @@ static void njsModule_finalizeGlobals(napi_env env, void *finalize_data,
     NJS_DELETE_REF_AND_CLEAR(globals->jsEncodeVectorFn);
     NJS_DELETE_REF_AND_CLEAR(globals->jsJsonIdConstructor);
     NJS_DELETE_REF_AND_CLEAR(globals->jsSparseVectorConstructor);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsIntervalYMConstructor);
+    NJS_DELETE_REF_AND_CLEAR(globals->jsIntervalDSConstructor);
     free(globals);
 }
 
@@ -201,6 +203,18 @@ static bool njsModule_populateGlobals(napi_env env, napi_value module,
             &temp))
     NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
                 &globals->jsSparseVectorConstructor))
+
+    // get the IntervalYM (year to month) class
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings, "_IntervalYM",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+                &globals->jsIntervalYMConstructor))
+
+    // get the IntervalDS (day to second) class
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, settings, "_IntervalDS",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_create_reference(env, temp, 1,
+                &globals->jsIntervalDSConstructor))
 
     // store a reference to the _makeDate() function
     NJS_CHECK_NAPI(env, napi_get_named_property(env, settings,

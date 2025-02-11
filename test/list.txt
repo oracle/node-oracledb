@@ -40,8 +40,9 @@ Overview of node-oracledb functional tests
         1.11.3 using invalid password
     1.12 confirm an exception is raised after closing a connection
         1.12.1 exception_on_close
-    1.13 unsupported year to month interval
-        1.13.1 test year to month interval not supported
+    1.13 interval datatypes - basic SELECT
+        1.13.1 year to month interval basic case
+        1.13.2 day to second interval basic case
     1.14 unacceptable boundary values for number datatypes
         1.14.1 unacceptable boundary numbers should get rejected
     1.15 result after bad execute
@@ -891,8 +892,9 @@ Overview of node-oracledb functional tests
         55.9.1
     55.10 use Resultset asyncIterator
         55.10.1
-    55.11 NEgative - resultSet with unsupported data types
+    55.11 resultSet with Interval data types
         55.11.1 INTERVAL YEAR TO MONTH data type
+        55.11.2 INTERVAL DAY TO SECOND data type
     55.12 bind a cursor BIND_INOUT
         55.12.1 has not supported binding a cursor with BIND_INOUT
     55.13 Negative - Invalid Ref Cursor
@@ -4983,8 +4985,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
      241.22 Negative - implicitly binding JSON
      241.23 Negative - type mismatch
      241.24 Negative - type mismatch
-     241.25 Negative - query INTERVAL YEAR TO MONTH
-     241.26 Negative - query INTERVAL DAY TO SECOND
+     241.25 query INTERVAL YEAR TO MONTH
+     241.26 query INTERVAL DAY TO SECOND
 
 242. dbObject18.js
     242.1 set oracledb.dbObjectAsPojo
@@ -6158,3 +6160,106 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       310.3.1 Query SPARSE Vector as CLOB and BLOB
     310.4 Vector Distance Calculations
       310.4.1 Calculate Distance Between DENSE Vectors
+    
+  311. dataTypeIntervalYM.js
+    311.1 binding in an interval
+    311.2 binding null
+    311.3 binding out with interval column
+    311.4 binding in/out with interval column
+    311.5 column metadata
+    311.6 fetch all data
+    311.7 fetch data in chunks
+    311.8 fetch single rows
+    311.9 bind and fetch negative interval
+    311.10 bind and fetch max interval value
+    311.11 bind and fetch min interval value
+    311.12 bind and fetch interval with zero values
+    311.13 bind and fetch interval with negative months and positive years
+    311.14 bind and fetch interval with large year value
+    311.15 bind and fetch interval from a table
+    311.16 bind and fetch interval in WHERE clause
+    311.17 handle complex interval arithmetic in PL/SQL
+    311.18 validate interval precision constraints
+    311.19 test interval comparison operations
+    311.20 handle interval type conversions
+    311.21 test interval with null and undefined values
+    311.22 SELECT INTERVAL with year only
+    311.23 SELECT INTERVAL with month (2-digits) only
+    311.24 SELECT INTERVAL with month (3-digits) only
+    311.25 invalid interval format
+    311.26 invalid attribute in bind value
+    311.27 negative precision for interval
+    311.28 non-numeric input for interval
+    311.29 interval arithmetic with invalid types
+    311.30 interval column with null precision
+    311.31 insert data with invalid year precision into interval column
+    311.32 interval comparison with invalid format
+    311.33 empty interval value in bind
+    311.34 bulk inserts with INTERVAL YEAR TO MONTH
+    311.35 ignore additional invalid attribute in bind value
+    311.36 Negative - inserting a POJO instead of an IntervalYM object for an IntervalYM bind
+    311.37 fetch INTERVAL YM as string format
+    311.38 invalid attribute values
+    311.39 IntervalYM constructor with missing attributes
+    311.40 months normalization
+    311.41 PL/SQL aggregate functions
+    311.42 PL/SQL record types
+    311.43 leading/trailing whitespace
+    311.44 different precision specifications
+    311.45 fractional months
+
+  312. dataTypeIntervalDS.js
+    312.1 - binding in an interval
+    312.2 - binding a null value for an interval column
+    312.3 - binding out with interval column
+    312.4 - binding out with interval column - no fractional seconds
+    312.5 - binding in/out with interval arithmetic
+    312.6 - binding in/out with fractional seconds
+    312.7 - column metadata
+    312.8 - fetch all rows
+    312.9 - fetch data in chunks
+    312.10 - fetch single row
+    312.11 - bind and fetch a negative interval
+    312.12 - fetch interval with maximum fractional seconds
+    312.13 - fetch interval with maximum days for DAY(7) precision
+    312.14 - insert interval exceeding day precision (DAY(7))
+    312.15 - interval components exceeding normal ranges are normalized
+    312.16 - select rows where NullableCol is NULL
+    312.17 - verify non-NULL NullableCol value for IntCol=1
+    312.18 - select rows where IntervalCol > 5 days
+    312.19 - interval arithmetic in SQL
+    312.20 - select maximum IntervalCol from table
+    312.21 - test interval with null and undefined values
+    312.22 - SELECT INTERVAL with seconds only
+    312.23 - SELECT INTERVAL with fractional seconds overflow
+    312.24 - invalid interval format
+    312.25 - invalid attribute in bind value
+    312.26 - negative precision for interval
+    312.27 - non-numeric input for interval
+    312.28 - interval arithmetic with invalid types
+    312.29 - day and seconds precision
+    312.30 - interval comparison with invalid format
+    312.31 - empty interval value in bind
+    312.32 - maximum allowed interval value
+    312.33 - interval with all components at maximum
+    312.34 - bind and fetch interval with zero values
+    312.35 - interval with negative fractional seconds
+    312.36 - interval multiplication in SQL
+    312.37 - interval subtraction in SQL
+    312.38 - SQL functions with intervals
+    312.39 - bulk inserts with intervals
+    312.40 - rounding fractional seconds during arithmetic
+    312.41 - Negative - bind a POJO instead of an IntervalDS object
+    312.42 - some invalid attribute values in bind
+    312.43 - ignore additional invalid attribute in bind value
+    312.44 - ignore invalid attribute in bind value
+    312.45 - insert and fetch interval with only days and seconds
+    312.46 - bind interval with only hours and minutes
+    312.47 - constructor with partial attributes
+    312.48 - time component normalization during binding
+    312.49 - undefined/null in constructor attributes
+    312.50 - PL/SQL function returning IntervalDS
+    312.51 - reject non-IntervalDS binds
+    312.52 - string values in constructor attributes
+    312.53 - interval sorting in queries
+    312.54 - interval arithmetic with multiple operations

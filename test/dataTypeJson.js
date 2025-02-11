@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -212,9 +212,16 @@ describe('244.dataTypeJson.js', function() {
         keyBuf: Buffer.from("A Raw")
       };
       const jsonVal22 = { "key22": [new Uint8Array([20, 10])]};
-      const sparseRowEntry = 23;
       const jsonVal23 = {
-        "key23": [new oracledb.SparseVector(
+        "key23": new oracledb.IntervalYM({ years: 5, months: 9 })
+      };
+      const jsonVal24 = {
+        "key24": new oracledb.IntervalDS({ days: 5, hours: 10, minutes: 30,
+          seconds: 15, fseconds: 123 })
+      };
+      const sparseRowEntry = 25;
+      const jsonVal25 = {
+        "key25": [new oracledb.SparseVector(
           {
             values: new Float64Array([-992.1, 994.3]),
             indices: new Uint32Array([0, 2]),
@@ -252,9 +259,14 @@ describe('244.dataTypeJson.js', function() {
         binds.push([21, jsonVal21]);
         binds.push([22, jsonVal22]);
       }
+      // push interval datatypes in JSON
+      binds.push([23, jsonVal23]);
+      binds.push([24, jsonVal24]);
+
       if (isOracle_23_6) {
-        binds.push([23, jsonVal23]);
+        binds.push([25, jsonVal25]);
       }
+
       binds.forEach((element, index) => {
         binds[index].push(connection.encodeOSON(element[1]));
       });
@@ -273,6 +285,7 @@ describe('244.dataTypeJson.js', function() {
       result = await connection.execute(sql);
       let retRows = result.rows;
       retRows.forEach((element, index) => {
+
         assert.deepStrictEqual(binds[index][1], connection.decodeOSON(element[2]));
         assert.deepStrictEqual(binds[index][0], element[0]);
         assert.deepStrictEqual(binds[index][1], element[1]);
@@ -342,7 +355,9 @@ describe('244.dataTypeJson.js', function() {
         keyF: null,
         keyG: true,
         keyH: [ 9, 10, 11 ],
-        keyI: new Date()
+        keyI: new Date(),
+        keyJ: new oracledb.IntervalYM({ years: 5, months: 9 }), // Interval year-to-month
+        keyK: new oracledb.IntervalDS({ days: 5, hours: 8, minutes: 30, seconds: 15 }) // Interval day-to-second
       };
       let binds = {
         i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
