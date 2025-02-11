@@ -14,16 +14,7 @@ node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...
 Common Changes
 ++++++++++++++
 
-#)  Added support for `BigInt` values to be passed to Database Objects.
-    Exported new function `dbObjectTypeHandler` from `oracledb` which can be
-    used to convert strings passed to the handler to `BigInt`.
-    See `Issue #1710 <https://github.com/oracle/node-oracledb/issues/1710>`__.
-
 #)  Added support for Oracle Database 23ai sparse vectors.
-
-#)  Added support for :ref:`interval year-to-month <intervalyeartomonth>` and
-    :ref:`interval day-to-second <intervaldaytosecond>` database column types.
-    See `Issue #929 <https://github.com/oracle/node-oracledb/issues/929>`__.
 
 #)  Fixed :attr:`~dbObject.length` property for the database object
     collection types, which was broken from node-oracledb 6.0.
@@ -31,24 +22,11 @@ Common Changes
 #)  Added support for returning maximum identifier length allowed by the
     database using the new property :attr:`connection.maxIdentifierLength`.
 
-#)  Added :meth:`~dbObject.copy` method to create deep copies of database
+#)  Added :meth:`~dbObject.copy` method to create a deep copy of database
     objects.
 
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Added support for external authentication using Transport Layer
-    Security (TLS) protocol.
-
-#)  Added support for Advanced Network Compression which reduces the size
-    of the network data packets transmitted over a connection for improved
-    effective network throughput and bandwidth utilization.
-
-#)  Fixed issue that does not throw Authentication error for FastAuth
-    when invalid token is used with external authentication.
-
-#)  Added connection optimization feature which uses
-    Server Name Indication (SNI) extension of the TLS protocol.
 
 #)  Added support for setting the :attr:`~oracledb.edition` when connecting to
     the database.
@@ -58,24 +36,6 @@ Thin Mode Changes
 
 #)  Fixed bug with :meth:`dbObject.deleteElement()` which did not update the
     keys of associative arrays when an element was deleted.
-
-#)  Fixed issue with IAM token based authentication which allows unformatted
-    private keys to be used for refreshed access tokens leading to token
-    authentication errors.
-
-Thick Mode Changes
-++++++++++++++++++
-
-#)  Fixed internal error that occurs while running ``connection.subscribe()``
-    with same name for second time.
-    See `Issue #1718 <https://github.com/oracle/node-oracledb/issues/1718>`__.
-
-#)  Fixed internal error that occurs while running ``connection.subscribe()`` with
-    sql reading from non-existent tables.
-
-#)  Internal error handling improvements.
-
-#)  Internal code refactoring to optimize JSON data handling.
 
 node-oracledb `v6.7.2 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.7.2>`__ (11 Feb 2025)
 ---------------------------------------------------------------------------------------------------------
