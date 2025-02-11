@@ -142,7 +142,6 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
 {
     napi_value temp, name, fieldNames, fieldValues, vectorVal, global;
     napi_value uint8Val, uint8Proto, valProto;
-    napi_value jsSparseConstructor;
     napi_valuetype valueType;
     napi_typedarray_type type;
     size_t tempBufferLength;
@@ -224,13 +223,8 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
 
     // handle vectors
     NJS_CHECK_NAPI(env, napi_is_typedarray(env, value, &isTyped))
-
-    // get the reference from baton->globals as JSON payload in AQ
-    // does not set inside baton.
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsSparseVectorConstructor, &jsSparseConstructor))
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            jsSparseConstructor, &isSparse))
+            baton->jsSparseVectorConstructor, &isSparse))
     if (isTyped || isSparse) { // typed array or sparse vector
         NJS_CHECK_NAPI(env, napi_get_global(env, &global))
         if (!isSparse) {

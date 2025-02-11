@@ -67,6 +67,8 @@ Thick Mode Changes
 
 #)  Internal error handling improvements.
 
+#)  Internal code refactoring to optimize JSON data handling.
+
 node-oracledb `v6.7.1 <https://github.com/oracle/node-oracledb/compare/v6.7.0...v6.7.1>`__ (23 Dec 2024)
 ---------------------------------------------------------------------------------------------------------
 

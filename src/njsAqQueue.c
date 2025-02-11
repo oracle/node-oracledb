@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2024, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -109,7 +109,7 @@ bool njsAqQueue_setRecipients(njsBaton *baton, dpiMsgProps *handle,
 static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         napi_env env, napi_value value, dpiMsgProps **handle)
 {
-    napi_value payloadObj, constructor, tempObj;
+    napi_value payloadObj, tempObj;
     dpiMsgProps *tempHandle;
     bool isDbObject;
     size_t bufferLength;
@@ -133,10 +133,8 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     // set payload
     NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "payload",
             &payloadObj))
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsDbObjectConstructor, &constructor))
-    NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj, constructor,
-            &isDbObject))
+    NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj,
+            baton->jsDbObjectConstructor, &isDbObject))
     if (isDbObject) {
         // DB Object
         if (!njsDbObject_getInstance(baton->globals, env, payloadObj, &obj))
@@ -413,6 +411,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_enq, 1, NULL)
     baton->msgProps = calloc(baton->numMsgProps, sizeof(dpiMsgProps*));
     if (!baton->msgProps)
         return njsBaton_setErrorInsufficientMemory(baton);
+
+    if (!njsBaton_setJsValues(baton, env))
+        return false;
     for (i = 0; i < baton->numMsgProps; i++) {
         NJS_CHECK_NAPI(env, napi_get_element(env, args[0], i, &message))
         if (!njsAqQueue_createMessage(baton, queue, env, message,
