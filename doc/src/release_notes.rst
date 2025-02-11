@@ -59,6 +59,10 @@ Thin Mode Changes
 #)  Fixed bug with :meth:`dbObject.deleteElement()` which did not update the
     keys of associative arrays when an element was deleted.
 
+#)  Fixed issue with IAM token based authentication which allows unformatted
+    private keys to be used for refreshed access tokens leading to token
+    authentication errors.
+
 Thick Mode Changes
 ++++++++++++++++++
 
