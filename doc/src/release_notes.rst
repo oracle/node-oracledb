@@ -28,6 +28,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed issue that does not throw Authentication error for FastAuth
+    when invalid token is used with external authentication.
+
 #)  Added connection optimization feature which uses Server Name Indication (SNI)
     extension of the TLS protocol. 
  
