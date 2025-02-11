@@ -290,3 +290,4 @@ spec:
   - test/dataTypeVector5.js
   - test/dataTypeVector6.js
   - test/traceCalls.js
+  - test/inBandNotification.js
