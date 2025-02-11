@@ -966,9 +966,10 @@ Each of the configuration properties is described below.
     authentication. See :ref:`External Authentication <extauth>` for more
     information.
 
-    In node-oracledb Thin mode, when token-based authentication is required,
-    this property must be set to *true*. In all the other cases where this
-    property is set to *true*, an error is thrown.
+    In node-oracledb Thin mode, when token-based authentication or
+    :ref:`external authentication using TLS <tlsextauth>` is required, this
+    property must be set to *true*. In all the other cases where this property
+    is set to *true*, an error is thrown.
 
     The default value is *false*.
 
@@ -2120,7 +2121,7 @@ Oracledb Methods
 
             The default is *false*.
 
-            In Thin mode, when token-based authentication is required, this property must be set to *true*. In all the other cases where this property is set to *true*, an error is thrown.
+            In Thin mode, when token-based authentication or :ref:`external authentication using TLS <tlsextauth>` is required, this property must be set to *true*. In all the other cases where this property is set to *true*, an error is thrown.
 
             This optional property overrides the :attr:`oracledb.externalAuth` property.
 
@@ -2897,7 +2898,7 @@ Oracledb Methods
 
             If this optional property is set to *true* in Thick mode, then the connection will be established using :ref:`External Authentication <extauth>`.
 
-            In Thin mode, when token-based authentication is required, this property must be set to *true*. In all the other cases where this property is set to *true*, an error is thrown.
+            In Thin mode, when token-based authentication or :ref:`external authentication using TLS <tlsextauth>` is required, this property must be set to *true*. In all the other cases where this property is set to *true*, an error is thrown.
 
             This optional property overrides the :attr:`oracledb.externalAuth` property.
 

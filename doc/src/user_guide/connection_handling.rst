@@ -1981,17 +1981,28 @@ Connecting Using External Authentication
 External Authentication allows applications to use an external password
 store (such as an `Oracle Wallet <https://www.oracle.com/pls/topic/lookup?
 ctx=dblatest&id=GUID-E3E16C82-E174-4814-98D5-EADF1BCB3C37>`__),
-the `Secure Socket Layer <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-6AD89576-526F-4D6B-A539-ADF4B840819F>`__
-(SSL), or the `operating system <https://www.oracle.com/pls/topic/lookup
-?ctx=dblatest&id=GUID-37BECE32-58D5-43BF-A098-97936D66968F>`__
-to validate user access. One of the benefits is that database
-credentials do not need to be hard coded in the application.
+the `Transport Layer Security (TLS) or Secure Socket Layer (SSL)
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-6AD89576-526F-
+4D6B-A539-ADF4B840819F>`__, or the `operating system <https://www.oracle.com/
+pls/topic/lookup?ctx=dblatest&id=GUID-37BECE32-58D5-43BF-A098-97936D66968F>`__
+to validate user access. With an external password store, your application can
+use an Oracle Wallet to authenticate users. External Authentication using TLS
+authenticates users with Public Key Infrastructure (PKI) certificates. With
+operating system authentication, user authentication can be performed if the
+user has an operating system account on their machine recognized by Oracle
+Database. One of the benefits of using external authentication is that
+database credentials do not need to be hard coded in the application.
 
 .. note::
 
-    Connecting to Oracle Database using external authentication is only
-    supported in node-oracledb Thick mode. See :ref:`enablingthick`.
+    Connecting to Oracle Database using external authentication with an Oracle
+    Wallet, TLS, or the operating system is supported in node-oracledb Thick
+    mode. See :ref:`enablingthick`.
+
+    Node-oracledb Thin mode only supports external authentication with TLS.
+    See :ref:`tlsextauth` for more information.
+
+**In node-oracledb Thick Mode**
 
 To use external authentication, set the :attr:`oracledb.externalAuth` property
 to *true*. This property can also be set in the ``connAttrs`` or ``poolAttrs``
@@ -2072,6 +2083,67 @@ always 1, regardless of the value of
 connections exceeds ``poolMin`` and connections are idle for more than
 the :attr:`oracledb.poolTimeout` seconds, then the number of
 open connections does not fall below ``poolMin``.
+
+.. _tlsextauth:
+
+External Authentication Using TLS
+---------------------------------
+
+External authentication with Transport Layer Security (TLS) uses `Public Key
+Infrastructure (PKI) certificates <https://www.oracle.com/pls/topic/lookup?ctx
+=dblatest&id=GUID-6AD89576-526F-4D6B-A539-ADF4B840819F>`__ to authenticate
+users. This authentication method can be used in both node-oracledb Thin and
+Thick modes.
+
+To use TLS external authentication, you must set the
+:attr:`oracledb.externalAuth` property to *true*. This property can also be
+set in the ``externalAuth`` parameter of the :meth:`oracledb.getConnection()`
+or :meth:`oracledb.createPool()` calls. TLS external authentication can only
+be done for connections that are configured to use the *TCPS* protocol.
+
+For a standalone connection, you can use TLS authentication to authenticate
+the user as shown in the example below:
+
+.. code-block:: javascript
+
+    const config = { connectString: "tcps://localhost/orclpdb1", externalAuth: true };
+    const connection = await oracledb.getConnection(config);
+
+Note that TLS external authentication will not be enabled if you are using
+token-based authentication (that is, the ``accessToken`` property is set in
+:meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()`).
+
+For a connection pool, you can authenticate with TLS as shown in the example
+below:
+
+.. code-block:: javascript
+
+    const config = { connectString: "tcps://localhost/orclpdb1", externalAuth: true };
+    const pool = await oracledb.createPool(config);
+    const connection = await pool.getConnection();
+
+    . . . // connection has access to the schema objects of the externally identified user
+
+    await connection.close();
+
+In node-oracledb Thick mode, ensure that the `SQLNET.AUTHENTICATION_SERVICES
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FFDBCCFD-87EF
+-43B8-84DA-113720FCC095>`__ parameter contains *TCPS* as a value in the
+:ref:`sqlnet.ora <tnsadmin>` file. Note that *TCPS* is the default value of
+this parameter.
+
+Additional server side configuration is also required to enable external
+authentication using TLS:
+
+1. Create a user corresponding to the distinguished name (DN) in the
+   certificate using:
+
+   .. code-block:: sql
+
+     CREATE USER user_name IDENTIFIED EXTERNALLY AS 'user DN on certificate';
+
+2. Set the ``SSL_CLIENT_AUTHENTICATION`` parameter to *TRUE* in the server-side
+   :ref:`sqlnet.ora <tnsadmin>` file.
 
 .. _tokenbasedauthentication:
 
