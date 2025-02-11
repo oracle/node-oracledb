@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2018, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -268,7 +268,8 @@ static bool njsSubscription_createMessageTable(napi_env env,
 void njsSubscription_eventHandler(njsSubscription *subscr,
         dpiSubscrMessage *incomingMessage)
 {
-    if (subscr->handle) {
+    // handle is valid and listening notifications is enabled.
+    if (subscr->handle && subscr->notifications) {
         uv_mutex_lock(&subscr->mutex);
         uv_barrier_init(&subscr->barrier, 2);
         subscr->message = incomingMessage;
@@ -428,7 +429,6 @@ bool njsSubscription_startNotifications(njsSubscription *subscr,
     if (!subscr->notifications) {
 
         // keep the name on the subscription
-        subscr->notifications = true;
         baton->name = NULL;
         baton->nameLength = 0;
 
@@ -438,6 +438,7 @@ bool njsSubscription_startNotifications(njsSubscription *subscr,
         uv_async_init(loop, &subscr->async,
                 njsSubscription_processNotification);
         subscr->async.data = subscr;
+        subscr->notifications = true;
 
     }
 

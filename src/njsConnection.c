@@ -2359,6 +2359,8 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_subscribe, 2, NULL)
     if (valueType == napi_external) {
         NJS_CHECK_NAPI(env, napi_get_value_external(env, args[0],
                 (void**) &baton->subscription))
+        NJS_CHECK_NAPI(env, napi_create_reference(env, args[0], 1,
+                &baton->jsSubscriptionRef))
     } else {
         if (!njsSubscription_new(baton, env))
             return false;

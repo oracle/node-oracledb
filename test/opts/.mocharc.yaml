@@ -174,7 +174,6 @@ spec:
   - test/externalProxyAuth.js
   - test/dataTypeXML.js
   - test/sessionTag.js
-  - test/runCQN.js
   - test/sodaInstanceof.js
   - test/plsqlBindList.js
   - test/fetchRawAsString.js

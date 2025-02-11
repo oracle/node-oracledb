@@ -40,7 +40,7 @@ Thin Mode Changes
 
 #)  Added connection optimization feature which uses
     Server Name Indication (SNI) extension of the TLS protocol.
- 
+
 #)  Added support for setting the :attr:`~oracledb.edition` when connecting to
     the database.
 
@@ -52,6 +52,13 @@ Thin Mode Changes
 
 Thick Mode Changes
 ++++++++++++++++++
+
+#)  Fixed internal error that occurs while running ``connection.subscribe()``
+    with same name for second time.
+    See `Issue #1718 <https://github.com/oracle/node-oracledb/issues/1718>`__.
+
+#)  Fixed internal error that occurs while running ``connection.subscribe()`` with
+    sql reading from non-existent tables.
 
 #)  Internal error handling improvements.
 
