@@ -14,6 +14,11 @@ node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...
 Common Changes
 ++++++++++++++
 
+#)  Added support for `BigInt` values to be passed to Database Objects.
+    Exported new function `dbObjectTypeHandler` from `oracledb` which can be
+    used to convert strings passed to the handler to `BigInt`.
+    See `Issue #1710 <https://github.com/oracle/node-oracledb/issues/1710>`__.
+
 #)  Added support for Oracle Database 23ai sparse vectors.
 
 #)  Fixed :attr:`~dbObject.length` property for the database object

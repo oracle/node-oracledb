@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -204,8 +204,14 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getAttrValue, 1, &njsClassDefDbObject)
     njsDbObject *obj = (njsDbObject*) callingInstance;
     njsDbObjectAttr *attr;
     dpiData data;
+    char numberAsString[200];
 
     NJS_CHECK_NAPI(env, napi_unwrap(env, args[0], (void**) &attr))
+    if (attr->typeInfo.oracleTypeNum == DPI_ORACLE_TYPE_NUMBER) {
+        data.value.asBytes.ptr = numberAsString;
+        data.value.asBytes.length = sizeof(numberAsString);
+        data.value.asBytes.encoding = NULL;
+    }
     if (dpiObject_getAttributeValue(obj->handle, attr->handle,
             attr->typeInfo.nativeTypeNum, &data) < 0)
         return njsUtils_throwErrorDPI(env, globals);
@@ -223,8 +229,14 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getElement, 1, &njsClassDefDbObject)
     njsDbObject *obj = (njsDbObject*) callingInstance;
     int32_t index;
     dpiData data;
+    char numberAsString[200];
 
     NJS_CHECK_NAPI(env, napi_get_value_int32(env, args[0], &index))
+    if (obj->type->elementTypeInfo.oracleTypeNum == DPI_ORACLE_TYPE_NUMBER) {
+        data.value.asBytes.ptr = numberAsString;
+        data.value.asBytes.length = sizeof(numberAsString);
+        data.value.asBytes.encoding = NULL;
+    }
     if (dpiObject_getElementValueByIndex(obj->handle, index,
             obj->type->elementTypeInfo.nativeTypeNum, &data) < 0 )
         return njsUtils_throwErrorDPI(env, globals);
@@ -459,6 +471,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getValues, 0, &njsClassDefDbObject)
     uint32_t arrayPos;
     napi_value temp;
     dpiData data;
+    char numberAsString[200];
 
     // determine the size of the collection and create an array of that length
     if (dpiObject_getSize(obj->handle, &size) < 0)
@@ -471,6 +484,11 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsDbObject_getValues, 0, &njsClassDefDbObject)
     if (dpiObject_getFirstIndex(obj->handle, &index, &exists) < 0)
         return njsUtils_throwErrorDPI(env, globals);
     while (exists) {
+        if (obj->type->elementTypeInfo.oracleTypeNum == DPI_ORACLE_TYPE_NUMBER) {
+            data.value.asBytes.ptr = numberAsString;
+            data.value.asBytes.length = sizeof(numberAsString);
+            data.value.asBytes.encoding = NULL;
+        }
         if (dpiObject_getElementValueByIndex(obj->handle, index,
                 obj->type->elementTypeInfo.nativeTypeNum, &data) < 0)
             return njsUtils_throwErrorDPI(env, globals);
@@ -627,6 +645,7 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
         case DPI_ORACLE_TYPE_NCHAR:
         case DPI_ORACLE_TYPE_VARCHAR:
         case DPI_ORACLE_TYPE_NVARCHAR:
+        case DPI_ORACLE_TYPE_NUMBER:
             NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
                     data->value.asBytes.ptr, data->value.asBytes.length,
                     value))
@@ -635,15 +654,6 @@ static bool njsDbObject_transformFromOracle(njsDbObject *obj, napi_env env,
             NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
                     data->value.asBytes.length, data->value.asBytes.ptr, NULL,
                     value))
-            return true;
-        case DPI_ORACLE_TYPE_NUMBER:
-            if (typeInfo->nativeTypeNum == DPI_NATIVE_TYPE_INT64) {
-                NJS_CHECK_NAPI(env, napi_create_int64(env, data->value.asInt64,
-                        value))
-            } else {
-                NJS_CHECK_NAPI(env, napi_create_double(env,
-                        data->value.asDouble, value))
-            }
             return true;
         case DPI_ORACLE_TYPE_NATIVE_INT:
             NJS_CHECK_NAPI(env, napi_create_int64(env, data->value.asInt64,
@@ -712,6 +722,7 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
         njsDbObjectAttr *attr, njsModuleGlobals *globals)
 {
     napi_value constructor, getComponentsFn;
+    napi_value numStr;
     napi_valuetype valueType;
     njsDbObject *valueObj;
     bool check, tempBool;
@@ -738,8 +749,19 @@ static bool njsDbObject_transformToOracle(njsDbObject *obj, napi_env env,
             dpiData_setBytes(data, *strBuffer, (uint32_t) length);
             return true;
 
-        // numbers are handled as doubles in JavaScript
+        // numbers are handled as doubles in JavaScript.
+        // If property type is NUMBER, we write string.
         case napi_number:
+        case napi_bigint:
+            if (oracleTypeNum == DPI_ORACLE_TYPE_NUMBER) {
+                // Write to NUMBER/ INTEGER properties astring.
+                NJS_CHECK_NAPI(env, napi_coerce_to_string(env, value, &numStr))
+                if (!njsUtils_copyStringFromJS(env, numStr, strBuffer, &length))
+                    return false;
+                *nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+                dpiData_setBytes(data, *strBuffer, (uint32_t)length);
+                return true;
+            }
             NJS_CHECK_NAPI(env, napi_get_value_double(env, value,
                     &data->value.asDouble));
             *nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
@@ -1033,7 +1055,13 @@ static bool njsDbObjectType_populateTypeInfo(njsDataTypeInfo *info,
     napi_value temp;
 
     info->oracleTypeNum = sourceInfo->oracleTypeNum;
-    info->nativeTypeNum = sourceInfo->defaultNativeTypeNum;
+    if (sourceInfo->oracleTypeNum == DPI_ORACLE_TYPE_NUMBER) {
+        // For NUMBER property, we want to retrieve always as
+        // DPI_NATIVE_TYPE_BYTES not DPI_NATIVE_TYPE_DOUBLE.
+        info->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
+    } else {
+        info->nativeTypeNum = sourceInfo->defaultNativeTypeNum;
+    }
     info->precision = sourceInfo->precision;
     info->scale = sourceInfo->scale;
     info->dbSizeInBytes = sourceInfo->dbSizeInBytes;

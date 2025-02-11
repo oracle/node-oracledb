@@ -1462,4 +1462,164 @@ describe('290. dbObject20.js', () => {
     });
   });
 
+  describe(`290.8 db Object tests with fetchType Handler `, () => {
+    let conn;
+    const TYPE1 = 'NODB_TEST_FETCH_TYPE';
+    const TYPE2 = 'NODB_TEST_FETCH_TYPE2';
+    const TYPE3 = 'NODB_TEST_FETCH_TYPE3'; // with LOB property
+    const maxVarCharLen = 4;
+    const maxVarNCharLen = 4;
+    const maxVarRawLen = 10;
+    const myDbObjectFetchTypeHandler = function(metadata) {
+      if (metadata.type === oracledb.DB_TYPE_NUMBER) {
+        return {
+          converter: (val) => {
+            return String(val);
+          }
+        };
+      }
+      if (metadata.type === oracledb.CLOB) {
+        return {
+          converter: (val) => {
+            if (!val) {
+              return val;
+            }
+            return val.getData();
+          }
+        };
+      }
+    };
+
+    before(async () => {
+      conn = await oracledb.getConnection(dbConfig);
+
+      const sqlStmts = [
+        {
+          type: TYPE1, sql: `CREATE TYPE ${TYPE1} FORCE AS OBJECT (LINE_ID NUMBER,
+              LINE_STR VARCHAR2(${maxVarCharLen}), LINE_FIXED_CHAR CHAR(${maxVarCharLen}),
+              LINE_NSTR NVARCHAR2(${maxVarNCharLen}), LINE_FIXED_NSTR NCHAR(${maxVarNCharLen}),
+              LINE_ID2 FLOAT, rawAttr RAW(${maxVarRawLen}), ENTRY DATE)`
+        },
+        {
+          type: TYPE2, sql: `CREATE TYPE ${TYPE2} FORCE AS OBJECT (LINE_ID NUMBER,
+              LINE_STR VARCHAR2(${maxVarCharLen}), LINE_FIXED_CHAR CHAR(${maxVarCharLen}),
+              LINE_NSTR NVARCHAR2(${maxVarNCharLen}), LINE_FIXED_NSTR NCHAR(${maxVarNCharLen}),
+              LINE_ID2 FLOAT, rawAttr RAW(${maxVarRawLen}), ENTRY DATE)`
+        },
+        {
+          type: TYPE3, sql: `CREATE TYPE ${TYPE3} FORCE AS OBJECT (LINE_ID
+          NUMBER, description CLOB)`
+        }
+      ];
+
+      for (const { type, sql } of sqlStmts) {
+        await testsUtil.createType(conn, type, sql);
+      }
+
+    }); // before()
+
+    after(async () => {
+      if (conn) {
+        await testsUtil.dropType(conn, TYPE1);
+        await testsUtil.dropType(conn, TYPE2);
+        await testsUtil.dropType(conn, TYPE3);
+        await conn.close();
+      }
+    }); // after()
+
+    afterEach(() => {
+      oracledb.dbObjectTypeHandler = undefined;
+    }); // after()
+
+    it('290.8.1 Fetch Number property as string ', async () => {
+      //prepare data.
+      const date1 = new Date(1986, 8, 18);
+      const lineId = 9999.231412342;
+      const lineId2 = -8;
+      const expectedData = {
+        LINE_ID: lineId, // precision and scale of attributes inside object are ignored .
+        LINE_STR: "1".repeat(maxVarCharLen),
+        LINE_FIXED_CHAR: "1".repeat(maxVarCharLen),
+        LINE_NSTR: "Э".repeat(maxVarNCharLen),
+        LINE_FIXED_NSTR: "Э".repeat(maxVarNCharLen),
+        LINE_ID2: lineId2,
+        RAWATTR: Buffer.from("A".repeat(maxVarRawLen)),
+        ENTRY: date1
+      };
+      // global setting also applies to nested types in this TYPE1.
+      oracledb.dbObjectTypeHandler = myDbObjectFetchTypeHandler;
+      const pInClass = await conn.getDbObjectClass(TYPE1);
+      const pInObj = new pInClass(expectedData);
+      const pOutObj = new pInClass({}); //out obj inited as empty one
+
+      // create Procedure.
+      const PROC = 'nodb_proc_test2029041';
+      const createProc = `
+      CREATE OR REPLACE PROCEDURE ${PROC}
+        (a IN ${TYPE1}, b IN OUT ${TYPE1}) AS
+      BEGIN
+         b := a;
+      END;
+    `;
+      let result = await conn.execute(createProc);
+
+      // Call procedure.
+      let plsql = `BEGIN ${PROC} (:pIn, :pOut); END;`;
+      let bindVar = {
+        pIn: { val: pInObj, dir: oracledb.BIND_IN },
+        pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
+      };
+      result = await conn.execute(plsql, bindVar);
+      // convert number and float expected data as string.
+      expectedData.LINE_ID = String(expectedData.LINE_ID);
+      expectedData.LINE_ID2 = String(expectedData.LINE_ID2);
+      // Verify the result.
+      assert.strictEqual(JSON.stringify(expectedData), JSON.stringify(result.outBinds.pOut));
+
+      // dbObjectTypeHandler changes are not reflected for types already
+      // created.
+      oracledb.dbObjectTypeHandler = undefined;
+      assert.strictEqual(JSON.stringify(expectedData), JSON.stringify(result.outBinds.pOut));
+
+      // Reset dbObjectTypeHandler to default which is reflected for TYPE2.
+      oracledb.dbObjectTypeHandler = undefined;
+      expectedData.LINE_ID = lineId;
+      expectedData.LINE_ID2 = lineId2;
+      const pInClass2 = await conn.getDbObjectClass(TYPE2);
+      const pInObj2 = new pInClass2(expectedData);
+      const pOutObj2 = new pInClass2({}); //out obj inited as empty one
+
+      // create Procedure.
+      const PROC2 = 'nodb_proc_test2029042';
+      const createProc2 = `
+        CREATE OR REPLACE PROCEDURE ${PROC2}
+          (a IN ${TYPE2}, b IN OUT ${TYPE2}) AS
+        BEGIN
+           b := a;
+        END;
+      `;
+      result = await conn.execute(createProc2);
+
+      // Call procedure.
+      plsql = `BEGIN ${PROC2} (:pIn, :pOut); END;`;
+      bindVar = {
+        pIn: { val: pInObj2, dir: oracledb.BIND_IN },
+        pOut: { val: pOutObj2, dir: oracledb.BIND_INOUT },
+      };
+      result = await conn.execute(plsql, bindVar);
+      // Verify the result and no typehandler or converter is used.
+      assert.strictEqual(JSON.stringify(expectedData), JSON.stringify(result.outBinds.pOut));
+
+      if (!oracledb.thin) {
+        // converters for LOB are not supported.
+        oracledb.dbObjectTypeHandler = myDbObjectFetchTypeHandler;
+        await assert.rejects(
+          async () => await conn.getDbObjectClass(TYPE3),
+          /NJS-089:/
+        );
+      }
+
+    }); // 290.8.1
+
+  });
 });

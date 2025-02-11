@@ -5989,13 +5989,16 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     299.2 throws error for invalid numbers(smallest exponent - 1)
 
   300. bigInt.js
-    300.1 can bind bigInts
-      300.1.1 with execute
-      300.1.2 with executeMany
+    300.1 verify the bigints array
+      300.1.1 verify rows
     300.2 fetch values
       300.2.1 fetches the value as number(default)
       300.2.2 use fetchTypeHandler to get BigInt value
-      300.2.3 fetches values greater than Number.MAX_SAFE_INTEGER correctly
+      300.2.3 fetch Number.MAX_SAFE_INTEGER + 1
+      300.2.4 truncates Unsafe Integers
+    300.3 BigInt property inside objects
+      300.3.1 read bigint property from object type
+      300.3.2 read bigint values from collection type
 
   301. aq9.js
     301.1 Enqueue messages with transformation single user queue
@@ -6079,7 +6082,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       308.2.3 test connection reuse after marking unhealthy
       308.2.4 test pool draining with multiple sessions
 
-309. dataTypeVector7.js
+  309. dataTypeVector7.js
     309.1 Verify Sparse Vectors with float64
       309.1.1 bind and read the sparse data
       309.1.2 Different object format for sparse data
@@ -6145,7 +6148,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       309.3.12 Bulk Insert for int8 Sparse Vectors
       309.3.13 Complex Sparse Vector Structures for int8
 
-310. dataTypeVector8.js
+  310. dataTypeVector8.js
     310.1 SPARSE Vector Tests
       310.1.1 Insert and Query SPARSE Vector
       310.1.2 Query SPARSE Vector in Multiple Formats
