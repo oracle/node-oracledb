@@ -1,4 +1,4 @@
-/* Copyright 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -39,10 +39,44 @@ describe('300. bigInt.js', function() {
   let connection;
   const createTable = `CREATE TABLE nodb_bigint (id NUMBER)`;
   const dropTable = `DROP TABLE nodb_bigint PURGE`;
+  let bints, expectedRows;
 
   before('get connection and create table', async function() {
     connection = await oracledb.getConnection(dbConfig);
     await connection.execute(createTable);
+    const sql = 'INSERT INTO nodb_bigint VALUES(:a)';
+    bints = [
+      589508999999999999999n, // takes around 70 bits
+      BigInt(Number.MAX_SAFE_INTEGER) + 1n, // unsafe positive value Number
+      BigInt(Number.MAX_SAFE_INTEGER) + 2n, // unsafe positive value Number
+      0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFn, // 128 bits
+      BigInt(Number.MAX_SAFE_INTEGER) - 1n, // unsafe negative value Number
+      BigInt(Number.MIN_SAFE_INTEGER) - 2n, // unsafe negative value Number
+      98765432123456n, // safe Number.
+      200n, // smaller number.
+      23.4, // float
+      BigInt(Number.MAX_SAFE_INTEGER),
+      BigInt(Number.MIN_SAFE_INTEGER)
+    ];
+
+    expectedRows = bints.map((element) => {
+      return [Number(element)];
+    });
+    const binds = [];
+    for (let i = 0; i < bints.length; i++) {
+      binds[i] = {a: bints[i]};
+    }
+    const options = {
+      bindDefs: {
+        a: { type: oracledb.NUMBER }
+      }
+    };
+    await connection.executeMany(sql, binds, options);
+
+    const bind = [123n];
+    // Insert using execute.
+    await connection.execute(sql, bind);
+    expectedRows.push([Number(123n)]);
   });
 
   after('drop table and release connection', async function() {
@@ -50,63 +84,63 @@ describe('300. bigInt.js', function() {
     await connection.close();
   });
 
-  describe('300.1 can bind bigInts', function() {
-
-    it('300.1.1 with execute', async function() {
-      const sql = 'INSERT INTO nodb_bigint VALUES(:1)';
-      const bind = [123n];
-      await assert.doesNotReject(connection.execute(sql, bind));
+  describe('300.1 verify the bigints array', function() {
+    it('300.1.1 verify rows', async function() {
+      const result = await connection.execute(` select * from nodb_bigint`);
+      assert.deepStrictEqual(expectedRows, result.rows);
     }); //300.1.1
-
-    it('300.1.2 with executeMany', async function() {
-      const sql = 'INSERT INTO nodb_bigint VALUES(:a)';
-      const binds = [
-        { a: 1234n },
-        { a: 98765432123456n },
-        { a: -1234n },
-        { a: BigInt(Number.MAX_SAFE_INTEGER) + 1n }
-      ];
-      const options = {
-        bindDefs: {
-          a: { type: oracledb.NUMBER }
-        }
-      };
-      await assert.doesNotReject(connection.executeMany(sql, binds, options));
-    }); //300.1.2
 
   }); //300.1
 
   describe('300.2 fetch values', function() {
     const sql = 'SELECT id FROM nodb_bigint WHERE id = :1';
-    const bind = [ 123n ];
 
     afterEach('Reset oracledb.fetchTypeHandler property', function() {
       oracledb.fetchTypeHandler = undefined;
     });
 
     it('300.2.1 fetches the value as number(default)', async function() {
+      const num = bints[4];
+      const bind = [ num ];
       const result = await connection.execute(sql, bind);
-      assert.deepStrictEqual(result.rows[0][0], 123);
+      assert.deepStrictEqual(result.rows[0][0], Number(num));
     }); //300.2.1
 
     it('300.2.2 use fetchTypeHandler to get BigInt value', async function() {
-      const myFetchTypeHandler = function() {
-        return {converter: (val) => val === null ? null : BigInt(val)};
+      // Define fetchType handler to return Number as string
+      // and convert the string to BigInt.
+      const myFetchTypeHandler = function(metadata) {
+        if (metadata.dbTypeName === "NUMBER") {
+          return {
+            type: oracledb.DB_TYPE_VARCHAR, converter: (val) => {
+              return val === null ? null : BigInt(val);
+            }
+          };
+        }
       };
-
       oracledb.fetchTypeHandler = myFetchTypeHandler;
 
-      const result = await connection.execute(sql, bind);
-      assert.deepStrictEqual(result.rows[0][0], 123n);
+      const result = await connection.execute(sql, [bints[0]]);
+      assert.deepStrictEqual(result.rows[0][0], bints[0]);
     }); //300.2.2
 
-    it('300.2.3 fetches values greater than Number.MAX_SAFE_INTEGER correctly', async function() {
-      const bindval = [ BigInt(Number.MAX_SAFE_INTEGER) + 1n ];
+    it('300.2.3 fetch Number.MAX_SAFE_INTEGER + 1', async function() {
+      const num = BigInt(Number.MAX_SAFE_INTEGER) + 1n;
+      const bindval = [ num ];
 
       const result = await connection.execute(sql, bindval);
-      assert.deepStrictEqual(result.rows[0][0], Number.MAX_SAFE_INTEGER + 1);
+      assert.deepStrictEqual(result.rows[0][0], Number(num));
 
     }); //300.2.3
+
+    it('300.2.4 truncates Unsafe Integers', async function() {
+      const num = BigInt(Number.MAX_SAFE_INTEGER) + 2n;
+      const bindval = [ num ];
+
+      const result = await connection.execute(sql, bindval);
+      assert.deepStrictEqual(result.rows[0][0], Number(Number.MAX_SAFE_INTEGER + 1));
+
+    }); //300.2.4
 
   }); //300.2
 

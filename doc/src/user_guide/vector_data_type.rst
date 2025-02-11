@@ -11,6 +11,12 @@ The VECTOR data type is a homogeneous array of 8-bit signed integers, 8-bit
 unsigned integers, 32-bit floating-point numbers, or 64-bit floating-point
 numbers.
 
+There are two vector types that can be stored in Oracle Database, DENSE
+vectors and SPARSE vectors. A dense vector is a vector where each dimension is
+physically stored, including zero-values. This is the default vector type used
+in Oracle Database. A sparse vector is a vector which has mostly zero as its
+dimension values and only the non-zero values are physically stored.
+
 With the VECTOR data type, you can define the number of dimensions for the
 data and the storage format for each dimension value in the vector. The
 possible storage formats include:
@@ -43,8 +49,8 @@ To create a table with three columns for vector data, for example:
     )
 
 In this example, each column can store vector data of three dimensions where
-each dimension value is of the specified storage format. This example is used
-in subsequent sections.
+each dimension value is of the specified storage format. The vector type of
+the three columns is dense. This example is used in subsequent sections.
 
 .. _insertvector:
 
@@ -322,3 +328,181 @@ See `vectortype1.js <https://github.com/oracle/node-oracledb/tree/
 main/examples/vectortype1.js>`__ and `vectortype2.js <https://github.com/
 oracle/node-oracledb/tree/main/examples/vectortype2.js>`__ for runnable
 examples.
+
+.. _sparsevectors:
+
+Using SPARSE Vectors
+====================
+
+A sparse vector is a vector which has zero value for most of its dimensions.
+This vector physically stores only the non-zero values. For more information
+about using sparse vectors in Oracle Database, see the `Oracle AI Vector search
+User's Guide <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+6015566C-3277-4A3C-8DD0-08B346A05478>`__.
+
+A sparse vector is supported when you are using Oracle Database 23.7 or later.
+The sparse vector support was added in node-oracledb 6.8.
+
+The storage formats that can be used with sparse vectors are FLOAT32, FLOAT64,
+and INT8. Note that the BINARY storage format cannot be used with sparse
+vectors.
+
+You can define a column for a sparse vector using the following format::
+
+    VECTOR(number_of_dimensions, dimension_storage_format, SPARSE)
+
+For example, to create a table with all three properties for sparse vectors:
+
+.. code-block:: sql
+
+    CREATE TABLE vecSparseTable (
+        SPARSECOL64 VECTOR(4, FLOAT64, SPARSE)
+    )
+
+In this example, the SPARSECOL64 column can store sparse vector data of 4
+dimensions where each dimension value is a 64-bit floating-point number. This
+example is used in subsequent sections.
+
+The sparse vector format is::
+
+    [Total Dimension Count, [Dimension Index Array], [Dimension Value Array]]
+
+The three key components of sparse vectors are:
+
+- The total number of dimensions of the vector, which includes zero and
+  non-zero values.
+
+- An array that contains the indices of the dimensions which is zero-based.
+
+- An array containing the non-zero values of the dimensions at the specified
+  indices.
+
+To create sparse vectors in node-oracledb, you can use :ref:`Oracledb
+SparseVector objects <oracledbsparsevector>`.
+
+.. _insertsparsevector:
+
+Inserting SPARSE Vectors
+------------------------
+
+With node-oracledb, sparse vectors can be inserted using
+:ref:`SparseVector objects <oracledbsparsevector>`. You can specify the
+following properties in this object:
+
+- The number of dimensions of the vector which includes zero and non-zero
+  integers.
+
+- The indices of the dimensions with a JavaScript array or a 32-bit unsigned
+  integers (Uint32Array) TypedArray.
+
+- The non-zero values of the dimensions with a JavaScript array or TypedArray.
+
+If the array of indices is not a JavaScript array or a Uint32Array TypedArray,
+then the ``NJS-158: SPARSE VECTOR indices is not Uint32Array or an Array`` is
+raised. See :ref:`sparsevectorproperties` for more information.
+
+The SparseVector object can be defined in the following ways:
+
+- A string which is a JSON array that contains the number of dimensions, an
+  array of indices (zero-based), and an array of values. For example::
+
+    oracledb.SparseVector('[10, [1, 3, 5], [1.5, 3.5, 7.7]]')
+
+  This creates a sparse vector of 10 dimensions with the non-zero values of
+  [1.5, 3.5, 7.7] being present in indices [1,3,5].
+
+- An object that contains an array of values, an array of indices (zero-based),
+  and the number of dimensions. For example::
+
+    oracledb.SparseVector({values: [1.5, 3.5, 7.7], indices: [1, 3, 5], numDimensions: 10})
+
+- A dense array which can be a JavaScript array or a TypedArray. For example::
+
+    oracledb.SparseVector([1.5, 0, 3.5, 7.7])
+
+You can insert a sparse vector as a string, an object, or as an array.
+
+The example below inserts a sparse vector as an object using the
+:ref:`SparseVector objects <oracledbsparsevector>`:
+
+.. code-block:: javascript
+
+    const sparseVec = oracledb.SparseVector({values: [39, -65],
+                                        indices: [1, 3], numDimensions: 4});
+
+    await connection.execute(
+        `INSERT INTO vecSparseTable (SPARSECOL64) VALUES (:vec64)`,
+         { vec64: sparseVec }
+    );
+
+.. _fetchsparsevector:
+
+Fetching SPARSE Vectors
+-----------------------
+
+With node-oracledb, vector columns are fetched as :ref:`SparseVector objects
+<oracledbsparsevector>` if the VECTOR column in Oracle Database contains
+sparse vector data. To query a sparse vector column, for example:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `SELECT SPARSECOL64 FROM vecSparseTable`
+    );
+    const vecs = result.rows[0].SPARSECOL64;
+    const val = JSON.stringify(vecs); // change JavaScript object to a JSON string
+    console.log(val);
+
+This prints the following output::
+
+    {"SPARSECOL64":{"numDimensions":4,"indices":{"0":1,"1":3},"values":{"0":39,"1":-65}}
+
+The :ref:`vectorDimensions <execmetadata>`, :ref:`vectorFormat <execmetadata>`,
+and :ref:`isSparseVector <execmetadata>` attributes in the metadata returned
+by a query contains the number of dimensions of the vector column, the storage
+format of each dimension value in the vector column, and whether the column
+contains a sparse vector respectively. To fetch these attributes, you can use:
+
+.. code-block:: javascript
+
+    const vecDimensions = result.metadata[0].vectorDimensions;
+    const vecStorageFormat = result.metadata[0].vectorFormat;
+    const vecSparseVector = result.metadata[0].isSparseVector;
+    console.log('Vector dimensions for the SPARSECOL64 column:', vecDimensions);
+    console.log('Vector storage format for the SPARSECOL64 column:', vecStorageFormat);
+    console.log('Sparse vector available in the SPARSECOL64 column:', vecSparseVector);
+
+This prints the following output::
+
+    Vector dimensions for the SPARSECOL64 column: 4
+    Vector storage format for the SPARSECOL64 column: 3
+    Sparse vector available in the SPARSECOL64 column: true
+
+This output indicates that the SPARSECOL64 column in vecSparseTable is a
+4-dimensional SPARSE vector with FLOAT64 storage format.
+
+See `vectorSparse.js <https://github.com/oracle/node-oracledb/tree/
+main/examples/vectorSparse.js>`__ for a runnable example.
+
+.. _convertsparsevector:
+
+Converting Sparse Vectors to Dense Vectors
+------------------------------------------
+
+You can convert a sparse vector to a dense vector using
+:meth:`SparseVector.dense()`. This method returns a TypedArray of 8-bit signed
+integers, 32-bit floating-point numbers, or 64-bit floating-point numbers
+depending on the storage format of the sparse vector column's non-zero values
+in Oracle Database. To convert a sparse vector to a dense vector, for example:
+
+.. code-block:: javascript
+
+    const denseArray = sparseVec.dense();
+    console.log('Dense vector:', denseArray);
+
+This prints an output such as::
+
+    Dense vector: Float64Array(4) [ 0, 39, 0, -65 ]
+
+A Float64 Typedarray is returned in this example since the vector storage
+format of sparseVec sparse vector is FLOAT64.

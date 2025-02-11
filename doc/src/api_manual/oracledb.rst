@@ -3661,6 +3661,51 @@ Oracledb Methods
         * - Error ``error``
           - If ``startup()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
+.. _oracledbsparsevector:
+
+Oracledb SparseVector Class
+===========================
+
+.. versionadded:: 6.8
+
+A SparseVector Class stores information about a sparse vector. This class
+represents an object that accepts one of the following types in its
+constructor: typed array, JavaScript array, object, or string. See
+:ref:`sparsevectors` for more information.
+
+.. _sparsevectorproperties:
+
+SparseVector Properties
+-----------------------
+
+.. attribute:: SparseVector.indices
+
+    This property is a JavaScript array or a 32-bit unsigned integer
+    (Uint32Array) TypedArray that specifies the indices (zero-based) of
+    non-zero values in the vector.
+
+.. attribute:: SparseVector.numDimensions
+
+    This property is an integer that specifies the number of dimensions of the
+    vector.
+
+.. attribute:: SparseVector.values
+
+    This property is a JavaScript array or TypedArray that specifies the
+    non-zero values stored in the vector.
+
+SparseVector Methods
+--------------------
+
+.. method:: SparseVector.dense()
+
+    Converts a sparse vector to a dense vector and returns a TypedArray of
+    8-bit signed integers, 32-bit floating-point numbers, or 64-bit
+    floating-point numbers depending on the storage format of the sparse
+    vector column's non-zero values in Oracle Database.
+
+    This method is best used with sparse vectors read from Oracle Database.
+
 .. _oracledbfuture:
 
 Oracledb Future Object
