@@ -28,6 +28,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added connection optimization feature which uses Server Name Indication (SNI)
+    extension of the TLS protocol. 
+ 
 #)  Added support for setting the :attr:`~oracledb.edition` when connecting to
     the database.
 

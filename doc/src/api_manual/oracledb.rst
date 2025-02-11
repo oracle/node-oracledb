@@ -2574,6 +2574,20 @@ Oracledb Methods
             .. versionadded:: 5.2
 
                 The alias ``username``.
+        * - ``useSNI``
+          - Boolean
+          - Thin
+          - .. _createpoolpoolattrsusesni:
+
+            Enables the connection to use the TLS extension, Server Name Indication (SNI).
+
+            Usually, two TLS handshakes are required to establish a connection, one with the listener and the other with the server process. With useSNI, the connection information is sent in the SNI field which enables the listener to hand-off the connection to the appropriate server process without the listener having to perform a TLS handshake. SNI helps improve the connection establishment time.
+
+            The default is *False*.
+
+            This property requires Oracle Database 23.7 (or later).
+
+            .. versionadded:: 6.8
 
     **createPool(): accessToken Object Properties**
 
@@ -3214,6 +3228,20 @@ Oracledb Methods
             .. versionadded:: 5.2
 
                 The alias ``username``.
+        * - ``useSNI``
+          - Boolean
+          - Thin
+          - .. _getconnectiondbattrsusesni:
+
+            Enables the connection to use the TLS extension, Server Name Indication (SNI).
+
+            Usually, two TLS handshakes are required to establish a connection, one with the listener and the other with the server process. With useSNI, the connection information is sent in the SNI field which enables the listener to hand-off the connection to the appropriate server process without the listener having to perform a TLS handshake. SNI helps improve the connection establishment time.
+
+            The default is *False*.
+
+            This property requires Oracle Database 23.7 (or later).
+
+            .. versionadded:: 6.8
 
     **getConnection(): accessToken Object Properties**
 

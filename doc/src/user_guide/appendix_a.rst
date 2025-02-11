@@ -469,6 +469,9 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
     * - POOL_CONNECTION_CLASS
       - :attr:`cclass <oracledb.connectionClass>`
       - Defines a logical name for connections.
+    * - USE_SNI
+      - :ref:`useSNI <getconnectiondbattrsusesni>`
+      - Indicates whether the TLS extension, Server Name Indication (SNI), is enabled.
 
 In node-oracledb Thick mode, the above values only work when connected to
 Oracle Database 21c or later.
