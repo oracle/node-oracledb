@@ -1,10 +1,10 @@
-# node-oracledb version 6.7.1
+# node-oracledb version 6.7.2
 
 The node-oracledb add-on for Node.js powers high performance Oracle Database
 applications.  Applications can be written in TypeScript, or directly in
 JavaScript.
 
-Use node-oracledb 6.7.1 to connect Node.js 14.6, or later, to Oracle
+Use node-oracledb 6.7.2 to connect Node.js 14.6, or later, to Oracle
 Database.  Older versions of node-oracledb may work with older versions of
 Node.js.
 
@@ -48,7 +48,7 @@ vulnerability disclosure process.
 
 ## License
 
-Copyright (c) 2015, 2024, Oracle and/or its affiliates.
+Copyright (c) 2015, 2025, Oracle and/or its affiliates.
 
 This software is dual-licensed to you under the Universal Permissive License
 (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
