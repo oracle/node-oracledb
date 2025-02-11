@@ -28,7 +28,12 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for External Authentication using Transport Layer Security(TLS).
+#)  Added support for external authentication using Transport Layer
+    Security (TLS) protocol.
+
+#)  Added support for Advanced Network Compression which reduces the size
+    of the network data packets transmitted over a connection for improved
+    effective network throughput and bandwidth utilization.
 
 #)  Fixed issue that does not throw Authentication error for FastAuth
     when invalid token is used with external authentication.
