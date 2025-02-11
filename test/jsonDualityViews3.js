@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -173,17 +173,12 @@ describe('274 jsonDualityView3.js', function() {
     await connection.execute(testsUtil.sqlCreateTable('parts', createTableParts));
 
     // create a JSON duality view for the parts table
-    await assert.rejects(
-      async () => await connection.execute(`
+    await connection.execute(`
         CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
         AS
         parts @INSERT @UPDATE @DELETE
         {PartsId: part_id, grossMargin:gross_margin}
-      `),
-      /ORA-40945:/
-      //ORA-40945: Column 'GROSS_MARGIN' of table 'PARTS' cannot be selected in JSON
-      //relational duality view as it is virtual.
-    );
+      `);
     await connection.execute(testsUtil.sqlDropTable(`parts`));
   });
 

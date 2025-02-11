@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -218,15 +218,10 @@ describe('275. jsonDualityView4.js', function() {
     await connection.commit();
 
     // create JSON relational duality view student_ov
-    await assert.rejects(
-      async () => await connection.execute(`
+    await connection.execute(`
       CREATE OR REPLACE JSON RELATIONAL DUALITY VIEW student_ov
       AS t1{id, product, price, price_with_tax}
-    `),
-      /ORA-40945:/
-      // ORA-40945: Column 'PRICE_WITH_TAX' of table 'T1' cannot be selected in JSON
-      // relational duality view as it is virtual.
-    );
+    `);
 
     // drop the table
     await connection.execute(testsUtil.sqlDropTable(`t1`));
@@ -360,6 +355,7 @@ describe('275. jsonDualityView4.js', function() {
       SELECT view_owner, view_name, relationship
       FROM DBA_JSON_DUALITY_VIEW_TABS
       ORDER BY view_owner`);
+
     assert.deepStrictEqual(result.rows, [["NJS_JSONDV4", "STUDENT_OV", null],
       ["NJS_JSONDV4", "STUDENT_OV", "singleton"], ["NJS_JSONDV4", "STUDENT_OV", "nested"]]);
 
@@ -368,8 +364,8 @@ describe('275. jsonDualityView4.js', function() {
       SELECT COLUMN_NAME, DATA_TYPE
       FROM DBA_JSON_DUALITY_VIEW_TAB_COLS
       ORDER BY COLUMN_NAME`);
-    assert.deepStrictEqual(result.rows, [["CLSID", "NUMBER"], ["CLSID", "NUMBER"], ["NAME", "VARCHAR2"], ["NAME", "VARCHAR2"], ["SCID", "NUMBER"],
-      ["STUID", "NUMBER"], ["STUID", "NUMBER"]]);
+    assert.deepStrictEqual(result.rows, [["CLSID", "NUMBER"], ["CLSID", "NUMBER"],
+      ["NAME", "VARCHAR2"], ["NAME", "VARCHAR2"], ["SCID", "NUMBER"], ["STUID", "NUMBER"], ["STUID", "NUMBER"]]);
   });
 
   describe('275.7 Json Duality view with GraphQL', function() {
