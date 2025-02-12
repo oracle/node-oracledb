@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -39,42 +39,42 @@ describe('CLOB Tests', function() {
   const bind_in_ID = 1;
 
   const proc_clob_pre_tab = `
-    BEGIN 
-      DECLARE 
-          e_table_missing EXCEPTION; 
-          PRAGMA EXCEPTION_INIT(e_table_missing, -00942); 
-      BEGIN 
-          EXECUTE IMMEDIATE('DROP TABLE nodb_tab_lobs_pre PURGE'); 
-      EXCEPTION 
-          WHEN e_table_missing 
-          THEN NULL; 
-      END; 
-      EXECUTE IMMEDIATE (' 
-          CREATE TABLE nodb_tab_lobs_pre ( 
-              id    NUMBER, 
-              clob  CLOB 
-          ) 
-      '); 
+    BEGIN
+      DECLARE
+          e_table_missing EXCEPTION;
+          PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
+      BEGIN
+          EXECUTE IMMEDIATE('DROP TABLE nodb_tab_lobs_pre PURGE');
+      EXCEPTION
+          WHEN e_table_missing
+          THEN NULL;
+      END;
+      EXECUTE IMMEDIATE ('
+          CREATE TABLE nodb_tab_lobs_pre (
+              id    NUMBER,
+              clob  CLOB
+          )
+      ');
     END;
   `;
 
   const proc_clob_in_tab = `
-    BEGIN 
-      DECLARE 
-          e_table_missing EXCEPTION; 
-          PRAGMA EXCEPTION_INIT(e_table_missing, -00942); 
-      BEGIN 
-          EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob_in PURGE'); 
-      EXCEPTION 
-          WHEN e_table_missing 
-          THEN NULL; 
-      END; 
-      EXECUTE IMMEDIATE (' 
-          CREATE TABLE nodb_tab_clob_in ( 
-              id      NUMBER, 
-              clob    CLOB 
-          ) 
-      '); 
+    BEGIN
+      DECLARE
+          e_table_missing EXCEPTION;
+          PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
+      BEGIN
+          EXECUTE IMMEDIATE('DROP TABLE nodb_tab_clob_in PURGE');
+      EXCEPTION
+          WHEN e_table_missing
+          THEN NULL;
+      END;
+      EXECUTE IMMEDIATE ('
+          CREATE TABLE nodb_tab_clob_in (
+              id      NUMBER,
+              clob    CLOB
+          )
+      ');
     END;
   `;
 
@@ -110,9 +110,9 @@ describe('CLOB Tests', function() {
 
     const proc_bind_in = `
         CREATE OR REPLACE PROCEDURE nodb_clobs_in_741 (clob_id IN NUMBER, clob_in IN CLOB)
-        AS 
-        BEGIN 
-            insert into nodb_tab_clob_in (id, clob) values (clob_id, clob_in); 
+        AS
+        BEGIN
+            insert into nodb_tab_clob_in (id, clob) values (clob_id, clob_in);
         END nodb_clobs_in_741;
       `;
     await connection.execute(proc_bind_in);
@@ -130,10 +130,10 @@ describe('CLOB Tests', function() {
     await connection.execute("DROP PROCEDURE nodb_clobs_in_741");
 
     const proc_out = `
-        CREATE OR REPLACE PROCEDURE nodb_clobs_out_742 (clob_id IN NUMBER, clob_out OUT CLOB) 
-        AS 
-        BEGIN 
-            select clob into clob_out from nodb_tab_clob_in where id = clob_id; 
+        CREATE OR REPLACE PROCEDURE nodb_clobs_out_742 (clob_id IN NUMBER, clob_out OUT CLOB)
+        AS
+        BEGIN
+            select clob into clob_out from nodb_tab_clob_in where id = clob_id;
         END nodb_clobs_out_742;
       `;
     await connection.execute(proc_out);
@@ -158,14 +158,14 @@ describe('CLOB Tests', function() {
     await connection.execute("DROP TABLE nodb_tab_lobs_pre PURGE");
 
     const proc_compare_CLOB = `
-        CREATE OR REPLACE PROCEDURE nodb_clob_compare(result OUT INTEGER) 
-        IS 
-            CLOB1 CLOB; 
-            CLOB2 CLOB; 
-        BEGIN 
-            select CLOB into CLOB1 from nodb_tab_clob_in where id = ${bind_in_ID}; 
-            select CLOB into CLOB2 from nodb_tab_clob_in where id = ${resultInsert_ID}; 
-            result := DBMS_LOB.COMPARE(CLOB1, CLOB2); 
+        CREATE OR REPLACE PROCEDURE nodb_clob_compare(result OUT INTEGER)
+        IS
+            CLOB1 CLOB;
+            CLOB2 CLOB;
+        BEGIN
+            select CLOB into CLOB1 from nodb_tab_clob_in where id = ${bind_in_ID};
+            select CLOB into CLOB2 from nodb_tab_clob_in where id = ${resultInsert_ID};
+            result := DBMS_LOB.COMPARE(CLOB1, CLOB2);
         END nodb_CLOB_compare;
       `;
     await connection.execute(proc_compare_CLOB);

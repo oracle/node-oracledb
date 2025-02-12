@@ -4818,7 +4818,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     222.6 callTimeout is a String
     222.7 The callTimeout value applies not to the sum of all round-trips
     222.8 The callTimeout value applies to each round-trip individually
-	222.9 get the callTimeout value
+    222.9 get the callTimeout value
 
 223. accessPropertiesOnClosedObjects.js
     223.1 access properties of closed Connection object
@@ -5418,8 +5418,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         259.2.5 negative - missing formatId in XID
         259.2.6 negative missing globalTxnId in XID
         259.2.7 negative missing branchQualifier in XID
-		259.2.8 negative tpcForget after tpcPrepare
-		259.2.9 negative tpcForget without tpcPrepare
+        259.2.8 negative tpcForget after tpcPrepare
+        259.2.9 negative tpcForget without tpcPrepare
     259.3 TPC Functions with no default values
         259.3.1 test tpcBegin, tpcPrepare, tpcRollback
         259.3.2 test tpcBegin, tpcPrepare, tpcCommit
@@ -6160,7 +6160,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       310.3.1 Query SPARSE Vector as CLOB and BLOB
     310.4 Vector Distance Calculations
       310.4.1 Calculate Distance Between DENSE Vectors
-    
+
   311. dataTypeIntervalYM.js
     311.1 binding in an interval
     311.2 binding null

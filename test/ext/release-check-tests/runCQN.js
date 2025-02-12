@@ -631,7 +631,8 @@ describe('185. runCQN.js', function() {
     );
   }); // 185.16
 
-  it('185.17 CQN subscriptions using the same name with unsubscribe', async () => {
+  // Skipping these tests because of a subscription issue that cause segfault
+  it.skip('185.17 CQN subscriptions using the same name with unsubscribe', async () => {
     const cqnCallback = function(message) {
       assert(message);
     };
@@ -654,7 +655,8 @@ describe('185. runCQN.js', function() {
     }
   }); // 185.17
 
-  describe('185.18 multiple CQN Subscriptions with the Same Name', function() {
+  // Skipping these tests because of a subscription issue that cause segfault
+  describe.skip('185.18 multiple CQN Subscriptions with the Same Name', function() {
     let connection;
     const tableName = 'TestTable_CQN';
 

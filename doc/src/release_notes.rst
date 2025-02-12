@@ -28,6 +28,8 @@ Common Changes
 #)  Fixed :attr:`~dbObject.length` property for the database object
     collection types, which was broken from node-oracledb 6.0.
 
+#)  Added OCI and Azure SDK support for token based authentication.
+
 #)  Added support for returning maximum identifier length allowed by the
     database using the new property :attr:`connection.maxIdentifierLength`.
 

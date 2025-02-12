@@ -2160,6 +2160,38 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.machine` property.
 
             .. versionadded:: 6.7
+        * - ``networkCompression``
+          - Boolean
+          - Thin
+          - .. _createpoolpoolattrsnetworkcompression:
+
+            Indicates if network data compression needs to be enabled or disabled for a database connection. Enabling data compression reduces the size of the Oracle Net Session Data Unit (SDU) that is to be sent over a connection.
+
+            The default value is *false*.
+
+            For node-oracledb Thick mode, network compression is enabled by setting the `compression parameters <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F7B17046-3F25-4AE8-A325-39B9DFF506E9>`__ in connect strings (:ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`). Alternatively, you can enable network compression by setting the `SQLNET.COMPRESSION <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-61CE4FA9-3ABB-4E9B-B788-FB57E6B56F47>`__ parameter in the :ref:`sqlnet.ora <tnsadmin>` network configuration file.
+
+            See :ref:`networkcompression` for more information.
+
+            .. versionadded:: 6.8
+        * - ``networkCompressionThreshold``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrscompressionthreshold:
+
+            The minimum data size, in bytes, for which compression should be performed on the Oracle Net Session Data Unit (SDU).
+
+            The default value is *1024* bytes.
+
+            The minimum data size is *200* bytes.
+
+            If this property is set to any value below *200*, then the default value of *1024* bytes is taken as the networkCompressionThreshold value.
+
+            For node-oracledb Thick mode, network compression threshold can be set by using the `SQLNET.COMPRESSION_THRESHOLD <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8CB3FC39-0775-441C-9205-39288B9200FD>`__ parameter in the :ref:`sqlnet.ora <tnsadmin>` network configuration file.
+
+            See :ref:`networkcompression` for more information.
+
+            .. versionadded:: 6.8
         * - ``osUser``
           - String
           - Thin
@@ -2931,6 +2963,38 @@ Oracledb Methods
             See :ref:`Connection Tagging and Session State <connpooltagging>`.
 
             .. versionadded:: 3.1
+        * - ``networkCompression``
+          - Boolean
+          - Thin
+          - .. _getconnectiondbattrsnetworkcompression:
+
+            Indicates if network data compression needs to be enabled or disabled for a database connection. Enabling data compression reduces the size of the Oracle Net Session Data Unit (SDU) that is to be sent over a connection.
+
+            The default value is *false*.
+
+            For node-oracledb Thick mode, network compression is enabled by setting the `compression parameters <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F7B17046-3F25-4AE8-A325-39B9DFF506E9>`__ in connect strings (:ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>`). Alternatively, you can enable network compression by setting the `SQLNET.COMPRESSION <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-61CE4FA9-3ABB-4E9B-B788-FB57E6B56F47>`__ parameter in the :ref:`sqlnet.ora <tnsadmin>` network configuration file.
+
+            See :ref:`networkcompression` for more information.
+
+            .. versionadded:: 6.8
+        * - ``networkCompressionThreshold``
+          - Number
+          - Thin
+          - .. _getconnectiondbattrscompressionthreshold:
+
+            The minimum data size, in bytes, for which compression should be performed on the Oracle Net Session Data Unit (SDU).
+
+            The default value is *1024* bytes.
+
+            The minimum data size is *200* bytes.
+
+            If this property is set to any value below *200*, then the default value of *1024* bytes is taken as the networkCompressionThreshold value.
+
+            For node-oracledb Thick mode, network compression threshold can be set by using the `SQLNET.COMPRESSION_THRESHOLD <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8CB3FC39-0775-441C-9205-39288B9200FD>`__ parameter in the :ref:`sqlnet.ora <tnsadmin>` network configuration file.
+
+            See :ref:`networkcompression` for more information.
+
+            .. versionadded:: 6.8
         * - ``newPassword``
           - String
           - Both

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const assert   = require('assert');
+const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 const random = require('./random.js');
@@ -229,9 +229,9 @@ describe('9. columnMetadata.js', function() {
 
     it('9.1.16 nested function calls in column names', async function() {
       const result = await connection.execute(`
-        SELECT 
-          UPPER(department_name) AS upper_dept_name, 
-          LOWER(TRIM(department_name)) AS lower_dept_name 
+        SELECT
+          UPPER(department_name) AS upper_dept_name,
+          LOWER(TRIM(department_name)) AS lower_dept_name
         FROM nodb_cmd
       `);
 
@@ -466,7 +466,8 @@ describe('9. columnMetadata.js', function() {
     });
 
     it('9.7.3 columns with very long names', async function() {
-      // Skip the test for database versions <= 12.1.0.2.0 due to the 30-character limit on column names.
+      // Skip the test for database versions <= 12.1.0.2.0 due to the
+      // 30-character limit on column names.
       if (connection.oracleServerVersion <= 1201000200) this.skip();
 
       const tableName = "nodb_very_long_column_names";

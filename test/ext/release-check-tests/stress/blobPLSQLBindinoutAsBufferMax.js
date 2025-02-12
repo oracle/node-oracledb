@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -98,8 +98,8 @@ describe('BLOB PLSQL Bind In/Out Test', () => {
     // Create the procedure for BLOB IN/OUT
     await connection.execute(`
       CREATE OR REPLACE PROCEDURE nodb_blobs_741 (blob_id IN NUMBER, blob_inout IN OUT BLOB)
-      AS 
-      BEGIN 
+      AS
+      BEGIN
         INSERT INTO nodb_tab_blob_in (id, blob) VALUES (blob_id, blob_inout);
         SELECT blob INTO blob_inout FROM nodb_tab_blob_in WHERE id = blob_id;
       END nodb_blobs_741;

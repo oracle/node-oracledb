@@ -1838,6 +1838,23 @@ Connection Methods
             - ``metaData``: Contains properties equivalent to those given by ``execute()`` :ref:`metaData <execmetadata>`. This property exists only for queries.
             - ``statementType``: An integer corresponding to one of the :ref:`SQL Statement Type Constants <oracledbconstantsstmttype>`.
 
+.. method:: connection.isCompressionEnabled()
+
+    .. versionadded:: 6.8
+
+    .. code-block:: javascript
+
+        isCompressionEnabled()
+
+    This synchronous function returns a boolean indicating whether network
+    data compression is enabled for a connection.
+
+    See :ref:`networkcompression`.
+
+    .. note::
+
+        This function can only be used in node-oracledb Thin mode.
+
 .. method:: connection.isHealthy()
 
     .. versionadded:: 5.4

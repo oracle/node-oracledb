@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -32,14 +32,14 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb  = require('oracledb');
-const assert    = require('assert');
-const fs        = require('fs');
-const largeFile     = require('./largeFile.js');
-const dbConfig      = require('../../../dbconfig.js');
+const oracledb = require('oracledb');
+const assert = require('assert');
+const fs = require('fs');
+const largeFile = require('./largeFile.js');
+const dbConfig = require('../../../dbconfig.js');
 
 describe('1.blobDMLBindLargeData.js', function() {
-  let connection = null;
+  let connection;
   const fileRoot = process.cwd();
 
   const proc_blob_prepare_tab = `BEGIN \n
@@ -62,7 +62,6 @@ describe('1.blobDMLBindLargeData.js', function() {
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
-
     await setupAllTable();
   }); // before
 
@@ -206,7 +205,7 @@ describe('1.blobDMLBindLargeData.js', function() {
                              BEGIN \n
                                  select blob into blob1 from nodb_tab_lobs_pre where id = ` + selectID + `; \n
                                  select blob into blob2 from nodb_tab_lobs_pre where id = ` + insertID + `; \n
-                                 result := DBMS_LOB.COMPARE(blob1, blob2); \n 
+                                 result := DBMS_LOB.COMPARE(blob1, blob2); \n
                                  len := length(blob1); \n
                              END nodb_blob_compare;`;
     const sqlRunComparePorc = `begin nodb_blob_compare(:r, :l); end;`;

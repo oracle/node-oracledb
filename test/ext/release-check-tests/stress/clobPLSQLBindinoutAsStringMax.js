@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -101,22 +101,22 @@ describe('PLSQL CLOB Bind In/Out Test', function() {
 
     await connection.execute(`
       CREATE OR REPLACE PROCEDURE nodb_clobs_in_741 (clob_id IN NUMBER, clob_inout IN OUT CLOB)
-      AS 
-      BEGIN 
-        INSERT INTO nodb_tab_clob_in (id, clob) VALUES (clob_id, clob_inout); 
-        SELECT clob INTO clob_inout FROM nodb_tab_clob_in WHERE id = clob_id; 
+      AS
+      BEGIN
+        INSERT INTO nodb_tab_clob_in (id, clob) VALUES (clob_id, clob_inout);
+        SELECT clob INTO clob_inout FROM nodb_tab_clob_in WHERE id = clob_id;
       END nodb_clobs_in_741;
     `);
 
     await connection.execute(`
       CREATE OR REPLACE PROCEDURE nodb_clob_compare(result OUT INTEGER, id1 IN NUMBER, id2 IN NUMBER)
-      IS 
-        CLOB1 CLOB; 
-        CLOB2 CLOB; 
-      BEGIN 
-        SELECT clob INTO CLOB1 FROM nodb_tab_clob_in WHERE id = id1; 
-        SELECT clob INTO CLOB2 FROM nodb_tab_clob_in WHERE id = id2; 
-        result := DBMS_LOB.COMPARE(CLOB1, CLOB2); 
+      IS
+        CLOB1 CLOB;
+        CLOB2 CLOB;
+      BEGIN
+        SELECT clob INTO CLOB1 FROM nodb_tab_clob_in WHERE id = id1;
+        SELECT clob INTO CLOB2 FROM nodb_tab_clob_in WHERE id = id2;
+        result := DBMS_LOB.COMPARE(CLOB1, CLOB2);
       END nodb_clob_compare;
     `);
 

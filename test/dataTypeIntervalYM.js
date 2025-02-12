@@ -295,7 +295,7 @@ describe('311. dataTypeIntervalYM.js', function() {
   it('311.17 handle complex interval arithmetic in PL/SQL', async function() {
     const result = await connection.execute(`
       BEGIN
-        DECLARE 
+        DECLARE
           v_interval1 INTERVAL YEAR TO MONTH := TO_YMINTERVAL('5-6');
           v_interval2 INTERVAL YEAR TO MONTH := TO_YMINTERVAL('2-3');
           v_result INTERVAL YEAR TO MONTH;
@@ -323,14 +323,14 @@ describe('311. dataTypeIntervalYM.js', function() {
 
     // Test valid insertions with different precisions
     await connection.execute(`
-        INSERT INTO IntervalPrecisionTest VALUES 
+        INSERT INTO IntervalPrecisionTest VALUES
         (TO_YMINTERVAL('99-11'), TO_YMINTERVAL('9999-11'))
       `);
 
     // Attempt to insert values exceeding precision throw an error
     await assert.rejects(
       connection.execute(`
-          INSERT INTO IntervalPrecisionTest VALUES 
+          INSERT INTO IntervalPrecisionTest VALUES
           (TO_YMINTERVAL('100-0'), TO_YMINTERVAL('10000-0'))
         `),
       /ORA-01873:/  // Specified precision does not match column definition
@@ -353,7 +353,7 @@ describe('311. dataTypeIntervalYM.js', function() {
 
     // Insert various intervals
     await connection.execute(`
-        INSERT INTO IntervalComparisonTest VALUES 
+        INSERT INTO IntervalComparisonTest VALUES
         (1, TO_YMINTERVAL('1-0')),
         (2, TO_YMINTERVAL('1-6')),
         (3, TO_YMINTERVAL('2-0')),
@@ -362,14 +362,14 @@ describe('311. dataTypeIntervalYM.js', function() {
 
     // Test various comparison queries
     const gtResult = await connection.execute(`
-        SELECT ID FROM IntervalComparisonTest 
+        SELECT ID FROM IntervalComparisonTest
         WHERE IntervalCol > TO_YMINTERVAL('1-0')
       `);
     assert.strictEqual(gtResult.rows.length, 2);
     assert.deepStrictEqual(gtResult.rows.map(r => r[0]), [2, 3]);
 
     const ltResult = await connection.execute(`
-        SELECT ID FROM IntervalComparisonTest 
+        SELECT ID FROM IntervalComparisonTest
         WHERE IntervalCol < TO_YMINTERVAL('1-0')
       `);
     assert.strictEqual(ltResult.rows.length, 1);
@@ -379,7 +379,7 @@ describe('311. dataTypeIntervalYM.js', function() {
 
   it('311.20 handle interval type conversions', async function() {
     const result = await connection.execute(`
-      SELECT 
+      SELECT
         TO_CHAR(TO_YMINTERVAL('5-6')) AS CharInterval,
         TO_NUMBER(EXTRACT(YEAR FROM TO_YMINTERVAL('5-6'))) AS ExtractedYear,
         TO_NUMBER(EXTRACT(MONTH FROM TO_YMINTERVAL('5-6'))) AS ExtractedMonth
@@ -407,7 +407,7 @@ describe('311. dataTypeIntervalYM.js', function() {
 
     // Test various null scenarios
     await connection.execute(`
-        INSERT INTO IntervalNullTest VALUES 
+        INSERT INTO IntervalNullTest VALUES
         (TO_YMINTERVAL('5-6'), NULL),
         (NULL, TO_YMINTERVAL('2-3'))
       `);

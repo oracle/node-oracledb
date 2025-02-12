@@ -346,6 +346,149 @@ The main part of the application performs the “work” and calls
   after = await getRT(sid);
   console.log('Round-trips required: ' + (after - before));   // 1 round-trip
 
+.. _networkcompression:
+
+Advanced Network Compression
+============================
+
+`Advanced Network Compression <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-9F86FD03-0895-4D8A-8F0C-E9DFDD30E804>`__ reduces the size of
+the Oracle Net Session Data Unit (SDU) that is sent over a connection. If
+compression is negotiated for a connection, the client and database server
+compress the data before sending it over the network and decompress the
+compressed data once received. This results in increased effective network
+throughput and reduced bandwidth utilization. The ability to enable network
+data compression in Thin mode was introduced in node-oracledb 6.8.
+
+Two parameters need to be configured in both the application and database
+server to take advantage of Advanced Network Compression. Based on the
+settings of these parameters, the client and server negotiate and determine
+whether data compression should be used at the time of connection
+establishment.
+
+To use Advanced Network Compression, you must:
+
+1. Enable data compression:
+
+   a. In your application by:
+
+     - Setting the ``networkCompression`` property to *true* in the
+       :meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()`
+       methods if you are using node-oracledb Thin mode.
+
+       .. code-block:: javascript
+
+          const connection = await oracledb.getConnection({
+           user                 : "hr",
+           password             : mypw,  // mypw contains the hr schema password
+           networkCompression   : true,
+           connectString : "mydbmachine.example.com:1521/orclpdb1"
+          });
+
+     - Or by setting the ``compression`` parameter to *ON* in an
+       :ref:`Easy Connect string <easyconnect>` if you are using either
+       node-oracledb Thin mode or Thick mode. For example:
+
+       .. code-block:: javascript
+
+          const connection = await oracledb.getConnection({
+           user          : "hr",
+           password      : mypw,  // mypw contains the hr schema password
+           connectString : "mydbmachine.example.com?compression=on"
+          });
+
+     - Or by setting the ``compression`` parameter to *ON* in a
+       :ref:`Connect Descriptor <embedtns>` if you are using either
+       node-oracledb Thin mode or Thick mode. For example:
+
+       .. code-block:: javascript
+
+          const connection = await oracledb.getConnection({
+           user          : "hr",
+           password      : mypw,  // mypw contains the hr schema password
+           connectString : "(DESCRIPTION=(COMPRESSION=ON)(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
+          });
+
+     - Or by setting the `SQLNET.COMPRESSION <https://www.oracle.com/pls/
+       topic/lookup?ctx=dblatest&id=GUID-61CE4FA9-3ABB-4E9B-B788-
+       FB57E6B56F47>`__ parameter to *ON* in the :ref:`sqlnet.ora <tnsadmin>`
+       file if you are using node-oracledb Thick mode.
+
+   b. In the database server by setting the ``SQLNET.COMPRESSION`` parameter to
+      *ON* in the :ref:`sqlnet.ora <tnsadmin>` file.
+
+   Data compression will be enabled on a connection only if it is set in both
+   your application and the database server.
+
+2. Specify the compression level:
+
+   a. In your application by:
+
+      - Not doing any additional configuration in your application if you are
+        using node-oracledb Thin mode since this mode only supports *HIGH*
+        compression level.
+
+      - Or by setting the ``compression_level`` parameter to *HIGH*, or *LOW*,
+        or both in a :ref:`Connect Descriptor <embedtns>` if you are using
+        node-oracledb Thick mode. For example, setting the compression level
+        to both:
+
+        .. code-block:: javascript
+
+          const connection = await oracledb.getConnection({
+           user          : "hr",
+           password      : mypw,  // mypw contains the hr schema password
+           connectString : "(DESCRIPTION=(COMPRESSION=ON)(COMPRESSION_LEVELS=(LEVEL=LOW)(LEVEL=HIGH))(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
+          });
+
+        The default value of the ``compression_level`` parameter is *LOW*.
+
+      - Or by setting the `SQLNET.COMPRESSION_LEVELS <https://www.oracle.com/
+        pls/topic/lookup?ctx=dblatest&id=GUID-EFFC6896-05A6-4C19-A64D-
+        46B2A1EF7693>`__ parameter to *(HIGH)*, or *(LOW)*, or both
+        *(HIGH,LOW)* in the :ref:`sqlnet.ora <tnsadmin>` network configuration
+        file if you are using node-oracledb Thick mode.
+
+   b. In the database server by setting the ``SQLNET.COMPRESSION_LEVELS``
+      parameter to *(HIGH)*, or *(LOW)*, or both *(HIGH,LOW)* in the
+      :ref:`sqlnet.ora <tnsadmin>` file.
+
+   If you are using node-oracledb Thin mode, the compression level set in the
+   database server should contain *HIGH*. Otherwise, data compression will not
+   take place.
+
+You can also specify the minimum data size (in bytes) for which compression
+should be performed. In node-oracledb Thin mode, this can be done by using the
+``networkCompressionThreshold`` property of the
+:meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()` methods. For
+example:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user                       : "hr",
+        password                   : mypw,  // mypw contains the hr schema password
+        networkCompression         : true,
+        networkCompressionThreshold: 200,
+        connectString : "mydbmachine.example.com:1521/orclpdb1"
+    });
+
+In node-oracledb Thick mode, network compression threshold can be set by using
+the `SQLNET.COMPRESSION_THRESHOLD <https://www.oracle.com/pls/topic/lookup?ctx
+=dblatest&id=GUID-8CB3FC39-0775-441C-9205-39288B9200FD>`__ parameter in the
+:ref:`sqlnet.ora <tnsadmin>` network configuration file.
+
+Note that compression is not performed on an SDU if the size of that SDU is
+less than the value of the ``networkCompressionThreshold`` property. For
+example, if the value of this property is *200*, then compression will not
+take place if the SDU is less than this value. The minimum value of this
+property is *200* bytes. If this property is set to any value below 200, then
+the default value of *1024* bytes is taken as the networkCompressionThreshold
+value.
+
+To check whether data compression is enabled on a connection in node-oracledb
+Thin mode, you can use the :meth:`connection.isCompressionEnabled()` method.
+
 .. _stmtcache:
 
 Statement Caching

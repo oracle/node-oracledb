@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -380,7 +380,7 @@ describe('3.blobPLSQLBindLargeData.js', function() {
                              BEGIN \n
                                  select blob into blob1 from nodb_tab_lobs_pre where id = ` + preID + `; \n
                                  select blob into blob2 from nodb_tab_blob_in where id = ` + inID + `; \n
-                                 result := DBMS_LOB.COMPARE(blob1, blob2); \n 
+                                 result := DBMS_LOB.COMPARE(blob1, blob2); \n
                                  len := length(blob1); \n
                              END nodb_blob_compare;`;
     const sqlRunComparePorc = `begin nodb_blob_compare(:r, :l); end;`;

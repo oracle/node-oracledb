@@ -439,7 +439,7 @@ describe('312. dataTypeIntervalDS.js', function() {
           v_interval INTERVAL DAY TO SECOND := TO_DSINTERVAL('5 06:30:00');
           v_result INTERVAL DAY TO SECOND;
         BEGIN
-          v_result := v_interval + :invalidValue; 
+          v_result := v_interval + :invalidValue;
         END;
       END;`,
         bindVars),
