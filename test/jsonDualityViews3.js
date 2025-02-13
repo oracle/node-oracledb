@@ -159,6 +159,9 @@ describe('274 jsonDualityView3.js', function() {
   });
 
   it('274.2 Create View on Virtual columns, UNUSED columns', async function() {
+    // Virtual columns are supported only from Oracle Database 23.6 onwards
+    if (connection.oracleServerVersion < 2306000000) this.skip();
+
     // create the parts table
     const createTableParts = `
       CREATE TABLE parts(

@@ -198,6 +198,9 @@ describe('275. jsonDualityView4.js', function() {
   });
 
   it('275.3 Test with virtual columns', async function() {
+    // Virtual columns are supported only from Oracle Database 23.6 onwards
+    if (connection.oracleServerVersion < 2306000000) this.skip();
+
     // create table t1
     const sqlCreateTable = `
       CREATE TABLE t1 (
