@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -551,7 +551,7 @@ describe('4. binding.js', function() {
 
   describe('4.6 PL/SQL block with empty outBinds', function() {
 
-    it('4.6.1 ', async function() {
+    it('4.6.1 Empty result', async function() {
 
       const sql = "begin execute immediate 'drop table does_not_exist purge'; "
         + "exception when others then "
@@ -566,7 +566,7 @@ describe('4. binding.js', function() {
   });
 
   // Test cases involving JSON value as input
-  describe ('4.7 Value as JSON named/unamed test cases', function() {
+  describe ('4.7 Value as JSON named/unnamed test cases', function() {
     let connection;
 
     before(async function() {

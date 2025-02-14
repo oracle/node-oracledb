@@ -196,8 +196,8 @@ Overview of node-oracledb functional tests
         4.5.1 DML default bind
         4.5.2 negative DML invalid bind direction
     4.6 PL/SQL block with empty outBinds
-        4.6.1
-    4.7 Value as JSON named/unamed test cases
+        4.6.1 Empty result
+    4.7 Value as JSON named/unnamed test cases
         4.7.1 valid case when numeric values are passed as it is
         4.7.2 Valid values when one of the value is passed as JSON
         4.7.3 Valid test case when one of the value is passed as JSON

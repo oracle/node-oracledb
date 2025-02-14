@@ -103,6 +103,7 @@ File Name                                                 | Description
 [`lobstream2.js`](lobstream2.js)                          | Shows using Stream data events to fetch a CLOB
 [`lowercasecolumns.js`](lowercasecolumns.js)              | Shows how a type handler can convert column names to lower case
 [`metadata.js`](metadata.js)                              | Shows the metadata available after executing SELECT statements
+[`nesteddbobject.js](nesteddbobject.js)                   | Shows binding of nested Oracle Database Object types
 [`ociConfigProvider.js`](ociConfigProvider.js)            | Show how to connect to Oracle Database using OCI Config Provider
 [`ociConfigProviderPool.js`](ociConfigProviderPool.js)    | Show how to connect with custom pool settings to Oracle Database using OCI Config Provider
 [`plsqlarray.js`](plsqlarray.js)                          | Examples of binding PL/SQL "INDEX BY" tables
