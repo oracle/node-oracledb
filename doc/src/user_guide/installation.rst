@@ -1715,3 +1715,39 @@ must install the following OCI modules:
 
 See :ref:`ociobjstorage` for information on using this configuration provider
 with node-oracledb.
+
+.. _cloudnativemodules:
+
+Installing Cloud Native Authentication Modules for node-oracledb
+================================================================
+
+To use node-oracledb with a Cloud Native Authentication plugin, you must
+install the necessary modules for your preferred plugin as detailed below.
+
+.. _ocitokenmodules:
+
+Install Modules for the OCI Cloud Native Authentication Plugin
+--------------------------------------------------------------
+
+For node-oracledb to use the Oracle Cloud Infrastructure (OCI) Cloud Native
+Authentication plugin, you must install the `Node.js SDK for OCI module
+<https://www.npmjs.com/package/oci-sdk>`__ by using::
+
+    npm install oci-sdk
+
+See :ref:`cloudnativeauthoci` for more information on using the ``extensionOci``
+plugin in node-oracledb.
+
+.. _azuretokenmodules:
+
+Install Modules for the Azure Cloud Native Authentication Plugin
+----------------------------------------------------------------
+
+For node-oracledb to use the Azure Cloud Native Authentication plugin, you
+must install the `Microsoft Authentication Library for Node (msal-node)
+<https://www.npmjs.com/package/@azure/msal-node>`__ by using::
+
+    npm install @azure/msal-node
+
+See :ref:`cloudnativeauthoauth` for more information on using the
+``extensionAzure`` plugin in node-oracledb.

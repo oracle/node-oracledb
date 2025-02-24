@@ -825,6 +825,52 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.dbObjectAsPojo = false;
 
+.. attribute:: oracledb.dbObjectTypeHandler
+
+    .. versionadded:: 6.8
+
+    This property is a function which converts the data type of the
+    :ref:`DbObject <dbobjectclass>` property to the desired data type. This
+    function is called once for each property inside a DbObject with a single
+    object argument containing the following attributes:
+
+    - ``type``: The value of one of the :ref:`Oracle Database Type Objects
+      <oracledbconstantsdbtype>`.
+    - ``maxSize``: The maximum number of bytes allocated.
+    - ``typeName``: The name of the object.
+    - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER`` type.
+    - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` type.
+
+    The function is expected to return an object containing a
+    ``converter`` attribute which works similar to the existing fetch type
+    handler's :ref:`converters <converterfunc>`. The DbObject type handler's
+    ``converter`` attribute is a function which accepts the incoming read
+    value of the DbObject property and returns a transformed value (based on
+    the required data type) for the same DbObject property.
+
+    This property is not applicable for :ref:`LOB <lobhandling>` data type
+    attributes of a DbObject type.
+
+    See :ref:`dbobjecttypehandlers`.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        const myDbObjectFetchTypeHandler = function(metadata) {
+          if(metadata.type == oracledb.DB_TYPE_NUMBER) {
+            return {
+              converter: (val) => {
+                // The default string value received is converted to new types
+                // like BigInt
+                return BigInt(val);
+              }
+            };
+          }
+        }
+        oracledb.dbObjectTypeHandler = myDbObjectFetchTypeHandler;
+
 .. attribute:: oracledb.driverName
 
     .. versionadded:: 6.7
@@ -898,7 +944,8 @@ Each of the configuration properties is described below.
     Also some application modules may have the expectation that
     node-oracledb will handle any necessary connection usage serialization.
 
-    For more discussion, see `Parallelism on Each Connection <parallelism>`.
+    For more discussion, see :ref:`Parallelism on Each Connection
+    <parallelism>`.
 
     **Example**
 
@@ -2597,6 +2644,30 @@ Oracledb Methods
             The number of statements to be cached in the :ref:`statementcache <stmtcache>` of each connection in the pool.
 
             This optional property overrides the :attr:`oracledb.stmtCacheSize` property.
+        * - ``tokenAuthConfigAzure``
+          - Object
+          - Both
+          - .. _createpoolpoolattrstokenauthconfigazure:
+
+            A JavaScript object containing the Azure-specific parameters that need to be set when using the node-oracledb :ref:`extensionAzure plugin <extensionazureplugin>` with the support of `Azure SDK <https://www.npmjs.com/package/@azure/msal-node>`__ for token generation. The properties of the ``tokenAuthConfigAzure`` object are detailed in :ref:`tokenauthconfigazureproperties`. See `Azure SDK Parameters <https://learn.microsoft.com/en-us/entra/identity-platform/msal-client-application-configuration>`__ for more information on these properties.
+
+            When using OAuth 2.0 token-based authentication with node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used.
+
+            See :ref:`oauthtokenbasedauthentication` for more information.
+
+            .. versionadded:: 6.8
+        * - ``tokenAuthConfigOci``
+          - Object
+          - Both
+          - .. _createpoolpoolattrstokenauthconfigoci:
+
+            A JavaScript object containing the OCI-specific parameters that need to be set when using the node-oracledb :ref:`extensionOci plugin <extensionociplugin>` with the support of the `OCI SDK <https://www.npmjs.com/package/oci-sdk>`__ for token generation. The properties of the ``tokenAuthConfigOci`` object are described in :ref:`tokenauthconfigociproperties`. See `OCI SDK Parameters <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm#SDK_and_CLI_Configuration_File>`__ for more information on these properties.
+
+            When using IAM token-based authentication with node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used.
+
+            See :ref:`iamtokenbasedauthentication` for more information.
+
+            .. versionadded:: 6.8
         * - ``user``, ``username``
           - String
           - Both
@@ -2618,7 +2689,7 @@ Oracledb Methods
 
             Enables the connection to use the TLS extension, Server Name Indication (SNI).
 
-            Usually, two TLS handshakes are required to establish a connection, one with the listener and the other with the server process. With useSNI, the connection information is sent in the SNI field which enables the listener to hand-off the connection to the appropriate server process without the listener having to perform a TLS handshake. SNI helps improve the connection establishment time.
+            Usually, two TLS handshakes are required to establish a connection, one with the listener and the other with the server process. With useSNI, the connection information is sent in the SNI field which enables the listener to hand-off the connection to the appropriate server process without the listener having to perform a TLS handshake. SNI helps improve the connection establishment time. See the `Configuring SNI for TLS Authentications <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E98F42D0-DC9D-4B52-9C66-6DE7EC5F64D6>`__ section in the SQL*Net documentation for more details about SNI.
 
             The default is *False*.
 
@@ -2672,6 +2743,133 @@ Oracledb Methods
           - The application can return a token from an application-specific cache. If there is no cached token, the application must externally acquire one.
         * - *true*
           - The token previously passed to driver is known to be expired, the application should externally acquire a new token.
+
+    **createPool(): tokenAuthConfigOci Object Properties**
+
+    The properties of the ``tokenAuthConfigOci`` object are:
+
+    .. _tokenauthconfigociproperties:
+
+    .. list-table-with-summary::  createPool(): ``tokenAuthConfigOci`` Object Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 30 10
+        :width: 100%
+        :name: _create_pool_oci_properties
+        :summary: The first column displays the property. The second column
+         displays the description of the property. The third column displays
+         whether the property is required or optional.
+
+        * - Property
+          - Description
+          - Required or Optional
+        * - ``authType``
+          - The authentication type. The value should be the string *configFileBasedAuthentication* or *simpleAuthentication*.
+
+            In Configuration File Based Authentication, the location of the configuration file containing the necessary information must be provided.
+
+            In Simple Authentication, the configuration parameters can be provided at runtime.
+          - Required
+        * - ``profile``
+          - The configuration profile name. The default value is *DEFAULT*.
+
+            This property can be specified when the value of the ``authType`` property is *configFileBasedAuthentication*.
+          - Optional
+        * - ``configFileLocation``
+          - The configuration file location. The default value is *~/.oci/config*.
+
+            This property can be specified when the value of the ``authType`` property is *configFileBasedAuthentication*.
+          - Optional
+        * - ``fingerprint``
+          - Fingerprint for the public key that was added for the user.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``passphrase``
+          - Passphrase used for the key, if it is encrypted.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Optional
+        * - ``privateKeyLocation``
+          - The full path and file name of the private key.
+
+            For example, in Linux or macOS, the location of the private key can be *~/.oci/oci_api_key.pem*. In Windows, the location can be *%HOMEDRIVE%%HOMEPATH%.oci\oci_api_key.pem*.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``regionId``
+          - The ID of the Oracle Cloud Infrastructure region.
+
+            For example, *us-ashburn-1*.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``tenancy``
+          - Oracle Cloud Identifier (OCID) of your tenancy.
+
+            For example, *ocid1.tenancy.oc1..<unique_ID>*.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``user``
+          - OCID of the user calling the API.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+
+    **createPool(): tokenAuthConfigAzure Object Properties**
+
+    The properties of the ``tokenAuthConfigAzure`` object are:
+
+    .. _tokenauthconfigazureproperties:
+
+    .. list-table-with-summary::  createPool(): ``tokenAuthConfigAzure`` Object Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 30 10
+        :width: 100%
+        :name: _create_pool_azure_properties
+        :summary: The first column displays the property. The second column
+         displays the description of the property. The third column displays
+         whether the property is required or optional.
+
+        * - Property
+          - Description
+          - Required or Optional
+        * - ``authType``
+          - The authentication type. The authentication type for OAuth 2.0 is "azureServicePrincipal". This type makes the plugin acquire Azure service principal access tokens through a client credential flow.
+          - Required
+        * - ``authority``
+          - This parameter must be set as a string in URI format with the tenant ID, for example, ``https://{identity provider instance}/{tenantId}``.
+
+            The tenantId is the directory tenant the application plans to operate against in GUID or domain-name format.
+
+            Some of the common authority URLs are:
+            https://login.microsoftonline.com/<tenant>/
+            https://login.microsoftonline.com/common/
+            https://login.microsoftonline.com/organizations/
+            https://login.microsoftonline.com/consumers/
+          - Required
+        * - ``clientId``
+          - The application ID that is assigned to your application.
+
+            This information can be found in the portal where the application was registered.
+          - Required
+        * - ``clientSecret``
+          - The client secret that was generated for your application in the application registration portal.
+          - Required when using azureServicePrincipal
+        * - ``proxy``
+          - This property is to be set while using token generation behind a firewall.
+          - Optional
+        * - ``scopes``
+          - This parameter represents the value of the scope for the request.
+
+            The value passed for this parameter should be the resource identifier (application ID URI) of the desired resource, with the ".default" suffix. For example, ``https://{uri}/clientID/.default``.
+
+            All scopes included must be for a single resource. Specifying scopes for multiple resources will result in an error.
+          - Required
 
     **Callback**:
 
@@ -3285,6 +3483,30 @@ Oracledb Methods
             Indicates the tag that a connection returned from a connection pool should have. Various heuristics determine the tag that is actually returned, see :ref:`Connection Tagging and Session State <connpooltagging>`.
 
             .. versionadded:: 3.1
+        * - ``tokenAuthConfigAzure``
+          - Object
+          - Both
+          - .. _getconnectiondbattrstokenauthconfigazure:
+
+            A JavaScript object containing the Azure-specific parameters that need to be set when using the node-oracledb :ref:`extensionAzure plugin <extensionazureplugin>` with the support of `Azure SDK <https://www.npmjs.com/package/@azure/msal-node>`__ for token generation. The properties of the ``tokenAuthConfigAzure`` object are detailed in :ref:`getconnectiontokenauthconfigazureproperties`. See `Azure SDK Parameters <https://learn.microsoft.com/en-us/entra/identity-platform/msal-client-application-configuration>`__ for more information on these properties.
+
+            When using OAuth 2.0 token-based authentication with node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used.
+
+            See :ref:`oauthtokenbasedauthentication` for more information.
+
+            .. versionadded:: 6.8
+        * - ``tokenAuthConfigOci``
+          - Object
+          - Both
+          - .. _getconnectiondbattrstokenauthconfigoci:
+
+            A JavaScript object containing the OCI-specific parameters that need to be set when using the node-oracledb :ref:`extensionOci plugin <extensionazureplugin>` with the support of the `OCI SDK <https://www.npmjs.com/package/oci-sdk>`__ for token generation. The properties of the ``tokenAuthConfigOci`` object are described in :ref:`getconnectiontokenauthconfigociproperties`. See `OCI SDK Parameters <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdkconfig.htm#SDK_and_CLI_Configuration_File>`__ for more information on these properties.
+
+            When using IAM token-based authentication with node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used.
+
+            See :ref:`iamtokenbasedauthentication` for more information.
+
+            .. versionadded:: 6.8
         * - ``user``, ``username``
           - String
           - Both
@@ -3304,7 +3526,7 @@ Oracledb Methods
 
             Enables the connection to use the TLS extension, Server Name Indication (SNI).
 
-            Usually, two TLS handshakes are required to establish a connection, one with the listener and the other with the server process. With useSNI, the connection information is sent in the SNI field which enables the listener to hand-off the connection to the appropriate server process without the listener having to perform a TLS handshake. SNI helps improve the connection establishment time.
+            Usually, two TLS handshakes are required to establish a connection, one with the listener and the other with the server process. With useSNI, the connection information is sent in the SNI field which enables the listener to hand-off the connection to the appropriate server process without the listener having to perform a TLS handshake. SNI helps improve the connection establishment time. See the `Configuring SNI for TLS Authentications <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E98F42D0-DC9D-4B52-9C66-6DE7EC5F64D6>`__ section in the SQL*Net documentation for more details about SNI.
 
             The default is *False*.
 
@@ -3352,6 +3574,133 @@ Oracledb Methods
           - The application can return a token from an application-specific cache. If there is no cached token, the application must externally acquire one.
         * - *true*
           - The token previously passed to driver is known to be expired, the application should externally acquire a new token.
+
+    **getConnection(): tokenAuthConfigOci Object Properties**
+
+    The properties of the ``tokenAuthConfigOci`` object are:
+
+    .. _getconnectiontokenauthconfigociproperties:
+
+    .. list-table-with-summary::  getConnection(): ``tokenAuthConfigOci`` Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 30 10
+        :width: 100%
+        :name: _get_connection_oci_properties
+        :summary: The first column displays the property. The second column
+         displays the description of the property. The third column displays
+         whether the property is required or optional.
+
+        * - Property
+          - Description
+          - Required or Optional
+        * - ``authType``
+          - The authentication type. The value should be the string *configFileBasedAuthentication* or *simpleAuthentication*.
+
+            In Configuration File Based Authentication, the location of the configuration file containing the necessary information must be provided.
+
+            In Simple Authentication, the configuration parameters can be provided at runtime.
+          - Required
+        * - ``profile``
+          - The configuration profile name. The default value is *DEFAULT*.
+
+            This property can be specified when the value of the ``authType`` property is *configFileBasedAuthentication*.
+          - Optional
+        * - ``configFileLocation``
+          - The configuration file location. The default value is *~/.oci/config*.
+
+            This property can be specified when the value of the ``authType`` property is *configFileBasedAuthentication*.
+          - Optional
+        * - ``fingerprint``
+          - Fingerprint for the public key that was added for the user.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``passphrase``
+          - Passphrase used for the key, if it is encrypted.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Optional
+        * - ``privateKeyLocation``
+          - The full path and file name of the private key.
+
+            For example, in Linux or macOS, the location of the private key can be *~/.oci/oci_api_key.pem*. In Windows, the location can be *%HOMEDRIVE%%HOMEPATH%.oci\oci_api_key.pem*.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``regionId``
+          - The ID of the Oracle Cloud Infrastructure region.
+
+            For example, *us-ashburn-1*.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``tenancy``
+          - Oracle Cloud Identifier (OCID) of your tenancy.
+
+            For example, *ocid1.tenancy.oc1..<unique_ID>*.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+        * - ``user``
+          - OCID of the user calling the API.
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
+          - Required
+
+    **getConnection(): tokenAuthConfigAzure Object Properties**
+
+    The properties of the ``tokenAuthConfigAzure`` object are:
+
+    .. _getconnectiontokenauthconfigazureproperties:
+
+    .. list-table-with-summary::  getConnection(): ``tokenAuthConfigAzure`` Object Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 30 10
+        :width: 100%
+        :name: _get_connection_azure_properties
+        :summary: The first column displays the property. The second column
+         displays the description of the property. The third column displays
+         whether the property is required or optional.
+
+        * - Property
+          - Description
+          - Required or Optional
+        * - ``authType``
+          - The authentication type. The authentication type for OAuth 2.0 is "azureServicePrincipal". This type makes the plugin acquire Azure service principal access tokens through a client credential flow.
+          - Required
+        * - ``authority``
+          - This parameter must be set as a string in URI format with the tenant ID, for example, ``https://{identity provider instance}/{tenantId}``.
+
+            The tenantId is the directory tenant the application plans to operate against in GUID or domain-name format.
+
+            Some of the common authority URLs are:
+            https://login.microsoftonline.com/<tenant>/
+            https://login.microsoftonline.com/common/
+            https://login.microsoftonline.com/organizations/
+            https://login.microsoftonline.com/consumers/
+          - Required
+        * - ``clientId``
+          - The application ID that is assigned to your application.
+
+            This information can be found in the portal where the application was registered.
+          - Required
+        * - ``clientSecret``
+          - The client secret that was generated for your application in the application registration portal.
+          - Required when using azureServicePrincipal
+        * - ``proxy``
+          - This property is to be set while using token generation behind a firewall.
+          - Optional
+        * - ``scopes``
+          - This parameter represents the value of the scope for the request.
+
+            The value passed for this parameter should be the resource identifier (application ID URI) of the desired resource, with the ".default" suffix. For example, ``https://{uri}/clientID/.default``.
+
+            All scopes included must be for a single resource. Specifying scopes for multiple resources will result in an error.
+          - Required
 
     **Callback**:
 
@@ -3556,6 +3905,41 @@ Oracledb Methods
     because those libraries still need to be in the operating system search
     path, such as from running ``ldconfig`` or set in the environment
     variable ``LD_LIBRARY_PATH``.
+
+.. method:: oracledb.registerProcessConfigurationHook()
+
+    .. versionadded:: 6.8
+
+    ::
+
+        registerProcessConfigurationHook(Function fn)
+
+    Registers extension modules. These registered modules will be called and
+    executed during standalone and pool connection creation.
+
+    The parameters of the ``registerProcessConfigurationHook()`` method are:
+
+    .. _registerprocessconfigurationhookattrs:
+
+    .. list-table-with-summary:: oracledb.registerProcessConfigurationHook() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``fn``
+          - Function
+          - The user hook function that needs to be registered. This hook
+            function will be invoked when :meth:`oracledb.getConnection()` or
+            :meth:`oracledb.createPool()` are called. The user hook function
+            is expected to return an accessToken that needs to be registered.
 
 .. method:: oracledb.shutdown()
 

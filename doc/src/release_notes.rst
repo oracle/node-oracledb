@@ -14,21 +14,30 @@ node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...
 Common Changes
 ++++++++++++++
 
-#)  Added support for `BigInt` values to be passed to Database Objects.
-    Exported new function `dbObjectTypeHandler` from `oracledb` which can be
-    used to convert strings passed to the handler to `BigInt`.
+#)  Added a new :attr:`oracledb.dbObjectTypeHandler` property in which a user
+    function can be specified when using DbObjects to modify the properties
+    before it is returned to the application.
+
+#)  Added support for BigInt values to be passed to Database Objects. This is
+    done by using the new property :attr:`oracledb.dbObjectTypeHandler` which
+    can be used to convert strings passed to the dbObject Type Handler to
+    BigInt.
     See `Issue #1710 <https://github.com/oracle/node-oracledb/issues/1710>`__.
 
-#)  Added support for Oracle Database 23ai sparse vectors.
+#)  Added support for Oracle Database 23.7
+    :ref:`SPARSE vectors <sparsevectors>`.
 
 #)  Added support for :ref:`interval year-to-month <intervalyeartomonth>` and
     :ref:`interval day-to-second <intervaldaytosecond>` database column types.
     See `Issue #929 <https://github.com/oracle/node-oracledb/issues/929>`__.
 
-#)  Fixed :attr:`~dbObject.length` property for the database object
-    collection types, which was broken from node-oracledb 6.0.
+#)  Added :ref:`plugins <extendingnodeoracledb>` for :ref:`OCI IAM
+    <cloudnativeauthoci>` and :ref:`Azure OAuth <cloudnativeauthoauth>` token
+    generation and authentication that calls into OCI and Azure SDK APIs
+    respectively.
 
-#)  Added OCI and Azure SDK support for token based authentication.
+#)  Added :meth:`oracledb.registerProcessConfigurationHook()` to register
+    extension modules (:ref:`plugins <extendingnodeoracledb>`).
 
 #)  Added support for returning maximum identifier length allowed by the
     database using the new property :attr:`connection.maxIdentifierLength`.
@@ -36,24 +45,33 @@ Common Changes
 #)  Added :meth:`~dbObject.copy` method to create deep copies of database
     objects.
 
+#)  Fixed :attr:`~dbObject.length` property for the database object
+    collection types, which was broken from node-oracledb 6.0.
+
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for external authentication using Transport Layer
-    Security (TLS) protocol.
+#)  Added support for :ref:`external authentication using Transport Layer
+    Security (TLS) <tlsextauth>` protocol.
 
-#)  Added support for Advanced Network Compression which reduces the size
-    of the network data packets transmitted over a connection for improved
-    effective network throughput and bandwidth utilization.
+#)  Added support for :ref:`Advanced Network Compression <networkcompression>`
+    using the new properties ``networkCompression`` and
+    ``networkCompressionThreshold`` in :meth:`oracledb.createPool()` and
+    :meth:`oracledb.getConnection()`. This reduces the size of the network
+    data packets transmitted over a connection for improved effective network
+    throughput and bandwidth utilization.
 
-#)  Fixed issue that does not throw Authentication error for FastAuth
-    when invalid token is used with external authentication.
-
-#)  Added connection optimization feature which uses
-    Server Name Indication (SNI) extension of the TLS protocol.
+#)  Added a new property ``useSNI`` to
+    :ref:`oracledb.createPool() <createpoolpoolattrsusesni>` and
+    :ref:`oracledb.getConnection() <getconnectiondbattrsusesni>` that enables
+    a connection optimization feature which uses Server Name Indication (SNI)
+    extension of the TLS protocol.
 
 #)  Added support for setting the :attr:`~oracledb.edition` when connecting to
     the database.
+
+#)  Fixed issue that does not throw Authentication error for FastAuth
+    when invalid token is used with external authentication.
 
 #)  Fixed error message in ``NJS-131`` to provide the correct range of the
     database object collection types.
@@ -61,19 +79,20 @@ Thin Mode Changes
 #)  Fixed bug with :meth:`dbObject.deleteElement()` which did not update the
     keys of associative arrays when an element was deleted.
 
-#)  Fixed issue with IAM token based authentication which allows unformatted
+#)  Fixed issue with :ref:`IAM token-based authentication
+    <iamtokenbasedauthentication>` which allows unformatted
     private keys to be used for refreshed access tokens leading to token
     authentication errors.
 
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Fixed internal error that occurs while running ``connection.subscribe()``
-    with same name for second time.
+#)  Fixed internal error that occurs while running
+    :meth:`connection.subscribe()` with the same name for the second time.
     See `Issue #1718 <https://github.com/oracle/node-oracledb/issues/1718>`__.
 
-#)  Fixed internal error that occurs while running ``connection.subscribe()`` with
-    sql reading from non-existent tables.
+#)  Fixed internal error that occurs while running
+    :meth:`connection.subscribe()` with SQL reading from non-existent tables.
 
 #)  Internal error handling improvements.
 

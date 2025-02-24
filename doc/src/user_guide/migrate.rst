@@ -4,6 +4,70 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev67v68:
+
+Upgrading from node-oracledb 6.7 to 6.8
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- With the new :ref:`intervalymclass` and :ref:`intervaldsclass`, you can
+  fetch, insert, and update `INTERVAL YEAR TO MONTH <https://www.oracle.com/
+  pls/topic/lookup?ctx=dblatest&id=GUID-7690645A-0EE3-46CA-90DE-
+  C96DF5A01F8F>`__ and `INTERVAL DAY TO SECOND <https://www.oracle.com/pls/
+  topic/lookup?ctx=dblatest&id=GUID-7690645A-0EE3-46CA-90DE-C96DF5A01F8F>`__
+  database column types respectively. See :ref:`intervaltype`.
+
+- Using the :ref:`oracledbsparsevector`, you can fetch, insert, and update
+  Oracle Database 23.7 SPARSE vectors which store only the non-zero values
+  physically. See :ref:`sparsevectors`.
+
+- With Cloud Native Authentication, you can use:
+
+  - Node-oracledb's :ref:`extensionOci <extensionociplugin>` plugin to
+    automatically generate tokens using `OCI SDK <https://www.npmjs.com/
+    package/oci-sdk>`__ when authenticating with Oracle Cloud Infrastructure
+    (OCI) Identity and Access Management (IAM) token-based authentication. See
+    :ref:`cloudnativeauthoauth`.
+
+  - Node-oracledb's :ref:`extensionAzure <extensionazureplugin>` plugin to
+    automatically generate tokens using `Microsoft Authentication Library for
+    Node (msal-node) <https://www.npmjs.com/package/@azure/msal-node>`__ when
+    authenticating with OAuth 2.0 token-based authentication. See
+    :ref:`cloudnativeauthoauth`.
+
+- The new :meth:`oracledb.registerProcessConfigurationHook()` method registers
+  extension modules (:ref:`plugins <extendingnodeoracledb>`).
+
+- The new :attr:`connection.maxIdentifierLength` property returns the maximum
+  identifier length allowed by the database.
+
+- The new :meth:`dbObject.copy` method creates deep copies of database
+  objects.
+
+- With the new :attr:`oracledb.dbObjectTypeHandler` property, you can now
+  specify a user function when using :ref:`DbObjects <dbobjectclass>` to
+  modify its properties before it is returned to the application.
+
+- You can now pass BigInt values in :ref:`DbObjects <dbobjectclass>`.
+
+- In node-oracledb Thin mode, you can now perform :ref:`external
+  authentication using Transport Layer Security (TLS) <tlsextauth>` protocol.
+
+- In node-oracledb Thin mode, you can now enable :ref:`Advanced Network
+  Compression <networkcompression>` support using the new properties
+  ``networkCompression`` and ``networkCompressionThreshold`` in
+  :meth:`oracledb.createPool()` and :meth:`oracledb.getConnection()`.
+
+- You can now enable a connection optimization feature which uses Server Name
+  Indication (SNI) extension of the TLS protocol in node-oracledb Thin mode
+  by using the property ``useSNI`` in
+  :ref:`oracledb.createPool() <createpoolpoolattrsusesni>` or
+  :ref:`oracledb.getConnection() <getconnectiondbattrsusesni>`.
+
+- In node-oracledb Thin mode, you can now set the property
+  :attr:`~oracledb.edition` when connecting to Oracle Database.
+
 .. _upgradev66v67:
 
 Upgrading from node-oracledb 6.6 to 6.7

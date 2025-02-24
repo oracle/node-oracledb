@@ -30,25 +30,27 @@
     Add below parameters on server side to enable network
     Compression as the values are negotiated
     between client and server at the time of connection.
-    Edit sqlnet.ora file :
+    To enable compression, the server's sqlnet.ora file must be configured with:
     sqlnet.compression=on
     sqlnet.compression_levels=(high)
 
-    export NETWORK_COMPRESSION_HOST = HOSTNAME
-    export NETWORK_COMPRESSION_PORT = PORTNO
-    export NETWORK_COMPRESSION_SVCNAME = SERVICENAME
+    export NODE_ORACLEDB_HOST = HOSTNAME
+    export NODE_ORACLEDB_PORT = PORTNO
+    export NODE_ORACLEDB_SERVICENAME = SERVICENAME
+    export NODE_ORACLEDB_USER = USERNAME
+    export NODE_ORACLEDB_PASSWORD = USERPASSWORD
  *****************************************************************************/
 'use strict';
 const oracledb = require("oracledb");
 const assert   = require('assert');
 
 describe('1. Network Compression', function() {
-  let thinMode = 1;
+  let connectString;
   before(function() {
     // This test runs in both node-oracledb Thin and Thick modes.
     // Optionally run in node-oracledb Thick mode
     if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
-      thinMode = 0;
+      console.log("Thick mode selected");
       // Thick mode requires Oracle Client or Oracle Instant Client libraries.
       // On Windows and macOS Intel you can specify the directory containing the
       // libraries at runtime or before Node.js starts.  On other platforms (where
@@ -63,112 +65,207 @@ describe('1. Network Compression', function() {
         clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
       }
       oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
+    } else {
+      console.log("Thin mode selected");
     }
-    if (!process.env.NODE_ORACLEDB_HOST)
-      throw new Error('Hostname is not Set! Set env variable NODE_ORACLEDB_HOST');
-    if (!process.env.NODE_ORACLEDB_SERVICENAME)
-      throw new Error('servicename is not Set! Set env variable NODE_ORACLEDB_SERVICENAME');
-  });
-  const host = process.env.NODE_ORACLEDB_HOST;
-  const port = process.env.NODE_ORACLEDB_PORT || '1521';
-  const svcName = process.env.NODE_ORACLEDB_SERVICENAME;
 
-  it('1.1 Compression parameters specified in the dbConfig Object', async function() {
+    // Validate required environment variables
+    if (!process.env.NODE_ORACLEDB_HOST ||
+      !process.env.NODE_ORACLEDB_SERVICENAME ||
+      !process.env.NODE_ORACLEDB_PORT) {
+      throw new Error('Please set NODE_ORACLEDB_HOST, NODE_ORACLEDB_PORT, and NODE_ORACLEDB_SERVICENAME');
+    }
+
+    connectString = '(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=' +
+     process.env.NODE_ORACLEDB_HOST + ')(PORT=' +
+     process.env.NODE_ORACLEDB_PORT + '))' +
+     '(CONNECT_DATA=(SERVICE_NAME=' + process.env.NODE_ORACLEDB_SERVICENAME + ')))';
+  });
+
+  async function runQuery(dbConfig, expectedCompression) {
+    const connection = await oracledb.getConnection(dbConfig);
+    const result = await connection.execute("select 1+1 from dual");
+    assert.strictEqual(result.rows[0][0], 2);
+    if (oracledb.thin && typeof expectedCompression === 'boolean') {
+      assert.strictEqual(connection.isCompressionEnabled(), expectedCompression);
+    }
+    await connection.close();
+  }
+
+  it('1.1 Compression enabled via dbConfig object', async function() {
+    if (!oracledb.thin) this.skip();
     const dbConfig = {
-      user: 'scott',
-      password: 'tiger',
-      connectString: '(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=' + host + ')(PORT=' + port + '))(CONNECT_DATA=(SERVICE_NAME=' + svcName + ')))',
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: connectString,
       networkCompression: true,
     };
-    if (!thinMode)
-      this.skip();
-    const connection = await oracledb.getConnection(dbConfig);
-    const result = await connection.execute("select 1+1 from dual");
-    assert(result.rows[0][0], 2);
-    const isCompressed = connection.isCompressionEnabled();
-    assert.deepStrictEqual(isCompressed, true);
-    await connection.close();
+    await runQuery(dbConfig, true);
   });
 
-  it('1.2 Compression parameters specified in the connect String which is in long tns format ', async function() {
+  it('1.2 Compression enabled via long TNS string', async function() {
     const dbConfig = {
-      user: 'scott',
-      password: 'tiger',
-      connectString: '(DESCRIPTION=(COMPRESSION=ON)(COMPRESSION_LEVELS=(LEVEL=HIGH))(ADDRESS=(PROTOCOL=tcp)(HOST=' + host + ')(PORT=' + port + '))(CONNECT_DATA=(SERVICE_NAME=' + svcName + ')))',
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: '(DESCRIPTION=(COMPRESSION=ON)(COMPRESSION_LEVELS=(LEVEL=HIGH))' +
+                       '(ADDRESS=(PROTOCOL=tcp)(HOST=' + process.env.NODE_ORACLEDB_HOST +
+                       ')(PORT=' + process.env.NODE_ORACLEDB_PORT + '))' +
+                       '(CONNECT_DATA=(SERVICE_NAME=' + process.env.NODE_ORACLEDB_SERVICENAME + ')))',
     };
     const connection = await oracledb.getConnection(dbConfig);
     const result = await connection.execute("select 1+1 from dual");
-    assert(result.rows[0][0], 2);
-    if (thinMode) {
-      const isCompressed = connection.isCompressionEnabled();
-      assert.deepStrictEqual(isCompressed, true);
+    assert.strictEqual(result.rows[0][0], 2);
+    if (oracledb.thin) {
+      assert.strictEqual(connection.isCompressionEnabled(), true);
     }
     await connection.close();
   });
 
-  it('1.3 Compression parameters specified in ezconnect plus syntax', async function() {
+  it('1.3 Compression enabled via EZConnect plus syntax', async function() {
+    if (!oracledb.thin) this.skip();
     const dbConfig = {
-      connectString: 'tcp://' + host + ':' + port + '/' + svcName + '?compression=on',
-      user: 'scott',
-      password: 'tiger',
-
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: 'tcp://' + process.env.NODE_ORACLEDB_HOST + ':' +
+                       process.env.NODE_ORACLEDB_PORT + '/' +
+                       process.env.NODE_ORACLEDB_SERVICENAME + '?compression=on'
     };
-    if (!thinMode)
-      this.skip();
-    const connection = await oracledb.getConnection(dbConfig);
-    const result = await connection.execute("select 1+1 from dual");
-    assert(result.rows[0][0], 2);
-    const isCompressed = connection.isCompressionEnabled();
-    assert.deepStrictEqual(isCompressed, true);
-    await connection.close();
+    await runQuery(dbConfig, true);
   });
 
-  it('1.4 Compression parameters specified in the dbConfig Object, compression set as false', async function() {
+  it('1.4 Compression disabled via dbConfig object (explicit false)', async function() {
+    if (!oracledb.thin) this.skip();
     const dbConfig = {
-      user: 'scott',
-      password: 'tiger',
-      connectString: '(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=' + host + ')(PORT=' + port + '))(CONNECT_DATA=(SERVICE_NAME=' + svcName + ')))',
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: connectString,
       networkCompression: false,
     };
-    if (!thinMode)
-      this.skip();
-    const connection = await oracledb.getConnection(dbConfig);
-    const result = await connection.execute("select 1+1 from dual");
-    assert(result.rows[0][0], 2);
-    const isCompressed = connection.isCompressionEnabled();
-    assert.deepStrictEqual(isCompressed, false);
-    await connection.close();
+    await runQuery(dbConfig, false);
   });
 
-  it('1.5 Compression parameters are not specified in the dbConfig Object', async function() {
+  it('1.5 No compression parameter specified (default off)', async function() {
+    if (!oracledb.thin) this.skip();
     const dbConfig = {
-      user: 'scott',
-      password: 'tiger',
-      connectString: '(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=' + host + ')(PORT=' + port + '))(CONNECT_DATA=(SERVICE_NAME=' + svcName + ')))',
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: connectString,
     };
-    if (!thinMode)
-      this.skip();
-    const connection = await oracledb.getConnection(dbConfig);
-    const result = await connection.execute("select 1+1 from dual");
-    assert(result.rows[0][0], 2);
-    const isCompressed = connection.isCompressionEnabled();
-    assert.deepStrictEqual(isCompressed, false);
-    await connection.close();
+    await runQuery(dbConfig, false);
   });
 
-  it('1.6 Compression parameters specified in the connect String which is in long tns format, compression level set as low', async function() {
+  it('1.6 Compression level low results in compression disabled', async function() {
     const dbConfig = {
-      user: 'scott',
-      password: 'tiger',
-      connectString: '(DESCRIPTION=(COMPRESSION=ON)(COMPRESSION_LEVELS=(LEVEL=low))(ADDRESS=(PROTOCOL=tcp)(HOST=' + host + ')(PORT=' + port + '))(CONNECT_DATA=(SERVICE_NAME=' + svcName + ')))',
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: '(DESCRIPTION=(COMPRESSION=ON)(COMPRESSION_LEVELS=(LEVEL=low))' +
+                       '(ADDRESS=(PROTOCOL=tcp)(HOST=' + process.env.NODE_ORACLEDB_HOST +
+                       ')(PORT=' + process.env.NODE_ORACLEDB_PORT + '))' +
+                       '(CONNECT_DATA=(SERVICE_NAME=' + process.env.NODE_ORACLEDB_SERVICENAME + ')))',
     };
     const connection = await oracledb.getConnection(dbConfig);
     const result = await connection.execute("select 1+1 from dual");
-    assert(result.rows[0][0], 2);
-    if (thinMode) {
-      const isCompressed = connection.isCompressionEnabled();
-      assert.deepStrictEqual(isCompressed, false);
+    assert.strictEqual(result.rows[0][0], 2);
+    if (oracledb.thin) {
+      assert.strictEqual(connection.isCompressionEnabled(), false);
     }
+    await connection.close();
+  });
+
+  it('1.7 Compression persists across multiple queries', async function() {
+    if (!oracledb.thin) this.skip();
+    const dbConfig = {
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: connectString,
+      networkCompression: true,
+    };
+    const connection = await oracledb.getConnection(dbConfig);
+
+    let result = await connection.execute("select 1+1 from dual");
+    assert.strictEqual(result.rows[0][0], 2);
+    assert.strictEqual(connection.isCompressionEnabled(), true);
+
+    result = await connection.execute("select sysdate from dual");
+    assert.ok(result.rows[0][0]);
+    assert.strictEqual(connection.isCompressionEnabled(), true);
+
+    result = await connection.execute("select user from dual");
+    assert.ok(result.rows[0][0]);
+    assert.strictEqual(connection.isCompressionEnabled(), true);
+
+    await connection.close();
+  });
+
+  it('1.8 Connection pool returns connections with compression enabled', async function() {
+    if (!oracledb.thin) this.skip();
+    const pool = await oracledb.createPool({
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: connectString,
+      networkCompression: true,
+      poolMin: 2,
+      poolMax: 4,
+      poolIncrement: 1
+    });
+
+    const conn1 = await pool.getConnection();
+    const conn2 = await pool.getConnection();
+    assert.strictEqual(conn1.isCompressionEnabled(), true);
+    assert.strictEqual(conn2.isCompressionEnabled(), true);
+
+    await conn1.close();
+    await conn2.close();
+    await pool.close();
+  });
+
+  it('1.9 Conflicting compression settings (dbConfig vs. connect string)', async function() {
+    if (!oracledb.thin) this.skip();
+    const dbConfig = {
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      // Connect string explicitly disables compression, overriding dbConfig's true setting
+      connectString: '(DESCRIPTION=(COMPRESSION=OFF)' +
+                       '(ADDRESS=(PROTOCOL=tcp)(HOST=' + process.env.NODE_ORACLEDB_HOST +
+                       ')(PORT=' + process.env.NODE_ORACLEDB_PORT + '))' +
+                       '(CONNECT_DATA=(SERVICE_NAME=' + process.env.NODE_ORACLEDB_SERVICENAME + ')))',
+      networkCompression: true,
+    };
+    await runQuery(dbConfig, false);
+  });
+
+  it('1.10 Handling invalid compression level parameter', async function() {
+    const dbConfig = {
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: '(DESCRIPTION=(COMPRESSION=ON)(COMPRESSION_LEVELS=(LEVEL=INVALID))' +
+                       '(ADDRESS=(PROTOCOL=tcp)(HOST=' + process.env.NODE_ORACLEDB_HOST +
+                       ')(PORT=' + process.env.NODE_ORACLEDB_PORT + '))' +
+                       '(CONNECT_DATA=(SERVICE_NAME=' + process.env.NODE_ORACLEDB_SERVICENAME + ')))',
+    };
+    const connection = await oracledb.getConnection(dbConfig);
+    const result = await connection.execute("select 1+1 from dual");
+    assert.strictEqual(result.rows[0][0], 2);
+    if (oracledb.thin) {
+      assert.strictEqual(connection.isCompressionEnabled(), false);
+    }
+    await connection.close();
+  });
+
+  it('1.11 Consistent compression setting on reconnection', async function() {
+    if (!oracledb.thin) this.skip();
+    const dbConfig = {
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: connectString,
+      networkCompression: true,
+    };
+    let connection = await oracledb.getConnection(dbConfig);
+    assert.strictEqual(connection.isCompressionEnabled(), true);
+    await connection.close();
+
+    connection = await oracledb.getConnection(dbConfig);
+    assert.strictEqual(connection.isCompressionEnabled(), true);
     await connection.close();
   });
 });

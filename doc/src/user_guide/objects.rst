@@ -243,6 +243,105 @@ LOBs will be fetched as :ref:`Lob objects <lobclass>`. The
 retrieve the data. Note it is an asynchronous method and requires a
 round-trip to the database.
 
+.. _dbobjecttypehandlers:
+
+Using DbObject Type Handlers
+============================
+
+You may need to convert the data type of a DbObject property to another data
+type for any reason (for example, to preserve numeric precision when reading
+as a JavaScript type). The data returned in the DbObject properties can be
+processed further by using a DbObject type handler introduced in node-oracledb
+6.8.
+
+The DbObject type handler converts the data type of the DbObject property to
+the desired data type before the data is returned from the database to
+node-oracledb.
+
+A DbObject type handler can be specified in the
+:attr:`oracledb.dbObjectTypeHandler` attribute.
+
+The DbObject type handler is expected to be a function with a single object
+argument. This single object argument contains the ``type``, ``maxSize``,
+``typeName``, ``precision``, and ``scale`` attributes. See
+:attr:`oracledb.dbObjectTypeHandler` for more information on these attributes.
+
+The function is called once for each property inside the DbObject. The
+function is expected to return an object containing
+:ref:`converter <converterfunc>` attribute.
+
+DbObject type handlers cannot be used with LOB data types.
+
+.. _bigintinobj:
+
+Using BigInt Data in DbObjects with DbObject Type Handlers
+----------------------------------------------------------
+
+From node-oracledb 6.8 onwards, you can pass BigInt numbers in a
+:ref:`DbObject Class <dbobjectclass>` instance in both Thin and Thick modes.
+
+By default, number and BigInt data types in the DbObject property are returned
+as JavaScript numbers from the database when using node-oracledb Thin or Thick
+mode. This results in an incorrect BigInt value being returned.
+
+You can use the :attr:`oracledb.dbObjectTypeHandler` property to convert the
+string value of the BigInt number to the actual number.
+
+Consider the following object nodb_bigIntType:
+
+.. code-block:: sql
+
+    CREATE TYPE nodb_bigIntType AS OBJECT (
+        BIGINTDATA NUMBER);
+
+To reliably work with BigInt numbers in DbObject, it is recommended to use a
+DbObject type handler. The following fetch type handler can be used to return
+the correct BigInt value:
+
+.. code-block:: javascript
+
+    const myDbObjectFetchTypeHandler = function(metadata) {
+      if (metadata.type === oracledb.DB_TYPE_NUMBER) {
+        return {
+          converter: (val) => {
+            if (val.includes('.')) {
+              return parseFloat(val); // It's a float, return as Number
+            }
+
+            // Convert to BigInt to avoid loss of precision.
+            const bigIntValue = BigInt(val);
+            return bigIntValue;
+          }
+        };
+      }
+    };
+
+The above type handler can be used as shown in the example below:
+
+.. code-block:: javascript
+
+    const num = 589508999999999999999n;
+    const plsql = `declare myType nodb_bigIntType := :t; begin :t := myType; end;`;
+    const bind =
+      {
+        t: {
+          dir: oracledb.BIND_INOUT,
+          type: nodb_bigIntType,
+          val: {
+            'BIGINTDATA': num
+        }
+      };
+    oracledb.dbObjectTypeHandler = myDbObjectFetchTypeHandler;
+    let result = await connection.execute(plsql, bind, {outFormat: oracledb.OUT_FORMAT_OBJECT});
+    console.log(result.outBinds.t.BIGINTDATA);
+
+This would print ``589508999999999999999n``.
+
+If ``JSON.stringify()`` is called on the DbObject, then a ``TypeError`` is
+thrown since `BigInt is not serializable
+<https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/BigInt_not_serializable>`__
+and hence JSON stringification is not possible here.
+
 .. _plsqlcollections:
 
 PL/SQL Collection Types
