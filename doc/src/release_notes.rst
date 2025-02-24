@@ -14,11 +14,12 @@ node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...
 Common Changes
 ++++++++++++++
 
-#)  Added a new :attr:`oracledb.dbObjectTypeHandler` property in which a user
-    function can be specified when using DbObjects to modify the properties
-    before it is returned to the application.
+#)  Added new :attr:`oracledb.dbObjectTypeHandler` property in which a user
+    function can be specified when using DbObjects to modify the database
+    object attributes before the database object is returned to the
+    application.
 
-#)  Added support for BigInt values to be passed to Database Objects. This is
+#)  Added support for BigInt values to be passed to database objects. This is
     done by using the new property :attr:`oracledb.dbObjectTypeHandler` which
     can be used to convert strings passed to the dbObject Type Handler to
     BigInt.

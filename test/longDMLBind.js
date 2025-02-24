@@ -172,8 +172,8 @@ describe('125. longDMLBind.js', function() {
     const sql_query = "select content from " + tableName + " where id = " + insertID;
     const result = await connection.execute(sql_query);
     assert(result);
+    assert.strictEqual(result.rows[0][0].length, expected.length);
     assert.strictEqual(result.rows[0][0], expected);
-
   };
 
 });
