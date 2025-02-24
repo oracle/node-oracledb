@@ -2601,9 +2601,9 @@ for token generation. This hook function sets the ``accessToken`` parameter of
 the connection methods to a callback function which uses the configuration
 parameters to generate OAuth 2.0 tokens.
 
-The plugin implementation can be seen in `plugins/tokens/extensionAzure/
-index.js <https://github.com/oracle/node-oracledb/tree/main/plugins/tokens/
-extensionAzure/index.js>`__.
+The ``extensionAzure`` plugin is available as part of the `plugins/tokens
+<https://github.com/oracle/node-oracledb/tree/main/plugins/tokens/
+extensionAzure/index.js>`__ directory in the node-oracledb package.
 
 For OAuth 2.0 token-based authentication with the ``extensionAzure`` plugin,
 the ``tokenAuthConfigAzure`` connection parameter must be specified. This
@@ -3086,9 +3086,9 @@ for token generation. This hook function sets the ``accessToken`` parameter of
 the connection methods to a callback function which uses the configuration
 parameters to generate IAM tokens.
 
-The plugin implementation can be seen in `plugins/tokens/extensionOci/
-index.js <https://github.com/oracle/node-oracledb/tree/main/plugins/tokens/
-extensionOci/index.js>`__.
+The ``extensionOci`` plugin is available as part of the `plugins/tokens
+<https://github.com/oracle/node-oracledb/tree/main/plugins/tokens/
+extensionOci/index.js>`__ directory in the node-oracledb package.
 
 For OCI IAM token-based authentication with the :ref:`extensionOci
 <extensionociplugin>` plugin, the ``tokenAuthConfigOci`` connection parameter

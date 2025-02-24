@@ -223,7 +223,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - Yes - No callback
     * - Transaction Guard (TG)
       - No
-      - Yes
+      - No
     * - Data Guard (DG) and Active Data Guard (ADG)
       - Yes
       - Yes
