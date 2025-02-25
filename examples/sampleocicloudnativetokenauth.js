@@ -79,6 +79,7 @@ async function run() {
   //   connectString:       The NODE_ORACLEDB_CONNECTIONSTRING environment
   //                        variable set to the Oracle Net alias or connect
   //                        descriptor of your Oracle Autonomous Database
+  //   walletPassword:      Required if we are using mTLS connection
   // Configuration for tokenAuthConfigOci:
   //   authType:            Must be set to authentication type.
   //                        Types are:
@@ -96,6 +97,7 @@ async function run() {
     externalAuth: true,
     homogeneous: true,
     connectString: process.env.NODE_ORACLEDB_CONNECTIONSTRING,
+    walletPassword: process.env.NODE_ORACLEDB_WALLET_PASSWORD,
   };
 
   try {
@@ -136,7 +138,7 @@ async function createConnection() {
 }
 
 async function closePoolAndExit() {
-  console.log('\nTerminating');
+  console.log('\nExiting the program');
   try {
     // Get the pool from the pool cache and close it
     await oracledb.getPool().close(0);

@@ -849,7 +849,14 @@ describe('1. connection.js', function() {
 
       // Whitespaces, comma, ( and ) are replaced by ? for the program name
       // in V$SESSION
-      const sanitizedProgName = process.argv0.replace(/[\s(),]/g, '?');
+      let sanitizedProgName = process.argv0.replace(/[\s(),]/g, '?');
+      /*
+        In Oracle < 23.0 DB, The program name (program column in v$session view)
+        can be set only upto 48 characters.
+      */
+      const serverVersion = conn.oracleServerVersion;
+      if (serverVersion < 2300000000)
+        sanitizedProgName = sanitizedProgName.substring(0, 48);
 
       // Fetch values from v$session
       let res = await conn.execute(sqlSessionDetails);
@@ -875,7 +882,6 @@ describe('1. connection.js', function() {
         In Oracle 12.1.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
         can be set only upto 8 characters.
       */
-      const serverVersion = conn.oracleServerVersion;
       if (serverVersion < 1201000200)
         assert.strictEqual(res.rows[0][0], "node-ora");
       else assert.strictEqual(res.rows[0][0], "node-oracledb : " + oracledb.versionString + " thn");

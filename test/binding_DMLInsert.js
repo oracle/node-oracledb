@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -104,7 +104,9 @@ describe('92.binding_DMLInsert.js', function() {
             },
             // ORA-01877: string is too long for internal buffer
             // ORA-01866: the datetime class is invalid
-            /ORA-01877:|ORA-01866:/
+            // ORA-01830: The string being converted to a date is too long to
+            // match the date format 'DD-MON-RR HH.MI.SSXFF AM'
+            /ORA-01877:|ORA-01866:|ORA-01830:/
           );
         }
         if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
