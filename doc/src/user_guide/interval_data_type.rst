@@ -66,13 +66,13 @@ If you specify non-integer values in the attributes of IntervalYM object, then
 the ``NJS-007`` error is raised.
 
 You can insert IntervalYM objects into an INTERVAL YEAR TO MONTH column by
-binding as ``oracledb.DB_TYPE_YM``, for example:
+binding as ``oracledb.DB_TYPE_INTERVAL_YM``, for example:
 
 .. code-block:: javascript
 
     await connection.execute(
         `INSERT INTO TableIntervalYM VALUES (:bv)`,
-        { bv: { val: interval, type: oracledb.DB_TYPE_YM }
+        { bv: { val: interval, type: oracledb.DB_TYPE_INTERVAL_YM }
     );
 
 .. _fetchintervalyeartomonth:
@@ -139,13 +139,13 @@ If you specify non-integer values in the attributes of IntervalDS object, then
 the ``NJS-007`` error is raised.
 
 You can insert IntervalDS objects into an INTERVAL DAY TO SECOND column by
-binding as ``oracledb.DB_TYPE_DS``, for example:
+binding as ``oracledb.DB_TYPE_INTERVAL_DS``, for example:
 
 .. code-block:: javascript
 
     await connection.execute(
         `INSERT INTO TableIntervalDS VALUES (:bv)`,
-        { bv: { val: data, type: oracledb.DB_TYPE_DS }
+        { bv: { val: data, type: oracledb.DB_TYPE_INTERVAL_DS }
     );
 
 .. _fetchintervaldaytosecond:
