@@ -8,7 +8,7 @@ node-oracledb Release Notes
 For deprecated and desupported features, see
 :ref:`Deprecations and desupported features <deprecations>`.
 
-node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.8.0>`__ (26 Feb 2025)
+node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.8.0>`__ (27 Feb 2025)
 ---------------------------------------------------------------------------------------------------------
 
 Common Changes
