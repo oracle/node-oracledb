@@ -32,3 +32,4 @@ To make PDF documentation, run::
     make pdf
 
 The program ``latexmk`` may be required by Sphinx to generate PDF output.
+good program
