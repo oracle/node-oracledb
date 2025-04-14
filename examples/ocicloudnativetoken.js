@@ -16,10 +16,10 @@
  * limitations under the License.
  *
  * NAME
- *   sampleocicloudnativetokenauth.js
+ *   ocicloudnativetoken.js
  *
  * DESCRIPTION
- *   Shows connection pooling with OAuth 2.0 token based authentication to
+ *   Shows connection pooling with cloud native token based authentication to
  *   Oracle Autonomous Database from OCI-SDK.
  *
  *   For more information refer to

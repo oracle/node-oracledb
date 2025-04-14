@@ -64,8 +64,9 @@ File Name                                                 | Description
 [`aqoptions.js`](aqoptions.js)                            | Oracle Advanced Queuing (AQ) example setting options and message attributes
 [`aqraw.js`](aqraw.js)                                    | Basic Oracle Advanced Queuing (AQ) example passing text messages
 [`aqutil.js`](aqutil.js)                                  | Common file to setup the user credentials for all the Advanced Queuing (AQ) examples.
+[`azureConfigProvider.js`](azureConfigProvider.js)        | Shows how to connect to Oracle Database using Azure Configuration Provider
+[`azurecloudnativetoken.js`](azurecloudnativetoken.js)    | Shows how to connect to Oracle Database with cloud native token based authentication using Azure SDK
 [`blobhttp.js`](blobhttp.js)                              | Simple web app that streams an image
-[`azureConfigProvider.js`](azureConfigProvider.js)        | Show how to connect to Oracle Database using Azure Configuration Provider
 [`calltimeout.js`](calltimeout.js)                        | Shows how to cancel a SQL statement if it doesn't complete in a specified time
 [`connect.js`](connect.js)                                | Basic example for creating a standalone (non-pooled) connection
 [`connectionpool.js`](connectionpool.js)                  | Basic example creating a pool of connections
@@ -105,8 +106,9 @@ File Name                                                 | Description
 [`lowercasecolumns.js`](lowercasecolumns.js)              | Shows how a type handler can convert column names to lower case
 [`metadata.js`](metadata.js)                              | Shows the metadata available after executing SELECT statements
 [`nesteddbobject.js](nesteddbobject.js)                   | Shows binding of nested Oracle Database Object types
-[`ociConfigProvider.js`](ociConfigProvider.js)            | Show how to connect to Oracle Database using OCI Config Provider
-[`ociConfigProviderPool.js`](ociConfigProviderPool.js)    | Show how to connect with custom pool settings to Oracle Database using OCI Config Provider
+[`ociConfigProvider.js`](ociConfigProvider.js)            | Shows how to connect to Oracle Database using OCI Config Provider
+[`ociConfigProviderPool.js`](ociConfigProviderPool.js)    | Shows how to connect with custom pool settings to Oracle Database using OCI Config Provider
+[`ocicloudnativetoken.js`](ocicloudnativetoken.js)        | Shows how to connect to Oracle Database with cloud native token based authentication using OCI SDK
 [`plsqlarray.js`](plsqlarray.js)                          | Examples of binding PL/SQL "INDEX BY" tables
 [`plsqlfunc.js`](plsqlfunc.js)                            | How to call a PL/SQL function
 [`plsqlproc.js`](plsqlproc.js)                            | How to call a PL/SQL procedure
@@ -120,8 +122,8 @@ File Name                                                 | Description
 [`resultset2.js`](resultset2.js)                          | Executes a query and uses a ResultSet to fetch batches of rows with `getRows()`
 [`resultsettoquerystream.js`](resultsettoquerystream.js)  | Converts a ResultSet returned from `execute()` into a Readable Stream.
 [`rowlimit.js`](rowlimit.js)                              | Shows ways to limit the number of records fetched by queries
-[`sampleazuretokenauth.js`](sampleazuretokenauth.js)      | Shows connection pooling with Azure token based authentication.
-[`sampleocitokenauth.js`](sampleocitokenauth.js)          | Shows connection pooling with OCI OAuth 2.0 token based authentication.
+[`sampleazuretokenauth.js`](sampleazuretokenauth.js)      | Shows connection pooling with Azure token based authentication
+[`sampleocitokenauth.js`](sampleocitokenauth.js)          | Shows connection pooling with OCI token based authentication
 [`select1.js`](select1.js)                                | Executes a basic query without using a connection pool or ResultSet
 [`select2.js`](select2.js)                                | Executes queries to show array and object output formats
 [`selectgeometry.js`](selectgeometry.js)                  | Insert and query Oracle Spatial geometries
@@ -135,6 +137,7 @@ File Name                                                 | Description
 [`sessiontagging1.js`](sessiontagging1.js)                | Simple pooled connection tagging for setting session state
 [`sessiontagging2.js`](sessiontagging2.js)                | More complex example of pooled connection tagging for setting session state
 [`soda1.js`](soda1.js)                                    | Basic Simple Oracle Document Access (SODA) example
+[`soda2.js`](soda2.js)                                    | Simple Oracle Document Access (SODA) example with SodaDocumentCursor Iterators
 [`typehandlerdate.js`](typehandlerdate.js)                | Show how a type handler can format a queried date in a locale-specific way
 [`typehandlernum.js`](typehandlernum.js)                  | Show how a type handler can alter queried numbers
 [`vectorSparse.js`](vectorSparse.js)                      | Insert and query SPARSE VECTOR columns.

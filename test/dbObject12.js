@@ -38,50 +38,39 @@ const testsUtil = require('./testsUtil.js');
 
 describe('211. dbObject12.js', function() {
 
-  let isRunnable = false;
   let conn;
 
   const PKG  = 'NODB_REC_PKG';
   const TYPE = 'NODB_REC_TYP';
 
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites();
-    if (!isRunnable) {
-      this.skip();
-    } else {
-      conn = await oracledb.getConnection(dbConfig);
+    conn = await oracledb.getConnection(dbConfig);
 
-      let plsql = `
-        CREATE OR REPLACE PACKAGE ${PKG} AS
-          TYPE ${TYPE} IS RECORD (name VARCHAR2(40), pos NUMBER, force PLS_INTEGER);
-          PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE});
-        END ${PKG};
-      `;
-      await conn.execute(plsql);
+    let plsql = `
+      CREATE OR REPLACE PACKAGE ${PKG} AS
+        TYPE ${TYPE} IS RECORD (name VARCHAR2(40), pos NUMBER, force PLS_INTEGER);
+        PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE});
+      END ${PKG};
+    `;
+    await conn.execute(plsql);
 
-      plsql = `
-        CREATE OR REPLACE PACKAGE BODY ${PKG} AS
-          PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE}) AS
-          BEGIN
-            p_out := p_in;
-            p_out.pos := p_out.pos * 2;
-            p_out.force := p_out.pos * -1;
-          END;
-        END ${PKG};
-      `;
-      await conn.execute(plsql);
-    }
-
+    plsql = `
+      CREATE OR REPLACE PACKAGE BODY ${PKG} AS
+        PROCEDURE myproc (p_in IN ${TYPE}, p_out OUT ${TYPE}) AS
+        BEGIN
+          p_out := p_in;
+          p_out.pos := p_out.pos * 2;
+          p_out.force := p_out.pos * -1;
+        END;
+      END ${PKG};
+    `;
+    await conn.execute(plsql);
   }); // before()
 
   after(async function() {
-    if (!isRunnable) {
-      return;
-    } else {
-      const sql = `DROP PACKAGE ${PKG}`;
-      await conn.execute(sql);
-      await conn.close();
-    }
+    const sql = `DROP PACKAGE ${PKG}`;
+    await conn.execute(sql);
+    await conn.close();
   }); // after()
 
   it('211.1 examples/plsqlrecord.js', async () => {

@@ -85,7 +85,6 @@ async function run() {
         y NUMBER
     )`
   );
-  conn.commit();
 
   result = await conn.execute(
     `CREATE TYPE shape_type AS OBJECT (
@@ -93,7 +92,6 @@ async function run() {
         point point_type
     )`
   );
-  conn.commit();
 
   // CREATE TABLE
   result = await conn.execute(

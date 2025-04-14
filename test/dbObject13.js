@@ -34,60 +34,48 @@
 const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('212. dbObject13.js', function() {
-
-  let isRunnable = false;
 
   let conn;
   const PKG = 'NODB_NETBALL_PKG';
 
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites();
-    if (!isRunnable) {
-      this.skip();
-    } else {
-      conn = await oracledb.getConnection(dbConfig);
+    conn = await oracledb.getConnection(dbConfig);
 
-      let plsql = `
-        CREATE OR REPLACE PACKAGE ${PKG} AS
-          TYPE playerType IS RECORD (name VARCHAR2(40), position VARCHAR2(20), shirtnumber NUMBER,
-            address VARCHAR2(1024));
-          TYPE teamType IS VARRAY(10) OF playerType;
-          PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType);
-        END ${PKG};
-      `;
-      await conn.execute(plsql);
+    let plsql = `
+      CREATE OR REPLACE PACKAGE ${PKG} AS
+        TYPE playerType IS RECORD (name VARCHAR2(40), position VARCHAR2(20), shirtnumber NUMBER,
+          address VARCHAR2(1024));
+        TYPE teamType IS VARRAY(10) OF playerType;
+        PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType);
+      END ${PKG};
+    `;
+    await conn.execute(plsql);
 
-      plsql = `
-        CREATE OR REPLACE PACKAGE BODY ${PKG} AS
-          PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType) AS
-            p teamType := teamType();
-          BEGIN
-            FOR i in 1..t_in.COUNT LOOP
-              p.EXTEND;
-              p(i) := t_in(i);
-              p(i).SHIRTNUMBER := i;
-            END LOOP;
-            t_out := p;
-          END;
+    plsql = `
+      CREATE OR REPLACE PACKAGE BODY ${PKG} AS
+        PROCEDURE assignShirtNumbers (t_in IN teamType, t_out OUT teamType) AS
+          p teamType := teamType();
+        BEGIN
+          FOR i in 1..t_in.COUNT LOOP
+            p.EXTEND;
+            p(i) := t_in(i);
+            p(i).SHIRTNUMBER := i;
+          END LOOP;
+          t_out := p;
+        END;
 
-        END ${PKG};
-      `;
-      await conn.execute(plsql);
-    }
+      END ${PKG};
+    `;
+    await conn.execute(plsql);
 
   }); // before()
 
   after(async function() {
-    if (!isRunnable) {
-      return;
-    } else {
-      const sql = `DROP PACKAGE ${PKG}`;
-      await conn.execute(sql);
-      await conn.close();
-    }
+    const sql = `DROP PACKAGE ${PKG}`;
+    await conn.execute(sql);
+    await conn.close();
 
   }); // after()
 

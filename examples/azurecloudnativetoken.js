@@ -16,10 +16,11 @@
  * limitations under the License.
  *
  * NAME
- *   sampleazurecloudnativetokenauth.js
+ *   azurecloudnativetoken.js
  *
  * DESCRIPTION
- *   This script shows connection pooling with token based authentication.
+ *   This script shows connection pooling with cloud native token based
+ *   authentication using Azure SDK.
  *
  * PREREQUISITES
  *   - node-oracledb 6.8 or later.

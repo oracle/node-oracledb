@@ -528,15 +528,83 @@ which can be doing a single operation.
 Connection Pooling
 ==================
 
-Applications which frequently create and close connections should use a
-connection pool.  This is important for performance and scalability when
-applications need to handle a large number of users who do database work for
-short periods of time but have relatively long periods when the connections
-are not needed. The high availability features of pools also make small pools
-useful for applications that want a few connections available for infrequent
-use and requires them to be immediately usable when acquired. Applications
-that would benefit from connection pooling but are too difficult to modify
-from the use of standalone connections can take advantage of
+Connection pooling significantly improves application performance and
+scalability, allows resource sharing, and lets applications use advanced
+Oracle High Availability features.
+
+The pooling solutions available to node-oracledb applications are:
+
+- :ref:`Driver Connection Pools <driverconnpool>`: These pools are managed by
+  the driver layer. They provide readily available database connections that
+  can be shared by multiple users and are quick for applications to obtain.
+  They help make applications scalable and highly available. They are created
+  with :meth:`oracledb.createPool()`.
+
+  The main use case is for applications that hold connections for relatively
+  short durations while doing database work, and that acquire and release
+  connections back to the pool as needed to do those database operations.
+  Using a driver pool is recommended for applications that need to support
+  multiple users. High availability benefits also make driver pools useful for
+  single-user applications that do infrequent database operations.
+
+- :ref:`drcp`: The pooling of server processes on the database host so they
+  can be shared between application connections. This reduces the number of
+  server processes that the database host needs to manage.
+
+  DRCP is useful if there are large number of application connections,
+  typically from having multiple application processes, and those applications
+  do frequent connection acquire and release calls as needed to do database
+  operations.  It is recommended to use DRCP in conjunction with a driver
+  connection pool, since this reduces the number of re-authentications and
+  session memory re-allocations.
+
+- `Proxy Resident Connection Pooling (PRCP)
+  <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E0032017-03B1-
+  4F14-AF9B-BCC87C982DA8>`__: Connection pooling is handled by a dedicated
+  mid-tier connection proxy, `CMAN-TDM <https://download.oracle.com/
+  ocomdocs/global/CMAN_TDM_Oracle_DB_Connection_Proxy_for_scalable_
+  apps.pdf>`__.
+
+  This is useful for applications taking advantage of CMAN-TDM.
+
+- :ref:`implicitpool`: This can add pooling benefits to applications that
+  connect when they start, and only close the connection when the application
+  terminates — but relatively infrequently do database work. It makes use of
+  DRCP or PRCP, but instead of relying on the application to explicitly acquire
+  and release connections, Implicit Connection Pooling automatically detects
+  when applications are not performing database work. It then allows the
+  associated database server process to be used by another connection that
+  needs to do a database operation. Implicit Connection Pooling is available
+  from Oracle Database 23ai onwards.
+
+  Implicit Connection Pooling is useful for legacy applications or third-party
+  code that cannot be updated to use a driver connection pool.
+
+Node-oracledb :ref:`driver connection pools <driverconnpool>` are the first
+choice for performance, scalability, and high availability. If your database
+is under memory pressure from having too many applications opening too many
+connections, then consider either :ref:`DRCP <drcp>` or :ref:`Implicit
+Connection Pooling <implicitpool>`, depending on your application’s
+connection life-cycle. If you are utilizing CMAN-TDM, then using `PRCP
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+E0032017-03B1-4F14-AF9B-BCC87C982DA8>`__ can be considered.
+
+.. _driverconnpool:
+
+Driver Connection Pooling
+-------------------------
+
+Node-oracledb's driver connection pooling lets applications create and
+maintain a pool of open connections to the database. Connection pooling is
+available in both Thin and :ref:`Thick <enablingthick>` modes. Connection
+pooling is important for performance and scalability when applications need to
+handle a large number of users who do database work for short periods of time
+but have relatively long periods when the connections are not needed. The high
+availability features of pools also make small pools useful for applications
+that want a few connections available for infrequent use and requires them to
+be immediately usable when acquired. Applications that would benefit from
+connection pooling but are too difficult to modify from the use of
+:ref:`standalone connections <standaloneconnection>` can take advantage of
 :ref:`implicitpool`.
 
 Each node-oracledb process can use one or more connection pools. Each pool can
@@ -544,94 +612,52 @@ contain zero or more connections. In addition to providing an immediately
 available set of connections, pools provide :ref:`dead connection detection
 <connpoolpinging>` and transparently handle Oracle Database :ref:`High
 Availability events <connectionha>`. This helps shield applications during
-planned maintenance and from unplanned failures.  In node-oracledb Thick mode,
-the pool implementation uses Oracle's `session pool technology
-<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
-id=GUID-F9662FFB-EAEF-495C-96FC-49C6D1D9625C>`__ which supports additional
-Oracle Database features such as Application Continuity.
+planned maintenance and from unplanned failures.
 
-Pools are created by calling :meth:`oracledb.createPool()`. Generally,
-applications will create a pool once as part of initialization.  After an
-application finishes using a connection pool, it should release all connections
-and terminate the connection pool by calling the :meth:`pool.close()`
-method.  During runtime, some pool properties can be changed with
-:meth:`pool.reconfigure()`.  Note that in node-oracledb Thick mode, the number
-of :ref:`worker threads <workerthreads>` should be sized correctly before
-creating a pool.
+In node-oracledb Thick mode, the pool implementation uses Oracle's `session
+pool technology <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+F9662FFB-EAEF-495C-96FC-49C6D1D9625C>`__ which supports additional Oracle
+Database features for example some advanced :ref:`high availability
+<connectionha>` features.
 
-Connections from the pool are obtained with :meth:`pool.getConnection()`.
-If all connections in a pool are being used, then
-subsequent ``getConnection()`` calls will be put in
-a :ref:`queue <connpoolqueue>` until a connection is available.
-Connections must be released with :meth:`connection.close()` when no longer
-needed so they can be reused. Make sure to release connections in all
-code paths including in error handlers.
+Creating a Connection Pool
+++++++++++++++++++++++++++
 
-Each connection in a pool should be used for a given unit of work, such as a
-transaction or a set of sequentially executed statements. Statements should be
-:ref:`executed sequentially, not in parallel <numberofthreads>` on each
-connection.
+A driver connection pool is created by calling :meth:`oracledb.createPool()`.
+Generally, applications will create a pool once as part of initialization.
+Various pool settings can be specified as described in
+:meth:`~oracledb.createPool()`.
 
-For example:
+For example, to create a pool that initially contains one connection but can
+grow up to five connections:
 
 .. code-block:: javascript
 
-    const oracledb = require('oracledb');
+    const pool = await oracledb.createPool({
+      user          : "hr",
+      password      : mypw,  // mypw contains the hr schema password
+      connectString : "localhost/FREEPDB1",
+      poolIncrement: 1,
+      poolMin: 1,
+      poolMax: 5
+    });
 
-    const mypw = ...  // set mypw to the hr schema password
+Note that in node-oracledb Thick mode, the number of
+:ref:`worker threads <workerthreads>` should be sized correctly before
+creating a pool.
 
-    async function run() {
-        try {
-            await oracledb.createPool({
-                user          : "hr",
-                password      : mypw  // mypw contains the hr schema password
-                connectString : "localhost/FREEPDB1"
-            });
+The default value of :attr:`~oracledb.poolMin` is *0*, meaning no connections
+are created when :meth:`oracledb.createPool()` is called. This means the
+credentials and connection string are not validated when the pool is created,
+and so problems such as invalid passwords will not return an error.
+Credentials will be validated when a connection is later created, for example
+with :meth:`pool.getConnection()`. Validation will occur when
+:meth:`~oracledb.createPool()` is called if :attr:`~oracledb.poolMin` is
+greater or equal to *1*, since this creates one or more connections when the
+pool is started.
 
-            let connection;
-            try {
-                // get connection from the pool and use it
-                connection = await oracledb.getConnection();
-                result = await connection.execute(`SELECT last_name FROM employees`);
-                console.log("Result is:", result);
-            } catch (err) {
-                throw (err);
-            } finally {
-                if (connection) {
-                    try {
-                        await connection.close(); // Put the connection back in the pool
-                    } catch (err) {
-                        throw (err);
-                    }
-                }
-            }
-        } catch (err) {
-            console.error(err.message);
-        } finally {
-            await oracledb.getPool().close(0);
-        }
-    }
-
-    run();
-
-When a connection is released back to its pool, any ongoing transaction
-will be :ref:`rolled back <transactionmgt>` however it will retain session
-state, such as :ref:`NLS <nls>` settings from ALTER SESSION statements.
-See :ref:`Connection Tagging and Session State <connpooltagging>` for more
-information.
-
-Connections can also be :ref:`dropped completely from the
-pool <connectionclose>`.
-
-The default value of :attr:`~oracledb.poolMin` is 0, meaning no
-connections are created when ``oracledb.createPool()`` is called. This
-means the credentials and connection string are not validated when the
-pool is created, so problems such as invalid passwords will not return
-an error. Credentials will be validated when a connection is later
-created, for example with ``pool.getConnection()``. Validation will
-occur when ``oracledb.createPool()`` is called if ``poolMin`` is greater
-or equal to 1, since this creates one or more connections when the pool
-is started.
+During runtime, some pool properties can be changed with
+:meth:`pool.reconfigure()`.
 
 A connection pool should be started during application initialization,
 for example before the web server is started:
@@ -708,6 +734,88 @@ can be obtained from the pool and used:
 
 See `webapp.js <https://github.com/oracle/node-oracledb/tree/main/examples/
 webapp.js>`__ for a runnable example.
+
+Getting Connections From a Pool
++++++++++++++++++++++++++++++++
+
+After a pool has been created, your application can get a connection from it
+by calling :meth:`pool.getConnection()`:
+
+.. code-block:: javascript
+
+    const connection = await pool.getConnection();
+
+If all connections in a pool are being used, then
+subsequent ``getConnection()`` calls will be put in
+a :ref:`queue <connpoolqueue>` until a connection is available.
+
+Each connection in a pool should be used for a given unit of work, such as a
+transaction or a set of sequentially executed statements. Statements should be
+:ref:`executed sequentially, not in parallel <numberofthreads>` on each
+connection. For example:
+
+.. code-block:: javascript
+
+    const oracledb = require('oracledb');
+
+    const mypw = ...  // set mypw to the hr schema password
+
+    async function run() {
+        try {
+            await oracledb.createPool({
+                user          : "hr",
+                password      : mypw  // mypw contains the hr schema password
+                connectString : "localhost/FREEPDB1"
+            });
+
+            let connection;
+            try {
+                // get connection from the pool and use it
+                connection = await oracledb.getConnection();
+                result = await connection.execute(`SELECT last_name FROM employees`);
+                console.log("Result is:", result);
+            } catch (err) {
+                throw (err);
+            } finally {
+                if (connection) {
+                    try {
+                        await connection.close(); // Put the connection back in the pool
+                    } catch (err) {
+                        throw (err);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error(err.message);
+        } finally {
+            await oracledb.getPool().close(0);
+        }
+    }
+
+    run();
+
+Closing a Connection Pool
++++++++++++++++++++++++++
+
+After an application finishes using a connection pool, it should release all
+connections and terminate the connection pool by calling the
+:meth:`pool.close()` method:
+
+.. code-block:: javascript
+
+    await pool.close();
+
+Ensure that all the connections in all code paths including error handlers
+are released back to the pool.
+
+When a connection is released back to its pool, any ongoing transaction
+will be :ref:`rolled back <transactionmgt>` however it will retain session
+state, such as :ref:`NLS <nls>` settings from ALTER SESSION statements.
+See :ref:`Connection Tagging and Session State <connpooltagging>` for more
+information.
+
+Connections can also be :ref:`dropped completely from the
+pool <connectionclose>`.
 
 .. _conpoolsizing:
 
@@ -2684,8 +2792,8 @@ in :meth:`oracledb.createPool()`. For example:
 For information on the Azure specific parameters, see
 :ref:`_create_pool_azure_properties`.
 
-See `sampleazurecloudnativetokenauth.js <https://github.com/oracle/node-
-oracledb/tree/main/examples/sampleazurecloudnativetokenauth.js>`__ for a
+See `azurecloudnativetoken.js <https://github.com/oracle/node-
+oracledb/tree/main/examples/azurecloudnativetoken.js>`__ for a
 runnable example using the :ref:`extensionAzure <extensionazureplugin>`
 plugin.
 
@@ -3164,8 +3272,8 @@ in :meth:`oracledb.createPool()`. For example:
 For more information on the OCI specific parameters, see
 :ref:`_create_pool_oci_properties`.
 
-See `sampleocicloudnativetokenauth.js <https://github.com/oracle/node-
-oracledb/tree/main/examples/sampleocicloudnativetokenauth.js>`__ for a
+See `ocicloudnativetoken.js <https://github.com/oracle/node-
+oracledb/tree/main/examples/ocicloudnativetoken.js>`__ for a
 runnable example using the extensionOci plugin.
 
 .. _drcp:
