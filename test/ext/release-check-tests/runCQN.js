@@ -659,6 +659,10 @@ describe('185. runCQN.js', function() {
   describe.skip('185.18 multiple CQN Subscriptions with the Same Name', function() {
     let connection;
     const tableName = 'TestTable_CQN';
+    const sql = `CREATE TABLE ${tableName} (
+        id NUMBER GENERATED ALWAYS AS IDENTITY,
+        data VARCHAR2(100)
+      )`;
 
     // Promise to track if CQN messages have been processed
     let cqnMessageReceived = false;
@@ -677,12 +681,7 @@ describe('185. runCQN.js', function() {
         events: true,
       });
 
-      await connection.execute(`
-      CREATE TABLE ${tableName} (
-        id NUMBER GENERATED ALWAYS AS IDENTITY,
-        data VARCHAR2(100)
-      )
-    `);
+      await conn.execute(testsUtil.sqlCreateTable(tableName, sql));
       await connection.execute(`INSERT INTO ${tableName} (data) VALUES ('Initial data1')`);
       await connection.execute(`INSERT INTO ${tableName} (data) VALUES ('Initial data2')`);
       await connection.commit();
@@ -728,4 +727,52 @@ describe('185. runCQN.js', function() {
       }
     }); // 185.18.1
   }); // 185.18
+
+  // It has to be run with node option --expose_gc as global.gc is used.
+  // Ex: node --expose_gc --trace-warnings /home/user/node_modules/mocha/lib/cli/cli.js
+  // test/ext/release-check-tests/runCQN.js --t 0
+  it('185.19 check memory leaks/corruptions in subscirbe/unsubscribe in loop', async () => {
+
+    const TABLE = 'nodb_tab_cqn_memloop';
+    let sql =
+          `CREATE TABLE ${TABLE} (
+            k NUMBER
+          )`;
+    const myCallback = function(message) {
+      assert.strictEqual(message.type, oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
+      assert.strictEqual(message.registered, true);
+      const table = message.queries[0].tables[0];
+      const tableName = dbConfig.user.toUpperCase() + '.' + TABLE.toUpperCase();
+      assert.strictEqual(table.name, tableName);
+      assert.strictEqual(table.operation, oracledb.CQN_OPCODE_INSERT);
+    };
+    const options = {
+      callback: myCallback,
+      sql: `SELECT * FROM ${TABLE} WHERE k > :bv`,
+      binds: { bv: 100 },
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+    };
+
+    await conn.execute(testsUtil.sqlCreateTable(TABLE, sql));
+    const initialMemory = process.memoryUsage().rss;
+    const iterations = 100; // increase this to large value to check mem leaks
+    for (let i = 0; i < iterations; i++) {
+      await conn.subscribe('sub1', options);
+      sql = `INSERT INTO ${TABLE} VALUES (101)`;
+      await conn.execute(sql);
+      await conn.commit();
+      await conn.unsubscribe('sub1');
+      global.gc();
+      await new Promise(r => setTimeout(r, 2000));
+    }
+    const finalMemory = process.memoryUsage().rss;
+    console.log(`Memory before loop: ${initialMemory} bytes`);
+    console.log(`Memory after loop:  ${finalMemory} bytes`);
+
+    // one way to assert this difference is its not huge or linear if you plot.
+    console.log(`Memory difference:  ${finalMemory - initialMemory} bytes`);
+    await testsUtil.dropTable(conn, TABLE);
+  }); // 185.19
+
 }); // 185

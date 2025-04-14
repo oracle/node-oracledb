@@ -8,6 +8,21 @@ node-oracledb Release Notes
 For deprecated and desupported features, see
 :ref:`Deprecations and desupported features <deprecations>`.
 
+node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v7.0.0>`__ (TBD)
+---------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+Thin Mode Changes
++++++++++++++++++
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Fixed intermittent crash seen after ``connection.unsubscribe()`` caused by
+    a race condition.
+
 node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.8.0>`__ (27 Feb 2025)
 ---------------------------------------------------------------------------------------------------------
 
