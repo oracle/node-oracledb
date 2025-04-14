@@ -1,4 +1,4 @@
-# node-oracledb version 7.0.0-dev
+# node-oracledb version 7.0.0-dev <img src="https://img.shields.io/npm/v/oracledb.svg" alt="oracledb"/>  <img src="https://img.shields.io/npm/dm/oracledb.svg" alt="oracledb"/>
 
 **This release is under development and information may be incomplete**
 
@@ -18,7 +18,41 @@ It is stable, well documented, and has a comprehensive test suite.
 
 ## Installation
 
+Run `npm install oracledb`
+
 See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Installation][2].
+
+## Dependencies and Interoperability
+
+- Node.js versions 14.6 and later.
+
+  Pre-built packages are available on [npm][14] and other mirror repositories.
+
+  Source code is also available.
+
+  Previous versions of node-oracledb supported older Node.js versions.
+
+- Oracle Client libraries are *optional* starting from node-oracledb 6.0.
+  Older versions of node-oracledb require Oracle Client libraries.
+
+  **Thin mode**: By default node-oracledb (from version 6.0 onwards) runs in a
+  'Thin' mode which connects directly to Oracle Database.
+
+  **Thick mode**: Some advanced Oracle Database functionality is currently only
+  available when optional Oracle Client libraries are loaded by
+  node-oracledb. Libraries are available in the free [Oracle Instant
+  Client][15] packages. Node-oracledb can use Oracle Client
+  libraries 11.2 through 23ai.
+
+- Oracle Database
+
+  **Thin mode**: Oracle Database 12.1 (or later) is required.
+
+  **Thick mode**: Oracle Database 9.2 (or later) is required, depending on the
+  Oracle Client library version.  Oracle Database's standard client-server
+  version interoperability allows connection to both older and newer
+  databases. For example when node-oracledb uses Oracle Client 19c libraries,
+  then it can connect to Oracle Database 11.2 or later.
 
 ## Documentation
 
@@ -36,7 +70,7 @@ to join Slack][6]).
 
 ## <a name="testing"></a> Tests
 
-To run the test suite see [test/README][11].
+To run the test suite, see [test/README][11].
 
 ## Contributing
 
@@ -85,3 +119,5 @@ limitations under the License.
 [11]: https://github.com/oracle/node-oracledb/blob/main/test/README.md
 [12]: https://github.com/oracle/node-oracledb/blob/main/CONTRIBUTING.md
 [13]: https://github.com/oracle/node-oracledb/blob/main/SECURITY.md
+[14]: https://www.npmjs.com/package/oracledb
+[15]: https://www.oracle.com/database/technologies/instant-client.html
