@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   vectortypesparse.js
+ *   vectorSparse.js
  *
  * DESCRIPTION
  *   Insert and query SPARSE VECTOR columns.
@@ -59,7 +59,7 @@ async function run() {
   try {
     let result;
     const serverVersion = connection.oracleServerVersion;
-    if (serverVersion < 2306000000) {
+    if (serverVersion < 2307000000) {
       console.log(`DB version ${serverVersion} does not support VECTOR type`);
       return;
     }

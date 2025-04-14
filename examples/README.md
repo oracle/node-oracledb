@@ -136,6 +136,7 @@ File Name                                                 | Description
 [`soda1.js`](soda1.js)                                    | Basic Simple Oracle Document Access (SODA) example
 [`typehandlerdate.js`](typehandlerdate.js)                | Show how a type handler can format a queried date in a locale-specific way
 [`typehandlernum.js`](typehandlernum.js)                  | Show how a type handler can alter queried numbers
+[`vectorSparse.js`](vectorSparse.js)                      | Insert and query SPARSE VECTOR columns.
 [`vectortype1.js`](vectortype1.js)                        | Insert and query VECTOR columns.
 [`vectortype2.js`](vectortype2.js)                        | Insert data into VECTOR columns and verify vector operations.
 [`version.js`](version.js)                                | Shows the node-oracledb version attributes

@@ -2007,7 +2007,7 @@ Oracledb Methods
         :class: wy-table-responsive
         :align: center
         :widths: 13 7 12 18
-        :summary: The first column, Property, displays the property. The second column, Type, displays the data type of the property. The third column, Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
+        :summary: The first column, Property, displays the property. The second column, Data Type, displays the data type of the property. The third column, node-oracledb Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
 
         * - Property
           - Data Type
@@ -2048,7 +2048,7 @@ Oracledb Methods
 
             .. versionadded:: 5.4
 
-                The ``accessToken`` property was added to support IAM token-based authentication.For IAM token-based authentiation, this property must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
+                The ``accessToken`` property was added to support IAM token-based authentication. For IAM token-based authentiation, this property must be an Object. For node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) must be used for IAM token-based authentication.
 
             .. versionchanged:: 5.5
 
@@ -2081,6 +2081,24 @@ Oracledb Methods
             For OAuth2.0 token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. For IAM token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) are required.
 
             .. versionadded:: 6.3
+        * - ``configDir``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsconfigdir:
+
+            The directory in which the :ref:`tnsadmin` are found.
+
+            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>` instead.
+
+            .. versionadded:: 6.0
+        * - ``connectionIdPrefix``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsprefix:
+
+            The application specific prefix parameter that is added to the connection identifier.
+
+            .. versionadded:: 6.0
         * - ``connectString``, ``connectionString``
           - String
           - Both
@@ -2090,7 +2108,19 @@ Oracledb Methods
 
             .. versionadded:: 2.1
 
-                The alias ``connectionString``.
+                The alias ``connectionString`` was added.
+        * - ``connectTimeout``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrsconntimeout:
+
+            The timeout duration in seconds for an application to establish an Oracle Net connection.
+
+            There is no timeout by default.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
         * - ``driverName``
           - String
           - Thin
@@ -2101,36 +2131,6 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.driverName` property.
 
             .. versionadded:: 6.7
-        * - ``walletPassword``
-          - String
-          - Thin
-          - .. _createpoolpoolattrswalletpw:
-
-            The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``walletLocation``
-          - String
-          - Thin
-          - .. _createpoolpoolattrswalletloc:
-
-            The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``walletContent``
-          - String
-          - Thin
-          - .. _createpoolpoolattrswalletcontent:
-
-            The security credentials required to establish a mutual TLS (mTLS) connection to Oracle Database. This property can be used to directly specify the security credentials instead of storing and reading the credentials from the ``ewallet.pem`` file specified in the ``walletLocation`` property.
-
-            The value of the ``walletContent`` property overrides the ``walletLocation`` value and the ``WALLET_LOCATION`` parameter in the connection string.
-
-            .. versionadded:: 6.6
         * - ``edition``
           - String
           - Thick
@@ -2163,6 +2163,18 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.events` property.
 
             .. versionadded:: 2.2
+        * - ``expireTime``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrsexpiretime:
+
+            The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
+
+            The default value is *0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
         * - ``externalAuth``
           - Boolean
           - Both
@@ -2197,6 +2209,28 @@ Oracledb Methods
             See :ref:`Heterogeneous Connection Pools and Pool Proxy Authentication <connpoolproxy>` for details and examples.
 
             .. versionadded:: 2.3
+        * - ``httpsProxy``
+          - String
+          - Thin
+          - .. _createpoolpoolattrshttpsproxy:
+
+            The name or IP address of a proxy host to use for tunneling secure connections.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``httpsProxyPort``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrshttpsproxyport:
+
+            The port to be used to communicate with the proxy host.
+
+            The default value is *0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
         * - ``machine``
           - String
           - Thin
@@ -2268,210 +2302,6 @@ Oracledb Methods
             See :ref:`Connection Pool Cache <connpoolcache>` for details and examples.
 
             .. versionadded:: 1.11
-        * - ``privilege``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrsprivilege:
-
-            The privilege to use when establishing a connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. All privileges must be specified individually except for ``oracledb.SYSPRELIM``.
-
-            ``oracledb.SYSPRELIM`` is specified only for startup and shutdown calls and must be used in combination with ``SYSDBA`` (``oracledb.SYSDBA | oracledb.SYSPRELIM``) or ``SYSOPER`` (``oracledb.SYOPER | oracledb.SYSPRELIM``).
-
-            See :ref:`Privileged Connections <privconn>` for more information.
-
-            .. versionadded:: 6.5.1
-        * - ``program``
-          - String
-          - Thin
-          - .. _createpoolpoolattrsprogram:
-
-            The name of the program connecting to the database. This is equivalent to the value in the ``PROGRAM`` column of the ``V$SESSION`` view.
-
-            This optional property overrides the :attr:`oracledb.program` property.
-
-            .. versionadded:: 6.7
-        * - ``configDir``
-          - String
-          - Thin
-          - .. _createpoolpoolattrsconfigdir:
-
-            The directory in which the :ref:`tnsadmin` are found.
-
-            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>` instead.
-
-            .. versionadded:: 6.0
-        * - ``sourceRoute``
-          - String
-          - Thin
-          - .. _createpoolpoolattrssourceroute:
-
-            Enables network routing through multiple protocol addresses. The value of this property can be ON or OFF.
-
-            The default value is *ON*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``sslServerCertDN``
-          - String
-          - Thin
-          - .. _createpoolpoolattrssslcert:
-
-            The distinguished name (DN) that should be matched with the certificate DN. If not specified, a partial match is performed instead. A partial match matches the hostname that the client connected to against the common name (CN) of the certificate DN or the Subject Alternate Names (SAN) of the certificate.
-
-            This value is ignored if the ``sslServerDNMatch`` property is not set to the value *True*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``sslServerDNMatch``
-          - Boolean
-          - Thin
-          - .. _createpoolpoolattrssslmatch:
-
-            Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
-
-            If the ``sslServerCertDN`` property is not provided, a partial DN match is performed instead. A partial match matches the hostname that the client connected to against the CN of the certificate DN or the SAN of the certificate.
-
-            The default value is *True*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``sslAllowWeakDNMatch``
-          - Boolean
-          - Thin
-          - .. _createpoolpoolattrssslallowweak:
-
-            Enables the connection to use either a weaker or more secure DN matching behavior when the ``sslServerDNMatch`` property is set.
-
-            If the value is *True*, then the ``sslServerDNMatch`` property uses a weaker DN matching behavior which only checks the server certificate (and not the listener certificate), and allows the service name to be used for partial DN matching. The DN matching for a partial match first matches the host name that the client connected to against the CN of the database server certificate DN or the SAN of the database server certificate. If this fails, then the service name is matched against the CN of the database server certificate DN.
-
-            If the value is *False*, then the ``sslServerDNMatch`` property uses a more secure DN matching behavior which checks both the listener and server certificates, and does not allow a service name check for partial DN matching. The DN matching for a partial match matches the host name that the client connected to against the CN of the certificate DN or the SAN of the certificate. The service name is not checked in this case.
-
-            The default value is *False*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.1
-        * - ``httpsProxy``
-          - String
-          - Thin
-          - .. _createpoolpoolattrshttpsproxy:
-
-            The name or IP address of a proxy host to use for tunneling secure connections.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``httpsProxyPort``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrshttpsproxyport:
-
-            The port to be used to communicate with the proxy host.
-
-            The default value is *0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``retryCount``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrsretrycount:
-
-            The number of times that a connection attempt should be retried before the attempt is terminated.
-
-            The default value is *0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``retryDelay``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrsretrydelay:
-
-            The number of seconds to wait before making a new connection attempt.
-
-            The default value is *1*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionchanged:: 6.7
-
-              The default value was changed from 0 seconds to 1 second.
-
-            .. versionadded:: 6.0
-        * - ``connectTimeout``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrsconntimeout:
-
-            The timeout duration in seconds for an application to establish an Oracle Net connection.
-
-            There is no timeout by default.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``terminal``
-          - String
-          - Thin
-          - .. _createpoolpoolattrsterminal:
-
-            The name of the terminal from where the connection originates. This is equivalent to the value in the ``TERMINAL`` column of the ``V$SESSION`` view.
-
-            This optional property overrides the :attr:`oracledb.terminal` property.
-
-            .. versionadded:: 6.7
-        * - ``transportConnectTimeout``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrstransportconntimeout:
-
-            The maximum number of seconds to wait to establish a connection to the database host.
-
-            The default value is *20.0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionchanged:: 6.7
-
-              The default value was changed from 60.0 seconds to 20.0 seconds.
-
-            .. versionadded:: 6.0
-        * - ``expireTime``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrsexpiretime:
-
-            The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
-
-            The default value is *0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``sdu``
-          - Number
-          - Thin
-          - .. _createpoolpoolattrssdu:
-
-            The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``connectionIdPrefix``
-          - String
-          - Thin
-          - .. _createpoolpoolattrsprefix:
-
-            The application specific prefix parameter that is added to the connection identifier.
-
-            .. versionadded:: 6.0
         * - ``poolIncrement``
           - Number
           - Both
@@ -2552,6 +2382,28 @@ Oracledb Methods
             The default value is *60*.
 
             This optional property overrides the :attr:`oracledb.poolTimeout` property.
+        * - ``privilege``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrsprivilege:
+
+            The privilege to use when establishing a connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. All privileges must be specified individually except for ``oracledb.SYSPRELIM``.
+
+            ``oracledb.SYSPRELIM`` is specified only for startup and shutdown calls and must be used in combination with ``SYSDBA`` (``oracledb.SYSDBA | oracledb.SYSPRELIM``) or ``SYSOPER`` (``oracledb.SYOPER | oracledb.SYSPRELIM``).
+
+            See :ref:`Privileged Connections <privconn>` for more information.
+
+            .. versionadded:: 6.5.1
+        * - ``program``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsprogram:
+
+            The name of the program connecting to the database. This is equivalent to the value in the ``PROGRAM`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.program` property.
+
+            .. versionadded:: 6.7
         * - ``queueMax``
           - Number
           - Both
@@ -2561,7 +2413,7 @@ Oracledb Methods
 
             When the number of ``pool.getConnection()`` calls that have been :ref:`queued <connpoolqueue>` waiting for an available connection reaches ``queueMax``, then any future ``pool.getConnection()`` calls will immediately return an error and will not be queued.
 
-            If ``queueMax`` is -1, then the queue length is not limited.
+            If ``queueMax`` is *-1*, then the queue length is not limited.
 
             The default value is *500*.
 
@@ -2573,17 +2425,55 @@ Oracledb Methods
           - NA
           - .. _createpoolpoolattrsqueuerequests:
 
-            This property was removed in node-oracledb 3.0 and queuing was always enabled. From node-oracledb 5.0, set ``queueMax`` to 0 to disable queuing. See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
+            This property was removed in node-oracledb 3.0 and queuing was always enabled. From node-oracledb 5.0, set ``queueMax`` to *0* to disable queuing. See :ref:`Connection Pool Queue <connpoolqueue>` for more information.
         * - ``queueTimeout``
           - Number
           - Both
           - .. _createpoolpoolattrsqueuetimeout:
 
-            The number of milliseconds after which connection requests waiting in the connection request queue are terminated. If ``queueTimeout`` is set to 0, then queued connection requests are never terminated.
+            The number of milliseconds after which connection requests waiting in the connection request queue are terminated. If ``queueTimeout`` is set to *0*, then queued connection requests are never terminated.
 
             The default value is *60000*.
 
             This optional property overrides the :attr:`oracledb.queueTimeout` property.
+        * - ``retryCount``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrsretrycount:
+
+            The number of times that a connection attempt should be retried before the attempt is terminated.
+
+            The default value is *0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``retryDelay``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrsretrydelay:
+
+            The number of seconds to wait before making a new connection attempt.
+
+            The default value is *1*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from *0* seconds to *1* second.
+
+            .. versionadded:: 6.0
+        * - ``sdu``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrssdu:
+
+            The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
         * - ``sessionCallback``
           - String or Function
           - Both
@@ -2636,6 +2526,60 @@ Oracledb Methods
             .. versionadded:: 5.2
 
             It requires Oracle Client 21.3 (or later). The feature is also available in Oracle Client 19c from 19.11 onward.
+        * - ``sourceRoute``
+          - String
+          - Thin
+          - .. _createpoolpoolattrssourceroute:
+
+            Enables network routing through multiple protocol addresses. The value of this property can be ON or OFF.
+
+            The default value is *ON*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``sslAllowWeakDNMatch``
+          - Boolean
+          - Thin
+          - .. _createpoolpoolattrssslallowweak:
+
+            Enables the connection to use either a weaker or more secure DN matching behavior when the ``sslServerDNMatch`` property is set.
+
+            If the value is *True*, then the ``sslServerDNMatch`` property uses a weaker DN matching behavior which only checks the server certificate (and not the listener certificate), and allows the service name to be used for partial DN matching. The DN matching for a partial match first matches the host name that the client connected to against the CN of the database server certificate DN or the SAN of the database server certificate. If this fails, then the service name is matched against the CN of the database server certificate DN.
+
+            If the value is *False*, then the ``sslServerDNMatch`` property uses a more secure DN matching behavior which checks both the listener and server certificates, and does not allow a service name check for partial DN matching. The DN matching for a partial match matches the host name that the client connected to against the CN of the certificate DN or the SAN of the certificate. The service name is not checked in this case.
+
+            The default value is *False*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.1
+        * - ``sslServerCertDN``
+          - String
+          - Thin
+          - .. _createpoolpoolattrssslcert:
+
+            The distinguished name (DN) that should be matched with the certificate DN. If not specified, a partial match is performed instead. A partial match matches the hostname that the client connected to against the common name (CN) of the certificate DN or the Subject Alternate Names (SAN) of the certificate.
+
+            This value is ignored if the ``sslServerDNMatch`` property is not set to the value *True*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``sslServerDNMatch``
+          - Boolean
+          - Thin
+          - .. _createpoolpoolattrssslmatch:
+
+            Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
+
+            If the ``sslServerCertDN`` property is not provided, a partial DN match is performed instead. A partial match matches the hostname that the client connected to against the CN of the certificate DN or the SAN of the certificate.
+
+            The default value is *True*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
         * - ``stmtCacheSize``
           - Number
           - Both
@@ -2644,6 +2588,16 @@ Oracledb Methods
             The number of statements to be cached in the :ref:`statementcache <stmtcache>` of each connection in the pool.
 
             This optional property overrides the :attr:`oracledb.stmtCacheSize` property.
+        * - ``terminal``
+          - String
+          - Thin
+          - .. _createpoolpoolattrsterminal:
+
+            The name of the terminal from where the connection originates. This is equivalent to the value in the ``TERMINAL`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.terminal` property.
+
+            .. versionadded:: 6.7
         * - ``tokenAuthConfigAzure``
           - Object
           - Both
@@ -2668,6 +2622,22 @@ Oracledb Methods
             See :ref:`iamtokenbasedauthentication` for more information.
 
             .. versionadded:: 6.8
+        * - ``transportConnectTimeout``
+          - Number
+          - Thin
+          - .. _createpoolpoolattrstransportconntimeout:
+
+            The maximum number of seconds to wait to establish a connection to the database host.
+
+            The default value is *20.0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from *60.0* seconds to *20.0* seconds.
+
+            .. versionadded:: 6.0
         * - ``user``, ``username``
           - String
           - Both
@@ -2696,6 +2666,36 @@ Oracledb Methods
             This property requires Oracle Database 23.7 (or later).
 
             .. versionadded:: 6.8
+        * - ``walletContent``
+          - String
+          - Thin
+          - .. _createpoolpoolattrswalletcontent:
+
+            The security credentials required to establish a mutual TLS (mTLS) connection to Oracle Database. This property can be used to directly specify the security credentials instead of storing and reading the credentials from the ``ewallet.pem`` file specified in the ``walletLocation`` property.
+
+            The value of the ``walletContent`` property overrides the ``walletLocation`` value and the ``WALLET_LOCATION`` parameter in the connection string.
+
+            .. versionadded:: 6.6
+        * - ``walletLocation``
+          - String
+          - Thin
+          - .. _createpoolpoolattrswalletloc:
+
+            The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``walletPassword``
+          - String
+          - Thin
+          - .. _createpoolpoolattrswalletpw:
+
+            The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
 
     **createPool(): accessToken Object Properties**
 
@@ -3053,6 +3053,24 @@ Oracledb Methods
             For OAuth2.0 token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. For IAM token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) are required.
 
             .. versionadded:: 6.3
+        * - ``configDir``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsconfigdir:
+
+            The directory in which the :ref:`tnsadmin` are found.
+
+            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>` instead.
+
+            .. versionadded:: 6.0
+        * - ``connectionIdPrefix``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsprefix:
+
+            The application specific prefix parameter that is added to the connection identifier.
+
+            .. versionadded:: 6.0
         * - ``connectString``, ``connectionString``
           - String
           - Both
@@ -3064,7 +3082,31 @@ Oracledb Methods
 
             .. versionadded:: 2.1
 
-                The alias ``connectionString``.
+                The alias ``connectionString`` was added.
+        * - ``connectTimeout``
+          - Number
+          - Thin
+          - .. _getconnectiondbattrsconntimeout:
+
+            The timeout duration in seconds for an application to establish an Oracle Net connection.
+
+            There is no timeout by default.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``debugJdwp``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsdebugjdwp:
+
+            Specifies the host and port of the PL/SQL debugger with the format *host=<host>;port=<port>*. This allows using the Java Debug Wire Protocol (JDWP) to debug PL/SQL code called by node-oracledb.
+
+            The default value is the value of environment variable ``ORA_DEBUG_JDWP``.
+
+            For node-oracledb Thick mode, set the ``ORA_DEBUG_JDWP`` environment variable with the same syntax instead. See :ref:`applntracing`.
+
+            .. versionadded:: 6.0
         * - ``driverName``
           - String
           - Thin
@@ -3075,36 +3117,6 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.driverName` property.
 
             .. versionadded:: 6.7
-        * - ``walletPassword``
-          - String
-          - Thin
-          - .. _getconnectiondbattrswalletpw:
-
-            The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``walletLocation``
-          - String
-          - Thin
-          - .. _getconnectiondbattrswalletloc:
-
-            The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``walletContent``
-          - String
-          - Thin
-          - .. _getconnectiondbattrswalletcontent:
-
-            The security credentials required to establish a mutual TLS (mTLS) connection to Oracle Database. This property can be used to directly specify the security credentials instead of storing and reading the credentials from the ``ewallet.pem`` file specified in the ``walletLocation`` property.
-
-            The value of the ``walletContent`` property overrides the ``walletLocation`` value and the ``WALLET_LOCATION`` parameter in the connection string.
-
-            .. versionadded:: 6.6
         * - ``edition``
           - String
           - Thick
@@ -3125,6 +3137,18 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.events` property.
 
             .. versionadded:: 2.2
+        * - ``expireTime``
+          - Number
+          - Thin
+          - .. _getconnectiondbattrsexpiretime:
+
+            The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
+
+            The default value is *0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
         * - ``externalAuth``
           - Boolean
           - Both
@@ -3139,6 +3163,28 @@ Oracledb Methods
             The ``user`` (or ``username``) and ``password`` properties should not be set when ``externalAuth`` is *true*.
 
             Note prior to node-oracledb 0.5 this property was called ``isExternalAuth``.
+        * - ``httpsProxy``
+          - String
+          - Thin
+          - .. _getconnectiondbattrshttpsproxy:
+
+            The name or IP address of a proxy host to use for tunneling secure connections.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``httpsProxyPort``
+          - Number
+          - Thin
+          - .. _getconnectiondbattrshttpsproxyport:
+
+            The port to be used to communicate with the proxy host.
+
+            The default value is *0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
         * - ``machine``
           - String
           - Thin
@@ -3215,12 +3261,34 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.osUser` property.
 
             .. versionadded:: 6.7
+        * - ``password``
+          - String
+          - Both
+          - .. _getconnectiondbattrspassword:
+
+            The password of the database user. A password is also necessary if a proxy user is specified.
         * - ``poolAlias``
           - String
           - Both
           - .. _getconnectiondbattrspoolalias:
 
             Specifies which previously created pool in the :ref:`connection pool cache <connpoolcache>` to obtain the connection from. See :ref:`Pool Alias <getconnectionpoolalias>`.
+        * - ``privilege``
+          - Number
+          - Both
+          - .. _getconnectiondbattrsprivilege:
+
+            The privilege to use when establishing connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. All privileges must be specified individually except for ``oracledb.SYSPRELIM``.
+
+            ``oracledb.SYSPRELIM`` is specified only for startup and shutdown calls and must be used in combination with ``SYSDBA`` (``oracledb.SYSDBA | oracledb.SYSPRELIM``) or ``SYSOPER`` (``oracledb.SYOPER | oracledb.SYSPRELIM``).
+
+            See :ref:`Privileged Connections <privconn>` for more information.
+
+            .. versionadded:: 2.1
+
+            .. versionchanged:: 6.5.1
+
+              The database privilege can be specified for pooled connections.
         * - ``program``
           - String
           - Thin
@@ -3231,16 +3299,54 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.program` property.
 
             .. versionadded:: 6.7
-        * - ``configDir``
-          - String
+        * - ``retryCount``
+          - Number
           - Thin
-          - .. _getconnectiondbattrsconfigdir:
+          - .. _getconnectiondbattrsretrycount:
 
-            The directory in which the :ref:`tnsadmin` are found.
+            The number of times that a connection attempt should be retried before the attempt is terminated.
 
-            For node-oracledb Thick mode, use the :meth:`oracledb.initOracleClient()` option :ref:`configDir <odbinitoracleclientattrsopts>` instead.
+            The default value is *0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``retryDelay``
+          - Number
+          - Thin
+          - .. _getconnectiondbattrsretrydelay:
+
+            The number of seconds to wait before making a new connection attempt.
+
+            The default value is *1*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from *0* seconds to *1* second.
+
+            .. versionadded:: 6.0
+        * - ``sdu``
+          - Number
+          - Thin
+          - .. _getconnectiondbattrssdu:
+
+            The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``shardingKey``
+          - Array
+          - Thick
+          - .. _getconnectiondbattrsshardingkey:
+
+            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Oracle Globally Distributed Database <sharding>`.
+
+            Array values may be of String type (mapping to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW). Multiple types may be used in the array. Sharding keys TIMESTAMP type are not supported.
+
+            .. versionadded:: 4.1
         * - ``sourceRoute``
           - String
           - Thin
@@ -3253,6 +3359,22 @@ Oracledb Methods
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
+        * - ``sslAllowWeakDNMatch``
+          - Boolean
+          - Thin
+          - .. _getconnectiondbattrssslallowweak:
+
+            Enables the connection to use either a weaker or more secure DN matching behavior when the ``sslServerDNMatch`` property is set.
+
+            If the value is *True*, then the ``sslServerDNMatch`` property uses a weaker DN matching behavior which only checks the server certificate (and not the listener certificate), and allows the service name to be used for partial DN matching. The DN matching for a partial match first matches the host name that the client connected to against the common name (CN) of the database server certificate DN or the Subject Alternate Names (SAN) of the database server certificate. If this fails, then the service name is matched against the CN of the database server certificate DN.
+
+            If the value is *False*, then the ``sslServerDNMatch`` property uses a more secure DN matching behavior which checks both the listener and server certificates, and does not allow a service name check for partial DN matching. The DN matching for a partial match matches the host name that the client connected to against the CN of the certificate DN or the SAN of the certificate. The service name is not checked in this case.
+
+            The default value is *False*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.1
         * - ``sslServerCertDN``
           - String
           - Thin
@@ -3279,184 +3401,6 @@ Oracledb Methods
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
             .. versionadded:: 6.0
-        * - ``sslAllowWeakDNMatch``
-          - Boolean
-          - Thin
-          - .. _getconnectiondbattrssslallowweak:
-
-            Enables the connection to use either a weaker or more secure DN matching behavior when the ``sslServerDNMatch`` property is set.
-
-            If the value is *True*, then the ``sslServerDNMatch`` property uses a weaker DN matching behavior which only checks the server certificate (and not the listener certificate), and allows the service name to be used for partial DN matching. The DN matching for a partial match first matches the host name that the client connected to against the common name (CN) of the database server certificate DN or the Subject Alternate Names (SAN) of the database server certificate. If this fails, then the service name is matched against the CN of the database server certificate DN.
-
-            If the value is *False*, then the ``sslServerDNMatch`` property uses a more secure DN matching behavior which checks both the listener and server certificates, and does not allow a service name check for partial DN matching. The DN matching for a partial match matches the host name that the client connected to against the CN of the certificate DN or the SAN of the certificate. The service name is not checked in this case.
-
-            The default value is *False*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.1
-        * - ``httpsProxy``
-          - String
-          - Thin
-          - .. _getconnectiondbattrshttpsproxy:
-
-            The name or IP address of a proxy host to use for tunneling secure connections.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``httpsProxyPort``
-          - Number
-          - Thin
-          - .. _getconnectiondbattrshttpsproxyport:
-
-            The port to be used to communicate with the proxy host.
-
-            The default value is *0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``debugJdwp``
-          - String
-          - Thin
-          - .. _getconnectiondbattrsdebugjdwp:
-
-            Specifies the host and port of the PL/SQL debugger with the format *host=<host>;port=<port>*. This allows using the Java Debug Wire Protocol (JDWP) to debug PL/SQL code called by node-oracledb.
-
-            The default value is the value of environment variable ``ORA_DEBUG_JDWP``.
-
-            For node-oracledb Thick mode, set the ``ORA_DEBUG_JDWP`` environment variable with the same syntax instead. See :ref:`applntracing`.
-
-            .. versionadded:: 6.0
-        * - ``retryCount``
-          - Number
-          - Thin
-          - .. _getconnectiondbattrsretrycount:
-
-            The number of times that a connection attempt should be retried before the attempt is terminated.
-
-            The default value is *0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``retryDelay``
-          - Number
-          - Thin
-          - .. _getconnectiondbattrsretrydelay:
-
-            The number of seconds to wait before making a new connection attempt.
-
-            The default value is *1*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionchanged:: 6.7
-
-              The default value was changed from 0 seconds to 1 second.
-
-            .. versionadded:: 6.0
-        * - ``connectTimeout``
-          - Number
-          - Thin
-          - .. _getconnectiondbattrsconntimeout:
-
-            The timeout duration in seconds for an application to establish an Oracle Net connection.
-
-            There is no timeout by default.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``terminal``
-          - String
-          - Thin
-          - .. _getconnectiondbattrsterminal:
-
-            The name of the terminal from where the connection originates. This is equivalent to the value in the ``TERMINAL`` column of the ``V$SESSION`` view.
-
-            This optional property overrides the :attr:`oracledb.terminal` property.
-
-            .. versionadded:: 6.7
-        * - ``transportConnectTimeout``
-          - Number
-          - Thin
-          - .. _getconnectiondbattrstransportconntimeout:
-
-            The maximum number of seconds to wait to establish a connection to the database host.
-
-            The default value is *20.0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionchanged:: 6.7
-
-              The default value was changed from 60.0 seconds to 20.0 seconds.
-
-            .. versionadded:: 6.0
-        * - ``expireTime``
-          - Number
-          - Thin
-          - .. _getconnectiondbattrsexpiretime:
-
-            The number of minutes between the sending of keepalive probes. If this property is set to a value greater than zero, it enables the keepalive probes.
-
-            The default value is *0*.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``sdu``
-          - Number
-          - Thin
-          - .. _getconnectiondbattrssdu:
-
-            The Oracle Net Session Data Unit (SDU) packet size in bytes. The database server configuration should also set this parameter.
-
-            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
-
-            .. versionadded:: 6.0
-        * - ``connectionIdPrefix``
-          - String
-          - Thin
-          - .. _getconnectiondbattrsprefix:
-
-            The application specific prefix parameter that is added to the connection identifier.
-
-            .. versionadded:: 6.0
-        * - ``password``
-          - String
-          - Both
-          - .. _getconnectiondbattrspassword:
-
-            The password of the database user. A password is also necessary if a proxy user is specified.
-        * - ``privilege``
-          - Number
-          - Both
-          - .. _getconnectiondbattrsprivilege:
-
-            The privilege to use when establishing connection to the database. This optional property should be one of the :ref:`privileged connection constants <oracledbconstantsprivilege>`. All privileges must be specified individually except for ``oracledb.SYSPRELIM``.
-
-            ``oracledb.SYSPRELIM`` is specified only for startup and shutdown calls and must be used in combination with ``SYSDBA`` (``oracledb.SYSDBA | oracledb.SYSPRELIM``) or ``SYSOPER`` (``oracledb.SYOPER | oracledb.SYSPRELIM``).
-
-            See :ref:`Privileged Connections <privconn>` for more information.
-
-            .. versionadded:: 2.1
-
-            .. versionchanged:: 6.5.1
-
-              The database privilege can be specified for pooled connections.
-        * - ``shardingKey``
-          - Array
-          - Thick
-          - .. _getconnectiondbattrsshardingkey:
-
-            Allows a connection to be established directly to a database shard. See :ref:`Connecting to Oracle Globally Distributed Database <sharding>`.
-
-            Array values may be of String type (mapping to VARCHAR2 sharding keys), Number (NUMBER), Date (DATE), or Buffer (RAW). Multiple types may be used in the array. Sharding keys TIMESTAMP type are not supported.
-
-            .. versionadded:: 4.1
         * - ``stmtCacheSize``
           - Number
           - Both
@@ -3483,6 +3427,16 @@ Oracledb Methods
             Indicates the tag that a connection returned from a connection pool should have. Various heuristics determine the tag that is actually returned, see :ref:`Connection Tagging and Session State <connpooltagging>`.
 
             .. versionadded:: 3.1
+        * - ``terminal``
+          - String
+          - Thin
+          - .. _getconnectiondbattrsterminal:
+
+            The name of the terminal from where the connection originates. This is equivalent to the value in the ``TERMINAL`` column of the ``V$SESSION`` view.
+
+            This optional property overrides the :attr:`oracledb.terminal` property.
+
+            .. versionadded:: 6.7
         * - ``tokenAuthConfigAzure``
           - Object
           - Both
@@ -3507,6 +3461,22 @@ Oracledb Methods
             See :ref:`iamtokenbasedauthentication` for more information.
 
             .. versionadded:: 6.8
+        * - ``transportConnectTimeout``
+          - Number
+          - Thin
+          - .. _getconnectiondbattrstransportconntimeout:
+
+            The maximum number of seconds to wait to establish a connection to the database host.
+
+            The default value is *20.0*.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionchanged:: 6.7
+
+              The default value was changed from *60.0* seconds to *20.0* seconds.
+
+            .. versionadded:: 6.0
         * - ``user``, ``username``
           - String
           - Both
@@ -3533,6 +3503,36 @@ Oracledb Methods
             This property requires Oracle Database 23.7 (or later).
 
             .. versionadded:: 6.8
+        * - ``walletContent``
+          - String
+          - Thin
+          - .. _getconnectiondbattrswalletcontent:
+
+            The security credentials required to establish a mutual TLS (mTLS) connection to Oracle Database. This property can be used to directly specify the security credentials instead of storing and reading the credentials from the ``ewallet.pem`` file specified in the ``walletLocation`` property.
+
+            The value of the ``walletContent`` property overrides the ``walletLocation`` value and the ``WALLET_LOCATION`` parameter in the connection string.
+
+            .. versionadded:: 6.6
+        * - ``walletLocation``
+          - String
+          - Thin
+          - .. _getconnectiondbattrswalletloc:
+
+            The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
+        * - ``walletPassword``
+          - String
+          - Thin
+          - .. _getconnectiondbattrswalletpw:
+
+            The password to decrypt the Privacy Enhanced Mail (PEM)-encoded private certificate, if it is encrypted.
+
+            For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            .. versionadded:: 6.0
 
     **getConnection(): accessToken Object Properties**
 
