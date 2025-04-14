@@ -294,3 +294,4 @@ spec:
   - test/dataTypeVector8.js
   - test/dataTypeIntervalYM.js
   - test/dataTypeIntervalDS.js
+  - test/dbObjectsNested.js

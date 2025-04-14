@@ -31,6 +31,8 @@ Thin Mode Changes
 #)  Fixed bug which throws a ``TypeError`` when the DbObject has an attribute
     with the same name as a DbObject property.
 
+#)  Fixed decoding of nested database objects and nested PL/SQL records.
+
 Thick Mode Changes
 ++++++++++++++++++
 

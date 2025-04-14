@@ -111,6 +111,7 @@ File Name                                                 | Description
 [`ocicloudnativetoken.js`](ocicloudnativetoken.js)        | Shows how to connect to Oracle Database with cloud native token based authentication using OCI SDK
 [`plsqlarray.js`](plsqlarray.js)                          | Examples of binding PL/SQL "INDEX BY" tables
 [`plsqlfunc.js`](plsqlfunc.js)                            | How to call a PL/SQL function
+[`plsqlnestedrecords.js`](plsqlnestedrecords.js)          | Shows binding of nested PL/SQL RECORDS
 [`plsqlproc.js`](plsqlproc.js)                            | How to call a PL/SQL procedure
 [`plsqlrecord.js`](plsqlrecord.js)                        | Shows binding of PL/SQL RECORDS
 [`plsqlvarrayrecord.js`](plsqlvarrayrecord.js)            | Shows binding a VARRAY of RECORD in PL/SQL

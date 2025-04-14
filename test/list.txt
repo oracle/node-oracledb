@@ -6265,3 +6265,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     312.52 - string values in constructor attributes
     312.53 - interval sorting in queries
     312.54 - interval arithmetic with multiple operations
+  313. dbObjectsNested.js
+    313.1 Nested DbObjects
+      313.1.1 Insert nested DbObject into table + fetch values
+    313.2 Nested Records
+      313.2.1 Works with nested records

@@ -79,14 +79,14 @@ async function run() {
   }
 
   // CREATE TYPES
-  let result = await conn.execute(
+  await conn.execute(
     `CREATE TYPE point_type AS OBJECT (
         x NUMBER,
         y NUMBER
     )`
   );
 
-  result = await conn.execute(
+  await conn.execute(
     `CREATE TYPE shape_type AS OBJECT (
         name VARCHAR2(50),
         point point_type
@@ -94,36 +94,58 @@ async function run() {
   );
 
   // CREATE TABLE
-  result = await conn.execute(
+  await conn.execute(
     `CREATE TABLE my_shapes(id NUMBER, shape SHAPE_TYPE)`
   );
-  conn.commit();
 
-  // Define the shape type and values
+  // Define the shape and point objects
   const shapeType = await conn.getDbObjectClass('SHAPE_TYPE');
   const pointType = await conn.getDbObjectClass('POINT_TYPE');
   // The attributes of the DbObject type must always be specified in upper
   // case
-  const point = new pointType({ X: 10, Y: 20 });
-  const shape = new shapeType({ NAME: 'My Shape', POINT: point });
+  const pointValues = [ {}, { Y: 20 },  { X: 10 }, { X: 10, Y: 20 } ];
 
-  // Insert the value using an IN BIND
+  let id = 1, result;
+  for (const ptVal of pointValues) {
+    const point = new pointType(ptVal);
+    const shape = new shapeType({ NAME: 'My Shape', POINT: point });
+
+    // Insert values into the table
+    result = await conn.execute(
+      `INSERT INTO my_shapes (id, shape) VALUES (:id, :shape)`,
+      { id: id, shape: shape }
+    );
+    await conn.commit();
+
+    console.log('Rows inserted:', result.rowsAffected);
+
+    // Get the shape object
+    result = await conn.execute(
+      `SELECT shape FROM my_shapes WHERE id = :id`,
+      { id: id }
+    );
+
+    // Print the value
+    console.log(`The shape object #${id} is:`);
+    console.log(JSON.stringify(result.rows[0][0]));
+
+    id++;
+  }
+
+  // Insert a shape object with no attributes initialized and read it
   result = await conn.execute(
     `INSERT INTO my_shapes (id, shape) VALUES (:id, :shape)`,
-    { id: 1, shape: shape }
+    { id: id, shape: new shapeType() }
   );
-  conn.commit();
-
+  await conn.commit();
   console.log('Rows inserted:', result.rowsAffected);
-
-  // Select the value from the table
   result = await conn.execute(
     `SELECT shape FROM my_shapes WHERE id = :id`,
-    { id: 1 }
+    { id: id }
   );
 
-  // Print the value
-  console.log('The shape object is:');
+  // Print values
+  console.log(`The shape object #${id} is:`);
   console.log(JSON.stringify(result.rows[0][0]));
 
   await conn.close();
