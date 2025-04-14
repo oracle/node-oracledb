@@ -188,8 +188,8 @@ to ``NEWBFILE.JPG``, you can use:
         `UPDATE bfile_table SET bfilecol = BFILENAME("MYBFILEDIR", "NEWBFILE.JPG") WHERE id = :ID`,
         [101]);
 
-In node-oracledb Thin mode, you can set the directory alias and file name
-using :meth:`lob.setDirFileName()`. For example:
+You can set the directory alias and file name using
+:meth:`lob.setDirFileName()`. For example:
 
 .. code-block:: javascript
 

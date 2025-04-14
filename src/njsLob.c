@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -505,7 +505,7 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsLob_setDirFileName, 1, NULL)
 {
     njsLob *lob = (njsLob*) callingInstance;
     size_t dirNameLength, fileNameLength;
-    char *dirName, *fileName;
+    char *dirName = NULL, *fileName = NULL;
 
     if (!njsUtils_getNamedPropertyString(env, args[0], "dirName",
             &dirName, &dirNameLength))

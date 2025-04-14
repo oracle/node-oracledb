@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -326,10 +326,6 @@ describe('308. bfileTestType.js', function() {
   }); // 308.9
 
   it('308.10 setDirFileName()', async function() {
-    if (!oracledb.thin) {
-      this.skip();
-    }
-
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
     const lob = result.rows[0][0];
@@ -664,4 +660,99 @@ describe('308. bfileTestType.js', function() {
       await conn.execute(`DROP TABLE ${tempTableName} PURGE`);
     }
   }); // 308.22
+
+  it('308.23 Negative:setDirFileName (empty dirName)', async function() {
+    const result = await conn.execute(`
+        SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    assert.strictEqual(dirFile.dirName, dirAlias);
+    assert.strictEqual(dirFile.fileName, "E.JPG");
+    const dirName = '';
+    const fileName = 'NEW_FILE_NAME.JPG';
+    assert.throws(() => {
+      lob.setDirFileName({dirName: dirName, fileName: fileName});
+    },
+    /NJS-004/
+    );
+  }); // 308.23
+
+  it('308.24 Negative:setDirFileName (empty fileName)', async function() {
+    const result = await conn.execute(`
+        SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    assert.strictEqual(dirFile.dirName, dirAlias);
+    assert.strictEqual(dirFile.fileName, "E.JPG");
+    const dirName = 'NEW_ALIAS';
+    const fileName = '';
+    assert.throws(() => {
+      lob.setDirFileName({dirName: dirName, fileName: fileName});
+    },
+    /NJS-004/
+    );
+  }); // 308.24
+
+  it('308.25 Negative: setDirFileName (missing dirName)', async function() {
+    const result = await conn.execute(`
+        SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    assert.strictEqual(dirFile.dirName, dirAlias);
+    assert.strictEqual(dirFile.fileName, "E.JPG");
+    const fileName = 'NEW_FILE_NAME.JPG';
+    assert.throws(() => {
+      lob.setDirFileName({fileName: fileName});
+    },
+    /NJS-005/
+    );
+  }); // 308.25
+
+  it('308.26 Negative:setDirFileName (missing fileName)', async function() {
+    const result = await conn.execute(`
+        SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    assert.strictEqual(dirFile.dirName, dirAlias);
+    assert.strictEqual(dirFile.fileName, "E.JPG");
+    const dirName = 'NEW_ALIAS';
+    assert.throws(() => {
+      lob.setDirFileName({dirName: dirName});
+    },
+    /NJS-005/
+    );
+  }); // 308.26
+
+  it('308.27 Negative:setDirFileName (fileName = null)', async function() {
+    const result = await conn.execute(`
+        SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    assert.strictEqual(dirFile.dirName, dirAlias);
+    assert.strictEqual(dirFile.fileName, "E.JPG");
+    const dirName = 'NEW_ALIAS';
+    const fileName = null;
+    assert.throws(() => {
+      lob.setDirFileName({dirName: dirName, fileName: fileName});
+    },
+    /NJS-004/
+    );
+  }); // 308.27
+
+  it('308.28 Negative:setDirFileName (dirName = null)', async function() {
+    const result = await conn.execute(`
+        SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
+    const lob = result.rows[0][0];
+    const dirFile = lob.getDirFileName();
+    assert.strictEqual(dirFile.dirName, dirAlias);
+    assert.strictEqual(dirFile.fileName, "E.JPG");
+    const dirName = null;
+    const fileName = "NEW_FILE_NAME";
+    assert.throws(() => {
+      lob.setDirFileName({dirName: dirName, fileName: fileName});
+    },
+    /NJS-004/
+    );
+  }); // 308.28
+
 });

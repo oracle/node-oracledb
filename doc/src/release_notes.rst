@@ -14,6 +14,9 @@ node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...
 Common Changes
 ++++++++++++++
 
+#)  Added check for :meth:`lob.setDirFileName()` to verify if empty strings
+    are passed or the properties are not found.
+
 Thin Mode Changes
 +++++++++++++++++
 
@@ -25,6 +28,8 @@ Thick Mode Changes
 
 #)  Fixed intermittent crash seen after ``connection.unsubscribe()`` caused by
     a race condition.
+
+#)  Added support for the BFILE method :meth:`lob.setDirFileName()`.
 
 node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.8.0>`__ (27 Feb 2025)
 ---------------------------------------------------------------------------------------------------------

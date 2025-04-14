@@ -309,10 +309,6 @@ Lob Methods
     types, this method returns the ``NJS-156: operation is only supported on
     BFILE LOBs`` error.
 
-    .. note::
-
-        This method can only be used in node-oracledb Thin mode.
-
     The parameters of the ``lob.setDirFileName()`` method are:
 
     .. list-table-with-summary:: lob.setDirFileName() Parameters
