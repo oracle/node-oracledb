@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -23,10 +23,10 @@
  * limitations under the License.
  *
  * NAME
- *   240. errorOffset.js
+ *   240. errorTest.js
  *
  * DESCRIPTION
- *   This test verifies a ODPI-C bug fix.
+ *   This test verifies the error object and its properties.
  *
  *****************************************************************************/
 'use strict';
@@ -35,7 +35,7 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
 
-describe('240. errorOffset.js', function() {
+describe('240. errorTest.js', function() {
 
   let conn;
   before(async () => {

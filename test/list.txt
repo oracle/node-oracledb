@@ -4955,7 +4955,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     239.6 check REF CURSOR round-trips with prefetching
     239.7 check REF CURSOR bind with re-execute
 
-240. errorOffset.js
+240. errorTest.js
     240.1 checks the offset value of the error
     240.2 database error
     240.3 the offset of system error is 0

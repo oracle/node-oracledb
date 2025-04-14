@@ -4300,7 +4300,7 @@ TraceHandlerBase Methods
 
     .. code-block:: javascript
 
-        onEnterFn([Object traceContext]);
+        onEnterFn(Object traceContext);
 
     This method is invoked before a public method passes the traceContext.
     Note that this is a synchronous method.
@@ -4354,7 +4354,7 @@ TraceHandlerBase Methods
 
     .. code-block:: javascript
 
-        onBeginRoundTrip([Object traceContext]);
+        onBeginRoundTrip(Object traceContext);
 
     Called when a round trip begins. OpenTelemetry will start a new span as a
     child of the public API span.
@@ -4381,7 +4381,7 @@ TraceHandlerBase Methods
 
     .. code-block:: javascript
 
-        onEndRoundTrip([Object traceContext]);
+        onEndRoundTrip(Object traceContext);
 
     Called when a round trip ends. OpenTelemetry will end the span. The
     traceContext object passed in :meth:`onBeginRoundTrip()` is also passed

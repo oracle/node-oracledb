@@ -92,6 +92,7 @@ File Name                                                 | Description
 [`impres.js`](impres.js)                                  | Shows PL/SQL 'Implict Results' returning multiple query results from PL/SQL code.
 [`insert1.js`](insert1.js)                                | Basic example creating a table and inserting data.  Shows DDL and DML
 [`insert2.js`](insert2.js)                                | Basic example showing auto commit behavior
+[`jsonDV.js`] (jsonDV.js)                                 | Basic example of JSON Duality View for a table with CRUD operations.
 [`lastinsertid.js`](lastinsertid.js)                      | Shows inserting a row and getting its ROWID.
 [`lobbinds.js`](lobbinds.js)                              | Demonstrates how to bind and query LOBs
 [`lobinsert1.js`](lobinsert1.js)                          | Shows inserting a file into a CLOB column

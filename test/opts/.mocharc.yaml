@@ -223,7 +223,7 @@ spec:
   - test/indexedTables01.js
   - test/soda14.js
   - test/plsqlBindCursorsIN.js
-  - test/errorOffset.js
+  - test/errorTest.js
   - test/dbType04.js
   - test/dbObject18.js
   - test/dbObject19.js

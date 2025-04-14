@@ -172,6 +172,13 @@ The properties of a *Connection* object are listed below.
         This property can only be used in the node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
+.. attribute:: connection.externalName
+
+    .. versionadded:: 5.3
+
+    This read/write attribute is a string that specifies the external name
+    that is used by the connection when logging two-phase commit transactions.
+
 .. attribute:: connection.hostName
 
     .. versionadded:: 6.7
@@ -190,6 +197,13 @@ The properties of a *Connection* object are listed below.
     This read-only attribute specifies the Oracle Database instance name
     associated with the connection. It returns the same value as the SQL expression
     ``sys_context('userenv', 'instance_name')``.
+
+.. attribute:: connection.internalName
+
+    .. versionadded:: 5.3
+
+    This read/write attribute is a string that specifies the internal name
+    that is used by the connection when logging two-phase commit transactions.
 
 .. attribute:: connection.maxIdentifierLength
 
@@ -371,20 +385,6 @@ The properties of a *Connection* object are listed below.
     :ref:`node-oracledb Thick mode <thickarch>`.
 
     The default value is *true*.
-
-.. attribute:: connection.tpcInternalName
-
-    .. versionadded:: 5.3
-
-    This read/write attribute is a string that specifies the internal name
-    that is used by the connection when logging two-phase commit transactions.
-
-.. attribute:: connection.tpcExternalName
-
-    .. versionadded:: 5.3
-
-    This read/write attribute is a string that specifies the external name
-    that is used by the connection when logging two-phase commit transactions.
 
 .. attribute:: connection.transactionInProgress
 
