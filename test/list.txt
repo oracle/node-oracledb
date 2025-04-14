@@ -4703,7 +4703,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 206. dbObject7.js
     206.1 OUT bind DB Object
-    206.2 IN OUT bind DB Object
+    206.2 Normal and IN OUT bind DB Object
+    206.3 DB Object with incorrect attributes - case sensitivity
 
 207. dbObject8.js
     207.1 examples/selectobject.js

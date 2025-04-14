@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -80,7 +80,7 @@ describe('206. dbObject7.js', () => {
     await conn.execute(sql);
   }); // 206.1
 
-  it('206.2 IN OUT bind DB Object', async () => {
+  it('206.2 Normal and IN OUT bind DB Object', async () => {
     const TABLE = 'nodb_tab_test2062';
     let sql = `
       CREATE TABLE ${TABLE} (
@@ -102,6 +102,13 @@ describe('206. dbObject7.js', () => {
     const seqOne = 1;
     let result = await conn.execute(sql, [seqOne, testObj]);
     assert.strictEqual(result.rowsAffected, 1);
+
+    sql = `SELECT * FROM ${TABLE} WHERE NUM = ${seqOne}`;
+    result = await conn.execute(sql);
+    // Verify the DbObject values are inserted correctly
+    assert.strictEqual(result.rows[0][0], seqOne);
+    assert.strictEqual(result.rows[0][1]['ID'], objData1.ID);
+    assert.strictEqual(result.rows[0][1]['NAME'], objData1.NAME);
 
     const PROC = 'nodb_proc_test2062';
     plsql = `
@@ -143,4 +150,41 @@ describe('206. dbObject7.js', () => {
     sql = `DROP TABLE ${TABLE} PURGE`;
     await conn.execute(sql);
   }); // 206.2
+
+  it('206.3 DB Object with incorrect attributes - case sensitivity', async () => {
+    const TABLE = 'nodb_tab_test2062';
+    let sql = `
+      CREATE TABLE ${TABLE} (
+        num NUMBER,
+        person ${TYPE}
+      )
+    `;
+    const plsql = testsUtil.sqlCreateTable(TABLE, sql);
+    await conn.execute(plsql);
+
+    sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
+    // 'id' and 'name' here is different from 'ID' and 'NAME' of
+    // the DbObject class
+    const objData1 = {
+      id: 201,
+      name: 'John Smith'
+    };
+    const CLS = await conn.getDbObjectClass(TYPE);
+    const testObj = new CLS(objData1);
+
+    const seqOne = 1;
+    let result = await conn.execute(sql, [seqOne, testObj]);
+    assert.strictEqual(result.rowsAffected, 1);
+
+    sql = `SELECT * FROM ${TABLE} WHERE NUM = ${seqOne}`;
+    result = await conn.execute(sql);
+    // Verify that null is returned, since 'NAME' and 'ID' are not set
+    assert.strictEqual(result.rows[0][0], seqOne);
+    assert.strictEqual(JSON.stringify(result.rows[0][1]), '{"ID":null,"NAME":null}');
+    assert.strictEqual(result.rows[0][1]['ID'], null);
+    assert.strictEqual(result.rows[0][1]['NAME'], null);
+
+    sql = `DROP TABLE ${TABLE} PURGE`;
+    await conn.execute(sql);
+  }); // 206.3
 });

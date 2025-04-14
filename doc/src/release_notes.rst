@@ -17,6 +17,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug which throws a ``TypeError`` when the DbObject has an attribute
+    with the same name as a DbObject property.
+
 Thick Mode Changes
 ++++++++++++++++++
 
