@@ -30,6 +30,8 @@ The *Error* object contains ``code``, ``errorNum``, ``isRecoverable``,
 
 .. attribute:: error.isRecoverable
 
+    .. versionadded:: 7.0
+
     This property is a boolean which determines whether the error is
     recoverable or not. This requires Oracle Database 12.1 (or later). For
     node-oracledb Thick mode, Oracle Client 12.1 (or later) is also required.

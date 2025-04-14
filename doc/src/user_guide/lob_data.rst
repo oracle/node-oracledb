@@ -17,7 +17,7 @@ LOB type was introduced in node-oracledb 6.6.
 node-oracledb uses :ref:`oracledb.CLOB <oracledbconstantsdbtype>`,
 :ref:`oracledb.BLOB <oracledbconstantsdbtype>`,
 :ref:`oracledb.NCLOB <oracledbconstantsdbtype>`, and
-:ref:`oracledb.BFILE <oracledbconstantsdbtype>` to represent CLOB, BLOB,
+:ref:`oracledb.DB_TYPE_BFILE <oracledbconstantsdbtype>` to represent CLOB, BLOB,
 NCLOB, and BFILE data types respectively. In node-oracledb, LOBs can be
 represented by instances of the :ref:`Lob <lobclass>` class or as Strings and
 Buffers.

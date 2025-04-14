@@ -703,7 +703,7 @@ Connection Methods
           - Description
         * - ``type``
           - Number
-          - One of the constants :ref:`oracledb.CLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.BLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.NCLOB <oracledbconstantsnodbtype>`, or :ref:`oracledb.BFILE <oracledbconstantsnodbtype>` (or equivalent ``DB_TYPE_*`` constants).
+          - One of the constants :ref:`oracledb.CLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.BLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.NCLOB <oracledbconstantsnodbtype>` (or the equivalent ``DB_TYPE_*`` constants), or :ref:`oracledb.DB_TYPE_BFILE <oracledbconstantsdbtype>`.
 
     **Callback**:
 
@@ -914,7 +914,7 @@ Connection Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 15 20 25
+        :widths: 16 15 20 21
         :summary: The first column displays the Node.js Type. The second
          column displays the Database type. The third column displays the
          Bind type value. The fourth column displays the notes.
@@ -979,6 +979,14 @@ Connection Methods
           - TIMESTAMP WITH LOCAL TIME ZONE
           - ``oracledb.DATE`` or ``oracledb.DB_TYPE_TIMESTAMP_LTZ``
           - Default ``type`` for Date IN and IN OUT binds.
+        * - :ref:`oracledb.INTERVALYM <intervalymclass>` object
+          - INTERVAL YEAR TO MONTH
+          - ``oracledb.DB_TYPE_INTERVAL_YM``
+          - This combination is supported from node-oracledb 6.8.
+        * - :ref:`oracledb.INTERVALDS <intervaldsclass>` object
+          - INTERVAL DAY TO SECOND
+          - ``oracledb.DB_TYPE_INTERVAL_DS``
+          - This combination is supported from node-oracledb 6.8.
         * - Buffer
           - RAW
           - ``oracledb.BUFFER`` or ``oracledb.DB_TYPE_RAW``
@@ -999,14 +1007,18 @@ Connection Methods
           - NCLOB
           - ``oracledb.NCLOB`` or ``oracledb.DB_TYPE_NCLOB``
           - This combination is supported from node-oracledb 4.2. Binding a String with ``type`` of ``oracledb.DB_TYPE_NVARCHAR`` will generally be preferred.
+        * - Lob
+          - BFILE
+          - ``oracledb.DB_TYPE_BFILE``
+          - This combination is supported from node-oracledb 6.6.
         * - String
           - ROWID
           - ``oracledb.STRING`` or ``oracledb.DB_TYPE_VARCHAR``
-          -
+          - No relevant notes
         * - String
           - UROWID
           - ``oracledb.STRING`` or ``oracledb.DB_TYPE_VARCHAR``
-          -
+          - No relevant notes
         * - Object
           - JSON
           - ``oracledb.DB_TYPE_JSON``
@@ -1027,12 +1039,16 @@ Connection Methods
           - Named type or collection
           - A string with the name of the Oracle Database object or collection, or a :ref:`DbObject <dbobjectclass>`.
           - This combination is supported from node-oracledb 4.0.
+        * - For dense vectors, Uint8Array, Int8Array, Float32Array, and Float16Array.
+
+            For sparse vectors, :ref:`oracledb.SparseVector <oracledbsparsevector>`.
+          - VECTOR
+          - ``oracledb.DB_TYPE_VECTOR``
+          - The dense vector combination is supported from node-oracledb 6.5 and sparse vector combination is supported from node-oracledb 6.8. See :ref:`Oracle Database VECTOR Data Type <vectors>`.
 
     When binding LONG, LONG RAW, CLOB, NCLOB, and BLOB database types using
     string or buffer bind types, then data is limited to a maximum size of 1
     GB.
-
-    Binding Oracle Database INTERVAL types or BFILE not supported.
 
     **execute(): Options Parameter Properties**
 

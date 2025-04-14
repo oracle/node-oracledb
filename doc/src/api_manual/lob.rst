@@ -324,3 +324,7 @@ Lob Methods
         * - ``dirFileName``
           - Object
           - This parameter contains the directory alias and file name of the BFILE type LOB.
+
+    .. versionchanged:: 7.0
+
+        Support for this method was added in node-oracledb Thick mode.

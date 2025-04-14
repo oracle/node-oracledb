@@ -209,10 +209,6 @@ for common :ref:`Oracle Database Type Constants <oracledbconstantsdbtype>`.
       - Value
       - ``DbType`` Object Equivalent
       - Notes
-    * - ``oracledb.BFILE``
-      - 2020
-      - ``oracledb.DB_TYPE_BFILE``
-      - No relevant notes
     * - ``oracledb.BLOB``
       - 2019
       - ``oracledb.DB_TYPE_BLOB``
