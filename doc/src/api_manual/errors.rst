@@ -11,8 +11,8 @@ See :ref:`exceptions` for usage information.
 Error Properties
 ================
 
-The *Error* object contains ``code``, ``errorNum``, ``message``, ``offset``,
-and ``stack`` properties.
+The *Error* object contains ``code``, ``errorNum``, ``isRecoverable``,
+``message``, ``offset``, and ``stack`` properties.
 
 .. attribute:: error.code
 
@@ -27,6 +27,12 @@ and ``stack`` properties.
     This property is a number which represents the Oracle error number. This
     value is undefined for non-Oracle errors and for messages prefixed with
     NJS or DPI.
+
+.. attribute:: error.isRecoverable
+
+    This property is a boolean which determines whether the error is
+    recoverable or not. This requires Oracle Database 12.1 (or later). For
+    node-oracledb Thick mode, Oracle Client 12.1 (or later) is also required.
 
 .. attribute:: error.message
 

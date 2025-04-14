@@ -17,6 +17,9 @@ Common Changes
 #)  Added check for :meth:`lob.setDirFileName()` to verify if empty strings
     are passed or the properties are not found.
 
+#)  Added :attr:`~error.isRecoverable` property to the Error object to check
+    if an error is recoverable.
+
 Thin Mode Changes
 +++++++++++++++++
 

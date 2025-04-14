@@ -285,6 +285,11 @@ bool njsUtils_getError(napi_env env, dpiErrorInfo *errorInfo,
         NJS_CHECK_NAPI(env, napi_set_named_property(env, tempError, "offset",
                 temp))
 
+        // store isRecoverable property
+        NJS_CHECK_NAPI(env, napi_get_boolean(env, errorInfo->isRecoverable, &temp))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, tempError,
+                "isRecoverable", temp))
+
     }
 
     *error = tempError;

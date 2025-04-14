@@ -34,16 +34,19 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('240. errorTest.js', function() {
 
   let conn;
+
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
   });
 
   after(async () => {
-    await conn.close();
+    if (conn)
+      await conn.close();
   });
 
   it('240.1 checks the offset value of the error', async () => {
@@ -105,9 +108,50 @@ describe('240. errorTest.js', function() {
       (err) => {
         assert.strictEqual(err.offset, 46);
         assert.strictEqual(err.errorNum, 6550);
+        assert.strictEqual(err.isRecoverable, false);
         return true;
       }
     );
   }); // 240.4
+
+  it('240.5 check isRecoverable property', async function() {
+    // isRecoverable requires Oracle Client 12.1 or later and Oracle Database
+    // 12.1 or later.
+    // It also does not work with CMAN-TDM or DRCP.
+    const isRunnable = await testsUtil.checkPrerequisites(1200000000, 1200000000);
+    if (!isRunnable || !dbConfig.test.DBA_PRIVILEGE ||
+      dbConfig.test.drcp || dbConfig.test.isCmanTdm) this.skip();
+    const dbaConfig = {
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectionString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA
+    };
+    const sysDBAConn = await oracledb.getConnection(dbaConfig);
+
+    const result = await conn.execute(
+      `select unique
+        'alter system kill session '''||sid||','||serial#||''';'
+        from v$session_connect_info
+        where sid = sys_context('USERENV', 'SID')
+      `);
+    // get the SQL to kill the session
+    const killSql = result.rows[0][0];
+    // remove the semicolon at the end of the fetched SQL and then execute it
+    await sysDBAConn.execute(killSql.substring(0, killSql.length - 1));
+    await sysDBAConn.close();
+
+    await assert.rejects(
+      async () => await conn.commit(),
+      (err) => {
+        assert.strictEqual(err.isRecoverable, true);
+        return true;
+      }
+    );
+    // Using close() on a connection with a killed session throws
+    // an 'ORA-01012: NOT LOGGED ON' error in Thick mode
+    if (!oracledb.thin)
+      conn = undefined;
+  }); // 240.5
 
 });

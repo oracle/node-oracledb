@@ -4960,6 +4960,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     240.2 database error
     240.3 the offset of system error is 0
     240.4 PL/SQL syntax error
+    240.5 check isRecoverable property
 
 241. dbType04.js
      241.1 JSON type check
