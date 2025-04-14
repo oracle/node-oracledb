@@ -25,6 +25,12 @@ Common Changes
 #)  Added :attr:`~error.isRecoverable` property to the Error object to check
     if an error is recoverable.
 
+#)  All Oracle errors that result in the connection no longer being usable will
+    be raised as an ``NJS-500`` error with the underlying reason being
+    included in the error message.
+
+#)  Improved NJS error messages.
+
 Thin Mode Changes
 +++++++++++++++++
 
