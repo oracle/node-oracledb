@@ -8,6 +8,11 @@ node-oracledb Release Notes
 For deprecated and desupported features, see
 :ref:`Deprecations and desupported features <deprecations>`.
 
+Starting from node-oracledb 6.0.0, each release lists the changes
+that impact both Thin and Thick modes ('Common'), the changes that
+affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
+and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
+
 node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v7.0.0>`__ (TBD)
 ---------------------------------------------------------------------------------------------------------
 
@@ -29,10 +34,25 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Fixed intermittent crash seen after ``connection.unsubscribe()`` caused by
-    a race condition.
+#)  Fixed intermittent crash seen after :meth:`connection.unsubscribe()`
+    caused by a race condition.
 
 #)  Added support for the BFILE method :meth:`lob.setDirFileName()`.
+
+#)  Fixed bug resulting in a segfault when unable to load the Oracle Client
+    libraries (`ODPI-C <https://github.com/oracle/odpi>`__ change).
+
+#)  Fixed bug which resulted in error ``ORA-24328: illegal attribute value``
+    when calling :meth:`connection.getDbObjectClass()` with Oracle Client 11.2
+    libraries (`ODPI-C <https://github.com/oracle/odpi>`__ change).
+
+#)  Improved error message when getting :attr:`connection.maxOpenCursors`
+    when using Oracle Client 11.2 libraries
+    (`ODPI-C <https://github.com/oracle/odpi>`__ change).
+
+#)  Improved error message when attempting to work with sparse vectors using
+    Oracle Client 23.6 (or earlier) libraries
+    (`ODPI-C <https://github.com/oracle/odpi>`__ change).
 
 node-oracledb `v6.8.0 <https://github.com/oracle/node-oracledb/compare/v6.7.1...v6.8.0>`__ (27 Feb 2025)
 ---------------------------------------------------------------------------------------------------------
