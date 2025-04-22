@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -456,6 +456,7 @@ describe('3. examples.js', function() {
   });
 
   describe('3.8 insert1.js', function() {
+    let conn;
     const script =
       "BEGIN " +
       "   DECLARE " +
@@ -475,8 +476,15 @@ describe('3. examples.js', function() {
       "   '); " +
       "END; ";
 
+    before(async function() {
+      conn = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async function() {
+      await conn.close();
+    });
+
     it('3.8.1 creates a table and inserts data', async function() {
-      const conn = await oracledb.getConnection(dbConfig);
       await conn.execute(script);
       let result = await conn.execute(
         "INSERT INTO nodb_eg_insert8 VALUES (:id, :nm)", [1, 'Chris']);
@@ -487,7 +495,6 @@ describe('3. examples.js', function() {
       result = await conn.execute("UPDATE nodb_eg_insert8 SET name = 'Bambi'");
       assert.strictEqual(result.rowsAffected, 2);
       await conn.execute("DROP TABLE nodb_eg_insert8 PURGE");
-      await conn.close();
     });
   });
 
@@ -540,7 +547,6 @@ describe('3. examples.js', function() {
         "SELECT * FROM nodb_eg_commit9  ORDER BY id");
       // This will only show 'Chris' because inserting 'Alison' is not commited by default.
       // Uncomment the autoCommit option above and you will see both rows
-      // console.log(result.rows);
       assert.deepStrictEqual(result.rows, [ [ 1, 'Chris' ] ]);
       await conn1.execute("DROP TABLE nodb_eg_commit9 PURGE");
     });

@@ -496,7 +496,11 @@ describe('9. columnMetadata.js', function() {
         CREATE TABLE ${tableName} (
           decimal_col DECIMAL(10,2),
           number_col NUMBER(5,3),
-          float_col FLOAT
+          float_col FLOAT,
+          double_precision_col DOUBLE PRECISION,
+          smallint_col SMALLINT,
+          integer_col INTEGER,
+          real_col REAL
         )
       `;
 
@@ -513,8 +517,14 @@ describe('9. columnMetadata.js', function() {
       assert.strictEqual(result.metaData[1].precision, 5);
       assert.strictEqual(result.metaData[1].scale, 3);
 
-      // Float columns might have different characteristics
-      assert(result.metaData[2].precision !== undefined);
+      // FLOAT, DOUBLE PRECISION, SMALLINT, INTEGER and REAL columns might
+      // have different precision and scale characteristics
+      for (let i = 2; i <= result.metaData.length - 1; i++) {
+        assert(typeof result.metaData[i].precision === 'number' &&
+          result.metaData[i].precision !== undefined);
+        assert(typeof result.metaData[i].scale === 'number' &&
+          result.metaData[i].scale != undefined);
+      }
 
       await connection.execute(testsUtil.sqlDropTable(tableName));
     });

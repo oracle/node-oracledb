@@ -32,10 +32,11 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const assert   = require('assert');
+const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
 const os = require('os');
-const random   = require('./random.js');
+const random = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('1. connection.js', function() {
 
@@ -258,8 +259,7 @@ describe('1. connection.js', function() {
             '); \
         END; ";
 
-    let conn1 = false;
-    let conn2 = false;
+    let conn1, conn2;
     beforeEach('get 2 connections and create the table', async function() {
       conn1 = await oracledb.getConnection(dbConfig);
       conn2 = await oracledb.getConnection(dbConfig);
@@ -784,8 +784,9 @@ describe('1. connection.js', function() {
 
       res = await conn2.execute(sqlDriverName);
       /*
-        In Oracle 12.1.1 DB, The driver name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view)
-        can be set only upto 8 characters.
+        In Oracle 12.1.1 DB, The driver
+        name (CLIENT_DRIVER column in V$SESSION_CONNECT_INFO view) can be set
+        upto only 8 characters.
       */
       let serverVersion = conn2.oracleServerVersion;
       if (serverVersion < 1201000200)
@@ -953,4 +954,50 @@ describe('1. connection.js', function() {
       await conn2.close();
     }); // 1.18.4
   }); // 1.18
+
+  describe('1.19 Check error in the middle of a statement execute', function() {
+
+    let connection;
+    const tbl = 'nodb_num_tab';
+
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+      const createTableSql = `CREATE TABLE ${tbl} (id NUMBER, data NUMBER)`;
+      await testsUtil.createTable(connection, tbl, createTableSql);
+    });
+
+    after(async function() {
+      await connection.execute(`DROP TABLE ${tbl} PURGE`);
+      await connection.close();
+    });
+
+    it('1.19.1 Negative - divide by zero error in the middle of an SQL request', async function() {
+      // Insert data
+      const sql = `INSERT INTO ${tbl} VALUES (:1, :2)`;
+      const binds = Array.from({ length: 1500 }, (_, i) => [i + 1, i < 1499 ? 2 : 0]);
+      let options = {
+        autoCommit: true,
+        bindDefs: [
+          { type: oracledb.NUMBER },
+          { type: oracledb.NUMBER }
+        ]
+      };
+      const result = await connection.executeMany(sql, binds, options);
+      assert.strictEqual(result.rowsAffected, 1500);
+
+      // Query with a divide by zero in between
+      const query = `select id, 1 / data from ${tbl} where id < 1500
+                      union all
+                      select id, 1 / data from ${tbl} where id = 1500`;
+      options = {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,   // query result format
+        fetchArraySize: 1500                 // internal buffer allocation size for tuning
+      };
+
+      await  assert.rejects(
+        async () => await connection.execute(query, {}, options),
+        /ORA-01476:/
+      );
+    });
+  });
 });

@@ -56,6 +56,8 @@ Overview of node-oracledb functional tests
     1.18 settable parameters
         1.18.1 negative - Check parameter value type
         1.18.2 Check parameter values after user update
+    1.19 Check error in the middle of a statement execute
+        1.19.1 Negative - divide by zero error in the middle of an SQL request
 
   2. pool.js
     2.1 default setting
