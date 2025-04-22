@@ -268,4 +268,18 @@ describe('1. Network Compression', function() {
     assert.strictEqual(connection.isCompressionEnabled(), true);
     await connection.close();
   });
+  it('1.12 compressionThreshold set as 200', async function() {
+    if (!oracledb.thin) this.skip();
+    const dbConfig = {
+      user: process.env.NODE_ORACLEDB_USER,
+      password: process.env.NODE_ORACLEDB_PASSWORD,
+      connectString: connectString,
+      networkCompression: true,
+      networkCompressionThreshold: 200
+    };
+    const connection = await oracledb.getConnection(dbConfig);
+    assert.strictEqual(connection.isCompressionEnabled(), true);
+    await connection.close();
+
+  });
 });

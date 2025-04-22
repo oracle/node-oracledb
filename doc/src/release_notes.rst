@@ -34,6 +34,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#) Fixed bug where the compression threshold was not being set to the
+   user-supplied value.
+
+#) Fixed bug where compressing multiple large packets results in an error.
+    
 #)  Fixed bug which throws a ``TypeError`` when the DbObject has an attribute
     with the same name as a DbObject property.
 
