@@ -107,13 +107,13 @@ async function run() {
 
     // 6. Update Data Using JSON View
     await connection.execute(`
-        UPDATE emp_ov 
+        UPDATE emp_ov
         SET data = '{
           "EMPLOYEE_ID": 101,
           "FIRST_NAME": "Alice",
           "LAST_NAME": "Brown",
           "DEPARTMENT": "Engineering"
-        }' 
+        }'
         WHERE json_value(data, '$.EMPLOYEE_ID') = 101
       `);
 
@@ -126,7 +126,7 @@ async function run() {
 
     // 8. Delete Data Using JSON View
     await connection.execute(`
-        DELETE FROM emp_ov 
+        DELETE FROM emp_ov
         WHERE json_value(data, '$.EMPLOYEE_ID') = 101
       `);
 
