@@ -40,17 +40,17 @@ const testsUtil = require('./testsUtil.js');
 describe('230. soda12.js', () => {
 
   before(async function() {
-    const isSodaRunnable = await testsUtil.isSodaRunnable();
-
     const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
-    if (clientVersion < 2000000000) {
+    if (clientVersion < 1909000000) {
       isClientOK = false;
     } else {
       isClientOK = true;
     }
 
-    const isRunnable = isClientOK && isSodaRunnable;
+    const sodaRole = await sodaUtil.isSodaRoleGranted();
+
+    const isRunnable = isClientOK && sodaRole;
     if (!isRunnable) {
       this.skip();
     }

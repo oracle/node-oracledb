@@ -4059,7 +4059,7 @@ available to node-oracledb applications.
 Transaction Guard
 -----------------
 
-From version 7.0 onwards, node-oracledb supports `Transaction Guard
+From version 6.9 onwards, node-oracledb supports `Transaction Guard
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A675AF7B-6FF0-
 460D-A6E6-C15E7C328C8F>`__ which enables Node.js applications to verify the
 success or failure of the last transaction in the event of an unplanned

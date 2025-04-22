@@ -79,7 +79,7 @@ The properties of a DbObject object are listed below.
           }
         }
 
-    .. versionchanged:: 7.0
+    .. versionchanged:: 6.9
 
         The ``precision``, ``scale``, and ``maxSize`` attributes were added to
         this property.

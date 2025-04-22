@@ -30,7 +30,7 @@ The *Error* object contains ``code``, ``errorNum``, ``isRecoverable``,
 
 .. attribute:: error.isRecoverable
 
-    .. versionadded:: 7.0
+    .. versionadded:: 6.9
 
     This property is a boolean which determines whether the error is
     recoverable or not. This requires Oracle Database 12.1 (or later). For

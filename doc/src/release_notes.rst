@@ -13,7 +13,7 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
-node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v7.0.0>`__ (TBD)
+node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (TBD)
 ---------------------------------------------------------------------------------------------------------
 
 Common Changes
@@ -51,9 +51,9 @@ Thin Mode Changes
 
 #)  Fixed decoding of nested database objects and nested PL/SQL records.
 
-#)  Fixed bug where the pool reconfigure operation was not removing extra
-    connections proactively when the poolMax parameter was reduced on pool
-    reconfiguration.
+#)  Fixed bug where :meth:`pool reconfiguration <pool.reconfigure()>` was not
+    removing extra connections proactively when the ``poolMax`` parameter was
+    reduced on pool reconfiguration.
 
 Thick Mode Changes
 ++++++++++++++++++

@@ -207,7 +207,7 @@ The properties of a *Connection* object are listed below.
 
 .. attribute:: connection.ltxid
 
-    .. versionadded:: 7.0
+    .. versionadded:: 6.9
 
     This read-only property is a JavaScript array of bytes that specifies the
     logical transaction ID for the connection. It is used within Oracle
