@@ -34,15 +34,19 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#) Fixed bug where the compression threshold was not being set to the
-   user-supplied value.
+#)  Fixed bug where the compression threshold was not being set to the
+    user-supplied value.
 
-#) Fixed bug where compressing multiple large packets results in an error.
-    
+#)  Fixed bug where compressing multiple large packets results in an error.
+
 #)  Fixed bug which throws a ``TypeError`` when the DbObject has an attribute
     with the same name as a DbObject property.
 
 #)  Fixed decoding of nested database objects and nested PL/SQL records.
+
+#)  Fixed bug where the pool reconfigure operation was not removing extra
+    connections proactively when the poolMax parameter was reduced on pool
+    reconfiguration.
 
 Thick Mode Changes
 ++++++++++++++++++

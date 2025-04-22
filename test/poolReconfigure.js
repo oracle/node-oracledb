@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -184,33 +184,49 @@ describe('255. poolReconfigure.js', function() {
     it('255.1.4 Change poolMax - decrease', async function() {
       if (dbConfig.test.drcp) this.skip();
 
-      const conn = await testsUtil.getPoolConnection(pool);
-      assert.strictEqual(pool.connectionsInUse, 1);
-      if (dbConfig.test.externalAuth) {
-        assert.strictEqual(pool.connectionsOpen, 1);
-      } else {
-        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
-        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
-      }
+      const conns = new Array();
+      let conIndex;
 
+      // Opening poolMax new connections
+      for (conIndex = 0; conIndex < poolMaxOriginalVal; conIndex++) {
+        const conn = await testsUtil.getPoolConnection(pool);
+        conns.push(conn);
+      }
+      // releasing two connections
+      await conns.pop().close();
+      await conns.pop().close();
+
+      // Making new poolMax as half of Original Value
       const poolMax = Math.floor (pool.poolMax / 2);
       const config = {
         poolMax: poolMax
       };
 
+      // reconfiguring the pool to decrease poolMax
       await pool.reconfigure(config);
       assert.strictEqual(pool.poolMax, poolMax);
       assert.strictEqual(pool.poolMin, poolMinOriginalVal);
       assert.strictEqual(pool.poolIncrement, poolIncrementOriginalVal);
-      assert.strictEqual(pool.connectionsInUse, 1);
-      if (dbConfig.test.externalAuth) {
-        assert.strictEqual(pool.connectionsOpen, 1);
-      } else {
-        await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === poolMinOriginalVal);
-        assert.strictEqual(pool.connectionsOpen, poolMinOriginalVal);
+
+      // The reconfigure should have triggered extra free connections to be
+      // dropped by thin pool
+      if (oracledb.thin)
+        assert.strictEqual(pool.connectionsOpen, poolMaxOriginalVal - 2);
+
+      // Since some connections were still open before reconfigure which was
+      // greater than current poolMax we still have them open
+      assert.strictEqual(pool.connectionsInUse, poolMaxOriginalVal - 2);
+
+      // Now releasing all the connections that are still being used
+      for (const conn of conns) {
+        await conn.close();
       }
 
-      await conn.close();
+      // We should be having only poolMax open connections now as
+      // extra connections exceeding poolMax were dropped during close
+      if (oracledb.thin)
+        assert.strictEqual(pool.connectionsOpen, 5);
+
     });
 
     it('255.1.5 Change poolIncrement - increase', async function() {
