@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -253,8 +253,39 @@ async function setupEm(connection) {
   }
 }
 
-module.exports.setupBf = setupBf;
+//
+// Create a table for Transaction Guard
+//
 
-module.exports.setupLobs = setupLobs;
+async function setupTg(connection) {
 
-module.exports.setupEm = setupEm;
+  try {
+
+    const stmts = [
+      `DROP TABLE no_tg_tab PURGE`,
+
+      `CREATE TABLE no_tg_tab (IntCol NUMBER(9) NOT NULL,
+        StringCol VARCHAR2(400),
+        constraint no_tg_tab_pk primary key (IntCol))`,
+    ];
+
+    for (const s of stmts) {
+      try {
+        await connection.execute(s);
+      } catch (e) {
+        if (e.errorNum != 942)
+          throw (e);
+      }
+    }
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+module.exports = {
+  setupBf,
+  setupLobs,
+  setupEm,
+  setupTg
+};

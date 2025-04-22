@@ -139,6 +139,7 @@ File Name                                                 | Description
 [`sessiontagging2.js`](sessiontagging2.js)                | More complex example of pooled connection tagging for setting session state
 [`soda1.js`](soda1.js)                                    | Basic Simple Oracle Document Access (SODA) example
 [`soda2.js`](soda2.js)                                    | Simple Oracle Document Access (SODA) example with SodaDocumentCursor Iterators
+[`transactionguard.js`](transactionguard.js)              | Shows the use of Transaction Guard to verify if a transaction has completed
 [`typehandlerdate.js`](typehandlerdate.js)                | Show how a type handler can format a queried date in a locale-specific way
 [`typehandlernum.js`](typehandlernum.js)                  | Show how a type handler can alter queried numbers
 [`vectorSparse.js`](vectorSparse.js)                      | Insert and query SPARSE VECTOR columns.

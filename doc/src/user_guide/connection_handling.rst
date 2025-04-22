@@ -4054,6 +4054,105 @@ service-for-apps-on-atpd-5486113.pdf>`__.
 When AC or TAC are configured on the database service, they are transparently
 available to node-oracledb applications.
 
+.. _tg:
+
+Transaction Guard
+-----------------
+
+From version 7.0 onwards, node-oracledb supports `Transaction Guard
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A675AF7B-6FF0-
+460D-A6E6-C15E7C328C8F>`__ which enables Node.js applications to verify the
+success or failure of the last transaction in the event of an unplanned
+outage. This feature requires Oracle Database 12.1 or later. For node-oracledb
+Thick mode, Oracle Client 12.1 or later is additionally required.
+
+Using Transaction Guard helps to
+
+- Preserve the commit outcome
+- Ensure a known outcome for every transaction
+
+See `Oracle Database Development Guide <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-6C5880E5-C45F-4858-A069-A28BB25FD1DB>`__ for more
+information about using Transaction Guard.
+
+When an error occurs during a commit, the Node.js application can acquire the
+logical transaction ID (``ltxid``) from the connection and then call a
+procedure to determine the outcome of the commit for this logical transaction
+ID.
+
+To use Transaction Guard in node-oracledb in a single-instance database,
+perform the following steps:
+
+1. Grant execute privileges to the database users who will be checking the
+   outcome of the commit. Log in as SYSDBA and run the following command:
+
+   .. code-block:: sql
+
+    GRANT EXECUTE ON DBMS_APP_CONT TO <username>;
+
+2. Create a new service by calling `DBMS_SERVICE.CREATE_SERVICE
+   <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-386E183E-
+   D83C-48A7-8BA3-40248CFB89F4>`__ as SYSDBA.  Replace the
+   ``<service-name>``, ``<network-name>`` and ``<retention-value>`` values
+   with suitable values. Note that the ``COMMIT_OUTCOME`` parameter must be
+   set to *true* for Transaction Guard to function properly.
+
+   .. code-block:: sql
+
+       DECLARE
+           t_Params dbms_service.svc_parameter_array;
+       BEGIN
+           t_Params('COMMIT_OUTCOME') := 'true';
+           t_Params('RETENTION_TIMEOUT') := <retention-value>;
+           DBMS_SERVICE.CREATE_SERVICE('<service-name>', '<network-name>', t_Params);
+       END;
+       /
+
+3. Start the service by calling `DBMS_SERVICE.START_SERVICE
+   <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-140B93AC-
+   9021-4091-B797-7CA3AAB446FE>`__ as SYSDBA:
+
+   .. code-block:: sql
+
+       BEGIN
+           DBMS_SERVICE.START_SERVICE('<service-name>');
+       END;
+       /
+
+Ensure that the service is running by examining the output of the following
+query:
+
+.. code-block:: sql
+
+    SELECT name, network_name FROM V$ACTIVE_SERVICES ORDER BY 1;
+
+Refer to Oracle documentation if you are using `RAC <https://www.oracle.com/
+pls/topic/lookup?ctx=dblatest&id=RACAD>`__ or standby databases.
+
+**Node.js Application code requirements to use Transaction Guard**
+
+In the Node.js application code:
+
+- Connect to the appropriately enabled database service. If the connection is
+  TAF, AC, or TAC enabled, then do not proceed with Transaction Guard.
+
+- Check :attr:`error.isRecoverable` to confirm the error is recoverable. If
+  not, do not proceed with Transaction Guard.
+
+- Use the connection attribute :attr:`connection.ltxid` to find the
+  logical transaction ID.
+
+- Call the `DBMS_APP_CONT.GET_LTXID_OUTCOME <https://www.oracle.com/pls/topic/
+  lookup?ctx=dblatest&id=GUID-03CEB530-D3A5-40B1-87C8-5BF1BB5D5D54>`__ PL/SQL
+  procedure with the logical transaction ID. This returns a boolean value
+  indicating if the last transaction was committed and whether the last
+  call was completed successfully or not.
+
+- Take any necessary action to re-do uncommitted work.
+
+See `transactionguard.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/transactionguard.js>`__ for an example of using Transaction Guard.
+
 .. _dbcalltimeouts:
 
 Database Call Timeouts

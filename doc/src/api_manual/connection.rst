@@ -205,6 +205,19 @@ The properties of a *Connection* object are listed below.
     This read/write attribute is a string that specifies the internal name
     that is used by the connection when logging two-phase commit transactions.
 
+.. attribute:: connection.ltxid
+
+    .. versionadded:: 7.0
+
+    This read-only property is a JavaScript array of bytes that specifies the
+    logical transaction ID for the connection. It is used within Oracle
+    Transaction Guard as a means of ensuring that transactions are not
+    duplicated. See :ref:`tg` for more information.
+
+    This property is only available with Oracle 12.1 or later. In
+    node-oracledb Thick mode, Oracle Client libraries 12.1 or later are
+    additionally required.
+
 .. attribute:: connection.maxIdentifierLength
 
     .. versionadded:: 6.8

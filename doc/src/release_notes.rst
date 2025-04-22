@@ -25,6 +25,9 @@ Common Changes
 #)  Added :attr:`~error.isRecoverable` property to the Error object to check
     if an error is recoverable.
 
+#)  Added support for :ref:`Transaction Guard <tg>` with the introduction of
+    the :attr:`~connection.ltxid` property.
+
 #)  All Oracle errors that result in the connection no longer being usable will
     be raised as an ``NJS-500`` error with the underlying reason being
     included in the error message.

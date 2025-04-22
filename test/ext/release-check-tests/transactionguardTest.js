@@ -1,0 +1,197 @@
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+
+/******************************************************************************
+ *
+ * This software is dual-licensed to you under the Universal Permissive License
+ * (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
+ * 2.0 as shown at https://www.apache.org/licenses/LICE22NSE-2.0. You may choose
+ * either license.
+ *
+ * If you elect to accept the software under the Apache License, Version 2.0,
+ * the following applies:
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * NAME
+ *   transactionguardTest.js
+ *
+ * DESCRIPTION
+ *   Test cases for Transaction Guard (TG) support.
+ *   No special setup is required but the test suite makes use of debugging
+ *   packages in Oracle Database that are not intended for normal use. It
+ *   also creates and drops a service.
+ *   Environment variables to be set:
+ *     ORACLEDB_CONNECTSTRING_TG - Connect String for a TG-enabled database
+ *     service. This is optional. The default TG value is 'localhost/orcl-tg'.
+ *
+ *****************************************************************************/
+'use strict';
+
+const oracledb  = require('oracledb');
+const assert    = require('assert');
+const dbConfig  = require('../../dbconfig.js');
+const testsUtil = require('../../testsUtil.js');
+
+describe('1. transactionguardTest.js', function() {
+  let dbaConn, isRunnable;
+  const tableName = 'test_temp_tab';
+  const svcName = 'orcl-test-tg';
+
+  before(async function() {
+
+    // Transaction Guard requires Oracle Client 12.1 or later and
+    // Oracle Database 12.1 or later.
+    // It also does not work with CMAN-TDM or DRCP.
+    isRunnable = await testsUtil.checkPrerequisites(1200000000, 1200000000);
+    if (!isRunnable || !dbConfig.test.DBA_PRIVILEGE ||
+      dbConfig.test.drcp || dbConfig.test.isCmanTdm) this.skip();
+
+    dbaConn = await oracledb.getConnection ({
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA
+    });
+
+    if (!process.env.ORACLEDB_CONNECTSTRING_TG) {
+      await dbaConn.execute(`
+        declare
+            params dbms_service.svc_parameter_array;
+        begin
+            params('COMMIT_OUTCOME') := 'true';
+            params('RETENTION_TIMEOUT') := 604800;
+            dbms_service.create_service('${svcName}',
+                                        '${svcName}', params);
+            dbms_service.start_service('${svcName}');
+        end;
+        `);
+    }
+    await dbaConn.execute(`grant execute on dbms_tg_dbg to ${dbConfig.user}`);
+    await dbaConn.execute(`grant execute on dbms_app_cont to ${dbConfig.user}`);
+
+    // Set the connect string to the TG-enabled database service
+    dbConfig.connectString = process.env.ORACLEDB_CONNECTSTRING_TG ?? `localhost/${svcName}`;
+
+    // Make the connection to create the demo table for testing TG
+    const createTblConn = await oracledb.getConnection(dbConfig);
+    const sql =  `CREATE TABLE ${tableName} (IntCol NUMBER(9) NOT NULL,
+      StringCol VARCHAR2(400),
+      constraint ${tableName}_pk primary key (IntCol))`;
+    const plsql = testsUtil.sqlCreateTable(tableName, sql);
+    await createTblConn.execute(plsql);
+
+    // close the connection
+    await createTblConn.close();
+  });
+
+  after(async function() {
+    if (!isRunnable) return;
+
+    // Drop the table and the connection
+    const dropTblConn = await oracledb.getConnection(dbConfig);
+    await dropTblConn.execute(testsUtil.sqlDropTable(tableName));
+    await dropTblConn.close();
+
+    // Revoke executes on DBMS procedures for TG for the current user
+    await dbaConn.execute(`revoke execute on dbms_tg_dbg from ${dbConfig.user}`);
+    await dbaConn.execute(`revoke execute on dbms_app_cont from ${dbConfig.user}`);
+
+    // stop the TG-enabled database service, if it is created in the before()
+    // function
+    if (!process.env.ORACLEDB_CONNECTSTRING_TG) {
+      await dbaConn.execute(
+        `BEGIN dbms_service.stop_service(:svcName); END;`,
+        { svcName: svcName }
+      );
+      await dbaConn.execute(
+        `BEGIN dbms_service.delete_service(:svcName); END;`,
+        { svcName: svcName }
+      );
+    }
+    await dbaConn.close();
+  });
+
+  it('1.1 standalone connection with TG', async function() {
+    for (const argName of ["pre_commit", "post_commit"]) {
+      let conn = await oracledb.getConnection(dbConfig);
+      await conn.execute(`TRUNCATE TABLE ${tableName}`);
+      await conn.execute(
+        `INSERT INTO ${tableName} VALUES (:1, :2)`,
+        [1, "String for test 1"]
+      );
+      const fullArgName = `dbms_tg_dbg.tg_failpoint_${argName}`;
+      await conn.execute(
+        `begin
+            dbms_tg_dbg.set_failpoint(${fullArgName});
+        end;`
+      );
+      const ltxid = conn.ltxid;
+      await assert.rejects(
+        async () => await conn.commit(),
+        /NJS-500:/
+      );
+      await conn.close();
+
+      conn = await oracledb.getConnection(dbConfig);
+      const result = await conn.execute(
+        `BEGIN dbms_app_cont.get_ltxid_outcome(:ltxid, :committed, :completed); END;`,
+        { ltxid: ltxid,
+          committed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN },
+          completed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+        }
+      );
+      const expectedValue = (argName === "post_commit");
+      assert.strictEqual(result.outBinds.committed, expectedValue);
+      assert.strictEqual(result.outBinds.completed, expectedValue);
+      await conn.close();
+    }
+  }); // 1.1
+
+  it('1.2 pooled connection with TG', async function() {
+    const pool = await oracledb.createPool(dbConfig);
+    for (const argName of ["pre_commit", "post_commit"]) {
+      let conn = await pool.getConnection();
+      await conn.execute(`TRUNCATE TABLE ${tableName}`);
+      await conn.execute(
+        `INSERT INTO ${tableName} VALUES (:1, :2)`,
+        [400, "String for test 400"]
+      );
+      const fullArgName = `dbms_tg_dbg.tg_failpoint_${argName}`;
+      await conn.execute(
+        `begin
+            dbms_tg_dbg.set_failpoint(${fullArgName});
+        end;`
+      );
+      const ltxid = conn.ltxid;
+      await assert.rejects(
+        async () => await conn.commit(),
+        /NJS-500:/
+      );
+      await conn.close();
+      conn = await pool.getConnection();
+      const result = await conn.execute(
+        `BEGIN dbms_app_cont.get_ltxid_outcome(:ltxid, :committed, :completed); END;`,
+        { ltxid: ltxid,
+          committed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN },
+          completed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+        }
+      );
+      const expectedValue = (argName === "post_commit");
+      assert.strictEqual(result.outBinds.committed, expectedValue);
+      assert.strictEqual(result.outBinds.completed, expectedValue);
+      await conn.close();
+    }
+    await pool.close(0);
+  }); // 1.2
+
+});

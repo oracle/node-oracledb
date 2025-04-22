@@ -48,6 +48,7 @@ NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getDbObjectClass);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getExternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInstanceName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getInternalName);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getLTXID);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getMaxOpenCursors);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getMaxIdentifierLength);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersion);
@@ -155,6 +156,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "getInstanceName", NULL, njsConnection_getInstanceName, NULL, NULL, NULL,
             napi_default, NULL },
     { "getInternalName", NULL, njsConnection_getInternalName, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getLTXID", NULL, njsConnection_getLTXID, NULL, NULL, NULL,
             napi_default, NULL },
     { "getMaxOpenCursors", NULL, njsConnection_getMaxOpenCursors, NULL, NULL,
             NULL, napi_default, NULL },
@@ -1215,6 +1218,27 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getInternalName, 0, NULL)
             return njsUtils_throwErrorDPI(env, globals);
         NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
                 returnValue))
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_getLTXID()
+//   Get accessor for "ltxid" property
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getLTXID, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (conn->handle) {
+        if (dpiConn_getLTXID(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value,
+                NULL, returnValue))
     }
 
     return true;
