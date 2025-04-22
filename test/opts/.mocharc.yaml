@@ -295,3 +295,4 @@ spec:
   - test/dataTypeIntervalYM.js
   - test/dataTypeIntervalDS.js
   - test/dbObjectsNested.js
+  - test/dbObject21.js

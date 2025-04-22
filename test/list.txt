@@ -6272,3 +6272,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       313.1.1 Insert nested DbObject into table + fetch values
     313.2 Nested Records
       313.2.1 Works with nested records
+  314. dbObject21.js
+    314.1 check attribute metadata
+      314.1.1 check metadata of DbObject attributes

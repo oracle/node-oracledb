@@ -35,14 +35,25 @@ The properties of a DbObject object are listed below.
 
     Each attribute will have an object that contains:
 
-    - ``type``: the value of one of the :ref:`Oracle Database Type
+    - ``type``: The value of one of the :ref:`Oracle Database Type
       Constants <oracledbconstantsdbtype>`, such as 2010 for
       ``oracledb.DB_TYPE_NUMBER`` and 2023 for ``oracledb.DB_TYPE_OBJECT``.
-    - ``typeName``: a string corresponding to the type, such as “VARCHAR2”
+    - ``typeName``: A string corresponding to the type, such as “VARCHAR2”
       or “NUMBER”. When the attribute is a DbObject, it will contain the
       name of the object.
-    - ``typeClass``: set if the value of ``type`` is a DbObject. It is the
+    - ``typeClass``: Set if the value of ``type`` is a DbObject. It is the
       DbObject class for the attribute.
+    - ``precision``: The precision of the attribute when the attribute's type
+      is ``oracledb.DB_TYPE_NUMBER``. For all other types, the value returned
+      is *undefined*.
+    - ``scale``: The scale of the attribute when the attribute's type is
+      ``oracledb.DB_TYPE_NUMBER``. For all other types, the value returned is
+      *undefined*.
+    - ``maxSize``: The maximum size (in bytes) of the attribute when the
+      attribute's type is one of ``oracledb.DB_TYPE_CHAR``,
+      ``oracledb.DB_TYPE_NCHAR``, ``oracledb.DB_TYPE_NVARCHAR``,
+      ``oracledb.DB_TYPE_RAW``, or ``oracledb.DB_TYPE_VARCHAR``. For all other
+      types, the value returned is *undefined*.
 
     For example:
 
@@ -55,7 +66,23 @@ The properties of a DbObject object are listed below.
             typeName: 'MDSYS.SDO_POINT_TYPE',
             typeClass: [Function]
           }
+          PROPERTY_NAME: {
+            type: 2001,
+            typeName: 'VARCHAR',
+            maxSize: 10
+          }
+          PROPERTY_VALUE: {
+            type: 2010,
+            typeName: 'NUMBER',
+            precision: 12,
+            scale: 2
+          }
         }
+
+    .. versionchanged:: 7.0
+
+        The ``precision``, ``scale``, and ``maxSize`` attributes were added to
+        this property.
 
 .. attribute:: dbObject.elementType
 

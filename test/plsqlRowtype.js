@@ -1,4 +1,4 @@
-/* Copyright 2024, Oracle and/or its affiliates. */
+/* Copyright 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -73,6 +73,7 @@ describe('304. plSqlRowType.js', function() {
 
     const createTableSql = `CREATE TABLE ${table} (
       NUMBERVALUE NUMBER(12),
+      NUMBERVALUE2 NUMBER,
       STRINGVALUE VARCHAR2(2),
       FIXEDCHARVALUE CHAR(10),
       NSTRINGVALUE NVARCHAR2(60),
@@ -83,6 +84,7 @@ describe('304. plSqlRowType.js', function() {
       REALVALUE REAL,
       DOUBLEPRECISIONVALUE DOUBLE PRECISION,
       FLOATVALUE FLOAT,
+      FLOATVALUE2 FLOAT(80),
       BINARYFLOATVALUE BINARY_FLOAT,
       BINARYDOUBLEVALUE BINARY_DOUBLE,
       DATEVALUE DATE,
@@ -96,20 +98,24 @@ describe('304. plSqlRowType.js', function() {
       INVISIBLEVALUE NUMBER INVISIBLE)`;
 
     let expectedTypes = {
-      NUMBERVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-      STRINGVALUE: { type: oracledb.DB_TYPE_VARCHAR, typeName: 'VARCHAR2' },
-      FIXEDCHARVALUE: { type: oracledb.DB_TYPE_CHAR, typeName: 'CHAR' },
-      NSTRINGVALUE: { type: oracledb.DB_TYPE_NVARCHAR, typeName: 'NVARCHAR2' },
-      NFIXEDCHARVALUE: { type: oracledb.DB_TYPE_NCHAR, typeName: 'NCHAR' },
-      RAWVALUE: { type: oracledb.DB_TYPE_RAW, typeName: 'RAW' },
-      INTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-      SMALLINTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
-      REALVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
+      NUMBERVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER', precision: 12, scale: 0 },
+      NUMBERVALUE2: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER', precision: 0, scale: -127 },
+      STRINGVALUE: { type: oracledb.DB_TYPE_VARCHAR, typeName: 'VARCHAR2', maxSize: 2 },
+      FIXEDCHARVALUE: { type: oracledb.DB_TYPE_CHAR, typeName: 'CHAR', maxSize: 10 },
+      NSTRINGVALUE: { type: oracledb.DB_TYPE_NVARCHAR, typeName: 'NVARCHAR2', maxSize: 60 * 2 },
+      NFIXEDCHARVALUE: { type: oracledb.DB_TYPE_NCHAR, typeName: 'NCHAR', maxSize: 10 * 2 },
+      RAWVALUE: { type: oracledb.DB_TYPE_RAW, typeName: 'RAW', maxSize: 15 },
+      INTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER', precision: 38, scale: 0 },
+      SMALLINTVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER', precision: 38, scale: 0 },
+      REALVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER', precision: 63, scale: -127 },
       DOUBLEPRECISIONVALUE: {
         type: oracledb.DB_TYPE_NUMBER,
-        typeName: 'NUMBER'
+        typeName: 'NUMBER',
+        precision: 126,
+        scale: -127
       },
-      FLOATVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER' },
+      FLOATVALUE: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER', precision: 126, scale: -127 },
+      FLOATVALUE2: { type: oracledb.DB_TYPE_NUMBER, typeName: 'NUMBER', precision: 80, scale: -127 },
       BINARYFLOATVALUE: {
         type: oracledb.DB_TYPE_BINARY_FLOAT,
         typeName: 'BINARY_FLOAT'
@@ -154,7 +160,7 @@ describe('304. plSqlRowType.js', function() {
         typeName: objType.prototype.fqn,
         typeClass: objType
       };
-      expectedTypes = {...expectedTypes, OBJECTVALUE };
+      expectedTypes = { ...expectedTypes, OBJECTVALUE };
     });
 
     after(async function() {
@@ -175,14 +181,16 @@ describe('304. plSqlRowType.js', function() {
       const name = 'NODB_ROWTYPE%ROWTYPE';
       const objClass = await connection.getDbObjectClass(name);
       const types = objClass.prototype.attributes;
-      assert.deepStrictEqual(expectedTypes, types);
+      assert.deepStrictEqual(types, expectedTypes);
+      assert.deepStrictEqual(types.OBJECTVALUE.typeClass.prototype.attributes,
+        expectedTypes.OBJECTVALUE.typeClass.prototype.attributes);
     }); // 304.1.1
 
     it('304.1.2 %ROWTYPE collection', async function() {
       const name = 'FOO_TEST.NODB_ROWTYPE_ARRAY';
       const objClass = await connection.getDbObjectClass(name);
       const types = objClass.prototype.elementTypeClass.prototype.attributes;
-      assert.deepStrictEqual(expectedTypes, types);
+      assert.deepStrictEqual(types, expectedTypes);
     }); // 304.1.2
 
     it('304.1.3 %ROWTYPE object create and delete in a loop to check cursor leak', async function() {

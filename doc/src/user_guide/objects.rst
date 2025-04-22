@@ -44,7 +44,7 @@ database type:
 .. code-block:: javascript
 
     const GeomType = await connection.getDbObjectClass("MDSYS.SDO_GEOMETRY");
-    console.log(GeomType.prototype);
+    console.log(JSON.stringify(GeomType.prototype));
 
 This gives::
 
@@ -53,8 +53,8 @@ This gives::
         name: 'SDO_GEOMETRY',
         fqn: 'MDSYS.SDO_GEOMETRY',
         attributes:
-        {   SDO_GTYPE: { type: 2010, typeName: 'NUMBER' },
-            SDO_SRID: { type: 2010, typeName: 'NUMBER' },
+        {   SDO_GTYPE: { type: 2010, typeName: 'NUMBER', precision: 0, scale: -127 },
+            SDO_SRID: { type: 2010, typeName: 'NUMBER', precision: 0, scale: -127 },
             SDO_POINT:
             {   type: 2023,
                 typeName: 'MDSYS.SDO_POINT_TYPE',

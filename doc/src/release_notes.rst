@@ -28,6 +28,10 @@ Common Changes
 #)  Added support for :ref:`Transaction Guard <tg>` with the introduction of
     the :attr:`~connection.ltxid` property.
 
+#)  Added ``precision``, ``scale``, and ``maxSize`` attributes to the
+    :attr:`dbObject.attributes` property which provide additional metadata
+    about the database object.
+
 #)  All Oracle errors that result in the connection no longer being usable will
     be raised as an ``NJS-500`` error with the underlying reason being
     included in the error message.
