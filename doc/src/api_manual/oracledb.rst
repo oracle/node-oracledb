@@ -757,6 +757,8 @@ Each of the configuration properties is described below.
 
     The default value is *86400* seconds.
 
+    See :ref:`conncaching`.
+
     **Example**
 
     .. code-block:: javascript

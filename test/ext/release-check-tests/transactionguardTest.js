@@ -194,4 +194,123 @@ describe('1. transactionguardTest.js', function() {
     await pool.close(0);
   }); // 1.2
 
+  it('1.3 TG failpoint with rollback: simulate crash and verify not committed/completed', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    await conn.execute(`TRUNCATE TABLE ${tableName}`);
+    await conn.execute(`INSERT INTO ${tableName} VALUES (:1, :2)`, [101, "Rollback Test"]);
+
+    const failpoint = 'dbms_tg_dbg.tg_failpoint_pre_commit';
+    await conn.execute(`begin dbms_tg_dbg.set_failpoint(${failpoint}); end;`);
+
+    const ltxid = conn.ltxid;
+
+    // Commit will fail and connection will be invalidated
+    await assert.rejects(async () => await conn.commit(), /NJS-500:/);
+    // NJS-500: connection to Oracle Database was closed or broken
+
+    await conn.close();
+
+    const verifyConn = await oracledb.getConnection(dbConfig);
+    const result = await verifyConn.execute(
+      `BEGIN dbms_app_cont.get_ltxid_outcome(:ltxid, :committed, :completed); END;`,
+      {
+        ltxid,
+        committed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN },
+        completed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+      }
+    );
+
+    assert.strictEqual(result.outBinds.committed, false);
+    assert.strictEqual(result.outBinds.completed, false);
+    await verifyConn.close();
+  });
+
+
+  it('1.4 TG should fail when DML is followed by DDL in same txn with failpoint', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    await conn.execute(`TRUNCATE TABLE ${tableName}`);
+    await conn.execute(`INSERT INTO ${tableName} VALUES (:1, :2)`, [202, "DDL Failpoint Test"]);
+
+    await conn.execute(`begin dbms_tg_dbg.set_failpoint(dbms_tg_dbg.tg_failpoint_post_commit); end;`);
+
+    // Add DDL
+    await conn.execute(`ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'`);
+
+    await assert.rejects(async () => await conn.commit(), /NJS-500:/);
+    // NJS-500: connection to Oracle Database was closed or broken
+
+    await conn.close();
+  });
+
+  it('1.5 TG with multiple connections should isolate LTXIDs', async function() {
+    const conn1 = await oracledb.getConnection(dbConfig);
+    const conn2 = await oracledb.getConnection(dbConfig);
+
+    await conn1.execute(`TRUNCATE TABLE ${tableName}`);
+    await conn1.execute(`INSERT INTO ${tableName} VALUES (:1, :2)`, [301, "Conn1"]);
+    await conn2.execute(`INSERT INTO ${tableName} VALUES (:1, :2)`, [302, "Conn2"]);
+
+    await conn1.execute(`begin dbms_tg_dbg.set_failpoint(dbms_tg_dbg.tg_failpoint_pre_commit); end;`);
+
+    const ltxid1 = conn1.ltxid;
+    await assert.rejects(() => conn1.commit(), /NJS-500:/);
+    // NJS-500: connection to Oracle Database was closed or broken
+
+    await conn1.close();
+
+    const result = await conn2.execute(`SELECT COUNT(*) AS COUNT FROM ${tableName}`);
+    assert.ok(result.rows[0][0] >= 1); // Conn2 insert is successful and independent
+
+    await conn2.close();
+
+    const connCheck = await oracledb.getConnection(dbConfig);
+    const outcome = await connCheck.execute(
+      `BEGIN dbms_app_cont.get_ltxid_outcome(:ltxid, :committed, :completed); END;`,
+      {
+        ltxid: ltxid1,
+        committed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN },
+        completed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+      }
+    );
+
+    assert.strictEqual(outcome.outBinds.committed, false);
+    assert.strictEqual(outcome.outBinds.completed, false);
+    await connCheck.close();
+  });
+
+  it('1.6 Invalid LTXID', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    await assert.rejects(
+      async () => await conn.execute(
+        `BEGIN dbms_app_cont.get_ltxid_outcome(:ltxid, :committed, :completed); END;`,
+        {
+          ltxid: Buffer.from('randomString', 'hex'), // Invalid
+          committed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN },
+          completed: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+        }
+      ),
+      /ORA-14903:/ // ORA-14903: Corrupt logical transaction detected.
+    );
+    await conn.close();
+  });
+
+  it('1.7 TG and connection attributes', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+
+    // Verify ltxid is available
+    assert(conn.ltxid, "ltxid attribute is available");
+    assert(Buffer.isBuffer(conn.ltxid), "Expected ltxid to be a Buffer");
+    assert(conn.ltxid.length > 0, "Expected ltxid to have non-zero length");
+
+    // Verify ltxid doesn't change after starting a transaction and it exists and is valid
+    await conn.execute(`INSERT INTO ${tableName} VALUES (:1, :2)`, [701, "Conn"]);
+
+    const transactionLtxid = conn.ltxid;
+    assert(transactionLtxid, "Expected ltxid to still be available during transaction");
+    assert(Buffer.isBuffer(transactionLtxid), "Expected transaction ltxid to be a Buffer");
+    assert(transactionLtxid.length > 0, "Expected transaction ltxid to have non-zero length");
+
+    await conn.rollback();
+    await conn.close();
+  }); // 1.7
 });

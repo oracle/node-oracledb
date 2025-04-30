@@ -84,9 +84,8 @@ Upgrading from node-oracledb 6.6 to 6.7
   - Connect to Oracle Database using wallets stored in Azure Key Vault and OCI
     vault.
 
-  - Cache the configuration information retrieved from
-    :ref:`Azure App Configuration <conninfocacheazure>` and
-    :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
+  - :ref:`Cache the configuration information <conncaching>` retrieved from
+    Azure App Configuration and OCI Object Storage centralized configuration
     providers.
 
 - In node-oracledb Thin mode, you can use the attributes

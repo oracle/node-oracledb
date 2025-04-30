@@ -253,9 +253,9 @@ Common Changes
       configuration providers using wallets stored in Azure Key Vault and
       OCI Vault.
 
-    - Added ability to cache the configuration information retrieved from
-      :ref:`Azure App Configuration <conninfocacheazure>` and
-      :ref:`OCI Object Storage <conninfocacheoci>` centralized configuration
+    - Added ability to
+      :ref:`cache the configuration information <conncaching>` retrieved from
+      Azure App Configuration and OCI Object Storage centralized configuration
       providers.
 
     - Ensure that the password stored in OCI vault and retrieved in
