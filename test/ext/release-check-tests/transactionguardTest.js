@@ -178,6 +178,7 @@ describe('1. transactionguardTest.js', function() {
         /NJS-500:/
       );
       await conn.close();
+      assert.strictEqual(pool.connectionsInUse, 0);
       conn = await pool.getConnection();
       const result = await conn.execute(
         `BEGIN dbms_app_cont.get_ltxid_outcome(:ltxid, :committed, :completed); END;`,

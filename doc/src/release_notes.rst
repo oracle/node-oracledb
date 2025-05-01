@@ -55,6 +55,9 @@ Thin Mode Changes
     removing extra connections proactively when the ``poolMax`` parameter was
     reduced on pool reconfiguration.
 
+#)  Fixed bug where connections were not removed from the pool, when 
+    `connection.close()` method fails for some reason.
+
 Thick Mode Changes
 ++++++++++++++++++
 
