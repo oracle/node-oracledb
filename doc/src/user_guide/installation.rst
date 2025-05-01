@@ -10,17 +10,17 @@ Oracle Client libraries. The database can be on the same machine as Node.js, or
 it can be remote.
 
 Pre-built 'Thick' mode binaries for common architectures (Windows 64-bit, Linux
-x86_64, Linux ARM (aarch64), and macOS Intel) are included in the node-oracledb
-installation as a convenience.  Thick mode provides some :ref:`additional
-functionality <featuresummary>`.  To use Thick mode, Oracle Client libraries
-version 11.2, or later, need to be manually installed.  Node-oracledb Thick
-mode can connect to Oracle Database 9.2 or later, depending on the Oracle
-Client library version.  Note the operating systems and versions of Node.js
-that the pre-built node-oracledb binaries are compatible with will change as
-the Node.js project evolves. The binaries are not guaranteed to be available or
-usable in your environment.  The Thick mode binary may additionally build from
-available C source code on other platforms like Windows 32-bit, Solaris, and
-AIX environments. See :ref:`github`.
+x86_64, Linux ARM (aarch64), macOS Intel, and macOS ARM64) are included in the
+node-oracledb installation as a convenience. Thick mode provides some
+:ref:`additional functionality <featuresummary>`. To use Thick mode, Oracle
+Client libraries version 11.2, or later, need to be manually installed.
+Node-oracledb Thick mode can connect to Oracle Database 9.2 or later,
+depending on the Oracle Client library version. Note the operating systems and
+versions of Node.js that the pre-built node-oracledb binaries are compatible
+with will change as the Node.js project evolves. The binaries are not
+guaranteed to be available or usable in your environment.  The Thick mode
+binary may additionally build from available C source code on other platforms
+like Windows 32-bit, Solaris, and AIX environments. See :ref:`github`.
 
 .. _quickstart:
 
@@ -749,7 +749,8 @@ Thin mode connecting directly to Oracle Database so no further installation
 steps are required.  However, to use additional node-oracledb features
 available in :ref:`Thick mode <featuresummary>`, you need to install Oracle
 Client libraries.  Thick mode uses a binary add-on installed with node-oracledb
-that loads these libraries.  This binary is available for macOS Intel only.
+that loads these libraries.  This binary is available for macOS Intel and
+macOS ARM64 (from node-oracledb version 6.6 onwards).
 
 You can get the libraries from either the Oracle Instant Client **Basic** or
 **Basic Light** package.  The steps below show installing **Basic**.
