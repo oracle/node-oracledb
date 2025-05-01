@@ -4761,7 +4761,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.4 one message in enqMany/deqMany
     217.5 deqOne on empty queue
     217.6 deqMany on empty queue
-    217.7 get delay property
+    217.7 get delay and enqTime properties
     217.8 get deliveryMode property
     217.9 get exceptionQueue property
     217.10 get numAttempts attribute

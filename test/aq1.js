@@ -204,7 +204,10 @@ describe('217. aq1.js', function() {
     assert.deepStrictEqual(messages, []);
   }); // 217.6
 
-  it('217.7 get delay property', async () => {
+  it('217.7 get delay and enqtime properties', async () => {
+    let result = await conn.execute('select current_timestamp from dual');
+    const startTime = result.rows[0][0].setMilliseconds(0);
+
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -228,8 +231,11 @@ describe('217. aq1.js', function() {
     );
     queue2.deqOptions.delay = myMsg.delay;
     const msg = await queue2.deqOne();
+    result = await conn.execute('select current_timestamp from dual');
+    const endTime = result.rows[0][0].setMilliseconds(0);
     if (msg) {
       assert.strictEqual(msg.payload.toString(), messageString);
+      assert(msg.enqTime >= startTime && msg.enqTime <= endTime);
     }
   }); // 217.7
 

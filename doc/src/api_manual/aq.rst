@@ -260,6 +260,10 @@ AqQueue Methods
           - An integer containing the number of seconds the message was delayed before it could be dequeued.
         * - ``deliveryMode``
           - An integer containing the delivery mode the messages was enqueued with.
+        * - ``enqTime``
+          - A JavaScript Date object with a precision of seconds containing the timestamp of when the message was enqueued. The fractional seconds will be *0*. For example, 2025-04-22T13:16:48.000Z. This is a read-only attribute.
+
+            .. versionadded:: 6.9
         * - ``exceptionQueue``
           - A String containing the name of the exception queue defined when the message was enqueued.
         * - ``expiration``

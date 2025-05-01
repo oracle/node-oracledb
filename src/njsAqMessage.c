@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -35,6 +35,7 @@
 // class methods
 NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getCorrelation);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getDelay);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getEnqTime);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getDeliveryMode);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getExceptionQueue);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqMessage_getExpiration);
@@ -53,6 +54,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "getCorrelation", NULL, njsAqMessage_getCorrelation, NULL, NULL, NULL,
             napi_enumerable, NULL },
     { "getDelay", NULL, njsAqMessage_getDelay, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "getEnqTime", NULL, njsAqMessage_getEnqTime, NULL, NULL, NULL,
             napi_enumerable, NULL },
     { "getDeliveryMode", NULL, njsAqMessage_getDeliveryMode, NULL, NULL, NULL,
             napi_enumerable, NULL },
@@ -153,6 +156,24 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getDelay, 0, NULL)
         return njsUtils_throwErrorDPI(env, globals);
     NJS_CHECK_NAPI(env, napi_create_int32(env, value, returnValue))
     return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsAqMessage_getEnqTime()
+//   Get accessor of "enqTime" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getEnqTime, 0, NULL)
+{
+    njsAqMessage *message = (njsAqMessage*) callingInstance;
+    dpiTimestamp timestamp;
+    napi_value makeDateFn;
+
+    if (dpiMsgProps_getEnqTime(message->handle, &timestamp) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
+            globals->jsMakeDateFn, &makeDateFn))
+    return njsUtils_getDateValue(DPI_ORACLE_TYPE_TIMESTAMP, env,
+            makeDateFn, &timestamp, returnValue);
 }
 
 

@@ -63,6 +63,10 @@ Thick Mode Changes
 
 #)  Added support for the BFILE method :meth:`lob.setDirFileName()`.
 
+#)  Added ``enqTime`` property for Advanced Queuing (AQ) messages to specify
+    the time when the message was enqueued.
+    See `Issue #1725 <https://github.com/oracle/node-oracledb/issues/1725>`__.
+
 #)  Fixed bug resulting in a segfault when unable to load the Oracle Client
     libraries (`ODPI-C <https://github.com/oracle/odpi>`__ change).
 

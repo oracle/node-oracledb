@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -139,6 +139,7 @@ async function deq() {
 
     const msg = await queue.deqOne();
     if (msg) {
+      console.log('Message enqueued at:', msg.enqTime);
       console.log('Dequeued:  ' + msg.payload.toString());
     } else {
       console.log('No message to dequeue');
