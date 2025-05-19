@@ -19,6 +19,10 @@ node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...
 Common Changes
 ++++++++++++++
 
+#)  Added a second argument for the fetchTypeHandler call to get
+    the metadata of all the result columns.
+    See `Issue #1728 <https://github.com/oracle/node-oracledb/issues/1728>`__.
+
 #)  Added check for :meth:`lob.setDirFileName()` to verify if empty strings
     are passed or the properties are not found.
 

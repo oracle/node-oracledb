@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -541,4 +541,82 @@ describe('271. fetchTypeHandler.js', function() {
       await connection.execute(testsUtil.sqlDropTable(TABLE));
     });
 
+  it('271.25 Verify fetchTypeHandler rowsetMetadata list',
+    async function() {
+      const expectedRowsMetaData = [
+        {
+          name: 'ID',
+          dbType: oracledb.NUMBER,
+          nullable: true,
+          isJson: false,
+          isOson: false,
+          precision: 0,
+          scale: -127,
+          dbTypeName: 'NUMBER'
+        },
+        {
+          name: 'NAME',
+          dbType: oracledb.STRING,
+          nullable: true,
+          isJson: false,
+          isOson: false,
+          byteSize: 50
+        },
+        {
+          name: 'AGE',
+          dbType: oracledb.NUMBER,
+          nullable: true,
+          isJson: false,
+          isOson: false,
+          precision: 0,
+          scale: -127
+        },
+        {
+          name: 'TS_DATE',
+          dbType: oracledb.DB_TYPE_TIMESTAMP,
+          nullable: true,
+          isJson: false,
+          isOson: false,
+          precision: 6
+        }
+      ];
+      oracledb.fetchTypeHandler = function(metadata, rowsetMetaData) {
+        // Verify if the received rowsetMetaData includes metadata of all other queried columns.
+        // We ignore comparing the dynamically updated fields like fetchtype and converter fields.
+        const filteredListMetadata = expectedRowsMetaData.map(item =>
+          Object.fromEntries(
+            Object.entries(item).filter(([key]) =>
+              rowsetMetaData.some(meta => key in meta)
+            )
+          )
+        );
+        assert.deepStrictEqual(expectedRowsMetaData, filteredListMetadata);
+
+        if (metadata.dbTypeName === "TIMESTAMP") {
+          return {type: oracledb.DATE};
+        } else if (metadata.dbTypeName === "NUMBER") {
+          return {type: oracledb.STRING};
+        }
+      };
+      const TABLE = 'nodb_isjsondata_271_25';
+      const sql = `CREATE TABLE ${TABLE} (
+                      id NUMBER,
+                      name VARCHAR2(50),
+                      age NUMBER,
+                      created_date TIMESTAMP
+                    )`;
+      const plsql = testsUtil.sqlCreateTable(TABLE, sql);
+      await connection.execute(plsql);
+
+      await connection.execute(`INSERT INTO ${TABLE} values (01, 'ABC', 23,
+                    TO_TIMESTAMP('2023-04-27 10:30:00', 'YYYY-MM-DD HH24:MI:SS'))`);
+      await connection.execute(
+        `SELECT id, name, age, created_date AS TS_DATE FROM ${TABLE}`,
+        [],
+        {
+          outFormat: oracledb.OUT_FORMAT_OBJECT
+        }
+      );
+      await connection.execute(testsUtil.sqlDropTable(TABLE));
+    });
 });
