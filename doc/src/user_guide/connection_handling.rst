@@ -370,7 +370,7 @@ use node-oracledb alternatives.
 
 Alternatively, if a JDBC connection string uses an old-style Oracle
 system identifier `SID <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&i
-d=GUID-BADFDC72-0F1D-47FA-8857-EC15DC8ACFBB>`__, and there is no service name
+d=GUID-8BB8140D-63ED-454E-AAC3-1964F80D102D>`__, and there is no service name
 available::
 
     jdbc:oracle:thin:@hostname:port:sid
@@ -3208,8 +3208,8 @@ for token generation. This hook function sets the ``accessToken`` parameter of
 the connection methods to a callback function which uses the configuration
 parameters to generate OAuth 2.0 tokens.
 
-The ``extensionAzure`` plugin is available as part of the `plugins/tokens
-<https://github.com/oracle/node-oracledb/tree/main/plugins/tokens/
+The ``extensionAzure`` plugin is available as part of the `plugins/token
+<https://github.com/oracle/node-oracledb/tree/main/plugins/token/
 extensionAzure/index.js>`__ directory in the node-oracledb package.
 
 For OAuth 2.0 token-based authentication with the ``extensionAzure`` plugin,
@@ -3693,8 +3693,8 @@ for token generation. This hook function sets the ``accessToken`` parameter of
 the connection methods to a callback function which uses the configuration
 parameters to generate IAM tokens.
 
-The ``extensionOci`` plugin is available as part of the `plugins/tokens
-<https://github.com/oracle/node-oracledb/tree/main/plugins/tokens/
+The ``extensionOci`` plugin is available as part of the `plugins/token
+<https://github.com/oracle/node-oracledb/tree/main/plugins/token/
 extensionOci/index.js>`__ directory in the node-oracledb package.
 
 For OCI IAM token-based authentication with the :ref:`extensionOci
@@ -4774,9 +4774,9 @@ encryption.
 A database username and password are still required for your application
 connections. If you need to create a new database schema so you do not login
 as the privileged ADMIN user, refer to the relevant Oracle Cloud documentation,
-for example see `Create Database Users <https://docs.oracle.com/en/cloud/paas/
-autonomous-database/adbdu/managing-database-users.html#GUID-5B94EA60-554A-4BA4
--96A3-1D5A3ED5878D>`__ in the Oracle Autonomous Database manual.
+for example see `Create Database Users <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-B5846072-995B-4B81-BDCB-AF530BC42847>`__ in the
+Oracle Autonomous Database manual.
 
 When using node-oracledb Thin mode, Node.js flags can be used to set the
 minimum TLS version used to connect to Oracle Database. For example, ``node
@@ -4993,10 +4993,9 @@ using :ref:`multiple wallets <connmultiwallets>`.
 
 If you need to create a new database schema so you do not login as the
 privileged ADMIN user, refer to the relevant Oracle Cloud documentation,
-for example see `Create Database Users <https://docs.oracle.com/en/cloud/
-paas/autonomous-database/adbdu/managing-database-users.html#GUID-5B94EA60-
-554A-4BA4-96A3-1D5A3ED5878D>`__ in the Oracle Autonomous Transaction
-Processing Dedicated Deployments manual.
+for example see `Create Database Users <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-B5846072-995B-4B81-BDCB-AF530BC42847>`__ in the
+Oracle Autonomous Database manual.
 
 Access Through a Proxy
 ++++++++++++++++++++++

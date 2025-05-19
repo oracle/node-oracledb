@@ -43,28 +43,35 @@ messages are returned as an :ref:`AqMessage object <aqmessageclass>`.
 There are differences in the payload types supported by TxEventQ and AQ
 classic queues as detailed below.
 
-**Classic Advanced Queuing (AQ) Support**
+.. list-table-with-summary:: Payload Differences Between Classic Queues and Transactional Event Queues
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 10 20 20
+    :summary: The first column displays the payload type. The second column displays whether the payload type is supported in Classic Queues. The third column displays whether the payload type is supported in Transactional Event Queues.
 
-- RAW, named Oracle objects, and JMS payloads are supported.
+    * - Payload Type
+      - Classic Queues
+      - Transactional Event Queues
+    * - RAW
+      - Supported
+      - Supported for single and array message enqueuing and dequeuing when using Oracle Client 19c (or later) and connected to Oracle Database 19c (or later).
+    * - Named Oracle Objects
+      - Supported
+      - Supported for single and array message enqueuing and dequeuing when using Oracle Client 19c (or later) and connected to Oracle Database 19c (or later).
+    * - JSON
+      - Supported when using Oracle Client libraries 21c (or later) and Oracle Database 21c (or later).
+      - Supported for single message enqueuing and dequeuing when using Oracle Client libraries 21c (or later) and Oracle Database 21c (or later).
 
-- The JSON payload requires Oracle Client libraries 21c (or later) and Oracle
-  Database 21c (or later).
+        Array enqueuing and dequeuing is not supported for JSON payloads.
+    * - JMS
+      - Supported
+      - Supported for single and array message enqueuing and dequeuing when using Oracle Client 19c (or later) and Oracle Database 23ai.
 
 There are examples of AQ Classic Queues in the `GitHub examples
 <https://github.com/oracle/node-oracledb/tree/main/examples>`__ directory.
 
-**Transactional Event Queue (TxEventQ) Support**
-
-- RAW and named Oracle object payloads are supported for single and array
-  message enqueuing and dequeuing when using Oracle Client 19c (or later) and
-  connected to Oracle Database 19c (or later).
-
-- JMS payloads are supported for single and array message enqueuing and
-  dequeuing when using Oracle Client 19c (or later) and Oracle Database 23ai.
-
-- JSON payloads are supported for single message enqueuing and dequeuing when
-  using Oracle Client libraries 21c (or later) and Oracle Database 21c (or
-  later). Array enqueuing and dequeuing is not supported for JSON payloads.
+**Creating a Queue**
 
 Before using a queue in node-oracledb, it must be created in the database
 using the DBMS_AQADM PL/SQL package. For these examples,

@@ -2131,12 +2131,16 @@ Oracledb Methods
             .. versionadded:: 6.7
         * - ``edition``
           - String
-          - Thick
+          - Both
           - .. _createpoolpoolattrsedition:
 
             Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by connections in the pool.
 
             This optional property overrides the :attr:`oracledb.edition` property.
+
+            .. versionchanged:: 6.8
+
+                Support for this property was added in node-oracledb Thin mode.
 
             .. versionadded:: 2.2
         * - ``enableStatistics``
@@ -3117,12 +3121,16 @@ Oracledb Methods
             .. versionadded:: 6.7
         * - ``edition``
           - String
-          - Thick
+          - Both
           - .. _getconnectiondbattrsedition:
 
             Sets the name used for :ref:`Edition-Based Redefinition <ebr>` by this connection.
 
             This optional property overrides the :attr:`oracledb.edition` property.
+
+            .. versionchanged:: 6.8
+
+                Support for this property was added in node-oracledb Thin mode.
 
             .. versionadded:: 2.2
         * - ``events``

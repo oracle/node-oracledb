@@ -55,8 +55,8 @@ Thin Mode Changes
     removing extra connections proactively when the ``poolMax`` parameter was
     reduced on pool reconfiguration.
 
-#)  Fixed bug where connections were not removed from the pool, when 
-    `connection.close()` method fails for some reason.
+#)  Fixed bug where connections were not removed from the pool, when
+    :meth:`connection.close()` method fails for some reason.
 
 Thick Mode Changes
 ++++++++++++++++++
@@ -66,8 +66,9 @@ Thick Mode Changes
 
 #)  Added support for the BFILE method :meth:`lob.setDirFileName()`.
 
-#)  Added ``enqTime`` property for Advanced Queuing (AQ) messages to specify
-    the time when the message was enqueued.
+#)  Added ``enqTime`` property for :ref:`Advanced Queuing (AQ) messages
+    <_aqmessage_class_attributes>` to specify the time when the message was
+    enqueued.
     See `Issue #1725 <https://github.com/oracle/node-oracledb/issues/1725>`__.
 
 #)  Fixed bug resulting in a segfault when unable to load the Oracle Client
@@ -1821,7 +1822,7 @@ node-oracledb `v3.1.0 <https://github.com/oracle/node-oracledb/compare/v3.0.1...
 
 #)  Fixed an issue with ``poolPingInterval`` that could cause usable
     pooled connections to be unnecessarily dropped by
-    ``connection.close()``.  (ODPI-C change).
+    :meth:`connection.close()`.  (ODPI-C change).
 
 #)  Fixed a memory leak under certain cirumstances when pooled
     connections are released back to the pool. (ODPI-C change)
@@ -1990,7 +1991,7 @@ node-oracledb `v2.2.0 <https://github.com/oracle/node-oracledb/compare/v2.1.2...
 
 #)  Improved the text for the NJS-045 runtime loader failure error.
 
-#)  Made the implementations of ``connection.close()`` and ``pool.close()``
+#)  Made the implementations of :meth:`connection.close()` and ``pool.close()``
     the primary code paths in place of their respective aliases
     ``connection.release()`` and ``pool.terminate()``.
 

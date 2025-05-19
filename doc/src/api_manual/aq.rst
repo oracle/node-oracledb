@@ -16,7 +16,7 @@ enqueuing, dequeuing, or for both.
 
 See :ref:`Oracle Advanced Queuing (AQ) <aq>` for usage.
 
-The AqQueue class was added in node-oracledb 4.0.
+.. versionadded:: 4.0
 
 .. _aqqueueproperties:
 
@@ -47,32 +47,43 @@ AqQueue Properties
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 40
+        :widths: 10 10 30
         :summary: The first column displays the attribute name. The second
-         column displays the description of the attribute.
+         column displays the data type of the attribute. The third column
+         displays the description of the attribute.
 
         * - Attribute Name
+          - Data Type
           - Description
         * - ``condition``
-          - A String that defines the condition that must be satisfied in order for a message to be dequeued.
+          - String
+          - The condition that must be satisfied in order for a message to be dequeued. The condition is a boolean expression similar to the WHERE clause of a SQL query. The boolean expression can include conditions on message properties, user data properties, and PL/SQL or SQL functions.
         * - ``consumerName``
-          - A String that defines the name of the consumer that is dequeuing messages.
+          - String
+          - The name of the consumer that is dequeuing messages. Only messages matching the consumer name will be accessed. If the queue is not set up for multiple consumers, then this attribute should not be set.
         * - ``correlation``
-          - A String that defines the correlation to use when dequeuing.
+          - String
+          - The correlation to use when dequeuing. Special pattern-matching characters, such as the percent sign (%) and the underscore (_), can be used. If multiple messages satisfy the pattern, the order of dequeuing is indeterminate.
         * - ``mode``
-          - An integer value that defines the mode to use for dequeuing messages. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_MODE_BROWSE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_LOCKED <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA <oracledbconstantsaq>`.
+          - Integer
+          - The mode to use for dequeuing messages. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_MODE_BROWSE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_LOCKED <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA <oracledbconstantsaq>`.
         * - ``msgId``
-          - A Buffer containing a unique identifier specifying the message to be dequeued.
+          - Buffer
+          - A unique identifier specifying the message to be dequeued.
         * - ``navigation``
-          - An integer value that defines the position in the queue of the message that is to be dequeued. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_NAV_FIRST_MSG <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_MSG <oracledbconstantsaq>`.
+          - Integer
+          - The position in the queue of the message that is to be dequeued. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_NAV_FIRST_MSG <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_MSG <oracledbconstantsaq>`.
         * - ``transformation``
-          - A String that defines the transformation that will take place on messages when they are dequeued.
+          - String
+          - The transformation that will take place on messages when they are dequeued. The transformation must be created using dbms_transform.
 
             This attribute is not supported in Transactional Event Queues (TxEventQ).
         * - ``visibility``
-          - An integer value that defines whether the dequeue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
+          - Integer
+          - Defines whether the dequeue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
         * - ``wait``
-          - An integer defining the number of seconds to wait for a message matching the search criteria to become available. It can alternatively be one of the following constants: :ref:`oracledb.AQ_DEQ_NO_WAIT <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_WAIT_FOREVER <oracledbconstantsaq>`.
+          - Integer
+          - The number of seconds to wait for a message matching the search criteria to become available. It can alternatively be one of the following constants: :ref:`oracledb.AQ_DEQ_NO_WAIT <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_WAIT_FOREVER <oracledbconstantsaq>`.
 
     See `Oracle Advanced Queuing Documentation <https://www.oracle.com/pls
     /topic/lookup?ctx=dblatest&id=ADQUE>`__ for more information about
@@ -107,10 +118,10 @@ AqQueue Properties
           - Description
         * - ``deliveryMode``
           - Integer
-          - Defines the delivery mode when enqueuing messages. It can be one of the following constants: :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED <oracledbconstantsaq>`.
+          - The delivery mode when enqueuing messages. It can be one of the following constants: :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED <oracledbconstantsaq>`.
         * - ``transformation``
           - String
-          - Defines the transformation that will take place when messages are enqueued.
+          - The transformation that will take place when messages are enqueued. The transformation must be created using dbms_transform.
 
             This attribute is not supported in Transactional Event Queues (TxEventQ).
         * - ``visibility``
@@ -137,8 +148,8 @@ AqQueue Properties
     This read-only property is the :ref:`DbObject Class <dbobjectclass>`
     corresponding to the payload type specified when the queue was created.
 
-    This is defined only if ``payloadType`` has the value
-    ``oracledb.DB_TYPE_OBJECT``.
+    This is defined only if the ``payloadType`` property has the value
+    :ref:`oracledb.DB_TYPE_OBJECT <oracledbconstantsdbtype>`.
 
 .. attribute:: aqQueue.payloadTypeName
 
@@ -240,7 +251,8 @@ AqQueue Methods
         * - AqMessage ``message``
           - The message that is dequeued. See :ref:`AqMessage Class <aqmessageclass>`.
 
-    Dequeued messages are returned as AqMessage objects.
+    Dequeued messages are returned as
+    :ref:`AqMessage objects <aqmessageclass>`.
 
     .. _aqmessageclass:
 
@@ -248,38 +260,53 @@ AqQueue Methods
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
-        :widths: 10 40
+        :name: _aqmessage_class_attributes
+        :widths: 10 10 30
         :summary: The first column displays the attribute name. The second
-         column displays the description of the attribute.
+         column displays the data type of the attribute. The third column
+         displays the description of the attribute.
 
         * - Attribute Name
+          - Data Type
           - Description
         * - ``correlation``
-          - A String containing the correlation that was used during enqueue.
+          - String
+          - The correlation that was used during enqueue.
         * - ``delay``
-          - An integer containing the number of seconds the message was delayed before it could be dequeued.
+          - Integer
+          - The number of seconds the message was delayed before it could be dequeued.
         * - ``deliveryMode``
-          - An integer containing the delivery mode the messages was enqueued with.
+          - Integer
+          - The delivery mode the messages was enqueued with.
         * - ``enqTime``
+          - Object
           - A JavaScript Date object with a precision of seconds containing the timestamp of when the message was enqueued. The fractional seconds will be *0*. For example, 2025-04-22T13:16:48.000Z. This is a read-only attribute.
 
             .. versionadded:: 6.9
         * - ``exceptionQueue``
-          - A String containing the name of the exception queue defined when the message was enqueued.
+          - String
+          - The name of the exception queue defined when the message was enqueued. Messages are moved if the number of unsuccessful dequeue attempts has exceeded the maximum number of retries or if the message has expired. The default value is the name of the exception queue associated with the queue table.
         * - ``expiration``
-          - The number of seconds until expiration defined when the message was enqueued.
+          - Integer
+          - The number of seconds until expiration defined when the message was enqueued. This attribute is an offset from the ``delay`` attribute. Expiration process requires the queue monitor to be running.
         * - ``msgId``
-          - A Buffer containing the unique identifier of the message.
+          - Buffer
+          - The unique identifier of the message.
         * - ``numAttempts``
-          - An integer containing the number of attempts that were made to dequeue the message.
+          - Integer
+          - The number of attempts that were made to dequeue the message.
         * - ``originalMsgId``
-          - A Buffer containing the unique identifier of the message in the last queue that generated it.
+          - Buffer
+          - The unique identifier of the message in the last queue that generated it.
         * - ``payload``
-          - A Buffer or DbObject containing the payload of the message, depending on the value of ``queue.payloadType``. Note that enqueued Strings are returned as UTF-8 encoded Buffers.
+          - Buffer or DbObject
+          - The payload of the message, depending on the value of :attr:`aqQueue.payloadType`. Note that enqueued Strings are returned as UTF-8 encoded Buffers.
         * - ``priority``
-          - An integer containing the priority of the message when it was enqueued.
+          - Integer
+          - The priority of the message when it was enqueued. A smaller number indicates a higher priority. The priority can be any integer, including negative numbers.
         * - ``state``
-          - An integer representing the state of the message. It is one of the following constants: :ref:`oracledb.AQ_MSG_STATE_READY <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_WAITING <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_PROCESSED <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_EXPIRED <oracledbconstantsaq>`.
+          - Integer
+          - The state of the message at the time of the dequeue. It is one of the following constants: :ref:`oracledb.AQ_MSG_STATE_READY <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_WAITING <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_PROCESSED <oracledbconstantsaq>`, or :ref:`oracledb.AQ_MSG_STATE_EXPIRED <oracledbconstantsaq>`.
 
     See `Oracle Advanced Queuing
     Documentation <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=ADQUE>`__
@@ -342,7 +369,8 @@ AqQueue Methods
         * - Error ``error``
           - If ``enqMany()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
-    The ``queue.enqMany()`` method returns an array of :ref:`AqMessage objects <aqmessageclass>`.
+    The ``aqQueue.enqMany()`` method returns an array of
+    :ref:`AqMessage objects <aqmessageclass>`.
 
     .. versionchanged:: 6.1
 
@@ -418,16 +446,18 @@ AqQueue Methods
           - The name of an exception queue in which to place the message if an exception takes place.
         * - ``expiration``
           - Number
-          - The number of seconds the message is available to be dequeued before it expires.
+          - The number of seconds the message is available to be dequeued before it expires. This attribute is an offset from the ``delay`` attribute. Expiration processing requires the queue monitor to be running.
         * - ``payload``
           - String, Buffer, :ref:`DbObject <dbobjectclass>`, Object
-          - The actual message to be queued. This property must be specified.
+          - The actual message to be queued. This property must be specified. When enqueuing, the value is checked to ensure that it conforms to the type expected by that queue.
         * - ``priority``
           - Integer
-          - An integer priority of the message.
+          - An integer priority of the message. A smaller number indicates a higher priority. The priority can be any integer, including negative numbers.
         * - ``recipients``
           - Array of strings
-          - An array of strings where each string is a recipients name.
+          - An array of strings where each string is a recipients name. This allows a limited set of recipients to dequeue each message. The recipients associated with the message overrides the queue subscriber list, if there is one. The recipient names need not be in the subscriber list but can be, if desired.
+
+            To dequeue a message, the ``consumerName`` attribute can be set to one of the recipient names. The original message recipient list is not available on dequeued messages. All recipients have to dequeue a message before it gets removed from the queue.
 
             .. versionadded:: 5.5
 

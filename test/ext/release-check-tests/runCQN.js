@@ -731,7 +731,7 @@ describe('185. runCQN.js', function() {
   // It has to be run with node option --expose_gc as global.gc is used.
   // Ex: node --expose_gc --trace-warnings /home/user/node_modules/mocha/lib/cli/cli.js
   // test/ext/release-check-tests/runCQN.js --t 0
-  it('185.19 check memory leaks/corruptions in subscirbe/unsubscribe in loop', async () => {
+  it('185.19 check memory leaks/corruptions in subscribe/unsubscribe in loop', async () => {
 
     const TABLE = 'nodb_tab_cqn_memloop';
     let sql =

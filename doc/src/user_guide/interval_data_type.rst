@@ -126,14 +126,15 @@ to *0*. You can also create an IntervalDS object with zero intervals using:
     const interval = oracledb.IntervalDS({});
 
 You can define the optional ``days``, ``hours``, ``minutes``, ``seconds``, and
-``fseconds`` attributes in the IntervalDS object. For example, to create an
-Oracledb IntervalDS object with the ``days``and ``seconds`` attributes set to
-*2* and *40* respectively is shown below. This example is used in subsequent
-sections.
+``fseconds`` attributes in the IntervalDS object. An example to create an
+Oracledb IntervalDS object with the ``days`` and ``seconds`` attributes set to
+*2* and *40* respectively is shown below.
 
 .. code-block:: javascript
 
     const data = new oracledb.IntervalDS({ days: 2, seconds: 40 });
+
+The above example is used in subsequent sections.
 
 If you specify non-integer values in the attributes of IntervalDS object, then
 the ``NJS-007`` error is raised.

@@ -18,8 +18,8 @@ Node-oracledb's ``extensionOci`` plugin enables token generation using `OCI
 Software Development Kit (SDK) <https://www.npmjs.com/package/oci-sdk>`__ when
 authenticating with IAM token-based authentication.
 
-The ``extensionOci`` plugin is available as part of the `plugins/tokens
-<https://github.com/oracle/node-oracledb/tree/main/plugins/tokens/
+The ``extensionOci`` plugin is available as part of the `plugins/token
+<https://github.com/oracle/node-oracledb/tree/main/plugins/token/
 extensionOci/index.js>`__ directory in the node-oracledb package. This plugin
 requires the `minimum Node.js version <https://docs.oracle.com/en-us/iaas/
 Content/API/SDKDocs/typescriptsdk.htm#Versions_Supported>`__ supported by OCI
@@ -42,8 +42,8 @@ Software Development Kit (SDK) <https://www.npmjs.com/~azure-sdk>`__ when
 authenticating with OAuth 2.0 token-based authentication.
 
 The ``extensionAzure`` plugin implementation is available as part of the
-`plugins/tokens <https://github.com/oracle/node-oracledb/tree/main/plugins/
-tokens/extensionAzure/index.js>`__ directory in the node-oracledb package.
+`plugins/token <https://github.com/oracle/node-oracledb/tree/main/plugins/
+token/extensionAzure/index.js>`__ directory in the node-oracledb package.
 This plugin requires the minimum Node.js version supported by Azure SDK.
 
 Adding this plugin to your code defines and registers a built-in hook function

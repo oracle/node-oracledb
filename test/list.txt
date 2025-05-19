@@ -5533,6 +5533,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     271.21 fetchTypeHandler for nulls with converter function
     271.22 converter function to convert column val to string
     271.23 converter function with multiple columns
+    271.24 getting JSON object for columns having IS JSON constraint
 
 272. jsonDualityViews1.js
     272.1 JSON Relational Duality View

@@ -40,6 +40,7 @@ const testsUtil = require('./testsUtil.js');
 describe('230. soda12.js', () => {
 
   before(async function() {
+    if (oracledb.thin) this.skip();
     const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
     if (clientVersion < 1909000000) {
