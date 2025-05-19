@@ -45,6 +45,9 @@ Common Changes
 #)  Added instance principal authentication support in native IAM token based
     authentication with Oracle Cloud Infrastructure.
 
+#)  Improved connection pool's queueTimeout behavior to account for network
+    delays and pool expansion delays.
+
 Thin Mode Changes
 +++++++++++++++++
 

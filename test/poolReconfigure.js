@@ -510,7 +510,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040:/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       // release two connections
       await conns[poolMaxOriginalVal - 1].close();
@@ -521,7 +521,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       // release a third connection
       await conns[poolMaxOriginalVal - 3].close();
@@ -532,7 +532,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       for (let i = 0; i < poolMax; i++) {
         await conns[i].close();
@@ -555,7 +555,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       const poolMax = pool.poolMax + 10;
       const config = {
@@ -576,7 +576,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       for (conIndex = 0; conIndex < poolMax; conIndex++) {
         // Execute a query using the existing connections
@@ -599,7 +599,7 @@ describe('255. poolReconfigure.js', function() {
       poolMax: poolMaxOriginalVal,
       poolIncrement: poolIncrementOriginalVal,
       enableStatistics: enableStatisticsOriginalVal,
-      queueTimeout: 5
+      queueTimeout: 500
     };
 
     if (dbConfig.test.externalAuth) {
@@ -610,7 +610,7 @@ describe('255. poolReconfigure.js', function() {
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
         enableStatistics: enableStatisticsOriginalVal,
-        queueTimeout: 5
+        queueTimeout: 500
       };
     }
 
@@ -698,7 +698,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       const totalConnectionRequestsOriginalVal = pool._totalConnectionRequests;
       const totalRequestsDequeuedOriginalVal = pool._totalConnectionRequests;
@@ -732,7 +732,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       assert.strictEqual(pool._totalConnectionRequests, poolMaxOriginalVal + 1);
       assert.strictEqual(pool._totalRequestsDequeued, 0);
@@ -765,7 +765,7 @@ describe('255. poolReconfigure.js', function() {
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
         enableStatistics: enableStatisticsOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         poolAlias: "255.2.7"
       };
       pool = await oracledb.createPool(poolConfig);
@@ -780,7 +780,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       let poolStatistics = pool.getStatistics();
       assert.strictEqual(poolStatistics, null);
@@ -806,7 +806,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       poolStatistics = pool.getStatistics();
 
@@ -830,7 +830,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolAlias, "255.2.7");
       assert.strictEqual(poolStatistics.queueMax, 500);
-      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.queueTimeout, 500);
       assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
       assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
@@ -862,7 +862,7 @@ describe('255. poolReconfigure.js', function() {
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
         enableStatistics: enableStatisticsOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         poolAlias: "255.2.8"
       };
       pool = await oracledb.createPool(poolConfig);
@@ -1605,7 +1605,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: false
       };
       pool = await oracledb.createPool(poolConfig);
@@ -1640,7 +1640,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: true
       };
 
@@ -1677,7 +1677,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolAlias, "255.6.1.2");
       assert.strictEqual(poolStatistics.queueMax, 500);
-      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.queueTimeout, 500);
       assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
       assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
@@ -1707,7 +1707,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: false
       };
       pool1 = await oracledb.createPool(poolConfig);
@@ -1720,7 +1720,7 @@ describe('255. poolReconfigure.js', function() {
       }
       await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool1),
-        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+        /NJS-040/ // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
       );
 
       let poolStatistics = pool1.getStatistics();
@@ -1738,7 +1738,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: true
       };
 
@@ -1753,7 +1753,7 @@ describe('255. poolReconfigure.js', function() {
         async () => await testsUtil.getPoolConnection(pool2),
         /NJS-040/
       );
-      // NJS-040: connection request timeout. Request exceeded queueTimeout of 5
+      // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
       poolStatistics = pool2.getStatistics();
 
@@ -1777,7 +1777,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolAlias, '255.6.2.2');
       assert.strictEqual(poolStatistics.queueMax, 500);
-      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.queueTimeout, 500);
       assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
       assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
@@ -1805,7 +1805,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: false,
         enableStatistics: true
       };
@@ -1824,7 +1824,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: true,
         enableStatistics: true
       };
@@ -1842,7 +1842,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: false,
         _enableStats: false
       };
@@ -1861,7 +1861,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: false,
         _enableStats: true
       };
@@ -1879,7 +1879,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: false,
         enableStatistics : true //eslint-disable-line
       };
@@ -1898,7 +1898,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: true,
         enableStatistics : false //eslint-disable-line
       };
@@ -1916,7 +1916,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: true,
         enableStatistics : false, //eslint-disable-line
         enableStatistics : false //eslint-disable-line
@@ -1937,7 +1937,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: false,
         _enableStats     : true //eslint-disable-line
       };
@@ -1956,7 +1956,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: true,
         _enableStats     : false //eslint-disable-line
       };
@@ -1974,7 +1974,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: true,
         enableStatistics : false, //eslint-disable-line
         enableStatistics : false //eslint-disable-line
@@ -1996,7 +1996,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: false
       };
       pool = await oracledb.createPool(poolConfig);
@@ -2032,7 +2032,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: true
       };
 
@@ -2069,7 +2069,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolAlias, "255.6.7.2");
       assert.strictEqual(poolStatistics.queueMax, 500);
-      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.queueTimeout, 500);
       assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
       assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
@@ -2099,7 +2099,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: false
       };
       pool1 = await oracledb.createPool(poolConfig);
@@ -2132,7 +2132,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: true
       };
 
@@ -2171,7 +2171,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolAlias, "255.6.8.2");
       assert.strictEqual(poolStatistics.queueMax, 500);
-      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.queueTimeout, 500);
       assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
       assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);
@@ -2201,7 +2201,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         enableStatistics: false
       };
       pool1 = await oracledb.createPool(poolConfig);
@@ -2232,7 +2232,7 @@ describe('255. poolReconfigure.js', function() {
         poolMin: poolMinOriginalVal,
         poolMax: poolMaxOriginalVal,
         poolIncrement: poolIncrementOriginalVal,
-        queueTimeout: 5,
+        queueTimeout: 500,
         _enableStats: true
       };
 
@@ -2270,7 +2270,7 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolAlias, "255.6.9.2");
       assert.strictEqual(poolStatistics.queueMax, 500);
-      assert.strictEqual(poolStatistics.queueTimeout, 5);
+      assert.strictEqual(poolStatistics.queueTimeout, 500);
       assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
       assert.strictEqual(poolStatistics.poolMax, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.poolIncrement, poolIncrementOriginalVal);

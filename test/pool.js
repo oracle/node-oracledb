@@ -175,7 +175,7 @@ describe('2. pool.js', function() {
         poolMax: 2,
         poolMin: 1,
         poolTimeout: 1,
-        queueTimeout: 1
+        queueTimeout: 2000
       };
       pool = await oracledb.createPool(config);
       conns.push(await pool.getConnection());
@@ -459,7 +459,7 @@ describe('2. pool.js', function() {
           setTimeout(resolve, 100);
         });
         // wait for a connection to wait in a connection queue
-        await testsUtil.checkAndWait(100, 50, () => pool._connRequestQueue.length === 1);
+        await testsUtil.checkAndWait(100, 50, () => pool._pendingRequestQueue.size === 1);
         await assert.rejects(
           async () => await pool.getConnection(),
           /NJS-076:/

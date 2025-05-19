@@ -227,9 +227,10 @@ static bool njsPool_createAsync(njsBaton *baton)
     params.maxSessions = baton->poolMax;
     params.maxSessionsPerShard = baton->poolMaxPerShard;
     params.sessionIncrement = baton->poolIncrement;
-    params.getMode = (baton->poolMaxPerShard > 0) ?
+    params.getMode = ( (baton->poolMaxPerShard > 0) || 
+            (baton->poolWaitTimeout > 0) ) ?
             DPI_MODE_POOL_GET_TIMEDWAIT : DPI_MODE_POOL_GET_WAIT;
-    params.waitTimeout = baton->poolWaitTimeout;
+    params.waitTimeout = baton->poolWaitTimeout + 10000;
     params.timeout = baton->poolTimeout;
     params.externalAuth = baton->externalAuth;
     params.homogeneous = baton->homogeneous;
