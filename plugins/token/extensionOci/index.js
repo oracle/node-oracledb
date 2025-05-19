@@ -36,6 +36,8 @@ async function getToken(params) {
       return await configFileBasedAuthentication(params);
     case 'simpleauthentication':
       return await simpleAuthentication(params);
+    case 'instanceprincipal':
+      return await instancePrincipalAuthentication(params);
     default:
       throwErr(`Invalid authentication type ${params.authType} in extensionOci plugins.`);
   }
@@ -46,6 +48,43 @@ async function getToken(params) {
 //---------------------------------------------------------------------------
 function throwErr(message) {
   throw new Error(message);
+}
+
+//---------------------------------------------------------------------------
+// Requests an access token from the dataplane service
+// Generating security token
+//---------------------------------------------------------------------------
+async function generateAccessToken(provider, scope) {
+  // Scope uses the * character to identify all databases in the cloud
+  // tenancy of the authenticated user. urn:oracle:db::id::*, default
+
+  // A scope that authorizes access to all databases within a compartment has
+  // the form: urn:oracle:db::id::<compartment-ocid>
+  // String scope = "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxxxx"
+
+  // A scope that authorizes access to a single database within a compartment
+  // has the form: urn:oracle:db::id::<compartment-ocid>::<database-ocid>
+  // String scope = "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxx::ocid1.autonomousdatabase.oc1.phx.xxxxxx"
+
+  const client = new identitydataplane.DataplaneClient({
+    authenticationDetailsProvider: provider
+  });
+  const keyPair = await _getKeyPair();
+
+  const generateScopedAccessTokenRequest = {
+    generateScopedAccessTokenDetails: {
+      scope: scope ?? "urn:oracle:db::id::*",
+      publicKey: keyPair.publicKey
+    }
+  };
+
+  const generateScopedAccessTokenResponse =
+    await client.generateScopedAccessToken(generateScopedAccessTokenRequest);
+
+  return {
+    token: generateScopedAccessTokenResponse.securityToken.token,
+    privateKey: keyPair.privateKey
+  };
 }
 
 //---------------------------------------------------------------------------
@@ -79,31 +118,33 @@ async function _getKeyPair() {
 //  scope of requested access. The request will specify a public key
 //  as being paired with a private key that the presenter of the token must
 //  prove to be in possession of.
+//
+//  The path and profile of the config file may be configured by optional
+//  parameters in object accessTokenConfig. If values not provided in
+//  accessTokenConfig then this method will read the DEFAULT
+//  profile from $HOME/.oci/config.
+//  accessTokenConfig.configFileLocation, Not null.
+//  accessTokenConfig.profile, Not null.
+//
+//  Return API Key-Based Authentication.
 //---------------------------------------------------------------------------
 async function configFileBasedAuthentication(accessTokenConfig) {
   const provider =
     new common.ConfigFileAuthenticationDetailsProvider(accessTokenConfig.configFileLocation, accessTokenConfig.profile);
-  const client = new identitydataplane.DataplaneClient({authenticationDetailsProvider: provider});
-  const keyPair = await _getKeyPair();
-  const generateScopedAccessTokenDetails = {
-    scope: "urn:oracle:db::id::*",
-    publicKey: keyPair.publicKey
-  };
 
-  const generateScopedAccessTokenRequest = {
-    generateScopedAccessTokenDetails: generateScopedAccessTokenDetails
-  };
-  const generateScopedAccessTokenResponse =
-    await client.generateScopedAccessToken(generateScopedAccessTokenRequest);
-  const obj = {
-    token: generateScopedAccessTokenResponse.securityToken.token,
-    privateKey: keyPair.privateKey
-  };
-  return obj;
+  return await generateAccessToken(provider, accessTokenConfig.scope);
 }
 
 //---------------------------------------------------------------------------
 // simpleAuthentication()
+// Returns authentication details for the provided credentials.
+//   tenancy: OCID of the tenancy
+//   user: OCID of the user
+//   fingerprint: Fingerprint of the public key
+//   privateKey: Private key
+//   passPhrase: Passphrase that is used to encrypt the private key.
+//               null if not used.
+// Return API Key-Based Authentication.
 //---------------------------------------------------------------------------
 async function simpleAuthentication(accessTokenConfig) {
   const tenancy = accessTokenConfig.tenancy ??
@@ -135,27 +176,22 @@ async function simpleAuthentication(accessTokenConfig) {
     passphrase,
     region
   );
-  const client = new identitydataplane.DataplaneClient({
-    authenticationDetailsProvider: provider
-  });
-  const keyPair = await _getKeyPair();
-  const generateScopedAccessTokenDetails = {
-    scope: "urn:oracle:db::id::*",
-    publicKey: keyPair.publicKey
-  };
-  const generateScopedAccessTokenRequest = {
-    generateScopedAccessTokenDetails: generateScopedAccessTokenDetails
-  };
 
-  const generateScopedAccessTokenResponse = await client.generateScopedAccessToken(
-    generateScopedAccessTokenRequest
-  );
+  return await generateAccessToken(provider, accessTokenConfig.scope);
+}
 
-  const obj = {
-    token: generateScopedAccessTokenResponse.securityToken.token,
-    privateKey: keyPair.privateKey
-  };
-  return obj;
+//---------------------------------------------------------------------------
+// instancePrincipalAuthentication()
+//
+// Authentication in a Compute Instance, without credentials, as an instance
+// principal. This authentication method should only work on compute
+// instances where internal network endpoints are reachable.
+// Return Instance Principal Authentication.
+//---------------------------------------------------------------------------
+async function instancePrincipalAuthentication(accessTokenConfig) {
+  const provider = await new common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
+
+  return await generateAccessToken(provider, accessTokenConfig.scope);
 }
 
 //---------------------------------------------------------------------------

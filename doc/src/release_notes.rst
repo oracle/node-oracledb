@@ -42,6 +42,9 @@ Common Changes
 
 #)  Improved NJS error messages.
 
+#)  Added instance principal authentication support in native IAM token based
+    authentication with Oracle Cloud Infrastructure.
+
 Thin Mode Changes
 +++++++++++++++++
 

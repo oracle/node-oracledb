@@ -30,7 +30,11 @@
  *   - node-oracledb 6.8 or later.
  *
  *   - While using Thick mode:
- *     Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+ *     Oracle Client libraries 19.16 (or later).
+ *     Some earlier clients (19c and 21c) provide a limited set of capabilities
+ *     for token access. Oracle Database client 21c does not fully support the
+ *     IAM token access feature.
+ *     Oracle Database client 23ai supports the IAM token access feature.
  *
  *   - The OCI-SDK package. See https://www.npmjs.com/package/oci-sdk
  *
@@ -71,6 +75,34 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
 
 console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 
+function getTokenAuthConfigOci() {
+  switch (process.env.NODE_ORACLEDB_AUTHTYPE.toLowerCase()) {
+    case "configfilebasedauthentication":
+      return {
+        profile: process.env.NODE_ORACLEDB_PROFILE,
+        configFileLocation: process.env.NODE_ORACLEDB_CONFIG_FILE_LOCATION,
+        authType: "configfilebasedauthentication",
+      };
+
+    case "simpleauthentication":
+      return {
+        tenancy: process.env.NODE_ORACLEDB_TENANCY,
+        user: process.env.NODE_ORACLEDB_OCI_USER,
+        fingerprint: process.env.NODE_ORACLEDB_FINGERPRINT,
+        privateKey: process.env.NODE_ORACLEDB_KEYLOCATION,
+        region: process.env.NODE_ORACLEDB_REGION,
+        authType: "simpleauthentication",
+      };
+
+    case "instanceprincipal":
+      return {
+        authType: "instanceprincipal",
+      };
+
+    default:
+      console.error("Not a supported token authentication type with OCI Cloud");
+  }
+}
 
 async function run() {
   // Configuration for token based authentication:
@@ -84,22 +116,23 @@ async function run() {
   //   authType:            Must be set to authentication type.
   //                        Types are:
   //                        configFileBasedAuthentication, simpleAuthentication
-  //   profile:             optional parameter for config profile name
-  //                        default value is 'DEFAULT'
-  //   configFileLocation:  optional parameter for config file location
-  //                        default value is ~/.oci/config
+  //  configFileBasedAuthentication:
+  //   profile:             Optional parameter for config profile name
+  //                        default value is 'DEFAULT'.
+  //   configFileLocation:  Optional parameter for config file location
+  //                        default value is ~/.oci/config.
+  //  simpleAuthentication:
+  //   tenancy:             tenancy OCID of the tenancy
+  //   user:                OCID of the user
+  //   privateKey:          Private key
+  //   passPhrase:          Passphrase that is used to encrypt the private key.
+  //   regionId:            Region id
   const config = {
-    tokenAuthConfigOci: {
-      profile: process.env.NODE_ORACLEDB_PROFILE,
-      configFileLocation: process.env.NODE_ORACLEDB_CONFIG_FILE_LOCATION,
-      authType: process.env.NODE_ORACLEDB_AUTHTYPE,
-    },
+    tokenAuthConfigOci: getTokenAuthConfigOci(),
     externalAuth: true,
     homogeneous: true,
     connectString: process.env.NODE_ORACLEDB_CONNECTIONSTRING,
-    walletPassword: process.env.NODE_ORACLEDB_WALLET_PASSWORD,
   };
-
   try {
 
     // Create pool using token based authentication
