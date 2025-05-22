@@ -6274,6 +6274,21 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
       313.1.1 Insert nested DbObject into table + fetch values
     313.2 Nested Records
       313.2.1 Works with nested records
+    313.3 Nested Collections
+      313.3.1 handle simple VARRAY
+    313.4 Nested Collections (TABLE of NUMBER)
+      313.4.1 handle TABLE of NUMBER
+    313.5 Nested Collections (TABLE of VARRAY)
+      313.5.1 handle TABLE of VARRAY
+    313.6 Extended Nested Collections tests
+      313.6.1 Nested Table of Nested Tables
+      313.6.2 VARRAY of Nested Tables
+      313.6.3 DB Object with Nested Collection Field
+    313.7 Nested Collections with NULL Values
+      313.7.1 Testing NULL Values in Nested Objects
+      313.7.2 Update nested collections from null to populated and vice versa
+      313.7.3 Distinguish between null, empty, and populated collections
+      313.7.4 Use PL/SQL to create collections with null elements
   314. dbObject21.js
     314.1 check attribute metadata
       314.1.1 check metadata of DbObject attributes
