@@ -102,6 +102,10 @@ Thick Mode Changes
     when using Oracle Client 11.2 libraries
     (`ODPI-C <https://github.com/oracle/odpi>`__ change).
 
+#)  Fixed issue with sharding keys, where an internal error was thrown when
+    connections to Oracle Globally Distributed Databases are created with
+    proper sharding key values.
+
 #)  Improved error message when attempting to work with sparse vectors using
     Oracle Client 23.6 (or earlier) libraries
     (`ODPI-C <https://github.com/oracle/odpi>`__ change).

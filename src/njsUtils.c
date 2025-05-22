@@ -391,7 +391,7 @@ bool njsUtils_getNamedPropertyShardingKey(napi_env env, napi_value value,
 
     // process each element
     for (i = 0; i < arrLen; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &element))
+        NJS_CHECK_NAPI(env, napi_get_element(env, shardingKey, i, &element))
         NJS_CHECK_NAPI(env, napi_typeof(env, element, &valueType))
 
         // handle strings
