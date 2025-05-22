@@ -652,12 +652,14 @@ attribute or as an :ref:`option <propexecfetchtypehandler>` in
 in the ``connection.execute()`` overrides the value of
 :attr:`oracledb.fetchTypeHandler`.
 
-The fetch type handler is expected to be a function with a single object
-argument. This single object argument contains the ``annotations``,
+The fetch type handler is expected to be a function with two object
+arguments. The first object argument contains the ``annotations``,
 ``byteSize``, ``dbType``, ``dbTypeName``, ``dbTypeClass``, ``domainName``,
 ``domainSchema``, ``isJson``, ``name``, ``nullable``, ``precision``, and
 ``scale`` attributes. See :attr:`oracledb.fetchTypeHandler` for more
-information on these attributes.
+information on these attributes. The second object argument contains the
+:ref:`metadata <execmetada>` list of all the result columns fetched using the
+SELECT statement.
 
 The function is called once for each column that is going to be fetched. The
 function is expected to return either nothing or an object containing:
@@ -676,25 +678,47 @@ For example, to tell the database to return numbers as strings:
 .. code-block:: javascript
 
     const result = await connection.execute(
-        `SELECT salary FROM employees WHERE employee_id = :id`,
+        `SELECT name, salary FROM employees WHERE employee_id = :id`,
         [178],
         {
-            fetchTypeHandler: function(metaData) {
+            fetchTypeHandler: function(metaData, rowsetMetaData) {
                 // Tells the database to return number as strings
                 if (metaData.dbType == oracledb.DB_TYPE_NUMBER) {
+                    // Gets the metadata of the name column
+                    const nameColumn = rowsetMetaData.find(col => col.name === 'NAME');
+                    console.log("MetaData of the NAME column:", nameColumn);
                     return {type: oracledb.STRING}
                 }
             }
         }
     );
 
-    console.log(result.rows);
+    console.log("Result as an array of JSON values (String):", result.rows);
 
-This fetch type handler is called once for the salary column in the SELECT query.
-The database will return a string representation of the row's value. This query
-prints ``'7000'`` which shows that the salary column which is a number was
-converted to a string. Without the fetch type handler, the output would have
-been the number ``7000``.
+This prints the following output::
+
+    MetaData of the NAME column: {
+      name: 'NAME',
+      dbType: [DbType DB_TYPE_VARCHAR],
+      nullable: true,
+      isJson: false,
+      isOson: false,
+      byteSize: 20,
+      dbTypeName: 'VARCHAR2',
+      fetchType: [DbType DB_TYPE_VARCHAR]
+    }
+    Result as an array of JSON values (String): { NAME: 'Donald', SALARY: '7000' }
+
+The fetch type handler defined in the example is called once for the name and
+salary columns in the SELECT query. The database will return the metadata of
+the name and salary columns, and a string representation of the row's value as
+an array of JSON values. In the above example, the metadata of name column is
+accessed when the fetch type handler is called for a number column. Note that
+the query prints the salary column value as ``'7000'`` which is a string, not
+a number, because of the fetch type handler conversion.
+
+Without the fetch type handler, the output would have been the number
+``7000``.
 
 .. note::
 

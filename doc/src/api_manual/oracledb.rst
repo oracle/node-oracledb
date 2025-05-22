@@ -1168,10 +1168,15 @@ Each of the configuration properties is described below.
 
     This property is a function that allows applications to examine and modify
     queried column data before it is returned to the user. This function is
-    called once for each column that is being fetched with a single object
-    argument containing the following attributes:
+    called once for each column that is being fetched with two object
+    arguments.
 
-    - ``annotations``: The object representing the `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__.
+    The first object argument contains the following attributes:
+
+    - ``annotations``: The object representing the
+      `annotations <https://docs.oracle.com/en/database/oracle/oracle-
+      database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-
+      2B99F8F68052>`__.
     - ``byteSize``: The maximum size in bytes. This is only set if ``dbType``
       is ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR``, or
       ``oracledb.DB_TYPE_RAW``.
@@ -1181,8 +1186,12 @@ Each of the configuration properties is described below.
       "VARCHAR2".
     - ``dbTypeClass``: The class associated with the database type. This is
       only set if ``dbType`` is ``oracledb.DB_TYPE_OBJECT``.
-    - ``domainName``: The name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
-    - ``domainSchema``: The schema name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__.
+    - ``domainName``: The name of the `data use case domain
+      <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-
+      D993-4E94-BF6B-CACA56581F41>`__.
+    - ``domainSchema``: The schema name of the `data use case domain
+      <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-
+      D993-4E94-BF6B-CACA56581F41>`__.
     - ``isJson``: Indicates if the column is known to contain JSON data.
     - ``name``: The name of the column.
     - ``nullable``: Indicates whether ``NULL`` values are permitted for this
@@ -1192,6 +1201,9 @@ Each of the configuration properties is described below.
     - ``scale``: Set only when the ``dbType`` is ``oracledb.DB_TYPE_NUMBER``.
 
     By default, this property is "undefined", that is, it is not set.
+
+    The second object argument contains the :ref:`metadata <execmetada>` list
+    of all the result columns fetched using the SELECT statement.
 
     The function is expected to return either nothing or an object containing:
 
@@ -1220,10 +1232,12 @@ Each of the configuration properties is described below.
     .. code-block:: javascript
 
         const oracledb = require('oracledb');
-        oracledb.fetchTypeHandler = function(metaData) {
+        oracledb.fetchTypeHandler = function(metaData, rowsetMetaData) {
         // Return number column data as strings
             if (metaData.dbType == oracledb.DB_TYPE_NUMBER) {
-                return {type: oracledb.STRING};
+              const nameColumn = rowsetMetaData.find(col => col.name === 'NAME');
+              console.log(nameColumn);
+              return {type: oracledb.STRING};
             }
         }
 
@@ -2767,11 +2781,15 @@ Oracledb Methods
           - Description
           - Required or Optional
         * - ``authType``
-          - The authentication type. The value should be the string *configFileBasedAuthentication* or *simpleAuthentication*.
+          - The authentication type. The value should be the string *configFileBasedAuthentication*, *simpleAuthentication*, or *instancePrincipal*.
 
             In Configuration File Based Authentication, the location of the configuration file containing the necessary information must be provided.
 
             In Simple Authentication, the configuration parameters can be provided at runtime.
+
+            In Instance Principal Authentication, an instance can be authorized to make API calls on OCI services without credentials. The authentication method will only work on compute instances where internal network endpoints are reachable.
+
+            See `OCI SDK Authentication Methods https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm`__ for more information.
           - Required
         * - ``profile``
           - The configuration profile name. The default value is *DEFAULT*.
@@ -2819,6 +2837,15 @@ Oracledb Methods
 
             This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
           - Required
+        * - ``scope``
+          - This property identifies all databases in the cloud tenancy of the authenticated user. The default value is "urn:oracle:db::id::*".
+
+            A scope that authorizes access to all databases within a compartment has the format "urn:oracle:db::id::<compartment-ocid>", for example, "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxxxx".
+
+            A scope that authorizes access to a single database within a compartment has the format "urn:oracle:db::id::<compartment-ocid>::<database-ocid>", for example, "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxx::ocid1.autonomousdatabase.oc1.phx.xxxxxx".
+
+            This property can be specified when the value of the ``authType`` property is *simpleAuthentication*, *configFileBasedAuthentication*, or *instancePrincipal*.
+          - Optional
 
     **createPool(): tokenAuthConfigAzure Object Properties**
 
