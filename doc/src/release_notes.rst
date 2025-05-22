@@ -19,6 +19,9 @@ node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...
 Common Changes
 ++++++++++++++
 
+#)  Fixed bug which does not trigger PL/SQL functions registered for callbacks
+    properly when using implicit pooling with temporary LOBs creation.
+
 #)  Added a second argument for the fetchTypeHandler call to get
     the metadata of all the result columns.
     See `Issue #1728 <https://github.com/oracle/node-oracledb/issues/1728>`__.
@@ -51,8 +54,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Fixed bug which forced node-oracledb to resolve the database host name 
-    even if a proxy was specified in the connect string. Now the proxy 
+#)  Fixed bug which forced node-oracledb to resolve the database host name
+    even if a proxy was specified in the connect string. Now the proxy
     specified in the connect string will resolve the database host name.
 
 #)  Fixed bug where the compression threshold was not being set to the
