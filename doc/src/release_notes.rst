@@ -54,6 +54,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for config-file, config-ociobject, and config-azurevault 
+    configuration providers.
+
 #)  Fixed bug which forced node-oracledb to resolve the database host name
     even if a proxy was specified in the connect string. Now the proxy
     specified in the connect string will resolve the database host name.

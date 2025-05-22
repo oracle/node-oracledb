@@ -109,24 +109,20 @@ describe('1. Azure Configuration Store', function() {
       }
       oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
     }
-
     if (process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZURE) {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZURE;
     } else {
       throw new Error('Connect String is not Set! Set env variable NODE_ORACLEDB_CONNECTIONSTRING_AZURE.');
     }
-
     if (!process.env.NODE_ORACLEDB_CONNECTIONSTRING_VAULTAZURE) {
       throw new Error('Set the connectString with key prefix as such that the password field in the prefix must contain vault_uri details.Set env variable NODE_ORACLEDB_CONNECTIONSTRING_VAULTAZURE.For more details see description');
     }
-
     if (!process.env.NODE_ORACLEDB_CONNECTIONSTRING_CERT_VAULT) {
       throw new Error('Set the connectstring with azure_client_certificate. Set env variable NODE_ORACLEDB_CONNECTIONSTRING_CERT_VAULT. For more Details, See Description');
     }
     if (!process.env.NODE_ORACLEDB_CONNECTIONSTRING_WALLET) {
       throw new Error('Set the connectstring with key prefix such that wallet_location field must contain vault_uri details. Set env variable NODE_ORACLEDB_CONNECTIONSTRING_WALLET. For more Details, See Description');
     }
-
     if (!process.env.AZURE_TENANT_ID) {
       throw new Error('Set AZURE_TENANT_ID env variable');
     }
@@ -141,7 +137,7 @@ describe('1. Azure Configuration Store', function() {
   });
 
   describe('1. Azure Config Store', function() {
-    it('1.1 Azure Config Store with basic password ', async function() {
+    it('1.1 Azure Config Store with password as text', async function() {
       const connection = await oracledb.getConnection(config);
       const result = await connection.execute("select 1+1 from dual");
       assert(result.rows[0][0], 2);
@@ -303,6 +299,7 @@ describe('1. Azure Configuration Store', function() {
 
     it('1.17 Azure Config Store with missing client secret', async function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZURE.replace(/azure_client_secret=[^&]+/, '');
+      process.env.AZURE_CLIENT_SECRET = '';
       await assert.rejects(
         async () => await oracledb.getConnection(config),
         /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider

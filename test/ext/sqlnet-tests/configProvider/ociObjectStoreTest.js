@@ -162,7 +162,6 @@ describe('1. OCI Object Storage', function() {
     } else {
       console.log("Running in Thin mode");
     }
-
     if (process.env.NODE_ORACLEDB_CONNECTIONSTRING_OCI) {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_OCI;
     } else {
@@ -187,7 +186,6 @@ describe('1. OCI Object Storage', function() {
   describe('1. OCI Object Store', function() {
     const path1 = path.join(os.homedir(), '.oci/config');
     const path2 = path.join(os.homedir(), '.oci/config1');
-
     before(function() {
       // Copy config file if necessary before tests
       if (!fs.existsSync(path1))
@@ -201,8 +199,7 @@ describe('1. OCI Object Storage', function() {
         fs.copyFileSync(path2, path1);
       fs.rmSync(path2);
     });
-
-    it('1.1 OCI Object Store with basic password', async function() {
+    it('1.1 OCI Object Store with password in base64 format', async function() {
       // Connect using basic password in connection string
       const connection = await oracledb.getConnection(config);
       const result = await connection.execute("select 1+1 from dual");
@@ -375,9 +372,17 @@ describe('1. OCI Object Storage', function() {
       const result = await connection.execute("select 1+1 from dual");
       assert(result.rows[0][0], 2);
       await connection.close();
-    }); // 1.18
+    }); // 1.16
 
-    describe('1.17 OCI Object Store with default config file removed', function() {
+    it.only('1.17 OCI Object Store with password stored in text format', async function() {
+      config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_ALIAS_TEXT;
+      await assert.rejects(
+        async () => await oracledb.getConnection(config),
+        /NJS-523:/
+      );
+    }); // 1.17
+
+    describe('1.18 OCI Object Store with default config file removed', function() {
       const config = {};
       beforeEach(function() {
         // Test connection with basic password without default config file
@@ -390,15 +395,15 @@ describe('1. OCI Object Storage', function() {
         fs.copyFileSync(path2, path1);
       });
 
-      it('1.17.1 OCI Object Store with basic password but no default config file', async function() {
+      it('1.18.1 OCI Object Store with basic password but no default config file', async function() {
         config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_OCI;
         const connection = await oracledb.getConnection(config);
         const result = await connection.execute("select 1+1 from dual");
         assert(result.rows[0][0], 2);
         await connection.close();
-      }); // 1.17.1
+      }); // 1.18.1
 
-      it('1.17.2 OCI Object Store with custom config file(oci_profile_path)', async function() {
+      it('1.18.2 OCI Object Store with custom config file(oci_profile_path)', async function() {
         const url = process.env.NODE_ORACLEDB_CONNECTIONSTRING_OCIPARAMS;
         const posQnMarkChar = url.indexOf('?');
         const isAuthParamsPresent = posQnMarkChar != -1 ? true : false;
@@ -410,7 +415,7 @@ describe('1. OCI Object Storage', function() {
         const result = await connection.execute("select 1+1 from dual");
         assert(result.rows[0][0], 2);
         await connection.close();
-      }); // 1.17.2
-    }); // 1.17
+      }); // 1.18.2
+    }); // 1.18
   });
 });
