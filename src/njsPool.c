@@ -45,6 +45,7 @@ NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolMin);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolPingInterval);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolPingTimeout);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getPoolTimeout);
+NJS_NAPI_METHOD_DECL_SYNC(njsPool_getMaxLifetimeSession);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getStmtCacheSize);
 NJS_NAPI_METHOD_DECL_SYNC(njsPool_getSodaMetaDataCache);
 NJS_NAPI_METHOD_DECL_ASYNC(njsPool_reconfigure);
@@ -89,6 +90,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, napi_default, NULL },
     { "getPoolTimeout", NULL, njsPool_getPoolTimeout, NULL, NULL, NULL,
             napi_default, NULL },
+    { "getMaxLifetimeSession", NULL, njsPool_getMaxLifetimeSession, NULL, NULL, 
+        NULL, napi_default, NULL },
     { "getStmtCacheSize", NULL, njsPool_getStmtCacheSize, NULL, NULL, NULL,
             napi_default, NULL },
     { "getSodaMetaDataCache", NULL, njsPool_getSodaMetaDataCache, NULL, NULL,
@@ -192,6 +195,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
     if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "queueTimeout",
             &baton->poolWaitTimeout))
         return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0],
+            "maxLifetimeSession", &baton->maxLifetimeSession))
+        return false;
     if (!njsUtils_getNamedPropertyBool(env, args[0], "sodaMetaDataCache",
             &baton->sodaMetadataCache))
         return false;
@@ -232,6 +238,7 @@ static bool njsPool_createAsync(njsBaton *baton)
             DPI_MODE_POOL_GET_TIMEDWAIT : DPI_MODE_POOL_GET_WAIT;
     params.waitTimeout = baton->poolWaitTimeout + 10000;
     params.timeout = baton->poolTimeout;
+    params.maxLifetimeSession = baton->maxLifetimeSession;
     params.externalAuth = baton->externalAuth;
     params.homogeneous = baton->homogeneous;
     params.plsqlFixupCallback = baton->plsqlFixupCallback;
@@ -307,6 +314,7 @@ static bool njsPool_createPostAsync(njsBaton *baton, napi_env env,
     pool->poolMin = baton->poolMin;
     pool->poolIncrement = baton->poolIncrement;
     pool->poolTimeout = baton->poolTimeout;
+    pool->maxLifetimeSession = baton->maxLifetimeSession;
     pool->poolPingInterval = baton->poolPingInterval;
     pool->poolPingTimeout = baton->poolPingTimeout;
     pool->stmtCacheSize = baton->stmtCacheSize;
@@ -487,6 +495,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_reconfigure, 1, NULL)
     baton->poolIncrement = pool->poolIncrement;
     baton->poolPingInterval = pool->poolPingInterval;
     baton->poolTimeout = pool->poolTimeout;
+    baton->maxLifetimeSession = pool->maxLifetimeSession;
     baton->stmtCacheSize = pool->stmtCacheSize;
     baton->poolMaxPerShard = pool->poolMaxPerShard;
     baton->sodaMetadataCache = pool->sodaMetadataCache;
@@ -509,6 +518,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_reconfigure, 1, NULL)
         return false;
     if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "poolTimeout",
             &baton->poolTimeout))
+        return false;
+    if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0],
+            "maxLifetimeSession", &baton->maxLifetimeSession))
         return false;
     if (!njsUtils_getNamedPropertyUnsignedInt(env, args[0], "stmtCacheSize",
             &baton->stmtCacheSize))
@@ -545,7 +557,7 @@ static bool njsPool_reconfigureAsync(njsBaton *baton)
     }
 
     // Other pool parameters: poolPingInterval, poolTimeout, poolMaxPerShard,
-    //    stmtCacheSize, sodaMetaDataCache
+    //    stmtCacheSize, sodaMetaDataCache, maxLifetimeSession
 
     if (pool->poolPingInterval != baton->poolPingInterval) {
         if (dpiPool_setPingInterval(pool->handle, baton->poolPingInterval) < 0)
@@ -557,6 +569,13 @@ static bool njsPool_reconfigureAsync(njsBaton *baton)
         if (dpiPool_setTimeout(pool->handle, baton->poolTimeout) < 0)
             return njsBaton_setErrorDPI(baton);
         pool->poolTimeout = baton->poolTimeout;
+    }
+
+    if (pool->maxLifetimeSession != baton->maxLifetimeSession) {
+        if (dpiPool_setMaxLifetimeSession(pool->handle,
+                baton->maxLifetimeSession) < 0)
+            return njsBaton_setErrorDPI(baton);
+        pool->maxLifetimeSession = baton->maxLifetimeSession;
     }
 
     if (pool->poolMaxPerShard != baton->poolMaxPerShard) {
@@ -716,6 +735,18 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getPoolTimeout, 0, NULL)
     return true;
 }
 
+//-----------------------------------------------------------------------------
+// njsPool_getMaxLifetimeSession()
+//   Get accessor of "maxLifetimeSession" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsPool_getMaxLifetimeSession, 0, NULL)
+{
+    njsPool *pool = (njsPool*) callingInstance;
+
+    NJS_CHECK_NAPI(env, napi_create_uint32(env, pool->maxLifetimeSession,
+            returnValue))
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 // njsPool_getSodaMetaDataCache()

@@ -196,7 +196,7 @@ describe('313. dbObjectsNested.js', () => {
       await connection.execute(
         `CREATE OR REPLACE PACKAGE BODY pkg_numbertable AS
           FUNCTION get_number_table RETURN number_table IS result
-          number_table := number_table(10, 20, 30); BEGIN RETURN result; 
+          number_table := number_table(10, 20, 30); BEGIN RETURN result;
         END; END pkg_numbertable;`);
     });
 
@@ -235,7 +235,7 @@ describe('313. dbObjectsNested.js', () => {
           table_of_varray := table_of_varray(); inner1 number_varray := number_varray(10, 20);
           inner2 number_varray := number_varray(30, 40); BEGIN result.extend;
           result(1) := inner1; result.extend; result(2) := inner2;
-          RETURN result; 
+          RETURN result;
         END; END pkg_tableofvarray;`);
     });
 
@@ -493,10 +493,10 @@ describe('313. dbObjectsNested.js', () => {
         BEGIN
           -- Leave null collection as NULL
           p_null_coll := NULL;
-          
+
           -- Initialize empty collection
           p_empty_coll := address_list();
-          
+
           -- Create populated collection
           p_populated_coll := address_list();
           p_populated_coll.extend;
@@ -507,7 +507,7 @@ describe('313. dbObjectsNested.js', () => {
       // Execute the procedure
       const result = await connection.execute(
         `BEGIN 
-           test_collection_states(:null_coll, :empty_coll, :populated_coll); 
+           test_collection_states(:null_coll, :empty_coll, :populated_coll);
          END;`,
         {
           null_coll: { type: AddressList, dir: oracledb.BIND_OUT },

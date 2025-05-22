@@ -394,6 +394,7 @@ struct njsBaton {
     uint32_t poolWaitTimeout;
     int32_t poolPingInterval;
     int32_t poolPingTimeout;
+    uint32_t maxLifetimeSession;
     uint32_t stmtCacheSize;
     uint32_t maxRows;
     uint32_t bindArraySize;
@@ -583,6 +584,7 @@ struct njsPool {
     uint32_t poolMaxPerShard;
     uint32_t poolIncrement;
     uint32_t poolTimeout;
+    uint32_t maxLifetimeSession;
     uint32_t stmtCacheSize;
     int32_t poolPingInterval;
     int32_t poolPingTimeout;

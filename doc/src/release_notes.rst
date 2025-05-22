@@ -19,8 +19,19 @@ node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...
 Common Changes
 ++++++++++++++
 
-#)  Fixed bug which does not trigger PL/SQL functions registered for callbacks
-    properly when using implicit pooling with temporary LOBs creation.
+#)  Added support for :ref:`Transaction Guard <tg>` with the introduction of
+    the :attr:`~connection.ltxid` property.
+
+#)  Added ``precision``, ``scale``, and ``maxSize`` attributes to the
+    :attr:`dbObject.attributes` property which provide additional metadata
+    about the database object.
+
+#)  Added support for property :attr:`pool.maxLifetimeSession` and added it as
+    an optional parameter for configurations of :meth:`oracledb.createPool()`
+    and :meth:`pool.reconfigure()`.
+
+#)  Added instance principal authentication support in native IAM token based
+    authentication with Oracle Cloud Infrastructure.
 
 #)  Added a second argument for the fetchTypeHandler call to get
     the metadata of all the result columns.
@@ -32,24 +43,17 @@ Common Changes
 #)  Added :attr:`~error.isRecoverable` property to the Error object to check
     if an error is recoverable.
 
-#)  Added support for :ref:`Transaction Guard <tg>` with the introduction of
-    the :attr:`~connection.ltxid` property.
-
-#)  Added ``precision``, ``scale``, and ``maxSize`` attributes to the
-    :attr:`dbObject.attributes` property which provide additional metadata
-    about the database object.
-
 #)  All Oracle errors that result in the connection no longer being usable will
     be raised as an ``NJS-500`` error with the underlying reason being
     included in the error message.
 
-#)  Improved NJS error messages.
-
-#)  Added instance principal authentication support in native IAM token based
-    authentication with Oracle Cloud Infrastructure.
-
 #)  Improved connection pool's queueTimeout behavior to account for network
     delays and pool expansion delays.
+
+#)  Fixed bug which does not trigger PL/SQL functions registered for callbacks
+    properly when using implicit pooling with temporary LOBs creation.
+
+#)  Improved NJS error messages.
 
 Thin Mode Changes
 +++++++++++++++++
@@ -81,15 +85,19 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Fixed intermittent crash seen after :meth:`connection.unsubscribe()`
-    caused by a race condition.
-
 #)  Added support for the BFILE method :meth:`lob.setDirFileName()`.
 
 #)  Added ``enqTime`` property for :ref:`Advanced Queuing (AQ) messages
     <_aqmessage_class_attributes>` to specify the time when the message was
     enqueued.
     See `Issue #1725 <https://github.com/oracle/node-oracledb/issues/1725>`__.
+
+#)  Fixed intermittent crash seen after :meth:`connection.unsubscribe()`
+    caused by a race condition.
+
+#)  Fixed issue with sharding keys, where an internal error was thrown when
+    connections to Oracle Globally Distributed Databases are created with
+    proper sharding key values.
 
 #)  Fixed bug resulting in a segfault when unable to load the Oracle Client
     libraries (`ODPI-C <https://github.com/oracle/odpi>`__ change).
@@ -101,10 +109,6 @@ Thick Mode Changes
 #)  Improved error message when getting :attr:`connection.maxOpenCursors`
     when using Oracle Client 11.2 libraries
     (`ODPI-C <https://github.com/oracle/odpi>`__ change).
-
-#)  Fixed issue with sharding keys, where an internal error was thrown when
-    connections to Oracle Globally Distributed Databases are created with
-    proper sharding key values.
 
 #)  Improved error message when attempting to work with sparse vectors using
     Oracle Client 23.6 (or earlier) libraries

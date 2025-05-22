@@ -103,7 +103,7 @@ describe('1. implicitPool1.js', function() {
     `);
 
     await connection.execute(testsUtil.sqlCreateTable('TestTempTable', `
-      CREATE TABLE TestTempTable (INTCOL NUMBER(9) NOT NULL, 
+      CREATE TABLE TestTempTable (INTCOL NUMBER(9) NOT NULL,
                                   VALUE VARCHAR2(100))
     `));
 
@@ -132,16 +132,16 @@ describe('1. implicitPool1.js', function() {
     // Create PL/SQL package for implicit callbacks
     await connection.execute(`
       CREATE OR REPLACE PACKAGE ora_cpool_state AS
-        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2, 
+        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2,
         connection_class VARCHAR2);
-        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2, 
+        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2,
         connection_class VARCHAR2);
       END ora_cpool_state;
     `);
 
     await connection.execute(`
       CREATE OR REPLACE PACKAGE BODY ora_cpool_state AS
-        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2, 
+        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2,
         connection_class VARCHAR2) IS
         BEGIN
           INSERT INTO ${dbConfig.user}.TestImplicitPoolCallbacks VALUES (
@@ -150,7 +150,7 @@ describe('1. implicitPool1.js', function() {
           COMMIT;
         END;
 
-        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2, 
+        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2,
         connection_class VARCHAR2) IS
         BEGIN
           INSERT INTO ${dbConfig.user}.TestImplicitPoolCallbacks VALUES (

@@ -51,6 +51,7 @@ describe('2. pool.js', function() {
       assert.strictEqual(pool.stmtCacheSize, oracledb.stmtCacheSize);
       assert.strictEqual(pool.connectionsOpen, 0);
       assert.strictEqual(pool.connectionsInUse, 0);
+      assert.strictEqual(pool.maxLifetimeSession, 0);
       await pool.close(0);
     });
   });
