@@ -51,6 +51,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug which forced node-oracledb to resolve the database host name 
+    even if a proxy was specified in the connect string. Now the proxy 
+    specified in the connect string will resolve the database host name.
+
 #)  Fixed bug where the compression threshold was not being set to the
     user-supplied value.
 
