@@ -122,6 +122,8 @@ Set the following environment variables to provide credentials for the test suit
 
 * `NODE_ORACLEDB_CLIENT_LIB_DIR` provides an optional path for the Oracle Client libraries to be used in Windows and macOS platforms, when using Thick mode in node-oracledb.
 
+* `NODE_ORACLEDB_IMPL_CONNECTIONSTRING` provides the DRCP Implicit connection pooling connection string. Use this to test DRCP Implicit connection pooling.
+
 Note: the test suite requires the schema to have these privileges: CREATE TABLE, CREATE SESSION,
 CREATE PROCEDURE, CREATE SEQUENCE, CREATE TRIGGER, and CREATE TYPE.
 Certain tests require CREATE DOMAIN, CREATE VIEW privileges as well.

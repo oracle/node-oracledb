@@ -1202,8 +1202,8 @@ Each of the configuration properties is described below.
 
     By default, this property is "undefined", that is, it is not set.
 
-    The second object argument contains the :ref:`metadata <execmetada>` list
-    of all the result columns fetched using the SELECT statement.
+    The second object argument contains the :ref:`metadata <execmetadata>`
+    list of all the result columns fetched using the SELECT statement.
 
     The function is expected to return either nothing or an object containing:
 
@@ -2789,7 +2789,7 @@ Oracledb Methods
 
             In Instance Principal Authentication, an instance can be authorized to make API calls on OCI services without credentials. The authentication method will only work on compute instances where internal network endpoints are reachable.
 
-            See `OCI SDK Authentication Methods https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm`__ for more information.
+            See `OCI SDK Authentication Methods <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm>`__ for more information.
           - Required
         * - ``profile``
           - The configuration profile name. The default value is *DEFAULT*.
@@ -2838,11 +2838,11 @@ Oracledb Methods
             This property can be specified when the value of the ``authType`` property is *simpleAuthentication*.
           - Required
         * - ``scope``
-          - This property identifies all databases in the cloud tenancy of the authenticated user. The default value is "urn:oracle:db::id::*".
+          - This property identifies all databases in the cloud tenancy of the authenticated user. The default value is *urn:oracle:db::id::**.
 
-            A scope that authorizes access to all databases within a compartment has the format "urn:oracle:db::id::<compartment-ocid>", for example, "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxxxx".
+            A scope that authorizes access to all databases within a compartment has the format *urn:oracle:db::id::<compartment-ocid>*, for example, "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxxxx".
 
-            A scope that authorizes access to a single database within a compartment has the format "urn:oracle:db::id::<compartment-ocid>::<database-ocid>", for example, "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxx::ocid1.autonomousdatabase.oc1.phx.xxxxxx".
+            A scope that authorizes access to a single database within a compartment has the format *urn:oracle:db::id::<compartment-ocid>::<database-ocid>*, for example, "urn:oracle:db::id::ocid1.compartment.oc1..xxxxxx::ocid1.autonomousdatabase.oc1.phx.xxxxxx".
 
             This property can be specified when the value of the ``authType`` property is *simpleAuthentication*, *configFileBasedAuthentication*, or *instancePrincipal*.
           - Optional

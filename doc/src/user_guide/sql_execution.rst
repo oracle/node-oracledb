@@ -658,7 +658,7 @@ arguments. The first object argument contains the ``annotations``,
 ``domainSchema``, ``isJson``, ``name``, ``nullable``, ``precision``, and
 ``scale`` attributes. See :attr:`oracledb.fetchTypeHandler` for more
 information on these attributes. The second object argument contains the
-:ref:`metadata <execmetada>` list of all the result columns fetched using the
+:ref:`metadata <execmetadata>` list of all the result columns fetched using the
 SELECT statement.
 
 The function is called once for each column that is going to be fetched. The
