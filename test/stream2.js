@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -175,7 +175,7 @@ describe('14. stream2.js', function() {
       function() {
         connection.queryStream();
       },
-      /NJS-009: invalid number of parameters/
+      /NJS-009: invalid number of function parameters: 0 provided but expected between 1 and 3/
     );
   }); //14.7
 
