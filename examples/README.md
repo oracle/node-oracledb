@@ -59,6 +59,7 @@ If this is your first time with node-oracledb, start with
 
 File Name                                                 | Description
 ----------------------------------------------------------|----------------------------------------------------------------------------------
+[`appcontext.js`](appcontext.js)                          | Shows how to set application context for connections.
 [`aqmulti.js`](aqmulti.js)                                | Oracle Advanced Queuing (AQ) example passing multiple messages
 [`aqobject.js`](aqobject.js)                              | Oracle Advanced Queuing (AQ) example passing an Oracle Database object
 [`aqoptions.js`](aqoptions.js)                            | Oracle Advanced Queuing (AQ) example setting options and message attributes

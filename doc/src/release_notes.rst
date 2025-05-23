@@ -33,6 +33,10 @@ Common Changes
 #)  Added instance principal authentication support in native IAM token based
     authentication with Oracle Cloud Infrastructure.
 
+#)  Added support for setting
+    :ref:`application context <getconnectiondbattrsappcontext>` with database
+    connections.
+
 #)  Added a second argument for the fetchTypeHandler call to get
     the metadata of all the result columns.
     See `Issue #1728 <https://github.com/oracle/node-oracledb/issues/1728>`__.

@@ -254,9 +254,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Implicit Result Sets (see :ref:`implicitresults`)
       - Yes
       - Yes
-    * - Application Contexts
-      - No
-      - No
+    * - Application Contexts (see :ref:`appcontext`)
+      - Yes
+      - Yes
     * - Persistent and Temporary LOBs
       - Yes
       - Yes

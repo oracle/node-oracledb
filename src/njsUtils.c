@@ -451,6 +451,63 @@ bool njsUtils_getNamedPropertyShardingKey(napi_env env, napi_value value,
 
 
 //-----------------------------------------------------------------------------
+// njsUtils_getNamedPropertyAppContext()
+//   Returns the value of the appContext property, which is assumed to be an
+// array of array of 3 strings. If the value is not found, the string value is
+// left unchanged.
+//-----------------------------------------------------------------------------
+bool njsUtils_getNamedPropertyAppContext(napi_env env, napi_value value,
+        const char *name, uint32_t *numAppContextEntries,
+        dpiAppContext **appContextEntries)
+{
+    napi_value appCtxJsArray, element, temp;
+    dpiAppContext *appContextArray;
+    uint32_t arrLen, i;
+    size_t numBytes;
+
+    // allocate space for app context entries; if array is empty, nothing
+    // further to do!
+    if (!njsUtils_getNamedProperty(env, value, name, &appCtxJsArray))
+        return false;
+    if (!appCtxJsArray)
+        return true;
+    NJS_CHECK_NAPI(env, napi_get_array_length(env, appCtxJsArray, &arrLen))
+    if (arrLen == 0)
+        return true;
+    appContextArray = calloc(arrLen, sizeof(dpiAppContext));
+    if (!appContextArray)
+        return njsUtils_throwInsufficientMemory(env);
+    *appContextEntries = appContextArray;
+    *numAppContextEntries = arrLen;
+
+    // process each app context entry
+    for (i = 0; i < arrLen; i++) {
+        NJS_CHECK_NAPI(env, napi_get_element(env, appCtxJsArray, i, &element))
+
+        // The JS layer will ensure that each app context entry is always
+        // an array of 3 string values (namespace, name and value).
+        NJS_CHECK_NAPI(env, napi_get_element(env, element, 0, &temp))
+        if (!njsUtils_copyStringFromJS(env, temp,
+                (char **) &appContextArray[i].namespaceName, &numBytes))
+            return false;
+        appContextArray[i].namespaceNameLength = (uint32_t) numBytes;
+        NJS_CHECK_NAPI(env, napi_get_element(env, element, 1, &temp))
+        if (!njsUtils_copyStringFromJS(env, temp,
+                (char **) &appContextArray[i].name, &numBytes))
+            return false;
+        appContextArray[i].nameLength = (uint32_t) numBytes;
+        NJS_CHECK_NAPI(env, napi_get_element(env, element, 2, &temp))
+        if (!njsUtils_copyStringFromJS(env, temp,
+                (char **) &appContextArray[i].value, &numBytes))
+            return false;
+        appContextArray[i].valueLength = (uint32_t) numBytes;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsUtils_getNamedPropertyString()
 //   Returns the value of the named property, which is assumed to be a string
 // value. If the value is not found, the string value is left unchanged.

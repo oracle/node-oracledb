@@ -437,6 +437,10 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_connect, 1, &njsClassDefConnection)
             &baton->numSuperShardingKeyColumns,
             &baton->superShardingKeyColumns))
         return false;
+    if (!njsUtils_getNamedPropertyAppContext(env, args[0], "appContext",
+            &baton->numAppContextEntries,
+            &baton->appContextEntries))
+        return false;
     return njsBaton_queueWork(baton, env, "Connect",
             njsConnection_connectAsync, njsConnection_connectPostAsync,
             returnValue);
@@ -471,6 +475,10 @@ static bool njsConnection_connectAsync(njsBaton *baton)
     params.numShardingKeyColumns = baton->numShardingKeyColumns;
     params.superShardingKeyColumns = baton->superShardingKeyColumns;
     params.numSuperShardingKeyColumns = baton->numSuperShardingKeyColumns;
+
+    // App Context
+    params.appContext = baton->appContextEntries;
+    params.numAppContext = baton->numAppContextEntries;
 
     commonParams.edition = baton->edition;
     commonParams.editionLength = (uint32_t) baton->editionLength;

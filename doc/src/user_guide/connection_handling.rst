@@ -1021,6 +1021,80 @@ the use of ``errorOnConcurrentExecute`` will not affect parallel use of
 multiple connections, which may all be in use concurrently, and each of
 which can be doing a single operation.
 
+.. _appcontext:
+
+Application Contexts
+====================
+
+An application context stores user-specific information on the database that
+can enable or prevent a user from accessing data. See `About Application
+Contexts <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+6745DB10-F540-45D7-9761-9E8F342F1435>`__ in the Oracle Database documentation.
+Node-oracledb supports application contexts from version 6.9 onwards.
+
+An application context has a namespace and a key-value pair. The namespace
+*CLIENTCONTEXT* is reserved for use with client session-based application
+contexts. Single or multiple application context values can be set when
+connecting to the database by using the
+:ref:`appContext <getconnectiondbattrsappcontext>` property in
+:meth:`oracledb.getConnection()` in both node-oracledb Thin and Thick modes.
+You must use an array of arrays to set this property value where each array
+element contains string values for the application context ``namespace``,
+``name``, and ``value``. For example:
+
+.. code-block:: javascript
+
+    const APP_CTX_NAMESPACE = 'CLIENTCONTEXT';
+
+    const APP_CTX_ENTRIES = [
+      [ APP_CTX_NAMESPACE, 'ATTR1', 'VALUE1' ],
+      [ APP_CTX_NAMESPACE, 'ATTR2', 'VALUE2' ],
+      [ APP_CTX_NAMESPACE, 'ATTR3', 'VALUE3' ],
+    ];
+
+    const connection = await oracledb.getConnection({
+      user: "hr",
+      password: mypw, // contains the hr schema password
+      connectString: "mydbmachine.example.com/orclpdb1",
+      appContext: APP_CTX_ENTRIES
+    });
+
+Application context values set during connection creation can be directly
+queried in your applications.
+
+.. code-block:: javascript
+
+    for (const entry of APP_CTX_ENTRIES) {
+      const result = await connection.execute(
+        `SELECT sys_context(:1, :2) FROM dual`,
+        [entry[0], entry[1]] // The bind value with namespace and name
+      );
+      console.log('The appcontext value is:', result.rows[0][0]);
+    }
+
+This query prints::
+
+    The appcontext value is: VALUE1
+    The appcontext value is: VALUE2
+    The appcontext value is: VALUE3
+
+See `appcontext.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/appcontext.js>`__ for a runnable example.
+
+In Thin mode, you can set the application context for pooled connections by
+using the :ref:`appContext <createpoolpoolattrsappcontext>`property in
+:meth:`oracledb.createPool()`.
+
+You can use application contexts to set up restrictive policies that are
+automatically applied to any query executed. See `Oracle Virtual Private
+Database (VPD) <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+06022729-9210-4895-BF04-6177713C65A7>`__ in the Oracle Database documentation.
+
+Note :ref:`Database Resident Connection Pooling (DRCP) <drcp>` does not
+support setting or working with application contexts. You also cannot set
+application contexts with application-side connection pools in Thick mode.
+The application context setting is ignored in these cases.
+
 .. _pooled-connections:
 .. _connpooling:
 

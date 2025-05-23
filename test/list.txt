@@ -58,6 +58,10 @@ Overview of node-oracledb functional tests
         1.18.2 Check parameter values after user update
     1.19 Check error in the middle of a statement execute
         1.19.1 Negative - divide by zero error in the middle of an SQL request
+    1.20 appContext property
+        1.20.1 set valid appContext values in connection
+        1.20.2 set invalid appContext values in connection
+        1.20.3 ignore empty appContext array in connection
 
   2. pool.js
     2.1 default setting
@@ -144,6 +148,10 @@ Overview of node-oracledb functional tests
     2.20 settable parameters
        2.20.1 Check parameter values after user update
        2.20.2 negative - Check parameter value types
+    2.21 appContext property with pools
+       2.21.1 set valid appContext values in pool
+       2.21.2 set invalid appContext values in pool
+       2.21.3 ignore empty appContext array in pool
 
   3. examples.js
     3.1 connect.js

@@ -354,6 +354,18 @@ void njsBaton_free(njsBaton *baton, napi_env env)
     njsBaton_freeShardingKeys(&baton->numSuperShardingKeyColumns,
             &baton->superShardingKeyColumns);
 
+    // free app context entries
+    if (baton->appContextEntries) {
+        for (i = 0; i < baton->numAppContextEntries; i++) {
+            NJS_FREE_AND_CLEAR(baton->appContextEntries[i].namespaceName);
+            NJS_FREE_AND_CLEAR(baton->appContextEntries[i].name);
+            NJS_FREE_AND_CLEAR(baton->appContextEntries[i].value);
+        }
+        free(baton->appContextEntries);
+        baton->numAppContextEntries = 0;
+        baton->appContextEntries = NULL;
+    }
+
     free(baton);
 }
 

@@ -456,6 +456,10 @@ struct njsBaton {
     uint8_t  numShardingKeyColumns;
     uint8_t  numSuperShardingKeyColumns;
 
+    // application context (requires free)
+    dpiAppContext *appContextEntries;
+    uint32_t numAppContextEntries;
+
     // TPC/XA related fields (requires free)
     dpiXid*  xid;
     uint32_t tpcFlags;
@@ -930,6 +934,9 @@ bool njsUtils_getNamedPropertyInt(napi_env env, napi_value value,
 bool njsUtils_getNamedPropertyShardingKey(napi_env env, napi_value value,
         const char *name, uint8_t *numShardingKeyColumns,
         dpiShardingKeyColumn **shardingKeyColumns);
+bool njsUtils_getNamedPropertyAppContext(napi_env env, napi_value value,
+        const char *name, uint32_t *numAppContextEntries,
+        dpiAppContext **appContextEntries);
 bool njsUtils_getNamedPropertyString(napi_env env, napi_value value,
         const char *name, char **result, size_t *resultLength);
 bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,

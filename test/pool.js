@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1496,6 +1496,79 @@ describe('2. pool.js', function() {
 
       await conn.close();
       await pool.close(0);
+    });
+  });
+
+  describe('2.21 appContext property with pools', function() {
+
+    let pool, connection;
+    before(function() {
+      // application context settings are not supported with DRCP
+      // or with Thick mode connection pools
+      if (dbConfig.test.drcp || !oracledb.thin) this.skip();
+    });
+
+    after(function() {
+      // application context settings are not supported with DRCP
+      // or with Thick mode connection pools
+      if (dbConfig.test.drcp || !oracledb.thin) return;
+    });
+
+    afterEach(async function() {
+      if (connection) {
+        await connection.close();
+        connection = null;
+      }
+      if (pool) {
+        await pool.close();
+        pool = null;
+      }
+    });
+
+    it('2.21.1 set valid appContext values in pool', async function() {
+      const APP_CTX_NAMESPACE = 'CLIENTCONTEXT';
+      const APP_CTX_ENTRIES = [
+        [ APP_CTX_NAMESPACE, 'ATTR1', 'VALUE1' ],
+        [ APP_CTX_NAMESPACE, 'ATTR2', 'VALUE2' ],
+        [ APP_CTX_NAMESPACE, 'ATTR3', 'VALUE3' ],
+      ];
+      const config = { ...dbConfig, appContext: APP_CTX_ENTRIES };
+
+      pool = await oracledb.createPool(config);
+      connection = await pool.getConnection();
+      for (const entry of APP_CTX_ENTRIES) {
+        const result = await connection.execute(
+          // The statement to execute
+          `SELECT sys_context(:1, :2) FROM dual`,
+
+          // The "bind value" with namespace and name
+          [entry[0], entry[1]]
+        );
+        assert.strictEqual(result.rows[0][0], entry[2]);
+      }
+    }); // 2.21.1
+
+    it('2.21.2 set invalid appContext values in pool', async function() {
+      const APP_CTX_NAMESPACE = 'CLIENTCONTEXT';
+      const APP_CTX_ENTRIES = [
+        [ APP_CTX_NAMESPACE, 'ATTR1' ],
+        [ APP_CTX_NAMESPACE, 'ATTR2' ],
+        [ APP_CTX_NAMESPACE, 'ATTR3' ],
+      ];
+      const config = { ...dbConfig, appContext: APP_CTX_ENTRIES };
+      await assert.rejects(
+        async () => {
+          await oracledb.createPool(config);
+        },
+        /NJS-007:/
+      );
+    });
+
+    it('2.21.3 ignore empty appContext array in pool', async function() {
+      const config = { ...dbConfig, appContext: [] };
+      pool = await oracledb.createPool(config);
+      connection = await pool.getConnection();
+      assert(connection);
     });
   });
 });

@@ -1000,4 +1000,69 @@ describe('1. connection.js', function() {
       );
     });
   });
+
+  describe('1.20 appContext property', function() {
+
+    let connection;
+    before(function() {
+      // application context settings are not supported with DRCP
+      if (dbConfig.test.drcp) this.skip();
+    });
+
+    after(function() {
+      // application context settings are not supported with DRCP
+      if (dbConfig.test.drcp) return;
+    });
+
+    afterEach(async function() {
+      if (connection) {
+        await connection.close();
+        connection = null;
+      }
+    });
+
+    it('1.20.1 set valid appContext values in connection', async function() {
+      const APP_CTX_NAMESPACE = 'CLIENTCONTEXT';
+      const APP_CTX_ENTRIES = [
+        [ APP_CTX_NAMESPACE, 'ATTR1', 'VALUE1' ],
+        [ APP_CTX_NAMESPACE, 'ATTR2', 'VALUE2' ],
+        [ APP_CTX_NAMESPACE, 'ATTR3', 'VALUE3' ],
+      ];
+      const config = { ...dbConfig, appContext: APP_CTX_ENTRIES };
+
+      connection = await oracledb.getConnection(config);
+      for (const entry of APP_CTX_ENTRIES) {
+        const result = await connection.execute(
+          // The statement to execute
+          `SELECT sys_context(:1, :2) FROM dual`,
+
+          // The "bind value" with namespace and name
+          [entry[0], entry[1]]
+        );
+        assert.strictEqual(result.rows[0][0], entry[2]);
+      }
+    }); // 1.20.1
+
+    it('1.20.2 set invalid appContext values in connection', async function() {
+      const APP_CTX_NAMESPACE = 'CLIENTCONTEXT';
+      const APP_CTX_ENTRIES = [
+        [ APP_CTX_NAMESPACE, 'ATTR1' ],
+        [ APP_CTX_NAMESPACE, 'ATTR2' ],
+        [ APP_CTX_NAMESPACE, 'ATTR3' ],
+      ];
+      const config = { ...dbConfig, appContext: APP_CTX_ENTRIES };
+      await assert.rejects(
+        async () => {
+          await oracledb.getConnection(config);
+        },
+        /NJS-007:/
+      );
+    }); // 1.20.2
+
+    it('1.20.3 ignore empty appContext array in connection', async function() {
+      const config = { ...dbConfig, appContext: [] };
+      connection = await oracledb.getConnection(config);
+      assert(connection);
+    }); // 1.20.3
+  }); // 1.20
 });

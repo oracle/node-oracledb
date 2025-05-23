@@ -2093,6 +2093,14 @@ Oracledb Methods
             For OAuth2.0 token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. For IAM token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) are required.
 
             .. versionadded:: 6.3
+        * - ``appContext``
+          - Array
+          - Thin
+          - .. _createpoolpoolattrsappcontext:
+
+            An array of array values that identifies the application context used by the connection. The elements of the array should contain three string values - namespace, name, and value. See :ref:`appcontext`.
+
+            .. versionadded:: 6.9
         * - ``configDir``
           - String
           - Thin
@@ -3082,6 +3090,14 @@ Oracledb Methods
             For OAuth2.0 token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. For IAM token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) are required.
 
             .. versionadded:: 6.3
+        * - ``appContext``
+          - Array
+          - Both
+          - .. _getconnectiondbattrsappcontext:
+
+            An array of array values that identifies the application context used by the connection. The elements of the array should contain three string values - namespace, name, and value. See :ref:`appcontext`.
+
+            .. versionadded:: 6.9
         * - ``configDir``
           - String
           - Thin
