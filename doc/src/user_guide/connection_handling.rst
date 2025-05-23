@@ -1082,7 +1082,7 @@ See `appcontext.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/appcontext.js>`__ for a runnable example.
 
 In Thin mode, you can set the application context for pooled connections by
-using the :ref:`appContext <createpoolpoolattrsappcontext>`property in
+using the :ref:`appContext <createpoolpoolattrsappcontext>` property in
 :meth:`oracledb.createPool()`.
 
 You can use application contexts to set up restrictive policies that are

@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -69,8 +69,11 @@ console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 // will be processed by the converter function before it is returned to the
 // application.
 
-function fth(metaData) {
+function fth(metaData, rowsetMetaData) {
   if (metaData.name == 'N_COL' && metaData.dbType === oracledb.DB_TYPE_NUMBER) {
+    // Gets the metadata of the N_COL column
+    const nColColumn = rowsetMetaData.find(col => col.name === 'N_COL');
+    console.log("    MetaData of the N_COL column:", nColColumn);
     return {converter: formatNumber};
   }
 }
@@ -100,12 +103,12 @@ async function run() {
     }
 
     await connection.execute(
-      `CREATE TABLE no_typehandler_tab (n_col NUMBER)`);
+      `CREATE TABLE no_typehandler_tab (id NUMBER, n_col NUMBER)`);
 
     const data = 123456.78;
     console.log('2. Inserting number ' + data);
 
-    const inssql = `INSERT INTO no_typehandler_tab (n_col) VALUES (:bv)`;
+    const inssql = `INSERT INTO no_typehandler_tab (id, n_col) VALUES (1, :bv)`;
     await connection.execute(inssql, { bv: data });
 
     // Example 1
@@ -113,11 +116,12 @@ async function run() {
     console.log('3. Selecting a formatted number');
 
     let result = await connection.execute(
-      "select n_col from no_typehandler_tab",
+      "SELECT id, n_col FROM no_typehandler_tab WHERE id = 1",
       [],
       { fetchTypeHandler: fth }
     );
-    console.log(`   Column ${result.metaData[0].name} is formatted as ${result.rows[0][0]}`);
+    console.log(`   Row fetched: ${result.rows}`);
+    console.log(`   Column ${result.metaData[0].name} is formatted as ${result.rows[0][1]}`);
 
     // Example 2
 

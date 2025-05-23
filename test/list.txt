@@ -6300,6 +6300,6 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
   314. dbObject21.js
     314.1 check attribute metadata
       314.1.1 check metadata of DbObject attributes
-  315. Pool maxLifetimeSession
+  315. poolMaxLifeTimeSession.js
     315.1 Testing maxLifetimeSession on conn release
     315.2 Testing maxLifetimeSession on conn acquire

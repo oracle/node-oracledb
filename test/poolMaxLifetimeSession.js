@@ -36,8 +36,16 @@ const assert = require('assert');
 const dbConfig = require('./dbconfig.js');
 const testUtil = require('./testsUtil.js');
 
-(oracledb.thin ? describe : describe.skip)('315. Pool maxLifetimeSession', function() {
+describe('315. poolMaxLifeTimeSession.js', function() {
   let pool;
+
+  before(function() {
+    if (!oracledb.thin) this.skip();
+  });
+
+  after(function() {
+    if (!oracledb.thin) return;
+  });
 
   afterEach(async function() {
     await pool?.close(0);
