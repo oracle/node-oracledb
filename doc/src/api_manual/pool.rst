@@ -113,6 +113,29 @@ values.
     See :ref:`homogeneous <createpoolpoolattrshomogeneous>` parameter of
     :meth:`oracledb.createPool()`.
 
+.. attribute:: pool.maxLifetimeSession
+
+    This read-only property is the number of seconds that a pooled connection
+    can exist in a pool after first being created.
+
+    A value of *0* means there is no limit defined for the connection in a
+    pool and no connections will be terminated. Connections become candidates
+    for termination when they are acquired or released back to the pool, and
+    have existed for longer than ``maxLifetimeSession`` seconds. Connections
+    that are in active use will not be closed.
+
+    In node-oracledb Thick mode, Oracle Client libraries 12.1 or later must
+    be used. Note that when using node-oracledb in Thick mode with Oracle
+    Client libraries prior to 21c, pool shrinkage is only initiated when the
+    pool is accessed. So, pools in fully dormant applications will not shrink
+    until the application is next used.
+
+    The default value is *0*.
+
+    See :ref:`conpoolsizing`.
+
+    .. versionadded:: 6.9
+
 .. attribute:: pool.poolAlias
 
     This read-only property is a number which specifies the alias of this
@@ -603,11 +626,16 @@ Pool Methods
             - :ref:`queueRequests <createpoolpoolattrsqueuerequests>`
             - :ref:`queueTimeout <createpoolpoolattrsqueuetimeout>`
             - :ref:`sodaMetaDataCache <createpoolpoolattrssodamdcache>` in only Thick mode
+            - :ref:`maxLifetimeSession <createpoolpoolattrsmaxlifetimesession>`
             - :ref:`stmtCacheSize <createpoolpoolattrsstmtcachesize>`
 
             A ``resetStatistics`` property can also be set to *true*. This zeros the current pool statistics, with the exception of ``queueMax`` which is set to the current queue length. Statistics are also reset when statistics recording is turned on with the ``enableStatistics`` property.
 
             Changing ``queueMax``, ``queueTimeout``, or resetting statistics does not affect any currently queued connection requests. If connections are not made available to currently queued requests, those queued requests will timeout based on the ``queueTimeout`` value in effect when they were originally added to the connection pool queue. If pool statistics are enabled, then these failed requests will be counted in :ref:`requestTimeouts <poolstats>` and included in the queue time statistics.
+
+            .. versionchanged:: 6.9
+
+                The ``maxLifetimeSession`` property was added.
 
     **Callback**:
 

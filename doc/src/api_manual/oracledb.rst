@@ -2265,6 +2265,20 @@ Oracledb Methods
             This optional property overrides the :attr:`oracledb.machine` property.
 
             .. versionadded:: 6.7
+        * - ``maxLifetimeSession``
+          - Number
+          - Both
+          - .. _createpoolpoolattrsmaxlifetimesession:
+
+            The number of seconds that a pooled connection can exist in a pool after first being created. A value of *0* means there is no limit defined for the connection in a pool and no connections will be terminated. Connections become candidates for termination when they are acquired or released back to the pool, and have existed for longer than ``maxLifetimeSession`` seconds. Connections that are in active use will not be closed.
+
+            In node-oracledb Thick mode, Oracle Client libraries 12.1 or later must be used. Note that when using node-oracledb in Thick mode with Oracle Client libraries prior to 21c, pool shrinkage is only initiated when the pool is accessed. So, pools in fully dormant applications will not shrink until the application is next used.
+
+            The default value is *0*.
+
+            See :ref:`conpoolsizing`.
+
+            .. versionadded:: 6.9
         * - ``networkCompression``
           - Boolean
           - Thin
@@ -2791,11 +2805,11 @@ Oracledb Methods
         * - ``authType``
           - The authentication type. The value should be the string *configFileBasedAuthentication*, *simpleAuthentication*, or *instancePrincipal*.
 
-            In Configuration File Based Authentication, the location of the configuration file containing the necessary information must be provided.
+            With Configuration File Based Authentication, the location of the configuration file containing the necessary information must be provided.
 
-            In Simple Authentication, the configuration parameters can be provided at runtime.
+            With Simple Authentication, the configuration parameters can be provided at runtime.
 
-            In Instance Principal Authentication, an instance can be authorized to make API calls on OCI services without credentials. The authentication method will only work on compute instances where internal network endpoints are reachable.
+            With Instance Principal Authentication, OCI compute instances can be authorized to access services on Oracle Cloud such as Oracle Autonomous Database. Node.js applications running on such a compute instance are automatically authenticated, eliminating the need to provide database user credentials. This authentication method will only work on compute instances where internal network endpoints are reachable. For more information on OCI compute instances, see `OCI Compute Instances <https://docs.oracle.com/en-us/iaas/compute-cloud-at-customer/topics/compute/compute-instances.htm>`__, `Creating a Compute Instance <https://docs.oracle.com/en-us/iaas/Content/Compute/Tasks/launchinginstance.htm>`__, and `Calling Services from a Compute Instance <https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm>`__.
 
             See `OCI SDK Authentication Methods <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm>`__ for more information.
           - Required

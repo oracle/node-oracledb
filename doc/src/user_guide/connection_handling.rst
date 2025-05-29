@@ -1472,6 +1472,32 @@ been created, so there is an initial time cost. However it can allow subsequent
 connection requests to be immediately satisfied. In this growth scenario, a
 ``poolIncrement`` of 0 is treated as 1.
 
+The optional pool creation property
+:ref:`maxLifetimeSession <createpoolpoolattrsmaxlifetimesession>` also allows
+pools to shrink. This property bounds the total length of time that a
+connection can exist in a pool after first being created. It is mostly used
+for defensive programming to mitigate against unforeseeable problems that may
+occur with connections. If a connection was created ``maxLifetimeSession`` or
+longer seconds ago, then it will be a candidate for being closed.
+
+In node-oracledb Thick mode, Oracle Client libraries 12.1, or later, are
+needed to use
+:ref:`maxLifetimeSession <createpoolpoolattrsmaxlifetimesession>`. Note that
+when using node-oracledb in Thick mode with Oracle Client libraries prior to
+21c, pool shrinkage is only initiated when the pool is accessed. So, pools in
+fully dormant applications will not shrink until the application is next used.
+
+If both :ref:`poolTimeout <createpoolpoolattrspooltimeout>` and
+:ref:`maxLifetimeSession <createpoolpoolattrsmaxlifetimesession>` properties
+are set on a pooled connection, the connection will be terminated if either
+the idle timeout happens or the ``maxLifeTimeSession`` setting is exceeded.
+In this case, if connections are idle for more than
+:ref:`poolTimeout <createpoolpoolattrspooltimeout>`, they are dropped only
+when doing so will ensure that :attr:`pool.connectionsOpen` is more than or
+equal to the :attr:`~pool.poolMin` setting. If the connection lifetime
+exceeds :ref:`maxLifetimeSession <createpoolpoolattrsmaxlifetimesession>`
+seconds, it is dropped and a new connection is created in the pool.
+
 Connection pool health can be impacted by firewalls, `resource manager <https:
 //www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2BEF5482-CF97-4A85-BD90
 -9195E41E74EF>`__, or user profile `IDLE_TIME <https://www.oracle.com/pls/
@@ -1888,6 +1914,7 @@ function record the following:
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
+    :widths: 10 10 30
     :summary: The first column displays the pool statistics attribute. The second column displays the logStatistics() label. The third column displays the description of the attribute.
 
     * - :ref:`Pool Statistics Class <poolstatisticsclass>` Attribute
@@ -1986,6 +2013,9 @@ function record the following:
     * - ``poolTimeout``
       - :attr:`poolTimeout (seconds) <pool.poolTimeout>`
       - The time (in seconds) after which the pool terminates idle connections (unused in the pool).
+    * - ``maxLifetimeSession``
+      - :attr:`maxLifetimeSession (seconds) <pool.maxLifetimeSession>`
+      - The time (in seconds) that a pooled connection can exist in a pool after first being created.
     * - ``queueMax``
       - :attr:`~pool.queueMax`
       - The maximum number of pending :meth:`pool.getConnection()` calls that can be queued.
