@@ -34,6 +34,7 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const dbConfig = require('./dbconfig.js');
+const testUtil = require('./testsUtil.js');
 const fs       = require('fs');
 
 describe('54. lobClose.js', function() {
@@ -107,9 +108,10 @@ describe('54. lobClose.js', function() {
 
   it('54.5 temp LOBs should be freed in next rpc', async function() {
     const conn2 = await oracledb.getConnection(dbConfig);
+    const sid = await testUtil.getSid(conn2);
     const tempLOBArray = [];
     const numLOBs = 20;
-    const query = "select cache_lobs+nocache_lobs from v$temporary_lobs where sid = sys_context('USERENV','SID')";
+    const query = "select cache_lobs+nocache_lobs from v$temporary_lobs where sid = :SID";
 
     // Create multiple temp LOB's
     for (let i = 0; i < numLOBs; i++) {
@@ -117,8 +119,9 @@ describe('54. lobClose.js', function() {
     }
 
     // Check number of opened temp LOB's
-    let result = await conn2.execute(query);
-    let numTempLOBs = result.rows[0][0];
+    await conn2.ping();
+    let result = await conn.execute(query, {SID: sid});
+    const numTempLOBs = result.rows[0][0];
     assert.strictEqual(numTempLOBs, numLOBs);
 
     // Destroy multiple temp LOB's
@@ -129,10 +132,11 @@ describe('54. lobClose.js', function() {
       });
     }
 
-    // temp LOB's should be freed on roundtrip (like execute) as piggybacks are sent for closing temp LOB's
-    result = await conn2.execute(query);
-    numTempLOBs = result.rows[0][0];
-    assert.strictEqual(numTempLOBs, 0);
+    // temp LOB's should be freed on roundtrip (like ping) as piggybacks are sent for closing temp LOB's
+    await conn2.ping();
+    result = await conn.execute(query, {SID: sid});
+    // if no temp lobs exist, the query will not return any rows
+    assert.strictEqual(result.rows.length, 0);
     await conn2.close();
   }); // 54.5
 

@@ -878,7 +878,7 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
 // njsUtils_setIntervalYM()
 //   Set the value of the interval year-to-month(YM) value from a JavaScript
 // IntervalYM object. It includes the "year" and "month" properties. At this
-// point it is assumed that the property values are intergers.
+// point it is assumed that the property values are integers.
 //-----------------------------------------------------------------------------
 bool njsUtils_setIntervalYM(napi_env env, napi_value value,
         dpiIntervalYM *data)
@@ -898,7 +898,7 @@ bool njsUtils_setIntervalYM(napi_env env, napi_value value,
 //   Set the value of the interval day-to-second(DS) value from a JavaScript
 // IntervalYM object. It includes the "days", "hours", "minutes", "seconds"
 // and "fseconds" (fractional seconds denoted in ns) properties. At this
-// point it is assumed that the property values are intergers.
+// point it is assumed that the property values are integers.
 //-----------------------------------------------------------------------------
 bool njsUtils_setIntervalDS(napi_env env, napi_value value,
         dpiIntervalDS *data)

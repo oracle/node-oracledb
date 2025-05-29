@@ -216,7 +216,6 @@ describe('300. bigInt.js', function() {
       // in JS Number.
       assert(result.outBinds.t.TESTNUMBER === num);
       assert(typeof result.outBinds.t.TESTNUMBER == 'bigint');
-      console.log(BigInt.prototype.toJSON);
       BigInt.prototype.toJSON = function() {
         return this.toString();
       };

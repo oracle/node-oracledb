@@ -37,6 +37,7 @@ const dbConfig = require('./dbconfig.js');
 const fs = require('fs');
 const fsPromises = require('fs/promises');
 const random = require('./random.js');
+const { Readable } = require('stream');
 
 describe('80. lobBindAsStringBuffer.js', function() {
   let connection;
@@ -485,6 +486,57 @@ describe('80. lobBindAsStringBuffer.js', function() {
       assert.strictEqual(result.outBinds.blob.toString('utf8', 0, specStrLength), specialStr);
       assert.strictEqual(result.outBinds.blob.toString('utf8', (resultLength2 - specStrLength), resultLength2), specialStr);
     }); // 80.3.2
+
+    it('80.3.3 PLSQL, BIND_INOUT, bind a 32K string using temp lob and a 32K buffer', async function() {
+      const specialStr = "80.3.3";
+      const size = 32768;
+      const bigStr = random.getRandomString(size, specialStr);
+      const clob = await connection.createLob(oracledb.CLOB);
+      const inStream = Readable.from([bigStr]);
+      inStream.pipe(clob);
+      await new Promise((resolve, reject) => {
+        inStream.on("error", reject);
+        clob.on("error", reject);
+        clob.on("finish", resolve);
+      });
+      const bufferStr = Buffer.from(bigStr, "utf-8");
+      const blob = await connection.createLob(oracledb.CLOB);
+      const inStream2 = Readable.from([bufferStr]);
+      inStream2.pipe(blob);
+      await new Promise((resolve, reject) => {
+        inStream.on("error", reject);
+        blob.on("error", reject);
+        blob.on("finish", resolve);
+      });
+
+      const bindVar = {
+        clob: { dir: oracledb.BIND_INOUT, type: oracledb.CLOB, val: clob },
+        blob: { dir: oracledb.BIND_INOUT, type: oracledb.BUFFER, val: bufferStr,
+          maxSize: size }
+      };
+      const result = await connection.execute(sqlRun, bindVar);
+      const cloboutstr = await result.outBinds.clob.getData();
+      const specStrLength = specialStr.length;
+      const resultLength1 = result.outBinds.clob.length;
+      assert.strictEqual(resultLength1, size);
+      assert.strictEqual(cloboutstr.substring(0, specStrLength), specialStr);
+      assert.strictEqual(cloboutstr.substring(resultLength1 - specStrLength,
+        resultLength1), specialStr);
+      const resultLength2 = result.outBinds.blob.length;
+      assert.strictEqual(resultLength2, size);
+      assert.strictEqual(result.outBinds.blob.toString('utf8',
+        0, specStrLength), specialStr);
+      assert.strictEqual(result.outBinds.blob.toString('utf8',
+        (resultLength2 - specStrLength), resultLength2), specialStr);
+      await new Promise((resolve) => {
+        clob.once('close', resolve);
+        clob.destroy();
+      });
+      await new Promise((resolve) => {
+        blob.once('close', resolve);
+        blob.destroy();
+      });
+    }); // 80.3.3
 
   }); // 80.3
 

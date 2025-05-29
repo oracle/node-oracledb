@@ -86,6 +86,8 @@ Thin Mode Changes
 #)  Fixed bug where connections were not removed from the pool, when
     :meth:`connection.close()` method fails for some reason.
 
+#)  Internal protocol handling improvements.
+
 Thick Mode Changes
 ++++++++++++++++++
 

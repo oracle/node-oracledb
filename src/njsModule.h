@@ -203,6 +203,9 @@ typedef struct njsBaton njsBaton;
 typedef struct njsClassDef njsClassDef;
 typedef struct njsConnection njsConnection;
 typedef struct njsDataTypeInfo njsDataTypeInfo;
+typedef struct njsDbObject njsDbObject;
+typedef struct njsDbObjectType njsDbObjectType;
+typedef struct njsDbObjectAttr njsDbObjectAttr;
 typedef struct njsImplicitResult njsImplicitResult;
 typedef struct njsJsonBuffer njsJsonBuffer;
 typedef struct njsLob njsLob;
@@ -216,12 +219,9 @@ typedef struct njsSodaDocCursor njsSodaDocCursor;
 typedef struct njsSodaDocument njsSodaDocument;
 typedef struct njsSodaOperation njsSodaOperation;
 typedef struct njsSubscription njsSubscription;
+typedef struct njsTokenCallback njsTokenCallback;
 typedef struct njsVariable njsVariable;
 typedef struct njsVariableBuffer njsVariableBuffer;
-typedef struct njsDbObject njsDbObject;
-typedef struct njsDbObjectType njsDbObjectType;
-typedef struct njsDbObjectAttr njsDbObjectAttr;
-typedef struct njsTokenCallback njsTokenCallback;
 
 
 //-----------------------------------------------------------------------------
