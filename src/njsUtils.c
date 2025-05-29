@@ -831,6 +831,24 @@ bool njsUtils_throwUnsupportedDataType(napi_env env, uint32_t oracleTypeNum,
 
 
 //-----------------------------------------------------------------------------
+// njsUtils_throwUnsupportedDataTypeInJson()
+//   Set the error on the baton to indicate that an unsupported data type was
+// encountered within the JSON object during fetch. Returns false as a
+// convenience to the caller.
+//-----------------------------------------------------------------------------
+bool njsUtils_throwUnsupportedDataTypeInJson(napi_env env,
+        uint32_t oracleTypeNum)
+{
+    char errorMessage[100];
+
+    (void) snprintf(errorMessage, sizeof(errorMessage),
+            NJS_ERR_UNSUPPORTED_DATA_TYPE_IN_JSON, oracleTypeNum);
+    napi_throw_error(env, NULL, errorMessage);
+    return false;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsUtils_validateArgs()
 //   Gets the instance associated with the object and gets the arguments as
 // well. If the number of arguments is incorrect, an exception is thrown.

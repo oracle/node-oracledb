@@ -11,6 +11,7 @@
              "src/njsTokenCallback.c",
              "src/njsConnection.c",
              "src/njsDbObject.c",
+             "src/njsJsContext.c",
              "src/njsJsonBuffer.c",
              "src/njsLob.c",
              "src/njsModule.c",

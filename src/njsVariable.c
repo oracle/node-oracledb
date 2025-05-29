@@ -425,7 +425,8 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             break;
         case DPI_NATIVE_TYPE_TIMESTAMP:
             if (!njsUtils_getDateValue(var->varTypeNum, env,
-                    baton->jsMakeDateFn, &data->value.asTimestamp, value))
+                    baton->jsContext.jsMakeDateFn, &data->value.asTimestamp,
+                    value))
                 return false;
             break;
         case DPI_NATIVE_TYPE_DOUBLE:
@@ -494,14 +495,17 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             if (dpiJson_getValue(data->value.asJson, DPI_JSON_OPT_DEFAULT,
                     &topNode) < 0)
                 return njsBaton_setErrorDPI(baton);
-            return njsBaton_getJsonNodeValue(baton, topNode, env, value);
+            return njsJsContext_getJsonNodeValue(&baton->jsContext, topNode,
+                env, value);
         case DPI_NATIVE_TYPE_VECTOR:
             return njsBaton_getVectorValue(baton, data->value.asVector,
                     env, value);
         case DPI_NATIVE_TYPE_INTERVAL_YM:
-            return njsBaton_getIntervalYM(baton, &(data->value.asIntervalYM), env, value);
+            return njsJsContext_getIntervalYM(&baton->jsContext,
+                &(data->value.asIntervalYM), env, value);
         case DPI_NATIVE_TYPE_INTERVAL_DS:
-            return njsBaton_getIntervalDS(baton, &(data->value.asIntervalDS), env, value);
+            return njsJsContext_getIntervalDS(&baton->jsContext,
+                &(data->value.asIntervalDS), env, value);
         default:
             break;
     }
@@ -824,7 +828,7 @@ static bool njsVariable_getVectorInfo(napi_env env, napi_value value,
     bool status = false;
 
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsSparseVectorConstructor, &isSparse))
+            baton->jsContext.jsSparseVectorConstructor, &isSparse))
     if (isSparse)
     {
         // get indices
@@ -979,12 +983,13 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
     if (check) {
         return njsUtils_setDateValue(var->varTypeNum, env, value,
-                baton->jsGetDateComponentsFn, &data->value.asTimestamp);
+                baton->jsContext.jsGetDateComponentsFn,
+                &data->value.asTimestamp);
     }
 
     // handle binding cursors
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsResultSetConstructor, &check))
+            baton->jsContext.jsResultSetConstructor, &check))
     if (check) {
         NJS_CHECK_NAPI(env, napi_unwrap(env, value, (void**) &resultSet))
         if (dpiVar_setFromStmt(var->dpiVarHandle, pos,
@@ -995,7 +1000,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 
     // handle binding LOBs
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsLobConstructor, &check))
+            baton->jsContext.jsLobConstructor, &check))
     if (check) {
 
         // get LOB instance
@@ -1027,7 +1032,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 
     // handle binding database objects
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsDbObjectConstructor, &check))
+            baton->jsContext.jsDbObjectConstructor, &check))
     if (check) {
         if (!njsDbObject_getInstance(baton->globals, env, value, &obj))
             return false;

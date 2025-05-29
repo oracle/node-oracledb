@@ -455,7 +455,7 @@ describe('1. implicitPool1.js', function() {
       await clearCallbacks(connection);
 
       // Execute first statement
-      await conn.execute(`INSERT INTO TestTempTable (IntCol, VALUE) 
+      await conn.execute(`INSERT INTO TestTempTable (IntCol, VALUE)
                         VALUES (501, 'transaction_test_1')`);
 
       // Check callbacks after first statement
@@ -464,7 +464,7 @@ describe('1. implicitPool1.js', function() {
 
       await clearCallbacks(connection);
 
-      await conn.execute(`INSERT INTO TestTempTable (IntCol, VALUE) 
+      await conn.execute(`INSERT INTO TestTempTable (IntCol, VALUE)
                         VALUES (502, 'transaction_test_2')`);
 
       // Check callbacks after second statement
@@ -490,7 +490,7 @@ describe('1. implicitPool1.js', function() {
 
       await conn.execute(`
       CREATE TABLE tb_tx_boundary_test (
-        id NUMBER, 
+        id NUMBER,
         description VARCHAR2(100)
       )
     `);
@@ -596,7 +596,7 @@ describe('1. implicitPool1.js', function() {
       assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
 
       await clearCallbacks(connection);
-      await conn.execute(`UPDATE ${dbConfig.user}.TestTempTable 
+      await conn.execute(`UPDATE ${dbConfig.user}.TestTempTable
                           SET VALUE='test_22' WHERE INTCOL=2`);
       await conn.commit();
       assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);

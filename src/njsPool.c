@@ -90,7 +90,7 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, napi_default, NULL },
     { "getPoolTimeout", NULL, njsPool_getPoolTimeout, NULL, NULL, NULL,
             napi_default, NULL },
-    { "getMaxLifetimeSession", NULL, njsPool_getMaxLifetimeSession, NULL, NULL, 
+    { "getMaxLifetimeSession", NULL, njsPool_getMaxLifetimeSession, NULL, NULL,
         NULL, napi_default, NULL },
     { "getStmtCacheSize", NULL, njsPool_getStmtCacheSize, NULL, NULL, NULL,
             napi_default, NULL },

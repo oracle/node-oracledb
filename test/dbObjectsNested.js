@@ -506,7 +506,7 @@ describe('313. dbObjectsNested.js', () => {
 
       // Execute the procedure
       const result = await connection.execute(
-        `BEGIN 
+        `BEGIN
            test_collection_states(:null_coll, :empty_coll, :populated_coll);
          END;`,
         {
@@ -543,7 +543,7 @@ describe('313. dbObjectsNested.js', () => {
         BEGIN
           -- Initialize the collection
           p_addresses := address_list();
-          
+
           -- Add elements, including nulls
           p_addresses.extend(3);
           p_addresses(1) := address_type('123 Main St', 'ABCXYZ', '12345');

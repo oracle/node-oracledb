@@ -208,6 +208,7 @@ typedef struct njsDbObjectType njsDbObjectType;
 typedef struct njsDbObjectAttr njsDbObjectAttr;
 typedef struct njsImplicitResult njsImplicitResult;
 typedef struct njsJsonBuffer njsJsonBuffer;
+typedef struct njsJsContext njsJsContext;
 typedef struct njsLob njsLob;
 typedef struct njsLobBuffer njsLobBuffer;
 typedef struct njsModuleGlobals njsModuleGlobals;
@@ -267,12 +268,29 @@ struct njsAqMessage {
     bool isPayloadJsonType;
 };
 
-// data for class AqQueue exposed to JS.
+// data for class AqQueue exposed to JS
 struct njsAqQueue {
     dpiQueue *handle;
     njsConnection *conn;
     njsDbObjectType *payloadObjectType;
     bool isJson;
+};
+
+// data for cached napi_values of JS functions to be used across async and
+// sync APIs
+struct njsJsContext {
+    // constructors and other functions that are called from inside C
+    napi_value jsLobConstructor;
+    napi_value jsResultSetConstructor;
+    napi_value jsDbObjectConstructor;
+    napi_value jsGetDateComponentsFn;
+    napi_value jsMakeDateFn;
+    napi_value jsDecodeVectorFn;
+    napi_value jsEncodeVectorFn;
+    napi_value jsJsonIdConstructor;
+    napi_value jsSparseVectorConstructor;
+    napi_value jsIntervalYMConstructor;
+    napi_value jsIntervalDSConstructor;
 };
 
 // data for asynchronous functions
@@ -473,18 +491,9 @@ struct njsBaton {
     napi_ref jsSubscriptionRef;
     napi_ref jsExecuteOptionsRef;
 
-    // constructors and other functions that are called from inside C
-    napi_value jsLobConstructor;
-    napi_value jsResultSetConstructor;
-    napi_value jsDbObjectConstructor;
-    napi_value jsGetDateComponentsFn;
-    napi_value jsMakeDateFn;
-    napi_value jsDecodeVectorFn;
-    napi_value jsEncodeVectorFn;
-    napi_value jsJsonIdConstructor;
-    napi_value jsSparseVectorConstructor;
-    napi_value jsIntervalYMConstructor;
-    napi_value jsIntervalDSConstructor;
+    // njsContext structure for JavaScript methods that are called from
+    // inside C
+    njsJsContext jsContext;
 
     // calling object value (used for setting a reference on created objects)
     napi_value jsCallingObj;
@@ -751,13 +760,6 @@ struct njsTokenCallback {
 
 
 //-----------------------------------------------------------------------------
-// definition of error functions
-//-----------------------------------------------------------------------------
-void njsErrors_getMessage(char *buffer, int errNum, ...);
-void njsErrors_getMessageVaList(char *buffer, int errNum, va_list vaList);
-
-
-//-----------------------------------------------------------------------------
 // definition of JSON buffer functions
 //-----------------------------------------------------------------------------
 void njsJsonBuffer_free(njsJsonBuffer *buf);
@@ -773,15 +775,11 @@ bool njsBaton_commonConnectProcessArgs(njsBaton *baton, napi_env env,
 bool njsBaton_create(njsBaton *baton, napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, const njsClassDef *classDef);
 void njsBaton_free(njsBaton *baton, napi_env env);
-bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
-        napi_env env, napi_value *value);uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
+uint32_t njsBaton_getNumOutBinds(njsBaton *baton);
 bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
         napi_env env, napi_value obj, dpiSodaDoc **handle);
 bool njsBaton_initCommonCreateParams(njsBaton *baton,
         dpiCommonCreateParams *params);
-bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value);
-bool njsBaton_isDate(njsBaton *baton, napi_env env, napi_value value,
-        bool *isDate);
 bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
         bool (*workCallback)(njsBaton*),
         bool (*afterWorkCallback)(njsBaton*, napi_env, napi_value*),
@@ -789,18 +787,10 @@ bool njsBaton_queueWork(njsBaton *baton, napi_env env, const char *methodName,
 bool njsBaton_reportError(njsBaton *baton, napi_env env);
 bool njsBaton_setErrorInsufficientBufferForBinds(njsBaton *baton);
 bool njsBaton_setErrorInsufficientMemory(njsBaton *baton);
-bool njsBaton_setErrorUnsupportedDataType(njsBaton *baton,
-        uint32_t oracleTypeNum, uint32_t columnNum);
-bool njsBaton_setErrorUnsupportedDataTypeInJson(njsBaton *baton,
-        uint32_t oracleTypeNum);
 bool njsBaton_setErrorDPI(njsBaton *baton);
-bool njsBaton_setJsValues(njsBaton *baton, napi_env env);
+bool njsBaton_setJsContext(njsBaton *baton, napi_env env);
 bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
         napi_env env, napi_value *value);
-bool njsBaton_getIntervalYM(njsBaton *baton, dpiIntervalYM *data, napi_env env,
-        napi_value *value);
-bool njsBaton_getIntervalDS(njsBaton *baton, dpiIntervalDS *data, napi_env env,
-        napi_value *value);
 bool njsBaton_setErrorUnsupportedVectorFormat(njsBaton *baton,
         uint8_t format);
 
@@ -837,6 +827,19 @@ bool njsAqQueue_createFromHandle(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 bool njsConnection_newFromBaton(njsBaton *baton, napi_env env,
         napi_value *connObj);
+
+
+//-----------------------------------------------------------------------------
+// definition of functions for njsJsContext class
+//-----------------------------------------------------------------------------
+bool njsJsContext_populate(napi_env env, njsModuleGlobals *globals,
+        njsJsContext *jsContext);
+bool njsJsContext_getJsonNodeValue(njsJsContext *jsContext, dpiJsonNode *node,
+        napi_env env, napi_value *value);
+bool njsJsContext_getIntervalYM(njsJsContext *jsContext, dpiIntervalYM *data,
+        napi_env env, napi_value *value);
+bool njsJsContext_getIntervalDS(njsJsContext *jsContext, dpiIntervalDS *data,
+        napi_env env, napi_value *value);
 
 
 //-----------------------------------------------------------------------------
@@ -946,16 +949,15 @@ bool njsUtils_getNamedPropertyStringOrBuffer(napi_env env, napi_value value,
         const char *name, char **result, size_t *resultLength);
 bool njsUtils_getNamedPropertyUnsignedInt(napi_env env, napi_value value,
         const char *name, uint32_t *outValue);
-bool njsUtils_getNamedPropertyUnsignedIntArray(napi_env env, napi_value value,
-        const char *name, uint32_t *numElements, uint32_t **elements);
 bool njsUtils_getXid(napi_env env, napi_value xidObj, dpiXid **xid);
-bool njsUtils_isInstance(napi_env env, napi_value value, const char *name);
 bool njsUtils_setDateValue(uint32_t varTypeNum, napi_env env, napi_value value,
         napi_value getComponentsFn, dpiTimestamp *timestamp);
 bool njsUtils_throwErrorDPI(napi_env env, njsModuleGlobals *globals);
 bool njsUtils_throwInsufficientMemory(napi_env env);
 bool njsUtils_throwUnsupportedDataType(napi_env env, uint32_t oracleTypeNum,
         uint32_t columnNum);
+bool njsUtils_throwUnsupportedDataTypeInJson(napi_env env,
+        uint32_t oracleTypeNum);
 bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, njsModuleGlobals **globals,
         napi_value *callingObj, const njsClassDef *classDef, void **instance);

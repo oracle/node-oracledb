@@ -218,13 +218,14 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         node->oracleTypeNum = DPI_ORACLE_TYPE_TIMESTAMP;
         node->nativeTypeNum = DPI_NATIVE_TYPE_TIMESTAMP;
         return njsUtils_setDateValue(DPI_ORACLE_TYPE_TIMESTAMP, env, value,
-                baton->jsGetDateComponentsFn, &node->value->asTimestamp);
+                baton->jsContext.jsGetDateComponentsFn,
+                &node->value->asTimestamp);
     }
 
     // handle vectors
     NJS_CHECK_NAPI(env, napi_is_typedarray(env, value, &isTyped))
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsSparseVectorConstructor, &isSparse))
+            baton->jsContext.jsSparseVectorConstructor, &isSparse))
     if (isTyped || isSparse) { // typed array or sparse vector
         NJS_CHECK_NAPI(env, napi_get_global(env, &global))
         if (!isSparse) {
@@ -253,7 +254,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
             node->oracleTypeNum = DPI_ORACLE_TYPE_VECTOR;
             node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
             NJS_CHECK_NAPI(env, napi_call_function(env, global,
-                    baton->jsEncodeVectorFn, 1, &value, &vectorVal))
+                    baton->jsContext.jsEncodeVectorFn, 1, &value, &vectorVal))
             NJS_CHECK_NAPI(env, napi_get_buffer_info(env, vectorVal,
                     (void**) &tempBuffer, &tempBufferLength))
             node->value->asBytes.ptr = tempBuffer;
@@ -266,7 +267,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &check))
     if (check) {
         NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-                baton->jsJsonIdConstructor, &check))
+                baton->jsContext.jsJsonIdConstructor, &check))
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value,
                 (void**) &tempBuffer, &tempBufferLength))
         if (check) {
@@ -283,7 +284,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
 
     // handle interval datatypes
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsIntervalYMConstructor, &check))
+            baton->jsContext.jsIntervalYMConstructor, &check))
     if (check) {
         node->oracleTypeNum = DPI_ORACLE_TYPE_INTERVAL_YM;
         node->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_YM;
@@ -292,7 +293,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
             &(node->value->asIntervalYM));
     }
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsIntervalDSConstructor, &check))
+            baton->jsContext.jsIntervalDSConstructor, &check))
     if (check) {
         node->oracleTypeNum = DPI_ORACLE_TYPE_INTERVAL_DS;
         node->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_DS;

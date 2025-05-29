@@ -207,7 +207,7 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
     njsVariable *var;
 
     // set JavaScript values to simplify creation of returned objects
-    if (!njsBaton_setJsValues(baton, env))
+    if (!njsBaton_setJsContext(baton, env))
         return false;
 
     // create array

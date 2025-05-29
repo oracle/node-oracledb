@@ -62,7 +62,7 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for config-file, config-ociobject, and config-azurevault 
+#)  Added support for config-file, config-ociobject, and config-azurevault
     configuration providers.
 
 #)  Fixed bug which forced node-oracledb to resolve the database host name
@@ -104,6 +104,9 @@ Thick Mode Changes
 #)  Fixed issue with sharding keys, where an internal error was thrown when
     connections to Oracle Globally Distributed Databases are created with
     proper sharding key values.
+
+#)  Fixed segfault with date, timestamp and interval fields in JSON payloads,
+    when dequeuing AQ messages.
 
 #)  Fixed bug resulting in a segfault when unable to load the Oracle Client
     libraries (`ODPI-C <https://github.com/oracle/odpi>`__ change).

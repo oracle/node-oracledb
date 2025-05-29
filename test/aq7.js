@@ -95,11 +95,17 @@ describe('283. aq7.js', function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
+    const dt = new Date(1990, 3, 2);
+    const intYM = new oracledb.IntervalYM({ years: 1, months: 6 });
+    const intDS = new oracledb.IntervalDS({ days: 5, hours: 12, minutes: 10, seconds: 15, fseconds: 0 });
 
     await queue.enqOne ({
       payload: {
         empName: "Chris",
-        empCity: "Melbourne"
+        empCity: "Melbourne",
+        hiredate: dt,
+        experience: intYM,
+        timeIn: intDS
       },
     });
 
@@ -112,16 +118,43 @@ describe('283. aq7.js', function() {
 
     assert.strictEqual(msg.payload.empName, "Chris");
     assert.strictEqual(msg.payload.empCity, "Melbourne");
+    assert.deepStrictEqual(msg.payload.hiredate, dt);
+    assert.deepStrictEqual(msg.payload.experience, intYM);
+    assert.deepStrictEqual(msg.payload.timeIn, intDS);
   }); // 283.1
 
   it('283.2 JSON type in enqMany/deqMany', async () => {
     const queue3 = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON });
 
+    const birthdate1 = new Date(1990, 3, 2);
+    const birthdate2 = new Date(1985, 10, 21);
+    const birthdate3 = new Date(2010, 6, 15);
+    const intYM = new oracledb.IntervalYM({ years: 1, months: 6 });
+    const intDS = new oracledb.IntervalDS({ days: 5, hours: 12, minutes: 10, seconds: 15, fseconds: 0 });
+
     const empList = [
-      {payload: { empName: "Employee #1", empId: 101 }},
-      {payload: { empName: "Employee #2", empId: 102 }},
-      {payload: { empName: "Employee #3", empId: 103 }}
+      {payload: {
+        empName: "Employee #1",
+        empId: 101,
+        birthdate: birthdate1,
+        experience: intYM,
+        timeIn: intDS }
+      },
+      {payload: {
+        empName: "Employee #2",
+        empId: 102,
+        birthdate: birthdate2,
+        experience: intYM,
+        timeIn: intDS }
+      },
+      {payload: {
+        empName: "Employee #3",
+        empId: 103,
+        birthdate: birthdate3,
+        experience: intYM,
+        timeIn: intDS }
+      }
     ];
 
     await queue3.enqMany(empList);
@@ -145,6 +178,18 @@ describe('283. aq7.js', function() {
     assert.equal(msgs[0].payload.empId, 101);
     assert.equal(msgs[1].payload.empId, 102);
     assert.equal(msgs[2].payload.empId, 103);
+
+    assert.deepStrictEqual(msgs[0].payload.birthdate, birthdate1);
+    assert.deepStrictEqual(msgs[1].payload.birthdate, birthdate2);
+    assert.deepStrictEqual(msgs[2].payload.birthdate, birthdate3);
+
+    assert.deepStrictEqual(msgs[0].payload.experience, intYM);
+    assert.deepStrictEqual(msgs[1].payload.experience, intYM);
+    assert.deepStrictEqual(msgs[2].payload.experience, intYM);
+
+    assert.deepStrictEqual(msgs[0].payload.timeIn, intDS);
+    assert.deepStrictEqual(msgs[1].payload.timeIn, intDS);
+    assert.deepStrictEqual(msgs[2].payload.timeIn, intDS);
     assert.strictEqual(queue4.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
   }); // 283.2
 

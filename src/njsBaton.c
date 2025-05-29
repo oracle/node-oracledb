@@ -428,108 +428,6 @@ static bool njsBaton_getErrorInfo(njsBaton *baton, napi_env env,
     return true;
 }
 
-//-----------------------------------------------------------------------------
-// njsBaton_getJsonNodeValue()
-//   Return an appropriate JavaScript value for the JSON node.
-//-----------------------------------------------------------------------------
-bool njsBaton_getJsonNodeValue(njsBaton *baton, dpiJsonNode *node,
-        napi_env env, napi_value *value)
-{
-    napi_value key, temp;
-    dpiJsonArray *array;
-    dpiJsonObject *obj;
-    void *destData = NULL;
-    size_t byteLength = 0;
-    double temp_double;
-    uint32_t i;
-    napi_value global, vectorBytes, arrBuf;
-
-    // null is a special case
-    if (node->nativeTypeNum == DPI_NATIVE_TYPE_NULL) {
-        NJS_CHECK_NAPI(env, napi_get_null(env, value))
-        return true;
-    }
-
-    // handle the other types supported in JSON nodes
-    switch (node->oracleTypeNum) {
-        case DPI_ORACLE_TYPE_JSON_ARRAY:
-            array = &node->value->asJsonArray;
-            NJS_CHECK_NAPI(env, napi_create_array_with_length(env,
-                    array->numElements, value))
-            for (i = 0; i < array->numElements; i++) {
-                if (!njsBaton_getJsonNodeValue(baton, &array->elements[i],
-                        env, &temp))
-                    return false;
-                NJS_CHECK_NAPI(env, napi_set_element(env, *value, i, temp))
-            }
-            return true;
-        case DPI_ORACLE_TYPE_JSON_OBJECT:
-            obj = &node->value->asJsonObject;
-            NJS_CHECK_NAPI(env, napi_create_object(env, value))
-            for (i = 0; i< obj->numFields; i++) {
-                NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
-                        obj->fieldNames[i], obj->fieldNameLengths[i], &key))
-                if (!njsBaton_getJsonNodeValue(baton, &obj->fields[i],
-                        env, &temp))
-                    return false;
-                NJS_CHECK_NAPI(env, napi_set_property(env, *value, key, temp))
-            }
-            return true;
-        case DPI_ORACLE_TYPE_VARCHAR:
-            NJS_CHECK_NAPI(env, napi_create_string_utf8(env,
-                    node->value->asBytes.ptr, node->value->asBytes.length,
-                    value))
-            return true;
-        case DPI_ORACLE_TYPE_RAW:
-            NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
-                    node->value->asBytes.length, node->value->asBytes.ptr,
-                    NULL, value))
-            return true;
-        case DPI_ORACLE_TYPE_NUMBER:
-            temp_double = (node->nativeTypeNum == DPI_NATIVE_TYPE_DOUBLE) ?
-                    node->value->asDouble : node->value->asFloat;
-            NJS_CHECK_NAPI(env, napi_create_double(env, temp_double, value))
-            return true;
-        case DPI_ORACLE_TYPE_DATE:
-        case DPI_ORACLE_TYPE_TIMESTAMP:
-            return njsUtils_getDateValue(node->oracleTypeNum, env,
-                baton->jsMakeDateFn, &node->value->asTimestamp, value);
-            return true;
-        case DPI_ORACLE_TYPE_BOOLEAN:
-            NJS_CHECK_NAPI(env, napi_get_boolean(env, node->value->asBoolean,
-                    value))
-            return true;
-        case DPI_ORACLE_TYPE_INTERVAL_YM:
-            return njsBaton_getIntervalYM(baton, &(node->value->asIntervalYM),
-                env, value);
-        case DPI_ORACLE_TYPE_INTERVAL_DS:
-            return njsBaton_getIntervalDS(baton, &(node->value->asIntervalDS),
-                env, value);
-        case DPI_ORACLE_TYPE_VECTOR:
-            NJS_CHECK_NAPI(env, napi_get_global(env, &global))
-            NJS_CHECK_NAPI(env, napi_create_buffer_copy(env,
-                    node->value->asBytes.length, node->value->asBytes.ptr,
-                    NULL, &vectorBytes))
-            NJS_CHECK_NAPI(env, napi_call_function(env, global,
-                    baton->jsDecodeVectorFn, 1, &vectorBytes, value))
-            return true;
-        case DPI_ORACLE_TYPE_JSON_ID:
-            byteLength = node->value->asBytes.length;
-            NJS_CHECK_NAPI(env, napi_create_arraybuffer(env,
-                    byteLength, &destData, &arrBuf))
-            memcpy(destData, node->value->asBytes.ptr, byteLength);
-            NJS_CHECK_NAPI(env, napi_new_instance(env,
-                    baton->jsJsonIdConstructor, 1, &arrBuf, value))
-            return true;
-
-        default:
-            break;
-    }
-
-    return njsBaton_setErrorUnsupportedDataTypeInJson(baton,
-            node->oracleTypeNum);
-}
-
 
 //-----------------------------------------------------------------------------
 // njsBaton_getNumOutBinds()
@@ -608,73 +506,6 @@ bool njsBaton_initCommonCreateParams(njsBaton *baton,
                 (params->createMode | DPI_MODE_CREATE_EVENTS);
 
     return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsBaton_isBindValue()
-//   Returns a boolean indicating if the value is one that can be bound.
-//-----------------------------------------------------------------------------
-bool njsBaton_isBindValue(njsBaton *baton, napi_env env, napi_value value)
-{
-    napi_valuetype valueType;
-    napi_status status;
-    bool check;
-
-    // anything that isn't an object can be checked directly
-    status = napi_typeof(env, value, &valueType);
-    if (status != napi_ok)
-        return false;
-    if (valueType != napi_undefined && valueType != napi_null &&
-            valueType != napi_number && valueType != napi_string &&
-            valueType != napi_object && valueType != napi_boolean)
-        return false;
-    if (valueType != napi_object)
-        return true;
-
-    // arrays can be bound directly
-    status = napi_is_array(env, value, &check);
-    if (status != napi_ok)
-        return false;
-    if (check)
-        return true;
-
-    // buffers can be bound directly
-    status = napi_is_buffer(env, value, &check);
-    if (status != napi_ok)
-        return false;
-    if (check)
-        return true;
-
-    // dates can be bound directly
-    NJS_CHECK_NAPI(env, napi_is_date(env, value, &check))
-    if (check)
-        return true;
-
-    // LOBs can be bound directly
-    status = napi_instanceof(env, value, baton->jsLobConstructor, &check);
-    if (status != napi_ok)
-        return false;
-    if (check)
-        return true;
-
-    // result sets can be bound directly
-    status = napi_instanceof(env, value, baton->jsResultSetConstructor,
-            &check);
-    if (status != napi_ok)
-        return false;
-    if (check)
-        return true;
-
-    // database objects can be bound directly
-    status = napi_instanceof(env, value, baton->jsDbObjectConstructor,
-            &check);
-    if (status != napi_ok)
-        return false;
-    if (check)
-        return true;
-
-    return false;
 }
 
 
@@ -765,21 +596,6 @@ bool njsBaton_setErrorInsufficientMemory(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_setErrorUnsupportedDataTypeInJson()
-//   Set the error on the baton to indicate that an unsupported data type was
-// encountered in a JSON value. Returns false as a convenience to the caller.
-//-----------------------------------------------------------------------------
-bool njsBaton_setErrorUnsupportedDataTypeInJson(njsBaton *baton,
-        uint32_t oracleTypeNum)
-{
-    (void) snprintf(baton->error, sizeof(baton->error),
-            NJS_ERR_UNSUPPORTED_DATA_TYPE_IN_JSON, oracleTypeNum);
-    baton->hasError = true;
-    return false;
-}
-
-
-//-----------------------------------------------------------------------------
 // njsBaton_setErrorDPI()
 //   Set the error on the baton from ODPI-C. False is returned as a convenience
 // to the caller.
@@ -794,65 +610,20 @@ bool njsBaton_setErrorDPI(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsBaton_setJsValues()
-//   Sets the JavaScript values on the baton. These are a number of
-// constructors and also the JavaScript object that is "this" for the method
-// that is currently being executed.
+// njsBaton_setJsContext()
+//   Sets the njsJsContext structure to store JavaScript values on the baton.
+// These are a number of constructors and also the JavaScript object that is
+// "this" for the method that is currently being executed.
 //-----------------------------------------------------------------------------
-bool njsBaton_setJsValues(njsBaton *baton, napi_env env)
+bool njsBaton_setJsContext(njsBaton *baton, napi_env env)
 {
-    // acquire the LOB constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsLobConstructor, &baton->jsLobConstructor))
-
-    // acquire the result set constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsResultSetConstructor,
-            &baton->jsResultSetConstructor))
-
-    // acquire the base database object constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsDbObjectConstructor,
-            &baton->jsDbObjectConstructor))
-
     // acquire the value for the calling object reference
     NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
             &baton->jsCallingObj))
 
-    // acquire the _getDateComponents() function
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsGetDateComponentsFn,
-            &baton->jsGetDateComponentsFn))
-
-    // acquire the _makeDate() function
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsMakeDateFn, &baton->jsMakeDateFn))
-
-    // acquire the _decodeVector function
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsDecodeVectorFn, &baton->jsDecodeVectorFn))
-
-    // acquire the _encodeVector function
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsEncodeVectorFn, &baton->jsEncodeVectorFn))
-
-    // acquire the JsonId constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsJsonIdConstructor, &baton->jsJsonIdConstructor))
-
-    // acquire the SparseVector constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsSparseVectorConstructor, &baton->jsSparseVectorConstructor))
-
-    // acquire the IntervalYM constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsIntervalYMConstructor, &baton->jsIntervalYMConstructor))
-
-    // acquire the IntervalDS constructor
-    NJS_CHECK_NAPI(env, napi_get_reference_value(env,
-            baton->globals->jsIntervalDSConstructor, &baton->jsIntervalDSConstructor))
-
-    return true;
+    // acquire the JavaScript values by setting the njsJsContext structure
+    // within the baton
+    return njsJsContext_populate(env, baton-> globals, &baton->jsContext);
 }
 
 //-----------------------------------------------------------------------------
@@ -929,7 +700,8 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
         NJS_CHECK_NAPI(env, napi_set_named_property(env, retSparseObject, "numDimensions", numDims));
         NJS_CHECK_NAPI(env, napi_set_named_property(env, retSparseObject, "values", valueArray))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, retSparseObject, "indices", indexArray))
-        NJS_CHECK_NAPI(env, napi_new_instance(env, baton->jsSparseVectorConstructor, 1,
+        NJS_CHECK_NAPI(env, napi_new_instance(env,
+                baton->jsContext.jsSparseVectorConstructor, 1,
                 &retSparseObject, value))
     } else {
         byteLength = elementLength * numElem;
@@ -942,62 +714,6 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
     return true;
 }
 
-//-----------------------------------------------------------------------------
-// njsBaton_getIntervalYM()
-//   Returns the appropriate IntervalYM JavaScript object for the Interval
-// year-to-month type. At this point it is known that the Javascript
-// attributes are integers and that the variable can support it.
-//-----------------------------------------------------------------------------
-bool njsBaton_getIntervalYM(njsBaton *baton, dpiIntervalYM *data, napi_env env,
-        napi_value *value)
-{
-    napi_value temp, intervalYMTempObj;
-
-    NJS_CHECK_NAPI(env, napi_create_object(env, &intervalYMTempObj))
-    NJS_CHECK_NAPI(env, napi_create_int32(env, data->years, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalYMTempObj,
-            "years", temp))
-    NJS_CHECK_NAPI(env, napi_create_int32(env, data->months, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalYMTempObj,
-            "months", temp))
-    NJS_CHECK_NAPI(env, napi_new_instance(env,
-            baton->jsIntervalYMConstructor, 1, &intervalYMTempObj, value))
-
-    return true;
-}
-
-//-----------------------------------------------------------------------------
-// njsBaton_getIntervalDS()
-//   Returns the appropriate IntervalDS JavaScript object for the Interval
-// day-to-second type. At this point it is known that the Javascript
-// attributes are integers and that the variable can support it.
-//-----------------------------------------------------------------------------
-bool njsBaton_getIntervalDS(njsBaton *baton, dpiIntervalDS *data, napi_env env,
-        napi_value *value)
-{
-    napi_value temp, intervalDSTempObj;
-
-    NJS_CHECK_NAPI(env, napi_create_object(env, &intervalDSTempObj))
-    NJS_CHECK_NAPI(env, napi_create_int32(env, data->days, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
-            "days", temp))
-    NJS_CHECK_NAPI(env, napi_create_int32(env, data->hours, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
-            "hours", temp))
-    NJS_CHECK_NAPI(env, napi_create_int32(env, data->minutes, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
-            "minutes", temp))
-    NJS_CHECK_NAPI(env, napi_create_int32(env, data->seconds, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
-            "seconds", temp))
-    NJS_CHECK_NAPI(env, napi_create_int32(env, data->fseconds, &temp))
-    NJS_CHECK_NAPI(env, napi_set_named_property(env, intervalDSTempObj,
-            "fseconds", temp))
-    NJS_CHECK_NAPI(env, napi_new_instance(env,
-            baton->jsIntervalDSConstructor, 1, &intervalDSTempObj, value))
-
-    return true;
-}
 
 //-----------------------------------------------------------------------------
 // njsBaton_setErrorUnsupportedVectorFormat()

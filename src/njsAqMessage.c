@@ -292,14 +292,17 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsAqMessage_getPayload, 0, NULL)
     const char *value;
     dpiJsonNode *topNode;
     dpiJson *json;
+    njsJsContext jsContext;
 
     if (message->isPayloadJsonType) {
         // JSON
         if (dpiMsgProps_getPayloadJson(message->handle, &json) < 0)
             return false;
-        if (dpiJson_getValue(json, DPI_JSON_OPT_DATE_AS_DOUBLE, &topNode) < 0)
+        if (dpiJson_getValue(json, DPI_JSON_OPT_DEFAULT, &topNode) < 0)
             return false;
-        if (!njsBaton_getJsonNodeValue(NULL, topNode, env, returnValue))
+        if (!njsJsContext_populate(env, globals, &jsContext))
+            return false;
+        if (!njsJsContext_getJsonNodeValue(&jsContext, topNode, env, returnValue))
             return false;
     } else {
         // DB Object

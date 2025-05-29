@@ -134,7 +134,7 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
     NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "payload",
             &payloadObj))
     NJS_CHECK_NAPI(env, napi_instanceof(env, payloadObj,
-            baton->jsDbObjectConstructor, &isDbObject))
+            baton->jsContext.jsDbObjectConstructor, &isDbObject))
     if (isDbObject) {
         // DB Object
         if (!njsDbObject_getInstance(baton->globals, env, payloadObj, &obj))
@@ -412,7 +412,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsAqQueue_enq, 1, NULL)
     if (!baton->msgProps)
         return njsBaton_setErrorInsufficientMemory(baton);
 
-    if (!njsBaton_setJsValues(baton, env))
+    if (!njsBaton_setJsContext(baton, env))
         return false;
     for (i = 0; i < baton->numMsgProps; i++) {
         NJS_CHECK_NAPI(env, napi_get_element(env, args[0], i, &message))

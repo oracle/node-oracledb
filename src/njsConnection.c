@@ -621,7 +621,7 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
     napi_value temp;
 
     // validate connection and process arguments
-    if (!njsBaton_setJsValues(baton, env))
+    if (!njsBaton_setJsContext(baton, env))
         return false;
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->sql,
             &baton->sqlLength))
@@ -752,7 +752,7 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
     dpiRowid *rowid;
 
     // set JavaScript values to simplify creation of returned objects
-    if (!njsBaton_setJsValues(baton, env))
+    if (!njsBaton_setJsContext(baton, env))
         return false;
 
     // create result object
@@ -915,7 +915,7 @@ static bool njsConnection_executeManyPostAsync(njsBaton *baton, napi_env env,
     napi_value temp, error;
 
     // set JavaScript values to simplify creation of returned objects
-    if (!njsBaton_setJsValues(baton, env))
+    if (!njsBaton_setJsContext(baton, env))
         return false;
 
     // create object for result
