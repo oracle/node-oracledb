@@ -66,6 +66,9 @@ Common Changes
 #)  Fixed bug which does not trigger PL/SQL functions registered for callbacks
     properly when using implicit pooling with temporary LOBs creation.
 
+#)  Bumped the minimum Node.js version required to 14.17 since
+    ``crypto.randomUUID()`` is used for Sessionless Transactions.
+
 #)  Improved NJS error messages.
 
 Thin Mode Changes

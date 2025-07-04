@@ -68,7 +68,7 @@ function warn(message) { // eslint-disable-line
   console.error.apply(console, args);
 }
 
-// This version of node-oracledb works with Node.js 14.6 or later.
+// This version of node-oracledb works with Node.js 14.17 or later.
 // Note: the checked version is the minimum required for Node-API
 // compatibility.  When new Node.js versions are released, older Node.js
 // versions are dropped from the node-oracledb test plan.
@@ -76,8 +76,8 @@ function warn(message) { // eslint-disable-line
 // Keep this code in sync with lib/oracledb.js
 function checkVersion() {
   const vs = process.version.substring(1).split(".").map(Number);
-  errors.assert(vs[0] > 14 || (vs[0] === 14 && vs[1] >= 6),
-    errors.ERR_NODE_TOO_OLD, nodbUtil.PACKAGE_JSON_VERSION, "14.6");
+  errors.assert(vs[0] > 14 || (vs[0] === 14 && vs[1] >= 17),
+    errors.ERR_NODE_TOO_OLD, nodbUtil.PACKAGE_JSON_VERSION, "14.17");
 }
 
 // Check for the binary node-oracledb module needed for "Thick mode".

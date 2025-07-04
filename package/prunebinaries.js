@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -47,11 +47,11 @@ const nodbUtil = require('../lib/util.js');
 
 const dir = nodbUtil.RELEASE_DIR; // contains the binaries
 
-let re = new RegExp(nodbUtil.BINARY_FILE);
+const re = new RegExp(nodbUtil.BINARY_FILE);
 
 try {
-  let f = fs.readdirSync(dir);
-  let opt = process.argv[2];
+  const f = fs.readdirSync(dir);
+  const opt = process.argv[2];
 
   if (opt) {
     // 'npm run prune <option>' is called
@@ -76,18 +76,12 @@ try {
   console.error(err.message);
 }
 
-async function removeFileorDir(fileOrDirPath) {
+function removeFileorDir(fileOrDirPath) {
   try {
     const isDir = fs.statSync(fileOrDirPath).isDirectory();
     if (isDir) {
       // Remove the directory and its files recursively
-      // Use fs.promises for Node.js versions 14.6-14.13,
-      // which do not support fs.rmSync()
-      const vs = process.version.substring(1).split(".").map(Number);
-      if (vs[0] > 14 || (vs[0] === 14 && vs[1] >= 14))
-        fs.rmSync(fileOrDirPath, { recursive: true, force: true });
-      else
-        await fs.promises.rmdir(fileOrDirPath, { recursive: true, force: true });
+      fs.rmSync(fileOrDirPath, { recursive: true, force: true });
     } else {
       // Remove the file or the symlink synchronously
       fs.unlinkSync(fileOrDirPath);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -59,7 +59,7 @@ if (fs.existsSync('.npmignore')) {
 }
 
 // Create the npm package
-async function packageUp() {
+function packageUp() {
   console.log('Creating the npm package for node-oracledb ' + packageJSON.version);
   try {
 
@@ -77,15 +77,9 @@ async function packageUp() {
     packageJSON.scripts.prune = 'node package/prunebinaries.js';
     fs.writeFileSync('package.json', JSON.stringify(packageJSON, null, 2) + '\n');
 
-    // Use 'await fs.promises' to remove the directory & its contents instead
-    // of fs.rmSync() for compatability with Node.js 14.6 - 14.13 versions.
-    // fs.rmSync() was introduced in Node.js 14.14 version.
+    // Remove the directory & its contents
     try {
-      const vs = process.version.substring(1).split(".").map(Number);
-      if (vs[0] > 14 || (vs[0] === 14 && vs[1] >= 14))
-        fs.rmSync(nodbUtil.RELEASE_DIR, { recursive: true, force: true });
-      else
-        await fs.promises.rmdir(nodbUtil.RELEASE_DIR, { recursive: true, force: true });
+      fs.rmSync(nodbUtil.RELEASE_DIR, { recursive: true, force: true });
     } catch (err) {
       if (err && !err.message.match(/ENOENT/))
         console.error(err.message);
@@ -127,10 +121,10 @@ async function packageUp() {
 // Copy a directory
 function copyDir(srcDir, destDir) {
   try {
-    let f = fs.readdirSync(srcDir);
+    const f = fs.readdirSync(srcDir);
     for (let i = 0; i < f.length; i++) {
       fs.copyFileSync(srcDir + '/' + f[i], destDir + '/' + f[i]);
-      let mode = f[i].match(/\.txt$/) ? 0o644 : 0o755;
+      const mode = f[i].match(/\.txt$/) ? 0o644 : 0o755;
       fs.chmodSync(destDir + '/' + f[i], mode);
     }
   } catch (err) {

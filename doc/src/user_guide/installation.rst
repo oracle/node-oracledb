@@ -226,7 +226,7 @@ Installation Requirements
 
 To use node-oracledb, you need:
 
-- Node.js 14.6 or later.
+- Node.js 14.17 or later.
 
 - Access to an Oracle Database either local or remote, on-premises, or in the
   :ref:`Cloud <connectionadb>`. You will need to know the `database
