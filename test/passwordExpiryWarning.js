@@ -131,8 +131,7 @@ describe('292. passwordExpiryWarning.js', function() {
       poolMax: 50,
       poolIncrement: 10,
       poolTimeout: 60,
-      homogeneous: true,
-      queueTimeout: 0
+      homogeneous: true
     };
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     pool = await oracledb.createPool(credentials);
@@ -158,8 +157,7 @@ describe('292. passwordExpiryWarning.js', function() {
       poolMax: 50,
       poolIncrement: 10,
       poolTimeout: 60,
-      homogeneous: false,
-      queueTimeout: 0
+      homogeneous: false
     };
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
     pool = await oracledb.createPool(credentials);
@@ -184,8 +182,7 @@ describe('292. passwordExpiryWarning.js', function() {
       poolMax: 50,
       poolIncrement: 10,
       poolTimeout: 60,
-      homogeneous: true,
-      queueTimeout: 0
+      homogeneous: true
     };
 
     pool = await oracledb.createPool(credentials);
@@ -204,8 +201,7 @@ describe('292. passwordExpiryWarning.js', function() {
       poolMax: 5,
       poolIncrement: 1,
       poolTimeout: 60,
-      homogeneous: true,
-      queueTimeout: 0
+      homogeneous: true
     };
 
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
@@ -238,8 +234,7 @@ describe('292. passwordExpiryWarning.js', function() {
       poolMax: 5,
       poolIncrement: 1,
       poolTimeout: 60,
-      homogeneous: true,
-      queueTimeout: 0
+      homogeneous: true
     };
 
     const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);

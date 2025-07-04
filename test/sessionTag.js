@@ -263,7 +263,6 @@ async function dropTable() {
       pool = await oracledb.createPool({
         ...dbConfig,
         sessionCallback: "plsql_fixup_test.set_tag_callback",
-        queueTimeout: 0 //Currently this test fails when queueTimeout enabled
       });
       await assert.rejects(
         async () => {

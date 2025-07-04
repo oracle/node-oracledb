@@ -58,9 +58,6 @@ Common Changes
     be raised as an ``NJS-500`` error with the underlying reason being
     included in the error message.
 
-#)  Improved connection pool's queueTimeout behavior to account for network
-    delays and pool expansion delays.
-
 #)  Fixed bug which does not trigger PL/SQL functions registered for callbacks
     properly when using implicit pooling with temporary LOBs creation.
 
