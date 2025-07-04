@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -41,6 +41,7 @@ describe('294. dataTypeVector1.js', function() {
   let connection = null, isRunnable = false, defaultFetchTypeHandler;
   let isVectorBinaryRunnable = false;
   const tableName = 'nodb_vectorDbTable';
+  let origAutoCommit;
 
   before('Get connection', async function() {
     isRunnable = await testsUtil.checkPrerequisites(2304000000, 2304000000);
@@ -49,6 +50,7 @@ describe('294. dataTypeVector1.js', function() {
       isVectorBinaryRunnable = true;
     }
 
+    origAutoCommit = oracledb.autoCommit;
     defaultFetchTypeHandler = oracledb.fetchTypeHandler;
     connection = await oracledb.getConnection(dbConfig);
     let sql;
@@ -88,9 +90,10 @@ describe('294. dataTypeVector1.js', function() {
 
   after('Release connection', async function() {
     if (!isRunnable) return;
+    oracledb.fetchTypeHandler = defaultFetchTypeHandler;
+    oracledb.autoCommit = origAutoCommit;
     await connection.execute(testsUtil.sqlDropTable(tableName));
     await connection.close();
-    oracledb.fetchTypeHandler = defaultFetchTypeHandler;
   });
 
   beforeEach(async function() {
@@ -1132,7 +1135,9 @@ describe('294. dataTypeVector1.js', function() {
   }); // 294.44
 
   it('294.45 transactional features on vector', async function() {
+    const currAutoCommit = oracledb.autoCommit;
     oracledb.autoCommit = false;
+
     let sql = `INSERT INTO ${tableName} (IntCol, VectorFixedCol) VALUES(1, :1)`;
 
     let binds = [
@@ -1153,7 +1158,8 @@ describe('294. dataTypeVector1.js', function() {
     await connection.execute(`COMMIT`);
     const result = await connection.execute(`SELECT COUNT(*) FROM ${tableName}`);
     assert.strictEqual(result.rows[0][0], 1);
-    oracledb.autoCommit = true;
+
+    oracledb.autoCommit = currAutoCommit;
   }); // 294.45
 
   it('294.46 validate assm mssm on vector table', async function() {

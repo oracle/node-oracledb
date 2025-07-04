@@ -670,7 +670,10 @@ To use an OCI Object Storage Centralized Configuration Provider, you must:
 
 2. Install the required OCI modules. See :ref:`ocimodules`.
 
-3. :ref:`Use an OCI Object Storage connection string URL <connstringoci>`
+3. Load the :ref:`ociobject <ociobjectplugin>` plugin in your application using
+   ``require('oracledb/plugins/configProviders/ociobject')``.
+
+4. :ref:`Use an OCI Object Storage connection string URL <connstringoci>`
    in the ``connectString`` property of connection and pool creation methods.
 
 Note that node-oracledb caches configurations by default, see
@@ -806,7 +809,10 @@ To use an OCI Vault Centralized Configuration Provider, you must:
 
 2. Install the required OCI modules. See :ref:`ocivaultmodules`.
 
-3. :ref:`Use an OCI Vault connection string URL <connstringocivault>` in the
+3. Load the :ref:`ocivault <ocivaultplugin>` plugin in your application using
+   ``require('oracledb/plugins/configProviders/ocivault')``.
+
+4. :ref:`Use an OCI Vault connection string URL <connstringocivault>` in the
    ``connectString`` property of connection and pool creation methods.
 
 Note that node-oracledb caches configurations by default, see
@@ -889,7 +895,10 @@ To use node-oracledb with Azure App Configuration, you must:
 
 2. Install the required Azure Application modules. See :ref:`azuremodules`.
 
-3. :ref:`Use an Azure App Configuration connection string URL
+3. Load the :ref:`azure <azureplugin>` plugin in your application using
+   ``require('oracledb/plugins/configProviders/azure')``.
+
+4. :ref:`Use an Azure App Configuration connection string URL
    <connstringazure>` in the ``connectString`` parameter of connection and
    pool creation methods.
 
@@ -1050,7 +1059,10 @@ To use node-oracledb with Azure Key Vault, you must:
 2. Install the required Azure Application modules. See
    :ref:`azurevaultmodules`.
 
-3. :ref:`Use an Azure Key Vault connection string URL <connstringazurevault>`
+3. Load the :ref:`azurevault <azurevaultplugin>` plugin in your application
+   using ``require('oracledb/plugins/configProviders/azurevault')``.
+
+4. :ref:`Use an Azure Key Vault connection string URL <connstringazurevault>`
    in the ``connectString`` parameter of connection and pool creation methods.
 
 Note that node-oracledb caches configurations by default, see
@@ -2884,11 +2896,64 @@ the number of open connections does not fall below ``poolMin``.
 Connection Hook Functions
 =========================
 
-Node-oracledb supports hook functions that can be used to customize connection
+Node-oracledb supports centralized configuration provider and process
+configuration hook functions that can be used to customize connection
 logic.
 
-Using oracledb.registerProcessConfigurationHook()
--------------------------------------------------
+.. _configproviderhookfn:
+
+Using Centralized Configuration Provider Hook Functions
+-------------------------------------------------------
+
+The :meth:`oracledb.registerConfigurationProviderHook()` method registers the
+:ref:`centralized configuration provider <configproviderplugins>` extension
+modules that were loaded in your code. When this method is called, it
+registers a user hook function that will be called internally by node-oracledb
+prior to connection or pool creation. The hook function will be invoked when
+:meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()` are called
+with the ``connectString`` property prefixed with a specified configuration
+provider. Your hook function can retrieve the connection information, which
+node-oracledb can subsequently use to complete the connection or pool
+creation.
+
+Pre-supplied node-oracledb plugins such as :ref:`OCI Object Storage
+(ociobject) <ociobjectplugin>`, :ref:`OCI Vault (ocivault) <ocivaultplugin>`,
+:ref:`Azure App Configuration (azure) <azureplugin>`, and
+:ref:`Azure Key Vault (azurevault) <azurevaultplugin>` make use of
+:meth:`oracledb.registerConfigurationProviderHook()`. These plugins use the
+information found in a connection method's ``connectString`` property which
+allows node-oracledb to access the required information from the configuration
+provider, and connect to Oracle Database with this information. For the
+complete plugin implementation, see the respective folders of the
+configuration providers in the `plugins/configProviders <https://github.com/
+oracle/node-oracledb/tree/main/plugins/configProviders>`__ directory of the
+node-oracledb package. Also, you can define your own plugins for centralized
+configuration providers and register it using
+:meth:`oracledb.registerConfigurationProviderHook()`, similar to how the
+pre-supplied node-oracledb plugins are registered.
+
+Once you define the plugin and register it using
+:meth:`oracledb.registerConfigurationProviderHook`, you can connect to Oracle
+Database using the information stored in the configuration provider, for
+example, with OCI Vault:
+
+.. code-block:: javascript
+
+    // Load the ocivault plugin
+    require('oracledb/plugins/configProviders/ocivault');
+
+    // Use an OCI vault connection string
+    const connection = await oracledb.getConnection({
+        connectString : "config-ocivault://ocid1.vaultsecret.oc1?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
+    });
+
+For more information on the centralized configuration providers supported by
+node-oracledb, see :ref:`configurationprovider`.
+
+.. _processconfighookfns:
+
+Using Process Configuration Hook Functions
+------------------------------------------
 
 The :meth:`oracledb.registerProcessConfigurationHook()` method registers
 extension modules that were added to your code. When this method is called, it

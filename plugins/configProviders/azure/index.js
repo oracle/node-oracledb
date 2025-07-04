@@ -182,5 +182,4 @@ async function hookFn(args) {
   }
   return [await configProvider.returnConfig(), configProvider.credential];
 }
-oracledb.registerConfigProviderHooks('azure', hookFn);
-
+oracledb.registerConfigurationProviderHook('azure', hookFn);

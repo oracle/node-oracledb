@@ -3969,6 +3969,57 @@ Oracledb Methods
     path, such as from running ``ldconfig`` or set in the environment
     variable ``LD_LIBRARY_PATH``.
 
+.. method:: oracledb.registerConfigurationProviderHook()
+
+    .. versionadded:: 6.9
+
+    ::
+
+        registerConfigurationProviderHook(String configProvider, Function fn)
+
+    Registers the :ref:`centralized configuration provider
+    <configproviderplugins>` extension modules. These registered modules will
+    be called and executed during standalone and pool connection creation.
+
+    If you have defined your own extension module for any particular
+    centralized configuration provider, you need to register it using this
+    method in your code.
+
+    The parameters of the ``oracledb.registerConfigurationProviderHook()`` method
+    are:
+
+    .. _registerconfigurationproviderhookattrs:
+
+    .. list-table-with-summary:: oracledb.registerConfigurationProviderHook() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``configProvider``
+          - String
+          - The centralized configuration provider extension that needs to be
+            accessed. The value can be the string "ociobject", "ocivault",
+            "azure", or "azurevault" which are the pre-supplied node-oracledb
+            configuration provider extensions.
+        * - ``fn``
+          - Function
+          - The hook function that needs to be registered. This hook
+            function will be invoked when :meth:`oracledb.getConnection()` or
+            :meth:`oracledb.createPool()` are called. The user hook function
+            is expected to return the configuration information from the
+            configuration provider specified in the ``configProvider``
+            parameter.
+
+    See :ref:`configproviderhookfn`.
+
 .. method:: oracledb.registerProcessConfigurationHook()
 
     .. versionadded:: 6.8

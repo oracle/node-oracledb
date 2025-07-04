@@ -173,4 +173,4 @@ async function hookFn(args) {
     throw new Error(errmsg);
   }
 }
-oracledb.registerConfigProviderHooks('ociobject', hookFn);
+oracledb.registerConfigurationProviderHook('ociobject', hookFn);

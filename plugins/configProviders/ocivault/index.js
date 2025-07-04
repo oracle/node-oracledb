@@ -97,4 +97,4 @@ async function hookFn(args) {
   }
   return  [await configProvider.returnConfig(args.credential), configProvider.credential];
 }
-oracledb.registerConfigProviderHooks('ocivault', hookFn);
+oracledb.registerConfigurationProviderHook('ocivault', hookFn);

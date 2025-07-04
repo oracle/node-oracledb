@@ -35,6 +35,11 @@ Common Changes
     <ocivault>`, and :ref:`Microsoft Azure Key Vault configuration provider
     <azurekeyvault>`.
 
+#)  Moved centralized configuration provider support to be part of the
+    :ref:`plugins <configproviderplugins>` to prevent package build errors
+    with external bundlers such as webpack and esbuild.
+    See `Issue #1791 <https://github.com/oracle/node-oracledb/issues/1791>`__.
+
 #)  Added support for
     :ref:`instance principal authentication <_create_pool_oci_properties>`
     in :ref:`native IAM token-based authentication <cloudnativeauthoci>`
@@ -65,11 +70,6 @@ Common Changes
 
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Moved centralized configuration provider support to be part of the
-    plugins to prevent package build errors with external bundlers like
-    webpack and esbuild. See:
-    `Issue #1791 <https://github.com/oracle/node-oracledb/issues/1791>`__.
 
 #)  Fixed bug which forced node-oracledb to resolve the database host name
     even if a proxy was specified in the connect string. Now the proxy

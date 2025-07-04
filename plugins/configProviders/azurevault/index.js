@@ -81,4 +81,4 @@ async function hookFn(args) {
   }
   return  [await configProvider.returnConfig(args.credential), configProvider.credential];
 }
-oracledb.registerConfigProviderHooks('azurevault', hookFn);
+oracledb.registerConfigurationProviderHook('azurevault', hookFn);
