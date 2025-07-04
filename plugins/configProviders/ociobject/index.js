@@ -26,8 +26,9 @@
 
 'use strict';
 
-const { base } = require("./base.js");
-const errors = require("../errors.js");
+const { base } = require("../base.js");
+const oracledb = require('oracledb');
+const util = require('node:util');
 const fs = require('fs');
 const cloud_net_naming_pattern_oci = new RegExp("(?<objservername>[A-Za-z0-9._-]+)/n/" + "(?<namespace>[A-Za-z0-9._-]+)/b/" + "(?<bucketname>[A-Za-z0-9._-]+)/o/" + "(?<filename>[A-Za-z0-9._-]+)$");
 // object to store module references that will be populated by init()
@@ -87,8 +88,10 @@ class OCIProvider extends base {
         provider = await oci.common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
       } else if (auth == 'OCI_RESOURCE_PRINCIPAL') {
         provider = await new oci.common.ResourcePrincipalAuthenticationDetailsProvider.builder();
-      } else
-        errors.throwErr(errors.ERR_OCIOBJECT_CONFIG_PROVIDER_AUTH_FAILED, auth);
+      } else {
+        const errmsg = util.format('OCI authentication failed: The authentication parameter value %s may be incorrect', auth);
+        throw new Error(errmsg);
+      }
     } else {
       // default authentication
       try {
@@ -149,6 +152,25 @@ class OCIProvider extends base {
     }
     return this.obj;
   }
+}module.exports = OCIProvider;
 
+//---------------------------------------------------------------------------
+//  hookFn()
+//  hookFn will get registered to the driver while loading the plugins
+//---------------------------------------------------------------------------
+async function hookFn(args) {
+  const configProvider = new OCIProvider(args.provider_arg, args.urlExtendedPart);
+  try {
+    configProvider.init();
+  } catch (err) {
+    const errmsg = util.format('Centralized Config Provider failed to load required libraries. Please install the required libraries.\n %s', err.message);
+    throw new Error(errmsg);
+  }
+  try {
+    return [await configProvider.returnConfig(), configProvider.credential];
+  } catch (err) {
+    const errmsg = util.format('Failed to retrieve configuration from Centralized Configuration Provider:\n %s', err.message);
+    throw new Error(errmsg);
+  }
 }
-module.exports = OCIProvider;
+oracledb.registerConfigProviderHooks('ociobject', hookFn);

@@ -24,11 +24,11 @@
 //-----------------------------------------------------------------------------
 
 'use strict';
-
 let AppConfigurationClient;
 let ClientSecretCredential, ClientCertificateCredential, ChainedTokenCredential, ManagedIdentityCredential, EnvironmentCredential;
-const errors = require("../errors.js");
-const { base } = require("./base.js");
+const util = require('node:util');
+const { base } = require("../base.js");
+const oracledb = require('oracledb');
 class AzureProvider extends base {
   constructor(provider_arg, urlExtendedPart) {
     super(urlExtendedPart);
@@ -64,11 +64,12 @@ class AzureProvider extends base {
         else if (this.paramMap.get("azure_client_secret"))
           return new ClientSecretCredential(this.paramMap.get("azure_tenant_id"), this.paramMap.get("azure_client_id"), this.paramMap.get("azure_client_secret"));
         else
-          errors.throwErr(errors.ERR_AZURE_SERVICE_PRINCIPAL_AUTH_FAILED);
+          throw new Error('Azure service principal authentication requires either a client certificate path or a client secret string');
       } else if (auth == 'AZURE_MANAGED_IDENTITY') {
         return new ManagedIdentityCredential(this.paramMap.get('azure_managed_identity_client_id'));
       } else {
-        errors.throwErr(errors.ERR_AZURE_CONFIG_PROVIDER_AUTH_FAILED, auth);
+        const errmsg = util.format('Azure Authentication Failed: The authentication parameter value %s may be incorrect', auth);
+        throw new Error(errmsg);
       }
     } else {
       //return default token credential
@@ -97,7 +98,12 @@ class AzureProvider extends base {
   async returnConfig() {
     const configObject = {};
     const label = this.paramMap.get("label");
-    this.credential =  await this.returnAzureCredential();
+    try {
+      this.credential =  await this.returnAzureCredential();
+    } catch (err) {
+      const errmsg = util.format('Azure Authentication Failed: The authentication parameter value %s may be incorrect', err.message);
+      throw new Error(errmsg);
+    }
     // azure config store
     const client = new AppConfigurationClient(
       "https://" + this.paramMap.get("appconfigname"), // ex: <https://<your appconfig resource>.azconfig.io>
@@ -128,7 +134,7 @@ class AzureProvider extends base {
     if (configObject.walletContent) {
       //only Pem file supported
       if (!this.isPemFile(configObject.walletContent))
-        errors.throwErr(errors.ERR_WALLET_TYPE_NOT_SUPPORTED);
+        throw new Error('Invalid wallet content format. Supported format is PEM');
     }
     return configObject;
   }
@@ -138,8 +144,10 @@ class AzureProvider extends base {
       paramJson = (await client.getConfigurationSetting({ key: this.paramMap.get("key") + param, label: label })).value;
     } catch (err) {
       // connect_descriptor must not be null
-      if (param == 'connect_descriptor')
-        errors.throwErr(errors.ERR_CONFIG_PROVIDER_FAILED_TO_RETRIEVE_CONFIG, err.message);
+      if (param == 'connect_descriptor') {
+        const errmsg = util.format('Failed to retrieve configuration from Centralized Configuration Provider:\n%s', err.message);
+        throw new Error(errmsg);
+      }
       return null;
     }
     if (paramJson) {
@@ -159,5 +167,20 @@ class AzureProvider extends base {
       }
     }
   }
+} module.exports = AzureProvider;
+//---------------------------------------------------------------------------
+//  hookFn()
+//  hookFn will get registered to the driver while loading the plugins
+//---------------------------------------------------------------------------
+async function hookFn(args) {
+  const configProvider = new AzureProvider(args.provider_arg, args.urlExtendedPart);
+  try {
+    configProvider.init();
+  } catch (err) {
+    const errmsg = util.format('Centralized Config Provider failed to load required libraries. Please install the required libraries.\n %s', err.message);
+    throw new Error(errmsg);
+  }
+  return [await configProvider.returnConfig(), configProvider.credential];
 }
-module.exports = AzureProvider;
+oracledb.registerConfigProviderHooks('azure', hookFn);
+

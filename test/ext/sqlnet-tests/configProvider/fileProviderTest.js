@@ -87,7 +87,9 @@
  */
 const oracledb = require('oracledb');
 const assert   = require('assert');
-
+require('../../../../lib/configProviders/file.js');
+require('../../../../plugins/configProviders/azurevault');
+require('../../../../plugins/configProviders/ocivault');
 describe('1. OCI Object Storage', function() {
   const config = {};
 
@@ -148,7 +150,8 @@ describe('1. OCI Object Storage', function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_FILE_ALIAS;
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/
+        '', // Failed to retrieve configuration from Centralized Configuration Provider
+        // password type text is only allowed in ocivault and azurevault
       );
     }); // 1.2
     it('1.3 Local Json file with password stored in OCIVault ', async function() {

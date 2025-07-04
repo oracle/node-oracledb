@@ -96,6 +96,8 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 
+require('../../../../plugins/configProviders/azurevault');
+
 describe('1. Azure Vault', function() {
   const config = {};
   // Check for connection string environment variable
@@ -158,7 +160,6 @@ describe('1. Azure Vault', function() {
     }); // 1.1
     it('1.2  Azure Vault with credentials set in environment variables', async function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZUREVAULT_ENV;
-      console.log(config.connectString);
       const connection = await oracledb.getConnection(config);
       const result = await connection.execute("select 1+1 from dual");
       assert(result.rows[0][0], 2);

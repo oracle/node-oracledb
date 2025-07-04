@@ -66,6 +66,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Moved centralized configuration provider support to be part of the
+    plugins to prevent package build errors with external bundlers like
+    webpack and esbuild. See:
+    `Issue #1791 <https://github.com/oracle/node-oracledb/issues/1791>`__.
+
 #)  Fixed bug which forced node-oracledb to resolve the database host name
     even if a proxy was specified in the connect string. Now the proxy
     specified in the connect string will resolve the database host name.

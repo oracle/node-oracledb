@@ -37,7 +37,7 @@
 Error.stackTraceLimit = 50;
 
 const oracledb = require('oracledb');
-
+require('oracledb/plugins/configProviders/ociobject');
 // This example runs in both node-oracledb Thin and Thick modes.
 //
 // Optionally run in node-oracledb Thick mode

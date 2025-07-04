@@ -25,8 +25,9 @@
 //-----------------------------------------------------------------------------
 'use strict';
 
-const { base } = require("./base.js");
-
+const { base } = require("../base.js");
+const oracledb = require('oracledb');
+const util = require('node:util');
 const oci = {};
 class ociVault extends base {
   constructor(provider_arg, urlExtendedPart) {
@@ -47,7 +48,7 @@ class ociVault extends base {
   //---------------------------------------------------------------------------
   async returnConfig(credential) {
     if (!credential) {
-      const ociObjectClass = require('./ociobject.js');
+      const ociObjectClass = require('../ociobject');
       const ociObject = new ociObjectClass();
       ociObject.paramMap = this.paramMap;
       ociObject.paramMap.set('authentication', '');
@@ -79,4 +80,21 @@ class ociVault extends base {
     return this.obj;
   }
 }
-module.exports = ociVault;
+//---------------------------------------------------------------------------
+//  hookFn()
+//  hookFn will get registered to the driver while loading the plugins
+//---------------------------------------------------------------------------
+async function hookFn(args) {
+  const configProvider = new ociVault(args.provider_arg, args.urlExtendedPart);
+  try {
+    configProvider.init();
+  } catch (err) {
+    const errmsg = util.format('Centralized Config Provider failed to load required libraries. Please install the required libraries.\n %s', err.message);
+    throw new Error(errmsg);
+  }
+  if (args.paramMap) {
+    configProvider.paramMap = args.paramMap;
+  }
+  return  [await configProvider.returnConfig(args.credential), configProvider.credential];
+}
+oracledb.registerConfigProviderHooks('ocivault', hookFn);

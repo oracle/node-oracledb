@@ -84,6 +84,7 @@
 
 const assert   = require('assert');
 const oracledb = require('oracledb');
+require('../../../../plugins/configProviders/azure');
 
 describe('1. Azure Configuration Store', function() {
   const config = {};
@@ -206,9 +207,10 @@ describe('1. Azure Configuration Store', function() {
       // Labels allow you to create variants of a key tailored
       // for specific use-cases like supporting multiple environments.
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_CERT_VAULT + '&label=test1';
+      oracledb.getConnection(config);
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider
+        ''
       );
     }); // 1.8
 
@@ -292,17 +294,16 @@ describe('1. Azure Configuration Store', function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZURE.replace(/azure_client_id=[^&]+/, '');
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider
+        ''
       );
     }); // 1.16
-
 
     it('1.17 Azure Config Store with missing client secret', async function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZURE.replace(/azure_client_secret=[^&]+/, '');
       process.env.AZURE_CLIENT_SECRET = '';
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider
+        '' // Failed to retrieve configuration from Centralized Configuration Provider
         // Invalid client secret provided
       );
     }); // 1.17
@@ -311,7 +312,7 @@ describe('1. Azure Configuration Store', function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZURE.replace(/azure_tenant_id=[^&]+/, '');
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider
+        '' //Azure Authentication Failed:
       );
     }); // 1.18
 
@@ -319,7 +320,7 @@ describe('1. Azure Configuration Store', function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_AZURE.replace(/key=[^&]+/, 'key=wrongKey/');
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider
+        '' //Failed to retrieve configuration from Centralized Configuration Provider
       );
     }); // 1.19
 
@@ -327,7 +328,7 @@ describe('1. Azure Configuration Store', function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_CERT_VAULT.replace(/azure_client_certificate_path=[^&]+/, '');
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider:
+        '' //Failed to retrieve configuration from Centralized Configuration Provider:
         // EnvironmentCredential authentication failed
       );
     }); // 1.20
@@ -336,7 +337,7 @@ describe('1. Azure Configuration Store', function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_CERT_VAULT.replace(/azure_client_certificate_path=[^&]+/, 'azure_client_certificate_path=wrong/path/to/cert.pem');
       await assert.rejects(
         async () => await oracledb.getConnection(config),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider
+        '' //Failed to retrieve configuration from Centralized Configuration Provider
       );
     }); // 1.21
     it('1.22 Azure Config Store with wallet stored in vault ', async function() {

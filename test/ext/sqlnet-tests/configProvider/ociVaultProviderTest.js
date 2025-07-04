@@ -87,6 +87,8 @@
  */
 const oracledb = require('oracledb');
 const assert   = require('assert');
+require('../../../../plugins/configProviders/ocivault');
+require('../../../../plugins/configProviders/azurevault');
 describe('1. OCI Object Storage', function() {
   const config = {};
 

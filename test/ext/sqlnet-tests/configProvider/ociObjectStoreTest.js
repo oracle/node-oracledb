@@ -135,10 +135,11 @@ const assert   = require('assert');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-
+require('../../../../plugins/configProviders/ociobject');
+require('../../../../plugins/configProviders/ocivault');
+require('../../../../plugins/configProviders/azurevault');
 describe('1. OCI Object Storage', function() {
   const config = {};
-
   // Check for connection string environment variable
   before(function() {
     // This test runs in both node-oracledb Thin and Thick modes.
@@ -303,7 +304,7 @@ describe('1. OCI Object Storage', function() {
         async () => await oracledb.getConnection({
           connectString: process.env.NODE_ORACLEDB_CONNECTIONSTRING_OCIPARAMS + 'oci_profile=test'
         }),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider:\n No profile named test exists in the configuration file.
+        '' //Failed to retrieve configuration from Centralized Configuration Provider:\n No profile named test exists in the configuration file.
       );
     }); // 1.10
 
@@ -313,7 +314,7 @@ describe('1. OCI Object Storage', function() {
         async () => await oracledb.getConnection({
           connectString: process.env.NODE_ORACLEDB_CONNECTIONSTRING_OCIPARAMS + 'oci_profile_path=' + __dirname + 'nvTest.js'
         }),
-        /NJS-523:/ // NJS-523: Failed to retrieve configuration from Centralized Configuration Provider:\n No profile named test exists in the configuration file.
+        '' // Failed to retrieve configuration from Centralized Configuration Provider:\n No profile named test exists in the configuration file.
       );
     }); // 1.11
 
@@ -374,7 +375,7 @@ describe('1. OCI Object Storage', function() {
       await connection.close();
     }); // 1.16
 
-    it.only('1.17 OCI Object Store with password stored in text format', async function() {
+    it('1.17 OCI Object Store with password stored in text format', async function() {
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_ALIAS_TEXT;
       await assert.rejects(
         async () => await oracledb.getConnection(config),

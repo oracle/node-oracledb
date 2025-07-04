@@ -25,7 +25,9 @@
 //-----------------------------------------------------------------------------
 'use strict';
 
-const { base } = require("./base.js");
+const { base } = require("../base.js");
+const oracledb = require('oracledb');
+const util = require('node:util');
 
 let SecretClient;
 class azureVault extends base {
@@ -39,7 +41,7 @@ class azureVault extends base {
   }
   async returnConfig(credential) {
     if (!credential) {
-      const azureClass = require('./azure.js');
+      const azureClass = require('../azure');
       var azureObject = new azureClass();
       azureObject.paramMap = this.paramMap;
       this.credential = await azureObject.returnAzureCredential();
@@ -55,7 +57,6 @@ class azureVault extends base {
     } catch {
       return resp; //when password is of type azurevault
     }
-    //
     const userAlias = this.paramMap.get('key'); // alias
     if (userAlias) {
       this.obj = this.obj[userAlias];
@@ -63,4 +64,21 @@ class azureVault extends base {
     return this.obj;
   }
 }
-module.exports = azureVault;
+//---------------------------------------------------------------------------
+//  hookFn()
+//   hookFn will get registered to the driver while loading the plugins
+//---------------------------------------------------------------------------
+async function hookFn(args) {
+  const configProvider = new azureVault(args.provider_arg, args.urlExtendedPart);
+  try {
+    configProvider.init();
+  } catch (err) {
+    const errmsg = util.format('Centralized Config Provider failed to load required libraries. Please install the required libraries.\n %s', err.message);
+    throw new Error(errmsg);
+  }
+  if (args.paramMap) {
+    configProvider.paramMap = args.paramMap;
+  }
+  return  [await configProvider.returnConfig(args.credential), configProvider.credential];
+}
+oracledb.registerConfigProviderHooks('azurevault', hookFn);
