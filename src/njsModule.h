@@ -457,6 +457,7 @@ struct njsBaton {
     bool isJson;
     bool isOson;
     bool fileExists;
+    bool suspendOnSuccess;
 
     // LOB buffer (requires free only if string was used)
     uint64_t bufferSize;
@@ -484,6 +485,12 @@ struct njsBaton {
     bool     tpcOnePhase;
     bool     tpcCommitNeeded;
     uint32_t tpcTxnTimeout;
+
+    // Sessionless related fields (requires free)
+    dpiSessionlessTransactionId* sessionlessTransactionId;
+    uint32_t sessionlessTimeout;
+    uint32_t sessionlessFlags;
+    bool     deferRoundTrip;
 
     // references that are held (requires free)
     napi_ref jsBufferRef;

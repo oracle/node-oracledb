@@ -6305,3 +6305,22 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
   315. poolMaxLifeTimeSession.js
     315.1 Testing maxLifetimeSession on conn release
     315.2 Testing maxLifetimeSession on conn acquire
+  316. sessionless.js
+    316.1 Sessionless Functions
+      316.1.1 Test server procedures
+      316.1.2 Test Client APIs
+      316.1.3 transaction timeout behavior
+      316.1.4 error handling during sessionless transaction
+      316.1.5 multiple concurrent sessionless transactions
+      316.1.6 different GTRID formats
+      316.1.7 with savepoints
+      316.1.8 sessionless transactions with connection pool
+      316.1.9 mixing server and client methods
+      316.1.10 resuming without suspnding current txn
+      316.1.11 suspendOnSuccess error
+      316.1.12 sessionless transaction with large operations
+      316.1.13 transaction behavior with some DDL operation
+      316.1.14 zero timeout behavior
+      316.1.15 retrieve GTRID of active sessionless transaction
+      316.1.16 Checking behaviour with XA transactions
+      316.1.17 Behaviour with local transactions

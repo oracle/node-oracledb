@@ -76,8 +76,10 @@ NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setInternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setModule);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setTag);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_shutdown);
+NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_startSessionlessTransaction);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_startup);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_subscribe);
+NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_suspendSessionlessTransaction);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_tpcBegin);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_tpcCommit);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_tpcEnd);
@@ -101,8 +103,10 @@ static NJS_ASYNC_METHOD(njsConnection_getStatementInfoAsync);
 static NJS_ASYNC_METHOD(njsConnection_pingAsync);
 static NJS_ASYNC_METHOD(njsConnection_rollbackAsync);
 static NJS_ASYNC_METHOD(njsConnection_shutdownAsync);
+static NJS_ASYNC_METHOD(njsConnection_startSessionlessTransactionAsync);
 static NJS_ASYNC_METHOD(njsConnection_startupAsync);
 static NJS_ASYNC_METHOD(njsConnection_subscribeAsync);
+static NJS_ASYNC_METHOD(njsConnection_suspendSessionlessTransactionAsync);
 static NJS_ASYNC_METHOD(njsConnection_tpcBeginAsync);
 static NJS_ASYNC_METHOD(njsConnection_tpcCommitAsync);
 static NJS_ASYNC_METHOD(njsConnection_tpcEndAsync);
@@ -214,9 +218,15 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL },
     { "shutdown", NULL, njsConnection_shutdown, NULL, NULL, NULL,
             napi_default, NULL },
+    { "startSessionlessTransaction", NULL,
+            njsConnection_startSessionlessTransaction, NULL, NULL, NULL,
+            napi_default, NULL },
     { "startup", NULL, njsConnection_startup, NULL, NULL, NULL,
             napi_default, NULL },
     { "subscribe", NULL, njsConnection_subscribe, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "suspendSessionlessTransaction", NULL,
+            njsConnection_suspendSessionlessTransaction, NULL, NULL, NULL,
             napi_default, NULL },
     { "tpcBegin", NULL, njsConnection_tpcBegin, NULL, NULL, NULL,
             napi_default, NULL },
@@ -657,6 +667,10 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_execute, 5, NULL)
             "keepInStmtCache", &temp))
     NJS_CHECK_NAPI(env, napi_get_value_bool(env, temp,
             &baton->keepInStmtCache))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, args[3],
+            "suspendOnSuccess", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, temp,
+            &baton->suspendOnSuccess))
 
     // process binds
     if (!njsConnection_processBinds(baton, env, args[2]))
@@ -703,6 +717,10 @@ static bool njsConnection_executeAsync(njsBaton *baton)
     // execute statement
     mode = (baton->autoCommit) ? DPI_MODE_EXEC_COMMIT_ON_SUCCESS :
             DPI_MODE_EXEC_DEFAULT;
+
+    if (baton->suspendOnSuccess)
+        mode |= DPI_MODE_EXEC_SUSPEND_ON_SUCCESS;
+
     if (dpiStmt_execute(baton->dpiStmtHandle, mode, &baton->numQueryVars) < 0)
         return njsBaton_setErrorDPI(baton);
 
@@ -864,6 +882,8 @@ static bool njsConnection_executeManyAsync(njsBaton *baton)
         mode |= DPI_MODE_EXEC_BATCH_ERRORS;
     if (baton->dmlRowCounts)
         mode |= DPI_MODE_EXEC_ARRAY_DML_ROWCOUNTS;
+    if (baton->suspendOnSuccess)
+        mode |= DPI_MODE_EXEC_SUSPEND_ON_SUCCESS;
     if (dpiStmt_executeMany(baton->dpiStmtHandle, mode,
             baton->bindArraySize) < 0)
         return njsBaton_setErrorDPI(baton);
@@ -2326,6 +2346,60 @@ static bool njsConnection_shutdownAsync(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
+// njsConnection_startSessionlessTransaction()
+//   Begin/Resume a sessionless transaction
+//
+// PARAMETERS
+//   - transactionId
+//   - timeout
+//   - flag
+//   - deferRoundTrip
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_startSessionlessTransaction, 4, NULL)
+{
+    void *buf;
+    baton->sessionlessTransactionId = calloc(1,
+        sizeof(dpiSessionlessTransactionId));
+
+    NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[0], &(buf),
+        (size_t*)&baton->sessionlessTransactionId->length));
+    strncpy(baton->sessionlessTransactionId->value, buf,
+        baton->sessionlessTransactionId->length);
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[1],
+            &baton->sessionlessTimeout));
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[2],
+        &baton->sessionlessFlags));
+    NJS_CHECK_NAPI(env, napi_get_value_bool(env, args[3],
+        &baton->deferRoundTrip));
+    return njsBaton_queueWork(baton, env, "startSessionlessTransaction",
+        njsConnection_startSessionlessTransactionAsync, NULL, returnValue);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_startSessionlessTransactionAsync()
+//   Worker thread function for njsConnection_startSessionlessTransaction().
+//-----------------------------------------------------------------------------
+static bool njsConnection_startSessionlessTransactionAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+    if (baton->sessionlessFlags == DPI_TPC_BEGIN_NEW) {
+        if (dpiConn_beginSessionlessTransaction(conn->handle, 
+                baton->sessionlessTransactionId, baton->sessionlessTimeout,
+                baton->deferRoundTrip) < 0)
+            return njsBaton_setErrorDPI(baton);
+    } else if (baton->sessionlessFlags == DPI_TPC_BEGIN_RESUME) {
+        if (dpiConn_resumeSessionlessTransaction(conn->handle, 
+                baton->sessionlessTransactionId, baton->sessionlessTimeout,
+                baton->deferRoundTrip) < 0)
+            return njsBaton_setErrorDPI(baton);
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsConnection_startup()
 //   Initiates a Database Server startup (mounting of Database).
 //
@@ -2564,6 +2638,33 @@ static bool njsConnection_subscribePostAsync(njsBaton *baton, napi_env env,
     // otherwise, return the subscription directly
     } else {
         *result = subscription;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_suspendSessionlessTransaction()
+//   Suspend a sessionless transaction
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_suspendSessionlessTransaction, 0, NULL)
+{
+    return njsBaton_queueWork(baton, env, "suspendSessionlessTransaction",
+        njsConnection_suspendSessionlessTransactionAsync, NULL, returnValue);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsConnection_suspendSessionlessTransactionAsync()
+//   Worker thread function for njsConnection_suspendSessionlessTransaction().
+//-----------------------------------------------------------------------------
+static bool njsConnection_suspendSessionlessTransactionAsync(njsBaton *baton)
+{
+    njsConnection *conn = (njsConnection*) baton->callingInstance;
+
+    if (dpiConn_suspendSessionlessTransaction(conn->handle) < 0) {
+        return njsBaton_setErrorDPI(baton);
     }
 
     return true;

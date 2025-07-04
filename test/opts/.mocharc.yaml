@@ -297,3 +297,4 @@ spec:
   - test/dbObjectsNested.js
   - test/dbObject21.js
   - test/poolMaxLifetimeSession.js
+  - test/sessionless.js
