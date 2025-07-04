@@ -116,6 +116,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Easy Connect connection strings (see :ref:`easyconnect`)
       - Yes - Unknown settings are ignored and not passed to Oracle Database
       - Yes
+    * - Centralized Configuration Providers (see :ref:`configurationprovider`)
+      - Yes
+      - Yes
     * - Oracle Cloud Database connectivity (see :ref:`connectionadb`)
       - Yes
       - Yes
@@ -796,16 +799,3 @@ connection or pool, respectively.
 
 Another method that can be used to check which mode is in use is to query
 ``V$SESSION_CONNECT_INFO``. See :ref:`vsessconinfo`.
-
-.. _frameworks:
-
-Frameworks, SQL Generators, and ORMs
-====================================
-
-The features of node-oracledb Thin mode cover the needs of common frameworks
-that depend upon the Node.js API. For example, the node-oracledb Thin mode can
-be used in Sequelize. To run the node-oracledb Thin mode through Sequelize,
-you must not set the ``libPath`` in the dialectOptions object and must not
-:meth:`~oracledb.initOracleClient`. For node-oracledb Thick mode, set the
-``libPath`` in the dialectOptions object or call
-:meth:`~oracledb.initOracleClient()`.

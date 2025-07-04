@@ -852,11 +852,11 @@ describe('1. connection.js', function() {
       // in V$SESSION
       let sanitizedProgName = process.argv0.replace(/[\s(),]/g, '?');
       /*
-        In Oracle < 23.0 DB, The program name (program column in v$session view)
+        In Oracle < 21.0 DB, The program name (program column in v$session view)
         can be set only upto 48 characters.
       */
       const serverVersion = conn.oracleServerVersion;
-      if (serverVersion < 2300000000)
+      if (serverVersion < 2100000000)
         sanitizedProgName = sanitizedProgName.substring(0, 48);
 
       // Fetch values from v$session

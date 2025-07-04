@@ -21,6 +21,12 @@
     margin-bottom: 0pt;
 }
 
+/* Added code to remove the extra lines displayed in a warning block in a table */
+.wy-table-responsive table td div.warning {
+    line-height: 0pt;
+    margin-bottom: 0pt;
+}
+
 /* Added code to wrap the code-blocks that are used in a table*/
 .wy-table-responsive table td pre {
     white-space: pre-wrap !important;

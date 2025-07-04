@@ -511,7 +511,7 @@ Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>`
       - Messages are persistent.
     * - ``oracledb.AQ_MSG_DELIV_MODE_BUFFERED``
       - 2
-      - Messages are buffered.
+      - Messages are buffered. For multi-consumer queues, a `subscriber <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-5FB46C6A-BB22-4CDE-B7D6-E242DC8808D8>`__ with buffered delivery mode needs to be created prior to enqueuing buffered messages.
     * - ``oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED``
       - 3
       - Messages are either persistent or buffered.

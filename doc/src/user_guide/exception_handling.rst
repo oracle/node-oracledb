@@ -41,23 +41,6 @@ occurs. The same is true for invalid operations on read-only or write-only
 properties. If an unrecognized property name is used, it will be
 ignored.
 
-.. _connectionid:
-
-Connection Identifiers
-======================
-
-Some Oracle Network errors contain connection identifiers (``CONNECTION_ID``)
-which uniquely identifies a connection in the trace and logs. With the
-connection identifier, you can correlate diagnostics and resolve
-connectivity errors. For example::
-
-    NJS-501: connection to host dbhost.example.com port 1521 terminated unexpectedly.
-    (CONNECTION_ID=4VIdFEpcSe3gU+FoRmR0aA==)
-
-See `Troubleshooting Oracle Net Services <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-3F42D057-C9AC-4747-B48B-5A5FF7672E5D>`_ for more
-information on connection identifiers.
-
 .. _stacktrace:
 
 Increasing the Stack Trace Limit

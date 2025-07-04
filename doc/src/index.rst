@@ -45,6 +45,7 @@ User Guide
     user_guide/pgmstyle.rst
     user_guide/resources.rst
     user_guide/appendix_a.rst
+    user_guide/appendix_b.rst
 
 API Manual
 ==========

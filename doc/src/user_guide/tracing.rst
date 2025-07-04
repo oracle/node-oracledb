@@ -19,14 +19,18 @@ There are multiple approaches for application tracing and monitoring:
 - The Java Debug Wire Protocol (JDWP) for debugging PL/SQL can be used. See
   :ref:`jdwp`.
 
+- Instrumentation libraries such as OpenTelemetry allow sophisticated
+  monitoring. See :ref:`opentelemetry`.
+
 - Node-oracledb in Thick mode can dump a trace of SQL statements executed. See
   :ref:`tracingsql`.
 
 - Node-oracledb in Thin and Thick modes can trace bind data values used in
   statements executed. See :ref:`tracingbind`.
 
-- In some Oracle Network errors, connection identifiers can be used to
-  identify a connection in the trace and logs. See :ref:`connectionid`.
+- The unique connection identifiers that appear in connection error messages,
+  and in Oracle Database traces and logs, can be used to resolve connectivity
+  errors. See :ref:`connectionid`.
 
 - The stack trace limit can be increased to help you understand the reason
   for the error. See :ref:`stacktrace`.
@@ -56,18 +60,23 @@ The Connection properties :attr:`~connection.action`,
 -4DBC-BDF6-98B83260A7AD>`__. The values can be tracked in database views,
 shown in audit trails, and seen in tools such as Enterprise Manager.
 
+Also see :ref:`appcontext` for information about setting Application Contexts.
+
 Applications should set the properties because they can greatly help
 troubleshooting. They can help identify and resolve unnecessary database
 resource usage, or improper access.
 
-The ``clientId`` property can also be used by applications that do their
-own mid-tier authentication but connect to the database using the one
+The :attr:`connection.clientId` property can also be used by applications that
+do their own mid-tier authentication but connect to the database using the one
 database schema. By setting ``clientId`` to the application’s
 authenticated user name, the database is aware of who the actual end user is.
 This can, for example, be used by Oracle `Virtual Private
 Database <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
 4F37BAE5-CA2E-42AC-9CDF-EC9181671FFE>`__ policies to automatically restrict
-data access by that user.
+data access by that user. Oracle Database’s `DBMS_MONITOR
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+GUID-951568BF-D798-4456-8478-15FEEBA0C78E>`__ package can take advantage of
+the client identifer to enable statistics and tracing at an individual level.
 
 The attributes are set on a :attr:`connection <oracledb.connectionClass>`
 object and sent to the database on the next :ref:`round-trip <roundtrips>`
@@ -94,14 +103,16 @@ from node-oracledb, for example, with ``execute()``:
 While the connection is open, the attribute values can be seen, for
 example with SQL*Plus::
 
-    SQL> SELECT username, client_identifier, client_info, action, module FROM v$session WHERE username = 'HR';
+    SQL> SELECT username, client_identifier, client_info, action, module
+         FROM v$session WHERE username = 'HR';
 
     USERNAME   CLIENT_IDENTIFIER    CLIENT_INFO            ACTION               MODULE
     ---------- -------------------- ---------------------- -------------------- --------------------
     HR         Chris                My demo application    Query departments    End-to-end example
 
-The value of :attr:`connection.dbOp` will be shown in the ``DBOP_NAME`` column of
-the ``V$SQL_MONITOR`` table::
+The value of :attr:`connection.dbOp` will be shown in the ``DBOP_NAME``
+column of the `V$SQL_MONITOR <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-79E97A84-9C27-4A5E-AC0D-C12CB3E748E6>`__ view:::
 
     SQL> SELECT dbop_name FROM v$sql_monitor;
     DBOP_NAME
@@ -219,6 +230,65 @@ and the SQL statement executed::
 See `ODPI-C Debugging <https://oracle.github.io/odpi/doc/user_guide/debugging.
 html>`__ for documentation on ``DPI_DEBUG_LEVEL``.
 
+.. _connectionid:
+
+Using Connection Identifiers
+----------------------------
+
+A unique connection identifier (``CONNECTION_ID``) is generated for each
+connection to the Oracle Database. The connection identifier is shown in some
+Oracle Network error messages and logs, which helps in better tracing and
+diagnosing of connection failures. For example::
+
+    NJS-501: connection to host dbhost.example.com port 1521 terminated unexpectedly.
+    (CONNECTION_ID=4VIdFEpcSe3gU+FoRmR0aA==)
+
+Depending on the Oracle Database version in use, the information that is shown
+in logs varies.
+
+You can define a prefix value which is added to the beginning of the
+``CONNECTION_ID`` value. This prefix aids in identifying the connections from a
+specific application.
+
+See `Troubleshooting Oracle Net Services <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-3F42D057-C9AC-4747-B48B-5A5FF7672E5D>`_ for more
+information on connection identifiers.
+
+**Node-oracledb Thin mode**
+
+In node-oracledb Thin mode, you can specify a prefix using the
+``connectionIdPrefix`` parameter when creating
+:meth:`standalone connections <oracledb.getConnection()>` or
+:meth:`pooled connections <oracledb.createPool()>`. For example:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+      user          : "hr",
+      password      : mypw,  // contains the hr schema password
+      connectString : "localhost/orclpdb",
+      connectionIdPrefix: "MYAPP"
+    });
+
+If this connection to the database fails, ``MYAPP`` is added as a prefix to the
+``CONNECTION_ID`` value shown in the error message, for example::
+
+    NJS-501: connection to host dbhost.example.com port 1521 terminated unexpectedly.
+    (CONNECTION_ID=MYAPP4VIdFEpcSe3gU+FoRmR0aA==)
+
+**Node-oracledb Thick mode**
+
+In node-oracledb Thick mode, you can specify the connection identifier prefix
+in the connection string or connect descriptor. For example::
+
+    mydb = (DESCRIPTION =
+             (ADDRESS_LIST= (ADDRESS=...) (ADDRESS=...))
+             (CONNECT_DATA=
+                (SERVICE_NAME=sales.us.example.com)
+                (CONNECTION_ID_PREFIX=MYAPP)
+             )
+           )
+
 .. _tracingbind:
 
 Tracing Bind Values
@@ -237,66 +307,84 @@ may also be useful.
 You can also write your own wrapper around ``execute()`` and log any
 parameters.
 
+OpenTelemetry can also be used to trace bind values. See :ref:`opentelemetry`.
+
 .. _dbviews:
 
-Database Views
---------------
+Database Views for Tracing node-oracledb
+----------------------------------------
 
-This section shows some sample column values for database views.
-
-``V$SESSION_CONNECT_INFO``
-++++++++++++++++++++++++++
-
-The following table lists sample values for some `V$SESSION_CONNECT_INFO
-<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE>`__
-columns for the node-oracledb Thin and Thick modes:
-
-.. list-table-with-summary:: Sample V$SESSION_CONNECT_INFO column values
-    :header-rows: 1
-    :class: wy-table-responsive
-    :widths: 15 10 10
-    :name: V$SESSION_CONNECT_INFO
-    :summary: The first column is the name of V$SESSION_CONNECT_INFO view's column. The second column lists a sample node-oracledb Thick mode value. The third column list a sample node-oracledb Thin mode value.
-
-    * - Column
-      - Thick Value
-      - Thin Value
-    * - CLIENT_OCI_LIBRARY
-      - The Oracle Client or Instant Client type, such as "Full Instant Client"
-      - "Unknown"
-    * - CLIENT_VERSION
-      - The Oracle Client library version number (for example, 19.3.0.0.0)
-      - "6.0.0.0.0" (the node-oracledb version number with an extra .0.0)
-    * - CLIENT_DRIVER
-      - "node-oracledb thk : 6.0.0"
-      - "node-oracledb thn : 6.0.0"
+This section shows some of the Oracle Database views useful for tracing and
+monitoring node-oracledb. Other views and columns not described here also
+contain useful information, such as the views discussed in
+:ref:`endtoendtracing` and :ref:`tracingbind`.
 
 ``V$SESSION``
 +++++++++++++
 
-The following table list sample values for columns with differences in
-`V$SESSION <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
-28E2DC75-E157-4C0A-94AB-117C205789B9>`__.
+The following table list sample values for some `V$SESSION
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-28E2DC75-E157-
+4C0A-94AB-117C205789B9>`__ columns. You may see other values if you have set
+the equivalent connection or pool creation parameters, or set the attribute
+:attr:`connection.module` as shown in :ref:`endtoendtracing`.
 
 .. list-table-with-summary:: Sample V$SESSION column values
     :header-rows: 1
     :class: wy-table-responsive
-    :widths: 15 10 10
+    :widths: 10 15 15
     :name: V$SESSION_COLUMN_VALUES
     :summary: The first column is the name of the column. The second column lists a sample node-oracledb Thick mode value. The third column lists a sample node-oracledb Thin mode value.
 
     * - Column
-      - Thick value
-      - Thin value
-    * - TERMINAL
-      - similar to `ttys001`
-      - the string "unknown"
-    * - PROGRAM
-      - similar to `node@myuser-mac2 (TNS V1-V3)`
-      - defaults to binary name
+      - Sample Thin mode value
+      - Sample Thick mode value
+    * - MACHINE
+      - "myusername-mac"
+      - "myusername-mac"
     * - MODULE
-      - similar to `node@myuser-mac2 (TNS V1-V3)`
-      - defaults to binary name
+      - `node`
+      - Similar to `node@myuser-mac2 (TNS V1-V3)`
+    * - OSUSER
+      - "myusername"
+      - "myusername"
+    * - PROGRAM
+      - `node`
+      - Similar to `node@myuser-mac2 (TNS V1-V3)`
+    * - TERMINAL
+      - "unknown"
+      - Similar to `ttys001`
+
+``V$SESSION_CONNECT_INFO``
+++++++++++++++++++++++++++
+
+The following table shows sample values for some `V$SESSION_CONNECT_INFO
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-9F0DCAEA-A67E-
+4183-89E7-B1555DC591CE>`__ columns. You may see other values if you have set
+the equivalent connection or pool creation parameters, or set the
+``driverName`` parameter in :meth:`oracledb.initOracleClient()`.
+
+.. list-table-with-summary:: Sample V$SESSION_CONNECT_INFO column values
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 10 15 15
+    :name: V$SESSION_CONNECT_INFO
+    :summary: The first column is the name of V$SESSION_CONNECT_INFO view's column. The second column lists a sample node-oracledb Thick mode value. The third column list a sample node-oracledb Thin mode value.
+
+    * - Column
+      - Sample Thin Mode Value
+      - Sample Thick Mode Value
+    * - CLIENT_DRIVER
+      - "node-oracledb thn : 6.9.0"
+      - "node-oracledb thk : 6.9.0"
+    * - CLIENT_OCI_LIBRARY
+      - "Unknown"
+      - The Oracle Client or Instant Client type, such as "Full Instant Client"
+    * - CLIENT_VERSION
+      - "6.9.0.0.0" (the node-oracledb version number with an extra .0.0)
+      - The Oracle Client library version number
+    * - OSUSER
+      - "myusername"
+      - "myusername"
 
 .. _vsessconinfo:
 
@@ -310,7 +398,8 @@ mode of a node-oracledb connection or pool, respectively. The node-oracledb
 version can be shown with :attr:`oracledb.version`.
 
 The information can also be seen in the Oracle Database data dictionary table
-``V$SESSION_CONNECT_INFO``:
+`V$SESSION_CONNECT_INFO <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+id=GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE>`__:
 
 .. code-block:: javascript
 
@@ -351,6 +440,264 @@ The ``CLIENT_DRIVER`` value is not configurable in node-oracledb Thin mode.
 
 Note if :attr:`oracledb.connectionClass` is set for a non-pooled connection,
 the ``CLIENT_DRIVER`` value will not be set for that connection.
+
+.. _opentelemetry:
+
+Using node-oracledb with OpenTelemetry
+======================================
+
+The `OpenTelemetry <https://opentelemetry.io/>`__ observability framework
+contains a set of APIs, Software Development Kits (SDKs), and tools that
+enables you to instrument, generate, collect, and export telemetry data
+(metrics, logs, and traces) to analyze your application’s performance and
+identify bottlenecks. The OpenTelemetry project is open-source and available
+on `GitHub <https://github.com/open-telemetry>`__ and from
+`npmjs.com <https://www.npmjs.com/org/opentelemetry>`__.
+
+The OpenTelemetry instrumentation support in Node.js for Oracle Database is
+available on npm as a separate package,
+`@opentelemetry/instrumentation-oracledb <https://www.npmjs.com/package/
+@opentelemetry/instrumentation-oracledb>`__. The source code is available in
+the `OpenTelemetry JavaScript GitHub repository <https://github.com/open-
+telemetry/opentelemetry-js-contrib/tree/main/plugins/node/opentelemetry-
+instrumentation-oracledb>`__. This module uses the tracing feature available
+in node-oracledb to generate the telemetry data for applications using this
+driver.
+
+The following components can be used to view the trace information from
+node-oracledb:
+
+- An OpenTelemetry trace visualizer that provides a graphic and intuitive
+  representation of the OpenTelemetry trace information such as Zipkin,
+  Jaeger, Prometheus, or another collector.
+
+- A trace exporter package compatible with your visualizer that sends the
+  telemetry data to a specific backend or storage system.
+
+Tracing information can also be printed on the console by making use of the
+exporter ConsoleSpanExporter from the @opentelemetry/sdk-trace-base package.
+
+**Sample Table Definition and Data Insertion**
+
+The following table will be used in the subsequent example to demonstrate
+using node-oracledb with OpenTelemetry:
+
+.. code-block:: sql
+
+    CREATE TABLE cars(
+        id NUMBER,
+        model VARCHAR2(20),
+        year NUMBER
+    );
+
+Consider the following data is inserted into the table:
+
+.. code-block:: sql
+
+    INSERT INTO cars VALUES (1, 'Skoda', 2024);
+
+**Install the OpenTelemetry instrumentation module for Oracle Database**
+
+To use node-oracledb with OpenTelemetry, install the OpenTelemetry
+instrumentation module for Oracle Database in Node.js by using::
+
+    npm install @opentelemetry/instrumentation-oracledb
+
+**Load the Required Modules**
+
+You can load the required modules as shown below:
+
+.. code-block:: javascript
+
+    const { OracleInstrumentation } = require('@opentelemetry/instrumentation-oracledb');
+    const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+    const { resourceFromAttributes } = require('@opentelemetry/resources');
+    const { ATTR_SERVICE_NAME } = require("@opentelemetry/semantic-conventions");
+    const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+    const { SimpleSpanProcessor, ConsoleSpanExporter } = require('@opentelemetry/sdk-trace-base');
+    const oracledb = require('oracledb');
+
+OpenTelemetry's NodeTraceProvider object is used to initialize the
+OpenTelemetry APIs to use trace bindings of your trace visualizer. Also,
+initialize the Oracle Database Instrumentation Object, OracleInstrumentation,
+and set it to work with the NodeTraceProvider as shown in the code below. By
+setting this, the instrumentation traces generated from OracleInstrumentation
+will be sent to your Trace Visualizer.
+
+**Sample of Using node-oracledb with OpenTelemetry**
+
+The sample code below uses OpenTelemetry's ConsoleSpanExporter to export and
+display trace information on the console.
+
+.. code-block:: javascript
+
+    const svcName = { serviceName: 'oracle-OT-service' };
+
+    // Add your trace exporter to the TraceProvider object
+    const exporter = new ConsoleSpanExporter();
+    const provider = new NodeTracerProvider({
+      resource: resourceFromAttributes({
+          [ATTR_SERVICE_NAME]: svcName.serviceName
+      }),
+      spanProcessors: [
+          new SimpleSpanProcessor(exporter)
+      ]
+    });
+
+    // Initialise the OpenTelemetry APIs to use the BasicTracer bindings
+    provider.register();
+
+    // Register the Oracle DB Instrumentation module
+    // Setting the enhancedDatabaseReporting parameter to true will print
+    // the SQL statement and bind value and should be used carefully!
+    // This parameter is set to false by default.
+    const instrumentation = new OracleInstrumentation(
+      { enhancedDatabaseReporting: true });
+    registerInstrumentations({
+      instrumentations: [
+        instrumentation,
+      ],
+    });
+
+    // Send the instrumentation logs to your trace provider
+    instrumentation.setTracerProvider(provider);
+
+    // Create a connection to Oracle Database
+    async function run() {
+      const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com/orclpdb1"
+      });
+
+      // Run the SQL query on the cars table created earlier
+      const result = await conn.execute('select model from cars where year = :1', [2024]);
+      console.log('The model of the car is', result.rows[0][0]);
+
+      await connection.close();
+    }
+
+    run();
+
+This code creates an Oracle Database connection and runs a simple SELECT
+query. The ConsoleSpanExporter prints the complete span traces of the three
+node-oracledb functions (``getConnection()``, ``execute()``, and
+``close()``) on the console, which are quite detailed. Here is a sample
+output::
+
+    ...
+    {
+      resource: { attributes: { 'service.name': 'oracle-OT-service' } },
+      instrumentationScope: {
+        name: '@opentelemetry/instrumentation-oracledb',
+        version: '0.26.0',
+        schemaUrl: undefined
+      },
+      traceId: 'c16c0db547a9acbd844c44057cb6057e',
+      parentSpanContext: undefined,
+      traceState: undefined,
+      name: 'oracledb.getConnection',
+      id: 'c3daa0f6d86f55b6',
+      kind: 2,
+      timestamp: 1748512419932000,
+      duration: 329122.9,
+      attributes: {
+        'db.system.name': 'oracle.db',
+        'network.transport': 'TCP',
+        'db.user': 'scott',
+        'db.namespace': 'orcl|ORCLPDB|orclpdb',
+        'server.address': 'localhost',
+        'server.port': 1521
+      },
+      status: { code: 0 },
+      events: [],
+      links: []
+    }
+    ...
+    {
+      resource: { attributes: { 'service.name': 'oracle-OT-service' } },
+      instrumentationScope: {
+        name: '@opentelemetry/instrumentation-oracledb',
+        version: '0.26.0',
+        schemaUrl: undefined
+      },
+      traceId: '321c7b2ba7eb136a8c887e3283e95951',
+      parentSpanContext: undefined,
+      traceState: undefined,
+      name: 'oracledb.Connection.execute:SELECT orcl|ORCLPDB|orclpdb',
+      id: '871493c320f2e15c',
+      kind: 2,
+      timestamp: 1748512420263000,
+      duration: 13863.1,
+      attributes: {
+        'db.system.name': 'oracle.db',
+        'network.transport': 'TCP',
+        'db.user': 'scott',
+        'db.namespace': 'orcl|ORCLPDB|orclpdb',
+        'server.address': 'localhost',
+        'server.port': 1521,
+        'db.operation.name': 'SELECT',
+        'db.query.text': 'select model from cars where year = :1',
+        'db.operation.parameter.0': '2024'
+      },
+      status: { code: 0 },
+      events: [],
+      links: []
+    }
+    ...
+    The model of the car is Skoda
+    ...
+    {
+      resource: { attributes: { 'service.name': 'oracle-OT-service' } },
+      instrumentationScope: {
+        name: '@opentelemetry/instrumentation-oracledb',
+        version: '0.26.0',
+        schemaUrl: undefined
+      },
+      traceId: 'f731a5261003f8834e2fc5525f5b9a02',
+      parentSpanContext: undefined,
+      traceState: undefined,
+      name: 'oracledb.Connection.close',
+      id: 'c2957831a6e49b61',
+      kind: 2,
+      timestamp: 1748512420280000,
+      duration: 3898.3,
+      attributes: {
+        'db.system.name': 'oracle.db',
+        'network.transport': 'TCP',
+        'db.user': 'scott',
+        'db.namespace': 'orcl|ORCLPDB|orclpdb',
+        'server.address': 'localhost',
+        'server.port': 1521
+      },
+      status: { code: 0 },
+      events: [],
+      links: []
+    }
+
+Note that the output is shown in an abbreviated form here to only highlight
+the relevant OpenTelemetry spans and query output.
+
+In the above sample code, the ``enhancedDatabaseReporting`` property is set to
+*true* which enables the tracing of statements and bind values.
+
+.. warning::
+
+    Use the ``enhancedDatabaseReporting`` property carefully since bind values
+    may contain sensitive information.
+
+The types of OpenTelemetry data and metrics for Oracle Database are listed
+`here <https://github.com/open-telemetry/semantic-conventions/blob/main/docs/
+database/oracledb.md>`__.
+
+The tracing parameters and methods that can be used by the OpenTelemetry
+JavaScript project to generate telemetry data were introduced in node-oracledb
+6.7. See :ref:`tracehandlerinterface`.
+
+For more information, see the blog `Integrate OpenTelemetry to build
+high-performance Oracle Database Applications with Node.js <https://medium.com
+/oracledevs/integrate-opentelemetry-to-build-high-performance-oracle-database-
+applications-with-node-js-118e3a6c8793#f0c3>`__.
 
 Low Level node-oracledb Driver Tracing
 ======================================

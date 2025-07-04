@@ -292,21 +292,23 @@ Centralized Configuration Provider URL Connection Strings
 
 A :ref:`Centralized Configuration Provider <configurationprovider>` URL
 connection string allows node-oracledb configuration information to be stored
-centrally in :ref:`OCI Object Storage <ociobjstorage>` and
-:ref:`Azure App Configuration <azureappconfig>`. Using a provider URL,
-node-oracledb will access the information stored in the configuration provider
+centrally in :ref:`OCI Object Storage <ociobjstorage>`,
+:ref:`OCI Vault <ocivault>`, :ref:`local file <fileconfigprovider>`,
+:ref:`Azure App Configuration <azureappconfig>`, or in a
+:ref:`Azure Key Vault <azurekeyvault>`. Using a provider URL, node-oracledb
+will access the information stored in the configuration provider
 and use it to connect to Oracle Database.
 
 The database connect descriptor and any database credentials stored in a
 configuration provider will be used by any language driver that accesses the
 configuration. Other driver-specific sections can exist. Node-oracledb will
-use the settings that are in a section with the prefix "node-oracledb", and
-will ignore other sections.
+use the settings that are in a section with the prefix "njs", and will ignore
+other sections.
 
 The Centralized Configuration Provider URL must begin with
-"config-<configuration-provider>://" where the configuration-provider value can
-be set to *ociobject* or *azure*, depending on the location of your
-configuration information.
+"config-<configuration-provider>://" where the configuration-provider value
+can be set to *ociobject*, *ocivault*, *file*, *azure*, or *azurevault*
+depending on the location of your configuration information.
 
 For example, consider the following connection configuration stored in
 :ref:`OCI Object Storage <ociobjstorage>`:
@@ -316,7 +318,7 @@ For example, consider the following connection configuration stored in
     {
       "connect_descriptor": "localhost/orclpdb",
       "user": "scott",
-      "node-oracledb": {
+      "njs": {
         "poolMin": 2,
         "poolMax": 10,
         "prefetchRows": 2
@@ -417,24 +419,77 @@ Centralized Configuration Providers
 ===================================
 
 `Centralized Configuration Providers <https://www.oracle.com/pls/topic/lookup?
-ctx=dblatest&id=GUID-E5D6E5D9-654C-4A11-90F8-2A79C58ABD38>`__ allow the storage
-and management of database connection credentials and application configuration
-information in a central location. These providers allow you to separately store
-configuration information from the code of your application. The information
-that can be stored includes the connect descriptor, database credentials,
-wallet, and node-oracledb specific properties such as connection pool
-settings. Node-oracledb can use the centrally stored information to connect to
-Oracle Database with :meth:`oracledb.getConnection()` and
+ctx=dblatest&id=GUID-E5D6E5D9-654C-4A11-90F8-2A79C58ABD38>`__ allow the
+storage and management of database connection credentials and application
+configuration information in a central location. These providers allow you to
+separately store configuration information from the code of your application.
+The information that can be stored includes the connect descriptor, database
+credentials, wallet, and node-oracledb specific properties such as connection
+pool settings. Node-oracledb can use the centrally stored information to
+connect to Oracle Database with :meth:`oracledb.getConnection()` and
 :meth:`oracledb.createPool()`.
 
 The following configuration providers are supported by node-oracledb:
 
+- :ref:`File Provider <fileconfigprovider>`
 - :ref:`Oracle Cloud Infrastructure (OCI) Object Storage <ociobjstorage>`
+- :ref:`Oracle Cloud Infrastructure (OCI) Vault <ocivault>`
 - :ref:`Microsoft Azure App Configuration <azureappconfig>`
+- :ref:`Microsoft Azure Key Vault <azurekeyvault>`
 
-The OCI Object Storage and Microsoft Azure App Configuration centralized
-configuration provider support is available from node-oracledb 6.6 onwards in
-both Thin and Thick modes.
+.. _configurationinformation:
+
+**Configuration Information Stored in Centralized Configuration Providers**
+
+The configuration information can be stored in the above-mentioned
+configuration providers by using specific keys which are listed in the table
+below.
+
+.. list-table-with-summary:: Configuration Information Stored in Configuration Providers
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 10 33 12
+    :name: _configuration_information
+    :summary: The first column displays the name of the key. The second column displays the description of the key. The third column displays whether the key is required or optional.
+
+    * - Key
+      - Description
+      - Required or Optional
+    * - ``user``
+      - The database user name.
+      - Optional
+    * - ``password``
+      - .. _passwordparams:
+
+        The password of the database user.
+
+        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, and :ref:`File <fileconfigprovider>` configuration providers, the value is an object which contains the following parameters:
+
+        - ``type``: The possible values of this required parameter are *ocivault*, *azurevault*, *base64*, and *text*.
+
+        - ``value``: The values of this required parameter dependent on the ``type`` parameter. The possible values are OCID of the secret when ``type`` is *ocivault*, Azure Key Vault URI when ``type`` is *azurevault*, and Base64 Encoded password when ``type`` is *base64*.
+
+        - ``authentication``: The possible values of this optional parameter are dependent on the configuration provider and include the authentication method and optional authentication parameters.
+
+        For :ref:`Azure App Configuration <azureappconfig>`, the password is the reference to the Azure Key Vault and Secret.
+
+        .. warning::
+
+            Storing passwords of type *base64* or *text* in the JSON file for File, OCI Object Storage, and Azure App Configuration  configuration providers should only ever be used in development or test environments. It can be used with Azure Vault and OCI Vault configuration providers.
+      - Optional
+    * - ``connect_descriptor``
+      - The database :ref:`connect descriptor <embedtns>`.
+      - Required
+    * - ``wallet_location``
+      - The reference to the wallet.
+
+        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, and :ref:`File <fileconfigprovider>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
+
+        For :ref:`Azure App Configuration <azureappconfig>`, this parameter is the reference to the Azure Key Vault and Secret that contains the wallet as the value.
+      - Optional
+    * - ``njs``
+      - The node-oracledb specific properties. The properties that can be stored in OCI Object Storage include ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``, ``poolPingInterval``, ``poolPingTimeout``, ``stmtCacheSize``, ``prefetchRows``, and ``lobPrefetch``.
+      - Optional
 
 **Precedence of Properties**
 
@@ -456,69 +511,211 @@ File <optconfigfiles>`), the configuration provider, and the application, then
 the values defined in the ``oraaccess.xml`` file will have the highest
 precedence followed by the configuration provider and then the application.
 
+.. _fileconfigprovider:
+
+Using a File Centralized Configuration Provider
+-----------------------------------------------
+
+The File Centralized Configuration Provider enables the storage and management
+of Oracle Database connection information using local files. This
+configuration provider support is available from node-oracledb 6.9 onwards.
+
+To use a File Centralized Configuration Provider, you must:
+
+1. Store the connection information in a JSON file on your local file system.
+   See :ref:`Connection Information for File Configuration Provider
+   <fileconfigparams>`.
+
+2. :ref:`Use a File configuration provider connection string URL
+   <connstringfile>` in the ``connectString`` property of connection and pool
+   creation methods.
+
+Note that node-oracledb caches configurations by default, see
+:ref:`conncaching`.
+
+.. _fileconfigparams:
+
+**Connection Information for File Configuration Provider**
+
+The connection information stored in a JSON file must contain at least a
+``connect_descriptor`` key to specify the database connection string.
+Optionally, you can store the database user name, password, wallet location,
+and node-oracledb properties. For details on the information that can be
+stored in this configuration provider, see :ref:`_configuration_information`.
+
+.. _examplefileconfigprovider:
+
+An example of a JSON file that can be used with File Centralized Configuration
+Provider is:
+
+.. code-block:: json
+
+    {
+        "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+                (host=adb.region.oraclecloud.com))(connect_data=(service_name=dbsvcname))
+                (security=(ssl_server_dn_match=yes)))",
+
+        "user": "scott",
+        "password": {
+          "type": "base64",
+          "value": "dGlnZXI="
+        }
+        "njs": {
+            "stmtCacheSize": 30,
+            "prefetchRows": 2,
+            "poolMin": 2,
+            "poolMax": 10
+        }
+    }
+
+This encodes the password as base64. See :ref:`ociobjstorage` for other
+password examples.
+
+.. _connstringfile:
+
+**File Centralized Configuration Provider connectString Syntax**
+
+The ``connectString`` parameter for :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()` calls should use a connection string URL in the
+format::
+
+    config-file://<filePath>?[alias=]
+
+For example, if you have the above JSON file stored in
+``/opt/oracle/my-config1.json``, you can connect to Oracle Database using:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-file:///opt/oracle/my-config1.json"
+    });
+
+The parameters of the connection string URL format are detailed in the table
+below.
+
+.. list-table-with-summary:: Connection String Parameters for File Configuration Provider
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 15 25 15
+    :name: _connection_string_for_file_configuration_provider
+    :summary: The first column displays the name of the connection string parameter. The second column displays the description of the connection string parameter.
+
+    * - Parameter
+      - Description
+      - Required or Optional
+    * - config-file
+      - Indicates that the centralized configuration provider is a file in your local system.
+      - Required
+    * - <filePath>
+      - The file path and name of the JSON file that contains the configuration information.
+      - Required
+    * - alias
+      - The connection alias name used to identify a specific configuration.
+      - Optional
+
+Multiple alias names can be defined in a JSON file as shown below:
+
+.. code-block:: json
+
+    {
+        "production": {
+            "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+              (host=adb.region.oraclecloud.com))(connect_data=(service_name=dbsvcname))
+              (security=(ssl_server_dn_match=yes)))"
+        },
+        "testing": {
+            "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+              (host=adb.region.oraclecloud.com))(connect_data=(service_name=dbsvcname))
+              (security=(ssl_server_dn_match=yes)))",
+            "user": "scott",
+            "password": {
+              "type": "base64",
+              "value": "dGlnZXI="
+            }
+        }
+    }
+
+If you have this configuration stored in a JSON file in
+``/opt/oracle/my-config2.json``, you can connect to Oracle Database using:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-file:///opt/oracle/my-config2.json?alias=production"
+    });
+
 .. _ociobjstorage:
 
-Using an OCI Object Storage Configuration Provider
---------------------------------------------------
+Using an OCI Object Storage Centralized Configuration Provider
+--------------------------------------------------------------
 
 The Oracle Cloud Infrastructure (OCI) `Object Storage configuration provider
 <https://docs.oracle.com/en-us/iaas/Content/Object/Concepts/
 objectstorageoverview.htm>`__ enables the storage and management of Oracle
 Database connection information as JSON in `OCI Object Storage <https://docs.
 oracle.com/en-us/iaas/Content/Object/Concepts/objectstorageoverview.htm>`__.
+This configuration provider support was introduced in node-oracledb 6.6.
 
 To use an OCI Object Storage Centralized Configuration Provider, you must:
 
 1. Upload a JSON file that contains the connection information into an OCI
-   Object Storage Bucket. See `Uploading an Object Storage Object to a Bucket
-   <https://docs.oracle.com/en-us/iaas/Content/Object/Tasks/managingobjects_
-   topic-To_upload_objects_to_a_bucket.htm>`__ and the `Oracle Database Net
-   Services Administrator’s Guide <https://www.oracle.com/pls/topic/lookup?ctx
-   =dblatest&id=GUID-B43EA22D-5593-40B3-87FC-C70D6DAF780E>`__ for the steps.
-   See :ref:`OCI Object Storage Centralized Configuration Provider Parameters
-   <ociconfigparams>` for the configuration information that can be added.
+   Object Storage Bucket. See :ref:`Connection Information for OCI Object
+   Storage Centralized Configuration Provider <ociconfigparams>`.
+
+   Also, see `Uploading an Object Storage Object to a Bucket <https://docs.
+   oracle.com/en-us/iaas/Content/Object/Tasks/managingobjects_topic-To_upload_
+   objects_to_a_bucket.htm>`__ and the `Oracle Database Net Services
+   Administrator’s Guide <https://www.oracle.com/pls/topic/lookup?ctx=dblatest
+   &id=GUID-B43EA22D-5593-40B3-87FC-C70D6DAF780E>`__ for the steps.
 
 2. Install the required OCI modules. See :ref:`ocimodules`.
 
 3. :ref:`Use an OCI Object Storage connection string URL <connstringoci>`
    in the ``connectString`` property of connection and pool creation methods.
 
+Note that node-oracledb caches configurations by default, see
+:ref:`conncaching`.
+
 .. _ociconfigparams:
 
-**OCI Object Storage Centralized Configuration Provider JSON File Syntax**
+**Connection Information for OCI Object Storage Configuration Provider**
 
-The stored JSON configuration file must contain a ``connect_descriptor`` key.
-Optionally, you can specify the database user name, password, wallet location,
-and node-oracledb properties. The database password can also be stored
-securely using `OCI Vault <https://docs.oracle.com/en-us/iaas/Content/
-KeyManagement/Tasks/managingsecrets.htm>`__. The keys that can be stored in a
-JSON file are listed below.
+The connection information stored in a JSON file must contain a
+``connect_descriptor`` key. Optionally, you can specify the database user
+name, password, wallet location, and node-oracledb properties. The database
+password can also be stored securely using `OCI Vault <https://docs.oracle.com
+/en-us/iaas/Content/KeyManagement/Tasks/managingsecrets.htm>`__. For details
+on the information that can be stored in this configuration provider, see
+:ref:`_configuration_information`.
 
-.. list-table-with-summary:: JSON Keys for OCI Object Storage Configuration Provider
-    :header-rows: 1
-    :class: wy-table-responsive
-    :widths: 15 25 15
-    :name: _oci_object_storage_sub-objects
-    :summary: The first column displays the name of the key. The second column displays the description of the key. The third column displays whether the key is required or optional.
+.. _exampleociobjstorage:
 
-    * - Key
-      - Description
-      - Required or Optional
-    * - ``user``
-      - The database user name.
-      - Optional
-    * - ``password``
-      - The database user password (that is, the reference to OCI Vault and secret).
-      - Optional
-    * - ``connect_descriptor``
-      - The database :ref:`connect descriptor <embedtns>`.
-      - Required
-    * - ``wallet_location``
-      - The reference to the OCI Vault and secret that contains the wallet as the value. This can only be used in node-oracledb Thin mode.
-      - Optional
-    * - ``node-oracledb``
-      - The node-oracledb specific properties. The properties that can be stored in OCI Object Storage include ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``, ``poolPingInterval``, ``poolPingTimeout``, ``stmtCacheSize``, ``prefetchRows``, and ``lobPrefetch``.
-      - Optional
+An example of a JSON file that can be used with OCI Object Centralized Storage
+Configuration Provider is:
+
+.. code-block:: json
+
+    {
+        "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+                (host=adb.region.oraclecloud.com))(connect_data=(service_name=dbsvcname))
+                (security=(ssl_server_dn_match=yes)))",
+
+        "user": "scott",
+        "password": {
+            "type": "ocivault",
+            "value": "ocid1.vaultsecret.my-secret-id"
+        },
+        "wallet_location": {
+            "type": "ocivault",
+            "value": "ocid1.vaultwallet.my-wallet-id"
+        },
+        "njs": {
+            "stmtCacheSize": 30,
+            "prefetchRows": 2,
+            "poolMin": 2,
+            "poolMax": 10
+        }
+    }
 
 .. _connstringoci:
 
@@ -531,7 +728,17 @@ format::
     config-ociobject://<objectstorage-name>/n/<namespaceName>/b/<bucketName>/o/
     <objectName>[?key=<networkServiceName>&<option1>=<value1>&<option2>=<value2>...]
 
-The parameters of the connection string are detailed in the table below.
+For example, a connection string to access OCI Object Storage and connect to
+Oracle Database is:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-ociobject://abc.oraclecloud.com/n/abcnamespace/b/abcbucket/o/abcobject?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
+    });
+
+The parameters of the connection string URL format are detailed in the table
+below.
 
 .. list-table-with-summary:: Connection String Parameters for OCI Object Storage
     :header-rows: 1
@@ -562,7 +769,9 @@ The parameters of the connection string are detailed in the table below.
       - The network service name or alias if the JSON file contains one or more network service names.
       - Optional
     * - <options> and <values>
-      - The authentication method and corresponding authentication parameters to access the OCI Object Storage configuration provider. See `OCI Authentication Methods <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm>`__ for more information. Depending on the specified authentication method, you must also set the corresponding authentication parameters in the connection string. You can specify one of the following authentication methods:
+      - .. _authmethodsociobject:
+
+        The authentication method and corresponding authentication parameters to access the OCI Object Storage configuration provider. See `OCI Authentication Methods <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm>`__ for more information. Depending on the specified authentication method, you must also set the corresponding authentication parameters in the connection string. You can specify one of the following authentication methods:
 
         - **API Key-based Authentication**: The authentication to OCI is done using API key-related values. This is the default authentication method. Note that this method is used when no authentication value is set or by setting the option value to *OCI_DEFAULT*. The optional authentication parameters that can be set for this method include *OCI_PROFILE*, *OCI_TENANCY*, *OCI_USER*, *OCI_FINGERPRINT*, *OCI_KEY_FILE*, and *OCI_PROFILE_PATH*. These authentication parameters can also be set in an OCI Authentication Configuration file which can be stored in a default location *~/.oci/config*, or in location *~/.oraclebmc/config*, or in the location specified by the OCI_CONFIG_FILE environment variable.
 
@@ -573,70 +782,92 @@ The parameters of the connection string are detailed in the table below.
         See `Authentication Parameters for OCI Object Storage <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-EB94F084-0F3F-47B5-AD77-D111070F7E8D>`__ for more information.
       - Optional
 
-**OCI Object Storage Centralized Configuration Provider Examples**
+.. _ocivault:
 
-.. _exampleociobjstorage:
+Using an OCI Vault Centralized Configuration Provider
+-----------------------------------------------------
 
-An example of OCI Object Centralized Storage Configuration Provider JSON file
-syntax is::
+The `Oracle Cloud Infrastructure (OCI) Vault configuration provider
+<https://docs.oracle.com/en-us/iaas/Content/KeyManagement/home.htm>`__ enables
+the storage and management of Oracle Database connection information as JSON
+objects. This configuration provider support is available from node-oracledb
+6.9 onwards.
 
-    {
-        "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
-                (host=adb.region.oraclecloud.com))(connect_data=(service_name=cdb_pdb1))
-                (security=(ssl_server_dn_match=yes)))",
+To use an OCI Vault Centralized Configuration Provider, you must:
 
-        "user": "scott",
-        "password": {
-            "type": "ocivault",
-            "value": "ocid1.vaultsecret.my-secret-id"
-        },
-        "wallet_location": {
-            "type": "ocivault",
-            "value": "ocid1.vaultwallet.my-wallet-id"
-        },
-        "node-oracledb": {
-            "stmtCacheSize": 30,
-            "prefetchRows": 2,
-            "poolMin": 2,
-            "poolMax": 10
-        }
-    }
+1. Enter and save the connection information as a secret in OCI Vault by using
+   the Manual secret generation method. The connection information must be
+   entered as a JSON object. See :ref:`Connection Information for OCI Vault
+   Centralized Configuration Provider <ocivaultparams>`.
+
+   Also, see `Creating a Secret in OCI Vault <https://docs.oracle.com/en-us/
+   iaas/Content/KeyManagement/Tasks/managingsecrets_topic-To_create_a_new_
+   secret.htm>`__ for the steps.
+
+2. Install the required OCI modules. See :ref:`ocivaultmodules`.
+
+3. :ref:`Use an OCI Vault connection string URL <connstringocivault>` in the
+   ``connectString`` property of connection and pool creation methods.
 
 Note that node-oracledb caches configurations by default, see
 :ref:`conncaching`.
 
-An example of a connection string for the OCI Object Centralized Storage
-configuration provider is:
+.. _ocivaultparams:
+
+**Connection Information for OCI Vault Configuration Provider**
+
+The JSON object must contain a ``connect_descriptor`` key. Optionally, you can
+specify the database user name, password, wallet location, and node-oracledb
+properties. For details on the information that can be stored in this
+configuration provider, see :ref:`_configuration_information`.
+
+The JSON object syntax for OCI Vault configuration provider is same as the
+syntax for OCI Object Storage, see :ref:`OCI Object Storage
+<exampleociobjstorage>` example.
+
+.. _connstringocivault:
+
+**OCI Vault Centralized Configuration Provider connectString Syntax**
+
+The ``connectString`` parameter for :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()` calls should use a connection string URL in the
+format::
+
+    config-ocivault://<ocidvault>?[<option1>=<value1>&<option2>=<value2>...]
+
+For example, a connection string to access OCI Vault and connect to Oracle
+Database is:
 
 .. code-block:: javascript
 
     const connection = await oracledb.getConnection({
-        connectString : "config-ociobject://abc.oraclecloud.com/n/abcnamespace/b/abcbucket/o/abcobject?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
+        connectString : "config-ocivault://ocid1.vaultsecret.oc1?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
     });
 
-To create a :ref:`standalone connection <standaloneconnection>`, for example:
+The parameters of the connection string URL format are detailed in the table
+below.
 
-.. code-block:: javascript
+.. list-table-with-summary:: Connection String Parameters for OCI Vault
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 15 25 15
+    :name: _connection_string_for_oci_vault
+    :summary: The first row displays the name of the connection string parameter. The second row displays the description of the connection string parameter. The third row displays whether the connection string parameter is required or optional.
 
-    const connection = await oracledb.getConnection({
-        connectString : "config-ociobject://abc.oraclecloud.com/n/abcnamespace/b/abcbucket/o/abcobject?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
-    });
+    * - Parameter
+      - Description
+      - Required or Optional
+    * - config-ocivault
+      - Indicates that the configuration provider is OCI Vault.
+      - Required
+    * - <ocidvault>
+      - The OCI vault identifier.
+      - Required
+    * - <options> and <values>
+      - The authentication method and corresponding authentication parameters to access the OCI Vault configuration provider.
 
-    const result = await connection.execute(`SELECT 1 FROM dual`);
-    console.log(result.rows[0][0]);
-
-The configuration can also be used to create a :ref:`connection pool
-<connpooling>`, for example:
-
-.. code-block:: javascript
-
-    const pool = await oracledb.createPool({
-        connectString : "config-ociobject://abc.oraclecloud.com/n/abcnamespace/b/abcbucket/o/abcobject?oci_tenancy=abc123&oci_user=ociuser1&oci_fingerprint=ab:14:ba:13&oci_key_file=ociabc/ocikeyabc.pem"
-    });
-
-    const connection = await pool.getConnection();
-    const result = await connection.execute(`SELECT 1 FROM dual`);
-    console.log(result.rows[0][0]);
+        The same authentication methods used in OCI Object Storage are used in OCI Vault. See :ref:`Authentication methods in OCI Object Storage <authmethodsociobject>`.
+      - Optional
 
 .. _azureappconfig:
 
@@ -646,13 +877,15 @@ Using an Azure App Centralized Configuration Provider
 `Azure App Configuration <https://learn.microsoft.com/en-us/azure/azure-app-
 configuration/overview>`__ is a cloud-based service provided by Microsoft
 Azure. It can be used for storage and management of Oracle Database connection
-information as key-value pairs.
+information as key-value pairs. This configuration provider support was
+introduced in node-oracledb 6.6.
 
 To use node-oracledb with Azure App Configuration, you must:
 
-1. Save your configuration information in your Azure App Configuration
-   Provider. See :ref:`Azure App Centralized Configuration Provider Parameters
-   <azureconfigparams>`.
+1. Enter and save your configuration information in your Azure App
+   Configuration Provider as key-value pairs. See
+   :ref:`Connection Information for Azure App Centralized Configuration
+   Provider <azureconfigparams>`.
 
 2. Install the required Azure Application modules. See :ref:`azuremodules`.
 
@@ -660,9 +893,12 @@ To use node-oracledb with Azure App Configuration, you must:
    <connstringazure>` in the ``connectString`` parameter of connection and
    pool creation methods.
 
+Note that node-oracledb caches configurations by default, see
+:ref:`conncaching`.
+
 .. _azureconfigparams:
 
-**Azure App Centralized Configuration Provider Parameters**
+**Connection Information for Azure App Configuration Provider**
 
 Key-value pairs for stored connection information can be added using the
 Configuration explorer page of your Azure App Configuration. See `Create a
@@ -688,94 +924,15 @@ securely using `Azure Key Vault <https://learn.microsoft.com/en-us
 /azure/key-vault/general/overview>`__.
 
 Optional node-oracledb properties can be set using a key such as
-"<prefix>/node-oracledb/<key name>", for example
-*sales/node-oracledb/poolMin*. This is similar to how `Oracle Call Interface
-<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=LNOCI>`__ settings
-use keys like "<prefix>/oci/<key name>" as shown in `Oracle Database Net
-Services Administrator’s Guide <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-97E22A68-6FE3-4FE9-98A9-90E5BF83E9EC>`__.
+"<prefix>/njs/<key name>", for example *sales/node-oracledb/poolMin*. This is
+similar to how `Oracle Call Interface <https://www.oracle.com/pls/topic/lookup
+?ctx=dblatest&id=LNOCI>`__ settings use keys like "<prefix>/oci/<key name>" as
+shown in `Oracle Database Net Services Administrator’s Guide
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-97E22A68-6FE3-
+4FE9-98A9-90E5BF83E9EC>`__.
 
-The keys that can be added in Azure App Configuration are listed below:
-
-.. list-table-with-summary:: Keys for Azure App Configuration
-    :header-rows: 1
-    :class: wy-table-responsive
-    :widths: 15 25 15
-    :name: _azure_app_configuration_keys
-    :summary: The first column displays the name of the key. The second column displays the description of the key. The third column displays whether the key is required or optional.
-
-    * - Key
-      - Description
-      - Required or Optional
-    * - ``user``
-      - The database user name.
-      - Optional
-    * - ``password``
-      - The password of the database user (that is, the reference to the Azure Key Vault and Secret).
-      - Optional
-    * - ``connect_descriptor``
-      - The database :ref:`connect descriptor <embedtns>`.
-      - Required
-    * - ``wallet_location``
-      - The reference to the Azure Key Vault and Secret that contains the wallet as the value. This can only be used in node-oracledb Thin mode.
-      - Optional
-    * - ``node-oracledb``
-      - The node-oracledb specific properties. The properties that can be stored in Azure App Configuration include ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``, ``poolPingInterval``, ``poolPingTimeout``, ``stmtCacheSize``, ``prefetchRows``, and ``lobPrefetch``.
-      - Optional
-
-.. _connstringazure:
-
-**Azure App Centralized Configuration Provider connectString Syntax**
-
-You must define a connection string URL in a specific format in the
-``connectString`` property of :meth:`oracledb.getConnection()` or
-:meth:`oracledb.createPool()` to access the information stored in Azure App
-Configuration. The syntax is::
-
-    config-azure://<appconfigname>[?key=<prefix>&label=<value>&<option1>=<value1>&<option2>=<value2>…]
-
-The parameters of the connection string are detailed in the table below.
-
-.. list-table-with-summary:: Connection String Parameters for Azure App Centralized Configuration
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 15 30 10
-    :name: _connection_string_for_azure_app
-    :summary: The first row displays the name of the connection string parameter. The second row displays the description of the connection string parameter. The third row displays whether the connection string parameter is required or optional.
-
-    * - Parameter
-      - Description
-      - Required or Optional
-    * - config-azure
-      - Indicates that the configuration provider is Azure App Configuration.
-      - Required
-    * - <appconfigname>
-      - The URL of the App configuration endpoint.
-      - Required
-    * - key=<prefix>
-      - A key prefix to identify the connection. You can organize configuration information under a prefix as per application requirements.
-      - Optional
-    * - label=<value>
-      - The Azure App Configuration label name.
-      - Optional
-    * - <options>=<values>
-      - The authentication method and its corresponding authentication parameters to access the Azure App Configuration provider. Depending on the specified authentication method, you must also set the corresponding authentication parameters in the connection string. You can specify one of the following authentication methods:
-
-        - **Default Azure Credential**: The authentication to Azure App Configuration is done as a service principal (using either a client secret or client certificate) or as a managed identity depending on which parameters are set. This authentication method also supports reading the parameters as environment variables. This is the default authentication method. This method is used when no authentication value is set or by setting the option value to *AZURE_DEFAULT*. The optional parameters that can be set for this option include *AZURE_CLIENT_ID*, *AZURE_CLIENT_SECRET*, *AZURE_CLIENT_CERTIFICATE_PATH*, *AZURE_TENANT_ID*, and *AZURE_MANAGED_IDENTITY_CLIENT_ID*.
-
-        - **Service Principal with Client Secret**: The authentication to Azure App Configuration is done using the client secret. To use this method, you must set the option value to *AZURE_SERVICE_PRINCIPAL*. The required parameters that must be set for this option include *AZURE_CLIENT_ID*, *AZURE_CLIENT_SECRET*, and *AZURE_TENANT_ID*.
-
-        - **Service Principal with Client Certificate**: The authentication to Azure App Configuration is done using the client certificate. To use this method, you must set the option value to *AZURE_SERVICE_PRINCIPAL*. The required parameters that must be set for this option are *AZURE_CLIENT_ID*, *AZURE_CLIENT_CERTIFICATE_PATH*, and *AZURE_TENANT_ID*.
-
-        - **Managed Identity**: The authentication to Azure App Configuration is done using managed identity or managed user identity credentials. To use this method, you must set the option value to *AZURE_MANAGED_IDENTITY*. If you want to use a user-assigned managed identity for authentication, then you must specify the required parameter *AZURE_MANAGED_IDENTITY_CLIENT_ID*.
-
-        Note that the Azure service principal with client certificate overrides Azure service principal with client secret.
-
-        See `Authentication Parameters for Azure App Configuration Store <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1EECAD82-6CE5-4F4F-A844-C75C7AA1F907>`__ for more information.
-      - Optional
-
-**Azure App Centralized Configuration Examples**
+For details on the information that can be stored in this configuration
+provider, see :ref:`_configuration_information`.
 
 .. _exampleazureappconfig:
 
@@ -801,43 +958,164 @@ example uses the prefix ``test/``.
       - {"uri":"https://mykeyvault.vault.azure.net/secrets/passwordsalescrm"}
     * - test/wallet_location
       - {"uri":"https://mykeyvault.vault.azure.net/secrets/walletsalescrm"}
-    * - test/node-oracledb
+    * - test/njs
       - {"stmtCacheSize":30, "prefetchRows":2, "poolMin":2, "poolMax":10}
 
-Note that node-oracledb caches configurations be default, see
+.. _connstringazure:
+
+**Azure App Centralized Configuration Provider connectString Syntax**
+
+You must define a connection string URL in a specific format in the
+``connectString`` property of :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()` to access the information stored in Azure App
+Configuration. The syntax is::
+
+    config-azure://<appconfigname>[?key=<prefix>&label=<value>&<option1>=<value1>&<option2>=<value2>…]
+
+For example, a connection string to access the Azure App Configuration
+provider and connect to Oracle Database is:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-azure://aznetnamingappconfig.azconfig.io/?key=test/&azure_client_id=123-456&azure_client_secret=MYSECRET&azure_tenant_id=789-123"
+    });
+
+The parameters of the connection string URL format are detailed in the table
+below.
+
+.. list-table-with-summary:: Connection String Parameters for Azure App Centralized Configuration
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 15 30 10
+    :name: _connection_string_for_azure_app
+    :summary: The first row displays the name of the connection string parameter. The second row displays the description of the connection string parameter. The third row displays whether the connection string parameter is required or optional.
+
+    * - Parameter
+      - Description
+      - Required or Optional
+    * - config-azure
+      - Indicates that the configuration provider is Azure App Configuration.
+      - Required
+    * - <appconfigname>
+      - The URL of the App configuration endpoint.
+      - Required
+    * - key=<prefix>
+      - A key prefix to identify the connection. You can organize configuration information under a prefix as per application requirements.
+      - Optional
+    * - label=<value>
+      - The Azure App Configuration label name.
+      - Optional
+    * - <options>=<values>
+      - .. _authmethodsazureapp:
+
+        The authentication method and its corresponding authentication parameters to access the Azure App Configuration provider. Depending on the specified authentication method, you must also set the corresponding authentication parameters in the connection string. You can specify one of the following authentication methods:
+
+        - **Default Azure Credential**: The authentication to Azure App Configuration is done as a service principal (using either a client secret or client certificate) or as a managed identity depending on which parameters are set. This authentication method also supports reading the parameters as environment variables. This is the default authentication method. This method is used when no authentication value is set or by setting the option value to *AZURE_DEFAULT*. The optional parameters that can be set for this option include *AZURE_CLIENT_ID*, *AZURE_CLIENT_SECRET*, *AZURE_CLIENT_CERTIFICATE_PATH*, *AZURE_TENANT_ID*, and *AZURE_MANAGED_IDENTITY_CLIENT_ID*.
+
+        - **Service Principal with Client Secret**: The authentication to Azure App Configuration is done using the client secret. To use this method, you must set the option value to *AZURE_SERVICE_PRINCIPAL*. The required parameters that must be set for this option include *AZURE_CLIENT_ID*, *AZURE_CLIENT_SECRET*, and *AZURE_TENANT_ID*.
+
+        - **Service Principal with Client Certificate**: The authentication to Azure App Configuration is done using the client certificate. To use this method, you must set the option value to *AZURE_SERVICE_PRINCIPAL*. The required parameters that must be set for this option are *AZURE_CLIENT_ID*, *AZURE_CLIENT_CERTIFICATE_PATH*, and *AZURE_TENANT_ID*.
+
+        - **Managed Identity**: The authentication to Azure App Configuration is done using managed identity or managed user identity credentials. To use this method, you must set the option value to *AZURE_MANAGED_IDENTITY*. If you want to use a user-assigned managed identity for authentication, then you must specify the required parameter *AZURE_MANAGED_IDENTITY_CLIENT_ID*.
+
+        Note that the Azure service principal with client certificate overrides Azure service principal with client secret.
+
+        See `Authentication Parameters for Azure App Configuration Store <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1EECAD82-6CE5-4F4F-A844-C75C7AA1F907>`__ for more information.
+      - Optional
+
+.. _azurekeyvault:
+
+Using an Azure Key Vault Centralized Configuration Provider
+-----------------------------------------------------------
+
+`Azure Key Vault <https://learn.microsoft.com/en-us/azure/key-vault/>`__ is a
+cloud-based service provided by Microsoft Azure. It can be used for storage
+and management of Oracle Database connection information as a JSON object.
+This configuration provider support is available from node-oracledb 6.9
+onwards.
+
+To use node-oracledb with Azure Key Vault, you must:
+
+1. Enter and save the connection information as a secret in your Azure Key
+   Vault. The connection information must be stored as a JSON object. See
+   :ref:`Connection Information for Azure Key Vault Centralized Configuration
+   Provider <azurekeyvaultparams>`.
+
+   For information on creating a secret, see `Create a secret in Azure Key
+   Vault <https://learn.microsoft.com/en-us/azure/key-vault/secrets/quick-
+   create-portal>`__.
+
+2. Install the required Azure Application modules. See
+   :ref:`azurevaultmodules`.
+
+3. :ref:`Use an Azure Key Vault connection string URL <connstringazurevault>`
+   in the ``connectString`` parameter of connection and pool creation methods.
+
+Note that node-oracledb caches configurations by default, see
 :ref:`conncaching`.
 
-An example of a connection string for the Azure App Configuration provider is:
+.. _azurekeyvaultparams:
+
+**Connection Information for Azure Key Vault Configuration Provider**
+
+The JSON object must contain a ``connect_descriptor`` key. Optionally, you can
+specify the database user name, password, wallet location, and node-oracledb
+properties. For details on the information that can be stored in this
+configuration provider, see :ref:`_configuration_information`.
+
+.. _exampleazurekeyvault:
+
+The JSON object syntax for Azure Key Vault configuration provider is same as
+the syntax for OCI Object Storage, see the :ref:`OCI Object Storage
+<exampleociobjstorage>` example.
+
+.. _connstringazurevault:
+
+**Azure Key Vault Configuration Provider connectString Syntax**
+
+You must define a connection string URL in a specific format in the
+``connectString`` property of :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()` to access the information stored in Azure Key
+Vault. The syntax is::
+
+    config-azurevault://<azure key vault url>?[<option1>=<value1>&<option2>=<value2>...]
+
+For example, a connection string to access Azure Key Vault and connect to
+Oracle Database is:
 
 .. code-block:: javascript
 
     const connection = await oracledb.getConnection({
-        connectString : "config-azure://aznetnamingappconfig.azconfig.io/?key=test/&azure_client_id=123-456&azure_client_secret=MYSECRET&azure_tenant_id=789-123"
+        connectString : "config-azurevault://https://abc.vault.azure.net/secrets/azurevaultjson?azure_client_id=123-456&azure_client_secret=MYSECRET&azure_tenant_id=789-123"
     });
 
-An example of using a :ref:`standalone connection <standaloneconnection>` is:
+The parameters of the connection string URL format are detailed in the table
+below.
 
-.. code-block:: javascript
+.. list-table-with-summary:: Connection String Parameters for Azure Key Vault
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :widths: 15 30 10
+    :name: _connection_string_for_azure_key_vault
+    :summary: The first row displays the name of the connection string parameter. The second row displays the description of the connection string parameter. The third row displays whether the connection string parameter is required or optional.
 
-    const connection = await oracledb.getConnection({
-        connectString : "config-azure://aznetnamingappconfig.azconfig.io/?key=test/&azure_client_id=123-456&azure_client_secret=MYSECRET&azure_tenant_id=789-123"
-    });
+    * - Parameter
+      - Description
+      - Required or Optional
+    * - config-azurevault
+      - Indicates that the configuration provider is Azure Key Vault.
+      - Required
+    * - <azure secret url>
+      - The unique identifier of a specific secret stored in Azure Key Vault.
+      - Required
+    * - <options>=<values>
+      - The authentication method and its corresponding authentication parameters to access the Azure Key Vault Configuration provider.
 
-    const result = await connection.execute(`SELECT 1 FROM dual`);
-    console.log(result.rows[0][0]);
-
-The configuration information can also be used to create a
-:ref:`connection pool <connpooling>`, for example:
-
-.. code-block:: javascript
-
-    await oracledb.createPool({
-        connectString : "config-azure://aznetnamingappconfig.azconfig.io/?key=test/&azure_client_id=123-456&azure_client_secret=MYSECRET&azure_tenant_id=789-123"
-    });
-
-    const connection = await oracledb.getConnection();
-    const result = await connection.execute(`SELECT 1 FROM dual`);
-    console.log(result.rows[0][0]);
+        The same authentication methods used in Azure App Configuration provider are also used in Azure Key Vault. See :ref:`Authentication Methods in Azure App Configuration <authmethodsazureapp>`.
+      - Optional
 
 .. _conncaching:
 
@@ -3907,107 +4185,415 @@ settings or PL/SQL package state), and where the application gets a
 database connection, works on it for a relatively short duration, and
 then releases it.
 
-The `Oracle DRCP documentation <https://www.oracle.com/pls/topic/lookup?ctx=
-dblatest&id=GUID-015CA8C1-2386-4626-855D-CC546DDC1086>`__
-has more details, including when to use, and when not to use DRCP.
-
-To use DRCP in node-oracledb:
-
-1. The DRCP pool must be started in the database, for example:
-
-   ``SQL> EXECUTE DBMS_CONNECTION_POOL.START_POOL();``
-
-2. The :attr:`oracledb.connectionClass` property should be set by the
-   node-oracledb application. If it is set, then the connection class
-   specified in this property is used in both standalone and pooled
-   connections.
-
-   You can also :ref:`specify the connection class in a connection string
-   <cclasspurity>` by setting the ``POOL_CONNECTION_CLASS`` parameter. If this
-   parameter is set, then this connection class is used in both standalone
-   and pooled connections.
-
-   If both the :attr:`oracledb.connectionClass` property and the
-   ``POOL_CONNECTION_CLASS`` connection string parameter are set, then the
-   ``POOL_CONNECTION_CLASS`` parameter has the highest priority and overrides
-   the default or application specified values.
-
-   If :attr:`oracledb.connectionClass` and ``POOL_CONNECTION_CLASS``
-   connection string parameter are not set, then:
-
-   - For standalone connections, the session request is sent to the shared
-     connection class in DRCP.
-
-   - For pooled connections, the pool generates a unique connection class if
-     a previously generated connection class does not exist. This connection
-     class is used when acquiring connections from the pool. The node-oracledb
-     Thin mode generates a connection class with the prefix "NJS" while the
-     Thick mode generates a connection class with the prefix "OCI".
-
-   If the connection class is not set, the pooled server session memory will
-   not be reused optimally, and the statistic views will record large values
-   for ``NUM_MISSES``.
-
-3. The ``pool.createPool()`` or ``oracledb.getConnection()`` property
-   ``connectString`` (or its alias ``connectionString``) must specify to
-   use a pooled server, either by the Easy Connect syntax like
-   :ref:`myhost/sales:POOLED <easyconnect>`, or by using a
-   :ref:`tnsnames.ora <tnsnames>` alias for a connection that contains
-   ``(SERVER=POOLED)``.
-
 For efficiency, it is recommended that DRCP connections should be used
-with node-oracledb’s local :ref:`connection pool <poolclass>`.
+with node-oracledb’s local :ref:`connection pool <poolclass>`. Using DRCP with
+:ref:`standalone connections <standaloneconnection>` is not as efficient but
+does allow the database to reuse database server processes which can provide a
+performance benefit for applications that cannot use a local connection pool.
+In this scenario, make sure to configure enough DRCP authentication servers to
+handle the connection load.
+
+Although applications can choose whether or not to use DRCP pooled connections
+at runtime, care must be taken to configure the database appropriately for the
+number of expected connections, and also to stop inadvertent use of non-DRCP
+connections leading to a database server resource shortage. Conversely, avoid
+using DRCP connections for long-running operations.
+
+For more information about DRCP, see the technical brief `Extreme Oracle
+Database Connection Scalability with Database Resident Connection Pooling
+(DRCP) <https://www.oracle.com/docs/tech/drcp-technical-brief.pdf>`__, the user
+documentation `Oracle Database Concepts Guide
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+id=GUID-531EEE8A-B00A-4C03-A2ED-D45D92B3F797>`__ and `Oracle Database
+Development Guide <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+GUID-015CA8C1-2386-4626-855D-CC546DDC1086>`__. For DRCP Configuration, see
+`Oracle Database Administrator's Guide <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-82FF6896-F57E-41CF-89F7-755F3BC9C924>`__.
+
+To use DRCP with node-oracledb, perform the following steps:
+
+1. :ref:`Enable DRCP in the database <enablingdrcp>`.
+2. :ref:`Configure the application to use DRCP pooled servers
+   <configuredrcp>`.
+
+.. _enablingdrcp:
+
+Enabling DRCP in Oracle Database
+--------------------------------
+
+Oracle Database versions prior to 21c have a single DRCP connection pool. From
+Oracle Database 21c, each pluggable database can optionally have its own pool,
+or can use the container level pool. From Oracle Database 23ai, you can create
+multiple pools at the pluggable, or container, database level. This
+multi-pool feature is useful where different applications connect to the same
+database, but there is a concern that one application's use of the pool may
+impact other applications. If this is not the case, a single pool may allow
+best resource sharing on the database host.
+
+Note that DRCP is already enabled in Oracle Autonomous Database and pool
+management is different to the steps below.
+
+DRCP pools can be configured and administered by a DBA using the
+``DBMS_CONNECTION_POOL`` package:
+
+.. code-block:: sql
+
+    EXECUTE DBMS_CONNECTION_POOL.CONFIGURE_POOL(
+      pool_name => 'SYS_DEFAULT_CONNECTION_POOL',
+      minsize => 4,
+      maxsize => 40,
+      incrsize => 2,
+      session_cached_cursors => 20,
+      inactivity_timeout => 300,
+      max_think_time => 600,
+      max_use_session => 500000,
+      max_lifetime_session => 86400)
+
+Alternatively, the method ``DBMS_CONNECTION_POOL.ALTER_PARAM()`` can
+set a single parameter:
+
+.. code-block:: sql
+
+    EXECUTE DBMS_CONNECTION_POOL.ALTER_PARAM(
+      pool_name => 'SYS_DEFAULT_CONNECTION_POOL',
+      param_name => 'MAX_THINK_TIME',
+      param_value => '1200')
+
+The ``inactivity_timeout`` parameter terminates idle pooled servers, helping
+optimize database resources. To avoid pooled servers permanently being held
+onto by a Node.js script, the ``max_think_time`` parameter can be set. The
+parameters ``num_cbrok`` and ``maxconn_cbrok`` can be used to distribute the
+persistent connections from the clients across multiple brokers. This may be
+needed in cases where the operating system per-process descriptor limit is
+small. Some customers have found that having several connection brokers
+improves performance. The ``max_use_session`` and ``max_lifetime_session``
+parameters help protect against any unforeseen problems affecting server
+processes. The default values will be suitable for most users. See the
+`Oracle DRCP documentation <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-015CA8C1-2386-4626-855D-CC546DDC1086>`__ for details on these
+parameters.
+
+In general, if pool parameters are changed, then the pool should be restarted.
+Otherwise, server processes will continue to use old settings.
+
+You can use a ``DBMS_CONNECTION_POOL.RESTORE_DEFAULTS()`` procedure to reset
+all of the values.
+
+When DRCP is used with `Oracle RAC <https://www.oracle.com/database/real-
+application-clusters/>`__, each database instance has its own connection
+broker and pool of servers. Each pool has the identical configuration. For
+example, all pools start with ``minsize`` server processes. A single
+DBMS_CONNECTION_POOL command will alter the pool of each instance at the same
+time. The pool needs to be started before connection requests begin. The
+command below does this by bringing up the broker, which registers itself with
+the database listener:
+
+.. code-block:: sql
+
+    EXECUTE DBMS_CONNECTION_POOL.START_POOL()
+
+Once enabled this way, the pool automatically restarts when the database
+instance restarts, unless explicitly stopped with the
+``DBMS_CONNECTION_POOL.STOP_POOL()`` command:
+
+.. code-block:: sql
+
+    EXECUTE DBMS_CONNECTION_POOL.STOP_POOL()
+
+Oracle Database 23ai allows a ``DRAINTIME`` argument to be passed to
+``STOP_POOL()``, indicating that the pool will only be closed after the
+specified time. This allows in-progress application work to continue. A
+draintime value of *0* can be used to immediately close the pool. See the
+database documentation on `DBMS_CONNECTION_POOL.STOP_POOL()
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-3FF5F327-7BE3
+-4EA8-844F-29554EE00B5F>`__.
+
+In older Oracle Database versions, the pool cannot be stopped while
+connections are open.
+
+.. _configuredrcp:
+
+Configuring Application to Use DRCP
+-----------------------------------
+
+Application connections using DRCP should specify a user-chosen
+:ref:`connection class name <drcpconnclasses>` when requesting a
+:ref:`DRCP pooled server <pooledserver>`. A :ref:`'purity' <cclasspurity>` of
+the connection session state can optionally be specified. See the Oracle
+Database documentation on `benefiting from scalability <https://www.oracle.com
+/pls/topic/lookup?ctx=dblatest&id=GUID-661BB906-74D2-4C5D-9C7E-
+2798F76501B3>`__ for more information on purity and connection classes.
+
+The best practice is to use DRCP in conjunction with a local driver
+:ref:`connection pool <connpooling>` created with
+:meth:`oracledb.createPool()`. The node-oracledb connection pool size does not
+need to match the DRCP pool size. The limit on overall execution parallelism
+is determined by the DRCP pool size. Note that when using DRCP with a
+node-oracledb local connection pool in Thick mode, the local connection pool
+``min`` value is ignored and the pool will be created with zero connections.
+
+.. _pooledserver:
+
+**Use a Pooled Server for a Connection**
+
+To enable connections to use a pooled server, you can:
+
+- Specify to use a pooled server in the ``connectString`` property (or its
+  alias ``connectionString``) of :meth:`oracledb.createPool()` or
+  :meth:`oracledb.getConnection()`. For example with the :ref:`Easy Connect
+  syntax <easyconnect>`:
+
+  .. code-block:: javascript
+
+    const pool = await oracledb.createPool({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com/orclpdb1:pooled"
+    });
+
+- Alternatively, add ``(SERVER=POOLED)`` to the :ref:`Connect Descriptor
+  <embedtns>` such as used in an Oracle Network configuration file
+  :ref:`tnsnames.ora <tnsnames>`::
+
+    customerpool = (DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)
+              (HOST=dbhost.example.com)
+              (PORT=1521))(CONNECT_DATA=(SERVICE_NAME=CUSTOMER)
+              (SERVER=POOLED)))
+
+.. _drcpconnclasses:
+
+**Setting DRCP Connection Classes**
+
+The best practice is to specify a name for a connection by using the
+:attr:`oracledb.connectionClass` property. If it is set, then the connection
+class specified in this property is used in both standalone and pooled
+connections. This user-chosen name provides some partitioning of DRCP session
+memory so reuse is limited to similar applications. It provides maximum pool
+sharing if multiple application processes are started and use the same class
+name. A class name also allows better DRCP usage tracking in the database. In
+the database monitoring views, the class name shown will be the value
+specified in the application prefixed with the user name.
+
+To enable a connection to use a pooled server and to specify a class name, you
+can use:
+
+.. code-block:: javascript
+
+    oracledb.connectionClass = 'HRPOOL';
+
+    const pool = await oracledb.createPool({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com/orclpdb1:pooled"
+    });
+
+You can also specify the connection class in a connection string by setting
+the ``POOL_CONNECTION_CLASS`` parameter. If this parameter is set, then this
+connection class is used in both standalone and pooled connections. See
+:ref:`Setting the Connection Class and Purity in the Connection String
+<cclasspurity>`.
+
+If both the :attr:`oracledb.connectionClass` property and the
+``POOL_CONNECTION_CLASS`` connection string parameter are set, then the
+``POOL_CONNECTION_CLASS`` parameter has the highest priority and overrides the
+default or application specified values.
+
+If :attr:`oracledb.connectionClass` and ``POOL_CONNECTION_CLASS`` connection
+string parameter are not set, then:
+
+- For standalone connections, the session request is sent to the shared
+  connection class in DRCP.
+
+- For pooled connections, the pool generates a unique connection class if a
+  previously generated connection class does not exist. This connection class
+  is used when acquiring connections from the pool. The node-oracledb Thin
+  mode generates a connection class with the prefix "NJS" while the Thick mode
+  generates a connection class with the prefix "OCI".
+
+If the connection class is not set, the pooled server session memory will not
+be reused optimally, and the statistic views will record large values for
+``NUM_MISSES``.
+
+**Acquiring a DRCP Connection**
+
+Once DRCP has been enabled and the driver connection pool has been created
+with the appropriate connection string, then your application can get a
+connection from a pool that uses DRCP by calling:
+
+.. code-block:: javascript
+
+    const connection = pool.getConnection();
+
+**Closing Connections when using DRCP**
+
+Similar to using a node-oracledb connection pool, Node.js scripts where
+node-oracledb connections do not go out of scope quickly (which releases
+them), or do not currently use :meth:`connection.close()` should be examined
+to see if the connections can be closed earlier. This allows maximum reuse of
+DRCP pooled servers by other users:
+
+.. code-block:: javascript
+
+    const pool = await oracledb.createPool({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/orclpdb:pooled?pool_connection_class=MYAPP&pool_purity=self"
+    });
+
+    // Do some database operations
+    const connection = pool.getConnection();
+
+    ...
+
+    connection.close();
+
+    // Do lots of non-database work
+    . . .
+
+    // Do some more database operations
+    const connection = pool.getConnection();   // Get a new pooled server only when needed
+    . . .
+    connection.close();
 
 .. _cclasspurity:
 
-**Setting the Connection Class and Purity in the Connection String**
+Setting DRCP Parameters in Connection Strings
+---------------------------------------------
 
-Using node-oracledb Thin mode with Oracle Database 21c or later, you can
-specify the connection class and pool purity in an
-:ref:`Easy Connect string <easyconnect>` or a
-:ref:`Connect Descriptor <embedtns>`. For node-oracledb Thick
-mode, you require Oracle Database 21c (or later) and Oracle Client 19c (or
-later).
+You can specify the connection class and pool purity in connection strings
+when using node-oracledb Thin mode with Oracle Database 21c (or later). For
+node-oracledb Thick mode, you require Oracle Database 21c (or later) and
+Oracle Client 19c (or later).
+
+DRCP allows the connection session memory to be reused or cleaned each time a
+connection is acquired from the pool by specifying the pool purity. You can
+specify the pool purity in node-oracledb by setting the ``POOL_PURITY``
+parameter in a connection string. The valid values for ``POOL_PURITY`` are
+*SELF* and *NEW*. These values are not case-sensitive. The value *NEW*
+indicates that the application must use a new session. The value *SELF* allows
+the application to reuse both the pooled server process and session memory,
+giving maximum benefit from DRCP. By default, node-oracledb pooled connections
+use *SELF* and standalone connections use *NEW*.
 
 The connection class can be specified in a connection string by setting the
 ``POOL_CONNECTION_CLASS`` parameter. The value for ``POOL_CONNECTION_CLASS``
 can be any string conforming to connection class semantics and is
 case-sensitive.
 
-The pool purity specifies whether the node-oracledb application must use a new
-session or reuse a pooled session. You can specify the pool purity in a
-connection string by setting the ``POOL_PURITY`` parameter. The valid values
-for ``POOL_PURITY`` are *SELF* and *NEW*. These values are not case-sensitive.
-The value *NEW* indicates that the application must use a new session. The
-value *SELF* allows the application to reuse both the pooled server process
-and session memory, giving maximum benefit from DRCP. See the Oracle
-documentation on `benefiting from scalability <https://www.oracle.com/pls/
-topic/lookup?ctx=dblatest&id=GUID-661BB906-74D2-4C5D-9C7E-2798F76501B3>`__.
-If this parameter is not defined in the connect string, then by default the
-pool purity is *NEW* for standalone connections and *SELF* for pooled
-connections.
+An example of setting the connection class and pool purity in an
+:ref:`Easy Connect <easyconnect>` syntax is shown below:
 
-An example of setting the connection class and pool purity in an Easy Connect
-string is shown below::
+.. code-block:: javascript
 
-    dsn = "localhost/orclpdb:pooled?pool_connection_class=MYAPP&pool_purity=self"
+    const pool = await oracledb.createPool({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "localhost/orclpdb:pooled?pool_connection_class=MYAPP&pool_purity=self"
+    });
 
-An example of setting the connection class and pool purity in an Full Connect
-Descriptor string is shown below::
+An example of setting the connection class and pool purity in a
+:ref:`Connect Descriptor <embedtns>` is shown below::
 
     db_alias =
         (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(PORT=1522)(HOST=abc.oraclecloud.com))
           (CONNECT_DATA=(SERVICE_NAME=cdb1_pdb1.regress.rdbms.dev.us.oracle.com)(SERVER=POOLED)
           (POOL_CONNECTION_CLASS=cclassname)(POOL_PURITY=SELF)))
 
-**Monitoring DRCP**
+.. _monitoringdrcp:
 
-There are a number of Oracle Database ``V$`` views that can be used to
-monitor DRCP. These are discussed in the Oracle documentation and in the
-Oracle technical paper `Extreme Oracle Database Connection Scalability with
-Database Resident Connection Pooling (DRCP) <https://www.oracle.com/docs/tech/
-drcp-technical-brief.pdf>`__. This paper also gives more detail on configuring
-DRCP.
+Monitoring DRCP
+---------------
+
+Data dictionary views are available to monitor the performance of DRCP.
+Database administrators can check statistics such as the number of busy and
+free servers, and the number of hits and misses in the pool against the total
+number of requests from clients. The views include:
+
+- DBA_CPOOL_INFO
+- V$PROCESS
+- V$SESSION
+- V$CPOOL_STATS
+- V$CPOOL_CC_STATS
+- V$CPOOL_CONN_INFO
+
+**DBA_CPOOL_INFO View**
+
+DBA_CPOOL_INFO displays configuration information about the DRCP pool. The
+columns are equivalent to the ``dbms_connection_pool.configure_pool()``
+settings described in the table of DRCP configuration options, with the
+addition of a STATUS column. The status is ``ACTIVE`` if the pool has been
+started and ``INACTIVE`` otherwise. Note that the pool name column is called
+CONNECTION_POOL. This example checks whether the pool has been started and
+finds the maximum number of pooled servers::
+
+    SQL> SELECT connection_pool, status, maxsize FROM dba_cpool_info;
+
+    CONNECTION_POOL              STATUS        MAXSIZE
+    ---------------------------- ---------- ----------
+    SYS_DEFAULT_CONNECTION_POOL  ACTIVE             40
+
+**V$PROCESS and V$SESSION Views**
+
+The V$SESSION view shows information about the currently active DRCP
+sessions. It can also be joined with V$PROCESS through
+``V$SESSION.PADDR = V$PROCESS.ADDR`` to correlate the views.
+
+**V$CPOOL_STATS View**
+
+The V$CPOOL_STATS view displays information about the DRCP statistics for
+an instance. The V$CPOOL_STATS view can be used to assess the efficiency of
+the pool settings. This example query shows an application using the pool
+effectively. The low number of misses indicates that servers and sessions were
+reused. The wait count shows just over 1% of requests had to wait for a pooled
+server to become available::
+
+    NUM_REQUESTS   NUM_HITS NUM_MISSES  NUM_WAITS
+    ------------ ---------- ---------- ----------
+           10031      99990         40       1055
+
+If ``connectionClass`` was set (allowing pooled servers and sessions to be
+reused), then NUM_MISSES will be low. If the pool maxsize is too small for
+the connection load, then NUM_WAITS will be high.
+
+**V$CPOOL_CC_STATS View**
+
+The view V$CPOOL_CC_STATS displays information about the connection class
+level statistics for the pool per instance::
+
+    SQL> select cclass_name, num_requests, num_hits, num_misses
+         from v$cpool_cc_stats;
+
+    CCLASS_NAME                      NUM_REQUESTS   NUM_HITS NUM_MISSES
+    -------------------------------- ------------ ---------- ----------
+    HR.MYCLASS                             100031      99993         38
+
+The class name columns shows the database user name appended with the
+connection class name.
+
+**V$CPOOL_CONN_INFO View**
+
+The V$POOL_CONN_INFO view gives insight into client processes that are
+connected to the connection broker, making it easier to monitor and trace
+applications that are currently using pooled servers or are idle. This view
+was introduced in Oracle 11gR2.
+
+You can monitor the view V$CPOOL_CONN_INFO to, for example, identify
+misconfigured machines that do not have the connection class set correctly.
+This view maps the machine name to the class name. In node-oracledb Thick
+mode, the class name will default to one as shown below::
+
+    SQL> select cclass_name, machine from v$cpool_conn_info;
+
+    CCLASS_NAME                             MACHINE
+    --------------------------------------- ------------
+    GK.OCI:SP:wshbIFDtb7rgQwMyuYvodA        gklinux
+
+In this example, you would examine applications on ``gklinux`` and make them
+set ``connectionClass``.
+
+When connecting to Oracle Autonomous Database on Shared Infrastructure (ADB-S),
+the V$CPOOL_CONN_INFO view can be used to track the number of connection
+hits and misses to show the pool efficiency.
 
 .. _implicitpool:
 

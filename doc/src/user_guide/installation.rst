@@ -1674,7 +1674,7 @@ install the following Microsoft Azure modules:
 
         npm install @azure/identity
 
-   This library offers a variety of credential classes capable of acquiring
+   This library offers a variety of credential classes capable of acquiring a
    Microsoft Entra ID (formerly Azure Active Directory) token to authenticate
    service requests.
 
@@ -1685,6 +1685,31 @@ install the following Microsoft Azure modules:
         npm install @azure/keyvault-secrets
 
 See :ref:`azureappconfig` for information on using this configuration provider
+with node-oracledb.
+
+.. _azurevaultmodules:
+
+Install Modules for Azure Vault Configuration Provider
+------------------------------------------------------
+
+For node-oracledb to work with Azure Vault Configuration Provider, you must
+install the following Microsoft Azure modules:
+
+1. Install the `Azure Identity <https://www.npmjs.com/package/
+   @azure/identity>`__ module using::
+
+        npm install @azure/identity
+
+   This library offers a variety of credential classes capable of acquiring a
+   Microsoft Entra ID (formerly Azure Active Directory) token to authenticate
+   service requests.
+
+2. Install the `Azure Key Vault <https://www.npmjs.com/package/@azure/keyvault
+   -secrets>`__ module using::
+
+        npm install @azure/keyvault-secrets
+
+See :ref:`azurekeyvault` for information on using this configuration provider
 with node-oracledb.
 
 .. _ocimodules:
@@ -1717,6 +1742,30 @@ must install the following OCI modules:
 See :ref:`ociobjstorage` for information on using this configuration provider
 with node-oracledb.
 
+.. _ocivaultmodules:
+
+Install Modules for OCI Vault Provider
+--------------------------------------
+
+For node-oracledb to work with OCI Vault provider, you must install the
+following OCI modules:
+
+1. Install the `OCI Node.js Client for Common Utilities <https://www.npmjs.
+   com/package/oci-common>`__ module using::
+
+        npm install oci-common
+
+2. Install the `OCI Node.js Client for Secrets Service <https://www.npmjs.com/
+   package/oci-secrets>`__ module using::
+
+        npm install oci-secrets
+
+   See `Managing Vault Secrets <https://docs.oracle.com/en-us/iaas/Content/
+   KeyManagement/Tasks/managingsecrets.htm>`__ for more information.
+
+See :ref:`ocivault` for information on using this configuration provider with
+node-oracledb.
+
 .. _cloudnativemodules:
 
 Installing Cloud Native Authentication Modules for node-oracledb
@@ -1736,8 +1785,8 @@ Authentication plugin, you must install the `Node.js SDK for OCI module
 
     npm install oci-sdk
 
-See :ref:`cloudnativeauthoci` for more information on using the ``extensionOci``
-plugin in node-oracledb.
+See :ref:`cloudnativeauthoci` for more information on using the
+``extensionOci`` plugin in node-oracledb.
 
 .. _azuretokenmodules:
 

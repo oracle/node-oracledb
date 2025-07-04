@@ -26,22 +26,29 @@ Common Changes
     :attr:`dbObject.attributes` property which provide additional metadata
     about the database object.
 
-#)  Added support for property :attr:`pool.maxLifetimeSession` and added it as
-    an optional parameter for configurations of :meth:`oracledb.createPool()`
-    and :meth:`pool.reconfigure()`.
+#)  Added property :attr:`pool.maxLifetimeSession` to the
+    :ref:`Pool object <poolclass>`. This was also added as an optional
+    property in :meth:`oracledb.createPool()` and :meth:`pool.reconfigure()`.
 
-#)  Added instance principal authentication support in native IAM token based
-    authentication with Oracle Cloud Infrastructure.
+#)  Added support for :ref:`File Configuration Provider <fileconfigprovider>`,
+    :ref:`Oracle Cloud Infrastructure (OCI) Vault configuration provider
+    <ocivault>`, and :ref:`Microsoft Azure Key Vault configuration provider
+    <azurekeyvault>`.
 
-#)  Added support for setting
-    :ref:`application context <getconnectiondbattrsappcontext>` with database
-    connections.
+#)  Added support for
+    :ref:`instance principal authentication <_create_pool_oci_properties>`
+    in :ref:`native IAM token-based authentication <cloudnativeauthoci>`
+    with Oracle Cloud Infrastructure.
 
-#)  Added a second argument for the fetchTypeHandler call to get
+#)  Added support for setting the :ref:`application context <appcontext>` with
+    database connections.
+
+#)  Added a second argument for the
+    :attr:`fetchTypeHandler <oracledb.fetchTypeHandler>` call to get
     the metadata of all the result columns.
     See `Issue #1728 <https://github.com/oracle/node-oracledb/issues/1728>`__.
 
-#)  Added check for :meth:`lob.setDirFileName()` to verify if empty strings
+#)  Added a check for :meth:`lob.setDirFileName()` to verify if empty strings
     are passed or the properties are not found.
 
 #)  Added :attr:`~error.isRecoverable` property to the Error object to check
@@ -61,9 +68,6 @@ Common Changes
 
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Added support for config-file, config-ociobject, and config-azurevault
-    configuration providers.
 
 #)  Fixed bug which forced node-oracledb to resolve the database host name
     even if a proxy was specified in the connect string. Now the proxy

@@ -766,7 +766,7 @@ describe('255. poolReconfigure.js', function() {
         poolIncrement: poolIncrementOriginalVal,
         enableStatistics: enableStatisticsOriginalVal,
         queueTimeout: 500,
-        poolAlias: "255.2.7"
+        poolAlias: "255.2.8"
       };
       pool = await oracledb.createPool(poolConfig);
 
@@ -828,7 +828,7 @@ describe('255. poolReconfigure.js', function() {
       assert(poolStatistics.averageTimeInQueue >= 5);
       assert.strictEqual(poolStatistics.connectionsInUse, poolMaxOriginalVal);
       assert.strictEqual(poolStatistics.connectionsOpen, poolMaxOriginalVal);
-      assert.strictEqual(poolStatistics.poolAlias, "255.2.7");
+      assert.strictEqual(poolStatistics.poolAlias, "255.2.8");
       assert.strictEqual(poolStatistics.queueMax, 500);
       assert.strictEqual(poolStatistics.queueTimeout, 500);
       assert.strictEqual(poolStatistics.poolMin, poolMinOriginalVal);
