@@ -4,6 +4,83 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev68v69:
+
+Upgrading from node-oracledb 6.8 to 6.9
+=======================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- With the new methods :meth:`connection.beginSessionlessTransaction()`,
+  :meth:`connection.resumeSessionlessTransaction()`, and
+  :meth:`connection.suspendSessionlessTransaction()`, you can use Oracle
+  Database 23ai :ref:`Sessionless Transactions <sessionlesstxns>`.
+
+- With the new property :attr:`~connection.ltxid`, you can now use
+  :ref:`Transaction Guard <tg>`.
+
+- The new attributes, ``precision``, ``scale``, and ``maxSize``, of the
+  :attr:`dbObject.attributes` property provide additional metadata about the
+  database object.
+
+- The new property, :attr:`pool.maxLifetimeSession`, determines the number of
+  seconds that a connection can exist in a connection pool after first being
+  created.
+
+- With Centralized Configuration Providers:
+
+  - You can now use the configuration information stored in
+    :ref:`File Configuration Provider <fileconfigprovider>`,
+    :ref:`OCI Vault <ocivault>`, and :ref:`Azure Key Vault <azurekeyvault>`
+    and connect to Oracle Database.
+
+  - You can now use the following node-oracledb
+    :ref:`centralized configuration provider plugins <configproviderplugins>`
+    to access the configuration information stored in the respective
+    configuration provider and connect to Oracle Database:
+
+    - :ref:`ociobject <ociobjectplugin>` plugin for :ref:`OCI Object Storage
+      <ociobjstorage>` centralized configuration provider.
+
+    - :ref:`ocivault <ocivaultplugin>` plugin for :ref:`OCI Vault <ocivault>`
+      centralized configuration provider.
+
+    - :ref:`azure <azureplugin>` plugin for :ref:`Azure App Configuration
+      <azureappconfig>` centralized configuration provider.
+
+    - :ref:`azurevault <azurevaultplugin>` plugin for :ref:`Azure Key Vault
+      <azurekeyvault>` centralized configuration provider.
+
+    To use centralized configuration provider plugins, you must add the
+    following line to your code::
+
+        require('oracledb/plugins/configProviders/<configProviderPlugin>');
+
+- The new method :meth:`oracledb.registerConfigurationProviderHook()`
+  registers :ref:`centralized configuration provider <configproviderplugins>`
+  extension modules.
+
+- Take advantage of :ref:`Instance Principal authentication
+  <instanceprincipalauth>` when using :ref:`Oracle Cloud Infrastructure
+  (OCI) Cloud Native token-based authentication <cloudnativeauthoci>`.
+
+- The :ref:`application context <appcontext>` can now be set when creating
+  database connections.
+
+- A new second argument for the
+  :attr:`fetchTypeHandler <oracledb.fetchTypeHandler>` call contains the
+  metadata of all the result columns.
+
+- The new property, :attr:`error.isRecoverable`, checks if an error is
+  recoverable.
+
+- In node-oracledb Thick mode, the BFILE method :meth:`lob.setDirFileName()`
+  can now be used.
+
+- In node-oracledb Thick mode, the new property, ``enqTime``, for
+  :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>`
+  specifies the time when the message was enqueued.
+
 .. _upgradev67v68:
 
 Upgrading from node-oracledb 6.7 to 6.8

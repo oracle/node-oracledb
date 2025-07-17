@@ -6322,6 +6322,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         316.3.4 auto-generated transactionId uniqueness
     316.4 Connection Pool Operations
         316.4.1 sessionless transactions with connection pool
+        316.4.2 same pooled connection with rollbacks/suspends
     316.5 Timeout and Error Handling
         316.5.1 transaction timeout behavior
         316.5.2 error handling during sessionless transaction

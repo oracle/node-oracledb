@@ -115,7 +115,7 @@ function <configproviderhookfn>` to handle connection strings which have the
 prefix ``config-ociobject``, see :ref:`OCI Object Storage connection strings
 <connstringoci>`.
 
-To load the ``ociobject`` plugin in your application, use::
+To load the ``ociobject`` plugin in your application, use:
 
 .. code-block:: javascript
 
@@ -139,7 +139,7 @@ function <configproviderhookfn>` to handle connection strings which have the
 prefix ``config-ocivault``, see :ref:`OCI Vault connection strings
 <connstringocivault>`.
 
-To load the ``ocivault`` plugin in your application, use::
+To load the ``ocivault`` plugin in your application, use:
 
 .. code-block:: javascript
 
@@ -163,7 +163,7 @@ function <configproviderhookfn>` to handle connection strings which have the
 prefix ``config-azure``, see :ref:`Azure App Configuration connection strings
 <connstringazure>`.
 
-To load the ``azure`` plugin in your application, use::
+To load the ``azure`` plugin in your application, use:
 
 .. code-block:: javascript
 
@@ -187,7 +187,7 @@ function <configproviderhookfn>` to handle connection strings which have the
 prefix ``config-azurevault``, see :ref:`Azure Key Vault connection strings
 <connstringazurevault>`.
 
-To load the ``azurevault`` plugin in your application, use::
+To load the ``azurevault`` plugin in your application, use:
 
 .. code-block:: javascript
 

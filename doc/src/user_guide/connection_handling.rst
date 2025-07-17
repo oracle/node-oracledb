@@ -3415,16 +3415,13 @@ authentication, for example:
         return accessTokenStr;
     }
 
-    async function init() {
-        try {
-            await oracledb.getConnection({
-                accessToken   : tokenCallback,    // the callback returning the token
-                externalAuth  : true,             // must specify external authentication
-                connectString : connect_string    // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+    async function run() {
+
+        await oracledb.getConnection({
+            accessToken   : tokenCallback,    // the callback returning the token
+            externalAuth  : true,             // must specify external authentication
+            connectString : connect_string    // Oracle Autonomous Database connection string
+        });
     }
 
 In this example, the global variable ``accessTokenStr`` is used to
@@ -3477,20 +3474,16 @@ generate tokens in the callback method. For example:
         return accessTokenData;
     }
 
-    async function init() {
-        try {
-            await oracledb.getConnection({
-                accessToken   : callbackfn,        // the callback returning the token
-                accessTokenConfig : {
-                                        ...        // Azure-specific parameters to be set
+    async function run() {
+        await oracledb.getConnection({
+            accessToken   : callbackfn,        // the callback returning the token
+            accessTokenConfig : {
+                                    ...        // Azure-specific parameters to be set
                                                    // when using Azure SDK
-                                    }
-                externalAuth  : true,              // must specify external authentication
-                connectString : '...'              // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+                                }
+            externalAuth  : true,              // must specify external authentication
+            connectString : '...'              // Oracle Autonomous Database connection string
+        });
     }
 
 See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
@@ -3517,17 +3510,13 @@ authentication, for example:
         return accessToken;
     }
 
-    async function init() {
-        try {
-            await oracledb.createPool({
-                accessToken   : tokenCallback,        // the callback returning the token
-                externalAuth  : true,                 // must specify external authentication
-                homogeneous   : true,                 // must use an homogeneous pool
-                connectString : '...'                 // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+    async function run() {
+        await oracledb.createPool({
+            accessToken   : tokenCallback,        // the callback returning the token
+            externalAuth  : true,                 // must specify external authentication
+            homogeneous   : true,                 // must use an homogeneous pool
+            connectString : '...'                 // Oracle Autonomous Database connection string
+        });
     }
 
 See :ref:`OAuth 2.0 Standalone Connections <oauthstandalone>` for a
@@ -3558,21 +3547,17 @@ generate tokens in the callback method. For example:
         return accessTokenData;
     }
 
-    async function init() {
-        try {
-            await oracledb.createPool({
-                accessToken   : tokenCallback,        // the callback returning the token
-                accessTokenConfig : {
-                                        ...           // Azure-specific parameters to be set
+    async function run() {
+        await oracledb.createPool({
+            accessToken   : tokenCallback,        // the callback returning the token
+            accessTokenConfig : {
+                                    ...           // Azure-specific parameters to be set
                                                       // when using Azure SDK
-                                    }
-                externalAuth  : true,                 // must specify external authentication
-                homogeneous   : true,                 // must use an homogeneous pool
-                connectString : '...'                 // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+                                }
+            externalAuth  : true,                 // must specify external authentication
+            homogeneous   : true,                 // must use an homogeneous pool
+            connectString : '...'                 // Oracle Autonomous Database connection string
+        });
     }
 
 See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
@@ -3681,22 +3666,18 @@ OAuth 2.0 tokens, you need to set the
 
     const tokenPlugin = require('oracledb/plugins/token/extensionAzure');
 
-    async function init() {
-      try {
-        await oracledb.getConnection({
-          tokenAuthConfigAzure: {
-            authType: ...,    // Azure-specific parameters to
-            clientId: ...,    // be set when using extensionAzure
-            authority: ...,   // plugin
-            scopes: ...,
-            clientSecret: ...
-          }
-          externalAuth: true, // must specify external authentication
-          connectString: ...  // Oracle Autonomous Database connection string
-        });
-      } catch (err){
-        console.error(err);
-      }
+    async function run() {
+      await oracledb.getConnection({
+        tokenAuthConfigAzure: {
+          authType: ...,    // Azure-specific parameters to
+          clientId: ...,    // be set when using extensionAzure
+          authority: ...,   // plugin
+          scopes: ...,
+          clientSecret: ...
+        }
+        externalAuth: true, // must specify external authentication
+        connectString: ...  // Oracle Autonomous Database connection string
+      });
     }
 
 For information on the Azure specific parameters, see
@@ -3716,23 +3697,19 @@ in :meth:`oracledb.createPool()`. For example:
 
     const tokenPlugin = require('oracledb/plugins/token/extensionAzure');
 
-    async function init() {
-      try {
-        await oracledb.createPool({
-          tokenAuthConfigAzure: {
-            authType: ...,    // Azure-specific parameters to
-            clientId: ...,    // be set when using extensionAzure
-            authority: ...,   // plugin
-            scopes: ...,
-            clientSecret: ...
-          }
-          externalAuth: true, // must specify external authentication
-          homogeneous: true,  // must use a homogeneous pool
-          connectString: ...  // Oracle Autonomous Database connection string
-        });
-      } catch (err){
-        console.error(err);
-      }
+    async function run() {
+      await oracledb.createPool({
+        tokenAuthConfigAzure: {
+          authType: ...,    // Azure-specific parameters to
+          clientId: ...,    // be set when using extensionAzure
+          authority: ...,   // plugin
+          scopes: ...,
+          clientSecret: ...
+        }
+        externalAuth: true, // must specify external authentication
+        homogeneous: true,  // must use a homogeneous pool
+        connectString: ...  // Oracle Autonomous Database connection string
+      });
     }
 
 For information on the Azure specific parameters, see
@@ -3878,16 +3855,12 @@ modes using IAM token-based authentication.
         return accessTokenObj;
     }
 
-    async function init() {
-        try {
-            await oracledb.getConnection({
-                accessToken    : tokenCallback,  // the callback returns the token object
-                externalAuth   : true,           // must specify external authentication
-                connectString  : '...'           // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+    async function run() {
+        await oracledb.getConnection({
+            accessToken    : tokenCallback,  // the callback returns the token object
+            externalAuth   : true,           // must specify external authentication
+            connectString  : '...'           // Oracle Autonomous Database connection string
+        });
     }
 
 In this example, the global object ``accessTokenObj`` is used to “cache”
@@ -3942,20 +3915,16 @@ generate tokens in the callback method. For example:
         return accessTokenData;
     }
 
-    async function init() {
-        try {
-            await oracledb.getConnection({
-                accessToken   : callbackfn,        // the callback returning the token
-                accessTokenConfig : {
-                                        ...        // OCI-specific parameters to be set
+    async function run() {
+        await oracledb.getConnection({
+            accessToken   : callbackfn,        // the callback returning the token
+            accessTokenConfig : {
+                                    ...        // OCI-specific parameters to be set
                                                    // when using OCI SDK
-                                    }
-                externalAuth  : true,              // must specify external authentication
-                connectString : '...'              // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+                                }
+            externalAuth  : true,              // must specify external authentication
+            connectString : '...'              // Oracle Autonomous Database connection string
+        });
     }
 
 See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
@@ -3982,17 +3951,13 @@ for example:
         return accessToken;
     }
 
-    async function init() {
-        try {
-            await oracledb.createPool({
-                accessToken   : tokenCallback,     // the callback returning the token
-                externalAuth  : true,              // must specify external authentication
-                homogeneous   : true,              // must use an homogeneous pool
-                connectString : connect_string     // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+    async function run() {
+        await oracledb.createPool({
+            accessToken   : tokenCallback,     // the callback returning the token
+            externalAuth  : true,              // must specify external authentication
+            homogeneous   : true,              // must use an homogeneous pool
+            connectString : connect_string     // Oracle Autonomous Database connection string
+        });
     }
 
 See :ref:`IAM Standalone Connections <iamstandalone>` for a description of
@@ -4024,20 +3989,16 @@ generate tokens in the callback method. For example:
     }
 
     async function init() {
-        try {
-            await oracledb.createPool({
-                accessToken   : tokenCallback,        // the callback returning the token
-                accessTokenConfig : {
-                                        ...           // OCI-specific parameters to be set
+        await oracledb.createPool({
+            accessToken   : tokenCallback,        // the callback returning the token
+            accessTokenConfig : {
+                                    ...           // OCI-specific parameters to be set
                                                       // when using Azure SDK
-                                    }
-                externalAuth  : true,                 // must specify external authentication
-                homogeneous   : true,                 // must use an homogeneous pool
-                connectString : '...'                 // Oracle Autonomous Database connection string
-            });
-        } catch (err) {
-            console.error(err);
-        }
+                                }
+            externalAuth  : true,                 // must specify external authentication
+            homogeneous   : true,                 // must use an homogeneous pool
+            connectString : '...'                 // Oracle Autonomous Database connection string
+        });
     }
 
 See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
@@ -4166,20 +4127,16 @@ in :meth:`oracledb.getConnection()`. For example:
 
     const tokenPlugin = require('oracledb/plugins/token/extensionOci');
 
-    async function init() {
-      try {
-        await oracledb.getConnection({
-          tokenAuthConfigOci: {
-            authType: ...,           // OCI-specific parameters to be set when
-            profile: ...,            // using extensionOci plugin with authType
-            configFileLocation: ...  // configFileBasedAuthentication
-          }
-          externalAuth: true,        // must specify external authentication
-          connectString: ...         // Oracle Autonomous Database connection string
-        });
-      } catch (err){
-        console.error(err);
-      }
+    async function run() {
+      await oracledb.getConnection({
+        tokenAuthConfigOci: {
+          authType: ...,           // OCI-specific parameters to be set when
+          profile: ...,            // using extensionOci plugin with authType
+          configFileLocation: ...  // configFileBasedAuthentication
+        }
+        externalAuth: true,        // must specify external authentication
+        connectString: ...         // Oracle Autonomous Database connection string
+      });
     }
 
 For information on the Azure specific parameters, see
@@ -4199,20 +4156,16 @@ in :meth:`oracledb.createPool()`. For example:
 
     const tokenPlugin = require('oracledb/plugins/token/extensionOci');
 
-    async function init() {
-      try {
-        await oracledb.createPool({
-          tokenAuthConfigOci: {
-            authType: ...,           // OCI-specific parameters to be set when
-            tenancy: ...,            // using extensionOci plugin with authType
-            user: ...                // simpleAuthentication
-          }
-          externalAuth: true,        // must specify external authentication
-          connectString: ...         // Oracle Autonomous Database connection string
-        });
-      } catch (err){
-        console.error(err);
-      }
+    async function run() {
+      await oracledb.createPool({
+        tokenAuthConfigOci: {
+          authType: ...,           // OCI-specific parameters to be set when
+          tenancy: ...,            // using extensionOci plugin with authType
+          user: ...                // simpleAuthentication
+        }
+        externalAuth: true,        // must specify external authentication
+        connectString: ...         // Oracle Autonomous Database connection string
+      });
     }
 
 For more information on the OCI specific parameters, see
@@ -4221,6 +4174,114 @@ For more information on the OCI specific parameters, see
 See `ocicloudnativetoken.js <https://github.com/oracle/node-
 oracledb/tree/main/examples/ocicloudnativetoken.js>`__ for a
 runnable example using the extensionOci plugin.
+
+.. _instanceprincipalauth:
+
+Instance Principal Authentication
+=================================
+
+With Instance Principal Authentication, Oracle Cloud Infrastructure (OCI)
+compute instances can be authorized to access services on Oracle Cloud such as
+Oracle Autonomous Database (ADB). Node-oracledb applications running on such a
+compute instance do not need to provide database user credentials.
+
+Each compute instance behaves as a distinct type of Identity and Access
+Management (IAM) Principal, that is, each compute instance has a unique
+identity in the form of a digital certificate which is managed by OCI. When
+using Instance Principal Authentication, a compute instance authenticates with
+OCI IAM using this identity and obtains a short-lived token. This token is
+then used to access Oracle Cloud services without storing or managing any
+secrets in your application.
+
+The example below demonstrates how to connect to Oracle Autonomous
+Database using Instance Principal authentication. To enable this, use
+node-oracledb's pre-supplied :ref:`extensionOci <extensionociplugin>` plugin.
+
+**Step 1: Create an OCI Compute Instance**
+
+An `OCI compute instance <https://docs.oracle.com/en-us/iaas/compute-cloud-at-
+customer/topics/compute/compute-instances.htm>`__ is a virtual machine running
+within OCI that provides compute resources for your application. This compute
+instance will be used to authenticate access to Oracle Cloud services when
+using Instance Principal Authentication.
+
+To create an OCI compute instance, see the steps in `Creating an Instance
+<https://docs.oracle.com/en-us/iaas/Content/Compute/Tasks/
+launchinginstance.htm>`__ section of the Oracle Cloud Infrastructure
+documentation.
+
+For more information on OCI compute instances, see `Calling Services from a
+Compute Instance <https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/
+callingservicesfrominstances.htm>`__.
+
+**Step 2: Install the OCI CLI on your compute instance**
+
+The `OCI Command Line Interface (CLI) <https://docs.oracle.com/en-us/iaas/
+Content/API/Concepts/cliconcepts.htm>`__ that can be used on its own or with
+the Oracle Cloud console to complete OCI tasks.
+
+To install the OCI CLI on your compute instance, see the installation
+instructions in the `Installing the CLI <https://docs.oracle.com/en-us/iaas/
+Content/API/SDKDocs/cliinstall.htm>`__ section of Oracle Cloud Infrastructure
+documentation.
+
+**Step 3: Create a Dynamic Group**
+
+A Dynamic Group is used to define rules to group the compute instances that
+require access.
+
+To create a dynamic group using the Oracle Cloud console, see the steps in the
+`To create a dynamic group <https://docs.oracle.com/en-us/iaas/Content/
+Identity/Tasks/managingdynamicgroups.htm#>`__ section of the Oracle Cloud
+Infrastructure documentation.
+
+**Step 4: Create an IAM Policy**
+
+An IAM Policy is used to grant a dynamic group permission to access the
+required OCI services such as Oracle Autonomous Database.
+
+To create an IAM policy using Oracle Cloud console, see the steps in the
+`Create an IAM Policy <https://docs.oracle.com/en-us/iaas/application-
+integration/doc/creating-iam-policy.html>`__ section of the Oracle Cloud
+Infrastructure documentation.
+
+**Step 5: Map an Instance Principal to an Oracle Database User**
+
+You must map the Instance Principal to an Oracle Database user. For more
+information, see `Accessing the Database Using an Instance Principal
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1B648FB0-BE86-
+4BCE-91D0-239D287C638B>`__.
+
+Also, make sure that external authentication is enabled on Oracle ADB and the
+Oracle Database parameter ``IDENTITY_PROVIDER_TYPE`` is set to *OCI_IAM*. For
+the steps, see `Enable IAM Authentication on ADB <https://docs.oracle.com/en/
+cloud/paas/autonomous-database/serverless/adbsb/enable-iam-authentication
+.html>`__.
+
+**Step 6: Deploy your application on the Compute Instance**
+
+To use Instance Principal authentication, set the
+:ref:`tokenAuthConfigOci <getconnectiondbattrstokenauthconfigoci>`,
+:ref:`externalAuth <getconnectiondbattrsexternalauth>`, and
+:ref:`connectString <getconnectiondbattrsconnectstring>` properties
+when creating a standalone connection or a connection pool. For example:
+
+.. code-block:: javascript
+
+    const tokenPlugin = require('oracledb/plugins/token/extensionOci');
+
+    async function run() {
+      await oracledb.getConnection({
+        tokenAuthConfigOci: {
+          authType: "instancePrincipal"
+        }
+        externalAuth: true,        // must specify external authentication
+        connectString: ...         // Oracle ADB connection string
+      });
+    }
+
+For information on the OCI specific parameters, see
+:ref:`_get_connection_oci_properties`.
 
 .. _drcp:
 

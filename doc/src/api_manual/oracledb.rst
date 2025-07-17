@@ -2809,7 +2809,7 @@ Oracledb Methods
 
             With Simple Authentication, the configuration parameters can be provided at runtime.
 
-            With Instance Principal Authentication, OCI compute instances can be authorized to access services on Oracle Cloud such as Oracle Autonomous Database. Node.js applications running on such a compute instance are automatically authenticated, eliminating the need to provide database user credentials. This authentication method will only work on compute instances where internal network endpoints are reachable. For more information on OCI compute instances, see `OCI Compute Instances <https://docs.oracle.com/en-us/iaas/compute-cloud-at-customer/topics/compute/compute-instances.htm>`__, `Creating a Compute Instance <https://docs.oracle.com/en-us/iaas/Content/Compute/Tasks/launchinginstance.htm>`__, and `Calling Services from a Compute Instance <https://docs.oracle.com/en-us/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm>`__.
+            With Instance Principal Authentication, OCI compute instances can be authorized to access services on Oracle Cloud such as Oracle Autonomous Database. Node-oracledb applications running on such a compute instance are automatically authenticated, eliminating the need to provide database user credentials. This authentication method will only work on compute instances where internal network endpoints are reachable. See :ref:`instanceprincipalauth` for more information.
 
             See `OCI SDK Authentication Methods <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm>`__ for more information.
           - Required

@@ -19,6 +19,9 @@ node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...
 Common Changes
 ++++++++++++++
 
+#)  Added support for Oracle Database 23ai
+    :ref:`Sessionless Transactions <sessionlesstxns>`.
+
 #)  Added support for :ref:`Transaction Guard <tg>` with the introduction of
     the :attr:`~connection.ltxid` property.
 
@@ -39,6 +42,10 @@ Common Changes
     :ref:`plugins <configproviderplugins>` to prevent package build errors
     with external bundlers such as webpack and esbuild.
     See `Issue #1791 <https://github.com/oracle/node-oracledb/issues/1791>`__.
+
+#)  Added :meth:`oracledb.registerConfigurationProviderHook()` to register
+    :ref:`centralized configuration provider <configproviderplugins>`
+    extension modules.
 
 #)  Added support for
     :ref:`instance principal authentication <_create_pool_oci_properties>`

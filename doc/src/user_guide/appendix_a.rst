@@ -242,6 +242,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Feature tracking
       - No
       - Yes
+    * - Oracle Database 23ai Sessionless Transactions (see :ref:`sessionlesstxns`)
+      - Yes
+      - Yes
     * - Two-phase Commit (TPC) (see :ref:`twopc`)
       - Yes
       - Yes
