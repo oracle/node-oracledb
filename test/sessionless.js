@@ -399,7 +399,50 @@ describe('316. sessionless.js', function() {
       assert.strictEqual(res.rows.length, 2);
       await pool.close();
     });
+    it('316.4.2 same pooled connection with rollbacks/suspends', async function() {
+      const pool = await oracledb.createPool({
+        ...dbConfig,
+        poolMin: 0,
+        poolMax: 1
+      });
+
+      const transactionId = '316.4.2';
+      let poolConn = await pool.getConnection();
+
+      await poolConn.beginSessionlessTransaction({transactionId, timeout: 5});
+      await poolConn.execute(`INSERT INTO ${tableName} VALUES(60, 'POOL_CONN')`);
+      await poolConn.close();
+
+      // begin transaction on same pooled connection(after release and re-acquire)
+      poolConn = await pool.getConnection();
+      await poolConn.beginSessionlessTransaction({transactionId, timeout: 5});
+      await poolConn.execute(`INSERT INTO ${tableName} VALUES(60, 'POOL_CONN')`);
+      await poolConn.suspendSessionlessTransaction();
+      await poolConn.close();
+
+      // resume transaction on same pooled connection(after release and
+      // re-acquire) with suspendOnSuccess
+      poolConn = await pool.getConnection();
+      await poolConn.resumeSessionlessTransaction(transactionId, {timeout: 0});
+      await poolConn.execute(`INSERT INTO ${tableName} VALUES(61, 'POOL_CONN')`
+        , {}, {suspendOnSuccess: true});
+      await poolConn.close();
+
+      // commit from same reacquired connection
+      poolConn = await pool.getConnection();
+      await poolConn.resumeSessionlessTransaction(transactionId, {timeout: 0, deferRoundTrip: true});
+      await poolConn.commit();
+      await poolConn.close();
+
+      const verifyConn = await pool.getConnection();
+      const res = await verifyConn.execute(`SELECT * FROM ${tableName} WHERE INTCOL IN (60, 61)`);
+      await verifyConn.close();
+
+      assert.strictEqual(res.rows.length, 2);
+      await pool.close();
+    });
   });
+
 
   describe('316.5 Timeout and Error Handling', function() {
     it('316.5.1 transaction timeout behavior', async function() {
