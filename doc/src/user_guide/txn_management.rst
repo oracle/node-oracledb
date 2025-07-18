@@ -151,6 +151,15 @@ the database server waits for the `DISTRIBUTED_LOCK_TIMEOUT
 412D-95F2-5B6C1F18415D>`__ time to allow other instances to suspend this
 transaction before proceeding with a commit or rollback.
 
+Note that there are some constraints when using Sessionless Transactions.
+You cannot rollback to a savepoint of the sessionless transaction in a
+previous connection. Sessionless Transactions cannot be promoted to
+:ref:`distributedtxns`. Session states such as all parameters set by
+ALTER SESSION, temporary LOB states, and PL/SQL states are not carried over to
+the new connection. For more information on other constraints, see
+`Restrictions for Sessionless Transactions <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-7F76D67C-4470-4DA3-BAAE-8E243D9FA87B>`__.
+
 For more information on Sessionless Transactions, see `Developing Applications
 with Sessionless Transactions <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-C1F67D04-CE72-416E-8CED-243E5710E83D>`__ in the Oracle
@@ -180,11 +189,11 @@ You can pass the following parameters to
 
 - ``transactionId``: This parameter is the unique identifier of the
   transaction which is used to manage the transaction from start to end. If
-  you do not specify the ``transactionId`` value, node-oracledb generates a
-  unique identifier for the transaction as a `universally-unique identifier
-  (UUID) <https://www.rfc-editor.org/rfc/rfc4122.txt>`__ value when
-  :meth:`connection.beginSessionlessTransaction` is called. An example of a
-  transaction identifier in UUID v4 is "36b8f84d-df4e-4d49-b662-bcde71a8764f".
+  you do not specify the ``transactionId`` value, a unique `universally-unique
+  identifier (UUID) <https://www.rfc-editor.org/rfc/rfc4122.txt>`__ is
+  generated and returned by
+  :meth:`~Connection.beginSessionlessTransaction`. An example is
+  "36b8f84d-df4e-4d49-b662-bcde71a8764f".
 
 - ``timeout``: This parameter determines the duration before which this
   transaction can be resumed by a connection the next time that it is
@@ -238,11 +247,6 @@ performance. For example:
 
 .. code-block:: javascript
 
-    const connection = await oracledb.getConnection({
-        user          : "hr",
-        password      : mypw,  // mypw contains the hr schema password
-        connectString : "mydbmachine.example.com/orclpdb1"
-    });
     const result = await connection.execute(
         `INSERT INTO slt_table (name) VALUES ('John')`, {},
         {suspendOnSuccess: true});
@@ -276,10 +280,9 @@ You can set the following parameters in
 
 - ``timeout``: This parameter specifies how long this connection should wait
   to resume a sessionless transaction if it is currently in use by another
-  connection. This timeout is only effective when the transaction is in use by
-  another connection. In this case, the current connection waits for the
-  transaction to be suspended within this timeout period. If the transaction
-  remains in use by the other connection after the timeout period, the error
+  connection. In this case, the current connection waits for the transaction
+  to be suspended within this timeout period. If the transaction remains in
+  use by the other connection after the timeout period, the error
   `ORA-25351 <https://docs.oracle.com/en/error-help/db/ora-25351>`__ is raised.
   If another connection completes the transaction, the error `ORA-24756
   <https://docs.oracle.com/en/error-help/db/ora-24756>`__ is raised. These
@@ -363,15 +366,6 @@ code snippet)::
 
     [ [ 1, 'John' ], [ 2, 'Jane' ]]
 
-Note that there are some constraints when using Sessionless Transactions.
-You cannot rollback to a savepoint of the sessionless transaction in a
-previous conneciton. Sessionless Transactions cannot be promoted to XA
-(Extended Architecture) Transactions. Session states such as all parameters
-set by ALTER SESSION, Temp LOB states, and PL/SQL states are not carried over
-to the new connection. For more information on other constraints, see
-`Restrictions for Sessionless Transactions <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-7F76D67C-4470-4DA3-BAAE-8E243D9FA87B>`__.
-
 .. _viewsessionlesstxns:
 
 Viewing Sessionless Transactions
@@ -388,18 +382,10 @@ following query with `NVL() <https://docs.oracle.com/en/database/oracle/oracle
 
 .. code-block:: sql
 
-    SELECT NVL(dbms_transaction.get_transaction_id, 'NULL transactionId') FROM dual;
+    SELECT NVL(dbms_transaction.get_transaction_id, 'NULL transactionId')
+    FROM dual;
 
 The `GET_TRANSACTION_ID Function <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-5E1C1B63-207F-4587-8259-0CED93EB9643>`__ of the
 DBMS_TRANSACTION package returns the transaction identifier that is used in
 the current connection.
-
-Note that there are some constraints when using Sessionless Transactions.
-You cannot rollback to a savepoint of the sessionless transaction in a
-previous connection. Sessionless Transactions cannot be promoted to XA
-(Extended Architecture) Transactions. Session states such as all parameters
-set by ALTER SESSION, temporary LOB states, and PL/SQL states are not carried
-over to the new connection. For more information on other constraints, see
-`Restrictions for Sessionless Transactions <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-7F76D67C-4470-4DA3-BAAE-8E243D9FA87B>`__.

@@ -13,7 +13,7 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
-node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (TBD)
+node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (18 Jul 2025)
 ---------------------------------------------------------------------------------------------------------
 
 Common Changes
@@ -24,6 +24,14 @@ Common Changes
 
 #)  Added support for :ref:`Transaction Guard <tg>` with the introduction of
     the :attr:`~connection.ltxid` property.
+
+#)  Added support for
+    :ref:`instance principal authentication <_create_pool_oci_properties>`
+    in :ref:`native IAM token-based authentication <cloudnativeauthoci>`
+    with Oracle Cloud Infrastructure.
+
+#)  Added support for setting the :ref:`application context <appcontext>` with
+    database connections.
 
 #)  Added ``precision``, ``scale``, and ``maxSize`` attributes to the
     :attr:`dbObject.attributes` property which provide additional metadata
@@ -46,14 +54,6 @@ Common Changes
 #)  Added :meth:`oracledb.registerConfigurationProviderHook()` to register
     :ref:`centralized configuration provider <configproviderplugins>`
     extension modules.
-
-#)  Added support for
-    :ref:`instance principal authentication <_create_pool_oci_properties>`
-    in :ref:`native IAM token-based authentication <cloudnativeauthoci>`
-    with Oracle Cloud Infrastructure.
-
-#)  Added support for setting the :ref:`application context <appcontext>` with
-    database connections.
 
 #)  Added a second argument for the
     :attr:`fetchTypeHandler <oracledb.fetchTypeHandler>` call to get
