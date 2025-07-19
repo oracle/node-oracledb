@@ -2384,12 +2384,12 @@ static bool njsConnection_startSessionlessTransactionAsync(njsBaton *baton)
 {
     njsConnection *conn = (njsConnection*) baton->callingInstance;
     if (baton->sessionlessFlags == DPI_TPC_BEGIN_NEW) {
-        if (dpiConn_beginSessionlessTransaction(conn->handle, 
+        if (dpiConn_beginSessionlessTransaction(conn->handle,
                 baton->sessionlessTransactionId, baton->sessionlessTimeout,
                 baton->deferRoundTrip) < 0)
             return njsBaton_setErrorDPI(baton);
     } else if (baton->sessionlessFlags == DPI_TPC_BEGIN_RESUME) {
-        if (dpiConn_resumeSessionlessTransaction(conn->handle, 
+        if (dpiConn_resumeSessionlessTransaction(conn->handle,
                 baton->sessionlessTransactionId, baton->sessionlessTimeout,
                 baton->deferRoundTrip) < 0)
             return njsBaton_setErrorDPI(baton);

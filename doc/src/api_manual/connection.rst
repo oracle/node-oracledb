@@ -214,7 +214,7 @@ The properties of a *Connection* object are listed below.
     Transaction Guard as a means of ensuring that transactions are not
     duplicated. See :ref:`tg` for more information.
 
-    This property is only available with Oracle 12.1 or later. In
+    This property is only available with Oracle Database 12.1 or later. In
     node-oracledb Thick mode, Oracle Client libraries 12.1 or later are
     additionally required.
 

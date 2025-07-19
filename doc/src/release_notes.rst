@@ -46,7 +46,7 @@ Common Changes
     <ocivault>`, and :ref:`Microsoft Azure Key Vault configuration provider
     <azurekeyvault>`.
 
-#)  Moved centralized configuration provider support to be part of the
+#)  Moved Centralized Configuration Provider support to be part of the
     :ref:`plugins <configproviderplugins>` to prevent package build errors
     with external bundlers such as webpack and esbuild.
     See `Issue #1791 <https://github.com/oracle/node-oracledb/issues/1791>`__.
@@ -55,12 +55,12 @@ Common Changes
     :ref:`centralized configuration provider <configproviderplugins>`
     extension modules.
 
-#)  Added a second argument for the
+#)  Added second argument for the
     :attr:`fetchTypeHandler <oracledb.fetchTypeHandler>` call to get
     the metadata of all the result columns.
     See `Issue #1728 <https://github.com/oracle/node-oracledb/issues/1728>`__.
 
-#)  Added a check for :meth:`lob.setDirFileName()` to verify if empty strings
+#)  Added check for :meth:`lob.setDirFileName()` to verify if empty strings
     are passed or the properties are not found.
 
 #)  Added :attr:`~error.isRecoverable` property to the Error object to check

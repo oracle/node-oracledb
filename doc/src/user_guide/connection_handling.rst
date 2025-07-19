@@ -790,11 +790,11 @@ below.
 Using an OCI Vault Centralized Configuration Provider
 -----------------------------------------------------
 
-The `Oracle Cloud Infrastructure (OCI) Vault configuration provider
+`Oracle Cloud Infrastructure (OCI) Vault Centralized Configuration Provider
 <https://docs.oracle.com/en-us/iaas/Content/KeyManagement/home.htm>`__ enables
 the storage and management of Oracle Database connection information as JSON
-objects. This configuration provider support is available from node-oracledb
-6.9 onwards.
+objects. This Centralized Configuration Provider support is available from
+node-oracledb 6.9 onwards.
 
 To use an OCI Vault Centralized Configuration Provider, you must:
 
@@ -815,7 +815,7 @@ To use an OCI Vault Centralized Configuration Provider, you must:
 4. :ref:`Use an OCI Vault connection string URL <connstringocivault>` in the
    ``connectString`` property of connection and pool creation methods.
 
-Note that node-oracledb caches configurations by default, see
+Note that node-oracledb caches configurations by default. See
 :ref:`conncaching`.
 
 .. _ocivaultparams:
@@ -825,11 +825,11 @@ Note that node-oracledb caches configurations by default, see
 The JSON object must contain a ``connect_descriptor`` key. Optionally, you can
 specify the database user name, password, wallet location, and node-oracledb
 properties. For details on the information that can be stored in this
-configuration provider, see :ref:`_configuration_information`.
+Centralized Configuration Provider, see :ref:`_configuration_information`.
 
-The JSON object syntax for OCI Vault configuration provider is same as the
-syntax for OCI Object Storage, see :ref:`OCI Object Storage
-<exampleociobjstorage>` example.
+The JSON object syntax for OCI Vault Centralized Configuration Provider is
+the same as the syntax for OCI Object Storage.
+See :ref:`OCI Object Storage <exampleociobjstorage>` example.
 
 .. _connstringocivault:
 
@@ -1380,7 +1380,7 @@ automatically applied to any query executed. See `Oracle Virtual Private
 Database (VPD) <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
 06022729-9210-4895-BF04-6177713C65A7>`__ in the Oracle Database documentation.
 
-Note :ref:`Database Resident Connection Pooling (DRCP) <drcp>` does not
+Note that :ref:`Database Resident Connection Pooling (DRCP) <drcp>` does not
 support setting or working with application contexts. You also cannot set
 application contexts with application-side connection pools in Thick mode.
 The application context setting is ignored in these cases.
