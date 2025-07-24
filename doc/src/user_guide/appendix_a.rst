@@ -98,6 +98,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Kerberos, Radius, and Public Key Infrastructure (PKI) authentication services
       - No
       - Yes
+    * - Multi-Factor Authentication (MFA) (see :ref:`mfa`)
+      - Yes
+      - Yes
     * - Oracle Database Native Network Encryption and Checksumming (see :ref:`nne`)
       - No
       - Yes

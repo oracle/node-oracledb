@@ -1361,32 +1361,32 @@ Or you would install with::
 
 .. _docker:
 
-Using node-oracledb in Docker
-=============================
+Using node-oracledb Containers
+==============================
 
 `Docker <https://www.docker.com/>`__ allows applications to be
 containerized. Each application will have a ``Dockerfile`` with steps to
-create a Docker image. Once created, the image can be shared and run.
+create a container image. Once created, the image can be shared and run.
 
 Sample Dockerfiles for Oracle Linux are available on
-`GitHub <https://github.com/oracle/docker-images/tree/main/OracleLinuxDevelopers>`__.
-Some container images are in `Oracle’s GitHub Container
-Registry <https://github.com/orgs/oracle/packages>`__.
+`GitHub <https://github.com/oracle/docker-images/tree/main/
+OracleLinuxDevelopers>`__. Some container images are in `Oracle’s GitHub
+Container Registry <https://github.com/orgs/oracle/packages>`__.
 
-Installing Node.js in Docker
-----------------------------
+Installing Node.js in Container
+-------------------------------
 
 If your ``Dockerfile`` uses Oracle Linux::
 
-    FROM oraclelinux:7-slim
+    FROM ghcr.io/oracle/oraclelinux:9
 
 Then you can install Node.js from
 `yum.oracle.com <https://yum.oracle.com/oracle-linux-nodejs.html>`__
 using::
 
-    RUN  yum -y install oracle-nodejs-release-el7 && \
-         yum -y install nodejs && \
-         rm -rf /var/cache/yum
+    RUN dnf -y module enable nodejs:22 && \
+        dnf -y install nodejs npm && \
+        rm -rf /var/cache/dnf
 
 One alternative to Oracle Linux is to use a `Node.js image from Docker
 Hub <https://hub.docker.com/_/node/>`__, for example using::
@@ -1407,7 +1407,7 @@ Include node-oracledb as a normal dependency in your application
       "start": "node server.js"
     },
     "dependencies": {
-      "oracledb" : "^6"
+      "oracledb" : "^6.9"
     },
     . . .
 
@@ -1420,28 +1420,28 @@ dependencies installed when the image is built::
 
     CMD exec node server.js
 
-Installing Instant Client in Docker
------------------------------------
+Installing Instant Client in Container
+--------------------------------------
 
 If you want to use node-oracledb in :ref:`Thick mode <thickarch>`, then you
 need to separately install Oracle Instant Client in the container.
 
-Review the available Instant Client Linux x86_64 packages for `Oracle Linux 7
-<https://yum.
-oracle.com/repo/OracleLinux/OL7/oracle/instantclient21/x86_64/index.html>`__
-and `Oracle Linux 8 <https://yum.oracle.com/repo/OracleLinux/OL8/oracle/
-instantclient21/x86_64/index.html>`__. Older Oracle Instant Clients are in the
-`Oracle Linux 7 <https://yum.oracle.com/repo/OracleLinux/OL7/
-oracle/instantclient/x86_64/index.html>`__ and `Oracle Linux 8 <https://yum.
-oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/index.html>`__
+Review the available Instant Client Linux x86_64 packages for `Oracle Linux 9
+<https://yum.oracle.com/repo/OracleLinux/OL9/oracle/instantclient23/x86_64/
+index.html>`__ and `Oracle Linux 8 <https://yum.oracle.com/repo/OracleLinux/
+OL8/oracle/instantclient23/x86_64/index.html>`__. Older Oracle Instant Clients
+are in the `Oracle Linux 9 <https://yum.oracle.com/repo/OracleLinux/OL9/oracle
+/instantclient/x86_64/index.html>`__ and `Oracle Linux 8 <https://yum.oracle.
+com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/index.html>`__
 repositories.
 
 Packages for Oracle Linux ARM (aarch64) are available for `Oracle Linux 8
-<https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/aarch64/index.html>`__.
+<https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/aarch64/
+index.html>`__.
 
 Instant Client RPMs and ZIP files are also available from `Oracle Database
-Instant Client download pages
-<https://www.oracle.com/database/technologies/instant-client.html>`__.
+Instant Client download pages <https://www.oracle.com/database/technologies/
+instant-client.html>`__.
 
 There are various ways to install Instant Client. Three methods are
 shown below.
@@ -1450,13 +1450,13 @@ shown below.
 
    If you have an Oracle Linux image::
 
-        FROM oraclelinux:7-slim
+        FROM oraclelinux:9
 
    Then you can install Instant Client RPMs::
 
-        RUN yum -y install oracle-instantclient-release-el7 && \
-            yum -y install oracle-instantclient-basic && \
-            rm -rf /var/cache/yum
+        RUN  dnf -y install oracle-instantclient-release-23ai-el9 && \
+             dnf -y install oracle-instantclient-basic && \
+             rm -rf /var/cache/dnf
 
 2. Automatically downloading an Instant Client ZIP file
 
@@ -1484,8 +1484,8 @@ shown below.
             echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
    When using Instant Client 19 on recent Linux versions, such as Oracle
-   Linux 8, you may also need to install the ``libnsl`` package. This is
-   not needed from Instant Client 21 onward.
+   Linux 9, you may also need to install the ``libnsl`` package. This is
+   not needed from Instant Client 21 onwards.
 
 3. Copying Instant Client zip files from the host
 
@@ -1518,7 +1518,7 @@ shown below.
         RUN apt-get update && apt-get install -y libaio1
 
    When using Instant Client 19 on recent Linux versions, such as Oracle
-   Linux 8, you may also need to install the ``libnsl`` package. This is
+   Linux 9, you may also need to install the ``libnsl`` package. This is
    not needed from Instant Client 21 onward.
 
 Using Oracle Net configuration Files and Oracle Wallets
@@ -1548,11 +1548,11 @@ as environment variables.  This example show node-oracledb Thick mode.
 
 If you use Oracle Linux, your ``Dockerfile`` will be like::
 
-    FROM oraclelinux:7-slim
+    FROM oraclelinux:9
 
-    RUN yum -y install oracle-instantclient-release-el7 && \
-        yum -y install oracle-instantclient-basiclite && \
-        rm -rf /var/cache/yum
+    RUN  dnf -y install oracle-instantclient-release-23ai-el9 && \
+         dnf -y install oracle-instantclient-basic && \
+         rm -rf /var/cache/dnf
 
     WORKDIR /myapp
     ADD package.json server.js /myapp/
@@ -1596,7 +1596,7 @@ For either Dockerfile, the ``package.json`` is::
             "myapp"
         ],
         "dependencies": {
-            "oracledb" : "^6"
+            "oracledb" : "^6.9"
         },
         "author": "Me",
         "license": "UPL"

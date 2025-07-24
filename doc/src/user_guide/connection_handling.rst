@@ -3255,6 +3255,121 @@ authentication using TLS:
 2. Set the ``SSL_CLIENT_AUTHENTICATION`` parameter to *TRUE* in the server-side
    :ref:`sqlnet.ora <tnsadmin>` file.
 
+.. _mfa:
+
+Multi-Factor Authentication
+===========================
+
+Multi-Factor authentication (MFA) requires database users to verify their
+identity using more than one authentication method in order to connect to
+Oracle Database. This provides an additional layer of security to access the
+database, enhancing database security and reducing unauthorized access.
+
+MFA is supported in both node-oracledb Thin and Thick modes. It is available
+from Oracle Database 23.9 (or later) and Oracle Database 19c Release Update
+19.28 (and future 19c Release Updates).
+
+With MFA, the primary authentication factor used is user credential
+authentication (user name and password). On successful credential
+authentication, the user is then required to verify their identity using
+another authentication method. Oracle Database supports the following
+authentication methods that can be configured as MFA:
+
+- :ref:`MFA Push Notifications Authentication <mfapush>`
+- :ref:`MFA Certificate-based Authentication <mfacertauth>`
+
+.. _mfapush:
+
+MFA Push Notifications
+----------------------
+
+You can add push notifications as an additional method to verify the identity
+of database users. MFA Push Notifications can be configured for use with
+either the Oracle Mobile Authenticator (OMA) or Cisco Duo applications. For
+more information, see `MFA Push Notifications <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-EC060ABD-BAF3-466C-9B7C-7287166B11AF>`__ in
+the Oracle Database Security Guide.
+
+To use OMA or Cisco Duo push notifications as the secondary authentication
+method, you must add certain configurations in the database. Also, the
+database adminstrators must add OMA or Cisco Duo as the secondary
+authentication method when creating a new database user or when altering an
+existing user. For the steps to configure OMA or Cisco Duo as the MFA factor,
+see the `OMA <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+AD0D7985-5A29-40D8-8D81-DE2C1DF723AC>`__ and `Cisco Duo <https://www.oracle.
+com/pls/topic/lookup?ctx=dblatest&id=GUID-FCE63B9B-D165-476A-9507-
+097F24D08DFB>`__ sections in the Oracle Database Security Guide.
+
+Once a database administrator adds OMA or Cisco Duo as the secondary
+authentication method for a user, they will receive an email that contains
+information to download and register their device with the OMA or Cisco Duo
+application respectively.
+
+Once the device is registered, you can use OMA or Cisco Duo Push Notification
+authentication as the secondary authentication factor when connecting to the
+database using standalone connections or connection pools. Using a standalone
+connection, for example:
+
+.. code-block:: javascript
+
+    connection = await oracledb.getConnection({
+      user: "smith",
+      password: mypw,
+      connectString: "localhost/orclpdb1"
+    });
+
+The authentication begins with database credentials verification of the user.
+Once the password is successfully verified, the user receives a notification on
+their registered device in the OMA or Cisco Duo application to approve or deny
+an Oracle Database connection attempt. If you approve the notification, the
+authentication is completed and you can connect to Oracle Database.
+
+.. _mfacertauth:
+
+MFA Certificate-based Authentication
+------------------------------------
+
+With MFA Certificate-based authentication, you can add a Public Key
+Infrastructure (PKI) certificate as an additional authentication method to
+verify the identity of database users. When a PKI certificate is configured as
+the second factor in MFA, the user can connect to the database using a signed
+user certificate stored in their wallet or smart card.
+
+To use certificate-based authentication as the secondary authentication
+method, you must ensure that users have a signed certificate with the
+Distinguished Name (DN) value matching the value specified in the
+``walletLocation`` property in node-oracledb Thin mode. For node-oracledb
+Thick mode, it should match the value specified in WALLET_LOCATION in the
+:ref:`sqlnet.ora <tnsadmin>` file. Also, database administrators must add
+certificate-based authentication as the secondary authentication method when
+creating a new database user or altering an existing user. For the steps to
+configure certificate-based MFA, see `MFA Certificate-based Authentication
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E3CFA8C5-1BC9-
+4BDE-973D-CEF829E163BE>`__ in the Oracle Database Security Guide.
+
+You can use certificate-based authentication to authenticate the user using
+standalone connections or connection pools. Using a standalone connection in
+node-oracledb Thin mode, for example:
+
+.. code-block:: javascript
+
+    connection = await oracledb.getConnection({
+      user: "smith",
+      password: mypw,
+      connectString: "tcps://localhost/orclpdb1",
+      walletLocation: "/opt/OracleCloud"
+    });
+
+In the above example, the authentication to connect to Oracle Database begins
+with database credentials verification of the user. Once the credentials are
+successfully verified, the user's Distinguished Name (DN) value, *cn=j.smith*,
+in the certificate present in the wallet specified in the
+``walletLocation`` property is checked with the external name in the
+dictionary. If the DNs match, then the connection is created.
+
+For node-oracledb Thick mode, the wallet location can be specified in the
+``WALLET_LOCATION`` parameter in the :ref:`sqlnet.ora <tnsadmin>` file.
+
 .. _tokenbasedauthentication:
 
 Token-Based Authentication
@@ -5375,8 +5490,8 @@ Transaction Guard
 -----------------
 
 From version 6.9 onwards, node-oracledb supports `Transaction Guard
-<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-A675AF7B-6FF0-
-460D-A6E6-C15E7C328C8F>`__ which enables Node.js applications to verify the
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F7E968E4-EE8F-
+4563-91F3-CD44B5D2E747>`__ which enables Node.js applications to verify the
 success or failure of the last transaction in the event of an unplanned
 outage. This feature requires Oracle Database 12.1 or later. For node-oracledb
 Thick mode, Oracle Client 12.1 or later is additionally required.

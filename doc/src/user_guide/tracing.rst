@@ -459,10 +459,9 @@ available on npm as a separate package,
 `@opentelemetry/instrumentation-oracledb <https://www.npmjs.com/package/
 @opentelemetry/instrumentation-oracledb>`__. The source code is available in
 the `OpenTelemetry JavaScript GitHub repository <https://github.com/open-
-telemetry/opentelemetry-js-contrib/tree/main/plugins/node/opentelemetry-
-instrumentation-oracledb>`__. This module uses the tracing feature available
-in node-oracledb to generate the telemetry data for applications using this
-driver.
+telemetry/opentelemetry-js-contrib/tree/main/packages/instrumentation-
+oracledb>`__. This module uses the tracing feature available in node-oracledb
+to generate the telemetry data for applications using this driver.
 
 The following components can be used to view the trace information from
 node-oracledb:

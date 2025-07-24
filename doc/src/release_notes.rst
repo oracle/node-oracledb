@@ -42,17 +42,17 @@ Common Changes
     property in :meth:`oracledb.createPool()` and :meth:`pool.reconfigure()`.
 
 #)  Added support for :ref:`File Configuration Provider <fileconfigprovider>`,
-    :ref:`Oracle Cloud Infrastructure (OCI) Vault configuration provider
-    <ocivault>`, and :ref:`Microsoft Azure Key Vault configuration provider
+    :ref:`Oracle Cloud Infrastructure (OCI) Vault Configuration Provider
+    <ocivault>`, and :ref:`Microsoft Azure Key Vault Configuration Provider
     <azurekeyvault>`.
 
 #)  Moved Centralized Configuration Provider support to be part of the
     :ref:`plugins <configproviderplugins>` to prevent package build errors
     with external bundlers such as webpack and esbuild.
-    See `Issue #1791 <https://github.com/oracle/node-oracledb/issues/1791>`__.
+    See `Issue #1691 <https://github.com/oracle/node-oracledb/issues/1691>`__.
 
 #)  Added :meth:`oracledb.registerConfigurationProviderHook()` to register
-    :ref:`centralized configuration provider <configproviderplugins>`
+    :ref:`Centralized Configuration Provider <configproviderplugins>`
     extension modules.
 
 #)  Added second argument for the

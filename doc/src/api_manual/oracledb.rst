@@ -2897,11 +2897,12 @@ Oracledb Methods
 
             The tenantId is the directory tenant the application plans to operate against in GUID or domain-name format.
 
-            Some of the common authority URLs are:
-            https://login.microsoftonline.com/<tenant>/
-            https://login.microsoftonline.com/common/
-            https://login.microsoftonline.com/organizations/
-            https://login.microsoftonline.com/consumers/
+            Some of the common authority URLs are::
+
+              https://login.microsoftonline.com/<tenant>/
+              https://login.microsoftonline.com/common/
+              https://login.microsoftonline.com/organizations/
+              https://login.microsoftonline.com/consumers/
           - Required
         * - ``clientId``
           - The application ID that is assigned to your application.
