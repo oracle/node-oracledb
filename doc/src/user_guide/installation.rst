@@ -1364,17 +1364,16 @@ Or you would install with::
 Using node-oracledb Containers
 ==============================
 
-`Docker <https://www.docker.com/>`__ allows applications to be
-containerized. Each application will have a ``Dockerfile`` with steps to
-create a container image. Once created, the image can be shared and run.
+Dockerfiles showing installation of Node.js and node-oracledb on Oracle Linux
+are available from
+`github.com/oracle/docker-images/tree/main/OracleLinuxDevelopers
+<https://github.com/oracle/docker-images/tree/main/OracleLinuxDevelopers>`__.
 
-Sample Dockerfiles for Oracle Linux are available on
-`GitHub <https://github.com/oracle/docker-images/tree/main/
-OracleLinuxDevelopers>`__. Some container images are in `Oracle’s GitHub
-Container Registry <https://github.com/orgs/oracle/packages>`__.
+Some container images are in `Oracle’s GitHub Container Registry <https://
+github.com/orgs/oracle/packages>`__.
 
-Installing Node.js in Container
--------------------------------
+Installing Node.js in a Container
+---------------------------------
 
 If your ``Dockerfile`` uses Oracle Linux::
 
@@ -1384,14 +1383,9 @@ Then you can install Node.js from
 `yum.oracle.com <https://yum.oracle.com/oracle-linux-nodejs.html>`__
 using::
 
-    RUN dnf -y module enable nodejs:22 && \
+    RUN dnf -y module enable nodejs:18 && \
         dnf -y install nodejs npm && \
         rm -rf /var/cache/dnf
-
-One alternative to Oracle Linux is to use a `Node.js image from Docker
-Hub <https://hub.docker.com/_/node/>`__, for example using::
-
-    FROM node:12-buster-slim
 
 Note: You should review Oracle’s supported distributions before choosing
 an operating system.
@@ -1407,7 +1401,7 @@ Include node-oracledb as a normal dependency in your application
       "start": "node server.js"
     },
     "dependencies": {
-      "oracledb" : "^6.9"
+      "oracledb" : "^6"
     },
     . . .
 
@@ -1420,8 +1414,8 @@ dependencies installed when the image is built::
 
     CMD exec node server.js
 
-Installing Instant Client in Container
---------------------------------------
+Installing Instant Client in a Container
+----------------------------------------
 
 If you want to use node-oracledb in :ref:`Thick mode <thickarch>`, then you
 need to separately install Oracle Instant Client in the container.
@@ -1483,9 +1477,9 @@ shown below.
             cd /opt/oracle/instantclient* && rm -f *jdbc* *occi* *mysql* *mql1* *ipc1* *jar uidrvci genezi adrci && \
             echo /opt/oracle/instantclient* > /etc/ld.so.conf.d/oracle-instantclient.conf && ldconfig
 
-   When using Instant Client 19 on recent Linux versions, such as Oracle
-   Linux 9, you may also need to install the ``libnsl`` package. This is
-   not needed from Instant Client 21 onwards.
+   When using Instant Client 19 on Linux versions, such as Oracle Linux 8, you
+   may also need to install the ``libnsl`` package. This is not needed from
+   Instant Client 21 onwards.
 
 3. Copying Instant Client zip files from the host
 
@@ -1517,9 +1511,9 @@ shown below.
 
         RUN apt-get update && apt-get install -y libaio1
 
-   When using Instant Client 19 on recent Linux versions, such as Oracle
-   Linux 9, you may also need to install the ``libnsl`` package. This is
-   not needed from Instant Client 21 onward.
+   When using Instant Client 19 on Linux versions, such as Oracle Linux 8, you
+   may also need to install the ``libnsl`` package. This is not needed from
+   Instant Client 21 onward.
 
 Using Oracle Net configuration Files and Oracle Wallets
 -------------------------------------------------------
@@ -1538,8 +1532,8 @@ files using::
 
 The ``Z`` option is needed when SELinux is enabled.
 
-Example Application in Docker
-+++++++++++++++++++++++++++++
+Example Application in a Container
+++++++++++++++++++++++++++++++++++
 
 This example consists of a ``Dockerfile``, a ``package.json`` file with
 the application dependencies, a ``server.js`` file that is the
@@ -1596,7 +1590,7 @@ For either Dockerfile, the ``package.json`` is::
             "myapp"
         ],
         "dependencies": {
-            "oracledb" : "^6.9"
+            "oracledb" : "^6"
         },
         "author": "Me",
         "license": "UPL"
