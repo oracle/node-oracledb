@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -206,7 +206,6 @@ describe('203. dbObject4.js', () => {
   }); // 203.4
 
   it('203.5 call procedure with 2 OUT binds of DbObject', async function() {
-
     const result = await conn.execute(
       `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
           p_cur2 => :p_cur2); end;`,
@@ -218,11 +217,10 @@ describe('203. dbObject4.js', () => {
 
     let resultSet = await result.outBinds.p_cur1.getRows();
     assert.equal(resultSet.length, testCount);
-    result.outBinds.p_cur1.close();
+    await result.outBinds.p_cur1.close();
 
     resultSet = await result.outBinds.p_cur2.getRows();
     assert.equal(resultSet.length, testCount);
-    result.outBinds.p_cur2.close();
+    await result.outBinds.p_cur2.close();
   }); // 203.5;
-
 });

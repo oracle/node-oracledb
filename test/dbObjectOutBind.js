@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -137,8 +137,8 @@ describe('262. dbObjectOutBind.js', function() {
         p_cur2: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
       }
     );
-    result.outBinds.p_cur1.close();
-    result.outBinds.p_cur2.close();
+    await result.outBinds.p_cur1.close();
+    await result.outBinds.p_cur2.close();
   });
 
   it('262.2 call procedure with multiple OUT binds of DbObject', async function() {
@@ -154,18 +154,18 @@ describe('262. dbObjectOutBind.js', function() {
     );
     let resultSet = await result.outBinds.p_cur1.getRows();
     assert.equal(resultSet.length, 9);
-    result.outBinds.p_cur1.close();
+    await result.outBinds.p_cur1.close();
 
     resultSet = await result.outBinds.p_cur2.getRows();
     assert.equal(resultSet.length, 3);
-    result.outBinds.p_cur2.close();
+    await result.outBinds.p_cur2.close();
 
     resultSet = await result.outBinds.p_cur3.getRows();
     assert.equal(resultSet.length, 9);
-    result.outBinds.p_cur3.close();
+    await result.outBinds.p_cur3.close();
 
     resultSet = await result.outBinds.p_cur4.getRows();
     assert.equal(resultSet.length, 3);
-    result.outBinds.p_cur4.close();
+    await result.outBinds.p_cur4.close();
   });
 });

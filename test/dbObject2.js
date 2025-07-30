@@ -230,10 +230,10 @@ describe('201. dbObject2.js', () => {
 
     let resultSet = await result.outBinds.p_cur1.getRows();
     assert.equal(resultSet.length, 4);
-    result.outBinds.p_cur1.close();
+    await result.outBinds.p_cur1.close();
 
     resultSet = await result.outBinds.p_cur2.getRows();
     assert.equal(resultSet.length, 4);
-    result.outBinds.p_cur2.close();
+    await result.outBinds.p_cur2.close();
   }); // 201.6;
 });

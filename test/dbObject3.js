@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -210,10 +210,10 @@ describe('202. dbObject3.js', () => {
 
     let resultSet = await result.outBinds.p_cur1.getRows();
     assert.equal(resultSet.length, 3);
-    result.outBinds.p_cur1.close();
+    await result.outBinds.p_cur1.close();
 
     resultSet = await result.outBinds.p_cur2.getRows();
     assert.equal(resultSet.length, 3);
-    result.outBinds.p_cur2.close();
+    await result.outBinds.p_cur2.close();
   }); // 200.5;
 });

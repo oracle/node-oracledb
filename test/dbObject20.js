@@ -315,11 +315,11 @@ describe('290. dbObject20.js', () => {
 
       let resultSet = await result.outBinds.p_cur1.getRows();
       assert.equal(resultSet.length, 6);
-      result.outBinds.p_cur1.close();
+      await result.outBinds.p_cur1.close();
 
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur2.close();
+      await result.outBinds.p_cur2.close();
     }); // 290.1.8
 
     it('290.1.9 copy an object with numeric/string values in NCHAR datatype', async () => {
@@ -572,7 +572,6 @@ describe('290. dbObject20.js', () => {
     }); // 290.2.7
 
     it('290.2.8 call procedure with 2 OUT binds of DbObject', async function() {
-
       const result = await conn.execute(
         `BEGIN nodb_getDataCursor3(p_cur1 => :p_cur1,
             p_cur2 => :p_cur2); end;`,
@@ -584,11 +583,11 @@ describe('290. dbObject20.js', () => {
 
       let resultSet = await result.outBinds.p_cur1.getRows();
       assert.equal(resultSet.length, 6);
-      result.outBinds.p_cur1.close();
+      await result.outBinds.p_cur1.close();
 
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur2.close();
+      await result.outBinds.p_cur2.close();
     }); // 290.2.8
   });
 
@@ -837,11 +836,11 @@ describe('290. dbObject20.js', () => {
 
       let resultSet = await result.outBinds.p_cur1.getRows();
       assert.equal(resultSet.length, 6);
-      result.outBinds.p_cur1.close();
+      await result.outBinds.p_cur1.close();
 
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur2.close();
+      await result.outBinds.p_cur2.close();
     }); // 290.3.8
 
     it('290.3.9 insert an object with buffer value with size 10', async () => {

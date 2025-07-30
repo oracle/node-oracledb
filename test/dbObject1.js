@@ -376,11 +376,11 @@ describe('200. dbObject1.js', () => {
 
       let resultSet = await result.outBinds.p_cur1.getRows();
       assert.equal(resultSet.length, 6);
-      result.outBinds.p_cur1.close();
+      await result.outBinds.p_cur1.close();
 
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
-      result.outBinds.p_cur2.close();
+      await result.outBinds.p_cur2.close();
     }); // 200.1.10;
 
     it('200.1.11 insert an object with large string values', async () => {
