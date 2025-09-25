@@ -297,6 +297,7 @@ static bool njsModule_initDPI(napi_env env, napi_value *args,
     // initialize structure
     memset(&params, 0, sizeof(params));
     params.useJsonId = 1; // Enable JSONID
+    params.sodaUseJsonDesc = 1; // Enable use of JSON descriptor in SODA
     if (*libDirLength > 0)
         params.oracleClientLibDir = *libDir;
     if (*configDirLength > 0)
@@ -315,6 +316,7 @@ static bool njsModule_initDPI(napi_env env, napi_value *args,
         NJS_CHECK_NAPI(env, napi_throw(env, error))
         return false;
     }
+    globals->sodaUseJsonDesc = (bool) params.sodaUseJsonDesc;
 
     return true;
 }

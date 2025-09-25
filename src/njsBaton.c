@@ -457,9 +457,7 @@ bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
 {
     napi_value constructor;
     njsSodaDocument *doc;
-    size_t contentLength;
     bool isSodaDocument;
-    void *content;
 
     // get the SODA document constructor
     NJS_CHECK_NAPI(env, napi_get_reference_value(env,
@@ -476,15 +474,12 @@ bool njsBaton_getSodaDocument(njsBaton *baton, njsSodaDatabase *db,
             return njsBaton_setErrorDPI(baton);
         *handle = doc->handle;
 
-    // otherwise, create a new SODA document from the value (which is assumed
-    // to be a buffer)
+    // otherwise, create the SODA document using the passed-in data
     } else {
-        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, obj, &content,
-                &contentLength))
-        if (dpiSodaDb_createDocument(db->handle, NULL, 0, content,
-                (uint32_t) contentLength, NULL, 0, DPI_SODA_FLAGS_DEFAULT,
-                handle) < 0)
-            return njsBaton_setErrorDPI(baton);
+        if (!njsUtils_addSodaContent(db->handle, env, obj, baton->globals,
+                NULL, (uint32_t) 0, NULL, (uint32_t) 0,
+                DPI_SODA_FLAGS_DEFAULT, handle))
+            return false;
     }
 
     return true;

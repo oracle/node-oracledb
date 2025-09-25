@@ -92,8 +92,15 @@ describe('288. embedded_oid.js', function() {
       // Fetch the document back
       const fetchedDoc = await collection.find().key(myKey).getOne();
       const content = fetchedDoc.getContent(); // A JavaScript object
+      let contentId;
+      if (oracledb.oracleClientVersion > 2304000000) {
+        assert.strictEqual(content._id instanceof oracledb.JsonId, true);
+        contentId = content._id.toJSON();
+      } else {
+        contentId = content._id;
+      }
 
-      assert.strictEqual("08" + content._id, myKey.toLowerCase());
+      assert.strictEqual("08" + contentId, myKey.toLowerCase());
 
       await conn.commit();
       const res = await collection.drop();

@@ -43,8 +43,16 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Added support for internal use of JSON in SODA with Oracle Client 23ai.
+    This allows for seamless transfer of extended data types in JSON values.
+
+#)  Added capability for :meth:`sodaDocument.getContent()` to return non-JSON
+    content as a JavaScript Buffer.
+
 #)  Fixed memory leak when enqueuing to JSON queues with
     :ref:`Advanced Queuing <aq>`.
+
+#)  Internal code refactoring to optimize handling of SODA functions.
 
 node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (18 Jul 2025)
 ---------------------------------------------------------------------------------------------------------

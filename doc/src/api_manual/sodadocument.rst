@@ -100,11 +100,9 @@ are read-only. The properties for default collections are listed below.
 SodaDocument Methods
 ====================
 
-These methods return the document content stored in a SodaDocument.
-Which one to call depends on the content and how you want to use it. For
-example, if the document content is JSON, then any of the methods may be
-called. But if the document content is binary, then only
-:meth:`sodaDocument.getContentAsBuffer()` may be called.
+These methods return the document content stored in a SodaDocument object.
+You can choose one of these methods depending on the required output format
+for the document content and how you want to use it.
 
 Although documents cannot be null, content can be.
 
@@ -116,9 +114,14 @@ Although documents cannot be null, content can be.
 
         getContent()
 
-    A synchronous method that returns the document content as an object. An
-    exception will occur if the document content is not JSON and cannot be
-    converted to an object.
+    A synchronous method that returns the document content as an object.
+    If the document content is not JSON, it is returned as a JavaScript
+    Buffer.
+
+    .. versionchanged:: 6.10
+
+        Previously, this method returned an exception for non-JSON document
+        content. Now, non-JSON content is returned as a JavaScript Buffer.
 
 .. method:: sodaDocument.getContentAsBuffer()
 

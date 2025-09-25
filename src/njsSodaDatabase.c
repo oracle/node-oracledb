@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2023, Oracle and/or its affiliates.
+// Copyright (c) 2018, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -144,20 +144,15 @@ static bool njsSodaDatabase_createCollectionPostAsync(njsBaton *baton,
 //-----------------------------------------------------------------------------
 NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDatabase_createDocument, 2, NULL)
 {
-    size_t contentLength, keyLength = 0, mediaTypeLength = 0;
+    size_t keyLength = 0, mediaTypeLength = 0;
     njsSodaDatabase *db = (njsSodaDatabase*) callingInstance;
     char *key = NULL, *mediaType = NULL;
     dpiSodaDoc *docHandle;
-    void *content;
-    int dpiStatus;
-
-    // acquire the content from the buffer
-    NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[0], &content,
-            &contentLength))
+    bool status;
 
     // acquire the key value, if one was specified
     if (!njsUtils_getNamedPropertyString(env, args[1], "key", &key,
-             &keyLength))
+            &keyLength))
         return false;
 
     // acquire the mediaType value, if one was specified
@@ -168,16 +163,16 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDatabase_createDocument, 2, NULL)
         return false;
     }
 
-    // create ODPI-C document
-    dpiStatus = dpiSodaDb_createDocument(db->handle, key, (uint32_t) keyLength,
-            content, (uint32_t) contentLength, mediaType,
-            (uint32_t) mediaTypeLength, DPI_SODA_FLAGS_DEFAULT, &docHandle);
+    // create SODA document using the passed-in data
+    status = njsUtils_addSodaContent(db->handle, env, args[0], globals, key,
+            (uint32_t) keyLength, mediaType, (uint32_t) mediaTypeLength,
+            DPI_SODA_FLAGS_DEFAULT, &docHandle);
     if (key)
         free(key);
     if (mediaType)
         free(mediaType);
-    if (dpiStatus < 0)
-        return njsUtils_throwErrorDPI(env, globals);
+    if (!status)
+        return status;
 
     // return wrapped document
     if (!njsSodaDocument_createFromHandle(env, docHandle, globals,
@@ -281,6 +276,8 @@ bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
         njsModuleGlobals *globals, dpiSodaDb *handle, napi_value *dbObj)
 {
     njsSodaDatabase *db;
+    bool supportsJson = globals->sodaUseJsonDesc;
+    napi_value boolValue;
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefSodaDatabase,
@@ -295,6 +292,12 @@ bool njsSodaDatabase_createFromHandle(napi_env env, napi_value connObj,
     // database object
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *dbObj, "_connection",
             connObj))
+
+    // store supportsJSON property on the SODA database object to indicate
+    // JSON in SODA is supported or not
+    NJS_CHECK_NAPI(env, napi_get_boolean(env, supportsJson, &boolValue))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *dbObj, "_supportsJson",
+            boolValue))
 
     return true;
 }

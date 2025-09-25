@@ -572,6 +572,7 @@ struct njsLobBuffer {
 struct njsModuleGlobals {
     dpiContext *context;
     dpiVersionInfo clientVersionInfo;
+    bool sodaUseJsonDesc;
     napi_ref jsAqDeqOptionsConstructor;
     napi_ref jsAqEnqOptionsConstructor;
     napi_ref jsAqMessageConstructor;
@@ -972,6 +973,9 @@ bool njsUtils_setIntervalYM(napi_env env, napi_value value,
         dpiIntervalYM *data);
 bool njsUtils_setIntervalDS(napi_env env, napi_value value,
         dpiIntervalDS *data);
+bool njsUtils_addSodaContent(dpiSodaDb *db, napi_env env, napi_value value,
+    njsModuleGlobals *globals, char *key, uint32_t keyLength, char *mediaType,
+    uint32_t mediaTypeLength, uint32_t flags, dpiSodaDoc **docHandle);
 
 
 //-----------------------------------------------------------------------------

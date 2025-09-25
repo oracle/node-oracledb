@@ -32,6 +32,11 @@
 
 #include "njsModule.h"
 
+// methods used internally
+static bool njsUtils_createJsonDocumentInSoda(dpiSodaDb *db, napi_env env,
+    napi_value value, njsModuleGlobals *globals, const char *key,
+    uint32_t keyLength, uint32_t flags, dpiSodaDoc **doc);
+
 //-----------------------------------------------------------------------------
 // njsUtils_addTypeProperties()
 //   Add type properties to the specified object given the ODPI-C Oracle type
@@ -90,6 +95,40 @@ bool njsUtils_addMetaDataProperties(napi_env env, napi_value obj,
                 temp))
     }
 
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_addSodaContent
+//   Create the SODA Document with either JSON or Buffer data.
+//-----------------------------------------------------------------------------
+bool njsUtils_addSodaContent(dpiSodaDb *dbHandle, napi_env env, napi_value value,
+    njsModuleGlobals *globals, char *key, uint32_t keyLength, char *mediaType,
+    uint32_t mediaTypeLength, uint32_t flags, dpiSodaDoc **docHandle)
+{
+    void *content;
+    size_t contentLength;
+    bool checkBuffer;
+
+    // check if the passed in content is Buffer or JSON as JSON in SODA is
+    // supported from Oracle Client 23ai onwards.
+    NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &checkBuffer))
+    if (checkBuffer) {
+        // acquire the content from the buffer
+        NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value, &content,
+                &contentLength))
+        if (dpiSodaDb_createDocument(dbHandle, key, keyLength, content,
+                (uint32_t) contentLength, mediaType, mediaTypeLength,
+                DPI_SODA_FLAGS_DEFAULT, docHandle) < 0) {
+            return njsUtils_throwErrorDPI(env, globals);
+        }
+    } else {
+        // acquire the content from JSON
+        return njsUtils_createJsonDocumentInSoda(dbHandle, env, value,
+                globals, key, (uint32_t) keyLength, DPI_SODA_FLAGS_DEFAULT,
+                docHandle);
+    }
     return true;
 }
 
@@ -163,6 +202,35 @@ bool njsUtils_createBaton(napi_env env, napi_callback_info info,
     }
 
     *baton = tempBaton;
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsUtils_createJsonDocumentInSoda
+//   Create the JSON Document for SODA. Usable only from Oracle Database 23ai
+//   onwards.
+//-----------------------------------------------------------------------------
+static bool njsUtils_createJsonDocumentInSoda(dpiSodaDb *db, napi_env env,
+    napi_value value, njsModuleGlobals *globals, const char *key,
+    uint32_t keyLength, uint32_t flags, dpiSodaDoc **doc)
+{
+    njsJsonBuffer jsonBuffer;
+    njsJsContext jsContext;
+
+    if (!njsJsContext_populate(env, globals, &jsContext)) {
+        return false;
+    }
+    if (!njsJsonBuffer_fromValue(&jsonBuffer, env, value, &jsContext)) {
+        njsJsonBuffer_free(&jsonBuffer);
+        return false;
+    }
+    if (dpiSodaDb_createJsonDocument(db, key, keyLength, &jsonBuffer.topNode,
+            flags, doc) < 0) {
+        njsJsonBuffer_free(&jsonBuffer);
+        return njsUtils_throwErrorDPI(env, globals);
+    }
+    njsJsonBuffer_free(&jsonBuffer);
     return true;
 }
 

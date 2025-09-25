@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2022, Oracle and/or its affiliates.
+// Copyright (c) 2018, 2025, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -33,8 +33,7 @@
 #include "njsModule.h"
 
 // class methods
-NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getContentAsBuffer);
-NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getContentAsString);
+NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getContent);
 NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getCreatedOn);
 NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getKey);
 NJS_NAPI_METHOD_DECL_SYNC(njsSodaDocument_getLastModified);
@@ -46,9 +45,7 @@ static NJS_NAPI_FINALIZE(njsSodaDocument_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
-    { "getContentAsBuffer", NULL, njsSodaDocument_getContentAsBuffer,
-            NULL, NULL, NULL, napi_default, NULL },
-    { "getContentAsString", NULL, njsSodaDocument_getContentAsString,
+    { "getContent", NULL, njsSodaDocument_getContent,
             NULL, NULL, NULL, napi_default, NULL },
     { "getCreatedOn", NULL, njsSodaDocument_getCreatedOn, NULL, NULL, NULL,
             napi_default, NULL },
@@ -142,46 +139,61 @@ static bool njsSodaDocument_genericGetter(napi_env env,
 
 
 //-----------------------------------------------------------------------------
-// njsSodaDocument_getContentAsBuffer()
-//   Returns the contents of the SODA document as a buffer.
+// njsSodaDocument_getContent()
+//   Returns the contents of the SODA document as a JSON Document (Oracle
+//   Client 23ai) or as a string.
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getContentAsBuffer, 0, NULL)
+NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getContent, 0, NULL)
 {
     njsSodaDocument *doc = (njsSodaDocument*) callingInstance;
-    const char *value, *encoding;
-    uint32_t valueLength;
+    const char *value, *encoding, *mediaType;
+    uint32_t valueLength, mediaTypeLength;
+    dpiJson *json;
+    dpiJsonNode *jsonNode;
+    njsJsContext jsContext;
+    bool isJson;
 
-    if (dpiSodaDoc_getContent(doc->handle, &value, &valueLength,
-            &encoding) < 0)
+    if (dpiSodaDoc_getIsJson(doc->handle, (int*) &isJson) < 0)
         return njsUtils_throwErrorDPI(env, globals);
-    NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
-            returnValue))
 
-    return true;
-}
-
-
-//-----------------------------------------------------------------------------
-// njsSodaDocument_getContentAsString()
-//   Returns the contents of the SODA document as a string.
-//-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getContentAsString, 0, NULL)
-{
-    njsSodaDocument *doc = (njsSodaDocument*) callingInstance;
-    const char *value, *encoding;
-    uint32_t valueLength;
-
-    if (dpiSodaDoc_getContent(doc->handle, &value, &valueLength,
-            &encoding) < 0)
-        return njsUtils_throwErrorDPI(env, globals);
-    if (valueLength == 0) {
-        NJS_CHECK_NAPI(env, napi_get_null(env, returnValue))
-    } else if (!encoding || strcmp(encoding, "UTF-8") == 0) {
-        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+    if (isJson) {
+        if (dpiSodaDoc_getJsonContent(doc->handle, &json) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        if (dpiJson_getValue(json, DPI_JSON_OPT_DEFAULT, &jsonNode) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        if (!njsJsContext_populate(env, globals, &jsContext))
+            return false;
+        if (!njsJsContext_getJsonNodeValue(&jsContext, jsonNode, env,
                 returnValue))
+            return false;
     } else {
-        NJS_CHECK_NAPI(env, napi_create_string_utf16(env, (char16_t*) value,
-                (size_t) (valueLength / 2), returnValue))
+        if (dpiSodaDoc_getContent(doc->handle, &value, &valueLength,
+                &encoding) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        if (valueLength == 0) {
+            NJS_CHECK_NAPI(env, napi_get_null(env, returnValue))
+            return true;
+        }
+
+        //get the mediaType to fetch the correct data
+        if (dpiSodaDoc_getMediaType(doc->handle, (const char**) &mediaType,
+                (uint32_t*) &mediaTypeLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+
+        if (strcmp(mediaType, "application/json") == 0) {
+            if (!encoding || strcmp(encoding, "UTF-8") == 0) {
+                NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                        returnValue))
+            } else {
+                NJS_CHECK_NAPI(env, napi_create_string_utf16(env, (char16_t*) value,
+                        (size_t) (valueLength / 2), returnValue))
+            }
+
+        // fetch non-JSON content
+        } else {
+            NJS_CHECK_NAPI(env, napi_create_buffer_copy(env, valueLength, value, NULL,
+                    returnValue))
+        }
     }
 
     return true;
