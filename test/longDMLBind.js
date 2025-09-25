@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -169,11 +169,13 @@ describe('125. longDMLBind.js', function() {
   };
 
   const fetch = async function(expected) {
-    const sql_query = "select content from " + tableName + " where id = " + insertID;
-    const result = await connection.execute(sql_query);
+    const sql_query = "select content from " + tableName + " where id = :i";
+    const bindVar = {
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER }
+    };
+    const result = await connection.execute(sql_query, bindVar);
     assert(result);
     assert.strictEqual(result.rows[0][0].length, expected.length);
     assert.strictEqual(result.rows[0][0], expected);
   };
-
 });

@@ -133,22 +133,23 @@ describe('128.clobStream.js', function() {
   };
 
   const verifyClob = async function(selectID, insertID, lenExpected) {
-    const selectSql = "select clob from nodb_tab_lobs_pre where id = " + selectID;
+    const selectSql = "select clob from nodb_tab_lobs_pre where id = :id";
     const insertSql = "INSERT INTO nodb_tab_lobs_pre (id, clob) VALUES (:i, :c)";
-    const proc_compare_clob = "CREATE OR REPLACE PROCEDURE nodb_clob_compare(result OUT NUMBER, len OUT NUMBER) \n" +
+    const proc_compare_clob = "CREATE OR REPLACE PROCEDURE nodb_clob_compare(selectId IN NUMBER, insertId IN NUMBER, result OUT NUMBER, len OUT NUMBER) \n" +
                             "IS \n" +
                             "    clob1 CLOB; \n" +
                             "    clob2 CLOB; \n" +
                             "BEGIN \n" +
-                            "    select clob into clob1 from nodb_tab_lobs_pre where id = " + selectID + "; \n" +
-                            "    select clob into clob2 from nodb_tab_lobs_pre where id = " + insertID + "; \n" +
+                            "    select clob into clob1 from nodb_tab_lobs_pre where id = selectId; \n" +
+                            "    select clob into clob2 from nodb_tab_lobs_pre where id = insertId; \n" +
                             "    result := DBMS_LOB.COMPARE(clob1, clob2); \n" + // Zero if the comparison succeeds, nonzero if not.
                             "    len := length(clob1); \n" +
                             "END nodb_clob_compare;";
-    const sqlRunCompareProc = "begin nodb_clob_compare(:r, :l); end;";
+    const sqlRunCompareProc = "begin nodb_clob_compare(:selectId, :insertId, :r, :l); end;";
     const sqlDropCompareProc = "DROP PROCEDURE nodb_clob_compare";
 
-    let result = await connection.execute(selectSql);
+    const selectBindVar = { id: { val: selectID, dir: oracledb.BIND_IN, type: oracledb.NUMBER } };
+    let result = await connection.execute(selectSql, selectBindVar);
     const lob = result.rows[0][0];
     let binds = {
       i: insertID,
@@ -159,6 +160,8 @@ describe('128.clobStream.js', function() {
     await lob.close();
     await connection.execute(proc_compare_clob);
     binds = {
+      selectId: { val: selectID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      insertId: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       r: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
       l: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
     };
@@ -167,5 +170,4 @@ describe('128.clobStream.js', function() {
     assert.strictEqual(result.outBinds.l, lenExpected);
     await connection.execute(sqlDropCompareProc);
   };
-
 });

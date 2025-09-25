@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -369,12 +369,16 @@ describe('107. rowidDMLBindAsString.js', function() {
 
   const dmlInsert_substr = async function(content) {
     const id = insertID++;
-    const sql_insert = "insert into " + tableName + "(id, content) values (" + id + ", CHARTOROWID(:c))";
-    const sql_select = "select content, SUBSTR(content,1,6) , SUBSTR(content,7,3), SUBSTR(content,10,6), SUBSTR(content,16,3) from " + tableName + " where id = " + id;
-    const bindVar = { c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }};
-    let result = await connection.execute(sql_insert, bindVar);
+    const sql_insert = "insert into " + tableName + "(id, content) values (:id, CHARTOROWID(:c))";
+    const sql_select = "select content, SUBSTR(content,1,6) , SUBSTR(content,7,3), SUBSTR(content,10,6), SUBSTR(content,16,3) from " + tableName + " where id = :id";
+    const insertBindVar = {
+      id: { val: id, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
+    };
+    const selectBindVar = { id: { val: id, dir: oracledb.BIND_IN, type: oracledb.NUMBER } };
+    let result = await connection.execute(sql_insert, insertBindVar);
     assert.strictEqual(result.rowsAffected, 1);
-    result = await connection.execute(sql_select);
+    result = await connection.execute(sql_select, selectBindVar);
     const resultVal_rowid = result.rows[0][0];
     const resultVal_object = result.rows[0][1];
     const resultVal_file = result.rows[0][2];
@@ -439,14 +443,15 @@ describe('107. rowidDMLBindAsString.js', function() {
   };
 
   const where_select = async function() {
-    let sql = "insert into " + tableName + " T (ID) values (" + insertID + ")";
-    let result = await connection.execute(sql);
+    let sql = "insert into " + tableName + " T (ID) values (:id)";
+    const bindVar = { id: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER } };
+    let result = await connection.execute(sql, bindVar);
     assert.strictEqual(result.rowsAffected, 1);
-    sql = "UPDATE " + tableName + " T SET content = T.ROWID where ID = " + insertID;
-    result = await connection.execute(sql);
+    sql = "UPDATE " + tableName + " T SET content = T.ROWID where ID = :id";
+    result = await connection.execute(sql, bindVar);
     assert.strictEqual(result.rowsAffected, 1);
-    sql = "select content from " + tableName + " where ID = " + insertID;
-    result = await connection.execute(sql);
+    sql = "select content from " + tableName + " where ID = :id";
+    result = await connection.execute(sql, bindVar);
     const resultVal = result.rows[0][0];
     sql = "select * from " + tableName + " where ROWID = CHARTOROWID(:c)";
     const binds = {
@@ -460,5 +465,4 @@ describe('107. rowidDMLBindAsString.js', function() {
     assert.strictEqual(resultVal_1, insertID);
     assert.strictEqual(resultVal_2, resultVal);
   };
-
 });

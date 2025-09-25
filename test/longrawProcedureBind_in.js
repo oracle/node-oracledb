@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -190,8 +190,8 @@ describe('132. longrawProcedureBind_in.js', function() {
     }
 
     const bind_in_var  = {
-      i: { val: insertID, dir: await oracledb.BIND_IN, type: await oracledb.NUMBER },
-      c: { val: insertBuf, dir: await oracledb.BIND_IN, type: await oracledb.BUFFER }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: insertBuf, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
     };
     await connection.execute(
       proc_bindin_exec,
@@ -210,8 +210,8 @@ describe('132. longrawProcedureBind_in.js', function() {
     }
 
     const bind_in_var = {
-      i: { val: insertID, dir: await oracledb.BIND_IN, type: await oracledb.NUMBER },
-      c: { val: insertBuf, dir: await oracledb.BIND_IN, type: await oracledb.BUFFER, maxSize: maxsize }
+      i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
+      c: { val: insertBuf, dir: oracledb.BIND_IN, type: oracledb.BUFFER, maxSize: maxsize }
     };
     await connection.execute(
       proc_bindin_exec,
@@ -220,8 +220,9 @@ describe('132. longrawProcedureBind_in.js', function() {
   };
 
   const checkResult = async function(expected) {
-    const result = await connection.execute(
-      "select * from " + tableName + " where id = " + insertID);
+    const sql = "select * from " + tableName + " where id = :id";
+    const bindVar = { id: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER } };
+    const result = await connection.execute(sql, bindVar);
 
     assert.strictEqual(result.rows[0][0], insertID);
     if (expected == null) {
@@ -230,5 +231,4 @@ describe('132. longrawProcedureBind_in.js', function() {
       assert.deepStrictEqual(result.rows[0][1], expected);
     }
   };
-
 });

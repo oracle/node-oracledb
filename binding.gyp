@@ -98,6 +98,9 @@
     ],
     [
       "OS=='win'", {
+        "variables" : {
+          "dpi_check%"    : "<!(set INSTURL=https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#github && set ERR=oracledb ERR! Error: && IF EXIST odpi\\include\\dpi.h (echo Has dpi.h) ELSE (echo %ERR% Cannot find odpi\\include\\dpi.h.  For GitHub ZIP downloads you must separately download the odpi subdirectory from GitHub. && echo %ERR% See %INSTURL% && echo. 1>&2 && echo.))"
+        },
         "configurations" : {
           "Release" : {
             "msvs_settings": {

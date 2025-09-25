@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -376,8 +376,9 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
     };
     const option_in = { autoCommit: true };
     await connection.execute(proc_execute, bindVar_in, option_in);
-    const sql = "select * from " + tableName + " where id = " + insertID;
-    const result = await connection.execute(sql);
+    const sql = "select * from " + tableName + " where id = :id";
+    const selectBindVar = { id: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN } };
+    const result = await connection.execute(sql, selectBindVar);
     const resultVal = result.rows[0][1];
     assert.strictEqual(resultVal, expected);
   };
@@ -389,15 +390,17 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
       c: content_in
     };
     await connection.execute(proc_execute, bindVar_in, option_in);
-    let sql = "select * from " + tableName + " where id = " + insertID;
-    let result = await connection.execute(sql);
+    let sql = "select * from " + tableName + " where id = :id";
+    let selectBindVar = { id: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN } };
+    let result = await connection.execute(sql, selectBindVar);
     let resultVal = result.rows[0][1];
     assert.strictEqual(resultVal, expected);
     insertID++;
     bindVar_in = [ insertID, content_in ];
     await connection.execute(proc_execute, bindVar_in, option_in);
-    sql = "select * from " + tableName + " where id = " + insertID;
-    result = await connection.execute(sql);
+    sql = "select * from " + tableName + " where id = :id";
+    selectBindVar = { id: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN } };
+    result = await connection.execute(sql, selectBindVar);
     resultVal = result.rows[0][1];
     assert.strictEqual(resultVal, expected);
   };
@@ -410,8 +413,9 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
     };
     const option_in = { autoCommit: true };
     await connection.execute(proc_execute, bindVar_in, option_in);
-    const sql = "select * from " + tableName + " where id = " + insertID;
-    const result = await connection.execute(sql);
+    const sql = "select * from " + tableName + " where id = :id";
+    const selectBindVar = { id: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN } };
+    const result = await connection.execute(sql, selectBindVar);
     const resultVal = result.rows[0][1];
     assert.strictEqual(resultVal, expected);
   };
@@ -424,17 +428,18 @@ describe('108. rowidProcedureBindAsString_bindin.js', function() {
       c2: content_2
     };
     await connection.execute(proc_execute, bindVar_in, option_in);
-    let sql = "select * from " + tableName + " where id = " + insertID;
-    let result = await connection.execute(sql);
+    let sql = "select * from " + tableName + " where id = :id";
+    let selectBindVar = { id: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN } };
+    let result = await connection.execute(sql, selectBindVar);
     let resultVal = result.rows[0][1];
     assert.strictEqual(resultVal, expected);
     insertID++;
     bindVar_in = [ insertID, content_1, content_2 ];
     await connection.execute(proc_execute, bindVar_in, option_in);
-    sql = "select * from " + tableName + " where id = " + insertID;
-    result = await connection.execute(sql);
+    sql = "select * from " + tableName + " where id = :id";
+    selectBindVar = { id: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN } };
+    result = await connection.execute(sql, selectBindVar);
     resultVal = result.rows[0][1];
     assert.strictEqual(resultVal, expected);
   };
-
 });
