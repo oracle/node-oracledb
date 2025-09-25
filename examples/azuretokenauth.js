@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  * NAME
- *   sampleazuretokenauth.js
+ *   azuretokenauth.js
  *
  * DESCRIPTION
  *   This script shows connection pooling with token based authentication to
@@ -217,7 +217,7 @@ async function createConnection() {
     const sql = `SELECT TO_CHAR(current_date, 'DD-Mon-YYYY HH24:MI') AS D
                  FROM DUAL`;
     const result = await connection.execute(sql);
-    console.log("Result is:\n", result);
+    console.log("Result is:\n", result.rows[0][0]);
   } finally {
     await connection.close();
   }

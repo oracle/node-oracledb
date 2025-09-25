@@ -64,7 +64,8 @@ File Name                                                 | Description
 [`aqobject.js`](aqobject.js)                              | Oracle Advanced Queuing (AQ) example passing an Oracle Database object
 [`aqoptions.js`](aqoptions.js)                            | Oracle Advanced Queuing (AQ) example setting options and message attributes
 [`aqraw.js`](aqraw.js)                                    | Basic Oracle Advanced Queuing (AQ) example passing text messages
-[`aqutil.js`](aqutil.js)                                  | Common file to setup the user credentials for all the Advanced Queuing (AQ) examples.
+[`aqutil.js`](aqutil.js)                                  | Common file to setup user credentials for all the Advanced Queuing (AQ) examples.
+[`azuretokenauth.js`](azuretokenauth.js)                  | Shows connection pooling with Azure token based authentication
 [`azureConfigProvider.js`](azureConfigProvider.js)        | Shows how to connect to Oracle Database using Azure Configuration Provider
 [`azurecloudnativetoken.js`](azurecloudnativetoken.js)    | Shows how to connect to Oracle Database with cloud native token based authentication using Azure SDK
 [`blobhttp.js`](blobhttp.js)                              | Simple web app that streams an image
@@ -90,12 +91,12 @@ File Name                                                 | Description
 [`em_plsql.js`](em_plsql.js)                              | `executeMany()` example calling PL/SQL multiple times with one call
 [`em_rowcounts.js`](em_rowcounts.js)                      | `executeMany()` example showing how to find the number of rows affected by each input row
 [`endtoend.js`](endtoend.js)                              | Example showing setting tracing attributes
-[`example.js`](example.js)                                | Basic example showing creating a table, inserting multiple rows, and querying rows
-[`impres.js`](impres.js)                                  | Shows PL/SQL 'Implict Results' returning multiple query results from PL/SQL code.
-[`insert1.js`](insert1.js)                                | Basic example creating a table and inserting data.  Shows DDL and DML
+[`example.js`](example.js)                                | Basic example of creating a table, inserting multiple rows, and querying rows
+[`impres.js`](impres.js)                                  | Shows PL/SQL 'Implicit Results' returning multiple query results from PL/SQL code.
+[`insert1.js`](insert1.js)                                | Basic example creating a table and inserting data with DDL and DML respectively
 [`insert2.js`](insert2.js)                                | Basic example showing auto commit behavior
-[`jsonDV.js`] (jsonDV.js)                                 | Basic example of JSON Duality View for a table with CRUD operations.
-[`lastinsertid.js`](lastinsertid.js)                      | Shows inserting a row and getting its ROWID.
+[`jsonDV.js`] (jsonDV.js)                                 | Basic example of JSON Duality View for a table with CRUD operations
+[`lastinsertid.js`](lastinsertid.js)                      | Shows inserting a row and getting its ROWID
 [`lobbinds.js`](lobbinds.js)                              | Demonstrates how to bind and query LOBs
 [`lobinsert1.js`](lobinsert1.js)                          | Shows inserting a file into a CLOB column
 [`lobinsert2.js`](lobinsert2.js)                          | Inserts text into a CLOB column using the RETURNING INTO method.
@@ -110,6 +111,7 @@ File Name                                                 | Description
 [`ociConfigProvider.js`](ociConfigProvider.js)            | Shows how to connect to Oracle Database using OCI Config Provider
 [`ociConfigProviderPool.js`](ociConfigProviderPool.js)    | Shows how to connect with custom pool settings to Oracle Database using OCI Config Provider
 [`ocicloudnativetoken.js`](ocicloudnativetoken.js)        | Shows how to connect to Oracle Database with cloud native token based authentication using OCI SDK
+[`ocitokenauth.js`](ocitokenauth.js)                      | Shows connection pooling with OCI IAM token based authentication
 [`plsqlarray.js`](plsqlarray.js)                          | Examples of binding PL/SQL "INDEX BY" tables
 [`plsqlfunc.js`](plsqlfunc.js)                            | How to call a PL/SQL function
 [`plsqlnestedrecords.js`](plsqlnestedrecords.js)          | Shows binding of nested PL/SQL RECORDS
@@ -124,8 +126,6 @@ File Name                                                 | Description
 [`resultset2.js`](resultset2.js)                          | Executes a query and uses a ResultSet to fetch batches of rows with `getRows()`
 [`resultsettoquerystream.js`](resultsettoquerystream.js)  | Converts a ResultSet returned from `execute()` into a Readable Stream.
 [`rowlimit.js`](rowlimit.js)                              | Shows ways to limit the number of records fetched by queries
-[`sampleazuretokenauth.js`](sampleazuretokenauth.js)      | Shows connection pooling with Azure token based authentication
-[`sampleocitokenauth.js`](sampleocitokenauth.js)          | Shows connection pooling with OCI token based authentication
 [`select1.js`](select1.js)                                | Executes a basic query without using a connection pool or ResultSet
 [`select2.js`](select2.js)                                | Executes queries to show array and object output formats
 [`selectgeometry.js`](selectgeometry.js)                  | Insert and query Oracle Spatial geometries

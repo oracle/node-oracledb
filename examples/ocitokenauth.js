@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  * NAME
- *   sampleocitokenauth.js
+ *   ocitokenauth.js
  *
  * DESCRIPTION
  *   Shows connection pooling with OAuth 2.0 token based authentication to
@@ -195,7 +195,7 @@ async function createConnection() {
     const sql = `SELECT TO_CHAR(current_date, 'DD-Mon-YYYY HH24:MI') AS D
                  FROM DUAL`;
     const result = await connection.execute(sql);
-    console.log("Result is:\n", result);
+    console.log("Result is:\n", result.rows[0][0]);
   } catch (err) {
     console.error(err);
   } finally {

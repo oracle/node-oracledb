@@ -852,6 +852,53 @@ bool njsUtils_setDateValue(uint32_t varTypeNum, napi_env env, napi_value value,
 
 
 //-----------------------------------------------------------------------------
+// njsUtils_setIntervalYM()
+//   Set the value of the interval year-to-month(YM) value from a JavaScript
+// IntervalYM object. It includes the "year" and "month" properties. At this
+// point it is assumed that the property values are integers.
+//-----------------------------------------------------------------------------
+bool njsUtils_setIntervalYM(napi_env env, napi_value value,
+        dpiIntervalYM *data)
+{
+    napi_value temp;
+
+    // set years and months
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "years", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->years))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "months", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->months))
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// njsUtils_setIntervalDS()
+//   Set the value of the interval day-to-second(DS) value from a JavaScript
+// IntervalYM object. It includes the "days", "hours", "minutes", "seconds"
+// and "fseconds" (fractional seconds denoted in ns) properties. At this
+// point it is assumed that the property values are integers.
+//-----------------------------------------------------------------------------
+bool njsUtils_setIntervalDS(napi_env env, napi_value value,
+        dpiIntervalDS *data)
+{
+    napi_value temp;
+
+    // set day and time units
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "days", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->days))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "hours", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->hours))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "minutes", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->minutes))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "seconds", &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->seconds))
+    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "fseconds",
+            &temp))
+    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->fseconds))
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsUtils_throwErrorDPI()
 //   Get the error message from ODPI-C and throw an equivalent JavaScript
 // error. False is returned as a convenience to the caller.
@@ -957,51 +1004,5 @@ bool njsUtils_validateArgs(napi_env env, napi_callback_info info,
                     (void**) instance))
         }
     }
-    return true;
-}
-
-//-----------------------------------------------------------------------------
-// njsUtils_setIntervalYM()
-//   Set the value of the interval year-to-month(YM) value from a JavaScript
-// IntervalYM object. It includes the "year" and "month" properties. At this
-// point it is assumed that the property values are integers.
-//-----------------------------------------------------------------------------
-bool njsUtils_setIntervalYM(napi_env env, napi_value value,
-        dpiIntervalYM *data)
-{
-    napi_value temp;
-
-    // set years and months
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "years", &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->years))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "months", &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->months))
-    return true;
-}
-
-//-----------------------------------------------------------------------------
-// njsUtils_setIntervalDS()
-//   Set the value of the interval day-to-second(DS) value from a JavaScript
-// IntervalYM object. It includes the "days", "hours", "minutes", "seconds"
-// and "fseconds" (fractional seconds denoted in ns) properties. At this
-// point it is assumed that the property values are integers.
-//-----------------------------------------------------------------------------
-bool njsUtils_setIntervalDS(napi_env env, napi_value value,
-        dpiIntervalDS *data)
-{
-    napi_value temp;
-
-    // set day and time units
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "days", &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->days))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "hours", &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->hours))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "minutes", &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->minutes))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "seconds", &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->seconds))
-    NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "fseconds",
-            &temp))
-    NJS_CHECK_NAPI(env, napi_get_value_int32(env, temp, &data->fseconds))
     return true;
 }

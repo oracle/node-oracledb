@@ -478,8 +478,11 @@ describe('275. jsonDualityView4.js', function() {
       await assert.rejects(
         async () => await connection.execute(`CREATE OR REPLACE JSON
           RELATIONAL DUALITY VIEW xmltype_ov AS t{x y}`),
-        /ORA-40654:/ //ORA-40654: Input to JSON generation function has
-        //unsupported data type.
+        /ORA-40654:| ORA-40168:/
+        //ORA-40654: Input to JSON generation function has unsupported
+        //data type.
+        // ORA-40168: Cannot create JSON-relational duality view 'XMLTYPE_OV':
+        // Unsupported data type 'XMLTYPE' used in a column of table 'T'
       );
 
       await connection.execute(testsUtil.sqlDropTable('t'));

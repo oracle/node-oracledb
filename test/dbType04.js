@@ -323,10 +323,6 @@ describe('241. dbType04.js', function() {
   }); // 241.13
 
   it('241.14 binding simple dbobject with no attributes couldn\'t get converted to JSON Object value, returns an empty object', async function() {
-
-    // database objects not supported in thin mode yet
-    if (oracledb.thin) this.skip();
-
     const sql =
       `CREATE OR REPLACE TYPE NODE_OBJ AS OBJECT (
         id NUMBER,
