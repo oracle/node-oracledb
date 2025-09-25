@@ -163,6 +163,10 @@ describe('5. externalAuth.js', function() {
     }); // 5.1.6
 
     it("5.1.7 throws error when getting pool from oracledb only given username when externalAuth is enabled", async function() {
+      let expectedErr = /NJS-136:/;
+      if (oracledb.thin) {
+        expectedErr = /NJS-140:/;
+      }
 
       await assert.rejects(
         async () => {
@@ -177,7 +181,8 @@ describe('5. externalAuth.js', function() {
           );
         },
         // NJS-136: user and password should not be set when using external authentication
-        /NJS-136:/
+        // NJS-140: user name must be enclosed in [] when using external authentication with a proxy user
+        expectedErr
       );
     }); // 5.1.7
 

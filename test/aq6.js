@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -191,7 +191,32 @@ describe('282. aq6.js', function() {
       await conn.commit();
     }); //282.2.1
 
-    it('282.2.2 JSON type in enqMany/deqMany', async () => {
+    it('282.2.2 enqMany and deqMany Json val as array type', async function() {
+      let msgs;
+      const queue = await conn.getQueue(objQueueName,
+        { payloadType: oracledb.DB_TYPE_JSON }
+      );
+
+      msgs = await queue.enqMany([
+        {payload: { "employees": [ "Employee1", "Employee2", "Employee3" ] } },
+        {payload: { "ids": [ 101, 102, 103 ] } },
+      ]);
+
+      await conn.commit();
+
+      /*Dequeue*/
+      const options = { payloadType: oracledb.DB_TYPE_JSON };
+      const queue2 = await conn.getQueue(objQueueName, options);
+      msgs = await queue2.deqMany(2);
+      assert(msgs);
+      assert(msgs[0].msgId.length > 0);
+      assert(msgs[0].msgId instanceof Buffer);
+      assert(msgs[1].msgId.length > 0);
+      assert(msgs[1].msgId instanceof Buffer);
+      await conn.commit();
+    }); //282.2.2
+
+    it('282.2.3 JSON type in enqMany/deqMany', async () => {
       const queue3 = await conn.getQueue (objQueueName,
         { payloadType: oracledb.DB_TYPE_JSON });
 
@@ -220,7 +245,7 @@ describe('282. aq6.js', function() {
           assert(msgs[i].msgId instanceof Buffer);
         }
       }
-    }); //282.2.2
+    }); //282.2.3
   });
 
   describe('282.3 msgId as Oracle Database Object AQ Messages', function() {

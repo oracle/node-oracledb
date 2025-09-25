@@ -73,13 +73,13 @@ describe('283. aq7.js', function() {
   };
 
   before(async function() {
+    if (!dbconfig.test.DBA_PRIVILEGE || oracledb.thin) this.skip();
+
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2100000000);
-    if (!dbconfig.test.DBA_PRIVILEGE || oracledb.thin || !isRunnable) {
-      this.skip();
-    }
+    if (!isRunnable) this.skip();
+
     await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
     conn = await oracledb.getConnection(credential);
-
     await conn.execute(plsqlCreateQueue);
   }); // before
 
@@ -332,7 +332,7 @@ describe('283. aq7.js', function() {
   }); // 283.7
 
   it('283.8 enqMany and deqMany with JSON val as array type', async function() {
-    const queue3 = await conn.getQueue (objQueueName,
+    const queue3 = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON });
 
     const empList = [
@@ -382,7 +382,7 @@ describe('283. aq7.js', function() {
   }); // 283.9
 
   it('283.10 enqMany and deqMany with JSON val as object type', async function() {
-    const queue3 = await conn.getQueue (objQueueName,
+    const queue3 = await conn.getQueue(objQueueName,
       {payloadType: oracledb.DB_TYPE_JSON});
 
     const empList = [

@@ -1348,6 +1348,8 @@ Overview of node-oracledb functional tests
         72.3.4 Negative - invalid value
         72.3.5 DML - UPDATE statement
         72.3.6 BIND_INOUT, PL/SQL, IN LOB gets closed automatically
+    72.4 Create Table with CLOB and Number columns and do select with empty rows and select after rows insertion
+        72.4.1 Read both CLOB and Number with statement being in statement cache
 
 73. poolPing.js
     73.1 the default value of poolPingInterval is 60
@@ -5703,7 +5705,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         282.1.2 msgId in enqMany/deqMany
     282.2 msgId in QUEUE_PAYLOAD_TYPE as ‘JSON’
         282.2.1 enqOne and deqOne Json val as array type
-        282.2.2 JSON type in enqMany/deqMany
+        282.2.2 enqMany and deqMany Json val as array type
+        282.2.3 JSON type in enqMany/deqMany
     282.3 msgId as Oracle Database Object AQ Messages
         282.3.1 msgId in enqOne/deqOne
         282.3.2 msgId in deqMany() with DB object array
