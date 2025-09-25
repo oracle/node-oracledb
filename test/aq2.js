@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -172,10 +172,10 @@ describe('218. aq2.js', function() {
         const message = new objClass(addrData);
         await queue1.enqOne(message);
       },
-      /DPI-1071/
+      /NJS-174/
     );
-    // DPI-1071: payload type in message properties must match
-    // the payload type of the queue
+    /* NJS-174: Payload cannot be enqueued since it does not match the payload
+    type supported by the queue */
   }); // 218.4
 
   it('218.5 Enqueue a DB object as payload attribute', async () => {
