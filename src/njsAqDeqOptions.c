@@ -45,6 +45,7 @@ NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_getWait);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setCondition);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setConsumerName);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setCorrelation);
+NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setDeliveryMode);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setMode);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setMsgId);
 NJS_NAPI_METHOD_DECL_SYNC(njsAqDeqOptions_setNavigation);
@@ -80,6 +81,8 @@ static const napi_property_descriptor njsClassProperties[] = {
     { "setConsumerName", NULL, njsAqDeqOptions_setConsumerName, NULL, NULL,
             NULL, napi_enumerable, NULL },
     { "setCorrelation", NULL, njsAqDeqOptions_setCorrelation, NULL, NULL, NULL,
+            napi_enumerable, NULL },
+    { "setDeliveryMode", NULL, njsAqDeqOptions_setDeliveryMode, NULL, NULL, NULL,
             napi_enumerable, NULL },
     { "setMode", NULL, njsAqDeqOptions_setMode, NULL, NULL, NULL,
             napi_enumerable, NULL },
@@ -306,6 +309,22 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setCorrelation, 1, NULL)
 {
     return njsAqDeqOptions_setTextAttribute(env, globals, callingInstance,
             args[0], dpiDeqOptions_setCorrelation);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsAqDeqOptions_setDeliveryMode()
+//   Set accessor of "deliveryMode" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsAqDeqOptions_setDeliveryMode, 1, NULL)
+{
+    njsAqDeqOptions *options = (njsAqDeqOptions*) callingInstance;
+    uint32_t value;
+
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0], &value))
+    if (dpiDeqOptions_setDeliveryMode(options->handle, (uint16_t) value) < 0)
+        return njsUtils_throwErrorDPI(env, globals);
+    return true;
 }
 
 

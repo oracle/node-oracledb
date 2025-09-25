@@ -4787,6 +4787,10 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.15 test dequeue with wait timeout
     217.16 test buffer message payload - 32KB
     217.17 test large buffer message payload - 1MB
+    217.18 test enqueue/dequeue with BUFFERED delivery mode 
+    217.19 test enqueue/dequeue with PERSISTENT delivery mode
+    217.20 test enqueue/dequeue with PERSISTENT_OR_BUFFERED delivery mode
+    217.21 test enqueue/dequeue with mismatched delivery modes
 
 218. aq2.js
     218.1 examples/aqobject.js

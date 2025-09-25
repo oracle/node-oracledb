@@ -46,6 +46,7 @@ describe('217. aq1.js', function() {
 
   const rawQueueName = "NODB_RAW_QUEUE";
   const RAW_TABLE = 'NODB_RAW_QUEUE_TAB';
+  let credential;
 
   before(async function() {
     if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
@@ -56,7 +57,7 @@ describe('217. aq1.js', function() {
       this.skip();
     } else {
       await testsUtil.createAQtestUser(AQ_USER, AQ_USER_PWD);
-      const credential = {
+      credential = {
         user: AQ_USER,
         password: AQ_USER_PWD,
         connectString: dbConfig.connectString
@@ -251,7 +252,7 @@ describe('217. aq1.js', function() {
     const message = {
       payload: messageString // the message itself
     };
-    const myMsg = await queue1.enqOne(message);
+    await queue1.enqOne(message);
 
     // Get the deliveryMode attribute in enqOptions
     assert.strictEqual(queue1.enqOptions.deliveryMode,
@@ -265,7 +266,7 @@ describe('217. aq1.js', function() {
         visibility: oracledb.AQ_VISIBILITY_IMMEDIATE, // Change the visibility so that no explicit commit is required
       }
     );
-    queue2.deqOptions.deliveryMode = myMsg.deliveryMode;
+    queue2.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT;
     const msg = await queue2.deqOne();
     if (msg) {
       assert.strictEqual(msg.payload.toString(), messageString);
@@ -499,4 +500,103 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg.payload.length, largeMessage.length);
     assert.strictEqual(msg.payload.toString(), largeMessage.toString());
   }); // 217.17
+
+  it('217.18 test enqueue/dequeue with BUFFERED delivery mode', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+
+    const messageString = 'This is a buffered message';
+    await queue.enqOne(messageString);
+
+    const conn2 = await oracledb.getConnection(credential);
+    const queue2 = await conn2.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+
+    const msg = await queue2.deqOne();
+    await conn2.close();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.toString(), messageString);
+    assert.strictEqual(msg.deliveryMode, oracledb.AQ_MSG_DELIV_MODE_BUFFERED);
+  }); // 217.18
+
+  it('217.19 test enqueue/dequeue with PERSISTENT delivery mode', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT;
+
+    const messageString = 'This is a persistent message';
+    await queue.enqOne(messageString);
+
+    const conn2 = await oracledb.getConnection(credential);
+    const queue2 = await conn2.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT;
+
+    const msg = await queue2.deqOne();
+    await conn2.commit();
+    await conn2.close();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.toString(), messageString);
+    assert.strictEqual(msg.deliveryMode, oracledb.AQ_MSG_DELIV_MODE_PERSISTENT);
+  }); // 217.19
+
+  it('217.20 test enqueue/dequeue with PERSISTENT_OR_BUFFERED delivery mode', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED;
+
+    const messageString = 'This is a persistent or buffered message';
+    await queue.enqOne(messageString);
+
+    const conn2 = await oracledb.getConnection(credential);
+    const queue2 = await conn2.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED;
+
+    const msg = await queue2.deqOne();
+    await conn2.commit();
+    await conn2.close();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.toString(), messageString);
+  }); // 217.20
+
+  it('217.21 test enqueue/dequeue with mismatched delivery modes', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+    // queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+    // queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    // queue.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED;
+    // let myMsg = await queue.deqOne();
+    // while (myMsg) {
+    //   myMsg = await queue.deqOne();
+    // }
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+
+    const messageString = 'This should not be dequeued with persistent mode';
+    await queue.enqOne(messageString);
+
+    const conn2 = await oracledb.getConnection(credential);
+    const queue2 = await conn2.getQueue(rawQueueName);
+    queue2.deqOptions.navigation = oracledb.AQ_DEQ_NAV_FIRST_MSG;
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT;
+    queue2.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+
+    const msg = await queue2.deqOne();
+    await conn2.close();
+
+    assert.strictEqual(msg, undefined);
+
+    // Cleanup: dequeue properly with matching mode
+    const cleanupQueue = await conn.getQueue(rawQueueName);
+    cleanupQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    cleanupQueue.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+    await cleanupQueue.deqOne();
+  }); // 217.21
+
 });

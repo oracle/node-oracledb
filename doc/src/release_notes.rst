@@ -29,6 +29,9 @@ Common Changes
 #)  Fixed bug that threw empty error message when NaN values were used
     in JSON binds.
 
+#) Added support for :attr:`deqOptions.deliveryMode` in
+    :ref:`Advanced Queuing <aq>`.
+
 Thin Mode Changes
 +++++++++++++++++
 
