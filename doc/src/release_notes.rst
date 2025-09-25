@@ -19,6 +19,9 @@ node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0..
 Common Changes
 ++++++++++++++
 
+#)  Improved connection pool's queueTimeout behavior to account for network
+    delays and pool expansion delays.
+
 Thin Mode Changes
 +++++++++++++++++
 

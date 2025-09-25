@@ -5315,6 +5315,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         255.1.13 Decreasing poolMax when all connection are in use
         255.1.14 reconfigure poolMin/poolMax/poolIncrement multiple times
         255.1.15 reconfigure poolMin/poolMax/poolIncrement multiple times
+        255.1.16 Connection queuing after decreasing poolMax
+        255.1.17 Connection queuing after increasing poolMax
     255.2 poolReconfigure - other properties
         255.2.1 change poolPingInterval
         255.2.2 change poolTimeout
