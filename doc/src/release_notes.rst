@@ -29,6 +29,10 @@ Thin Mode Changes
     in :meth:`oracledb.createPool()` for Thin mode.
     See `Issue #1743 <https://github.com/oracle/node-oracledb/issues/1743>`__.
 
+#)  Avoid exception in the connection finalizer due to incorrect connection 
+    state.
+    See `Issue #1749 <https://github.com/oracle/node-oracledb/issues/1749>`__.
+
 #)  Fixed bug which results in error ``ORA-01652: unable to extend temp segment``
     when bind type CLOB or BLOB is used and bind value passed is not a LOB object.
 
