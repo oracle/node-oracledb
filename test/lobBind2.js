@@ -574,4 +574,56 @@ describe("72. lobBind2.js", function() {
     });
 
   });
+
+  describe('72.5 Verify internal temp lobs are freed', () => {
+
+    let connection;
+
+    const tableName = "nodb_test_templobs_free";
+
+    before('create table, insert data', async () => {
+      connection = await oracledb.getConnection(dbConfig);
+      const sql = `CREATE TABLE ${tableName} (id NUMBER, clob CLOB, blob BLOB)`;
+      await testsUtil.createTable(connection, tableName, sql);
+    }); // before()
+
+    after(async () => {
+      await testsUtil.dropTable(connection, tableName);
+      await connection.close();
+    }); // after()
+
+    it('72.5.1 executeMany with temp lobs implicity created are freed', async () => {
+      const text = "Test 1 (One)";
+      const buf = Buffer.from(text);
+      const id = 100;
+      const binds = [
+        [id, text, buf ],
+        [id + 1, text, buf ],
+        [id + 2, text, buf ],
+        [id + 3, text, buf ],
+      ];
+      const sql = `INSERT INTO ${tableName}(ID, CLOB, BLOB) VALUES (:1, :2, :3)`;
+      const options = {
+        autoCommit: false,
+        bindDefs: [
+          {type: oracledb.NUMBER},
+          {type: oracledb.CLOB},
+          {type: oracledb.BLOB}
+        ]
+      };
+      const sid = await testsUtil.getSid(connection);
+
+      let result;
+      const numIters = 10; // insert many times to cause more temp lobs creation.
+      for (let index = 0; index < numIters; index++) {
+        result = await connection.executeMany(sql, binds, options);
+        assert.strictEqual(result.rowsAffected, binds.length);
+      }
+
+      const query = "select cache_lobs+nocache_lobs from v$temporary_lobs where sid = :SID";
+      result = await connection.execute(query, {SID: sid});
+      assert.strictEqual(result.rows[0][0], 0);
+    }); // 72.5.1
+
+  });
 });

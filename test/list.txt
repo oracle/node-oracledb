@@ -1350,6 +1350,8 @@ Overview of node-oracledb functional tests
         72.3.6 BIND_INOUT, PL/SQL, IN LOB gets closed automatically
     72.4 Create Table with CLOB and Number columns and do select with empty rows and select after rows insertion
         72.4.1 Read both CLOB and Number with statement being in statement cache
+    72.5 Verify internal temp lobs are freed
+        72.5.1 executeMany with temp lobs implicity created are freed
 
 73. poolPing.js
     73.1 the default value of poolPingInterval is 60

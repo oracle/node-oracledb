@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,6 +38,7 @@ const dbConfig = require('./dbconfig.js');
 const fs       = require('fs');
 const fsPromises = require('fs/promises');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('74. clobPlsqlBindAsString_bindin.js', function() {
 
@@ -365,6 +366,14 @@ describe('74. clobPlsqlBindAsString_bindin.js', function() {
       };
       const option = { autoCommit: true };
       await plsqlBindIn(sqlRun, bindVar, option);
+
+      // ensure temporary lob created above for large string is freed.
+      const sid = await testsUtil.getSid(connection);
+      const query = "select cache_lobs+nocache_lobs from v$temporary_lobs where sid = :SID";
+      const result = await connection.execute(query, {SID: sid});
+      const tempLobsCount = result.rows[0][0];
+      assert.strictEqual(tempLobsCount, 0);
+
       const sql = "select clob_1 from nodb_tab_clob_in where id = " + sequence;
       await verifyClobValueWithString(sql, clobStr, specialStr);
     }); // 74.1.15
