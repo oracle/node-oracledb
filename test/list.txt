@@ -4799,6 +4799,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.19 test enqueue/dequeue with PERSISTENT delivery mode
     217.20 test enqueue/dequeue with PERSISTENT_OR_BUFFERED delivery mode
     217.21 test enqueue/dequeue with mismatched delivery modes
+    217.22 enqueue message with medium delay value
 
 218. aq2.js
     218.1 examples/aqobject.js
@@ -5512,6 +5513,12 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     267.11 recipient list with enqMany invalid datatype in dequeue
     267.12 Enqueue with duplicate recipients
     267.13 Enqueue with special characters in recipient name
+    267.14 dequeue message with single recipient and verify processing
+    267.15 dequeue message with multiple recipients
+    267.16 dequeue from queue with no recipients to test empty path
+    267.17 enqueue and dequeue with recipient information processing
+    267.18 process recipients with enqMany and varied recipient lists
+    267.19 dequeue with recipient metadata processing
 
 268. procAndFuncs.js
     268.1 calling stored procedures

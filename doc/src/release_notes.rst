@@ -54,6 +54,8 @@ Thin Mode Changes
 #)  Fixed bug which results in error ``ORA-01652: unable to extend temp segment``
     when bind type CLOB or BLOB is used and bind value passed is not a LOB object.
 
+#) Added support for :ref:`Advanced Queuing <aq>` in Thin Mode.
+
 Thick Mode Changes
 ++++++++++++++++++
 

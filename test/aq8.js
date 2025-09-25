@@ -48,7 +48,7 @@ describe('285. aq8.js', function() {
 
   before(async function() {
     const prerequisites = await testsUtil.checkPrerequisites(2100000000, 2100000000);
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin || !prerequisites) {
+    if (!dbConfig.test.DBA_PRIVILEGE || !prerequisites) {
       isRunnable = false;
     }
 
@@ -126,6 +126,8 @@ describe('285. aq8.js', function() {
     }); // 285.1.1
 
     it('285.1.2 query by msgId in enqMany and deqOne in non-sequential order', async function() {
+      // Skipping in Thin mode due to existing server-side issue with visibility
+      if (oracledb.thin) this.skip();
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -199,6 +201,8 @@ describe('285. aq8.js', function() {
     }); // 285.1.3
 
     it('285.1.4 query by msgId in enqMany and deqOne in random order', async function() {
+      // Skipping in Thin mode due to existing server-side issue with visibility
+      if (oracledb.thin) this.skip();
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -275,6 +279,8 @@ describe('285. aq8.js', function() {
     }); // 285.1.6
 
     it('285.1.7 query by originalMsgId in enqMany and deqOne in random order', async function() {
+      // Skipping in Thin mode due to existing server-side issue with visibility
+      if (oracledb.thin) this.skip();
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 

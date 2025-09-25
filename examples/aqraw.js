@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -42,22 +42,26 @@ const oracledb = require('oracledb');
 const dbConfig = require('./dbconfig.js');
 const aqUtil = require('./aqutil.js');
 
-// This example requires node-oracledb Thick mode.
+// This example runs in both node-oracledb Thin and Thick modes.
 //
-// Thick mode requires Oracle Client or Oracle Instant Client libraries.  On
-// Windows and macOS you can specify the directory containing the
-// libraries at runtime or before Node.js starts.  On other platforms (where
-// Oracle libraries are available) the system library search path must always
-// include the Oracle library path before Node.js starts.  If the search path
-// is not correct, you will get a DPI-1047 error.  See the node-oracledb
-// installation documentation.
-let clientOpts = {};
-// On Windows and macOS platforms, set the environment variable
-// NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
-if (process.platform === 'win32' || process.platform === 'darwin') {
-  clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
+// Optionally run in node-oracledb Thick mode
+if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
+
+  // Thick mode requires Oracle Client or Oracle Instant Client libraries.
+  // On Windows and macOS you can specify the directory containing the
+  // libraries at runtime or before Node.js starts.  On other platforms (where
+  // Oracle libraries are available) the system library search path must always
+  // include the Oracle library path before Node.js starts.  If the search path
+  // is not correct, you will get a DPI-1047 error.  See the node-oracledb
+  // installation documentation.
+  let clientOpts = {};
+  // On Windows and macOS platforms, set the environment variable
+  // NODE_ORACLEDB_CLIENT_LIB_DIR to the Oracle Client library path
+  if (process.platform === 'win32' || process.platform === 'darwin') {
+    clientOpts = { libDir: process.env.NODE_ORACLEDB_CLIENT_LIB_DIR };
+  }
+  oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
-oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 
 const queueName = "DEMO_RAW_QUEUE";
 const RAW_TABLE = "NODB_RAW_QUEUE_TAB";

@@ -49,7 +49,7 @@ describe('217. aq1.js', function() {
   let credential;
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       isRunnable = false;
     }
 
@@ -142,7 +142,8 @@ describe('217. aq1.js', function() {
   }); // 217.2
 
   it('217.3 examples/aqmulti.js', async function() {
-
+    // Skipping in Thin mode due to existing server-side issue with visibility
+    if (oracledb.thin) this.skip();
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
     queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
@@ -330,6 +331,8 @@ describe('217. aq1.js', function() {
   }); // 217.10
 
   it('217.11 get numAttempts attribute', async function() {
+    // Skipping in Thin mode due to existing server-side issue with visibility
+    if (oracledb.thin) this.skip();
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -361,6 +364,8 @@ describe('217. aq1.js', function() {
   }); // 217.11
 
   it('217.12 test priority attribute in enqueue', async function() {
+    // Skipping in Thin mode due to existing server-side issue with visibility
+    if (oracledb.thin) this.skip();
     const q = await conn.getQueue(rawQueueName);
     q.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
     q.deqOptions.wait = 0; // Don't wait if queue is empty
@@ -599,4 +604,33 @@ describe('217. aq1.js', function() {
     await cleanupQueue.deqOne();
   }); // 217.21
 
+  it('217.22 enqueue message with medium delay value', async function() {
+    // Enqueue
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    // Send a message immediately without requiring a commit
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messageString = 'Test message with large delay';
+    const message = {
+      payload: messageString,
+      delay: 1500 // Delay value in the range 256-65535
+    };
+
+    await queue1.enqOne(message);
+
+    // Dequeue
+    const queue2 = await conn.getQueue(rawQueueName);
+    Object.assign(
+      queue2.deqOptions,
+      {
+        visibility: oracledb.AQ_VISIBILITY_IMMEDIATE,
+        wait: 1 // Don't wait long since message is delayed
+      }
+    );
+
+    // Message should not be available yet due to delay
+    const msg = await queue2.deqOne();
+    assert.strictEqual(msg, undefined);
+  }); // 218.22
 });

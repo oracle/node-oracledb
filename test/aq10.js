@@ -49,7 +49,7 @@ describe('302. aq10.js', function() {
 
   before(async function() {
     const prerequisites = await testsUtil.checkPrerequisites(2100000000, 2100000000);
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin || !prerequisites) {
+    if (!dbConfig.test.DBA_PRIVILEGE || !prerequisites) {
       isRunnable = false;
     }
 

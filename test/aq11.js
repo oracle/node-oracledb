@@ -44,7 +44,7 @@ describe('303. aq11.js', function() {
   const AQ_USER_PWD = testsUtil.generateRandomPassword();
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       isRunnable = false;
     }
 

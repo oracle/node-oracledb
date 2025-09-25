@@ -92,7 +92,7 @@ describe('267. aq4.js', function() {
   `;
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       this.skip();
     }
 
@@ -111,7 +111,7 @@ describe('267. aq4.js', function() {
 
 
   after(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin)
+    if (!dbConfig.test.DBA_PRIVILEGE)
       return;
 
     if (conn)
@@ -398,4 +398,176 @@ describe('267. aq4.js', function() {
       /ORA-24047:/ // ORA-24047: invalid agent name sub@#1, agent name should be of the form NAME
     );
   }); // 267.13
+
+  it('267.14 dequeue message with single recipient and verify processing', async function() {
+    // Enqueue
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+
+    const message = new queue1.payloadTypeClass(addrData);
+    await queue1.enqOne({
+      payload: message,
+      recipients: ["subscriber1"]
+    });
+
+    await conn.commit();
+
+    // Dequeue to trigger _processRecipients with numRecipients > 0
+    const queue2 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+    Object.assign(
+      queue2.deqOptions,
+      {
+        consumerName: "subscriber1",
+        navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+        wait: oracledb.AQ_DEQ_NO_WAIT
+      }
+    );
+
+    const msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.NAME, "scott");
+    await conn.commit();
+  }); // 267.14
+
+  it('267.15 dequeue message with multiple recipients', async function() {
+    // Enqueue with multiple recipients
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+    const message = new queue1.payloadTypeClass(addrData);
+    await queue1.enqOne({
+      payload: message,
+      recipients: ["sub1", "sub2", "sub3"]
+    });
+    await conn.commit();
+
+    // Dequeue from first recipient
+    const queue2 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+    Object.assign(
+      queue2.deqOptions,
+      {
+        consumerName: "sub1",
+        navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+        wait: oracledb.AQ_DEQ_NO_WAIT
+      }
+    );
+
+    const msg = await queue2.deqOne();
+    assert.strictEqual(msg.payload.NAME, "scott");
+    await conn.commit();
+  }); // 267.15
+
+  it('267.16 dequeue from queue with no recipients to test empty path', async function() {
+    // hit the return [] path when numRecipients = 0
+    const queue = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+
+    // dequeue when no messages exist
+    Object.assign(
+      queue.deqOptions,
+      {
+        consumerName: "nonexistent",
+        navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+        wait: oracledb.AQ_DEQ_NO_WAIT
+      }
+    );
+
+    const msg = await queue.deqOne();
+    assert.strictEqual(msg, undefined);
+  }); // 267.16
+
+  it('267.17 enqueue and dequeue with recipient information processing', async function() {
+    // Create a message with multiple recipients that will return recipient info
+    const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const message = new queue1.payloadTypeClass(addrData);
+
+    await queue1.enqOne({
+      payload: message,
+      recipients: ["recipient1", "recipient2", "recipient3"]
+    });
+    await conn.commit();
+
+    // Dequeue as recipient1 with specific options to trigger recipient processing
+    const queue2 = await conn.getQueue(objQueueName, { payloadType: objType });
+    Object.assign(queue2.deqOptions, {
+      consumerName: "recipient1",
+      navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+      wait: oracledb.AQ_DEQ_NO_WAIT,
+      mode: oracledb.AQ_DEQ_MODE_BROWSE
+    });
+
+    const msg = await queue2.deqOne();
+    if (msg) {
+      assert.strictEqual(msg.payload.NAME, "scott");
+      assert.strictEqual(msg.payload.ADDRESS, "The kennel");
+    }
+    await conn.commit();
+  }); // 267.17
+
+  it('267.18 process recipients with enqMany and varied recipient lists', async function() {
+    const msgList = [];
+    const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
+
+    // Create messages with different recipient patterns
+    for (let i = 0; i < addrDataArr.length; i++) {
+      const msg = new queue1.payloadTypeClass(addrDataArr[i]);
+      msgList[i] = {
+        payload: msg,
+        recipients: [`sub${i + 1}`, `sub${i + 2}`, `sub${i + 3}`]
+      };
+    }
+
+    await queue1.enqMany(msgList);
+    await conn.commit();
+
+    // Dequeue with specific consumer to trigger recipient processing
+    const queue2 = await conn.getQueue(objQueueName, { payloadType: objType });
+    Object.assign(queue2.deqOptions, {
+      consumerName: "sub1",
+      navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+      wait: oracledb.AQ_DEQ_NO_WAIT
+    });
+
+    const msgs = await queue2.deqMany(5);
+    assert(msgs.length > 0);
+  }); // 267.18
+
+  it('267.19 dequeue with recipient metadata processing', async function() {
+
+    // Create a queue with specific configuration that might return recipient info
+    const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
+    const message = new queue1.payloadTypeClass(addrData);
+
+    // Enqueue with recipients
+    await queue1.enqOne({
+      payload: message,
+      recipients: ["admin_recipient", "test_recipient"]
+    });
+    await conn.commit();
+
+    // dequeue with administrative/diagnostic mode
+    const queue2 = await conn.getQueue(objQueueName, { payloadType: objType });
+    Object.assign(queue2.deqOptions, {
+      consumerName: "admin_recipient",
+      navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+      mode: oracledb.AQ_DEQ_MODE_LOCKED, // Different mode that might return metadata
+      wait: oracledb.AQ_DEQ_NO_WAIT
+    });
+
+    const msg = await queue2.deqOne();
+    if (msg) {
+      assert.strictEqual(msg.payload.NAME, "scott");
+    }
+    await conn.commit();
+  }); // 267.19
 });

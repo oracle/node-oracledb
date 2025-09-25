@@ -47,7 +47,7 @@ describe('219. aq3.js', function() {
   const RAW_TABLE = 'NODB_RAW_QUEUE_TAB';
 
   before(async function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       isRunnable = false;
     }
 
@@ -215,6 +215,8 @@ describe('219. aq3.js', function() {
   }); // 219.8
 
   it('219.9 Get correlation property in deqOne by specifying same correlation ID', async function() {
+    // Skipping in Thin mode due to existing server-side issue with visibility
+    if (oracledb.thin) this.skip();
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -251,6 +253,8 @@ describe('219. aq3.js', function() {
   }); // 219.9
 
   it('219.10 Negative - Get correlation property in dequeue by changing correlation ID', async function() {
+    // Skipping in Thin mode due to existing server-side issue with visibility
+    if (oracledb.thin) this.skip();
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -287,6 +291,8 @@ describe('219. aq3.js', function() {
   }); // 219.10
 
   it('219.11 get correlation property in deqMany', async function() {
+    // Skipping in Thin mode due to existing server-side issue with visibility
+    if (oracledb.thin) this.skip();
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -344,11 +350,11 @@ describe('219. aq3.js', function() {
 
     const messages = [
       {
-        priority: 2, // Priority of the message when it was enqueued
+        priority: 2,  // Priority of the message when it was enqueued
         payload: "Message 1"
       },
       {
-        priority: 1, // Priority of the message when it was enqueued
+        priority: -2, // Priority of the message when it was enqueued
         payload: "Message 2"
       }
     ];

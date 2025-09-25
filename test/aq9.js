@@ -48,9 +48,9 @@ describe('301. aq9.js', function() {
     const initConn = await oracledb.getConnection(dbConfig);
     const dbVersion = initConn.oracleServerVersion;
     await initConn.close();
-
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin || dbVersion < 1900000000
-      || testsUtil.getClientVersion() < 2306000000) {
+    // Skipping in Thin mode due to no support for transformations
+    if (!dbConfig.test.DBA_PRIVILEGE || dbVersion < 1900000000
+      || testsUtil.getClientVersion() < 2306000000 || oracledb.thin) {
       isRunnable = false;
     }
 
@@ -317,7 +317,7 @@ describe('301. aq9.js', function() {
 
     assert.deepStrictEqual(JSON.stringify(msg.payload),
       '{"ATTR1":1,"ATTR2":"Some important data","ATTR3":"Some text"}');
-  }); 301.3;
+  }); // 301.3
 
   // Test with multi consumer queue
   // enqueue with transformation, message_order_transform
@@ -354,5 +354,5 @@ describe('301. aq9.js', function() {
 
     assert.deepStrictEqual(JSON.stringify(msg.payload),
       '{"ATTR1":1,"ATTR2":"Some important data","ATTR3":"Some text"}');
-  }); 301.4;
+  }); // 301.4
 });

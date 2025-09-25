@@ -73,7 +73,7 @@ describe('283. aq7.js', function() {
   };
 
   before(async function() {
-    if (!dbconfig.test.DBA_PRIVILEGE || oracledb.thin) this.skip();
+    if (!dbconfig.test.DBA_PRIVILEGE) this.skip();
 
     isRunnable = await testsUtil.checkPrerequisites(2100000000, 2100000000);
     if (!isRunnable) this.skip();
@@ -84,7 +84,7 @@ describe('283. aq7.js', function() {
   }); // before
 
   after(async function() {
-    if (!dbconfig.test.DBA_PRIVILEGE || oracledb.thin || !isRunnable) {
+    if (!dbconfig.test.DBA_PRIVILEGE || !isRunnable) {
       return;
     }
     await conn.close();

@@ -49,7 +49,7 @@ describe('281. aq5.js', function() {
   let isRunnable = true;
 
   before(function() {
-    if (!dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    if (!dbConfig.test.DBA_PRIVILEGE) {
       isRunnable = false;
     }
 
@@ -106,6 +106,10 @@ describe('281. aq5.js', function() {
     });
 
     it('281.1.1 subscribe dequeue messages', async function() {
+      // Skipping in Thin mode due to no support for subscription/aq notifs
+      if (oracledb.thin)
+        return this.skip();
+
       const options = {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
         callback: cbSubscribe,
@@ -269,3 +273,4 @@ describe('281. aq5.js', function() {
     }); // 281.2.4
   });
 });
+

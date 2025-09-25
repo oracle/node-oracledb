@@ -501,6 +501,7 @@ testsUtil.dropAQtestUser = async function(AQ_USER) {
     const connAsDBA = await oracledb.getConnection(dbaCredential);
     const sql = `DROP USER ${AQ_USER} CASCADE`;
     await connAsDBA.execute(sql);
+    await connAsDBA.close();
   }
 };
 
@@ -561,7 +562,7 @@ testsUtil.isDate = function(date) {
 // return a fake version for thin to facilitate client version checks
 testsUtil.getClientVersion = function() {
   if (oracledb.thin)
-    return 2304000000;
+    return 2306000000;
   return oracledb.oracleClientVersion;
 };
 
