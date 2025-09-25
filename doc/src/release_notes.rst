@@ -29,6 +29,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug validating the database host during connection.
+
 #)  Enabled proxy user to be passed with :ref:`external authentication <extauth>`
     in :meth:`oracledb.createPool()` for Thin mode.
     See `Issue #1743 <https://github.com/oracle/node-oracledb/issues/1743>`__.
