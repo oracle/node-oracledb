@@ -449,7 +449,7 @@ describe('241. dbType04.js', function() {
     assert.deepStrictEqual(result2.rows[0][1], jsonVal);
   }); // 241.20
 
-  it.skip('241.21 NaN', async () => {
+  it('241.21 NaN', async () => {
     const jsonId = 21;
     const jsonVal = NaN;
     const sqlOne = `insert into ${TABLE} values (:1, :2)`;
@@ -458,12 +458,10 @@ describe('241. dbType04.js', function() {
       { val: jsonVal, type: oracledb.DB_TYPE_JSON }
     ];
     const result1 = await conn.execute(sqlOne, binds);
-    //assert.strictEqual(result1.rowsAffected, 1);
-    console.log(result1);
-    // const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
-    // const result2 = await conn.execute(sqlTwo);
-    // console.log(result2.rows[0][1]);
-    // assert.strictEqual(result2.rows[0][1], jsonVal);
+    assert.strictEqual(result1.rowsAffected, 1);
+    const sqlTwo = `select * from ${TABLE} where id = ${jsonId}`;
+    const result2 = await conn.execute(sqlTwo);
+    assert.strictEqual(result2.rows[0][1], jsonVal);
   }); // 241.21
 
   it('241.22 Negative - implicitly binding JSON', async () => {

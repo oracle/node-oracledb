@@ -26,6 +26,9 @@ Common Changes
     for the :meth:`sodaOperation.limit()` and :meth:`sodaOperation.skip()`
     methods in SODA operations.
 
+#)  Fixed bug that threw empty error message when NaN values were used
+    in JSON binds.
+
 Thin Mode Changes
 +++++++++++++++++
 

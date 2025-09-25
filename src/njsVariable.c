@@ -903,7 +903,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
         }
         if (dpiJson_setValue(data->value.asJson, &jsonBuffer.topNode) < 0) {
             njsJsonBuffer_free(&jsonBuffer);
-            return false;
+            return njsBaton_setErrorDPI(baton);
         }
         njsJsonBuffer_free(&jsonBuffer);
         return true;

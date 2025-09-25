@@ -40,8 +40,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "dpi.h"
 #include "uv.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#ifndef isnan
+#define isnan                   _isnan
+#endif
+#endif
 
 // maximum length of error messages
 #define NJS_MAX_ERROR_MSG_LEN           256

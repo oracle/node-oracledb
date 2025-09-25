@@ -180,10 +180,15 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
 
     // handle numbers
     if (valueType == napi_number) {
-        node->oracleTypeNum = DPI_ORACLE_TYPE_NUMBER;
         node->nativeTypeNum = DPI_NATIVE_TYPE_DOUBLE;
         NJS_CHECK_NAPI(env, napi_get_value_double(env, value,
                 &node->value->asDouble))
+
+        // pass in NaN JSON value as Binary Double in OSON
+        if (isnan(node->value->asDouble))
+            node->oracleTypeNum = DPI_ORACLE_TYPE_NATIVE_DOUBLE;
+        else
+            node->oracleTypeNum = DPI_ORACLE_TYPE_NUMBER;
         return true;
     }
 
