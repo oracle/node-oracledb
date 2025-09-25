@@ -93,7 +93,7 @@ describe('282. aq6.js', function() {
       await conn.execute(plsql);
     });
 
-    it('282.1.1 msgId in enqOne/deqOne', async () => {
+    it('282.1.1 msgId in enqOne/deqOne', async function() {
       let msg;
 
       // Enqueue
@@ -114,7 +114,7 @@ describe('282. aq6.js', function() {
       await conn.commit();
     }); // 282.1.1
 
-    it('282.1.2 msgId in enqMany/deqMany', async () => {
+    it('282.1.2 msgId in enqMany/deqMany', async function() {
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -216,7 +216,7 @@ describe('282. aq6.js', function() {
       await conn.commit();
     }); //282.2.2
 
-    it('282.2.3 JSON type in enqMany/deqMany', async () => {
+    it('282.2.3 JSON type in enqMany/deqMany', async function() {
       const queue3 = await conn.getQueue (objQueueName,
         { payloadType: oracledb.DB_TYPE_JSON });
 
@@ -282,7 +282,7 @@ describe('282. aq6.js', function() {
       await conn.execute(plsql);
     });
 
-    it('282.3.1 msgId in enqOne/deqOne', async () => {
+    it('282.3.1 msgId in enqOne/deqOne', async function() {
       let msg;
       const addrData = {
         NAME: "scott",
@@ -332,7 +332,7 @@ describe('282. aq6.js', function() {
       }
     ];
 
-    it('282.3.2 msgId in deqMany() with DB object array', async () => {
+    it('282.3.2 msgId in deqMany() with DB object array', async function() {
     // Enqueue
       const queue1 = await conn.getQueue(
         objQueueName,

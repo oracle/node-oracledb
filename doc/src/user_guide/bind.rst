@@ -19,15 +19,32 @@ and ``:country_name`` are the two bind variables in this SQL statement:
      {country_id: 90, country_name: "Tonga"}
    );
 
-IN binds are values passed into the database. OUT binds are used to
-retrieve data. IN OUT binds are passed in, and may return a different
-value after the statement executes.
+As part of execution, the supplied bind variable values ``90`` and
+``"Tonga"`` are substituted for the placeholders by the database. This is
+called binding.
 
-.. note::
+Using bind variables is important for scalability and security. They help
+avoid SQL Injection security problems because data is never treated as part of
+an executable statement when it is parsed.
 
-    Using bind parameters is recommended in preference to constructing SQL or
-    PL/SQL statements by string concatenation or template literals. This is
-    for performance and security.
+Bind variables reduce parsing and execution costs when statements are executed
+more than once with different data values. If you do not use bind variables,
+Oracle must reparse and cache multiple statements. When using bind variables,
+Oracle Database may be able to reuse the statement execution plan and context.
+
+.. important::
+
+    Never concatenate or interpolate user data into SQL statements.
+
+    .. code-block:: javascript
+
+        const did = 280;
+        const dnm = "Facility";
+
+        // !! Never do this !!
+        const sql = `INSERT INTO departments (department_id, department_name)
+                  VALUES ({did}, '{dnm}')`;
+        await connection.execute(sql);
 
 Inserted data that is bound is passed to the database separately from
 the statement text. It can never be executed directly. This means there
@@ -43,6 +60,9 @@ Bind parameters can be used to substitute data values. They cannot be
 used for direct substitution of column or table names in dynamically
 constructed statements, see :ref:`Binding Column and Table Names in
 Queries <sqlbindtablename>`.
+
+Bind parameters can be :ref:`IN <inbind>`, :ref:`OUT <outbind>`, or
+:ref:`IN OUT <outbind>` and are detailed in the subsequent sections.
 
 Bind variables cannot be used in `DDL <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=GUID-FD9A8CB4-6B9A-44E5-B114-EFB8DA76FC88>`__

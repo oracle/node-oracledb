@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -93,7 +93,7 @@ describe('285. aq8.js', function() {
       await conn.execute(plsql);
     }); // before ()
 
-    it('285.1.1 enqOne and deqOne by msgId as string in non-sequential order', async () => {
+    it('285.1.1 enqOne and deqOne by msgId as string in non-sequential order', async function() {
       let msg;
       const messageString1 = "This is my message 1",
         messageString2 = "This is my message 2",
@@ -125,7 +125,7 @@ describe('285. aq8.js', function() {
         msg1.msgId.toString('hex'));
     }); // 285.1.1
 
-    it('285.1.2 query by msgId in enqMany and deqOne in non-sequential order', async () => {
+    it('285.1.2 query by msgId in enqMany and deqOne in non-sequential order', async function() {
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -168,7 +168,7 @@ describe('285. aq8.js', function() {
         messages[0].msgId.toString('hex'));
     }); // 285.1.2
 
-    it('285.1.3 enqOne and deqOne by msgId as string in random order', async () => {
+    it('285.1.3 enqOne and deqOne by msgId as string in random order', async function() {
       let msg;
       const messageString1 = "This is my message 1",
         messageString2 = "This is my message 2",
@@ -198,7 +198,7 @@ describe('285. aq8.js', function() {
       assert.deepStrictEqual(queue2.deqOptions.msgId.toString('hex'), msg1.msgId.toString('hex'));
     }); // 285.1.3
 
-    it('285.1.4 query by msgId in enqMany and deqOne in random order', async () => {
+    it('285.1.4 query by msgId in enqMany and deqOne in random order', async function() {
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -233,7 +233,7 @@ describe('285. aq8.js', function() {
       assert(msg.payload.toString(), "This is my message 2");
     }); // 285.1.4
 
-    it('285.1.5 Negative - Invalid msgId in deqOptions', async () => {
+    it('285.1.5 Negative - Invalid msgId in deqOptions', async function() {
       const queue2 = await conn.getQueue(rawQueueName);
       assert.rejects(
         () => {
@@ -247,7 +247,7 @@ describe('285. aq8.js', function() {
 
     }); // 285.1.5
 
-    it('285.1.6 enqOne and deqOne by originalMsgId attribute as string in non-sequential order', async () => {
+    it('285.1.6 enqOne and deqOne by originalMsgId attribute as string in non-sequential order', async function() {
       let msg;
       const messageString1 = "This is my message 1",
         messageString2 = "This is my message 2",
@@ -274,7 +274,7 @@ describe('285. aq8.js', function() {
       assert(msg.payload.toString(), messageString1);
     }); // 285.1.6
 
-    it('285.1.7 query by originalMsgId in enqMany and deqOne in random order', async () => {
+    it('285.1.7 query by originalMsgId in enqMany and deqOne in random order', async function() {
       const queue1 = await conn.getQueue(rawQueueName);
       queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -525,7 +525,7 @@ describe('285. aq8.js', function() {
       ADDRESS: "300 Oracle Parkway Redwood City, CA US 94065"
     };
 
-    it('285.3.1 msgId in enqOne/deqOne in non-sequential order', async () => {
+    it('285.3.1 msgId in enqOne/deqOne in non-sequential order', async function() {
       // Enqueue
       const queue = await conn.getQueue(
         objQueueName,
@@ -565,7 +565,7 @@ describe('285. aq8.js', function() {
       assert.strictEqual(msgDeq.payload.ADDRESS, addrData1.ADDRESS);
     }); // 285.3.1
 
-    it('285.3.2 msgId in enqOne/deqOne in random order', async () => {
+    it('285.3.2 msgId in enqOne/deqOne in random order', async function() {
       // Enqueue
       const queue = await conn.getQueue(
         objQueueName,
@@ -624,7 +624,7 @@ describe('285. aq8.js', function() {
       }
     ];
 
-    it('285.3.3 msgId in enqOne/deqOne in non-sequential order', async () => {
+    it('285.3.3 msgId in enqOne/deqOne in non-sequential order', async function() {
       // Enqueue
       const queue1 = await conn.getQueue(
         objQueueName,
@@ -662,7 +662,7 @@ describe('285. aq8.js', function() {
       assert.strictEqual(msgDeq.payload.ADDRESS, addrArray[0].ADDRESS);
     }); // 285.3.3
 
-    it('285.3.4 msgId in enqOne/deqOne in random order', async () => {
+    it('285.3.4 msgId in enqOne/deqOne in random order', async function() {
       // Enqueue
       const queue1 = await conn.getQueue(
         objQueueName,

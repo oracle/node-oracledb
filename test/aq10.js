@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -125,7 +125,7 @@ describe('302. aq10.js', function() {
     ADDRESS: "300 Oracle Parkway Redwood City, CA US 94065"
   };
 
-  it('302.1 condition attribute in dequeue', async () => {
+  it('302.1 condition attribute in dequeue', async function() {
     // Enqueue
     const queue = await conn.getQueue(
       objQueueName,
@@ -155,7 +155,7 @@ describe('302. aq10.js', function() {
     assert.strictEqual(msgDeq.payload.ADDRESS, addrData2.ADDRESS);
   }); // 302.1
 
-  it('302.2 Negative - wrong identifier in condition attribute', async () => {
+  it('302.2 Negative - wrong identifier in condition attribute', async function() {
     // Dequeue
     const queue2 = await conn.getQueue(
       objQueueName,
@@ -163,9 +163,9 @@ describe('302. aq10.js', function() {
     );
 
     queue2.deqOptions.condition = `someString.NAME = '${addrData2.NAME}'`;
-    await assert.rejects(
-      async () => await queue2.deqOne(),
-      /ORA-00904:/ //ORA-00904: "SOMESTRING"."NAME": invalid identifier
+    await assert.rejects(async () =>
+      await queue2.deqOne(),
+    /ORA-00904:/ //ORA-00904: "SOMESTRING"."NAME": invalid identifier
     );
     assert.strictEqual(queue2.deqOptions.condition, `someString.NAME = '${addrData2.NAME}'`);
   }); // 302.2

@@ -105,7 +105,7 @@ describe('281. aq5.js', function() {
       await testsUtil.dropAQtestUser(AQ_USER);
     });
 
-    it('281.1.1 subscribe dequeue messages', async () => {
+    it('281.1.1 subscribe dequeue messages', async function() {
       const options = {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
         callback: cbSubscribe,
@@ -184,7 +184,7 @@ describe('281. aq5.js', function() {
       await testsUtil.dropAQtestUser(AQ_USER);
     });
 
-    it('281.2.1 test message order and consumer name', async () => {
+    it('281.2.1 test message order and consumer name', async function() {
       const queue = await conn.getQueue(objQueueName);
 
       // Test messages with different priorities
@@ -214,7 +214,7 @@ describe('281. aq5.js', function() {
       await conn.commit();
     }); // 281.2.1
 
-    it('281.2.2 test dequeue with timeout', async () => {
+    it('281.2.2 test dequeue with timeout', async function() {
       const deqQueue = await conn.getQueue(objQueueName);
       deqQueue.deqOptions.consumerName = CONSUMER_NAME;
       deqQueue.deqOptions.wait = 5; // 5 second timeout
@@ -227,7 +227,7 @@ describe('281. aq5.js', function() {
       assert(endTime - startTime >= 5000, "Dequeue should wait for at least 5 seconds");
     }); // 281.2.2
 
-    it('281.2.3 test dequeue with correlation ID', async () => {
+    it('281.2.3 test dequeue with correlation ID', async function() {
       const queue = await conn.getQueue(objQueueName);
       const correlationId = "TEST_CORRELATION_123";
 
@@ -251,7 +251,7 @@ describe('281. aq5.js', function() {
       await conn.commit();
     }); // 281.2.3
 
-    it('281.2.4 test visibility option', async () => {
+    it('281.2.4 test visibility option', async function() {
       const queue = await conn.getQueue(objQueueName);
       queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 

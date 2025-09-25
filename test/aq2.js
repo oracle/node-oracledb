@@ -105,7 +105,7 @@ describe('218. aq2.js', function() {
     }
   }); // after()
 
-  it('218.1 examples/aqobject.js', async () => {
+  it('218.1 examples/aqobject.js', async function() {
     const addrData = {
       NAME: "scott",
       ADDRESS: "The Kennel"
@@ -132,7 +132,7 @@ describe('218. aq2.js', function() {
     assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
   }); // 218.1
 
-  it.skip('218.2 The read-only property "payloadTypeClass"', async () => {
+  it.skip('218.2 The read-only property "payloadTypeClass"', async function() {
     const queue = await conn.getQueue(objQueueName, { payloadType: objType });
     const t = queue.payloadTypeClass;
     assert(t);
@@ -141,7 +141,7 @@ describe('218. aq2.js', function() {
     console.log(queue);
   }); // 218.2
 
-  it('218.3 Negative - enqueue a raw JavaScript object directly', async () => {
+  it('218.3 Negative - enqueue a raw JavaScript object directly', async function() {
     const addrData = {
       NAME: "John Smith",
       ADDRESS: "100 Oracle Parkway Redwood City, CA US 94065"
@@ -150,7 +150,7 @@ describe('218. aq2.js', function() {
     // Enqueue
     const queue1 = await conn.getQueue(objQueueName);
     await assert.rejects(
-      async () => {
+      async function() {
         await queue1.enqOne(addrData);
       },
       /NJS-070:/
@@ -160,13 +160,13 @@ describe('218. aq2.js', function() {
     buffer or database object */
   }); // 218.3
 
-  it('218.4 Negative - getQueue() without options on DB Object data', async () => {
+  it('218.4 Negative - getQueue() without options on DB Object data', async function() {
     const addrData = {
       NAME: "Changjie",
       ADDRESS: "200 Oracle Parkway Redwood City, CA US 94065"
     };
     await assert.rejects(
-      async () => {
+      async function() {
         const queue1 = await conn.getQueue(objQueueName);
         const objClass = await conn.getDbObjectClass(objType);
         const message = new objClass(addrData);
@@ -178,7 +178,7 @@ describe('218. aq2.js', function() {
     type supported by the queue */
   }); // 218.4
 
-  it('218.5 Enqueue a DB object as payload attribute', async () => {
+  it('218.5 Enqueue a DB object as payload attribute', async function() {
     const addrData = {
       NAME: "Changjie",
       ADDRESS: "400 Oracle Parkway Redwood City, CA US 94065"
@@ -205,7 +205,7 @@ describe('218. aq2.js', function() {
     assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
   }); // 218.5
 
-  it('218.6 Enqueue a JavaScript object as payload attribute', async () => {
+  it('218.6 Enqueue a JavaScript object as payload attribute', async function() {
     const addrData = {
       NAME: "Chris",
       ADDRESS: "400 Oracle Parkway Redwood City, CA US 94065"
@@ -232,13 +232,13 @@ describe('218. aq2.js', function() {
   }); // 218.6
 
   // A variation of 218.4
-  it('218.7 Negative - Set payloadType as oracledb.DB_TYPE_OBJECT', async () => {
+  it('218.7 Negative - Set payloadType as oracledb.DB_TYPE_OBJECT', async function() {
     const addrData = {
       NAME: "Changjie",
       ADDRESS: "200 Oracle Parkway Redwood City, CA US 94065"
     };
     await assert.rejects(
-      async () => {
+      async function() {
         const queue1 = await conn.getQueue(
           objQueueName,
           { payloadType: oracledb.DB_TYPE_OBJECT }
@@ -272,7 +272,7 @@ describe('218. aq2.js', function() {
     }
   ];
 
-  it('218.8 enqMany() with DB object array', async () => {
+  it('218.8 enqMany() with DB object array', async function() {
     // Enqueue
     const queue1 = await conn.getQueue(
       objQueueName,
@@ -299,7 +299,7 @@ describe('218. aq2.js', function() {
     }
   }); // 218.8
 
-  it('218.9 enqMany() with DB object array as payload', async () => {
+  it('218.9 enqMany() with DB object array as payload', async function() {
     // Enqueue
     const queue1 = await conn.getQueue(
       objQueueName,
@@ -327,7 +327,7 @@ describe('218. aq2.js', function() {
     }
   }); //218.9
 
-  it('218.10 enqMany() with JavaScript objects as payload', async () => {
+  it('218.10 enqMany() with JavaScript objects as payload', async function() {
     // Enqueue
     const queue1 = await conn.getQueue(
       objQueueName,
@@ -355,17 +355,17 @@ describe('218. aq2.js', function() {
     }
   }); // 218.10
 
-  it('218.11 Negative - enqOne with empty payload', async () => {
+  it('218.11 Negative - enqOne with empty payload', async function() {
     const queue = await conn.getQueue(objQueueName, { payloadType: objType });
     await assert.rejects(
-      async () => {
+      async function() {
         await queue.enqOne();
       },
       /NJS-009:/ // NJS-009: invalid number of parameters
     );
   }); // 218.11
 
-  it('218.12 Enqueue and Dequeue with non-ASCII characters', async () => {
+  it('218.12 Enqueue and Dequeue with non-ASCII characters', async function() {
     const addrData = {
       NAME: "Jörg",
       ADDRESS: "Grüner Weg 5, 12345 München, Germany"
@@ -387,7 +387,7 @@ describe('218. aq2.js', function() {
     assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
   }); // 218.12
 
-  it('218.13 Enqueue and Dequeue with large payloads', async () => {
+  it('218.13 Enqueue and Dequeue with large payloads', async function() {
     const largeAddress = "A".repeat(50); // 50 characters
     const addrData = {
       NAME: "LargeData",
@@ -410,7 +410,7 @@ describe('218. aq2.js', function() {
     assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
   }); // 218.13
 
-  it('218.14 Negative - Dequeue from an unstarted queue', async () => {
+  it('218.14 Negative - Dequeue from an unstarted queue', async function() {
     // Create but do not start a new queue
     const unstartedQueueName = "NODB_UNSTARTED_QUEUE";
     await conn.execute(`
@@ -425,7 +425,7 @@ describe('218. aq2.js', function() {
     const queue = await conn.getQueue(unstartedQueueName, { payloadType: objType });
 
     await assert.rejects(
-      async () => {
+      async function() {
         await queue.deqOne();
       },
       /ORA-25226:/ // ORA-25226: dequeue failed, queue NODB_SCHEMA_AQTEST2.NODB_UNSTARTED_QUEUE is not enabled for dequeue

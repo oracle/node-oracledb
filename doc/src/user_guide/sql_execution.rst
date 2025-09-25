@@ -4,10 +4,20 @@
 Executing SQL
 *************
 
-A single SQL or PL/SQL statement may be executed using the *Connection*
-:meth:`~connection.execute()` method. :ref:`Promises <promiseoverview>`,
-:ref:`Async/Await <asyncawaitoverview>` or :ref:`Callback style <callbackoverview>`
-may be used.
+Executing SQL statements is the primary way in which a Node.js application
+communicates with Oracle Database. Statements include queries, Data
+Manipulation Language (DML), and Data Definition Language (DDL).  A few other
+`specialty statements <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
+id=GUID-E1749EF5-2264-44DF-99EF-AEBEB943BED6>`__ can also be
+executed. A single SQL or PL/SQL statement may be executed using the
+:meth:`connection.execute()` method. :ref:`Promises <promiseoverview>`,
+:ref:`Async/Await <asyncawaitoverview>` or
+:ref:`Callback style <callbackoverview>` may be used.
+
+This chapter details executing SQL statements. PL/SQL statements are discussed
+in :ref:`plsqlexecution`. Specific data types and features are discussed in
+the :ref:`batchexecution`, :ref:`lobhandling`, :ref:`jsondatatype`, and
+:ref:`xmltype` chapters.
 
 Results may be returned in a single array, or fetched in batches with a
 :ref:`ResultSet <resultsetclass>`. Queries may optionally be streamed
@@ -24,14 +34,43 @@ Tune query performance by adjusting
 :ref:`prefetchRows <propexecprefetchrows>`. See :ref:`Tuning Fetch
 Performance <rowfetching>`.
 
-Connections can handle one database operation at a time. Other database
-operations will block. Structure your code to avoid starting parallel
+**Executing SQL Statements**
+
+Node-oracledb can be used to execute individual statements, one at a time.
+Once a statement has finished execution, only then will the next statement
+execute. If you try to execute statements concurrently in a single connection,
+the statements are queued and run consecutively in the order they are executed
+in the application code. Structure your code to avoid starting parallel
 operations on a connection. For example, avoid using ``async.parallel``
 or ``Promise.all()`` which call each of their items in parallel. See
 :ref:`Parallelism on Each Connection <parallelism>`.
 
 After all database calls on the connection complete, the application
 should use the :meth:`connection.close()` call to release the connection.
+
+**SQL Statement Syntax**
+
+SQL statements executed in node-oracledb should not contain a trailing
+semicolon (";") or forward slash ("/"). This will fail due to the semicolon:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(`SELECT * FROM myTable;`);
+
+This is correct:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(`SELECT * FROM myTable`);
+
+.. IMPORTANT::
+
+    Interpolating or concatenating user data with SQL statements, for example
+    ``await connection.execute(`SELECT * FROM mytab WHERE mycol =
+    '" + myvar + "'`)`` is a security risk and impacts performance. Use
+    :ref:`bind variables <bind>` instead, for example
+    ``await connection.execute (`SELECT * FROM mytab WHERE mycol = :mybv`,
+    [101])``.
 
 .. _select:
 

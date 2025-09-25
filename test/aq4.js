@@ -120,9 +120,9 @@ describe('267. aq4.js', function() {
     await testsUtil.dropAQtestUser(AQ_USER);
   });  // after
 
-  it('267.1 empty array or no recipients', async () => {
+  it('267.1 empty array or no recipients', async function() {
     await assert.rejects(
-      async () => {
+      async function() {
       // Enqueue
         const queue1 = await conn.getQueue(
           objQueueName,
@@ -153,7 +153,7 @@ describe('267. aq4.js', function() {
     );
   }); // 267.1
 
-  it('267.2 single element in array', async () => {
+  it('267.2 single element in array', async function() {
     // Enqueue
     const queue1 = await conn.getQueue(
       objQueueName,
@@ -183,14 +183,14 @@ describe('267. aq4.js', function() {
   }); // 267.2
 
 
-  it('267.3 Negative - numbers as recipients ', async () => {
+  it('267.3 Negative - numbers as recipients ', async function() {
     const queue1 = await conn.getQueue(
       objQueueName,
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
     await assert.rejects(
-      async () => {
+      async function() {
         await queue1.enqOne({
           payload: message,
           recipients: [1, 3, 5]
@@ -200,14 +200,14 @@ describe('267. aq4.js', function() {
     );
   }); // 267.3
 
-  it('267.4 Negative - number, string, date as recipients ', async () => {
+  it('267.4 Negative - number, string, date as recipients ', async function() {
     const queue1 = await conn.getQueue(
       objQueueName,
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
     await assert.rejects(
-      async () => {
+      async function() {
         await queue1.enqOne({
           payload: message,
           recipients: [1, "abc", new Date(2022, 5, 17)]
@@ -217,14 +217,14 @@ describe('267. aq4.js', function() {
     );
   }); // 267.4
 
-  it('267.5 Negative -  null value for recipient', async () => {
+  it('267.5 Negative -  null value for recipient', async function() {
     const queue1 = await conn.getQueue(
       objQueueName,
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
     await assert.rejects(
-      async () => {
+      async function() {
         await queue1.enqOne({
           payload: message,
           recipients: [ null ]
@@ -234,14 +234,14 @@ describe('267. aq4.js', function() {
     );
   }); // 267.5
 
-  it('267.6 Negative - undefined value for recipient', async () => {
+  it('267.6 Negative - undefined value for recipient', async function() {
     const queue1 = await conn.getQueue(
       objQueueName,
       {payloadType: objType}
     );
     const message = new queue1.payloadTypeClass(addrData);
     await assert.rejects(
-      async () => {
+      async function() {
         await queue1.enqOne({
           payload: message,
           recipients: [ undefined ]
@@ -251,9 +251,9 @@ describe('267. aq4.js', function() {
     );
   }); // 267.6
 
-  it('267.7 Negative - dequeue non-existent name', async () => {
+  it('267.7 Negative - dequeue non-existent name', async function() {
     await assert.rejects(
-      async () => {
+      async function() {
       // Enqueue
         const queue1 = await conn.getQueue(
           objQueueName,
@@ -284,11 +284,11 @@ describe('267. aq4.js', function() {
   }); // 267.7
 
 
-  it('267.8 empty recipient list with enqMany', async () => {
+  it('267.8 empty recipient list with enqMany', async function() {
     const msgList = [];
 
     await assert.rejects(
-      async () => {
+      async function() {
       // Enqueue
         const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
         for (let i = 0; i < addrDataArr.length; i++) {
@@ -301,7 +301,7 @@ describe('267. aq4.js', function() {
     );
   }); // 267.8
 
-  it('267.9 recipient list with enqMany', async () => {
+  it('267.9 recipient list with enqMany', async function() {
     const msgList = [];
 
     // Enqueue
@@ -327,7 +327,7 @@ describe('267. aq4.js', function() {
     assert.strictEqual(queue2.deqOptions.consumerName, "sub1");
   }); // 267.9
 
-  it('267.10 recipient list with enqMany non-existent in dequeue', async () => {
+  it('267.10 recipient list with enqMany non-existent in dequeue', async function() {
     const msgList = [];
 
     // Enqueue
@@ -353,11 +353,11 @@ describe('267. aq4.js', function() {
     assert.strictEqual(queue2.deqOptions.consumerName, "abc");
   }); // 267.10
 
-  it('267.11 recipient list with enqMany invalid datatype in dequeue', async () => {
+  it('267.11 recipient list with enqMany invalid datatype in dequeue', async function() {
     const msgList = [];
 
     await assert.rejects(
-      async () => {
+      async function() {
       // Enqueue
         const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
         for (let i = 0; i < addrDataArr.length; i++) {
@@ -371,25 +371,25 @@ describe('267. aq4.js', function() {
     );
   }); // 267.11
 
-  it('267.12 Enqueue with duplicate recipients', async () => {
+  it('267.12 Enqueue with duplicate recipients', async function() {
     const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
     const message = new queue1.payloadTypeClass(addrData);
 
-    await assert.rejects(
-      async () =>  await queue1.enqOne({
+    await assert.rejects(async () =>
+      await queue1.enqOne({
         payload: message,
         recipients: ["sub1", "sub1", "sub2"]
       }),
-      /ORA-25232:/ // ORA-25232: duplicate recipients specified for message
+    /ORA-25232:/ // ORA-25232: duplicate recipients specified for message
     );
   }); // 267.12
 
-  it('267.13 Enqueue with special characters in recipient name', async () => {
+  it('267.13 Enqueue with special characters in recipient name', async function() {
     const queue1 = await conn.getQueue(objQueueName, { payloadType: objType });
     const message = new queue1.payloadTypeClass(addrData);
 
     await assert.rejects(
-      async () => {
+      async function() {
         await queue1.enqOne({
           payload: message,
           recipients: ["sub@#1"]

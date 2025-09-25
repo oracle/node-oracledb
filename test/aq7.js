@@ -91,7 +91,7 @@ describe('283. aq7.js', function() {
     await testsUtil.dropAQtestUser(AQ_USER);
   }); // after
 
-  it('283.1 JSON type in enqOne/deqOne', async () => {
+  it('283.1 JSON type in enqOne/deqOne', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -123,7 +123,7 @@ describe('283. aq7.js', function() {
     assert.deepStrictEqual(msg.payload.timeIn, intDS);
   }); // 283.1
 
-  it('283.2 JSON type in enqMany/deqMany', async () => {
+  it('283.2 JSON type in enqMany/deqMany', async function() {
     const queue3 = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON });
 
@@ -193,7 +193,7 @@ describe('283. aq7.js', function() {
     assert.strictEqual(queue4.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
   }); // 283.2
 
-  it('283.3 Map JS object directly into JSON - enqOne/deqOne', async () => {
+  it('283.3 Map JS object directly into JSON - enqOne/deqOne', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -218,7 +218,7 @@ describe('283. aq7.js', function() {
     assert.equal(msg.payload.empCity, "City");
   }); // 283.3
 
-  it('283.4 Map JS object directly into JSON - enqMany/deqMany', async () => {
+  it('283.4 Map JS object directly into JSON - enqMany/deqMany', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -442,7 +442,7 @@ describe('283. aq7.js', function() {
     assert.deepStrictEqual(msg.payload, jsonDoc);
   }); // 283.11
 
-  it('283.12 enqOne/deqOne with empty JSON object/array', async () => {
+  it('283.12 enqOne/deqOne with empty JSON object/array', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -466,7 +466,7 @@ describe('283. aq7.js', function() {
     assert.deepStrictEqual(msg.payload, []);
   }); // 283.12
 
-  it('283.13 JSON with deeply nested structure', async () => {
+  it('283.13 JSON with deeply nested structure', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -495,7 +495,7 @@ describe('283. aq7.js', function() {
     assert.deepStrictEqual(msg.payload, deeplyNested);
   });  // 283.13
 
-  it('283.14 concurrent enqueue/dequeue operations', async () => {
+  it('283.14 concurrent enqueue/dequeue operations', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -520,7 +520,7 @@ describe('283. aq7.js', function() {
     assert.strictEqual(receivedIds.size, numMessages);
   }); // 283.14
 
-  it('283.15 JSON with special characters and Unicode', async () => {
+  it('283.15 JSON with special characters and Unicode', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );
@@ -541,7 +541,7 @@ describe('283. aq7.js', function() {
     assert.deepStrictEqual(msg.payload, specialData);
   }); // 283.15
 
-  it('283.16 large JSON payload size limits', async () => {
+  it('283.16 large JSON payload size limits', async function() {
     const queue = await conn.getQueue(objQueueName,
       { payloadType: oracledb.DB_TYPE_JSON }
     );

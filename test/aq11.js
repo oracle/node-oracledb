@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -150,7 +150,7 @@ describe('303. aq11.js', function() {
  * - Connection THREE dequeues messages B and C in sequence.
  * - Changing the dequeue mode to DEQUEUE_REMOVE explicitly yields the same result.
  */
-  it('303.1 enqueue/dequeue with modes', async () => {
+  it('303.1 enqueue/dequeue with modes', async function() {
     const MESSAGE_TYP  = `${AQ_USER}.MESSAGE_TYP`;
     const SINGLE_QUEUE = `${AQ_USER}.OBJECT_SINGLE_QUEUE`;
 

@@ -1523,7 +1523,7 @@ During runtime, some pool properties can be changed with
 :meth:`pool.reconfigure()`.
 
 A connection pool should be started during application initialization,
-for example before the web server is started:
+for example before a web server is started:
 
 .. code-block:: javascript
 
@@ -5699,15 +5699,14 @@ Connecting to Oracle Cloud Autonomous Databases
 
 Node.js applications can connect to Oracle Autonomous Database (ADB) in Oracle
 Cloud using one-way TLS (Transport Layer Security) or mutual TLS
-(mTLS). One-way TLS and mTLS provide enhanced security for authentication and
-encryption.
+(mTLS), depending on how the database instance is configured. One-way TLS and
+mTLS provide enhanced security for authentication and encryption.
 
 A database username and password are still required for your application
-connections. If you need to create a new database schema so you do not login
-as the privileged ADMIN user, refer to the relevant Oracle Cloud documentation,
-for example see `Create Database Users <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-B5846072-995B-4B81-BDCB-AF530BC42847>`__ in the
-Oracle Autonomous Database manual.
+connections. Refer to the relevant Oracle Cloud documentation, for example,
+see `Create Database Users <https://www.oracle.com/pls/topic/lookup?ctx=
+dblatest&id=GUID-B5846072-995B-4B81-BDCB-AF530BC42847>`__ in the Oracle
+Autonomous Database manual.
 
 When using node-oracledb Thin mode, Node.js flags can be used to set the
 minimum TLS version used to connect to Oracle Database. For example, ``node
@@ -5718,47 +5717,60 @@ minimum TLS version used to connect to Oracle Database. For example, ``node
 One-way TLS Connection to Oracle Autonomous Database
 ----------------------------------------------------
 
-With one-way TLS, node-oracledb applications can connect to Oracle ADB
-without using a wallet. Both Thin and Thick modes of the node-oracledb
-driver support one-way TLS. Applications that use the node-oracledb Thick
-mode can connect to the Oracle ADB through one-way TLS only when using Oracle
-Client library versions 19.14 (or later) or 21.5 (or later).
+With one-way TLS, the node-oracledb host machine must be in the Access Control
+List (ACL) of the ADB instance. Applications then connect to Oracle ADB by
+passing the database username, password, and appropriate connection string. A
+wallet is not used.
 
-To enable one-way TLS for an ADB instance, complete the following steps in an
-Oracle Cloud console in the **Autonomous Database Information** section of the
-ADB instance details:
+Both node-oracledb Thin and Thick modes support one-way TLS.
+
+Allowing One-way TLS Access to Oracle Autonomous Database
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+To create an ADB instance that allows one-way TLS, choose the access setting
+*Secure access from allowed IPs and VCNs only* in the Oracle Cloud console
+during instance creation. Then specify the IP addresses, hostnames, CIDR
+blocks, Virtual Cloud networks (VCN), or Virtual Cloud network OCIDs where
+Node.js will be running. The ACL limits access to only the resources that have
+been defined and blocks all other incoming traffic.
+
+Alternatively, to enable one-way TLS on an existing database, complete the
+following steps in the Oracle Cloud console in the **Autonomous Database
+Information** section of the ADB instance:
 
 1. Click the **Edit** link next to *Access Control List* to update the Access
-   Control List (ACL). The **Edit Access Control List** dialog box is displayed.
+   Control List (ACL).
 
-2. In the **Edit Access Control List** dialog box, select the type of address
-   list entries and the corresponding values. You can include the required IP
-   addresses, hostnames, or Virtual Cloud Networks (VCNs).  The ACL limits
-   access to only the IP addresses or VCNs that have been defined and blocks
-   all other incoming traffic.
+2. In the **Edit Access Control List** dialog box that is displayed, select
+   the type of address list entries and the corresponding values. You can
+   include the IP addresses, hostnames, CIDR block, Virtual Cloud Network
+   (VCN), or Virtual Cloud network OCID where Node.js will be running.
 
 3. Navigate back to the ADB instance details page and click the **Edit** link
-   next to *Mutual TLS (mTLS) Authentication*. The **Edit Mutual TLS
-   Authentication** is displayed.
+   next to *Mutual TLS (mTLS) Authentication*.
 
-4. In the **Edit Mutual TLS Authentication** dialog box, deselect the
-   **Require mutual TLS (mTLS) authentication** check box to disable the mTLS
-   requirement on Oracle ADB and click **Save Changes**.
+4. In the **Edit Mutual TLS Authentication** dialog box that is displayed,
+   deselect the **Require mutual TLS (mTLS) authentication** check box to
+   disable the mTLS requirement on Oracle ADB and click **Save Changes**.
 
-5. Navigate back to the ADB instance details page and click **DB Connection**
-   on the top of the page. A **Database Connection** dialog box is displayed.
+Connecting with node-oracledb Thin or Thick modes using One-way TLS
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-6. In the Database Connection dialog box, select TLS from the **Connection
-   Strings** drop-down list.
+When your database has been enabled to allow one-way TLS, you can connect with
+node-oracledb by following these steps:
 
-7. Copy the appropriate Connection String of the database instance used by
-   your application.
+1. Navigate to the ADB instance details page on the Cloud console and click
+   **Database Connection** at the top of the page.
 
-Applications can connect to your Oracle ADB instance using the database
-credentials and the copied :ref:`Connect Descriptor <embedtns>`. For example,
-to connect to the Oracle ADB instance:
+2. In the Database Connection dialog box that is displayed, select TLS from
+   the **Connection Strings** drop-down list.
 
-For example:
+3. Copy the appropriate Connection String for the connection service level you
+   want.
+
+Applications can connect using the database credentials and the copied
+:ref:`connection string <embedtns>`. Do *not* pass wallet parameters. For
+example, to connect to the Oracle ADB instance:
 
 .. code-block:: javascript
 
@@ -5772,11 +5784,24 @@ For example:
         connectString: cs
     });
 
-You can download the ADB connection wallet using the **DB Connection** button
-and extract the ``tnsnames.ora`` file, or create one yourself if you prefer to
-keep connection strings out of application code. See :ref:`tnsnames` for
-details on adding connection strings to a Net Service Name in a
-``tnsnames.ora`` file.
+If you prefer to keep connection descriptors out of application code, you can
+add the descriptor with a :ref:`TNS Alias <tnsnames>` to a :ref:`tnsnames.ora
+<tnsadmin>` file, and use the TNS alias as the ``dsn`` value.
+
+A common cause of connection errors is not having the ACL correctly
+configured. To aid troubleshooting, remove ``(retry_count=20)(retry_delay=3)``
+from the connect descriptor so that errors are returned faster. If network
+configuration issues are suspected then, for initial troubleshooting with a
+temporary database for testing, you can update the ACL to contain a CIDR block
+of ``0.0.0.0/0``. However, this means that *anybody* can attempt to connect to
+your database. So, you should recreate the database immediately after
+identifying a working, more restrictive ACL.
+
+To connect with node-oracledb Thick mode requires Oracle Client library
+versions 19.14 (or later), or 21.5 (or later), or 23.3 (or later). If you have
+also been experimenting with mTLS and your environment has ``sqlnet.ora`` and
+``tnsnames.ora`` files set up, then remove these before using node-oracledb
+Thick mode with one-way TLS to avoid configuration clashes.
 
 .. _connectionadbmtls:
 
@@ -5784,30 +5809,41 @@ Mutual TLS connections to Oracle Cloud Autonomous Database
 ----------------------------------------------------------
 
 To enable connections from node-oracledb to Oracle Autonomous Database in
-Oracle Cloud using mutual TLS (mTLS), a wallet needs to be downloaded from the cloud
-console. mTLS is sometimes called Two-way TLS.
+Oracle Cloud using mutual TLS (mTLS), a wallet needs to be downloaded from the
+cloud console. mTLS is sometimes called Two-way TLS.
 
-Install the Wallet and Network Configuration Files
+Allowing mTLS Access to Oracle Autonomous Database
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-From the Oracle Cloud console for the database, download the wallet zip
-file using the **DB Connection** button. The zip contains the wallet and
-network configuration files. When downloading the zip, the cloud console
-will ask you to create a wallet password. This password is used by
-node-oracledb in Thin mode, but not in Thick mode.
+When creating an ADB instance in the Oracle Cloud console, choose the access
+setting *Secure access from everywhere*.
 
-Note: Keep the wallet files in a secure location and share them only with
-authorized users.
+.. _getwallet:
 
-In the examples used in the sections that follow, consider that you have
-created a database called CJDB1 with the Always Free services from the
-`Oracle Cloud Free Tier <https://www.oracle.com//cloud/free/>`__, then you
-might decide to use the connection string called ``cjdb1_high`` in the
-``tnsnames.ora`` file.
+Downloading the Database Wallet
++++++++++++++++++++++++++++++++
 
-**In node-oracledb Thin Mode**
+After your Autonomous Database has been enabled to allow mTLS, download its
+``wallet.zip`` file which contains the certificate and network configuration
+files:
 
-For node-oracledb in Thin mode, only two files from the zip are needed:
+1. Navigate to the ADB instance details page on the Oracle Cloud console and
+   click **Database connection** at the top of the page.
+
+2. In the **Database Connection** dialog box that is displayed, select the
+   "Download Wallet" button in the *Download client credentials (Wallet)*
+   section. The cloud console will ask you to create a wallet password. This
+   password is required by node-oracledb in Thin mode, but not used in Thick
+   mode.
+
+**Note**: Keep wallet files in a secure location and only share them and the
+password with authorized users.
+
+Connecting with node-oracledb Thin mode using mTLS
+++++++++++++++++++++++++++++++++++++++++++++++++++
+
+For node-oracledb Thin mode, unzip the :ref:`wallet.zip <getwallet>` file.
+Only two files from the zip are needed:
 
 - ``tnsnames.ora`` - Maps net service names used for application connection
   strings to your database services.
@@ -5816,26 +5852,29 @@ For node-oracledb in Thin mode, only two files from the zip are needed:
 
 If you do not have a PEM file, see :ref:`createpem`.
 
-Unzip the wallet zip file and move the required files to a location such as
+Move the two files to a directory that is accessible by your application. In
+this example, the files are located in the same directory,
 ``/opt/OracleCloud/MYDB``.
 
-You can establish a connection to the database by using your database
-credentials and setting the ``connectString`` parameter to the desired network
-alias from the ``tnsnames.ora`` file. The ``configDir`` parameter indicates
-the directory containing ``tnsnames.ora``. The ``walletLocation`` parameter is
-the directory containing the PEM file. In this example, the files are in the
-same directory. The ``walletPassword`` parameter should be set to the password
-created in the cloud console when downloading the wallet. For example, to
-connect as the ADMIN user using the ``cjdb1_high`` connection string:
+A connection can be made by using your database credentials and setting the
+``connectString`` parameter to the desired :ref:`TNS Alias <tnsnames>` from
+the :ref:`tnsnames.ora <tnsadmin>` file. The ``configDir`` parameter indicates
+the directory containing :ref:`tnsnames.ora <tnsadmin>`. The
+``walletLocation`` parameter is the directory containing the PEM file. The
+``walletPassword`` parameter should be set to the password created in the
+cloud console when downloading the wallet. It is not the database user or
+ADMIN password.For example, to connect as the ADMIN user using the
+``cjdb1_high`` TNS Alias:
 
 .. code-block:: javascript
 
     connection = await oracledb.getConnection({
         user: "admin",
-        password: mypw,
-        configDir: "/opt/OracleCloud/MYDB",
-        walletLocation: "/opt/OracleCloud/MYDB",
-        walletPassword: wp
+        password: mypw,                          // database password for ADMIN
+        connectString: "cjdb1_high",             // TNS Alias from tnsnames.ora
+        configDir: "/opt/OracleCloud/MYDB",      // directory with tnsnames.ora
+        walletLocation: "/opt/OracleCloud/MYDB", // directory with ewallet.pem
+        walletPassword: wp                       // not a database user password
     });
 
 Instead of storing and reading the content from the ``ewallet.pem`` file which
@@ -5849,29 +5888,29 @@ precedence and overrides the ``walletLocation`` property value of
 :meth:`oracledb.getConnection()`, or the ``WALLET_LOCATION`` parameter
 in the connection string.
 
-**In node-oracledb Thick Mode**
+Connecting with node-oracledb Thick mode using mTLS
++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-For node-oracledb in Thick mode, only these files from the zip are needed:
+For node-oracledb Thick mode, unzip the :ref:`wallet.zip <getwallet>` file.
+Only three files from it are needed:
 
--  ``tnsnames.ora`` - Maps net service names used for application
+-  ``tnsnames.ora`` - Maps :ref:`TNS Aliases <tnsnames>` used for application
    connection strings to your database services.
 -  ``sqlnet.ora`` - Configures Oracle Network settings.
--  ``cwallet.sso`` - Enables SSL/TLS connections in Thick mode. Keep this file
-   secure.
+-  ``cwallet.sso`` - Enables SSL/TLS connections in node-oracledb Thick mode.
+   Keep this file secure.
 
-Unzip the wallet zip file. There are two options for placing the required
-files:
+There are two options for placing the required files:
 
--  Move the three files to the ``network/admin`` directory of the client
-   libraries used by your application. For example if you are using
-   Instant Client 19c and it is in ``$HOME/instantclient_19_11``, then
-   you would put the wallet files in
-   ``$HOME/instantclient_19_11/network/admin/``.
+1. Move the three files to the ``network/admin`` directory of the client
+   libraries used by your application. For example, if you are using Instant
+   Client 23ai and it is in ``$HOME/instantclient_23_9``, then you would put
+   the wallet files in ``$HOME/instantclient_23_9/network/admin/``.
 
-   Connection can be made using your database credentials and setting the
-   ``connectString`` parameter to the desired network alias from the
-   ``tnsnames.ora`` file. For example, to connect as the ADMIN user using
-   the ``cjdb1_high`` network service name:
+   A connection can be made using your database credentials and setting the
+   ``connectString`` parameter to the desired :ref:`TNS Alias <tnsnames>` from
+   the :ref:`tnsnames.ora <tnsadmin>` file. For example, to connect as the
+   ADMIN user using the ``cjdb1_high`` network service name:
 
    .. code-block:: javascript
 
@@ -5881,13 +5920,11 @@ files:
             connectString: "cjdb1_high"
         });
 
--  Alternatively, move them the three files to any accessible directory, for
+2. Alternatively, move the three files to any accessible directory, for
    example ``/opt/OracleCloud/MYDB``.
 
    Then edit ``sqlnet.ora`` and change the wallet location directory to
-   the directory containing the ``cwallet.sso`` file. For example:
-
-   ::
+   the directory containing the ``cwallet.sso`` file. For example::
 
       WALLET_LOCATION = (SOURCE = (METHOD = file) (METHOD_DATA = (DIRECTORY="/opt/OracleCloud/MYDB")))
       SSL_SERVER_DN_MATCH=yes
@@ -5895,16 +5932,16 @@ files:
    Since the ``tnsnames.ora`` and ``sqlnet.ora`` files are not in the
    default location, your application needs to indicate where they are,
    either with the :ref:`configDir <odbinitoracleclientattrsopts>`
-   parameter to :meth:`~oracledb.initOracleClient()`, or
+   parameter to :meth:`~oracledb.initOracleClient()`, or by
    using the ``TNS_ADMIN`` environment variable. See :ref:`Optional Oracle
-   Net Configuration <tnsadmin>`. Neither of these settings are
+   Net Configuration <tnsadmin>`. (Neither of these settings are
    needed, and you do not need to edit ``sqlnet.ora``, if you have put
-   all the files in the ``network/admin`` directory.
+   all the files in the ``network/admin`` directory.)
 
-  For example, to connect as the ADMIN user using the ``cjdb1_high`` network
-  service name:
+   For example, to connect as the ADMIN user using the ``cjdb1_high`` TNS
+   alias:
 
-  .. code-block:: javascript
+   .. code-block:: javascript
 
         const oracledb = require('oracledb');
 
@@ -5922,73 +5959,6 @@ its own directory. For each connection use different connection string
 file. It is recommended to use Oracle Client libraries 19.17 (or later) when
 using :ref:`multiple wallets <connmultiwallets>`.
 
-If you need to create a new database schema so you do not login as the
-privileged ADMIN user, refer to the relevant Oracle Cloud documentation,
-for example see `Create Database Users <https://www.oracle.com/pls/topic/
-lookup?ctx=dblatest&id=GUID-B5846072-995B-4B81-BDCB-AF530BC42847>`__ in the
-Oracle Autonomous Database manual.
-
-Access Through a Proxy
-++++++++++++++++++++++
-
-If you are behind a firewall, you can tunnel TLS/SSL connections via a
-proxy using `HTTPS_PROXY <https://www.oracle.com/pls/topic/lookup?ctx=dblatest
-&id=GUID-C672E92D-CE32-4759-9931-92D7960850F7>`__
-in the connect descriptor. Successful connection depends on specific
-proxy configurations. Oracle does not recommend doing this when
-performance is critical.
-
-**In node-oracledb Thin Mode**
-
-The proxy settings can be passed during connection creation:
-
-.. code-block:: javascript
-
-    connection = await oracledb.getConnection({
-        user: "admin",
-        password: mypw,
-        connectString: "cjdb1_high",
-        configDir: "/opt/OracleCloud/MYDB",
-        walletLocation: "/opt/OracleCloud/MYDB",
-        walletPassword: wp,
-        httpsProxy: 'myproxy.example.com',
-        httpsProxyPort: 80
-    });
-
-Alternatively, edit ``tnsnames.ora`` and add an ``HTTPS_PROXY`` proxy name and
-``HTTPS_PROXY_PORT`` port to the :ref:`Connect Descriptor <embedtns>` address
-list of any service name you plan to use, for example::
-
-    cjdb1_high = (description=
-        (address=
-        (https_proxy=myproxy.example.com)(https_proxy_port=80)
-        (protocol=tcps)(port=1522)(host= . . . )))
-
-.. code-block:: javascript
-
-    connection = await oracledb.getConnection({
-        user: "admin",
-        password: mypw,
-        connectString: "cjdb1_high",
-        configDir: "/opt/OracleCloud/MYDB",
-        walletLocation: "/opt/OracleCloud/MYDB",
-        walletPassword: wp,
-    });
-
-**In node-oracledb Thick Mode**
-
-Edit ``sqlnet.ora`` and add a line::
-
-    SQLNET.USE_HTTPS_PROXY=on
-
-Edit ``tnsnames.ora`` and add an ``HTTPS_PROXY`` proxy name and
-``HTTPS_PROXY_PORT`` port to the :ref:`Connect Descriptor <embedtns>` address
-list of any service name you plan to use, for example::
-
-    cjdb1_high = (description=
-      (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)
-      (protocol=tcps)(port=1522)(host=  . . .
-
 Using the Easy Connect Syntax with Autonomous Database
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -5996,7 +5966,10 @@ You can optionally use the :ref:`Easy Connect <easyconnect>` syntax to connect
 to Oracle Autonomous Database.  When using node-oracledb Thick mode this
 requires using Oracle Client libraries 19c or later.
 
-The mapping from a cloud ``tnsnames.ora`` entry to an Easy Connect string is::
+This section details the parameters for mTLS connection.
+
+The mapping from a cloud :ref:`tnsnames.ora <tnsadmin>` entries to an Easy
+Connect string is::
 
     protocol://host:port/service_name?wallet_location=/my/dir&retry_count=N&retry_delay=N
 
@@ -6020,12 +5993,12 @@ Then your applications can connect using the connection string:
     });
 
 The ``walletLocation`` parameter needs to be set to the directory
-containing the ``cwallet.sso`` or ``ewallet.pem`` file from the wallet zip.
-The other wallet files, including ``tnsnames.ora``, are not needed when you
-use the Easy Connect syntax.
+containing the ``cwallet.sso`` or ``ewallet.pem`` file from the
+:ref:`wallet.zip <getwallet>` file. The other files, including
+``tnsnames.ora``, are not needed when you use the Easy Connect syntax.
 
-You can optionally add other Easy Connect parameters to the connection
-string, for example:
+You can add other Easy Connect parameters to the connection string, for
+example:
 
 .. code-block:: javascript
 
@@ -6063,6 +6036,91 @@ connection string. The :meth:`~oracledb.getConnection()` and
 :meth:`~oracledb.createPool()` methods also accept a ``walletPassword``
 property, which can be the passphrase that was specified when the above
 openSSL command was run. See :ref:`connectionadbmtls`.
+
+.. _firewallproxy:
+
+Connecting Through a Firewall via a Proxy
++++++++++++++++++++++++++++++++++++++++++
+
+If you are behind a firewall, you can tunnel TLS/SSL connections via a proxy
+by setting connection attributes, or by using `HTTPS_PROXY <https://www.oracle
+.com/pls/topic/lookup?ctx=dblatest&id=GUID-C672E92D-CE32-4759-9931-
+92D7960850F7>`__ and `HTTPS_PROXY_PORT <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-E69D27B7-2B59-4946-89B3-5DDD491C2D9A>`__ port
+parameters available in your :ref:`connection string <easyconnect>`.
+
+.. note::
+
+    Oracle does not recommend connecting through a firewall via a proxy when
+    performance is critical.
+
+**In node-oracledb Thin Mode**
+
+- Proxy settings ``httpsProxy`` and ``httpsProxyPort`` can be passed during
+  connection or pool creation:
+
+  .. code-block:: javascript
+
+      connection = await oracledb.getConnection({
+          user: "admin",
+          password: mypw,
+          connectString: "cjdb1_high",
+          configDir: "/opt/OracleCloud/MYDB",
+          walletLocation: "/opt/OracleCloud/MYDB",
+          walletPassword: wp,
+          httpsProxy: 'myproxy.example.com',
+          httpsProxyPort: 80
+      });
+
+- Alternatively, add the parameters to your :ref:`Easy Connect <easyconnect>`
+  string::
+
+    localhost/orclpdb&https_proxy=myproxy.example.com&https_proxy_port=80
+
+- Alternatively, update the :ref:`Connect Descriptor <embedtns>` (either being
+  passed directly during connection or contained in your
+  :ref:`tnsnames.ora <tnsadmin>` file). If you are using a
+  :ref:`tnsnames.ora <tnsadmin>` file, a modified entry might look like::
+
+    cjdb1_high = (description=
+        (address=
+        (https_proxy=myproxy.example.com)(https_proxy_port=80)
+        (protocol=tcps)(port=1522)(host= . . . )))
+
+  You can pass this connect descriptor during connection creation:
+
+  .. code-block:: javascript
+
+      connection = await oracledb.getConnection({
+          user: "admin",
+          password: mypw,
+          connectString: "cjdb1_high",
+          configDir: "/opt/OracleCloud/MYDB",
+          walletLocation: "/opt/OracleCloud/MYDB",
+          walletPassword: wp,
+      });
+
+**In node-oracledb Thick Mode**
+
+- If you are using an :ref:`Easy Connect <easyconnect>` string, add
+  ``HTTPS_PROXY`` and ``HTTPS_PROXY_PORT`` parameters with appropriate values
+  for your proxy. For example, you might pass parameters like::
+
+      localhost/orclpdb&https_proxy=myproxy.example.com&https_proxy_port=80
+
+- Alternatively, update the :ref:`Connect Descriptor <embedtns>` (either being
+  passed directly during connection or contained in your
+  :ref:`tnsnames.ora <tnsadmin>` file). If you are using a
+  :ref:`tnsnames.ora <tnsadmin>` file, a modified entry might look like::
+
+    cjdb1_high = (description=
+      (address=(https_proxy=myproxy.example.com)(https_proxy_port=80)
+      (protocol=tcps)(port=1522)(host=  . . .
+
+  Additionally, create or edit a :ref:`sqlnet.ora <tnsnames>` file and add a
+  line::
+
+    SQLNET.USE_HTTPS_PROXY=on
 
 .. _connmultiwallets:
 

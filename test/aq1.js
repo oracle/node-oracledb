@@ -93,7 +93,7 @@ describe('217. aq1.js', function() {
     }
   }); // after()
 
-  it('217.1 examples/aqraw.js', async () => {
+  it('217.1 examples/aqraw.js', async function() {
 
     // Enqueue
     const queue1 = await conn.getQueue(rawQueueName);
@@ -111,7 +111,7 @@ describe('217. aq1.js', function() {
 
   }); // 217.1
 
-  it('217.2 examples/aqoptions.js', async () => {
+  it('217.2 examples/aqoptions.js', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -141,7 +141,7 @@ describe('217. aq1.js', function() {
 
   }); // 217.2
 
-  it('217.3 examples/aqmulti.js', async () => {
+  it('217.3 examples/aqmulti.js', async function() {
 
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
@@ -171,7 +171,7 @@ describe('217. aq1.js', function() {
     }
   }); // 217.3
 
-  it('217.4 one message in enqMany/deqMany', async () => {
+  it('217.4 one message in enqMany/deqMany', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
     queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
@@ -191,21 +191,21 @@ describe('217. aq1.js', function() {
     }
   }); // 217.4
 
-  it('217.5 deqOne on empty queue', async () => {
+  it('217.5 deqOne on empty queue', async function() {
     const queue2 = await conn.getQueue(rawQueueName);
     queue2.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
     const message = await queue2.deqOne();
     assert.strictEqual(message, undefined);
   }); // 217.5
 
-  it('217.6 deqMany on empty queue', async () => {
+  it('217.6 deqMany on empty queue', async function() {
     const queue2 = await conn.getQueue(rawQueueName);
     queue2.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
     const messages = await queue2.deqMany(1);
     assert.deepStrictEqual(messages, []);
   }); // 217.6
 
-  it('217.7 get delay and enqtime properties', async () => {
+  it('217.7 get delay and enqtime properties', async function() {
     let result = await conn.execute('select current_timestamp from dual');
     const startTime = result.rows[0][0].setMilliseconds(0);
 
@@ -240,7 +240,7 @@ describe('217. aq1.js', function() {
     }
   }); // 217.7
 
-  it('217.8 get deliveryMode property', async () => {
+  it('217.8 get deliveryMode property', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -273,7 +273,7 @@ describe('217. aq1.js', function() {
     }
   }); // 217.8
 
-  it('217.9 get exceptionQueue property', async () => {
+  it('217.9 get exceptionQueue property', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -302,7 +302,7 @@ describe('217. aq1.js', function() {
     }
   }); // 217.9
 
-  it('217.10 set and get visibility attribute', async () => {
+  it('217.10 set and get visibility attribute', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -329,7 +329,7 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg.payload.toString(), messageString);
   }); // 217.10
 
-  it('217.11 get numAttempts attribute', async () => {
+  it('217.11 get numAttempts attribute', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -360,7 +360,7 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg.numAttempts, 1); // should be 1
   }); // 217.11
 
-  it('217.12 test priority attribute in enqueue', async () => {
+  it('217.12 test priority attribute in enqueue', async function() {
     const q = await conn.getQueue(rawQueueName);
     q.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
     q.deqOptions.wait = 0; // Don't wait if queue is empty
@@ -401,7 +401,7 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg2.payload.toString(), "Low Priority Message");
   }); // 217.12
 
-  it('217.13 test correlation', async () => {
+  it('217.13 test correlation', async function() {
     const queue = await conn.getQueue(rawQueueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -424,7 +424,7 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg.payload.toString(), "Correlated Message");
   }); // 217.13
 
-  it('217.14 test message ordering in transaction group', async () => {
+  it('217.14 test message ordering in transaction group', async function() {
     const queue = await conn.getQueue(rawQueueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_ON_COMMIT;
 
@@ -452,7 +452,7 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg3.payload.toString(), "Third Message");
   }); // 217.14
 
-  it('217.15 test dequeue with wait timeout', async () => {
+  it('217.15 test dequeue with wait timeout', async function() {
     const queue = await conn.getQueue(rawQueueName);
     queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
     queue.deqOptions.wait = 2; // 2 second timeout
@@ -465,7 +465,7 @@ describe('217. aq1.js', function() {
     assert(endTime - startTime >= 2000, "Dequeue should wait for at least 2 seconds");
   }); // 217.15
 
-  it('217.16 test buffer message payload - 32KB', async () => {
+  it('217.16 test buffer message payload - 32KB', async function() {
     const queue = await conn.getQueue(rawQueueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 

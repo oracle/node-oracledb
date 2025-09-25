@@ -99,11 +99,12 @@ More details and options are shown in the following sections:
 
 - On any operating system, if you set ``libDir`` to the library directory of a
   full database or full client installation (such as from running
-  ``runInstaller``), you will need to have previously set the Oracle environment,
-  for example by setting the ``ORACLE_HOME`` environment variable. Otherwise you
-  will get errors like ``ORA-1804``. You should set this variable, and other
-  Oracle environment variables, before starting Node.js, as shown in :ref:`Oracle
-  Environment Variables <environmentvariables>`.
+  ``runInstaller``), you will need to have previously set the Oracle
+  environment, for example, by setting the ``ORACLE_HOME`` environment
+  variable. Otherwise, you will get errors like ``ORA-1804``. You should set
+  this variable, and other Oracle environment variables, before starting
+  Node.js, as shown in :ref:`Oracle Environment Variables
+  <environmentvariables>`.
 
 - The :meth:`~oracledb.initOracleClient()` function may be called multiple
   times in your application but must always pass the same arguments.

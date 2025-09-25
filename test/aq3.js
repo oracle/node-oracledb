@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -92,7 +92,7 @@ describe('219. aq3.js', function() {
     }
   }); // after()
 
-  it('219.1 The read-only property "name" of AqQueue Class', async () => {
+  it('219.1 The read-only property "name" of AqQueue Class', async function() {
     const queue = await conn.getQueue(rawQueueName);
 
     const t = queue.name;
@@ -105,7 +105,7 @@ describe('219. aq3.js', function() {
     );
   }); // 219.1
 
-  it.skip('219.2 The read-only property "payloadType"', async () => {
+  it.skip('219.2 The read-only property "payloadType"', async function() {
     const queue = await conn.getQueue(rawQueueName);
 
     const t = queue.payloadType;
@@ -115,7 +115,7 @@ describe('219. aq3.js', function() {
     console.log(queue);
   }); // 219.2
 
-  it.skip('219.3 The read-only property "payloadTypeName"', async () => {
+  it.skip('219.3 The read-only property "payloadTypeName"', async function() {
     const queue = await conn.getQueue(rawQueueName);
 
     const t = queue.payloadTypeName;
@@ -123,29 +123,29 @@ describe('219. aq3.js', function() {
     queue.payloadTypeName = 'Foobar';
   }); // 219.3
 
-  it('219.4 Negative - Set "maxMessages" argument to be -5', async () => {
+  it('219.4 Negative - Set "maxMessages" argument to be -5', async function() {
     const queue = await conn.getQueue(rawQueueName);
 
     await assert.rejects(
-      async () => {
+      async function() {
         await queue.deqMany(-5);
       },
       /NJS-005/
     );
   }); // 219.4
 
-  it('219.5 Negative - Set "maxMessages" argument to be 0', async () => {
+  it('219.5 Negative - Set "maxMessages" argument to be 0', async function() {
     const queue = await conn.getQueue(rawQueueName);
 
     await assert.rejects(
-      async () => {
+      async function() {
         await queue.deqMany(0);
       },
       /NJS-005/
     );
   }); // 219.5
 
-  it('219.6 Enqueue a Buffer', async () => {
+  it('219.6 Enqueue a Buffer', async function() {
     // Enqueue
     const queue1 = await conn.getQueue(rawQueueName);
     const messageString = 'This is my message';
@@ -162,7 +162,7 @@ describe('219. aq3.js', function() {
     assert.strictEqual(msg.payload.toString(), messageString);
   }); // 219.6
 
-  it('219.7 enqMany() mixes enqueuing string and buffer', async () => {
+  it('219.7 enqMany() mixes enqueuing string and buffer', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -189,7 +189,7 @@ describe('219. aq3.js', function() {
     }
   }); // 219.7
 
-  it('219.8 Get correlation property in deqOne', async () => {
+  it('219.8 Get correlation property in deqOne', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -214,7 +214,7 @@ describe('219. aq3.js', function() {
     assert.strictEqual(queue2.deqOptions.correlation, myMsg[1].correlation);
   }); // 219.8
 
-  it('219.9 Get correlation property in deqOne by specifying same correlation ID', async () => {
+  it('219.9 Get correlation property in deqOne by specifying same correlation ID', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -250,7 +250,7 @@ describe('219. aq3.js', function() {
     assert.strictEqual(queue2.deqOptions.correlation, myMsg[2].correlation);
   }); // 219.9
 
-  it('219.10 Negative - Get correlation property in dequeue by changing correlation ID', async () => {
+  it('219.10 Negative - Get correlation property in dequeue by changing correlation ID', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -273,9 +273,9 @@ describe('219. aq3.js', function() {
 
     queue2.deqOptions.correlation = myMsg[1].correlation;
 
-    await assert.rejects(
-      async () => await queue2.deqOne(),
-      /ORA-25241:/ /*
+    await assert.rejects(async () =>
+      await queue2.deqOne(),
+    /ORA-25241:/ /*
                     ORA-25241: Cannot change correlation ID
                     from 'someId' to 'two' without FIRST_MESSAGE option
                    */
@@ -286,7 +286,7 @@ describe('219. aq3.js', function() {
     assert.strictEqual(queue2.deqOptions.correlation, myMsg[1].correlation);
   }); // 219.10
 
-  it('219.11 get correlation property in deqMany', async () => {
+  it('219.11 get correlation property in deqMany', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -338,7 +338,7 @@ describe('219. aq3.js', function() {
     assert.strictEqual(queue2.deqOptions.correlation, myMsg[1].correlation);
   }); // 219.11
 
-  it('219.12 Get priority attribute in deqOne', async () => {
+  it('219.12 Get priority attribute in deqOne', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -366,7 +366,7 @@ describe('219. aq3.js', function() {
     assert.strictEqual(msg.payload.toString(), "Message 2");
   }); // 219.12
 
-  it('219.13 Get state attribute in deqOne', async () => {
+  it('219.13 Get state attribute in deqOne', async function() {
     /* Enqueue */
     const queue1 = await conn.getQueue(rawQueueName);
 
@@ -384,7 +384,7 @@ describe('219. aq3.js', function() {
     assert.strictEqual(msg.payload.toString(), messageString);
   }); // 219.13
 
-  it('219.14 Verify state change on expiration', async () => {
+  it('219.14 Verify state change on expiration', async function() {
     /* Enqueue with expiration */
     const queue1 = await conn.getQueue(rawQueueName);
 

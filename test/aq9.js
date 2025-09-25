@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -217,7 +217,7 @@ describe('301. aq9.js', function() {
 
   // Test with single consumer queue
   // enqueue with transformation, message_order_transform
-  it('301.1 Enqueue messages with transformation single user queue', async () => {
+  it('301.1 Enqueue messages with transformation single user queue', async function() {
     const queue1 = await conn.getQueue('OBJECT_SINGLE_QUEUE', {payloadType: MESSAGE_TYP});
     const messageString = {
       ATTR1: 1,  // Ensure attribute names and types match MESSAGE_TYP
@@ -249,7 +249,7 @@ describe('301. aq9.js', function() {
 
   // Test with multi consumer queue
   // enqueue with transformation, message_order_transform
-  it('301.2 Enqueue messages with transformation on multiple users', async () => {
+  it('301.2 Enqueue messages with transformation on multiple users', async function() {
     const queue1 = await conn.getQueue('OBJECT_MULTIPLE_QUEUE', {payloadType: MESSAGE_TYP});
     const messageString = {
       ATTR1: 1,  // Ensure attribute names and types match MESSAGE_TYP
@@ -287,7 +287,7 @@ describe('301. aq9.js', function() {
 
   // Test with single consumer queue
   // enqueue with transformation, message_order_transform
-  it('301.3 Enqueue and dequeue messages with transformation on single user queue', async () => {
+  it('301.3 Enqueue and dequeue messages with transformation on single user queue', async function() {
     const queue1 = await conn.getQueue('OBJECT_SINGLE_QUEUE', {payloadType: MESSAGE_TYP});
     const messageString = {
       ATTR1: 1,  // Ensure attribute names and types match MESSAGE_TYP
@@ -322,7 +322,7 @@ describe('301. aq9.js', function() {
   // Test with multi consumer queue
   // enqueue with transformation, message_order_transform
   // dequeue with transformation, order_message_transform
-  it('301.4 Enqueue and dequeue messages with transformation on multiple user queue', async () => {
+  it('301.4 Enqueue and dequeue messages with transformation on multiple user queue', async function() {
     const queue1 = await conn.getQueue('OBJECT_MULTIPLE_QUEUE', {payloadType: MESSAGE_TYP});
     const messageString = {
       ATTR1: 1,  // Ensure attribute names and types match MESSAGE_TYP
