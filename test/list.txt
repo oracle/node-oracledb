@@ -6377,3 +6377,31 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     317.6 Connection Pool and Resource Management
         317.6.1 SODA operations with autoCommit enabled
         317.6.2 SODA collection cleanup after connection close
+  318. soda16.js
+    318.1 Invalid JSON and Error Handling
+        318.1.1 inserting invalid JSON value into SODA collection (750ms)
+        318.1.2 various invalid JSON scenarios (643ms)
+    318.2 Document Metadata and Attributes
+        318.2.1 createdOn attribute of Document (743ms)
+        318.2.2 name and metadata attribute (582ms)
+        318.2.3 document version operations (1559ms)
+    318.3 Cursor and Limit Operations
+        318.3.1 close document cursor and confirm exception is raised (1060ms)
+        318.3.2 limit to get specific number of documents (1664ms)
+        318.3.3 get count exceptions when using limit and skip (783ms)
+    318.4 Advanced Query Operations
+        318.4.1 comprehensive search with different QBE filters (12302ms)
+        318.4.2 $and and $or operations (905ms)
+    318.5 Collection Management
+        318.5.1 createCollection() with same name and metadata (589ms)
+        318.5.2 createCollection() with same name but different metadata (622ms)
+        318.5.3 read-only collection restrictions (671ms)
+    318.6 Negative Cases
+        318.6.1 negative cases for SodaOperation methods
+        318.6.2 various unsupported parameter scenarios
+    318.7 Mixed Data Types and Edge Cases
+        318.7.1 documents with mixed content types (1071ms)
+        318.7.2 empty and whitespace content handling (1112ms)
+    318.8 Performance and Stress Tests
+        318.8.1 operations with large number of documents (1655ms)
+        318.8.2 concurrent document operations

@@ -245,7 +245,7 @@ describe('217. aq1.js', function() {
 
     // Send a message immediately without requiring a commit
     queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
-    queue1.enqOptions.deliveryMode = 1; // Delivery mode when enqueuing messages
+    queue1.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT; // Delivery mode when enqueuing messages
 
     const messageString = 'This is my other message';
     const message = {
@@ -254,7 +254,8 @@ describe('217. aq1.js', function() {
     const myMsg = await queue1.enqOne(message);
 
     // Get the deliveryMode attribute in enqOptions
-    assert.strictEqual(queue1.enqOptions.deliveryMode, 1);
+    assert.strictEqual(queue1.enqOptions.deliveryMode,
+      oracledb.AQ_MSG_DELIV_MODE_PERSISTENT);
 
     /* Dequeue */
     const queue2 = await conn.getQueue(rawQueueName);

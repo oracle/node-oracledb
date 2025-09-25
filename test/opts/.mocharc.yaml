@@ -299,3 +299,4 @@ spec:
   - test/poolMaxLifetimeSession.js
   - test/sessionless.js
   - test/soda15.js
+  - test/soda16.js
