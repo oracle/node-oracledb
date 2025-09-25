@@ -13,6 +13,21 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
+node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ ()
+---------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Allow Proxy user to be passed with :ref:`external authentication in :meth:`oracledb.createPool()` for Thin mode.
+    See `Issue #1743 <https://github.com/oracle/node-oracledb/issues/1743>`__.
+
+Thick Mode Changes
+++++++++++++++++++
+
 node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (18 Jul 2025)
 ---------------------------------------------------------------------------------------------------------
 

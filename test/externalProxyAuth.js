@@ -287,23 +287,41 @@ describe('180. externalProxyAuth.js', function() {
       );
     });
 
-    it('180.2.8 Pooled Connect: External Auth with proxy when acquire connection', async function() {
+    it('180.2.8 Pooled Connect: External Auth with proxy for thick and thin modes ', async function() {
       // Currently, heterogeneous pools are not supported for thin mode.
-      if (oracledb.thin || !dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
+      if (!dbConfig.test.externalAuth || !dbConfig.test.proxySessionUser) {
         this.skip();
       }
-
-      const pool = await oracledb.createPool({
+      const userConfig = `[${dbConfig.user.toUpperCase()}]`;
+      const poolConfig = {
         connectString: dbConfig.connectString,
         externalAuth: true,
         walletPassword: dbConfig.walletPassword,
         walletLocation: dbConfig.walletLocation
-      });
-      const conn = await pool.getConnection({user: `[${dbConfig.user.toUpperCase()}]`});
-      const [proxy_user, session_user] = await ShowUserInfo(conn);
+      };
+      const getConnectionConfig = {};
+
+      if (oracledb.thin) {
+        // thin mode allows session user to be passed in createPool.
+        poolConfig.user = userConfig;
+      } else {
+        // thick mode allows the session user to be passed in getConnection.
+        getConnectionConfig.user = userConfig;
+      }
+
+      const pool = await oracledb.createPool(poolConfig);
+      const conn1 = await pool.getConnection(getConnectionConfig);
+      const [proxy_user, session_user] = await ShowUserInfo(conn1);
       assert.strictEqual(proxy_user, dbConfig.test.proxySessionUser.toUpperCase());
       assert.strictEqual(session_user, dbConfig.user.toUpperCase());
-      await conn.close();
+      assert.strictEqual(pool.connectionsOpen, 1);
+
+      // check for pool expansion
+      const conn2 = await pool.getConnection(getConnectionConfig);
+      assert.strictEqual(pool.connectionsOpen, 2);
+
+      await conn1.close();
+      await conn2.close();
       await pool.close(0);
     });
 

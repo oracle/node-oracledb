@@ -4485,7 +4485,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         180.2.5 Pooled Connect: Basic Auth with proxy when acquire connection
         180.2.6 Pooled Connect: External Auth with proxy when create pool
         180.2.7 Pooled Connect: External Auth with proxy no brackets when create pool
-        180.2.8 Pooled Connect: External Auth with proxy when acquire connection
+        180.2.8 Pooled Connect: External Auth with proxy for thick and thin modes
         180.2.9 Pooled Connect: External Auth with proxy no brackets when acquire connection
 
 181. dataTypeXML.js
