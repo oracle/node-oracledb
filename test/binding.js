@@ -913,6 +913,7 @@ describe('4. binding.js', function() {
       const expectedBind = {
         name: "STRINGVALUE",
         fetchType: oracledb.DB_TYPE_CHAR,
+        dbColumnName: "STRINGVALUE",
         dbType: oracledb.DB_TYPE_CHAR,
         dbTypeName: "CHAR",
         nullable: true,

@@ -394,7 +394,9 @@ describe('9. columnMetadata.js', function() {
     it('9.5.1 works when using duplicate column alias', async function() {
       const result = await connection.execute("SELECT 1 a, 'abc' a FROM dual");
       assert.strictEqual(result.metaData[0].name, 'A');
+      assert.strictEqual(result.metaData[0].dbColumnName, 'A');
       assert.strictEqual(result.metaData[1].name, 'A_1');
+      assert.strictEqual(result.metaData[1].dbColumnName, 'A');
     });
   });
 

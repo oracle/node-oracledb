@@ -271,10 +271,12 @@ bool njsVariable_getMetadataOne(njsVariable *var, napi_env env,
     // create object to store metadata on
     NJS_CHECK_NAPI(env, napi_create_object(env, metadata))
 
-    // store name
+    // store name in "name" and "dbColumnName" properties initially
     NJS_CHECK_NAPI(env, napi_create_string_utf8(env, var->name,
             var->nameLength, &temp))
     NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata, "name", temp))
+    NJS_CHECK_NAPI(env, napi_set_named_property(env, *metadata,
+            "dbColumnName", temp))
 
     // store database type, name and class, as needed
     if (!njsUtils_addTypeProperties(env, *metadata, "dbType",

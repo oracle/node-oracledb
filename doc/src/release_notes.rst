@@ -35,6 +35,11 @@ Common Changes
 #)  Added error ``NJS-174`` which is thrown if payload type does not match the
     queue type in :ref:`Advanced Queuing <aq>`.
 
+#)  Added a new extended :ref:`metadata <execmetadata>` information attribute
+    ``dbColumnName`` for a fetched column which provides the actual database
+    column name as opposed to the unique column name provided by the ``name``
+    information attribute.
+
 #)  Fixed bug when attempting to use collection-specific methods for
     :ref:`database objects <dbobjectclass>` which is not actually a collection.
 

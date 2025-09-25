@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -223,6 +223,7 @@ describe('236. nestedCursor05.js', () => {
     const stringMetaData = {
       name: 'DESCRIPTION',
       fetchType: oracledb.DB_TYPE_VARCHAR,
+      dbColumnName: 'DESCRIPTION',
       dbType: oracledb.DB_TYPE_VARCHAR,
       dbTypeName: 'VARCHAR2',
       nullable: true,
@@ -233,6 +234,7 @@ describe('236. nestedCursor05.js', () => {
     assert.deepStrictEqual(result.metaData[0], stringMetaData);
     assert.strictEqual(result.metaData[1].name, 'CHILDREN');
     assert.strictEqual(result.metaData[1].fetchType, oracledb.DB_TYPE_CURSOR);
+    assert.strictEqual(result.metaData[1].dbColumnName, 'CHILDREN');
     assert.strictEqual(result.metaData[1].dbType, oracledb.DB_TYPE_CURSOR);
     assert.strictEqual(result.metaData[1].dbTypeName, 'CURSOR');
 
@@ -240,6 +242,8 @@ describe('236. nestedCursor05.js', () => {
     assert.strictEqual(result.metaData[1].metaData[1].name, 'GRANDCHILDREN');
     assert.strictEqual(result.metaData[1].metaData[1].fetchType,
       oracledb.DB_TYPE_CURSOR);
+    assert.strictEqual(result.metaData[1].metaData[1].dbColumnName,
+      'GRANDCHILDREN');
     assert.strictEqual(result.metaData[1].metaData[1].dbType,
       oracledb.DB_TYPE_CURSOR);
     assert.strictEqual(result.metaData[1].metaData[1].dbTypeName, 'CURSOR');

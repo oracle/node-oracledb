@@ -1369,6 +1369,7 @@ Connection Methods
 
             - ``annotations``: The `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object associated with the fetched column. If the column has no associated annotations, this attribute value is `undefined`. Annotations are supported from Oracle Database 23ai onwards. If node-oracledb Thick mode is used, Oracle Client 23ai is also required.
             - ``byteSize``: The database byte size. This is only set for ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR`` and ``oracledb.DB_TYPE_RAW`` column types.
+            - ``dbColumnName``: The actual database column name. This is to distinguish from the ``name`` attribute as the duplicate columns in the query will have the same value for this attribute.
             - ``dbType``: one of the :ref:`Oracle Database Type Constant <oracledbconstantsdbtype>` values.
             - ``dbTypeClass``: The class associated with the database type. This is only set if the database type is an object type.
             - ``dbTypeName``: The name of the database type, such as “NUMBER” or “VARCHAR2”. For object types, this will be the object name.
@@ -1384,6 +1385,10 @@ Connection Methods
             - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` columns.
             - ``vectorDimensions``: The number of dimensions of the VECTOR column. If the column is not a VECTOR column or allows for any number of dimensions, then the value of this attribute is *undefined*.
             - ``vectorFormat``: The storage format of each dimension value in the VECTOR column. If the column is not a VECTOR column or allows for any storage format, then the value of this attribute is *undefined*.
+
+            .. versionchanged:: 6.10
+
+                The ``dbColumnName`` information attribute was added.
 
             .. versionchanged:: 6.8
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -152,9 +152,13 @@ describe('246. dupColNames1.js', function() {
 
       const result = await connection.execute(sql);
       assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[0].dbColumnName, "EMPLOYEE_ID");
       assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[1].dbColumnName, "DEPARTMENT_ID");
       assert.equal(result.metaData[2].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[2].dbColumnName, "DEPARTMENT_ID");
       assert.equal(result.metaData[3].name, "DEPARTMENT_NAME");
+      assert.equal(result.metaData[3].dbColumnName, "DEPARTMENT_NAME");
       assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
       assert.equal(result.rows[0].DEPARTMENT_ID, 101);
       assert.equal(result.rows[1].DEPARTMENT_ID_1, 201);
@@ -192,9 +196,13 @@ describe('246. dupColNames1.js', function() {
 
       const result = await connection.execute(sql);
       assert.equal(result.metaData[0].name, "EMPLOYEE_ID");
+      assert.equal(result.metaData[0].dbColumnName, "EMPLOYEE_ID");
       assert.equal(result.metaData[1].name, "DEPARTMENT_ID");
+      assert.equal(result.metaData[1].dbColumnName, "DEPARTMENT_ID");
       assert.equal(result.metaData[2].name, "DEPARTMENT_ID_2");
+      assert.equal(result.metaData[2].dbColumnName, "DEPARTMENT_ID");
       assert.equal(result.metaData[3].name, "DEPARTMENT_ID_1");
+      assert.equal(result.metaData[3].dbColumnName, "DEPARTMENT_ID_1");
       assert.equal(result.rows[0].EMPLOYEE_ID, 1001);
       assert.equal(result.rows[0].DEPARTMENT_ID, 101);
       assert.equal(result.rows[0].DEPARTMENT_ID_1, 101);

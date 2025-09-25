@@ -45,6 +45,7 @@ describe('309. dataTypeVector7.js', function() {
   const metaDataFloat64 = {
     name: "SPARSEVECTOR64COL",
     dbType: oracledb.DB_TYPE_VECTOR,
+    dbColumnName: "SPARSEVECTOR64COL",
     nullable: true,
     isJson: false,
     isOson: false,
@@ -57,6 +58,7 @@ describe('309. dataTypeVector7.js', function() {
 
   const metaDataFloat64Flex = {
     name: "SPARSEVECTORFLEX64COL",
+    dbColumnName: "SPARSEVECTORFLEX64COL",
     dbType: oracledb.DB_TYPE_VECTOR,
     nullable: true,
     isJson: false,
@@ -69,6 +71,7 @@ describe('309. dataTypeVector7.js', function() {
 
   const metaDataFloat32 = {
     name: "SPARSEVECTOR32COL",
+    dbColumnName: "SPARSEVECTOR32COL",
     dbType: oracledb.DB_TYPE_VECTOR,
     nullable: true,
     isJson: false,
@@ -82,6 +85,7 @@ describe('309. dataTypeVector7.js', function() {
 
   const metaDataFloat32Flex = {
     name: "SPARSEVECTORFLEX32COL",
+    dbColumnName: "SPARSEVECTORFLEX32COL",
     dbType: oracledb.DB_TYPE_VECTOR,
     nullable: true,
     isJson: false,
@@ -94,6 +98,7 @@ describe('309. dataTypeVector7.js', function() {
 
   const metaDataInt8Flex = {
     name: "SPARSEVECTORFLEX8COL",
+    dbColumnName: "SPARSEVECTORFLEX8COL",
     dbType: oracledb.DB_TYPE_VECTOR,
     nullable: true,
     isJson: false,
@@ -106,6 +111,7 @@ describe('309. dataTypeVector7.js', function() {
 
   const metaDataInt8 = {
     name: "SPARSEVECTOR8COL",
+    dbColumnName: "SPARSEVECTOR8COL",
     dbType: oracledb.DB_TYPE_VECTOR,
     nullable: true,
     isJson: false,

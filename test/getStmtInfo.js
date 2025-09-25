@@ -66,6 +66,7 @@ describe('162. getStmtInfo.js', function() {
             dbTypeName: "NUMBER",
             fetchType: oracledb.DB_TYPE_NUMBER,
             name: "COL",
+            dbColumnName: "COL",
             nullable: true,
             precision: 0,
             scale: -127,
@@ -500,7 +501,9 @@ describe('162. getStmtInfo.js', function() {
 
     const info = await conn.getStatementInfo(sql);
     assert.strictEqual(info.metaData[0].name, 'A');
+    assert.strictEqual(info.metaData[0].dbColumnName, 'A');
     assert.strictEqual(info.metaData[1].name, 'A_1');
+    assert.strictEqual(info.metaData[1].dbColumnName, 'A');
     const result = await conn.execute(sql);
     assert.deepStrictEqual(result.rows[0], [1, 'abc']);
   });
@@ -510,7 +513,9 @@ describe('162. getStmtInfo.js', function() {
 
     const info = await conn.getStatementInfo(sql);
     assert.strictEqual(info.metaData[0].name, 'NUM');
+    assert.strictEqual(info.metaData[0].dbColumnName, 'NUM');
     assert.strictEqual(info.metaData[1].name, 'CONTENT');
+    assert.strictEqual(info.metaData[1].dbColumnName, 'CONTENT');
   });
 
   it('162.39 Mixed aliases and table columns', async function() {
@@ -518,8 +523,11 @@ describe('162. getStmtInfo.js', function() {
 
     const info = await conn.getStatementInfo(sql);
     assert.strictEqual(info.metaData[0].name, 'NUM');
+    assert.strictEqual(info.metaData[0].dbColumnName, 'NUM');
     assert.strictEqual(info.metaData[1].name, 'VALUE');
+    assert.strictEqual(info.metaData[1].dbColumnName, 'VALUE');
     assert.strictEqual(info.metaData[2].name, 'LIT');
+    assert.strictEqual(info.metaData[2].dbColumnName, 'LIT');
   });
 
   it('162.40 Very long column alias names', async function() {
@@ -527,6 +535,8 @@ describe('162. getStmtInfo.js', function() {
 
     const sql = `SELECT 1 AS "${longName}", 2 AS "${longName}" FROM dual`;
     const info = await conn.getStatementInfo(sql);
+    assert.strictEqual(info.metaData[0].dbColumnName, longName);
+    assert.strictEqual(info.metaData[1].dbColumnName, longName);
     assert.notStrictEqual(info.metaData[0].name, info.metaData[1].name);
   });
 
@@ -535,7 +545,9 @@ describe('162. getStmtInfo.js', function() {
 
     const info = await conn.getStatementInfo(sql);
     assert.strictEqual(info.metaData[0].name, 'A');
+    assert.strictEqual(info.metaData[0].dbColumnName, 'A');
     assert.strictEqual(info.metaData[1].name, 'A_1');
+    assert.strictEqual(info.metaData[1].dbColumnName, 'A');
   });
 
   it('162.42 Numeric aliases converted to strings', async function() {
@@ -543,7 +555,9 @@ describe('162. getStmtInfo.js', function() {
 
     const info = await conn.getStatementInfo(sql);
     assert.strictEqual(info.metaData[0].name, '1');
+    assert.strictEqual(info.metaData[0].dbColumnName, '1');
     assert.strictEqual(info.metaData[1].name, '1_1');
+    assert.strictEqual(info.metaData[1].dbColumnName, '1');
   });
 
   it('162.43 Special character aliases', async function() {
@@ -551,7 +565,9 @@ describe('162. getStmtInfo.js', function() {
 
     const info = await conn.getStatementInfo(sql);
     assert.strictEqual(info.metaData[0].name, '@#$');
+    assert.strictEqual(info.metaData[0].dbColumnName, '@#$');
     assert.strictEqual(info.metaData[1].name, '@#$_1');
+    assert.strictEqual(info.metaData[1].dbColumnName, '@#$');
   });
 
   it('162.44 Metadata consistency between output formats - duplicate aliases', async function() {
@@ -569,6 +585,8 @@ describe('162. getStmtInfo.js', function() {
     assert.deepStrictEqual(resultArray.metaData, resultObject.metaData);
 
     assert.strictEqual(infoArray.metaData[0].name, 'A');
+    assert.strictEqual(infoArray.metaData[0].dbColumnName, 'A');
     assert.strictEqual(infoArray.metaData[1].name, 'A_1');
+    assert.strictEqual(infoArray.metaData[1].dbColumnName, 'A');
   });
 });
