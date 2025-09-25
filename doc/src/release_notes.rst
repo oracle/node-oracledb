@@ -22,6 +22,10 @@ Common Changes
 #)  Improved connection pool's queueTimeout behavior to account for network
     delays and pool expansion delays.
 
+#)  Ensured proper errors are raised when invalid parameter values are passed
+    for the :meth:`sodaOperation.limit()` and :meth:`sodaOperation.skip()`
+    methods in SODA operations.
+
 Thin Mode Changes
 +++++++++++++++++
 

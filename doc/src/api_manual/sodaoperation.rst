@@ -148,11 +148,12 @@ with the key “c” is matched.
         limit(Number n)
 
     Sets the maximum number of documents that a terminal method will apply
-    to. The value of ``n`` must be greater than 0. The limit is applied to
-    documents that match the other SodaOperation criteria. The ``limit()``
-    method only applies to SodaOperation read operations like
-    ``getCursor()`` and ``getDocuments()``. If a filter ``$orderby`` is not
-    used, the document order is internally defined.
+    to. The value of ``n`` must be an integer greater than 0, otherwise an
+    error will be raised. The limit is applied to documents that match the
+    other SodaOperation criteria. The ``limit()`` method only applies to
+    SodaOperation read operations like ``getCursor()`` and ``getDocuments()``.
+    If a filter ``$orderby`` is not used, the document order is internally
+    defined.
 
     The ``limit()`` method cannot be used in conjunction with
     :meth:`~sodaOperation.count()`.
@@ -199,8 +200,9 @@ with the key “c” is matched.
         skip(Number n)
 
     Sets the number of documents that will be skipped before the terminal
-    method is applied. The value of ``n`` must be greater or equal to 0. The
-    skip applies to documents that match the other SodaOperation criteria.
+    method is applied. The value of ``n`` must be an integer greater or equal
+    to 0, otherwise an error will be raised. The skip applies to documents
+    that match the other SodaOperation criteria.
 
     If a filter ``$orderby`` is not used, the document order (and hence
     which documents are skipped) is internally defined.

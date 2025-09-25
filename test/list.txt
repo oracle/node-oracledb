@@ -6389,6 +6389,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         318.3.1 close document cursor and confirm exception is raised (1060ms)
         318.3.2 limit to get specific number of documents (1664ms)
         318.3.3 get count exceptions when using limit and skip (783ms)
+        318.3.4 valid skip and limit operations
     318.4 Advanced Query Operations
         318.4.1 comprehensive search with different QBE filters (12302ms)
         318.4.2 $and and $or operations (905ms)
