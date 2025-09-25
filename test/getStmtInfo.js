@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -493,5 +493,82 @@ describe('162. getStmtInfo.js', function() {
     assert.deepStrictEqual(info.bindNames, ['TABLE_NAME', 'VALUE']);
     const result = await conn.execute(sql, expectedRes);
     assert.deepStrictEqual(result.rows[0], expectedRes);
+  });
+
+  it('162.37 Duplicate column aliases', async function() {
+    const sql = `SELECT 1 a, 'abc' a FROM dual`;
+
+    const info = await conn.getStatementInfo(sql);
+    assert.strictEqual(info.metaData[0].name, 'A');
+    assert.strictEqual(info.metaData[1].name, 'A_1');
+    const result = await conn.execute(sql);
+    assert.deepStrictEqual(result.rows[0], [1, 'abc']);
+  });
+
+  it('162.38 Simple table columns without aliases', async function() {
+    const sql = `SELECT num, content FROM ${tableName}`;
+
+    const info = await conn.getStatementInfo(sql);
+    assert.strictEqual(info.metaData[0].name, 'NUM');
+    assert.strictEqual(info.metaData[1].name, 'CONTENT');
+  });
+
+  it('162.39 Mixed aliases and table columns', async function() {
+    const sql = `SELECT num, content AS value, 'literal' AS lit FROM ${tableName}`;
+
+    const info = await conn.getStatementInfo(sql);
+    assert.strictEqual(info.metaData[0].name, 'NUM');
+    assert.strictEqual(info.metaData[1].name, 'VALUE');
+    assert.strictEqual(info.metaData[2].name, 'LIT');
+  });
+
+  it('162.40 Very long column alias names', async function() {
+    const longName = 'A'.repeat(30);
+
+    const sql = `SELECT 1 AS "${longName}", 2 AS "${longName}" FROM dual`;
+    const info = await conn.getStatementInfo(sql);
+    assert.notStrictEqual(info.metaData[0].name, info.metaData[1].name);
+  });
+
+  it('162.41 Single character duplicate aliases', async function() {
+    const sql = `SELECT 1 AS "A", 2 AS "A" FROM dual`;
+
+    const info = await conn.getStatementInfo(sql);
+    assert.strictEqual(info.metaData[0].name, 'A');
+    assert.strictEqual(info.metaData[1].name, 'A_1');
+  });
+
+  it('162.42 Numeric aliases converted to strings', async function() {
+    const sql = `SELECT 1 AS "1", 2 AS "1" FROM dual`;
+
+    const info = await conn.getStatementInfo(sql);
+    assert.strictEqual(info.metaData[0].name, '1');
+    assert.strictEqual(info.metaData[1].name, '1_1');
+  });
+
+  it('162.43 Special character aliases', async function() {
+    const sql = `SELECT 1 AS "@#$", 2 AS "@#$" FROM dual`;
+
+    const info = await conn.getStatementInfo(sql);
+    assert.strictEqual(info.metaData[0].name, '@#$');
+    assert.strictEqual(info.metaData[1].name, '@#$_1');
+  });
+
+  it('162.44 Metadata consistency between output formats - duplicate aliases', async function() {
+    const sql = `SELECT sysdate as A, sysdate as A FROM dual`;
+
+    // Test with array format
+    const infoArray = await conn.getStatementInfo(sql);
+    const resultArray = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_ARRAY });
+
+    // Test with object format
+    const infoObject = await conn.getStatementInfo(sql);
+    const resultObject = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });
+
+    assert.deepStrictEqual(infoArray.metaData, infoObject.metaData);
+    assert.deepStrictEqual(resultArray.metaData, resultObject.metaData);
+
+    assert.strictEqual(infoArray.metaData[0].name, 'A');
+    assert.strictEqual(infoArray.metaData[1].name, 'A_1');
   });
 });

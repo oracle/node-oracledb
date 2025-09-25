@@ -65,6 +65,9 @@ Thick Mode Changes
 
 #)  Internal code refactoring to optimize handling of SODA functions.
 
+#)  Fixed bug to ensure that :meth:`connection.getStmtInfo()` processes the
+    query metadata correctly.
+
 node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (18 Jul 2025)
 ---------------------------------------------------------------------------------------------------------
 

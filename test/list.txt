@@ -4272,6 +4272,14 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     162.34 ignore literals only during bind processing
     162.35 Parse and Execute twice
     162.36 Multiple line and Multiple Asterisks
+    162.37 Duplicate column aliases
+    162.38 Simple table columns without aliases
+    162.39 Mixed aliases and table columns
+    162.40 Very long column alias names
+    162.41 Single character duplicate aliases
+    162.42 Numeric aliases converted to strings
+    162.43 Special character aliases
+    162.44 Metadata consistency between output formats - duplicate aliases
 
 163. executeMany1.js
     163.1 inserts many rows with bind by name

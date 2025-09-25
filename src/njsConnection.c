@@ -1745,7 +1745,7 @@ static bool njsConnection_getStatementInfoAsync(njsBaton *baton)
 static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
         napi_env env, napi_value *result)
 {
-    napi_value bindNames, metadata, temp;
+    napi_value bindNames, metadata, temp, options, callingObj;
     uint32_t i;
 
     // create object for the result
@@ -1756,9 +1756,27 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
         if (!njsVariable_initForQueryJS(baton->queryVars, baton->numQueryVars,
                 env, baton))
             return false;
-        if (!njsVariable_getMetadataMany(baton->queryVars, baton->numQueryVars,
-                env, &metadata))
+
+        // Setup the options parameter for "_setup" call in JavaScript
+        NJS_CHECK_NAPI(env, napi_create_object(env, &options))
+        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
+                &callingObj))
+        NJS_CHECK_NAPI(env, napi_set_named_property(env, options, "connection",
+                callingObj))
+        NJS_CHECK_NAPI(env, napi_create_reference(env, options, 1,
+                &baton->jsExecuteOptionsRef))
+
+        // return result set
+        if (!njsResultSet_new(baton, env,
+                (njsConnection*) baton->callingInstance, baton->dpiStmtHandle,
+                baton->queryVars, baton->numQueryVars, &temp))
             return false;
+
+        baton->dpiStmtHandle = NULL;
+        baton->queryVars = NULL;
+        baton->numQueryVars = 0;
+        NJS_CHECK_NAPI(env, napi_get_named_property(env, temp, "metaData",
+                &metadata))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "metaData",
                 metadata))
     }
