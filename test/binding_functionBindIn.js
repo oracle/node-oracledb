@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,16 +35,13 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const sql    = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('99.binding_functionBindIn.js', function() {
 
   let connection = null;
-  const executeSql = async function(sql) {
-    await connection.execute(sql);
-  };
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -54,6 +51,44 @@ describe('99.binding_functionBindIn.js', function() {
     await connection.close();
   });
 
+  const getExpectedErrorPattern = function(bindType, dbColType, nullBind) {
+    if (bindType === oracledb.STRING) {
+      // STRING binding
+      if (dbColType === "BLOB") {
+        return /ORA-06550:/; // PL/SQL compilation error
+      }
+
+      if (nullBind === true) {
+        return null;
+      }
+
+      if (dbColType.indexOf("CHAR") > -1 || dbColType === "CLOB") {
+        return null;
+      }
+
+      if (dbColType.indexOf("FLOAT") > -1 || dbColType === "NUMBER" ||
+          dbColType.indexOf("RAW") > -1 || dbColType === "BINARY_DOUBLE") {
+        return /ORA-06502:/; // Conversion errors
+      }
+
+      if (dbColType === "DATE" || dbColType === "TIMESTAMP") {
+        return /ORA-01858:/; // Date conversion error
+      }
+    } else {
+      // BUFFER binding
+      if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 ||
+          dbColType === "BINARY_DOUBLE" || dbColType === "DATE" ||
+          dbColType === "TIMESTAMP" || dbColType === "CLOB") {
+        return /ORA-06550:/; // PL/SQL compilation error
+      }
+
+      if (dbColType.indexOf("CHAR") > -1 || dbColType.indexOf("RAW") > -1 || dbColType === "BLOB") {
+        return null;
+      }
+    }
+    return null; // Default to success
+  };
+
   const doTest = async function(table_name, procName, bindType, dbColType, content, sequence, nullBind) {
     let bindVar = {
       i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -61,13 +96,12 @@ describe('99.binding_functionBindIn.js', function() {
       output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
     };
     await inBind(table_name, procName, dbColType, bindVar, bindType, nullBind);
+
     bindVar = [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, { val: content, type: bindType, dir: oracledb.BIND_IN } ];
     await inBind(table_name, procName, dbColType, bindVar, bindType, nullBind);
   };
 
   const inBind = async function(table_name, fun_name, dbColType, bindVar, bindType, nullBind) {
-    const createTable = await sql.createTable(table_name, dbColType);
-    const drop_table = "DROP TABLE " + table_name + " PURGE";
     const proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN " + dbColType + ") RETURN NUMBER\n" +
                "IS \n" +
                "    tmpvar NUMBER; \n" +
@@ -80,70 +114,27 @@ describe('99.binding_functionBindIn.js', function() {
     const sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
     const proc_drop = "DROP FUNCTION " + fun_name;
 
-    // console.log(proc);
-    await executeSql(createTable);
-    await executeSql(proc);
+    // Create table first
+    await testsUtil.createBindingTestTable(connection, table_name, dbColType);
 
-    let err;
-    try {
+    // Create function
+    await connection.execute(proc);
+
+    // Execute function with expected error handling
+    const expectedError = getExpectedErrorPattern(bindType, dbColType, nullBind);
+
+    if (expectedError) {
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar),
+        expectedError
+      );
+    } else {
       await connection.execute(sqlRun, bindVar);
-    } catch (e) {
-      err = e;
-    }
-    if (bindType === oracledb.STRING) {
-      compareErrMsgForString(nullBind, dbColType, err);
-    } else {
-      compareErrMsgForRAW(dbColType, err);
     }
 
-    await executeSql(proc_drop);
-    await executeSql(drop_table);
-  };
-
-  const compareErrMsgForString = function(nullBind, element, err) {
-    if (element === "BLOB") {
-      // ORA-06550: line 1, column 7:
-      // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_12'
-      // ORA-06550: line 1, column 7:
-      // PL/SQL: Statement ignored
-      assert.equal(err.message.substring(0, 10), "ORA-06550:");
-    } else {
-      if (nullBind === true) {
-        assert.ifError(err);
-      } else {
-        if (element.indexOf("CHAR") > -1 || element === "CLOB") {
-          assert.ifError(err);
-        }
-        if (element.indexOf("FLOAT") > -1 || element === "NUMBER" || element.indexOf("RAW") > -1) {
-          // FLOAT ORA-06502: PL/SQL: numeric or value error: character to number conversion error
-          // BINARY_FLOAT ORA-06502: PL/SQL: numeric or value error
-          // NUMBER: ORA-06502: PL/SQL: numeric or value error: character to number conversion error
-          // RAW: ORA-06502: PL/SQL: numeric or value error: hex to raw conversion error
-          assert.equal(err.message.substring(0, 10), "ORA-06502:");
-        }
-        if (element === "BINARY_DOUBLE") {
-          // ORA-01847: ORA-06502: PL/SQL: numeric or value error
-          assert.equal(err.message.substring(0, 10), "ORA-06502:");
-        }
-        if (element === "DATE" || element === "TIMESTAMP") {
-          // ORA-01858: a non-numeric character was found where a numeric was expected
-          assert.equal(err.message.substring(0, 10), "ORA-01858:");
-        }
-      }
-    }
-  };
-
-  const compareErrMsgForRAW = function(element, err) {
-    if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
-      // ORA-06550: line 1, column 7:
-      // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
-      // ORA-06550: line 1, column 7:
-      // PL/SQL: Statement ignored
-      assert.equal(err.message.substring(0, 10), "ORA-06550:");
-    }
-    if (element.indexOf("CHAR") > -1 || element.indexOf("RAW") > -1 || element === "BLOB") {
-      assert.ifError(err);
-    }
+    // Cleanup
+    await connection.execute(proc_drop);
+    await testsUtil.dropTable(connection, table_name);
   };
 
   const tableNamePre = "table_99";

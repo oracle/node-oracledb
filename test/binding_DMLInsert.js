@@ -35,17 +35,14 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const sql      = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('92.binding_DMLInsert.js', function() {
 
   let connection = null;
-  const executeSql = async function(sql) {
-    await connection.execute(sql);
-  };
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -54,6 +51,86 @@ describe('92.binding_DMLInsert.js', function() {
   after(async function() {
     await connection.close();
   });
+
+  const getExpectedErrorPattern = function(bindType, dbColType, largeVal, nullBind) {
+    if (bindType === oracledb.STRING) {
+      // STRING bindings
+      if (nullBind === true) {
+        return null;
+      }
+
+      if (largeVal === true) {
+        // Large STRING value tests
+        if (dbColType.indexOf("CHAR") > -1) {
+          return /ORA-12899:/; // value too large for column "HR"."TABLE_9250"."CONTENT"
+        }
+        if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 || dbColType === "BINARY_DOUBLE") {
+          return /ORA-01722:/; // invalid number
+        }
+        if (dbColType === "DATE") {
+          return /ORA-01858:/; // non-numeric character found where numeric expected
+        }
+        if (dbColType === "TIMESTAMP") {
+          return /ORA-01877:|ORA-01866:|ORA-01830:/;
+          // ORA-01877: string is too long for internal buffer
+          // ORA-01866: the datetime class is invalid
+          // ORA-01830: The string being converted to a date is too long to
+          // match the date format 'DD-MON-RR HH.MI.SSXFF AM'
+        }
+        if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
+          return /ORA-01465:/; // invalid hex number
+        }
+        if (dbColType === "CLOB") {
+          return null;
+        }
+      } else {
+        // Small STRING value tests
+        if (dbColType.indexOf("CHAR") > -1 || dbColType === "CLOB") {
+          return null;
+        }
+        if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 || dbColType === "BINARY_DOUBLE") {
+          return /ORA-01722:/; // invalid number
+        }
+        if (dbColType === "TIMESTAMP" || dbColType === "DATE") {
+          return /ORA-01858:/; // non-numeric character found where numeric expected
+        }
+        if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
+          return /ORA-01465:/; // invalid hex number
+        }
+      }
+    } else {
+      // BUFFER bindings
+      // BUFFER bindings to incompatible types always fail with ORA-00932, even with null values
+      if (dbColType === "NUMBER" || dbColType === "DATE" || dbColType === "TIMESTAMP" ||
+          dbColType.indexOf("FLOAT") > -1 || dbColType === "BINARY_DOUBLE") {
+        return /ORA-00932:/; // inconsistent datatypes
+      }
+
+      if (nullBind === true) {
+        // Null BUFFER bindings to compatible types succeed
+        if (dbColType === "BLOB" || dbColType === "CLOB" || dbColType.indexOf("CHAR") > -1 || dbColType.indexOf("RAW") > -1) {
+          return null;
+        }
+      } else {
+        // Non-null BUFFER bindings
+        if (largeVal === true) {
+          // Large BUFFER values
+          if (dbColType.indexOf("CHAR") > -1 || dbColType.indexOf("RAW") > -1) {
+            return /ORA-12899:/; // value too large for column
+          }
+          if (dbColType === "BLOB" || dbColType === "CLOB") {
+            return null;
+          }
+        } else {
+          // Small BUFFER values
+          if (dbColType === "BLOB" || dbColType === "CLOB" || dbColType.indexOf("CHAR") > -1 || dbColType.indexOf("RAW") > -1) {
+            return null;
+          }
+        }
+      }
+    }
+    return null;
+  };
 
   const doTest = async function(table_name, content, dbColType, bindType, nullBind, largeVal) {
     let bindVar = { c: { val: content, type: bindType, dir: oracledb.BIND_IN } };
@@ -64,145 +141,22 @@ describe('92.binding_DMLInsert.js', function() {
   };
 
   const dmlInsert = async function(table_name, dbColType, bindVar, bindType, nullBind, largeVal) {
-    const createTable = sql.createTable(table_name, dbColType);
-    const drop_table = "DROP TABLE " + table_name + " PURGE";
-    await executeSql(createTable);
+    await testsUtil.createBindingTestTable(connection, table_name, dbColType);
 
-    if (largeVal === true) {
-      if (bindType === oracledb.STRING) {
-        if (dbColType.indexOf("CHAR") > -1) {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // ORA-12899: value too large for column "HR"."TABLE_9250"."CONTENT"
-            /ORA-12899:/
-          );
-        }
-        if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 || dbColType === "BINARY_DOUBLE") {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // ORA-01722: invalid number
-            /ORA-01722:/
-          );
-        }
-        if (dbColType === "DATE") {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // ORA-01858: a non-numeric character was found where a numeric was expected
-            /ORA-01858:/
-          );
-        }
-        if (dbColType === "TIMESTAMP") {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // ORA-01877: string is too long for internal buffer
-            // ORA-01866: the datetime class is invalid
-            // ORA-01830: The string being converted to a date is too long to
-            // match the date format 'DD-MON-RR HH.MI.SSXFF AM'
-            /ORA-01877:|ORA-01866:|ORA-01830:/
-          );
-        }
-        if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // ORA-01465: invalid hex number
-            /ORA-01465:/
-          );
-        }
-        if (dbColType === "CLOB") {
+    const expectedError = getExpectedErrorPattern(bindType, dbColType, largeVal, nullBind);
+
+    if (expectedError) {
+      await assert.rejects(
+        async () => {
           await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-        }
-      } else {
-        if (dbColType === "NUMBER" || dbColType === "DATE" || dbColType === "TIMESTAMP" || dbColType.indexOf("FLOAT") > -1) {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // NUMBER: ORA-00932: inconsistent datatypes: expected NUMBER got BINARY
-            // DATE: ORA-00932: inconsistent datatypes: expected DATE got BINARY
-            // TIMESTAMP: ORA-00932: inconsistent datatypes: expected TIMESTAMP got BINARY
-            // FLOAT: ORA-00932: inconsistent datatypes: expected BINARY_FLOAT got BINARY
-            /ORA-00932:/
-          );
-        }
-        if (dbColType.indexOf("CHAR") > -1 || dbColType.indexOf("RAW") > -1) {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // ORA-12899: value too large for column "HR"."TABLE_9250"."CONTENT"
-            /ORA-12899:/
-          );
-        }
-        if (dbColType === "BLOB" || dbColType === "CLOB") {
-          await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-        }
-      }
+        },
+        expectedError
+      );
     } else {
-      if (bindType === oracledb.STRING) {
-        if (nullBind === true) {
-          await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-        } else {
-          if (dbColType.indexOf("CHAR") > -1 || dbColType === "CLOB") {
-            await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-          }
-          if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 || dbColType === "BINARY_DOUBLE") {
-            await assert.rejects(
-              async () => {
-                await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-              },
-              // ORA-01722: invalid number
-              /ORA-01722:/
-            );
-          }
-          if (dbColType === "TIMESTAMP" || dbColType === "DATE") {
-            await assert.rejects(
-              async () => {
-                await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-              },
-              // ORA-01858: a non-numeric character was found where a numeric was expected
-              /ORA-01858:/
-            );
-          }
-          if (dbColType === "BLOB" || dbColType.indexOf("RAW") > -1) {
-            await assert.rejects(
-              async () => {
-                await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-              },
-              // ORA-01465: invalid hex number
-              /ORA-01465:/
-            );
-          }
-        }
-      } else {
-        if (dbColType === "NUMBER" || dbColType === "DATE" || dbColType === "TIMESTAMP" || dbColType.indexOf("FLOAT") > -1) {
-          await assert.rejects(
-            async () => {
-              await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-            },
-            // NUMBER: ORA-00932: inconsistent datatypes: expected NUMBER got BINARY
-            // DATE: ORA-00932: inconsistent datatypes: expected DATE got BINARY
-            // TIMESTAMP: ORA-00932: inconsistent datatypes: expected TIMESTAMP got BINARY
-            // FLOAT: ORA-00932: inconsistent datatypes: expected BINARY_FLOAT got BINARY
-            /ORA-00932:/
-          );
-        }
-
-        if (dbColType === "BLOB" || dbColType === "CLOB" || dbColType.indexOf("CHAR") > -1 || dbColType.indexOf("RAW") > -1) {
-          await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
-        }
-      }
+      await connection.execute("insert into " + table_name + " ( content ) values (:c)", bindVar);
     }
-    await executeSql(drop_table);
+
+    await testsUtil.dropTable(connection, table_name);
   };
 
   const tableNamePre = "table_92";

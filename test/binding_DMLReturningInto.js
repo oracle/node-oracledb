@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,9 +36,9 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const sql      = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('98.binding_DMLReturningInto.js', function() {
   let connection;
@@ -51,20 +51,20 @@ describe('98.binding_DMLReturningInto.js', function() {
     await connection.close();
   });
 
-  const doTest = async function(table_name, dbColType, content, bindType, nullBind, throwError) {
+  const doTest = async function(table_name, dbColType, content, bindType, nullBind, errorPattern) {
     const inserted = getInsertVal(dbColType, nullBind);
 
     let bindVar = {
       c: { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN },
       output: { type: bindType, dir: oracledb.BIND_OUT, maxSize: 2000 }
     };
-    await dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, throwError);
+    await dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, errorPattern);
 
     bindVar = [
       { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN },
       { type: bindType, dir: oracledb.BIND_OUT, maxSize: 2000 }
     ];
-    await dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, throwError);
+    await dmlInsert(table_name, dbColType, bindVar, bindType, nullBind, errorPattern);
   };
 
   const getInsertVal = function(element, nullBind) {
@@ -88,57 +88,20 @@ describe('98.binding_DMLReturningInto.js', function() {
     return insertValue;
   };
 
-  const dmlInsert = async function(table_name, dbColType, bindVar, bindType, nullBind, throwError) {
-    const createTable = sql.createTable(table_name, dbColType);
-    const drop_table = "DROP TABLE " + table_name + " PURGE";
+  const dmlInsert = async function(table_name, dbColType, bindVar, bindType, nullBind, errorPattern) {
     const sqlToExec = "insert into " + table_name + " ( content ) values (:c) returning content into :output";
 
-    await connection.execute(createTable);
-    if (throwError) {
+    await testsUtil.createBindingTestTable(connection, table_name, dbColType);
+
+    if (errorPattern) {
       await assert.rejects(
         async () => await connection.execute(sqlToExec, bindVar),
-        (err) => {
-          if (bindType === oracledb.STRING) {
-            compareStrErrMsg(nullBind, dbColType, err);
-          } else {
-            // oracledb.BUFFER
-            compareBufErrMsg(dbColType, err);
-          }
-          return true;
-        }
+        errorPattern
       );
     } else {
       await connection.execute(sqlToExec, bindVar);
     }
-    await connection.execute(drop_table);
-  };
-
-  const compareBufErrMsg = function(element, err) {
-    switch (element) {
-      case "RAW":
-      case "BLOB":
-        assert(err);
-        break;
-      case "CHAR":
-      case "NCHAR":
-      case "VARCHAR2":
-        if (err) {
-        // ORA-01465: invalid hex number
-          assert(err.message.startsWith("ORA-01465:"));
-        }
-        break;
-      default:
-        assert(err.message.startsWith("ORA-00932:"));
-    }
-  };
-
-  const compareStrErrMsg = function(nullBind, element, err) {
-    if (nullBind === false && element === "BLOB" && (connection.oracleServerVersion < 1202000100)) {
-      // ORA-00932: inconsistent datatypes: expected CHAR got BLOB
-      assert(err.message.startsWith("ORA-00932:"));
-    } else {
-      assert(err);
-    }
+    await testsUtil.dropTable(connection, table_name);
   };
 
   const tableNamePre = "table_981";
@@ -152,8 +115,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "NUMBER";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.2 oracledb.STRING <--> DB: CHAR', async function() {
@@ -163,8 +125,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "CHAR";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.3 oracledb.STRING <--> DB: NCHAR', async function() {
@@ -174,8 +135,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "NCHAR";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.4 oracledb.STRING <--> DB: VARCHAR2', async function() {
@@ -185,8 +145,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "VARCHAR2";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.5 oracledb.STRING <--> DB: FLOAT', async function() {
@@ -196,8 +155,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "FLOAT";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.6 oracledb.STRING <--> DB: BINARY_FLOAT', async function() {
@@ -207,8 +165,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "BINARY_FLOAT";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.7 oracledb.STRING <--> DB: BINARY_DOUBLE', async function() {
@@ -218,8 +175,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "BINARY_DOUBLE";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.8 oracledb.STRING <--> DB: DATE', async function() {
@@ -229,8 +185,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "DATE";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.9 oracledb.STRING <--> DB: TIMESTAMP', async function() {
@@ -240,8 +195,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "TIMESTAMP";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.10 oracledb.STRING <--> DB: RAW', async function() {
@@ -251,8 +205,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "RAW";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.11 oracledb.STRING <--> DB: CLOB', async function() {
@@ -262,8 +215,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "CLOB";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.12 oracledb.STRING <--> DB: BLOB', async function() {
@@ -275,8 +227,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "BLOB";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.13 oracledb.BUFFER <--> DB: NUMBER', async function() {
@@ -286,8 +237,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "NUMBER";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.1.14 oracledb.BUFFER <--> DB: CHAR', async function() {
@@ -297,8 +247,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "CHAR";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-01465:/);
     });
 
     it('98.1.15 oracledb.BUFFER <--> DB: NCHAR', async function() {
@@ -308,8 +257,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "NCHAR";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-01465:/);
     });
 
     it('98.1.16 oracledb.BUFFER <--> DB: VARCHAR2', async function() {
@@ -319,8 +267,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "VARCHAR2";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-01465:/);
     });
 
     it('98.1.17 oracledb.BUFFER <--> DB: FLOAT', async function() {
@@ -330,8 +277,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "FLOAT";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.1.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', async function() {
@@ -341,8 +287,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "BINARY_FLOAT";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.1.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', async function() {
@@ -352,8 +297,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "BINARY_DOUBLE";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.1.20 oracledb.BUFFER <--> DB: DATE', async function() {
@@ -363,8 +307,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "DATE";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.1.21 oracledb.BUFFER <--> DB: TIMESTAMP', async function() {
@@ -374,8 +317,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "TIMESTAMP";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.1.22 oracledb.BUFFER <--> DB: RAW', async function() {
@@ -385,8 +327,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "RAW";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.1.23 oracledb.BUFFER <--> DB: CLOB', async function() {
@@ -396,8 +337,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "CLOB";
       const nullBind = false;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.1.24 oracledb.BUFFER <--> DB: BLOB', async function() {
@@ -407,8 +347,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "BLOB";
       const nullBind = false;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
   });
@@ -422,8 +361,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "NUMBER";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.2 oracledb.STRING <--> DB: CHAR', async function() {
@@ -433,8 +371,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "CHAR";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.3 oracledb.STRING <--> DB: NCHAR', async function() {
@@ -444,8 +381,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "NCHAR";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.4 oracledb.STRING <--> DB: VARCHAR2', async function() {
@@ -455,8 +391,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "VARCHAR2";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.5 oracledb.STRING <--> DB: FLOAT', async function() {
@@ -466,8 +401,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "FLOAT";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.6 oracledb.STRING <--> DB: BINARY_FLOAT', async function() {
@@ -477,8 +411,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "BINARY_FLOAT";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.7 oracledb.STRING <--> DB: BINARY_DOUBLE', async function() {
@@ -488,8 +421,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "BINARY_DOUBLE";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.8 oracledb.STRING <--> DB: DATE', async function() {
@@ -499,8 +431,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "DATE";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.9 oracledb.STRING <--> DB: TIMESTAMP', async function() {
@@ -510,8 +441,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "TIMESTAMP";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.10 oracledb.STRING <--> DB: RAW', async function() {
@@ -521,8 +451,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "RAW";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.11 oracledb.STRING <--> DB: CLOB', async function() {
@@ -532,8 +461,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "CLOB";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.12 oracledb.STRING <--> DB: BLOB', async function() {
@@ -545,8 +473,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.STRING;
       const dbColType = "BLOB";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.13 oracledb.BUFFER <--> DB: NUMBER', async function() {
@@ -556,8 +483,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "NUMBER";
       const nullBind = true;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.2.14 oracledb.BUFFER <--> DB: CHAR', async function() {
@@ -567,8 +493,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "CHAR";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.15 oracledb.BUFFER <--> DB: NCHAR', async function() {
@@ -578,8 +503,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "NCHAR";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.16 oracledb.BUFFER <--> DB: VARCHAR2', async function() {
@@ -589,8 +513,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "VARCHAR2";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.17 oracledb.BUFFER <--> DB: FLOAT', async function() {
@@ -600,8 +523,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "FLOAT";
       const nullBind = true;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.2.18 oracledb.BUFFER <--> DB: BINARY_FLOAT', async function() {
@@ -611,8 +533,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "BINARY_FLOAT";
       const nullBind = true;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.2.19 oracledb.BUFFER <--> DB: BINARY_DOUBLE', async function() {
@@ -622,8 +543,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "BINARY_DOUBLE";
       const nullBind = true;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.2.20 oracledb.BUFFER <--> DB: DATE', async function() {
@@ -633,8 +553,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "DATE";
       const nullBind = true;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.2.21 oracledb.BUFFER <--> DB: TIMESTAMP', async function() {
@@ -644,8 +563,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "TIMESTAMP";
       const nullBind = true;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.2.22 oracledb.BUFFER <--> DB: RAW', async function() {
@@ -655,8 +573,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "RAW";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
 
     it('98.2.23 oracledb.BUFFER <--> DB: CLOB', async function() {
@@ -666,8 +583,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "CLOB";
       const nullBind = true;
-      const throwError = true;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, /ORA-00932:/);
     });
 
     it('98.2.24 oracledb.BUFFER <--> DB: BLOB', async function() {
@@ -677,10 +593,7 @@ describe('98.binding_DMLReturningInto.js', function() {
       const bindType = oracledb.BUFFER;
       const dbColType = "BLOB";
       const nullBind = true;
-      const throwError = false;
-      await doTest(table_name, dbColType, content, bindType, nullBind, throwError);
+      await doTest(table_name, dbColType, content, bindType, nullBind, null);
     });
-
   });
-
 });

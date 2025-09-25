@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,15 +36,12 @@
 
 const oracledb = require('oracledb');
 const assert   = require('assert');
-const sql      = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('101.binding_defaultBindInout.js', function() {
 
   let connection = null;
-  const executeSql = async function(sql) {
-    await connection.execute(sql);
-  };
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -56,19 +53,17 @@ describe('101.binding_defaultBindInout.js', function() {
   });
 
   const doTest1 = async function(table_name, procName, dbColType, content, sequence) {
-
-    let bindconst = {
+    let bindVar = {
       i: sequence,
       c: content
     };
-    await inBind1(table_name, procName, dbColType, bindconst);
-    bindconst = [ sequence, content ];
-    await inBind1(table_name, procName, dbColType, bindconst);
+    await inBind1(table_name, procName, dbColType, bindVar);
+
+    bindVar = [ sequence, content ];
+    await inBind1(table_name, procName, dbColType, bindVar);
   };
 
-  const inBind1 = async function(table_name, proc_name, dbColType, bindconst) {
-    const createTable = sql.createTable(table_name, dbColType);
-    const drop_table = "DROP TABLE " + table_name + " PURGE";
+  const inBind1 = async function(table_name, proc_name, dbColType, bindVar) {
     const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ")\n" +
                "AS \n" +
                "BEGIN \n" +
@@ -77,41 +72,40 @@ describe('101.binding_defaultBindInout.js', function() {
                "END " + proc_name + "; ";
     const sqlRun = "BEGIN " + proc_name + " (:i, :c); END;";
     const proc_drop = "DROP PROCEDURE " + proc_name;
-    // console.log(proc);
 
-    await executeSql(createTable);
-    await executeSql(proc);
+    // Create table first
+    await testsUtil.createBindingTestTable(connection, table_name, dbColType);
+
+    // Create procedure
+    await connection.execute(proc);
+
     if (dbColType === "BLOB") {
       await assert.rejects(
-        async () => {
-          await connection.execute(sqlRun, bindconst);
-        },
+        async () => await connection.execute(sqlRun, bindVar),
         /ORA-06550:/
       );
     } else {
-      await connection.execute(sqlRun, bindconst);
+      await connection.execute(sqlRun, bindVar);
     }
-    await executeSql(proc_drop);
-    await executeSql(drop_table);
+
+    // Cleanup
+    await connection.execute(proc_drop);
+    await testsUtil.dropTable(connection, table_name);
   };
 
   const doTest2 = async function(table_name, procPre, dbColType, content, sequence) {
-
-    var bindconst = {
+    let bindVar = {
       i: sequence,
       c: content,
       output: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
     };
+    await inBind2(table_name, procPre, dbColType, bindVar);
 
-    await inBind2(table_name, procPre, dbColType, bindconst);
-
-    bindconst = [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
-    await inBind2(table_name, procPre, dbColType, bindconst);
+    bindVar = [ { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }, sequence, content ];
+    await inBind2(table_name, procPre, dbColType, bindVar);
   };
 
-  const inBind2 = async function(table_name, fun_name, dbColType, bindconst) {
-    const createTable = sql.createTable(table_name, dbColType);
-    const drop_table = "DROP TABLE " + table_name + " PURGE";
+  const inBind2 = async function(table_name, fun_name, dbColType, bindVar) {
     const proc = "CREATE OR REPLACE FUNCTION " + fun_name + " (ID IN NUMBER, inValue IN OUT " + dbColType + ") RETURN NUMBER\n" +
                "IS \n" +
                "    tmpconst NUMBER; \n" +
@@ -122,29 +116,30 @@ describe('101.binding_defaultBindInout.js', function() {
                "END ; ";
     const sqlRun = "BEGIN :output := " + fun_name + " (:i, :c); END;";
     const proc_drop = "DROP FUNCTION " + fun_name;
-    // console.log(proc);
 
-    await executeSql(createTable);
-    await executeSql(proc);
+    // Create table first
+    await testsUtil.createBindingTestTable(connection, table_name, dbColType);
+
+    // Create function
+    await connection.execute(proc);
 
     if (dbColType === "BLOB") {
       await assert.rejects(
-        async () => {
-          await connection.execute(sqlRun, bindconst);
-        },
+        async () => await connection.execute(sqlRun, bindVar),
         /ORA-06550:/
       );
     } else {
-      await connection.execute(sqlRun, bindconst);
+      await connection.execute(sqlRun, bindVar);
     }
 
-    await executeSql(proc_drop);
-    await executeSql(drop_table);
+    // Cleanup
+    await connection.execute(proc_drop);
+    await testsUtil.dropTable(connection, table_name);
   };
 
   const tableNamePre = "table_101";
   const procPre = "proc_101";
-  var index = 1;
+  let index = 1;
 
   describe('101.1 PLSQL procedure: bind out null value with default type and dir', function() {
 
@@ -631,5 +626,4 @@ describe('101.binding_defaultBindInout.js', function() {
       await doTest2(table_name, proc_name, dbColType, content, index);
     });
   });
-
 });

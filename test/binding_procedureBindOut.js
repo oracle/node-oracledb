@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,16 +35,13 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const sql    = require('./sql.js');
 const dbConfig = require('./dbconfig.js');
 const assist   = require('./dataTypeAssist.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('96.binding_procedureBindOut.js', function() {
 
   let connection = null;
-  const executeSql = async function(sql) {
-    await connection.execute(sql);
-  };
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
@@ -54,16 +51,45 @@ describe('96.binding_procedureBindOut.js', function() {
     await connection.close();
   });
 
+  const getExpectedErrorPattern = function(bindType, dbColType, nullBind) {
+    if (bindType === oracledb.STRING) {
+      // STRING binding
+      if (dbColType === "BLOB") {
+        return /ORA-06550:/; // PL/SQL compilation error
+      }
+      return null; // All other cases should succeed
+    } else {
+      // BUFFER binding
+      if (dbColType === "NUMBER" || dbColType.indexOf("FLOAT") > -1 ||
+          dbColType === "BINARY_DOUBLE" || dbColType === "DATE" ||
+          dbColType === "TIMESTAMP" || dbColType === "CLOB") {
+        return /ORA-06550:/; // PL/SQL compilation error
+      }
+
+      if (dbColType.indexOf("RAW") > -1 || dbColType === "BLOB") {
+        return null; // Should succeed
+      }
+
+      if (dbColType.indexOf("CHAR") > -1) {
+        if (nullBind === true) {
+          return null; // Should succeed with null values
+        } else {
+          return /ORA-06502:/; // Hex to raw conversion error
+        }
+      }
+    }
+    return null; // Default to success
+  };
+
   const doTest = async function(table_name, procName, bindType, dbColType, content, sequence, nullBind) {
-    procName = procName + "_1";
     let bindVar = {
       i: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c: { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 }
     };
-    await inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind);
-    procName = procName + "_2";
+    await inBind(table_name, procName + "_1", sequence, dbColType, bindVar, bindType, nullBind);
+
     bindVar = [ sequence, { type: bindType, dir: oracledb.BIND_OUT, maxSize: 1000 } ];
-    await inBind(table_name, procName, sequence, dbColType, bindVar, bindType, nullBind);
+    await inBind(table_name, procName + "_2", sequence, dbColType, bindVar, bindType, nullBind);
   };
 
   const getInsertVal = function(element, nullBind) {
@@ -88,8 +114,6 @@ describe('96.binding_procedureBindOut.js', function() {
   };
 
   const inBind = async function(table_name, proc_name, sequence, dbColType, bindVar, bindType, nullBind) {
-    const createTable = await sql.createTable(table_name, dbColType);
-    const drop_table = "DROP TABLE " + table_name + " PURGE";
     const proc = "CREATE OR REPLACE PROCEDURE " + proc_name + " (ID IN NUMBER, inValue OUT " + dbColType + ")\n" +
                "AS \n" +
                "BEGIN \n" +
@@ -99,66 +123,39 @@ describe('96.binding_procedureBindOut.js', function() {
     const proc_drop = "DROP PROCEDURE " + proc_name;
     const inserted = getInsertVal(dbColType, nullBind);
     const insertSql = "insert into " + table_name + " (id, content) values (:c1, :c2)";
-    await executeSql(createTable);
+
+    // Create table first
+    await testsUtil.createBindingTestTable(connection, table_name, dbColType);
+
     const bind = {
       c1: { val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
       c2: { val: inserted[0], type: inserted[1], dir: oracledb.BIND_IN }
     };
 
+    // Insert test data
     await connection.execute(insertSql, bind);
-    await executeSql(proc);
 
-    let err;
-    try {
+    // Create procedure
+    await connection.execute(proc);
+
+    const expectedError = getExpectedErrorPattern(bindType, dbColType, nullBind);
+
+    if (expectedError) {
+      await assert.rejects(
+        async () => await connection.execute(sqlRun, bindVar),
+        expectedError
+      );
+    } else {
       await connection.execute(sqlRun, bindVar);
-    } catch (e) {
-      err = e;
-    }
-    if (bindType === oracledb.STRING) {
-      compareErrMsgForString(dbColType, err);
-    } else {
-      compareErrMsgForRAW(nullBind, dbColType, err);
     }
 
-    await executeSql(proc_drop);
-    await executeSql(drop_table);
+    // Cleanup
+    await connection.execute(proc_drop);
+    await testsUtil.dropTable(connection, table_name);
   };
 
-  const compareErrMsgForString = function(element, err) {
-    if (element === "BLOB") {
-      // ORA-06550: line 1, column 7:
-      // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
-      // ORA-06550: line 1, column 7:
-      // PL/SQL: Statement ignored
-      assert.equal(err.message.substring(0, 10), "ORA-06550:");
-    } else {
-      assert.ifError(err);
-    }
-  };
-
-  const compareErrMsgForRAW = function(nullBind, element, err) {
-    if (element === "NUMBER" || element.indexOf("FLOAT") > -1 || element === "BINARY_DOUBLE" || element === "DATE" || element === "TIMESTAMP" || element === "CLOB") {
-      // ORA-06550: line 1, column 7:
-      // PLS-00306: wrong number or types of arguments in call to 'NODB_INBIND_XX'
-      // ORA-06550: line 1, column 7:
-      // PL/SQL: Statement ignored
-      assert.equal(err.message.substring(0, 10), "ORA-06550:");
-    }
-    if (element.indexOf("RAW") > -1 || element === "BLOB") {
-      assert.ifError(err);
-    }
-    if (element.indexOf("CHAR") > -1) {
-      if (nullBind === true) {
-        assert.ifError(err);
-      } else {
-        // ORA-06502: PL/SQL: numeric or value error: hex to raw conversion error
-        assert.equal(err.message.substring(0, 10), "ORA-06502:");
-      }
-    }
-  };
-
-  const tableNamePre = "table_95";
-  const procName = "proc_95";
+  const tableNamePre = "table_96";
+  const procName = "proc_96";
   let index = 1;
 
   describe('96.1 PLSQL procedure: bind out small value to oracledb.STRING/BUFFER', function() {

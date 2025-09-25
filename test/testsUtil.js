@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -134,6 +134,28 @@ testsUtil.sqlDropType = function(typeName) {
 testsUtil.createTable = async function(conn, tableName, sql) {
   const plsql = testsUtil.sqlCreateTable(tableName, sql);
   await conn.execute(plsql);
+};
+
+testsUtil.createBindingTestTable = async function(conn, tableName, dataType) {
+  let element = dataType;
+  if (dataType === "CHAR") {
+    element = element + "(1000)";
+  }
+  if (dataType === "NCHAR") {
+    element = element + "(1000)";
+  }
+  if (dataType === "VARCHAR2") {
+    element = element + "(1000)";
+  }
+  if (dataType === "RAW") {
+    element = element + "(1000)";
+  }
+
+  const createTableSql = `CREATE TABLE ${tableName} (
+      id        NUMBER,
+      content   ${element}
+  )`;
+  await this.createTable(conn, tableName, createTableSql);
 };
 
 testsUtil.createType = async function(conn, typeName, sql) {
