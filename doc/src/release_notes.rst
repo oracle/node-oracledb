@@ -46,6 +46,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for the config_time_to_live parameter for configurations
+    retrieved from centralized configuration providers.
+    
 #)  Fixed bug validating the database host during connection.
 
 #)  Enabled proxy user to be passed with :ref:`external authentication <extauth>`

@@ -128,6 +128,9 @@ class AzureProvider extends base {
     //retrieve password
     configObject.password = await this.retrieveParamValueFromAzureConfigurationProvider(client, label, 'password');
 
+    // retrieve config_time_to_live
+    configObject.configTTL = await this.retrieveParamValueFromAzureConfigurationProvider(client, label, 'config_time_to_live');
+
     // retrieve wallet_location
     configObject.walletContent = await this.retrieveParamValueFromAzureConfigurationProvider(client, label, 'wallet_location');
 
