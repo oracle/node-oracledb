@@ -507,13 +507,19 @@ describe('271. fetchTypeHandler.js', function() {
 
       oracledb.future.oldJsonColumnAsObj = true;
       await connection.execute(plsql);
-      const sql = `INSERT into ${TABLE} VALUES (:1, :2, :3)`;
+      let sql = `INSERT into ${TABLE} VALUES (:1, :2, :3)`;
       await connection.execute(sql, [clobVal, blobVal, charVal]);
+
+      // Add empty clob and blob
+      sql = `INSERT into ${TABLE} VALUES (EMPTY_CLOB(), EMPTY_BLOB(), :1)`;
+      await connection.execute(sql, [charVal]);
 
       let result = await connection.execute(`select * from ${TABLE}`);
       assert.deepStrictEqual(result.rows[0][0], JSON.parse(clobVal));
       assert.deepStrictEqual(result.rows[0][1], JSON.parse(blobVal));
       assert.deepStrictEqual(result.rows[0][2], JSON.parse(charVal));
+      assert.deepStrictEqual(result.rows[1][0], null);
+      assert.deepStrictEqual(result.rows[1][1], null);
 
       // fetchtype handlers given preference than oldJsonColumnAsObj setting.
       const defaultFetchTypeHandler = oracledb.fetchTypeHandler;

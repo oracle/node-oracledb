@@ -22,7 +22,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Allow Proxy user to be passed with :ref:`external authentication in :meth:`oracledb.createPool()` for Thin mode.
+#)  Allow proxy user to be passed with :ref:`external authentication <extauth>`
+    in :meth:`oracledb.createPool()` for Thin mode.
     See `Issue #1743 <https://github.com/oracle/node-oracledb/issues/1743>`__.
 
 Thick Mode Changes
