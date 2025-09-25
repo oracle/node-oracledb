@@ -29,6 +29,9 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Fixed memory leak when enqueuing to JSON queues with
+    :ref:`Advanced Queuing <aq>`.
+
 node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (18 Jul 2025)
 ---------------------------------------------------------------------------------------------------------
 

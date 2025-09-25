@@ -150,10 +150,12 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         }
         if (dpiJson_setValue(json, &jsonBuffer.topNode) < 0) {
             njsJsonBuffer_free(&jsonBuffer);
+            dpiJson_release(json);
             return false;
         }
         status = dpiMsgProps_setPayloadJson(*handle, json);
         njsJsonBuffer_free(&jsonBuffer);
+        dpiJson_release(json);
     } else {
         // RAW case
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, payloadObj,
