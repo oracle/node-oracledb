@@ -35,6 +35,9 @@ Common Changes
 #)  Added error ``NJS-174`` which is thrown if payload type does not match the
     queue type in :ref:`Advanced Queuing <aq>`.
 
+#)  Fixed bug when attempting to use collection-specific methods for
+    :ref:`database objects <dbobjectclass>` which is not actually a collection.
+
 Thin Mode Changes
 +++++++++++++++++
 

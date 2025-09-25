@@ -97,10 +97,6 @@ describe('200. dbObject1.js', () => {
     const sql = `DROP TYPE ${TYPE}`;
     await conn.execute(sql);
 
-    await conn.execute(`DROP PROCEDURE nodb_getDataCursor3`);
-    await conn.execute(`DROP PROCEDURE nodb_getDataCursor2`);
-    await conn.execute(`DROP PROCEDURE nodb_getDataCursor1`);
-
     await conn.close();
   }); // after()
 
@@ -271,7 +267,89 @@ describe('200. dbObject1.js', () => {
       assert.strictEqual(result.rows[0].PERSON.NAME, objData.NAME);
     }); // 200.1.7
 
-    it('200.1.8 insert multiple rows using executeMany() with inferred data type', async () => {
+    it('200.1.8 Negative - test collection methods', async () => {
+      const objData = {
+        ID: 208,
+        NAME: 'Christopher Jones'
+      };
+      const objClass = await conn.getDbObjectClass(TYPE);
+      const testObj = new objClass(objData);
+
+      assert.throws(
+        () => {
+          testObj.append(5);
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.deleteElement(5);
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.getElement(5);
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.getKeys();
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.getLastIndex();
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.getNextIndex(5);
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.getPrevIndex(5);
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.getValues();
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.hasElement(5);
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.setElement(5, 'a');
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.toMap();
+        },
+        /NJS-146:/
+      );
+      assert.throws(
+        () => {
+          testObj.trim(2);
+        },
+        /NJS-146:/
+      );
+    }); // 200.1.8
+
+    it('200.1.9 insert multiple rows using executeMany() with inferred data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 208;
       const initialSeq = 108;
@@ -312,9 +390,9 @@ describe('200. dbObject1.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.strictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
-    }); // 200.1.8
+    }); // 200.1.9
 
-    it('200.1.9 insert multiple rows using executeMany() with explicit data type', async () => {
+    it('200.1.10 insert multiple rows using executeMany() with explicit data type', async () => {
       const objClass = await conn.getDbObjectClass(TYPE);
       let initialID = 3000;
       const initialSeq = 300;
@@ -358,9 +436,9 @@ describe('200. dbObject1.js', () => {
         assert.strictEqual(result.rows[j][1]['ID'], objDataArray[j].ID);
         assert.strictEqual(result.rows[j][1].NAME, objDataArray[j].NAME);
       }
-    }); // 200.1.9
+    }); // 200.1.10
 
-    it('200.1.10 call procedure with 2 OUT binds of DbObject', async function() {
+    it('200.1.11 call procedure with 2 OUT binds of DbObject', async function() {
       await conn.execute(proc1);
       await conn.execute(proc2);
       await conn.execute(proc3);
@@ -381,9 +459,13 @@ describe('200. dbObject1.js', () => {
       resultSet = await result.outBinds.p_cur2.getRows();
       assert.equal(resultSet.length, 3);
       await result.outBinds.p_cur2.close();
-    }); // 200.1.10;
 
-    it('200.1.11 insert an object with large string values', async () => {
+      await conn.execute(`DROP PROCEDURE nodb_getDataCursor3`);
+      await conn.execute(`DROP PROCEDURE nodb_getDataCursor2`);
+      await conn.execute(`DROP PROCEDURE nodb_getDataCursor1`);
+    }); // 200.1.11
+
+    it('200.1.12 insert an object with large string values', async () => {
       let sql = `INSERT INTO ${TABLE} VALUES (:1, :2)`;
       const maxLen = 1024;
       const largeString = 'A'.repeat(maxLen);
@@ -402,7 +484,7 @@ describe('200. dbObject1.js', () => {
 
       assert.strictEqual(result.rows[0][0], seq);
       assert.strictEqual(result.rows[0][1]['ADDRESS'], objData.ADDRESS);
-    }); // 200.1.11
+    }); // 200.1.12
   });
 
   describe('200.2 Number property with Precision', function() {
