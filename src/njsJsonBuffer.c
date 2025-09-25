@@ -34,11 +34,10 @@
 
 // forward declarations for functions only used in this file
 static void njsJsonBuffer_freeNode(dpiJsonNode *node);
-static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
-        napi_env env, napi_value inValue, char **outValue,
-        uint32_t *outValueLength);
+static bool njsJsonBuffer_getString(njsJsonBuffer *buf, napi_env env,
+        napi_value inValue, char **outValue, uint32_t *outValueLength);
 static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
-        napi_env env, napi_value value, njsBaton *baton);
+        napi_env env, napi_value value, njsJsContext *jsContext);
 
 
 //-----------------------------------------------------------------------------
@@ -99,9 +98,8 @@ static void njsJsonBuffer_freeNode(dpiJsonNode *node)
 // requested space to store the string value. If an element in the array is not
 // available, more space for the array is allocated in chunks.
 //-----------------------------------------------------------------------------
-static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
-        napi_env env, napi_value inValue, char **outValue,
-        uint32_t *outValueLength)
+static bool njsJsonBuffer_getString(njsJsonBuffer *buf, napi_env env,
+        napi_value inValue, char **outValue, uint32_t *outValueLength)
 {
     char **tempBuffers, *temp;
     size_t tempLength;
@@ -112,7 +110,7 @@ static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
         buf->allocatedBuffers += 16;
         tempBuffers = malloc(buf->allocatedBuffers * sizeof(char*));
         if (!tempBuffers)
-            return njsBaton_setErrorInsufficientMemory(baton);
+            return njsUtils_throwInsufficientMemory(env);
         if (buf->numBuffers > 0) {
             memcpy(tempBuffers, buf->buffers, buf->numBuffers * sizeof(char*));
             free(buf->buffers);
@@ -123,7 +121,7 @@ static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
             &tempLength))
     temp = malloc(tempLength + 1);
     if (!temp)
-        return njsBaton_setErrorInsufficientMemory(baton);
+        return njsUtils_throwInsufficientMemory(env);
     buf->buffers[buf->numBuffers++] = temp;
     NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, inValue, temp,
             tempLength + 1, &tempLength))
@@ -138,7 +136,7 @@ static bool njsJsonBuffer_getString(njsJsonBuffer *buf, njsBaton *baton,
 //   Populates a particular node with the contents of the JavaScript value.
 //-----------------------------------------------------------------------------
 static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
-        napi_env env, napi_value value, njsBaton *baton)
+        napi_env env, napi_value value, njsJsContext *jsContext)
 {
     napi_value temp, name, fieldNames, fieldValues, vectorVal, global;
     napi_value uint8Val, uint8Proto, valProto;
@@ -176,7 +174,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     if (valueType == napi_string) {
         node->oracleTypeNum = DPI_ORACLE_TYPE_VARCHAR;
         node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
-        return njsJsonBuffer_getString(buf, baton, env, value,
+        return njsJsonBuffer_getString(buf, env, value,
                 &node->value->asBytes.ptr, &node->value->asBytes.length);
     }
 
@@ -201,12 +199,12 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         array->elementValues = calloc(array->numElements,
                 sizeof(dpiDataBuffer));
         if (!array->elements || !array->elementValues)
-            return njsBaton_setErrorInsufficientMemory(baton);
+            return njsUtils_throwInsufficientMemory(env);
         for (i = 0; i < array->numElements; i++) {
             NJS_CHECK_NAPI(env, napi_get_element(env, value, i, &temp))
             array->elements[i].value = &array->elementValues[i];
             if (!njsJsonBuffer_populateNode(buf, &array->elements[i], env,
-                    temp, baton))
+                    temp, jsContext))
                 return false;
         }
         return true;
@@ -218,14 +216,14 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
         node->oracleTypeNum = DPI_ORACLE_TYPE_TIMESTAMP;
         node->nativeTypeNum = DPI_NATIVE_TYPE_TIMESTAMP;
         return njsUtils_setDateValue(DPI_ORACLE_TYPE_TIMESTAMP, env, value,
-                baton->jsContext.jsGetDateComponentsFn,
+                jsContext->jsGetDateComponentsFn,
                 &node->value->asTimestamp);
     }
 
     // handle vectors
     NJS_CHECK_NAPI(env, napi_is_typedarray(env, value, &isTyped))
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsContext.jsSparseVectorConstructor, &isSparse))
+            jsContext->jsSparseVectorConstructor, &isSparse))
     if (isTyped || isSparse) { // typed array or sparse vector
         NJS_CHECK_NAPI(env, napi_get_global(env, &global))
         if (!isSparse) {
@@ -254,7 +252,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
             node->oracleTypeNum = DPI_ORACLE_TYPE_VECTOR;
             node->nativeTypeNum = DPI_NATIVE_TYPE_BYTES;
             NJS_CHECK_NAPI(env, napi_call_function(env, global,
-                    baton->jsContext.jsEncodeVectorFn, 1, &value, &vectorVal))
+                    jsContext->jsEncodeVectorFn, 1, &value, &vectorVal))
             NJS_CHECK_NAPI(env, napi_get_buffer_info(env, vectorVal,
                     (void**) &tempBuffer, &tempBufferLength))
             node->value->asBytes.ptr = tempBuffer;
@@ -267,7 +265,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     NJS_CHECK_NAPI(env, napi_is_buffer(env, value, &check))
     if (check) {
         NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-                baton->jsContext.jsJsonIdConstructor, &check))
+                jsContext->jsJsonIdConstructor, &check))
         NJS_CHECK_NAPI(env, napi_get_buffer_info(env, value,
                 (void**) &tempBuffer, &tempBufferLength))
         if (check) {
@@ -284,7 +282,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
 
     // handle interval datatypes
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsContext.jsIntervalYMConstructor, &check))
+            jsContext->jsIntervalYMConstructor, &check))
     if (check) {
         node->oracleTypeNum = DPI_ORACLE_TYPE_INTERVAL_YM;
         node->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_YM;
@@ -293,7 +291,7 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
             &(node->value->asIntervalYM));
     }
     NJS_CHECK_NAPI(env, napi_instanceof(env, value,
-            baton->jsContext.jsIntervalDSConstructor, &check))
+            jsContext->jsIntervalDSConstructor, &check))
     if (check) {
         node->oracleTypeNum = DPI_ORACLE_TYPE_INTERVAL_DS;
         node->nativeTypeNum = DPI_NATIVE_TYPE_INTERVAL_DS;
@@ -319,16 +317,16 @@ static bool njsJsonBuffer_populateNode(njsJsonBuffer *buf, dpiJsonNode *node,
     obj->fieldValues = calloc(obj->numFields, sizeof(dpiDataBuffer));
     if (!obj->fieldNames || !obj->fieldNameLengths || !obj->fields ||
             !obj->fieldValues)
-        return njsBaton_setErrorInsufficientMemory(baton);
+        return njsUtils_throwInsufficientMemory(env);
     for (i = 0; i < obj->numFields; i++) {
         NJS_CHECK_NAPI(env, napi_get_element(env, fieldNames, i, &name))
-        if (!njsJsonBuffer_getString(buf, baton, env, name,
-                &obj->fieldNames[i], &obj->fieldNameLengths[i]))
+        if (!njsJsonBuffer_getString(buf, env, name, &obj->fieldNames[i],
+                &obj->fieldNameLengths[i]))
             return false;
         NJS_CHECK_NAPI(env, napi_get_element(env, fieldValues, i, &temp))
         obj->fields[i].value = &obj->fieldValues[i];
         if (!njsJsonBuffer_populateNode(buf, &obj->fields[i], env, temp,
-                baton))
+                jsContext))
             return false;
     }
     return true;
@@ -357,7 +355,7 @@ void njsJsonBuffer_free(njsJsonBuffer *buf)
 //   Populates a JSON buffer from the specified JavaScript value.
 //-----------------------------------------------------------------------------
 bool njsJsonBuffer_fromValue(njsJsonBuffer *buf, napi_env env,
-        napi_value value, njsBaton *baton)
+        napi_value value, njsJsContext *jsContext)
 {
     // initialize JSON buffer structure
     buf->topNode.value = &buf->topNodeBuffer;
@@ -366,5 +364,5 @@ bool njsJsonBuffer_fromValue(njsJsonBuffer *buf, napi_env env,
     buf->buffers = NULL;
 
     // populate the top level node
-    return njsJsonBuffer_populateNode(buf, &buf->topNode, env, value, baton);
+    return njsJsonBuffer_populateNode(buf, &buf->topNode, env, value, jsContext);
 }

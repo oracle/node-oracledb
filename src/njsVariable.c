@@ -897,7 +897,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
     // handle binding to JSON values; the types of values that can be stored in
     // a JSON value are managed independently
     if (var->varTypeNum == DPI_ORACLE_TYPE_JSON) {
-        if (!njsJsonBuffer_fromValue(&jsonBuffer, env, value, baton)) {
+        if (!njsJsonBuffer_fromValue(&jsonBuffer, env, value, &baton->jsContext)) {
             njsJsonBuffer_free(&jsonBuffer);
             return false;
         }

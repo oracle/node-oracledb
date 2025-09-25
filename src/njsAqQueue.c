@@ -142,7 +142,7 @@ static bool njsAqQueue_createMessage(njsBaton *baton, njsAqQueue *queue,
         status = dpiMsgProps_setPayloadObject(tempHandle, obj->handle);
     } else if (queue->isJson) {
         // JSON
-        if (!njsJsonBuffer_fromValue(&jsonBuffer, env, payloadObj, baton))
+        if (!njsJsonBuffer_fromValue(&jsonBuffer, env, payloadObj, &baton->jsContext))
             return false;
         if (dpiConn_newJson(queue->conn->handle, &json) < 0) {
             njsJsonBuffer_free(&jsonBuffer);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -113,7 +113,9 @@ async function run() {
 
     // Insert a document.
     // A system generated key is created by default.
-    content = {name: "Matilda", address: {city: "Melbourne"}};
+    content = {name: "Matilda", address: {city: "Melbourne"}, age: 38,
+      dob: new Date('11-06-1987')};
+    console.log("The content to be inserted is:", content);
     doc = await collection.insertOneAndGet(content);
     const key = doc.key;
     console.log("The key of the new SODA document is: ", key);

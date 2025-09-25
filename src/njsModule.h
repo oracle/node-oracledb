@@ -771,7 +771,7 @@ struct njsTokenCallback {
 //-----------------------------------------------------------------------------
 void njsJsonBuffer_free(njsJsonBuffer *buf);
 bool njsJsonBuffer_fromValue(njsJsonBuffer *buf, napi_env env,
-        napi_value value, njsBaton *baton);
+        napi_value value, njsJsContext *jsContext);
 
 
 //-----------------------------------------------------------------------------
