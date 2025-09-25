@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,6 +40,7 @@ const testsUtil = require('./testsUtil.js');
 const t_contents = sodaUtil.t_contents;
 
 describe('176. soda8.js', () => {
+  let conn;
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -50,8 +51,18 @@ describe('176. soda8.js', () => {
     await sodaUtil.cleanup();
   });
 
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  afterEach(async function() {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
+  });
+
   it('176.1 replaceOne(), basic case with document content', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_1");
 
@@ -85,12 +96,10 @@ describe('176. soda8.js', () => {
     await conn.commit();
     res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 176.1
 
   it('176.2 replaceOne(), basic case with document content with autocommit = true', async () => {
     oracledb.autoCommit = true;
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_1");
 
@@ -124,12 +133,10 @@ describe('176. soda8.js', () => {
     await conn.commit();
     res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
     oracledb.autoCommit = false;
   }); // 176.2
 
   it('176.3 replaceOne(), basic case with document object', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_2");
 
@@ -164,11 +171,9 @@ describe('176. soda8.js', () => {
     await conn.commit();
     res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 176.3
 
   it('175.4 replaceOne(), no error is reported if the query criteria do not match any document', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_3");
 
@@ -199,11 +204,9 @@ describe('176. soda8.js', () => {
     await conn.commit();
     res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 175.4
 
   it('175.5 Negative - replaceOne(), the key() method must be used', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_4");
 
@@ -235,11 +238,9 @@ describe('176. soda8.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 175.5
 
   it('175.6 replaceOneAndGet(), basic case with document content', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_5");
 
@@ -273,12 +274,10 @@ describe('176. soda8.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 175.6
 
   it('175.7 replaceOneAndGet(), basic case with document content with autocommit = true', async () => {
     oracledb.autoCommit = true;
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_5");
 
@@ -312,12 +311,10 @@ describe('176. soda8.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
     oracledb.autoCommit = false;
   }); // 175.7
 
   it('175.8 replaceOneAndGet(), basic case with document object', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_6");
 
@@ -354,11 +351,9 @@ describe('176. soda8.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 175.8
 
   it('175.9 replaceOneAndGet(), updatedDocument does not have document content', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_7");
 
@@ -379,11 +374,9 @@ describe('176. soda8.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 175.9
 
   it('175.10 replaceOneAndGet(), no error is reported if it does not match any document', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = await conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_176_8");
 
@@ -404,6 +397,5 @@ describe('176. soda8.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 175.10
 });

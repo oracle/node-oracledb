@@ -38,6 +38,7 @@ const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('165. soda2.js', () => {
+  let conn;
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -48,8 +49,18 @@ describe('165. soda2.js', () => {
     await sodaUtil.cleanup();
   });
 
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  afterEach(async function() {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
+  });
+
   it('165.1 create two sodaDatabase objects which point to the same instance', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd1 = conn.getSodaDatabase();
     const sd2 = conn.getSodaDatabase();
     // sd1 creates the collection
@@ -59,11 +70,10 @@ describe('165. soda2.js', () => {
     const coll_open = await sd2.openCollection(collName);
     assert(coll_open);
     await coll_create.drop();
-    await conn.close();
   }); // 165.1
 
   it('165.2 create two sodaDatabase objects from two connections', async () => {
-    const conn1 = await oracledb.getConnection(dbConfig);
+    const conn1 = conn; // Use the beforeEach connection as conn1
     const sd1 = await conn1.getSodaDatabase();
     const conn2 = await oracledb.getConnection(dbConfig);
     const sd2 = await conn1.getSodaDatabase();
@@ -75,12 +85,10 @@ describe('165. soda2.js', () => {
     assert.deepStrictEqual(cNames, [ t_collname ]);
 
     await coll.drop();
-    await conn1.close();
     await conn2.close();
   }); // 165.2
 
   it('165.3 will open this collection when creating a collection with the existing name', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const t_collname = "soda_test_165_3";
@@ -91,11 +99,9 @@ describe('165. soda2.js', () => {
     assert.deepStrictEqual(cNames, [ t_collname ]);
 
     await coll.drop();
-    await conn.close();
   }); // 165.3
 
   it('165.4 Negative - createCollection() when collection name is empty string', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collName = "";
@@ -104,8 +110,6 @@ describe('165. soda2.js', () => {
       /ORA-40658:/
     );
     // ORA-40658: Collection name cannot be null for this operation.
-
-    await conn.close();
   }); // 165.4
 
   // This is a variation of 173.1
@@ -172,7 +176,6 @@ describe('165. soda2.js', () => {
   }); // 165.5
 
   it('165.6 test multiple collections with same connection', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collections = [
@@ -197,11 +200,9 @@ describe('165. soda2.js', () => {
     await Promise.all(
       createdCollections.map(coll => coll.drop())
     );
-    await conn.close();
   });
 
   it('165.7 test collection creation with metadata', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collName = "soda_test_165_7";
@@ -241,7 +242,6 @@ describe('165. soda2.js', () => {
     assert(cNames.includes(collName));
 
     await collection.drop();
-    await conn.close();
   });
 
   it('165.8 test concurrent operations on different collections', async () => {
@@ -292,7 +292,6 @@ describe('165. soda2.js', () => {
   });
 
   it('165.9 test collection name with special characters', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const specialNames = [
@@ -305,12 +304,9 @@ describe('165. soda2.js', () => {
       const collection = await sd.createCollection(name);
       await collection.drop();
     }
-
-    await conn.close();
   });
 
   it('165.10 test collection creation with custom storage options', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collName = "soda_test_165_10";
@@ -329,11 +325,9 @@ describe('165. soda2.js', () => {
     assert(collection);
 
     await collection.drop();
-    await conn.close();
   });
 
   it('165.11 test collection with maximum name length', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     // Create collection name with maximum allowed length
@@ -349,6 +343,5 @@ describe('165. soda2.js', () => {
     );
 
     await collection.drop();
-    await conn.close();
   }); // 165.11
 });

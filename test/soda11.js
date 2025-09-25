@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,6 +40,7 @@ const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('179. soda11.js', () => {
+  let conn;
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -50,600 +51,525 @@ describe('179. soda11.js', () => {
     await sodaUtil.cleanup();
   });
 
-  it('179.1 create collection with metadata', async () => {
-    let conn, collection;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const schema = await testsUtil.getUser(conn);
-      const sd = conn.getSodaDatabase();
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
 
-      const t_tablename = "myTableName";
-      const t_metadata = {
-        "schemaName": schema,
-        "tableName": t_tablename,
-        "keyColumn":
-                      {
-                        "name": "ID",
-                        "sqlType": "VARCHAR2",
-                        "maxLength": 255,
-                        "assignmentMethod": "UUID"
-                      },
-        "contentColumn":
-                      {
-                        "name": "JSON_DOCUMENT",
-                        "sqlType": "BLOB",
-                        "compress": "NONE",
-                        "cache": true,
-                        "encrypt": "NONE",
-                        "validation": "STANDARD"
-                      },
-        "versionColumn":
-                      {
-                        "name": "VERSION",
-                        "method": "SHA256"
-                      },
-        "lastModifiedColumn":
-                      {
-                        "name": "LAST_MODIFIED"
-                      },
-        "creationTimeColumn":
-                      {
-                        "name": "CREATED_ON"
-                      },
-        "readOnly": true
-      };
-
-      const t_collname = "soda_test_179_1";
-      const options = { metaData: t_metadata };
-      collection = await sd.createCollection(t_collname, options);
-
-      await conn.commit();
-
-      assert.strictEqual(collection.name, t_collname);
-
-      assert.strictEqual(typeof (collection.metaData), "object");
-      assert.deepStrictEqual(collection.metaData, t_metadata);
-
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        const res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
+  afterEach(async function() {
+    if (conn) {
       await conn.close();
+      conn = null;
     }
+  });
+
+  it('179.1 create collection with metadata', async () => {
+    const schema = await testsUtil.getUser(conn);
+    const sd = conn.getSodaDatabase();
+
+    const t_tablename = "myTableName";
+    const t_metadata = {
+      "schemaName": schema,
+      "tableName": t_tablename,
+      "keyColumn":
+                    {
+                      "name": "ID",
+                      "sqlType": "VARCHAR2",
+                      "maxLength": 255,
+                      "assignmentMethod": "UUID"
+                    },
+      "contentColumn":
+                    {
+                      "name": "JSON_DOCUMENT",
+                      "sqlType": "BLOB",
+                      "compress": "NONE",
+                      "cache": true,
+                      "encrypt": "NONE",
+                      "validation": "STANDARD"
+                    },
+      "versionColumn":
+                    {
+                      "name": "VERSION",
+                      "method": "SHA256"
+                    },
+      "lastModifiedColumn":
+                    {
+                      "name": "LAST_MODIFIED"
+                    },
+      "creationTimeColumn":
+                    {
+                      "name": "CREATED_ON"
+                    },
+      "readOnly": true
+    };
+
+    const t_collname = "soda_test_179_1";
+    const options = { metaData: t_metadata };
+    const collection = await sd.createCollection(t_collname, options);
+
+    await conn.commit();
+
+    assert.strictEqual(collection.name, t_collname);
+
+    assert.strictEqual(typeof (collection.metaData), "object");
+    assert.deepStrictEqual(collection.metaData, t_metadata);
+
+    await conn.commit();
+    const res = await collection.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 179.1
 
   it('179.2 Negative - create collection with an invalid metadata', async () => {
-    let conn, collection;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const sd = conn.getSodaDatabase();
+    const sd = conn.getSodaDatabase();
 
-      const t_metadata = {
-        "schemaName": "nonexistent",
-        "tableName": "bar",
-        "keyColumn":
-                      {
-                        "name": "ID",
-                        "sqlType": "VARCHAR2",
-                        "maxLength": 255,
-                        "assignmentMethod": "UUID"
-                      },
-        "contentColumn":
-                      {
-                        "name": "JSON_DOCUMENT",
-                        "sqlType": "BLOB",
-                        "compress": "NONE",
-                        "cache": true,
-                        "encrypt": "NONE",
-                        "validation": "STANDARD"
-                      },
-        "versionColumn":
-                      {
-                        "name": "VERSION",
-                        "method": "SHA256"
-                      },
-        "lastModifiedColumn":
-                      {
-                        "name": "LAST_MODIFIED"
-                      },
-        "creationTimeColumn":
-                      {
-                        "name": "CREATED_ON"
-                      },
-        "readOnly": false
-      };
+    const t_metadata = {
+      "schemaName": "nonexistent",
+      "tableName": "bar",
+      "keyColumn":
+                    {
+                      "name": "ID",
+                      "sqlType": "VARCHAR2",
+                      "maxLength": 255,
+                      "assignmentMethod": "UUID"
+                    },
+      "contentColumn":
+                    {
+                      "name": "JSON_DOCUMENT",
+                      "sqlType": "BLOB",
+                      "compress": "NONE",
+                      "cache": true,
+                      "encrypt": "NONE",
+                      "validation": "STANDARD"
+                    },
+      "versionColumn":
+                    {
+                      "name": "VERSION",
+                      "method": "SHA256"
+                    },
+      "lastModifiedColumn":
+                    {
+                      "name": "LAST_MODIFIED"
+                    },
+      "creationTimeColumn":
+                    {
+                      "name": "CREATED_ON"
+                    },
+      "readOnly": false
+    };
 
-      const t_collname = "soda_test_179_2";
-      const options = { metaData: t_metadata };
-      await assert.rejects(
-        async () => await sd.createCollection(t_collname, options),
-        /ORA-01918:/
-      );
-      // ORA-01918: user \'nonexistent\' does not exist
+    const t_collname = "soda_test_179_2";
+    const options = { metaData: t_metadata };
+    await assert.rejects(
+      async () => await sd.createCollection(t_collname, options),
+      /ORA-01918:/
+    );
+    // ORA-01918: user \'nonexistent\' does not exist
 
-    } finally {
-      await conn.commit();
-
-      if (collection) {
-        const res = await collection.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      await conn.close();
-    }
+    await conn.commit();
   }); // 179.2
 
   it('179.3 throw error when creating collection with the existing name and different metadata', async () => {
-    let conn;
-    let collection1;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const schema = await testsUtil.getUser(conn);
-      const sd = conn.getSodaDatabase();
+    const schema = await testsUtil.getUser(conn);
+    const sd = conn.getSodaDatabase();
 
-      const t_metadata1 = {
-        "schemaName": schema,
-        "tableName": "nodb_tab_179_3",
-        "keyColumn":
-                       {
-                         "name": "ID",
-                         "sqlType": "VARCHAR2",
-                         "maxLength": 255,
-                         "assignmentMethod": "UUID"
-                       },
-        "contentColumn":
-                       {
-                         "name": "JSON_DOCUMENTS",
-                         "sqlType": "BLOB",
-                         "compress": "NONE",
-                         "cache": true,
-                         "encrypt": "NONE",
-                         "validation": "STRICT"
-                       },
-        "versionColumn":
-                       {
-                         "name": "VERSION",
-                         "type": "String",
-                         "method": "SHA256"
-                       },
-        "lastModifiedColumn":
-                       {
-                         "name": "LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name": "CREATED_ON"
-                       },
-        "readOnly": false
-      };
-      const t_collname = "soda_test_179_3";
-      const options = { metaData: t_metadata1 };
-      collection1 = await sd.createCollection(t_collname, options);
+    const t_metadata1 = {
+      "schemaName": schema,
+      "tableName": "nodb_tab_179_3",
+      "keyColumn":
+                     {
+                       "name": "ID",
+                       "sqlType": "VARCHAR2",
+                       "maxLength": 255,
+                       "assignmentMethod": "UUID"
+                     },
+      "contentColumn":
+                     {
+                       "name": "JSON_DOCUMENTS",
+                       "sqlType": "BLOB",
+                       "compress": "NONE",
+                       "cache": true,
+                       "encrypt": "NONE",
+                       "validation": "STRICT"
+                     },
+      "versionColumn":
+                     {
+                       "name": "VERSION",
+                       "type": "String",
+                       "method": "SHA256"
+                     },
+      "lastModifiedColumn":
+                     {
+                       "name": "LAST_MODIFIED"
+                     },
+      "creationTimeColumn":
+                     {
+                       "name": "CREATED_ON"
+                     },
+      "readOnly": false
+    };
+    const t_collname = "soda_test_179_3";
+    const options = { metaData: t_metadata1 };
+    const collection1 = await sd.createCollection(t_collname, options);
 
-      const t_metadata2 = {
-        "schemaName": "foo",
-        "tableName": "bar",
-        "keyColumn":
-                       {
-                         "name": "ID",
-                         "sqlType": "VARCHAR2",
-                         "maxLength": 255,
-                         "assignmentMethod": "UUID"
-                       },
-        "contentColumn":
-                       {
-                         "name": "JSON_DOCUMENTS",
-                         "sqlType": "BLOB",
-                         "compress": "NONE",
-                         "cache": true,
-                         "encrypt": "NONE",
-                         "validation": "STRICT"
-                       },
-        "versionColumn":
-                       {
-                         "name": "VERSION",
-                         "type": "String",
-                         "method": "SHA256"
-                       },
-        "lastModifiedColumn":
-                       {
-                         "name": "LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name": "CREATED_ON"
-                       },
-        "readOnly": true
-      };
+    const t_metadata2 = {
+      "schemaName": "foo",
+      "tableName": "bar",
+      "keyColumn":
+                     {
+                       "name": "ID",
+                       "sqlType": "VARCHAR2",
+                       "maxLength": 255,
+                       "assignmentMethod": "UUID"
+                     },
+      "contentColumn":
+                     {
+                       "name": "JSON_DOCUMENTS",
+                       "sqlType": "BLOB",
+                       "compress": "NONE",
+                       "cache": true,
+                       "encrypt": "NONE",
+                       "validation": "STRICT"
+                     },
+      "versionColumn":
+                     {
+                       "name": "VERSION",
+                       "type": "String",
+                       "method": "SHA256"
+                     },
+      "lastModifiedColumn":
+                     {
+                       "name": "LAST_MODIFIED"
+                     },
+      "creationTimeColumn":
+                     {
+                       "name": "CREATED_ON"
+                     },
+      "readOnly": true
+    };
 
-      const options2 = { metaData: t_metadata2 };
+    const options2 = { metaData: t_metadata2 };
 
-      await assert.rejects(
-        async () => await sd.createCollection(t_collname, options2),
-        /ORA-40669:/
-      );
-      // ORA-40669: Collection create failed: collection with same name but different metadata exists.
+    await assert.rejects(
+      async () => await sd.createCollection(t_collname, options2),
+      /ORA-40669:/
+    );
+    // ORA-40669: Collection create failed: collection with same name but different metadata exists.
 
-    } finally {
-      if (collection1) {
-        await collection1.drop();
-      }
-      if (conn) {
-        await conn.close();
-      }
-    }
+    await collection1.drop();
   }); // 179.3
 
   it('179.4 customize the key value, String value', async () => {
-    let conn;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const schema = await testsUtil.getUser(conn);
-      const sd = conn.getSodaDatabase();
-      const collectionName = 'soda_test_179_4';
-      const testMetaData = {
-        "schemaName": schema,
-        "tableName": collectionName,
-        "keyColumn":
-                       {
-                         "name": "ID",
-                         "sqlType": "NUMBER",
-                         "assignmentMethod": "CLIENT"
-                       },
-        "contentColumn":
-                       {
-                         "name": "JSON_DOCUMENTS",
-                         "sqlType": "BLOB",
-                         "compress": "NONE",
-                         "cache": true,
-                         "encrypt": "NONE",
-                         "validation": "STRICT"
-                       },
-        "versionColumn":
-                       {
-                         "name": "VERSION",
-                         "type": "String",
-                         "method": "SHA256"
-                       },
-        "lastModifiedColumn":
-                       {
-                         "name": "LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name": "CREATED_ON"
-                       },
-        "readOnly": false
-      };
+    const schema = await testsUtil.getUser(conn);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_179_4';
+    const testMetaData = {
+      "schemaName": schema,
+      "tableName": collectionName,
+      "keyColumn":
+                     {
+                       "name": "ID",
+                       "sqlType": "NUMBER",
+                       "assignmentMethod": "CLIENT"
+                     },
+      "contentColumn":
+                     {
+                       "name": "JSON_DOCUMENTS",
+                       "sqlType": "BLOB",
+                       "compress": "NONE",
+                       "cache": true,
+                       "encrypt": "NONE",
+                       "validation": "STRICT"
+                     },
+      "versionColumn":
+                     {
+                       "name": "VERSION",
+                       "type": "String",
+                       "method": "SHA256"
+                     },
+      "lastModifiedColumn":
+                     {
+                       "name": "LAST_MODIFIED"
+                     },
+      "creationTimeColumn":
+                     {
+                       "name": "CREATED_ON"
+                     },
+      "readOnly": false
+    };
 
-      const coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+    const coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
-      const testContent = {
-        name: "Shelly",
-        address: {city: "Shenzhen", country: "China"}
-      };
+    const testContent = {
+      name: "Shelly",
+      address: {city: "Shenzhen", country: "China"}
+    };
 
-      /* The key must always be a string and is always returned a string as
-         well -- even if the "type" in the database is numeric. */
-      const testKey = '86755';
-      const testDoc = sd.createDocument(testContent, { key: testKey });
-      assert.strictEqual(testDoc.key, testKey);
-      await coll.insertOne(testDoc);
+    /* The key must always be a string and is always returned a string as
+       well -- even if the "type" in the database is numeric. */
+    const testKey = '86755';
+    const testDoc = sd.createDocument(testContent, { key: testKey });
+    assert.strictEqual(testDoc.key, testKey);
+    await coll.insertOne(testDoc);
 
-      // Fetch it back
-      const docGot = await coll.find().key(testKey).getOne();
-      const contentGot = docGot.getContent();
-      assert.strictEqual(contentGot.name, testContent.name);
-      assert.strictEqual(
-        contentGot.address.country,
-        testContent.address.country
-      );
+    // Fetch it back
+    const docGot = await coll.find().key(testKey).getOne();
+    const contentGot = docGot.getContent();
+    assert.strictEqual(contentGot.name, testContent.name);
+    assert.strictEqual(
+      contentGot.address.country,
+      testContent.address.country
+    );
 
-      await conn.commit();
-      const res = await coll.drop();
-      assert.strictEqual(res.dropped, true);
-
-    } finally {
-      if (conn) {
-        await conn.close();
-      }
-    }
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 179.4
 
   // A variation of 179.4
   it('179.5 Negative - customize the key value, numeric value', async () => {
-    let conn, coll;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const schema = await testsUtil.getUser(conn);
-      const sd = conn.getSodaDatabase();
-      const collectionName = 'soda_test_179_5';
-      const testMetaData = {
-        "schemaName": schema,
-        "tableName": collectionName,
-        "keyColumn":
-                       {
-                         "name": "ID",
-                         "sqlType": "NUMBER",
-                         "assignmentMethod": "CLIENT"
-                       },
-        "contentColumn":
-                       {
-                         "name": "JSON_DOCUMENTS",
-                         "sqlType": "BLOB",
-                         "compress": "NONE",
-                         "cache": true,
-                         "encrypt": "NONE",
-                         "validation": "STRICT"
-                       },
-        "versionColumn":
-                       {
-                         "name": "VERSION",
-                         "type": "String",
-                         "method": "SHA256"
-                       },
-        "lastModifiedColumn":
-                       {
-                         "name": "LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name": "CREATED_ON"
-                       },
-        "readOnly": false
-      };
+    const schema = await testsUtil.getUser(conn);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_179_5';
+    const testMetaData = {
+      "schemaName": schema,
+      "tableName": collectionName,
+      "keyColumn":
+                     {
+                       "name": "ID",
+                       "sqlType": "NUMBER",
+                       "assignmentMethod": "CLIENT"
+                     },
+      "contentColumn":
+                     {
+                       "name": "JSON_DOCUMENTS",
+                       "sqlType": "BLOB",
+                       "compress": "NONE",
+                       "cache": true,
+                       "encrypt": "NONE",
+                       "validation": "STRICT"
+                     },
+      "versionColumn":
+                     {
+                       "name": "VERSION",
+                       "type": "String",
+                       "method": "SHA256"
+                     },
+      "lastModifiedColumn":
+                     {
+                       "name": "LAST_MODIFIED"
+                     },
+      "creationTimeColumn":
+                     {
+                       "name": "CREATED_ON"
+                     },
+      "readOnly": false
+    };
 
-      coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+    const coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
-      const testContent = {
-        name: "Shelly",
-        address: {city: "Shenzhen", country: "China"}
-      };
+    const testContent = {
+      name: "Shelly",
+      address: {city: "Shenzhen", country: "China"}
+    };
 
-      /* The key must always be a string and is always returned a string as
-         well -- even if the "type" in the database is numeric. */
-      const testKey = 86755;
-      await assert.rejects(
-        async () => await sd.createDocument(testContent, { key: testKey }),
-        /NJS-007: invalid value for "key" in parameter 2/
-      );
+    /* The key must always be a string and is always returned a string as
+       well -- even if the "type" in the database is numeric. */
+    const testKey = 86755;
+    await assert.rejects(
+      async () => await sd.createDocument(testContent, { key: testKey }),
+      /NJS-007: invalid value for "key" in parameter 2/
+    );
 
-    } finally {
-      if (coll) {
-        const res = await coll.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        await conn.close();
-      }
-    }
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 179.5
 
   it('179.6 customize the value of mediaType', async () => {
-    let conn, coll;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const schema = await testsUtil.getUser(conn);
-      const sd = conn.getSodaDatabase();
-      const collectionName = 'soda_test_179_6';
-      const testMetaData = {
-        "schemaName": schema,
-        "tableName": collectionName,
-        "keyColumn":
+    const schema = await testsUtil.getUser(conn);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_179_6';
+    const testMetaData = {
+      "schemaName": schema,
+      "tableName": collectionName,
+      "keyColumn":
+                   {
+                     "name": "ID",
+                     "sqlType": "NUMBER",
+                     "assignmentMethod": "CLIENT"
+                   },
+      "mediaTypeColumn":
+                       {
+                         "name": "MediaType"
+                       },
+      "contentColumn":
                      {
-                       "name": "ID",
-                       "sqlType": "NUMBER",
-                       "assignmentMethod": "CLIENT"
+                       "name": "DOCUMENT",
+                       "sqlType": "BLOB",
+                       "compress": "NONE",
+                       "cache": true,
+                       "encrypt": "NONE",
+                       "validation": "STRICT"
                      },
-        "mediaTypeColumn":
-                         {
-                           "name": "MediaType"
-                         },
-        "contentColumn":
-                       {
-                         "name": "DOCUMENT",
-                         "sqlType": "BLOB",
-                         "compress": "NONE",
-                         "cache": true,
-                         "encrypt": "NONE",
-                         "validation": "STRICT"
-                       },
-        "versionColumn":
-                       {
-                         "name": "VERSION",
-                         "type": "String",
-                         "method": "SHA256"
-                       },
-        "lastModifiedColumn":
-                       {
-                         "name": "LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name": "CREATED_ON"
-                       },
-        "readOnly": false
-      };
+      "versionColumn":
+                     {
+                       "name": "VERSION",
+                       "type": "String",
+                       "method": "SHA256"
+                     },
+      "lastModifiedColumn":
+                     {
+                       "name": "LAST_MODIFIED"
+                     },
+      "creationTimeColumn":
+                     {
+                       "name": "CREATED_ON"
+                     },
+      "readOnly": false
+    };
 
-      coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+    const coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
-      // Insert a new document
-      const testContent = {};
-      const testMediaType = 'image/png';
-      const testKey = '86755';
-      const testDoc = sd.createDocument(
-        testContent,
-        { mediaType: testMediaType, key: testKey }
-      );
-      assert.strictEqual(testDoc.mediaType, testMediaType);
+    // Insert a new document
+    const testContent = {};
+    const testMediaType = 'image/png';
+    const testKey = '86755';
+    const testDoc = sd.createDocument(
+      testContent,
+      { mediaType: testMediaType, key: testKey }
+    );
+    assert.strictEqual(testDoc.mediaType, testMediaType);
 
-      const myKey = testDoc.key;
+    const myKey = testDoc.key;
 
-      await coll.insertOne(testDoc);
+    await coll.insertOne(testDoc);
 
-      // Fetch the document back
-      const myDoc = await coll.find().key(myKey).getOne();
+    // Fetch the document back
+    const myDoc = await coll.find().key(myKey).getOne();
 
-      assert.strictEqual(myDoc.mediaType, testMediaType);
+    assert.strictEqual(myDoc.mediaType, testMediaType);
 
-    } finally {
-      await conn.commit();
-      if (coll) {
-        const res = await coll.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        await conn.close();
-      }
-    }
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 179.6
 
   it('179.7 Negative - customize mediaType, invalid type, numeric value', async () => {
-    let conn, coll;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const schema = await testsUtil.getUser(conn);
-      const sd = conn.getSodaDatabase();
-      const collectionName = 'soda_test_179_7';
-      const testMetaData = {
-        "schemaName": schema,
-        "tableName": collectionName,
-        "keyColumn":
+    const schema = await testsUtil.getUser(conn);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_179_7';
+    const testMetaData = {
+      "schemaName": schema,
+      "tableName": collectionName,
+      "keyColumn":
+                   {
+                     "name": "ID",
+                     "sqlType": "NUMBER",
+                     "assignmentMethod": "CLIENT"
+                   },
+      "mediaTypeColumn":
+                       {
+                         "name": "MediaType"
+                       },
+      "contentColumn":
                      {
-                       "name": "ID",
-                       "sqlType": "NUMBER",
-                       "assignmentMethod": "CLIENT"
+                       "name": "DOCUMENT",
+                       "sqlType": "BLOB",
+                       "compress": "NONE",
+                       "cache": true,
+                       "encrypt": "NONE",
+                       "validation": "STRICT"
                      },
-        "mediaTypeColumn":
-                         {
-                           "name": "MediaType"
-                         },
-        "contentColumn":
-                       {
-                         "name": "DOCUMENT",
-                         "sqlType": "BLOB",
-                         "compress": "NONE",
-                         "cache": true,
-                         "encrypt": "NONE",
-                         "validation": "STRICT"
-                       },
-        "versionColumn":
-                       {
-                         "name": "VERSION",
-                         "type": "String",
-                         "method": "SHA256"
-                       },
-        "lastModifiedColumn":
-                       {
-                         "name": "LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name": "CREATED_ON"
-                       },
-        "readOnly": false
-      };
+      "versionColumn":
+                     {
+                       "name": "VERSION",
+                       "type": "String",
+                       "method": "SHA256"
+                     },
+      "lastModifiedColumn":
+                     {
+                       "name": "LAST_MODIFIED"
+                     },
+      "creationTimeColumn":
+                     {
+                       "name": "CREATED_ON"
+                     },
+      "readOnly": false
+    };
 
-      coll = await sd.createCollection(collectionName, { metaData: testMetaData});
+    const coll = await sd.createCollection(collectionName, { metaData: testMetaData});
 
-      // Insert a new document
-      const testContent = {};
+    // Insert a new document
+    const testContent = {};
 
-      /* Negative value */
-      const testMediaType = 65432;
-      const testKey = '86755';
-      await assert.rejects(
-        async () => await sd.createDocument(
-          testContent,
-          { mediaType: testMediaType, key: testKey }
-        ),
-        /NJS-007: invalid value for "mediaType" in parameter 2/
-      );
+    /* Negative value */
+    const testMediaType = 65432;
+    const testKey = '86755';
+    await assert.rejects(
+      async () => await sd.createDocument(
+        testContent,
+        { mediaType: testMediaType, key: testKey }
+      ),
+      /NJS-007: invalid value for "mediaType" in parameter 2/
+    );
 
-    } finally {
-      await conn.commit();
-      if (coll) {
-        const res = await coll.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        await conn.close();
-      }
-    }
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 179.7
 
   it('179.8 insert an empty document with customized metadata', async () => {
-    let conn, coll;
-    try {
-      conn = await oracledb.getConnection(dbConfig);
-      const schema = await testsUtil.getUser(conn);
-      const sd = conn.getSodaDatabase();
-      const collectionName = 'soda_test_179_8';
-      const testMetaData = {
-        "schemaName": schema,
-        "tableName": collectionName,
-        "keyColumn":
+    const schema = await testsUtil.getUser(conn);
+    const sd = conn.getSodaDatabase();
+    const collectionName = 'soda_test_179_8';
+    const testMetaData = {
+      "schemaName": schema,
+      "tableName": collectionName,
+      "keyColumn":
+                   {
+                     "name": "ID",
+                     "sqlType": "NUMBER",
+                     "assignmentMethod": "CLIENT"
+                   },
+      "mediaTypeColumn":
+                       {
+                         "name": "MediaType"
+                       },
+      "contentColumn":
                      {
-                       "name": "ID",
-                       "sqlType": "NUMBER",
-                       "assignmentMethod": "CLIENT"
+                       "name": "DOCUMENT",
+                       "sqlType": "BLOB",
+                       "compress": "NONE",
+                       "cache": true,
+                       "encrypt": "NONE",
+                       "validation": "STRICT"
                      },
-        "mediaTypeColumn":
-                         {
-                           "name": "MediaType"
-                         },
-        "contentColumn":
-                       {
-                         "name": "DOCUMENT",
-                         "sqlType": "BLOB",
-                         "compress": "NONE",
-                         "cache": true,
-                         "encrypt": "NONE",
-                         "validation": "STRICT"
-                       },
-        "versionColumn":
-                       {
-                         "name": "VERSION",
-                         "type": "String",
-                         "method": "SHA256"
-                       },
-        "lastModifiedColumn":
-                       {
-                         "name": "LAST_MODIFIED"
-                       },
-        "creationTimeColumn":
-                       {
-                         "name": "CREATED_ON"
-                       },
-        "readOnly": false
-      };
+      "versionColumn":
+                     {
+                       "name": "VERSION",
+                       "type": "String",
+                       "method": "SHA256"
+                     },
+      "lastModifiedColumn":
+                     {
+                       "name": "LAST_MODIFIED"
+                     },
+      "creationTimeColumn":
+                     {
+                       "name": "CREATED_ON"
+                     },
+      "readOnly": false
+    };
 
-      coll = await sd.createCollection(collectionName, { metaData: testMetaData });
+    const coll = await sd.createCollection(collectionName, { metaData: testMetaData });
 
-      const testContent = {};
-      const testKey = '86755';
-      const testDoc = sd.createDocument(testContent, { key: testKey });
+    const testContent = {};
+    const testKey = '86755';
+    const testDoc = sd.createDocument(testContent, { key: testKey });
 
-      const outDocument = await coll.insertOneAndGet(testDoc);
-      assert(outDocument);
+    const outDocument = await coll.insertOneAndGet(testDoc);
+    assert(outDocument);
 
-    } finally {
-      await conn.commit();
-      if (coll) {
-        const res = await coll.drop();
-        assert.strictEqual(res.dropped, true);
-      }
-
-      if (conn) {
-        await conn.close();
-      }
-    }
+    await conn.commit();
+    const res = await coll.drop();
+    assert.strictEqual(res.dropped, true);
   }); // 179.8
 });

@@ -1065,7 +1065,9 @@ describe('244.dataTypeJson.js', function() {
           type: oracledb.DB_TYPE_JSON,
           val: genDoc
         }]),
-        /ORA-54059:/ // cannot update an immutable column to a different value
+        /ORA-54059:|ORA-60703:/
+        // ORA-54059: cannot update an immutable column to a different value
+        // ORA-60703: Cannot modify _id field of data column of a JSON collection table
       );
 
       // User provided keys should still work.

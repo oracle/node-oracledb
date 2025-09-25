@@ -38,6 +38,7 @@ const sodaUtil = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('177. soda9.js', () => {
+  let conn;
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -48,8 +49,18 @@ describe('177. soda9.js', () => {
     await sodaUtil.cleanup();
   });
 
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  afterEach(async function() {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
+  });
+
   it('177.1 insertOne() with a document content', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_1");
     const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
@@ -65,11 +76,9 @@ describe('177. soda9.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.1
 
   it('177.2 insertOne() with a document', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_2");
     const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
@@ -86,11 +95,9 @@ describe('177. soda9.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.2
 
   it('177.3 insertOneAndGet() with a document content', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_3");
 
@@ -111,11 +118,9 @@ describe('177. soda9.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.3
 
   it('177.4 insertOneAndGet() with a document', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_4");
 
@@ -137,12 +142,10 @@ describe('177. soda9.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.4
 
   it('177.5 createDocument() followd by getContent() i.e. without being inserted', async () => {
 
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
 
     const inContent = { id: 2000, name: "Paul",  office: "Singapore" };
@@ -153,11 +156,9 @@ describe('177. soda9.js', () => {
     assert.deepStrictEqual(outContent, inContent);
 
     await conn.commit();
-    await conn.close();
   }); // 177.5
 
   it('177.6 update a document and verify content', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_6");
 
@@ -178,11 +179,9 @@ describe('177. soda9.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.6
 
   it('177.7 retrieve document metadata', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_7");
 
@@ -196,11 +195,9 @@ describe('177. soda9.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.7
 
   it('177.8 negative test: replace a non-existent document', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_8");
 
@@ -215,11 +212,9 @@ describe('177. soda9.js', () => {
     // Drop the collection and ensure it succeeds
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.8
 
   it('177.9 insert multiple documents and verify retrieval', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_9");
 
@@ -248,11 +243,9 @@ describe('177. soda9.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.9
 
   it('177.10 verify collection drop when empty', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_177_10");
 
@@ -263,6 +256,5 @@ describe('177. soda9.js', () => {
     // Drop collection
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 177.10
 });

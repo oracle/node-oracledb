@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,6 +40,7 @@ const testsUtil = require('./testsUtil.js');
 const t_contents = sodaUtil.t_contents;
 
 describe('173. soda5.js', () => {
+  let conn;
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -50,9 +51,18 @@ describe('173. soda5.js', () => {
     await sodaUtil.cleanup();
   });
 
-  it('173.1 create index, basic case', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
 
+  afterEach(async function() {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
+  });
+
+  it('173.1 create index, basic case', async () => {
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_1");
 
@@ -84,12 +94,9 @@ describe('173. soda5.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.1
 
   it('173.2 query row not via indexSpec', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_2");
 
@@ -121,12 +128,9 @@ describe('173. soda5.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.2
 
   it('173.3 Negative - invalid indexSpec, invalid index property', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_3");
 
@@ -139,21 +143,17 @@ describe('173. soda5.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.3
 
   it('173.4 collection.drop(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
     const collName = "soda_test_173_4";
     const collection = await sd.createCollection(collName);
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.4
 
   it('173.5 drop multiple times, no error thrown', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
 
     const collName = "soda_test_173_5";
@@ -167,13 +167,9 @@ describe('173. soda5.js', () => {
 
     res = await collection.drop();
     assert.strictEqual(res.dropped, false);
-
-    await conn.close();
   }); // 173.5
 
   it('173.6 dropIndex(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_6");
 
@@ -209,12 +205,9 @@ describe('173. soda5.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.6
 
   it('173.7 dropping index does not impact query', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_7");
 
@@ -250,12 +243,9 @@ describe('173. soda5.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.7
 
   it('173.8 The index is dropped regardless of the auto commit mode', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_8");
 
@@ -292,12 +282,9 @@ describe('173. soda5.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.8
 
   it('173.9 Negative - dropIndex() no parameter', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_9");
 
@@ -336,11 +323,9 @@ describe('173. soda5.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.9
 
   it('173.10 option object of dropIndex(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_10");
 
@@ -366,11 +351,9 @@ describe('173. soda5.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.10
 
   it('173.11 option object of dropIndex(), boolean value is false', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection("soda_test_173_11");
 
@@ -402,11 +385,9 @@ describe('173. soda5.js', () => {
     await conn.commit();
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 173.11
 
   it('173.12 getDataGuide(), basic case', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const collection = await soda.createCollection('soda_test_173_12');
 
@@ -449,7 +430,6 @@ describe('173. soda5.js', () => {
     }
 
     await collection.drop();
-    await conn.close();
 
   }); // 173.12
 

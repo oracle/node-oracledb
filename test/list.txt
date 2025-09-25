@@ -4301,17 +4301,18 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     163.25 Negative - executeMany with DDL - CREATE TABLE
 
 164. soda1.js
-    164.1 getSodaDatabase() creates a sodaDatabase Object
-    164.2 createCollection() creates a collection
-    164.3 openCollection() opens an existing collection
-    164.4 getCollectionNames() gets an array of collection names
-    164.5 the operation status of collection.drop()
-    164.6 Negative: the operation status of collection.drop()
-    164.7 get one document
-    164.8 get multiple documents
-    164.9 create index
-    164.10 the examples/soda1.js case
+    164.1 createCollection() creates a collection
+    164.2 openCollection() opens an existing collection
+    164.3 getCollectionNames() gets an array of collection names
+    164.4 the operation status of collection.drop()
+    164.5 Negative: the operation status of collection.drop()
+    164.6 get one document
+    164.7 get multiple documents
+    164.8 create index
+    164.9 the "examples/soda1.js" case with autoCommit = true
+    164.10 the "examples/soda1.js" case with no autocommit set up
     164.11 Negative: create collection with invalid metaData value
+    164.12 Create a collection with custom metadata
 
 165. soda2.js
     165.1 create two sodaDatabase objects which point to the same instance
@@ -6353,3 +6354,26 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     316.8 other Transaction Types
         316.8.1 checking behaviour with XA transactions
         316.8.2 checking behaviour with local transactions
+  317. soda15.js
+    317.1 data Type and JSON Validation Tests
+        317.1.1 insert and query documents with all JSON data types
+        317.1.2 Unicode and special characters in JSON
+        317.1.3 very large JSON documents
+    317.2 advanced Query and Filter Tests
+        317.2.1 $and, $or, $nor operations (914ms)
+        317.2.2 numeric range queries with $gt, $gte, $lt, $lte
+        317.2.3 $in and $nin array operations
+    317.3 performance and Scale Tests
+        317.3.1 bulk operations with large datasets
+        317.3.2 concurrent insertions from multiple operations
+    317.4 Error Handling and Edge Cases
+        317.4.1 operations on non-existent collections
+        317.4.2 invalid JSON filter expressions
+        317.4.3 transaction rollback scenarios
+        317.4.4 document size edge cases
+    317.5 Advanced Collection Operations
+        317.5.1 collection metadata and statistics
+        317.5.2 mixed operations on same collection
+    317.6 Connection Pool and Resource Management
+        317.6.1 SODA operations with autoCommit enabled
+        317.6.2 SODA collection cleanup after connection close

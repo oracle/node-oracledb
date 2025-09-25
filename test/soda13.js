@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -38,6 +38,7 @@ const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('231. soda13.js', () => {
+  let conn;
 
   before(async function() {
     const isSodaRunnable = await testsUtil.isSodaRunnable();
@@ -58,10 +59,20 @@ describe('231. soda13.js', () => {
     await sodaUtil.cleanup();
   }); // before()
 
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  afterEach(async function() {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
+  });
+
   it('231.1 example case', async () => {
 
     const TABLE = "soda_test_13_1";
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE);
 
@@ -79,14 +90,12 @@ describe('231. soda13.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
 
   }); // 231.1
 
   it('231.2 truncate multiple times', async () => {
 
     const TABLE = "soda_test_13_2";
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE);
 
@@ -106,14 +115,12 @@ describe('231. soda13.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
 
   }); // 231.2
 
   it('231.3 Negative -invalid parameters', async () => {
 
     const TABLE = "soda_test_13_3";
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE);
 
@@ -130,6 +137,5 @@ describe('231. soda13.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 231.3
 });

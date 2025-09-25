@@ -38,6 +38,7 @@ const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('164. soda1.js', () => {
+  let conn;
 
   before(async function() {
     const runnable = await testsUtil.isSodaRunnable();
@@ -48,44 +49,44 @@ describe('164. soda1.js', () => {
     await sodaUtil.cleanup();
   });
 
-  it('164.1 getSodaDatabase() creates a sodaDatabase Object', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  afterEach(async function() {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
+  });
+
+  it('164.1 createCollection() creates a collection', async () => {
     const sd = conn.getSodaDatabase();
     assert(sd);
-    await conn.close();
-  }); // 164.1
-
-  it('164.2 createCollection() creates a collection', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
-    const sd = conn.getSodaDatabase();
-    const collName = "soda_test_164_2";
+    const collName = "soda_test_164_1";
     const coll = await sd.createCollection(collName);
     await coll.drop();
-    await conn.close();
-  });// 164.2
+  });// 164.1
 
-  it('164.3 openCollection() opens an existing collection', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.2 openCollection() opens an existing collection', async () => {
     const sd = conn.getSodaDatabase();
-    const collName = "soda_test_164_3";
+    const collName = "soda_test_164_2";
     const coll = await sd.createCollection(collName);
     await conn.commit();
     const newColl = await sd.openCollection(collName);
     assert.strictEqual(newColl.name, coll.name);
     await newColl.drop();
-    await conn.close();
-  }); // 164.3
+  }); // 164.2
 
-  it('164.4 getCollectionNames() gets an array of collection names', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.3 getCollectionNames() gets an array of collection names', async () => {
     const sd = conn.getSodaDatabase();
 
     const collNames = [
-      "soda_test_164_4_1",
-      "soda_test_164_4_2",
-      "soda_test_164_4_3",
-      "soda_test_164_4_4",
-      "soda_test_164_4_5"
+      "soda_test_164_3_1",
+      "soda_test_164_3_2",
+      "soda_test_164_3_3",
+      "soda_test_164_3_4",
+      "soda_test_164_3_5"
     ];
 
     const collections = await Promise.all(
@@ -107,34 +108,28 @@ describe('164. soda1.js', () => {
     opResults.forEach(function(res) {
       assert.strictEqual(res.dropped, true);
     });
-    await conn.close();
-  }); // 164.4
+  }); // 164.3
 
-  it('164.5 the operation status of collection.drop()', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.4 the operation status of collection.drop()', async () => {
     const sd = conn.getSodaDatabase();
-    const collName = "soda_test_164_5";
+    const collName = "soda_test_164_4";
     const coll = await sd.createCollection(collName);
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
-  }); // 164.5
+  }); // 164.4
 
-  it('164.6 Negative: the operation status of collection.drop()', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.5 Negative: the operation status of collection.drop()', async () => {
     const sd = conn.getSodaDatabase();
-    const collName = "soda_test_164_6";
+    const collName = "soda_test_164_5";
     const coll = await sd.createCollection(collName);
     await coll.drop();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, false);
-    await conn.close();
-  }); // 164.6
+  }); // 164.5
 
-  it('164.7 get one document', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.6 get one document', async () => {
     const sd = conn.getSodaDatabase();
-    const collectionName = 'soda_test_164_7';
+    const collectionName = 'soda_test_164_6';
     const coll = await sd.createCollection(collectionName);
     await coll.find().remove();
 
@@ -158,14 +153,11 @@ describe('164. soda1.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
+  }); // 164.6
 
-    await conn.close();
-  }); // 164.7
-
-  it('164.8 get multiple documents', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.7 get multiple documents', async () => {
     const sd = conn.getSodaDatabase();
-    const collectionName = 'soda_test_164_8';
+    const collectionName = 'soda_test_164_7';
     const coll = await sd.createCollection(collectionName);
 
     const myContents = [
@@ -190,15 +182,13 @@ describe('164. soda1.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
+  }); // 164.7
 
-    await conn.close();
-  }); // 164.8
+  it('164.8 create index', async () => {
+    const indexName = "soda_index_164_8";
 
-  it('164.9 create index', async () => {
-    const indexName = "soda_index_164_9";
-    const conn = await oracledb.getConnection(dbConfig);
     const sd = conn.getSodaDatabase();
-    const collectionName = 'soda_test_164_9';
+    const collectionName = 'soda_test_164_8';
     const coll = await sd.createCollection(collectionName);
 
     const index =
@@ -212,17 +202,16 @@ describe('164. soda1.js', () => {
     await coll.dropIndex(indexName);
     await coll.drop();
     await conn.commit();
-    await conn.close();
-  }); // 164.9
+  }); // 164.8
 
-  it('164.10 the "examples/soda1.js" case with autoCommit = true', async () => {
+  it('164.9 the "examples/soda1.js" case with autoCommit = true', async () => {
     oracledb.autoCommit = true;
-    const conn = await oracledb.getConnection(dbConfig);
+
     // Create the parent object for SODA
     const soda = conn.getSodaDatabase();
 
     // Create a new SODA collection and index
-    const collection = await soda.createCollection("soda_test_164_10");
+    const collection = await soda.createCollection("soda_test_164_9");
     const indexSpec = {
       "name": "CITY_IDX",
       "fields": [
@@ -299,16 +288,14 @@ describe('164. soda1.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
-  }); // 164.10
+  }); // 164.9
 
-  it('164.11 the "examples/soda1.js" case with no autocommit set up', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.10 the "examples/soda1.js" case with no autocommit set up', async () => {
     // Create the parent object for SODA
     const soda = conn.getSodaDatabase();
 
     // Create a new SODA collection and index
-    const collection = await soda.createCollection("soda_test_164_11");
+    const collection = await soda.createCollection("soda_test_164_10");
     const indexSpec = {
       "name": "CITY_IDX",
       "fields": [
@@ -381,11 +368,9 @@ describe('164. soda1.js', () => {
 
     const res = await collection.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
-  }); // 164.11
+  }); // 164.10
 
-  it('164.12 Negative: create collection with invalid metaData value', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.11 Negative: create collection with invalid metaData value', async () => {
     const sd = conn.getSodaDatabase();
 
     const t_collname = "soda_test_164_11";
@@ -395,12 +380,9 @@ describe('164. soda1.js', () => {
       async () => await sd.createCollection(t_collname, options),
       /NJS-007:/
     );
+  }); // 164.11
 
-    await conn.close();
-  }); // 164.12
-
-  it('164.13 Create a collection with custom metadata', async () => {
-    const conn = await oracledb.getConnection(dbConfig);
+  it('164.12 Create a collection with custom metadata', async () => {
     const sd = conn.getSodaDatabase();
 
     const customMetadata = {
@@ -411,10 +393,8 @@ describe('164. soda1.js', () => {
       "lastModifiedColumn": { "name": "LAST_MODIFIED" }
     };
 
-    const collection = await sd.createCollection('soda_test_164_18', { metaData: customMetadata });
+    const collection = await sd.createCollection('soda_test_164_12', { metaData: customMetadata });
     assert(collection);
-
     await collection.drop();
-    await conn.close();
-  }); // 164.13
+  }); // 164.12
 });

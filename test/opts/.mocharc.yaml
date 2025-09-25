@@ -298,3 +298,4 @@ spec:
   - test/dbObject21.js
   - test/poolMaxLifetimeSession.js
   - test/sessionless.js
+  - test/soda15.js

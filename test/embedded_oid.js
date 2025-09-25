@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,7 +40,7 @@ const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('288. embedded_oid.js', function() {
-  let connection = null;
+  let conn;
   let isRunnable = true;
 
   before(async function() {
@@ -52,12 +52,17 @@ describe('288. embedded_oid.js', function() {
 
     if (!isRunnable) this.skip();
     await sodaUtil.cleanup();
-    connection = await oracledb.getConnection(dbConfig);
   });
 
-  after(async function() {
-    if (!isRunnable) return;
-    await connection.close();
+  beforeEach(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  afterEach(async function() {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
   });
 
   describe('288.1 Test embedded oid normal operations', function() {
@@ -78,9 +83,9 @@ describe('288. embedded_oid.js', function() {
       const docs = await collection.insertOneAndGet(myContent);
 
       /*
-     If the _id field is not present in the document supplied to a write operation,
-     then it's injected by SODA into the content.
-    */
+      If the _id field is not present in the document supplied to a write
+      operation, then it's injected by SODA into the content.
+      */
       const myKey = docs.key;
       assert.strictEqual(typeof (myKey), "string");
 
@@ -93,12 +98,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.1
 
     it('288.1.2 Embedded varchar key already present in the doc', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -123,12 +125,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.2
 
     it('288.1.3 Embedded number key already present in the doc', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -149,12 +148,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.3
 
     it('288.1.4 test replaceOne, for each replace op, use previously retrieved key', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -181,12 +177,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.4
 
     it('288.1.5 test replaceOne, A new string ID is present in the target document', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -213,12 +206,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.5
 
     it('288.1.6 test replaceOne, A new integer ID is present in the target document', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -245,12 +235,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.6
 
     it('288.1.7 test replaceOneAndGet, for each replace op, use previously retrieved key', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -277,12 +264,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.7
 
     it('288.1.8 test replaceOneAndGet, A new string ID is present in the target document', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -309,12 +293,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.8
 
     it('288.1.9 test replaceOneAndGet, A new integer ID is present in the target document', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -341,12 +322,9 @@ describe('288. embedded_oid.js', function() {
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.9
 
     it('288.1.10 Negative test for save()', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -356,18 +334,17 @@ describe('288. embedded_oid.js', function() {
       const doc = sd.createDocument(content);
       await assert.rejects(
         async () => await collection.save(doc),
-        /ORA-03001:/ // ORA-03001: unimplemented feature
+        /ORA-03001:|ORA-42725:/
+        // ORA-03001: unimplemented feature
+        // ORA-42725: Invalid duality view collection
       );
 
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.10
 
     it('288.1.11 Negative test for saveAndGet()', async () => {
-      const conn = await oracledb.getConnection(dbConfig);
       const sd = conn.getSodaDatabase();
       const collname = "myc";
       const options = {metaData: {"keyColumn": {"assignmentMethod": "EMBEDDED_OID"}}};
@@ -377,14 +354,14 @@ describe('288. embedded_oid.js', function() {
       const doc = sd.createDocument(content);
       await assert.rejects(
         async () => await collection.saveAndGet(doc),
-        /ORA-03001:/ // ORA-03001: unimplemented feature
+        /ORA-03001:|ORA-42725:/
+        // ORA-03001: unimplemented feature
+        // ORA-42725: Invalid duality view collection
       );
 
       await conn.commit();
       const res = await collection.drop();
       assert.strictEqual(res.dropped, true);
-
-      await conn.close();
     }); //288.1.11
   });
 

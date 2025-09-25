@@ -38,16 +38,12 @@ const sodaUtil  = require('./sodaUtil.js');
 const testsUtil = require('./testsUtil.js');
 
 describe('230. soda12.js', () => {
+  let conn;
 
   before(async function() {
     if (oracledb.thin) this.skip();
     const clientVersion = testsUtil.getClientVersion();
-    let isClientOK;
-    if (clientVersion < 1909000000) {
-      isClientOK = false;
-    } else {
-      isClientOK = true;
-    }
+    const isClientOK = clientVersion < 1909000000 ? false : true;
 
     const sodaRole = await sodaUtil.isSodaRoleGranted();
 
@@ -89,12 +85,22 @@ describe('230. soda12.js', () => {
     };
   }
 
+  beforeEach(async () => {
+    conn = await oracledb.getConnection(dbConfig);
+  }); // beforeEach()
+
+  afterEach(async () => {
+    if (conn) {
+      await conn.close();
+      conn = null;
+    }
+  }); // afterEach()
+
   it('230.1 example case', async () => {
 
     const TABLE = "soda_test_230_1";
     const metadata = getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -143,7 +149,6 @@ describe('230. soda12.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
 
   }); // 230.1
 
@@ -152,7 +157,6 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_2";
     const metadata = getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -181,7 +185,6 @@ describe('230. soda12.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
 
   }); // 230.2
 
@@ -190,7 +193,6 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_3";
     const metadata = getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -215,7 +217,6 @@ describe('230. soda12.js', () => {
 
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
 
   }); // 230.3
 
@@ -224,7 +225,6 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_4";
     const metadata = getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -247,7 +247,6 @@ describe('230. soda12.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
 
   }); // 230.4
 
@@ -256,7 +255,6 @@ describe('230. soda12.js', () => {
     const TABLE = "soda_test_230_5";
     const metadata = getMetadata(TABLE);
 
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -278,14 +276,12 @@ describe('230. soda12.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 230.5
 
   it('230.6 save() with different key column types', async () => {
     const TABLE = "soda_test_230_8";
     const metadata = getMetadata(TABLE, "CLIENT", "VARCHAR2");
 
-    const conn = await oracledb.getConnection(dbConfig);
     const soda = conn.getSodaDatabase();
     const coll = await soda.createCollection(TABLE, { metaData: metadata });
 
@@ -313,6 +309,5 @@ describe('230. soda12.js', () => {
     await conn.commit();
     const res = await coll.drop();
     assert.strictEqual(res.dropped, true);
-    await conn.close();
   }); // 230.6
 });
