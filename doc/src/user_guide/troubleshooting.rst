@@ -154,7 +154,7 @@ NJS-116
     * - Message
       - ``NJS-116: password verifier type 0x939 is not supported by node-oracledb in Thin mode.``
     * - Cause
-      - Connecting to Oracle Database with node-oracledb Thin mode failed because your user account was only created with a 10G password verifier. The node-oracledb Thin mode supports password verifiers 11G and later. See :ref:`pwverifier`.
+      - Connecting to Oracle Database with node-oracledb Thin mode failed because your user account was only created with a 10G password verifier. Node-oracledb Thin mode supports password verifiers 11G and later. See :ref:`pwverifier`.
     * - Action
       - You can either:
 

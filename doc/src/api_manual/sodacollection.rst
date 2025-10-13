@@ -12,8 +12,8 @@ are in Preview status.
 
 .. note::
 
-    In this release, SODA is only supported in the node-oracledb Thick mode.
-    See :ref:`enablingthick`.
+    In this release, SODA is only supported in node-oracledb Thick mode. See
+    :ref:`enablingthick`.
 
 .. _sodacollectionproperties:
 

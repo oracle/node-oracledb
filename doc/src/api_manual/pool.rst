@@ -71,7 +71,7 @@ values.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
 .. attribute:: pool.events
@@ -84,7 +84,7 @@ values.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
 .. attribute:: pool.externalAuth
@@ -176,7 +176,7 @@ values.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
 .. attribute:: pool.poolMin
@@ -270,7 +270,7 @@ values.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
 .. attribute:: pool.status

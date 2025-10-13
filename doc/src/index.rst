@@ -19,6 +19,7 @@ User Guide
     user_guide/installation.rst
     user_guide/initialization.rst
     user_guide/connection_handling.rst
+    user_guide/authentication_methods.rst
     user_guide/sql_execution.rst
     user_guide/plsql_execution.rst
     user_guide/bind.rst

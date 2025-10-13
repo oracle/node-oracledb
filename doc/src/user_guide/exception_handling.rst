@@ -91,13 +91,13 @@ In node-oracledb:
 The Thin and Thick modes of node-oracledb return some errors differently. Some
 differences are shown in the examples below:
 
-* Connection messages: The node-oracledb Thin mode connection and networking
-  is handled by Node.js itself. Some errors portable accross operating systems
+* Connection messages: Node-oracledb Thin mode connection and networking is
+  handled by Node.js itself. Some errors portable accross operating systems
   and Node.js versions have NJS-prefixed errors displayed by node-oracledb.
   Other messages are returned directly from Node.js and may vary accordingly.
   The traditional Oracle connection errors with prefix "ORA" are not shown. For
   example, the scenarios detailed below show how the connection and network
-  error messages might differ between the node-oracledb Thin and Thick modes.
+  error messages might differ between node-oracledb Thin and Thick modes.
 
   * Scenario 1: The given host does not have a database listener running.
 
@@ -140,11 +140,11 @@ differences are shown in the examples below:
 * Connection Pooling: The node-oracledb Thin mode pool is not based on the
   Oracle Call Interface (OCI) Session Pool and has its own NJS messages.
 
-* Binding: When binding is incorrect, the node-oracledb Thick mode may
-  generate an Oracle Client library error such as::
+* Binding: When binding is incorrect, node-oracledb Thick mode may generate an
+  Oracle Client library error such as::
 
     ORA-01008: not all variables bound
 
-  In contrast, the node-oracledb Thin mode might generate::
+  In contrast, node-oracledb Thin mode might generate::
 
     NJS-097: no bind placeholder named ":USER1" was found in the SQL text

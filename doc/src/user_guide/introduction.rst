@@ -29,8 +29,8 @@ hosted at `github.com/oracle/node-oracledb <https://github.com/oracle/
 node-oracledb>`__.
 
 This module is currently tested with Node.js 16, 18, 20, 22, and 23 against
-Oracle Database 23ai, 21c, 19c, 12c, and 11gR2 on Oracle Linux x86_64
-(releases 7 and 8), Oracle Linux ARM (aarch64, release 8), Windows, and macOS.
+Oracle Database 23, 21, 19, 12, and 11.2 on Oracle Linux x86_64 (releases 7
+and 8), Oracle Linux ARM (aarch64, release 8), Windows, and macOS.
 Node-oracledb may run on other platforms, and with other Node.js versions, if
 they are `Node-API <https://nodejs.org/api/n-api.html>`__ version 4
 compatible. Previous versions of node-oracledb may work with older versions of
@@ -76,11 +76,12 @@ Client libraries.
 The figure shows the architecture of node-oracledb Thin mode. Users interact
 with a Node.js application, for example by making web requests. The
 application program makes calls to node-oracledb functions. The connection
-from node-oracledb Thin mode to the Oracle Database is established directly.  The
-database can be on the same machine as Node.js, or it can be remote.
+from node-oracledb Thin mode to the Oracle Database is established directly
+over the Oracle Net protocol. The database can be on the same machine as
+Node.js, or it can be remote.
 
-The Oracle Net behavior can optionally be configured by using a
-``tnsnames.ora`` file and with application settings. See :ref:`tnsadmin`.
+The behavior of Oracle Net can optionally be configured with application
+settings, or by using a ``tnsnames.ora`` file. See :ref:`tnsadmin`.
 
 .. _thickarch:
 
@@ -102,10 +103,11 @@ the client libraries, see :ref:`enablingthick`.
 The figure shows the architecture of node-oracledb Thick mode. Users interact
 with a Node.js application, for example by making web requests. The application
 program makes calls to node-oracledb functions. Internally, node-oracledb
-dynamically loads Oracle Client libraries which handle the connections to
-Oracle Database.  Depending on the version of the libraries, this mode of
-node-oracledb can connect to Oracle Database 9.2 or later.  The database can be
-on the same machine as Node.js, or it can be remote.
+dynamically loads Oracle Client libraries. Connections from node-oracledb
+Thick mode to Oracle Database are established by the Oracle Client libraries
+over the Oracle Net protocol. Depending on the version of the libraries, this
+mode of node-oracledb can connect to Oracle Database 9.2 or later. The
+database can be on the same machine as Node.js, or it can be remote.
 
 To use node-oracledb Thick mode, the Oracle Client libraries must be installed
 separately, see :ref:`installation`. The libraries can be from an installation
@@ -120,7 +122,7 @@ Some behaviors of the Oracle Client libraries can optionally be configured
 with an ``oraaccess.xml`` file, for example to enable auto-tuning of a
 statement cache. See :ref:`Optional Oracle Client Configuration <oraaccess>`.
 
-The Oracle Net behavior can optionally be configured with files such as
+The behavior of Oracle Net can optionally be configured with files such as
 ``tnsnames.ora`` and ``sqlnet.ora``, for example to enable network encryption.
 See :ref:`Optional Oracle Net Configuration <tnsadmin>`.
 

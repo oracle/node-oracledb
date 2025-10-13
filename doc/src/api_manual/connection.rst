@@ -67,7 +67,7 @@ The properties of a *Connection* object are listed below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
 .. attribute:: connection.clientInfo
@@ -82,7 +82,7 @@ The properties of a *Connection* object are listed below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
 .. attribute:: connection.connectString
@@ -169,7 +169,7 @@ The properties of a *Connection* object are listed below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
 .. attribute:: connection.externalName
@@ -341,7 +341,7 @@ The properties of a *Connection* object are listed below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     When node-oracledb Thick mode is using Oracle Client libraries 12.2 or
@@ -569,7 +569,7 @@ Connection Methods
     .. note::
 
         Connections can receive out-of-band (OOB) break messages from the
-        Oracle Database only in the node-oracledb Thick mode. See
+        Oracle Database only in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     If you use ``break()`` with :ref:`DRCP connections <drcp>`, it is
@@ -1367,14 +1367,14 @@ Connection Methods
 
             Extended metadata is now always returned and includes the following information attributes:
 
-            - ``annotations``: The `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object associated with the fetched column. If the column has no associated annotations, this attribute value is `undefined`. Annotations are supported from Oracle Database 23ai onwards. If node-oracledb Thick mode is used, Oracle Client 23ai is also required.
+            - ``annotations``: The `annotations <https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/annotations_clause.html#GUID-1AC16117-BBB6-4435-8794-2B99F8F68052>`__ object associated with the fetched column. If the column has no associated annotations, this attribute value is `undefined`. Annotations are supported from Oracle Database version 23 onwards. If node-oracledb Thick mode is used, Oracle Client version 23 or later is also required.
             - ``byteSize``: The database byte size. This is only set for ``oracledb.DB_TYPE_VARCHAR``, ``oracledb.DB_TYPE_CHAR`` and ``oracledb.DB_TYPE_RAW`` column types.
             - ``dbColumnName``: The actual database column name. This is to distinguish from the ``name`` attribute as the duplicate columns in the query will have the same value for this attribute.
             - ``dbType``: one of the :ref:`Oracle Database Type Constant <oracledbconstantsdbtype>` values.
             - ``dbTypeClass``: The class associated with the database type. This is only set if the database type is an object type.
             - ``dbTypeName``: The name of the database type, such as “NUMBER” or “VARCHAR2”. For object types, this will be the object name.
-            - ``domainName``: The name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a data use case domain, this attribute value is `undefined`. `Data use case domains <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4743FDE1-7C6E-471B-BC9D-442383CCA2F9>`__ are supported from Oracle Database 23ai onwards. If node-oracledb Thick mode is used, Oracle Client 23ai is also required.
-            - ``domainSchema``: The schema name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a data use case domain, this attribute value is `undefined`. `Data use case domains <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4743FDE1-7C6E-471B-BC9D-442383CCA2F9>`__ are supported from Oracle Database 23ai onwards. If node-oracledb Thick mode is used, Oracle Client 23ai is also required.
+            - ``domainName``: The name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a data use case domain, this attribute value is `undefined`. `Data use case domains <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4743FDE1-7C6E-471B-BC9D-442383CCA2F9>`__ are supported from Oracle Database version 23 onwards. If node-oracledb Thick mode is used, Oracle Client version 23 or later is also required.
+            - ``domainSchema``: The schema name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a data use case domain, this attribute value is `undefined`. `Data use case domains <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4743FDE1-7C6E-471B-BC9D-442383CCA2F9>`__ are supported from Oracle Database version 23 onwards. If node-oracledb Thick mode is used, Oracle Client version 23 or later is also required.
             - ``fetchType``: One of the :ref:`Node-oracledb Type Constant <oracledbconstantsnodbtype>` values.
             - ``isJson``: Indicates if the column is known to contain JSON data. This will be ``true`` for JSON columns (from Oracle Database 21c) and for LOB and VARCHAR2 columns where "IS JSON" constraint is enabled (from Oracle Database 19c). This property will be ``false`` for all the other columns. It will also be ``false`` for any column when Oracle Client 18c or earlier is used in Thick mode or the Oracle Database version is earlier than 19c.
             - ``isOson``: Indicates if the column is known to contain binary encoded OSON data. This attribute will be ``true`` in Thin mode and while using Oracle Client version 21c (or later) in Thick mode when the "IS JSON FORMAT OSON" check constraint is enabled on BLOB and RAW columns. It will be set to ``false`` for all other columns. It will also be set to ``false`` for any column when the Thick mode uses Oracle Client versions earlier than 21c. Note that the "IS JSON FORMAT OSON" check constraint is available from Oracle Database 19c onwards.
@@ -1805,7 +1805,7 @@ Connection Methods
 
     .. note::
 
-        This method is only supported in the node-oracledb Thick mode. See
+        This method is only supported in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     The parameters of the ``connection.getQueue()`` method are:
@@ -1910,7 +1910,7 @@ Connection Methods
 
     .. note::
 
-        This method is only supported in the node-oracledb Thick mode. See
+        This method is only supported in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     SODA can be used with Oracle Database 18.3 and above, when node-oracledb

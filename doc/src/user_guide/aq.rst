@@ -19,7 +19,7 @@ Queuing. They were previously called AQ Sharded Queues.
 
 .. note::
 
-    In this release, TxEventQ and AQ classic queues are only supported in
+    In this release, Transactional Event Queues are only supported in
     node-oracledb Thick mode. See :ref:`enablingthick`.
 
 The same node-oracledb APIs are used for TxEventQ and AQ classic queues and
@@ -30,10 +30,7 @@ Both TxEventQ and AQ classic queues are represented in node-oracledb by
 several classes. A single top level :ref:`AqQueue object <aqqueueclass>` in
 node-oracledb contains :attr:`aqQueue.deqOptions` and
 :attr:`aqQueue.enqOptions` object properties which can be used
-to change queue behavior. TxEventQ queues do not support the
-``transformation`` attribute of :attr:`aqQueue.enqOptions` and
-:attr:`aqQueue.deqOptions` properties, and
-:ref:`Recipient Lists <aqrecipientlists>`. A single AqQueue object can be
+to change queue behavior. A single AqQueue object can be
 used for enqueuing, or dequeuing, or both at the same time.
 
 Messages are enqueued by passing them to an enqueue method directly, or
@@ -61,17 +58,38 @@ classic queues as detailed below.
       - Supported for single and array message enqueuing and dequeuing when using Oracle Client 19c (or later) and connected to Oracle Database 19c (or later).
     * - JSON
       - Supported when using Oracle Client libraries 21c (or later) and Oracle Database 21c (or later).
+
+        Buffered messaging using the :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>` constant of :attr:`aqQueue.enqOptions` property is not supported for JSON payloads.
       - Supported for single message enqueuing and dequeuing when using Oracle Client libraries 21c (or later) and Oracle Database 21c (or later).
 
         Array enqueuing and dequeuing is not supported for JSON payloads.
+
+        Buffered messaging using the :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>` constant of :attr:`aqQueue.enqOptions` property is not supported for JSON payloads.
     * - JMS
       - Supported
-      - Supported for single and array message enqueuing and dequeuing when using Oracle Client 19c (or later) and Oracle Database 23ai.
+      - Supported for single and array message enqueuing and dequeuing when using Oracle Client version 19 (or later) and Oracle Database version 23 (or later).
+
+**Usage Notes**
+
+Only node-oracledb :ref:`Thick mode <enablingthick>` supports the use of:
+
+- The ``transformation`` attribute of :attr:`aqQueue.enqOptions` and
+  :attr:`aqQueue.deqOptions` properties
+
+- :ref:`Advanced Queuing Notifications <aqnotifications>`
+
+- Visibility constant :data:`oracledb.AQ_VISIBILITY_IMMEDIATE` in
+  :meth:`aqQueue.enqMany()` and :meth:`aqQueue.deqMany()` methods
+
+Transactional Event Queues do not support the ``transformation``
+attribute of :attr:`aqQueue.enqOptions` and :attr:`aqQueue.deqOptions`, or
+:ref:`Recipient Lists <aqrecipientlists>`.
 
 There are examples of AQ Classic Queues in the `GitHub examples
 <https://github.com/oracle/node-oracledb/tree/main/examples>`__ directory.
 
-**Creating a Queue**
+Creating a Queue
+================
 
 Before using a queue in node-oracledb, it must be created in the database
 using the DBMS_AQADM PL/SQL package. For these examples,
@@ -483,7 +501,7 @@ queues, the ``payload`` value should be a :ref:`DbObject <dbobjectclass>`
 object.
 
 To change the enqueue behavior of a queue, alter the
-:attr:`aqQueue.enqOptions` attributes. For example to make a
+:attr:`aqQueue.enqOptions` attributes. For example, to make a
 message buffered, and not persistent:
 
 .. code-block:: javascript
@@ -493,6 +511,10 @@ message buffered, and not persistent:
     queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
     await queue.enqOne(message);
     await connection.commit();
+
+Note that the :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`
+constant for :attr:`aqQueue.enqOptions` property is not supported for JSON
+payload type.
 
 To send a message immediately without requiring a commit, you can change
 the queue’s message visibility:
@@ -523,6 +545,7 @@ To change multiple properties at once, you can also use syntax like::
     Object.assign(queue.deqOptions,
                 {
                     mode: oracledb.AQ_DEQ_MODE_BROWSE,
+                    deliveryMode: oracledb.AQ_MSG_DELIV_MODE_BUFFERED,
                     visibility: oracledb.AQ_VISIBILITY_IMMEDIATE,
                     wait: 10
                 });
@@ -708,11 +731,16 @@ Advanced Queuing Notifications
 
 The :meth:`connection.subscribe()` method can be used to
 register interest in a queue, allowing a callback to be invoked when
-there are messages to dequeue. To subscribe to a queue, pass its name to
-``subscribe()`` and set the :ref:`namespace <consubscribeoptnamespace>`
-option to ``oracledb.SUBSCR_NAMESPACE_AQ``:
+there are messages to dequeue.
 
-For example:
+.. note::
+
+    In this release, Advanced Queuing Notifications is only supported in
+    node-oracledb :ref:`Thick mode <enablingthick>`.
+
+To subscribe to a queue, pass its name to ``subscribe()`` and set the
+:ref:`namespace <consubscribeoptnamespace>` option to
+``oracledb.SUBSCR_NAMESPACE_AQ``. For example:
 
 .. code-block:: javascript
 

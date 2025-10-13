@@ -642,10 +642,11 @@ describe('2. pool.js', function() {
       };
       await assert.rejects(
         async () => await oracledb.createPool(config),
-        /ORA-01017:|NJS-125:|ORA-12162:/
+        /ORA-01017:|NJS-125:|ORA-12162:|NJS-500:/
         // ORA-12162: TNS:net service name is incorrectly specified (23.3 Database Thin Mode)
         // ORA-01017: invalid username/password; logon denied
         // NJS-125: "connectString" cannot be empty or undefined. Bequeath connections are not supported in Thin mode
+        // NJS-500: connection to database was closed on broken (In Thick mode)
       );
     });  // 2.13.2
   });  // 2.13

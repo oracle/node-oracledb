@@ -4,12 +4,12 @@
 Deprecated and Desupported Features
 ***********************************
 
-The following table contains the deprecated and desupported methods,
-properties, and constants of the node-oracledb API, the version they were
-deprecated or desupported, and an alternative to use instead, if applicable.
-The desupported API feature is a previous deprecation that has been removed
-and is not available in node-oracledb. The most recent deprecated and
-desupported features are listed first.
+The following table contains the deprecated and desupported features of the
+node-oracledb API, the version they were deprecated or desupported, and an
+alternative to use instead, if applicable. The desupported API feature is a
+previous deprecation that has been removed and is not available in
+node-oracledb. The most recent deprecated and desupported features are listed
+first.
 
 .. list-table-with-summary:: Deprecated and Desupported API Features
     :header-rows: 1
@@ -17,11 +17,16 @@ desupported features are listed first.
     :align: center
     :widths: 20 20 15
     :width: 100%
-    :summary: The first column displays the deprecated API method, property, or constant. The second column displays the node-oracledb version in which the API method, property, or constant was deprecated or desupported. The third column displays the API property, method, or constant to use instead, if applicable.
+    :summary: The first column displays the name of the deprecated or desupported feature. The second column displays the node-oracledb version in which the feature was deprecated or desupported. The third column displays the API property, method, or constant to use instead, if applicable.
 
-    * - Method, Property, or Constant
+    * - Name
       - Version Deprecated or Desupported
       - Alternative
+    * - Connectivity and interoperability with Oracle Database and Oracle Client libraries older than version 19
+      - Deprecated in 6.10
+      - Upgrade the database and client library versions.
+
+        Production use, and availability of database and client software, is detailed in `Release Schedule of Current Database Releases <https://support.oracle.com/epmos/faces/ DocumentDisplay?id=742060.1>`__.
     * - Property :ref:`fetchInfo <propexecfetchinfo>`
       - Deprecated in 6.0
       - Use :ref:`fetchTypeHandler <fetchtypehandler>` functionality

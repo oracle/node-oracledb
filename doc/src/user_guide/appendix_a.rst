@@ -1,8 +1,8 @@
 .. _appendixa:
 
-**************************************************
-Appendix A: The node-oracledb Thin and Thick Modes
-**************************************************
+**********************************************
+Appendix A: Node-oracledb Thin and Thick Modes
+**********************************************
 
 By default, node-oracledb runs in a 'Thin' mode which connects directly to
 Oracle Database. This mode does not need Oracle Client libraries. However, when
@@ -27,7 +27,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
-    :summary: The first column displays the Oracle feature. The second column indicates whether the feature is supported in the node-oracledb Thin mode. The third column indicates whether the feature is supported in the node-oracledb Thick mode.
+    :summary: The first column displays the Oracle feature. The second column indicates whether the feature is supported in node-oracledb Thin mode. The third column indicates whether the feature is supported in node-oracledb Thick mode.
 
     * - Oracle Feature
       - node-oracledb Thin Mode
@@ -134,7 +134,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database Dedicated Servers, Shared Servers, and Database Resident Connection Pooling (DRCP) (see :ref:`drcp`)
       - Yes
       - Yes
-    * - Oracle Database 23ai Implicit connection pooling for DRCP and PRCP (see :ref:`implicitpool`)
+    * - Oracle Database version 23 Implicit connection pooling for DRCP and PRCP (see :ref:`implicitpool`)
       - Yes
       - Yes
     * - Multitenant Databases
@@ -245,7 +245,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Feature tracking
       - No
       - Yes
-    * - Oracle Database 23ai Sessionless Transactions (see :ref:`sessionlesstxns`)
+    * - Oracle Database version 23 Sessionless Transactions (see :ref:`sessionlesstxns`)
       - Yes
       - Yes
     * - Two-phase Commit (TPC) (see :ref:`twopc`)
@@ -290,10 +290,10 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database 21c JSON data type (see :ref:`json21ctype`)
       - Yes
       - Yes
-    * - Oracle Database 23ai JSON-Relational Duality Views (see :ref:`jsondualityviews`)
+    * - Oracle Database version 23 JSON-Relational Duality Views (see :ref:`jsondualityviews`)
       - Yes
       - Yes
-    * - Oracle Database 23ai BOOLEAN data type (see :ref:`oracledbconstantsdbtype`)
+    * - Oracle Database version 23 BOOLEAN data type (see :ref:`oracledbconstantsdbtype`)
       - Yes
       - Yes
     * - ROWID, UROWID data types (see :ref:`oracledbconstantsdbtype`)
@@ -338,11 +338,12 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
 
 .. _modediff:
 
-Differences between the node-oracledb Thin and Thick Modes
-==========================================================
+Differences between node-oracledb Thin and Thick Modes
+======================================================
 
-This section details the differences between the node-oracledb Thin and Thick
-modes. Also, see the summary feature comparison table in :ref:`featuresummary`.
+This section details the differences between node-oracledb Thin and Thick
+modes. Also, see the summary feature comparison table in
+:ref:`featuresummary`.
 
 Connection Handling Differences between Thin and Thick Modes
 ------------------------------------------------------------
@@ -369,13 +370,13 @@ Unclosed Standalone Connections
 
 In node-oracedb Thin mode, an unclosed standalone connection takes several
 seconds to terminate after the query results are printed. This does not
-occur if :meth:`connection.close()` is explicitly called. The node-oracledb
-Thick mode does not use event handlers to manage its connections and does not
-run into this issue. However, the Thick mode does not close connections until
+occur if :meth:`connection.close()` is explicitly called. Node-oracledb Thick
+mode does not use event handlers to manage its connections and does not run
+into this issue. However, the Thick mode does not close connections until
 garbage collection occurs or it may not close the connection if the process
 terminates before garbage collection occurs. It is recommended to explicitly
-close standalone connections using :meth:`connection.close()` in both the Thin
-and Thick modes.
+close standalone connections using :meth:`connection.close()` in both Thin and
+Thick modes.
 
 Connections to a Local Database
 +++++++++++++++++++++++++++++++
@@ -391,7 +392,7 @@ string, or equivalent, must always be used.
 Oracle Net Services and Client Configuration Files
 ++++++++++++++++++++++++++++++++++++++++++++++++++
 
-In the node-oracledb Thin mode:
+In node-oracledb Thin mode:
 
 - The ``tnsnames.ora`` file will be read. The directory can be set using:
 
@@ -428,7 +429,7 @@ either in :ref:`Easy Connect <easyconnect>` strings, or in
 :ref:`Connect Descriptors <embedtns>` that are either explicitly passed, or
 are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
 
-.. list-table-with-summary::  Oracle Net Keywords Supported in the node-oracledb Thin Mode
+.. list-table-with-summary::  Oracle Net Keywords Supported in node-oracledb Thin Mode
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
@@ -494,13 +495,13 @@ network transfers is supported in node-oracledb Thin mode and has a default
 value of 8 KB. In node-oracledb Thick mode, the SDU connect descriptor option
 and equivalent ``sqlnet.ora`` setting are used.
 
-If a bare name is given as a connect string, then the node-oracledb Thin mode
-will consider it as a Net Service Name and not as the minimal Easy Connect
-string of a hostname. The given connect string will be looked up in a
-``tnsnames.ora`` file. This is different from the node-oracledb Thick mode. If
-supporting a bare name as a hostname is important to you in the node-oracledb
-Thin mode, then you can alter the connection string to include a port number
-such as ``hostname:1521`` or a protocol such as ``tcp://hostname``.
+If a bare name is given as a connect string, then node-oracledb Thin mode will
+consider it as a Net Service Name and not as the minimal Easy Connect string
+of a hostname. The given connect string will be looked up in a
+``tnsnames.ora`` file. This is different from node-oracledb Thick mode. If
+supporting a bare name as a hostname is important to you in node-oracledb Thin
+mode, then you can alter the connection string to include a port number such
+as ``hostname:1521`` or a protocol such as ``tcp://hostname``.
 
 For multiple hosts or IP addresses, node-oracledb connects to the host name
 used in the parameters of the Connection object, if available. If the
@@ -513,30 +514,29 @@ Database Resident Connection Pooling (DRCP)
 When using DRCP, the :attr:`oracledb.connectionClass` should be set in the
 node-oracledb application. If not, then node-oracledb generates a unique
 connection class for each pool. The prefix of the generated connection class
-varies in the node-oracledb Thin and Thick modes. In node-oracledb Thin mode,
-the prefix of the generated connection class is "NJS". For node-oracledb Thick
+varies in node-oracledb Thin and Thick modes. In node-oracledb Thin mode, the
+prefix of the generated connection class is "NJS". For node-oracledb Thick
 mode, the prefix is "OCI". See :ref:`drcp` for more information.
 
 Transport Layer Security (TLS) Support
 ++++++++++++++++++++++++++++++++++++++
 
-When connecting with mutual TLS (mTLS) also known as two-way TLS, for example to
-Oracle Autonomous Database in Oracle Cloud using a wallet, the certificate must
-be in the correct format.
+When connecting with mutual TLS (mTLS) also known as two-way TLS, for example
+to Oracle Autonomous Database in Oracle Cloud using a wallet, the certificate
+must be in the correct format.
 
-For the node-oracledb Thin mode, the certificate must be in a Privacy
-Enhanced Mail (PEM) ``ewallet.pem`` file. In node-oracledb Thick mode the
-certificate must be in a ``cwallet.sso`` file. See :ref:`connectionadb` for
-more information.
+For node-oracledb Thin mode, the certificate must be in a Privacy Enhanced
+Mail (PEM) ``ewallet.pem`` file. In node-oracledb Thick mode, the certificate
+must be in a ``cwallet.sso`` file. See :ref:`connectionadb` for more
+information.
 
 Native Network Encryption and Checksumming
 ++++++++++++++++++++++++++++++++++++++++++
 
-The node-oracledb Thin mode does not support connections using Oracle
-Database native network encryption or checksumming. You can enable
-TLS instead of using native network encryption. If native network encryption
-or checksumming are required, then use node-oracledb in the Thick mode. See
-:ref:`nne`.
+Node-oracledb Thin mode does not support connections using Oracle Database
+native network encryption or checksumming. You can enable TLS instead of using
+native network encryption. If native network encryption or checksumming are
+required, then use node-oracledb in Thick mode. See :ref:`nne`.
 
 .. _pwverifier:
 
@@ -550,8 +550,8 @@ versions. The password verifier can be 10G (case-insensitive Oracle password
 verifier), 11G (SHA-1-based password verifier), and 12C (SHA-2-based SHA-512
 password verifier).
 
-The node-oracledb Thin mode supports password verifiers 11G and later. The
-node-oracledb Thick mode supports password verifiers 10G and later. To view
+Node-oracledb Thin mode supports password verifiers 11G and later.
+Node-oracledb Thick mode supports password verifiers 10G and later. To view
 all the password verifiers configured for the user accounts, use the following
 query:
 
@@ -571,8 +571,8 @@ then the connection will fail with the :ref:`njs116` error.
 Connection Pooling Differences between Thin and Thick Modes
 -----------------------------------------------------------
 
-The :meth:`~oracledb.createPool()` method in the node-oracledb Thin mode
-differs from the node-oracledb Thick mode in the following ways:
+The :meth:`~oracledb.createPool()` method in node-oracledb Thin mode differs
+from node-oracledb Thick mode in the following ways:
 
 - Not all the parameters of the :meth:`oracledb.createPool()` method are
   applicable to both node-oracledb modes. Each mode ignores unrecognized
@@ -583,9 +583,9 @@ differs from the node-oracledb Thick mode in the following ways:
   ``queueMax``, ``queueRequests``, ``queueTimeout``, ``stmtCacheSize``,
   ``user``, and ``username`` parameters.
 
-- The node-oracledb Thin mode only supports homogeneous pools.
+- Node-oracledb Thin mode only supports homogeneous pools.
 
-- The node-oracledb Thin mode creates connections in an async fashion and so
+- Node-oracledb Thin mode creates connections in an async fashion and so
   :func:`oracledb.createPool()` returns before any or all minimum number of
   connections are created. As soon as the pool is created, the
   :attr:`pool.connectionsOpen` attribute will not be equal to
@@ -610,18 +610,18 @@ differs from the node-oracledb Thick mode in the following ways:
 - In node-oracledb Thin mode, the connection pool supports all the
   :ref:`connection mode privileges <oracledbconstantsprivilege>`.
 
-  The node-oracledb Thick mode does not support all the connection mode
+  Node-oracledb Thick mode does not support all the connection mode
   privileges.
 
 - In node-oracledb Thin mode, :ref:`privileged connections <privconn>` can be
   created with homogeneous pools.
 
-  The node-oracledb Thick mode can only create privileged connections with
+  Node-oracledb Thick mode can only create privileged connections with
   :ref:`heterogeneous pools <connpoolproxy>`.
 
 - In node-oracledb Thick mode, the worker threads can be increased by setting
   the environment variable ``UV_THREADPOOL_SIZE`` before starting Node.js. This
-  is not applicable to the Thin mode since it does not use threads.
+  is not applicable to Thin mode since it does not use threads.
 
 .. _querymetadatadiff:
 
@@ -633,23 +633,24 @@ ROWID and UROWID database types. The UROWID database type shows the new value
 ``DB_TYPE_UROWID`` and the database type ROWID uses the existing value
 ``DB_TYPE_ROWID``.
 
-In node-oracledb Thick mode, the value ``DB_TYPE_ROWID`` is shown for both ROWID
-and UROWID database types. In node-oracledb Thick and Thin modes, comparison with
-the type ``oracledb.ROWID`` will match both ROWID and UROWID database types.
+In node-oracledb Thick mode, the value ``DB_TYPE_ROWID`` is shown for both
+ROWID and UROWID database types. In node-oracledb Thick and Thin modes,
+comparison with the type ``oracledb.ROWID`` will match both ROWID and UROWID
+database types.
 
 Error Handling in Thin and Thick Modes
 --------------------------------------
 
-The node-oracledb Thin and Thick modes handle some errors differently. See
+Node-oracledb Thin and Thick modes handle some errors differently. See
 :ref:`errordiff`.
 
 Globalization in Thin and Thick Modes
 -------------------------------------
 
 All Oracle NLS environment variables, and the ``ORA_TZFILE``
-environment variable, are ignored by the node-oracledb Thin mode.
+environment variable, are ignored by node-oracledb Thin mode.
 
-The node-oracledb Thin mode can only use NCHAR, NVARCHAR2, and NCLOB data
+Node-oracledb Thin mode can only use NCHAR, NVARCHAR2, and NCLOB data
 when Oracle Database's secondary character set is AL16UTF16.
 
 See :ref:`nls`.
@@ -657,15 +658,15 @@ See :ref:`nls`.
 Tracing in Thin and Thick Modes
 -------------------------------
 
-In the node-oracledb Thin mode, low level tracing is different because there
-are no Oracle Client libraries. See :ref:`endtoend`.
+In node-oracledb Thin mode, low level tracing is different because there are
+no Oracle Client libraries. See :ref:`endtoend`.
 
 Data Type Conversion in Thin and Thick Modes
 --------------------------------------------
 
-The node-oracledb Thick mode uses Oracle NLS conversion routines to convert
-the data found in the database to the desired data type. The node-oracledb Thin
-mode uses fixed JavaScript routines such as toString(). You can use a converter
+Node-oracledb Thick mode uses Oracle NLS conversion routines to convert the
+data found in the database to the desired data type. Node-oracledb Thin mode
+uses fixed JavaScript routines such as toString(). You can use a converter
 function to modify the behavior. See :ref:`fetch type handlers
 <fetchtypehandler>`.
 
@@ -674,7 +675,7 @@ function to modify the behavior. See :ref:`fetch type handlers
 Supported Database Data Types in Thin and Thick Modes
 -----------------------------------------------------
 
-The node-oracledb Thin and Thick modes support different Oracle Database data
+Node-oracledb Thin and Thick modes support different Oracle Database data
 types. The following table lists the types that are supported in the
 node-oracledb driver. See `Oracle Database Types <https://docs.oracle.
 com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html#GUID-A3C0D836-

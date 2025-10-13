@@ -7,9 +7,9 @@ Using Oracle Database Objects and Collections
 You can query and insert most Oracle Database objects and collections,
 with some :ref:`limitations <objectlimitations>`.
 
-Both the node-oracledb Thin and Thick modes support Oracle Database Objects.
-The node-oracledb Thin mode does not support Oracle Database Objects that
-contain LOBs.
+Both node-oracledb Thin and Thick modes support Oracle Database Objects.
+Node-oracledb Thin mode does not support Oracle Database Objects that contain
+LOBs.
 
 .. _objectinsert:
 

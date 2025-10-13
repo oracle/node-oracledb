@@ -438,12 +438,14 @@ To use node-oracledb Thick mode with Oracle Instant Client zip files:
    - `Linux ARM 64-bit (aarch64) <https://www.oracle.com/database/
      technologies/instant-client/linux-arm-aarch64-downloads.html>`__
 
-   Oracle Instant Client 23ai will connect to Oracle Database 19 or later.
-   Oracle Instant Client 19c will connect to Oracle Database 11.2 or later.
+   Oracle Instant Client version 23 will connect to Oracle Database 19 or
+   later. Oracle Instant Client 19 will connect to Oracle Database 11.2 or
+   later.
 
-   Oracle Database 23ai and 19c are Long Term Support Releases. Note Oracle
-   Database 23ai 32-bit clients are not available on any platform, however you
-   can use older 32-bit clients to connect to Oracle Database 23ai.
+   Oracle Database versions 23 and 19 are Long Term Support Releases. Note
+   32-bit clients are not available on any platform for Oracle Database
+   version 23, however you can use older 32-bit clients to connect to this
+   version of the database.
 
    It is recommended to keep up to date with the latest Oracle Instant Client
    release updates of your desired major version.
@@ -560,20 +562,21 @@ To use node-oracledb with Oracle Instant Client RPMs:
     It is recommended to keep up to date with the latest Oracle Instant Client
     release updates of your desired major version.
 
-    Oracle Database 23ai and 19c are Long Term Support Releases. Oracle Instant
-    Client 23ai will connect to Oracle Database 19 or later. Oracle Instant
-    Client 19c will connect to Oracle Database 11.2 or later.
+    Oracle Database versions 23 and 19 are Long Term Support Releases. Oracle
+    Instant Client version 23 will connect to Oracle Database 19 or later.
+    Oracle Instant Client version 19 will connect to Oracle Database 11.2 or
+    later.
 
-    Note Oracle Database 23ai 32-bit clients are not available on any platform,
-    however you can use older 32-bit clients to connect to Oracle Database
-    23ai.
+    Note 32-bit clients are not available on any platform for Oracle Database
+    version 23, however you can use older 32-bit clients to connect to this
+    version of the database.
 
 1b. Alternatively, install Instant Client from Oracle's yum server.
 
     See `Oracle Database Instant Client for Oracle Linux <https://yum.oracle.
     com/oracle-instant-client.html>`__ instructions. The repositories are:
 
-    - 23ai on Oracle Linux 9
+    - Instant Client version 23 on Oracle Linux 9
 
       - `Instant Client 23 for Oracle Linux 9 (x86-64) <https://yum.oracle.com
         /repo/OracleLinux/OL9/oracle/instantclient23/x86_64/index.html>`__
@@ -586,7 +589,7 @@ To use node-oracledb with Oracle Instant Client RPMs:
           sudo dnf install oracle-instantclient-release-23ai-el9
           sudo dnf install oracle-instantclient-basic
 
-    - 19c on Oracle Linux 9
+    - Instant Client version 19 on Oracle Linux 9
 
       - `Instant Client 19 for Oracle Linux 9 (x86-64) <https://yum.oracle.com/
         repo/OracleLinux/OL9/oracle/instantclient/x86_64/index.html>`__
@@ -599,7 +602,7 @@ To use node-oracledb with Oracle Instant Client RPMs:
           sudo dnf install oracle-instantclient-release-el9
           sudo dnf install oracle-instantclient19.XX-basic
 
-    - 23ai on Oracle Linux 8
+    - Instant Client version 23 on Oracle Linux 8
 
       - `Instant Client 23 for Oracle Linux 8 (x86-64) <https://yum.oracle.com/
         repo/OracleLinux/OL8/oracle/instantclient23/x86_64/index.html>`__
@@ -612,7 +615,7 @@ To use node-oracledb with Oracle Instant Client RPMs:
           sudo dnf install oracle-instantclient-release-23ai-el8
           sudo dnf install oracle-instantclient-basic
 
-    - 19c on Oracle Linux 8
+    - Instant Client version 19 on Oracle Linux 8
 
       - `Instant Client 19 for Oracle Linux 8 (x86-64) <https://yum.oracle.com/
         repo/OracleLinux/OL8/oracle/instantclient/x86_64/index.html>`__
@@ -675,9 +678,9 @@ libraries from a local Oracle Database or full Oracle Client installation
 (such as installed by Oracle's GUI installer).
 
 The libraries must be either 32-bit or 64-bit, matching your Python
-architecture. Note Oracle Database 23ai 32-bit clients are not available on any
-platform, however you can use older 32-bit clients to connect to Oracle
-Database 23ai.
+architecture. Note 32-bit clients are not available on any platform for Oracle
+Database version 23, however you can use older 32-bit clients to connect to
+this version of the database.
 
 The ``ORACLE_HOME`` can be either a database home or a full Oracle
 client installation installed with Oracle’s ``runInstaller``.

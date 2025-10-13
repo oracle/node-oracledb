@@ -678,11 +678,11 @@ The fetch type handler functionality replaces the deprecated
 :ref:`fetchInfo <propexecfetchinfo>` property.
 
 For BLOB, CLOB, NCLOB, and JSON data types, the data type conversion is
-performed on the database. For all other data types, the node-oracledb Thick
-mode uses :ref:`National Language Support (NLS) <nls>` conversion routines to
-perform the data type conversion. The node-oracledb Thin mode uses
-JavaScript functionality such as ``toString()``. To modify the default
-conversion behavior, you can use a :ref:`converter function <converterfunc>`.
+performed on the database. For all other data types, node-oracledb Thick mode
+uses :ref:`National Language Support (NLS) <nls>` conversion routines to
+perform the data type conversion. Node-oracledb Thin mode uses JavaScript
+functionality such as ``toString()``. To modify the default conversion
+behavior, you can use a :ref:`converter function <converterfunc>`.
 
 A fetch type handler can be specified in the :attr:`oracledb.fetchTypeHandler`
 attribute or as an :ref:`option <propexecfetchtypehandler>` in

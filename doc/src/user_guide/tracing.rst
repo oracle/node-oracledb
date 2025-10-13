@@ -397,9 +397,9 @@ attribute :attr:`oracledb.thin`. The boolean attributes
 mode of a node-oracledb connection or pool, respectively. The node-oracledb
 version can be shown with :attr:`oracledb.version`.
 
-The information can also be seen in the Oracle Database data dictionary table
-`V$SESSION_CONNECT_INFO <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
-id=GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE>`__:
+The mode and version information can also be seen in the Oracle Database data
+dictionary table `V$SESSION_CONNECT_INFO <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE>`__:
 
 .. code-block:: javascript
 
@@ -407,13 +407,13 @@ id=GUID-9F0DCAEA-A67E-4183-89E7-B1555DC591CE>`__:
       `SELECT UNIQUE CLIENT_DRIVER FROM V$SESSION_CONNECT_INFO WHERE
        SID = SYS_CONTEXT('USERENV', 'SID')`)
 
-In the node-oracledb Thin mode, the output will be::
+In node-oracledb Thin mode, the output will be::
 
-    node-oracledb thn : 6.0.0
+    node-oracledb thn : 6.10.0
 
-In the node-oracledb Thick mode, the output will be::
+In node-oracledb Thick mode, the output will be::
 
-    node-oracledb thk : 6.0.0
+    node-oracledb thk : 6.10.0
 
 Database Administrators (DBAs) can verify whether applications are
 using the desired add-on version. For example::
@@ -425,12 +425,12 @@ using the desired add-on version. For example::
 
         SID CLIENT_DRIVER
     ---------- ------------------------------
-        16 node-oracledb thn : 6.0.0
-        33 node-oracledb thk : 6.0.0
+        16 node-oracledb thn : 6.10.0
+        33 node-oracledb thk : 6.10.0
 
 
-If you are using the node-oracledb Thick mode, the ``CLIENT_DRIVER`` value
-can be configured with a call to :meth:`oracledb.initOracleClient()` such as
+If you are using node-oracledb Thick mode, the ``CLIENT_DRIVER`` value can be
+configured with a call to :meth:`oracledb.initOracleClient()` such as
 ``oracledb.initOracleClient({driverName:'myapp : 2.0.0'})``. The
 ``driverName`` attribute in :meth:`~oracledb.initOracleClient()` can be used
 to override the value that will be shown in the ``CLIENT_DRIVER`` column. See
@@ -703,7 +703,7 @@ Low Level node-oracledb Driver Tracing
 
 Low level tracing is mostly useful to maintainers of node-oracledb.
 
-- For the node-oracledb Thin mode, packets can be traced by setting the
+- For node-oracledb Thin mode, packets can be traced by setting the
   environment variable::
 
       NODE_ORACLEDB_DEBUG_PACKETS=1
@@ -711,7 +711,7 @@ Low level tracing is mostly useful to maintainers of node-oracledb.
   Output goes to stdout. The logging is similar to an Oracle Net trace of
   level 16.
 
-- The node-oracledb Thick mode can be traced using:
+- Node-oracledb Thick mode can be traced using:
 
   - DPI_DEBUG_LEVEL as documented in `ODPI-C Debugging
     <https://oracle.github.io/odpi/doc/user_guide/debugging.html>`__.

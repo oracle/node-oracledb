@@ -9,14 +9,13 @@ An AqQueue object is created by
 dequeuing Oracle Advanced Queuing messages. Each AqQueue can be used for
 enqueuing, dequeuing, or for both.
 
-.. note::
-
-    In this release, Oracle Advanced Queuing (AQ) is only supported in the
-    node-oracledb Thick mode. See :ref:`enablingthick`.
-
 See :ref:`Oracle Advanced Queuing (AQ) <aq>` for usage.
 
 .. versionadded:: 4.0
+
+.. versionchanged:: 6.10
+
+    Support for AQ was added in node-oracledb Thin mode.
 
 .. _aqqueueproperties:
 
@@ -43,47 +42,56 @@ AqQueue Properties
 
     .. _aqdeqoptionsclass:
 
-    .. list-table-with-summary::  AqDeqOptions Class Attributes
+    .. list-table-with-summary::  AqDeqOptions Class Properties
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
         :widths: 10 10 30
-        :summary: The first column displays the attribute name. The second
-         column displays the data type of the attribute. The third column
-         displays the description of the attribute.
+        :summary: The first column displays the property name. The second
+         column displays the data type of the property. The third column
+         displays the description of the property.
 
-        * - Attribute Name
+        * - Property Name
           - Data Type
           - Description
         * - ``condition``
           - String
-          - The condition that must be satisfied in order for a message to be dequeued. The condition is a boolean expression similar to the WHERE clause of a SQL query. The boolean expression can include conditions on message properties, user data properties, and PL/SQL or SQL functions.
+          - This read/write property is the condition that must be satisfied in order for a message to be dequeued. The condition is a boolean expression similar to the WHERE clause of a SQL query. The boolean expression can include conditions on message properties, user data properties, and PL/SQL or SQL functions.
         * - ``consumerName``
           - String
-          - The name of the consumer that is dequeuing messages. Only messages matching the consumer name will be accessed. If the queue is not set up for multiple consumers, then this attribute should not be set.
+          - This read/write property is the name of the consumer that is dequeuing messages. Only messages matching the consumer name will be accessed. If the queue is not set up for multiple consumers, then this attribute should not be set.
         * - ``correlation``
           - String
-          - The correlation to use when dequeuing. Special pattern-matching characters, such as the percent sign (%) and the underscore (_), can be used. If multiple messages satisfy the pattern, the order of dequeuing is indeterminate.
+          - This read/write property is the correlation to use when dequeuing. Special pattern-matching characters, such as the percent sign (%) and the underscore (_), can be used. If multiple messages satisfy the pattern, the order of dequeuing is indeterminate.
+        * - ``deliveryMode``
+          - Integer
+          - This write-only property is the delivery mode when dequeuing messages. It can be one of the following constants: :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`, or :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED <oracledbconstantsaq>`.
+
+            Note that :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>` is not supported with JSON payloads.
+
+            .. versionadded:: 6.10
         * - ``mode``
           - Integer
-          - The mode to use for dequeuing messages. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_MODE_BROWSE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_LOCKED <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA <oracledbconstantsaq>`.
+          - This read/write property is the mode to use for dequeuing messages. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_MODE_BROWSE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_LOCKED <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_MODE_REMOVE_NO_DATA <oracledbconstantsaq>`.
         * - ``msgId``
           - Buffer
-          - A unique identifier specifying the message to be dequeued.
+          - This read/write property is a unique identifier specifying the message to be dequeued.
         * - ``navigation``
           - Integer
-          - The position in the queue of the message that is to be dequeued. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_NAV_FIRST_MSG <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_MSG <oracledbconstantsaq>`.
+          - This read/write property is the position in the queue of the message that is to be dequeued. It can be one of the following constants: :ref:`oracledb.AQ_DEQ_NAV_FIRST_MSG <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_TRANSACTION <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_NAV_NEXT_MSG <oracledbconstantsaq>`.
         * - ``transformation``
           - String
-          - The transformation that will take place on messages when they are dequeued. The transformation must be created using dbms_transform.
+          - This read/write property is the transformation that will take place on messages when they are dequeued. The transformation must be created using dbms_transform.
 
-            This attribute is not supported in Transactional Event Queues (TxEventQ).
+            This attribute is only supported in node-oracledb :ref:`Thick mode <enablingthick>` and is not supported in Transactional Event Queues (TxEventQ).
         * - ``visibility``
           - Integer
-          - Defines whether the dequeue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
+          - This read/write property defines whether the dequeue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
+
+            Constant :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>` can only be specified in :meth:`aqQueue.deqMany()` when using node-oracledb :ref:`Thick mode <enablingthick>`.
         * - ``wait``
           - Integer
-          - The number of seconds to wait for a message matching the search criteria to become available. It can alternatively be one of the following constants: :ref:`oracledb.AQ_DEQ_NO_WAIT <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_WAIT_FOREVER <oracledbconstantsaq>`.
+          - This read/write property is the number of seconds to wait for a message matching the search criteria to become available. It can alternatively be one of the following constants: :ref:`oracledb.AQ_DEQ_NO_WAIT <oracledbconstantsaq>`, :ref:`oracledb.AQ_DEQ_WAIT_FOREVER <oracledbconstantsaq>`.
 
     See `Oracle Advanced Queuing Documentation <https://www.oracle.com/pls
     /topic/lookup?ctx=dblatest&id=ADQUE>`__ for more information about
@@ -104,29 +112,33 @@ AqQueue Properties
 
     .. _aqenqoptionsclass:
 
-    .. list-table-with-summary::  AqEnqOptions Class Attributes
+    .. list-table-with-summary::  AqEnqOptions Class Properties
         :header-rows: 1
         :class: wy-table-responsive
         :align: center
         :widths: 10 10 30
-        :summary: The first column displays the attribute name. The second
-         column displays the data type of the attribute. The third column
-         displays the description of the attribute.
+        :summary: The first column displays the property name. The second
+         column displays the data type of the property. The third column
+         displays the description of the property.
 
-        * - Attribute Name
+        * - Property Name
           - Data Type
           - Description
         * - ``deliveryMode``
           - Integer
-          - The delivery mode when enqueuing messages. It can be one of the following constants: :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED <oracledbconstantsaq>`.
+          - This read/write property is the delivery mode when enqueuing messages. It can be one of the following constants: :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED <oracledbconstantsaq>`.
+
+            Note that :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>` is not supported with JSON payloads.
         * - ``transformation``
           - String
-          - The transformation that will take place when messages are enqueued. The transformation must be created using dbms_transform.
+          - This read/write property is the transformation that will take place when messages are enqueued. The transformation must be created using dbms_transform.
 
-            This attribute is not supported in Transactional Event Queues (TxEventQ).
+            This attribute is only supported in node-oracledb :ref:`Thick mode <enablingthick>` and is not supported in Transactional Event Queues (TxEventQ).
         * - ``visibility``
           - Integer
-          - Defines whether the enqueue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
+          - This read/write property defines whether the enqueue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
+
+            Constant :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>` can only be specified in :meth:`aqQueue.enqMany()` when using node-oracledb :ref:`Thick mode <enablingthick>`.
 
     See `Oracle Advanced Queuing Documentation <https://www.oracle.com/pls/
     topic/lookup?ctx=dblatest&id=ADQUE>`__ for more information about

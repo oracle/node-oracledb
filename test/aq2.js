@@ -440,5 +440,30 @@ describe('218. aq2.js', function() {
       END;
     `);
   }); // 218.14
+
+  it('218.15 enqueue wrong BaseDbObject type', async function() {
+    // Create a different object type
+    await conn.execute(`
+      CREATE OR REPLACE TYPE DIFFERENT_TYP AS OBJECT (
+        different_field VARCHAR2(10)
+      )
+    `);
+
+    const DifferentClass = await conn.getDbObjectClass('DIFFERENT_TYP');
+    const queue = await conn.getQueue(objQueueName, {
+      payloadType: objType
+    });
+
+    const wrongTypeObj = new DifferentClass({ different_field: "test" });
+
+    await assert.rejects(
+      async () => await queue.enqOne(wrongTypeObj),
+      /NJS-174:/
+      // NJS-174: Payload cannot be enqueued since it does not match the payload type supported by the queue
+    );
+
+    // Cleanup
+    await conn.execute('DROP TYPE DIFFERENT_TYP');
+  }); // 218.15
 });
 

@@ -4,6 +4,37 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev69v610:
+
+Upgrading from node-oracledb 6.9 to 6.10
+========================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- The new ``deliveryMode`` property in :attr:`aqQueue.deqOptions` can be used
+  to set the delivery mode when dequeing messages.
+
+- The new extended :ref:`metadata <execmetadata>` information attribute
+  ``dbColumnName`` for a fetched column provides the actual database column
+  name.
+
+- You can now store the duration that node-oracledb should keep the
+  configuration information cached in :ref:`configurationprovider` by using
+  the ``config_time_to_live`` key.
+
+- You can now use :ref:`Oracle Advanced Queuing <aq>` in node-oracledb Thin
+  mode.
+
+- In node-oracledb Thin mode, you can pass a proxy user with
+  :ref:`external authentication <extauth>` in :meth:`oracledb.createPool()`.
+
+- In node-oracleb Thick mode, you can now work directly with JSON data types
+  in SODA starting with Oracle Client version 23 which allows for seamless
+  transfer of extended data types in JSON values.
+
+- The method :meth:`sodaDocument.getContent()` now returns non-JSON content as
+  a JavaScript Buffer.
+
 .. _upgradev68v69:
 
 Upgrading from node-oracledb 6.8 to 6.9
@@ -14,7 +45,7 @@ Upgrading from node-oracledb 6.8 to 6.9
 - With the new methods :meth:`connection.beginSessionlessTransaction()`,
   :meth:`connection.resumeSessionlessTransaction()`, and
   :meth:`connection.suspendSessionlessTransaction()`, you can use Oracle
-  Database 23ai :ref:`Sessionless Transactions <sessionlesstxns>`.
+  Database version 23 :ref:`Sessionless Transactions <sessionlesstxns>`.
 
 - With the new property :attr:`~connection.ltxid`, you can now use
   :ref:`Transaction Guard <tg>`.
@@ -193,7 +224,7 @@ Upgrading from node-oracledb 6.5 to 6.6
   and connect to Oracle Database.
 
 - You can use the new :ref:`oracledb.DB_TYPE_BFILE <oracledbconstantsdbtype>`
-  constant to represent Oracle Database 23ai data type
+  constant to represent Oracle Database version 23 data type
   :ref:`BFILE <insertbfile>`.
 
 - In node-oracledb Thin mode, you can directly specify the security
@@ -214,14 +245,14 @@ Upgrading from node-oracledb 6.4 to 6.5
 - Review the :ref:`releasenotes` and take advantage of new features.
 
 - The new :ref:`oracledb.JsonId <jsonid>` class represents JSON ID values
-  returned by SODA in Oracle Database 23ai and later in the ``_id`` attribute
-  of documents stored in native collections.
+  returned by SODA in Oracle Database version 23 and later in the ``_id``
+  attribute of documents stored in native collections.
 
 - You can now pass BigInt values as binds to :meth:`connection.execute()` and
   :meth:`connection.executeMany()`.
 
 - With the new :ref:`oracledb.DB_TYPE_VECTOR <oracledbconstantsdbtype>`
-  constant, you can now represent Oracle Database 23ai data type
+  constant, you can now represent Oracle Database version 23 data type
   :ref:`VECTOR <vectors>` with the ``vectorDimensions`` and ``vectorFormat``
   :ref:`metadata <execmetadata>` information attributes.
 
@@ -229,7 +260,7 @@ Upgrading from node-oracledb 6.4 to 6.5
   changed without restarting the pool or application using the
   :meth:`pool.reconfigure()` method.
 
-- In node-oracledb Thin mode, you can now use Oracle Database 23ai's
+- In node-oracledb Thin mode, you can now use Oracle Database version 23's
   :ref:`Implicit Connection Pooling <implicitpool>` feature with Database
   Resident Connection Pooling (DRCP) and Proxy Resident Connection Pooling
   (PRCP).
@@ -332,8 +363,8 @@ Upgrading from node-oracledb 6.2 to 6.3
   `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
   id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched
   column. Annotations and data use case domains are supported from Oracle
-  Database 23ai onwards. For node-oracledb Thick mode, Oracle Client 23ai is
-  also required.
+  Database version 23 onwards. For node-oracledb Thick mode, Oracle Client
+  version 23 is also required.
 
 - In node-oracledb Thin mode, ``SYS.XMLTYPE`` data can now be
   :ref:`fetched as strings <xmltype>`.

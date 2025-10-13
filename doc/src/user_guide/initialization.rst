@@ -344,7 +344,7 @@ files affect connections and applications. The common files are:
     * - ``sqlnet.ora``
       - A configuration file controlling the network transport behavior. For example it can set call timeouts for :ref:`high availability <connectionha>`, or be used to :ref:`encrypt network traffic <securenetwork>`, or be used to configure logging and tracing. The `Oracle Net documentation on sqlnet.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-19423B71-3F6C-430F-84CC-18145CC2A818>`__ has more information.  Many settings can alternatively be specified using :ref:`Easy Connect syntax <easyconnect>`
 
-        This file is only used in node-oracledb Thick mode. In the node-oracledb Thin mode, many settings can be defined in :ref:`Easy Connect syntax <easyconnect>`, in :meth:`~oracledb.getConnection()` or :meth:`~oracledb.createPool()` calls, or in the ``tnsnames.ora`` file.
+        This file is only used in node-oracledb Thick mode. In node-oracledb Thin mode, many settings can be defined in :ref:`Easy Connect syntax <easyconnect>`, in :meth:`~oracledb.getConnection()` or :meth:`~oracledb.createPool()` calls, or in the ``tnsnames.ora`` file.
 
 
 The documentation :ref:`Connections and High Availability <connectionha>`
@@ -369,8 +369,8 @@ read from the same directory as the :ref:`Optional Oracle Net Configuration
 
 .. note::
 
-    The ``oraaccess.xml`` files is only used in the node-oracledb Thick mode.
-    See :ref:`enablingthick`.
+    The ``oraaccess.xml`` files is only used in node-oracledb Thick mode. See
+    :ref:`enablingthick`.
 
 The following ``oraaccess.xml`` file sets the Oracle client
 `‘prefetch’ <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
@@ -518,7 +518,7 @@ set before node-oracledb is first used. System environment variables like
     :align: center
     :widths: 20 40 10
     :name: _oracle_environment_variables
-    :summary: The first column displays the common Oracle Environment Variable. The second column, Purpose, describes what the environment variable is used for. The third column displays whether the environment variable can be used in the node-oracledb Thin mode, Thick mode, or both modes.
+    :summary: The first column displays the common Oracle Environment Variable. The second column, Purpose, describes what the environment variable is used for. The third column displays whether the environment variable can be used in node-oracledb Thin mode, Thick mode, or both modes.
 
     * - Oracle Environment Variables
       - Purpose
@@ -575,7 +575,7 @@ of the Oracle software owner will need permissions relaxed.
 .. note::
 
     The ``ORACLE_HOME`` and ``LD_LIBRARY_PATH`` environment variables are only
-    used in the node-oracledb Thick mode.
+    used in node-oracledb Thick mode.
 
 .. _otherinit:
 

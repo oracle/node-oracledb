@@ -502,9 +502,10 @@ without re-parsing the statement. Each cached statement will retain
 its cursor. Statement caching also reduces meta data transfer costs between
 node-oracledb and the database. Performance and scalability are improved.
 
-The node-oracledb Thick mode uses `Oracle Call Interface statement
-cache <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4947CAE8-1F00-4897-BB2B-7F921E495175>`__,
-whereas the Thin mode uses natively implemented statement caching.
+Node-oracledb Thick mode uses `Oracle Call Interface statement cache
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4947CAE8-1F00-
+4897-BB2B-7F921E495175>`__, whereas the Thin mode uses natively implemented
+statement caching.
 
 Each non-pooled connection and each session in the connection pool has
 its own cache of statements with a default size of 30. The cache key is

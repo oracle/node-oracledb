@@ -10,8 +10,8 @@ returned from :meth:`sodaCollection.find()` and
 
 .. note::
 
-    In this release, SODA is only supported in the node-oracledb Thick mode.
-    See :ref:`enablingthick`.
+    In this release, SODA is only supported in node-oracledb Thick mode. See
+    :ref:`enablingthick`.
 
 From node-oracledb 6.4, the SodaDocumentCursor class implements the
 ``asyncIterator()`` symbol to support asynchronous iteration. See

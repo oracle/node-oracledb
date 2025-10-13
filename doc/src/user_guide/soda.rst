@@ -13,8 +13,8 @@ document key lookups, or by query-by-example (QBE) pattern-matching.
 
 .. note::
 
-    In this release, SODA is only supported in the node-oracledb Thick mode.
-    See :ref:`enablingthick`.
+    In this release, SODA is only supported in node-oracledb Thick mode. See
+    :ref:`enablingthick`.
 
 SODA internally uses a SQL schema to store documents but you do not need
 to know SQL or how the documents are stored. However, optional access

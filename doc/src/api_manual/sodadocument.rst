@@ -9,8 +9,8 @@ operations.
 
 .. note::
 
-    In this release, SODA is only supported in the node-oracledb Thick mode.
-    See :ref:`enablingthick`.
+    In this release, SODA is only supported in node-oracledb Thick mode. See
+    :ref:`enablingthick`.
 
 SODA can be used with Oracle Database 18.3 and above, when node-oracledb
 uses Oracle Client 18.5 or Oracle Client 19.3, or later. The SODA bulk

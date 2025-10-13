@@ -13,8 +13,8 @@ Database Character Set
 ----------------------
 
 All database characters are supported by node-oracledb. In node-oracledb Thick
-mode, the data fetched from and sent to Oracle Database will be mapped between the
-`database character set <https://www.oracle.com/pls/topic/lookup?ctx=dbla
+mode, the data fetched from and sent to Oracle Database will be mapped between
+the `database character set <https://www.oracle.com/pls/topic/lookup?ctx=dbla
 test&id=GUID-EA913CC8-C5BA-4FB3-A1B8-882734AF4F43>`__ and the "Oracle client"
 character set of the Oracle Client libraries used by node-oracledb which is
 always AL32UTF8. In node-oracledb Thin mode, the database server does the
@@ -37,8 +37,8 @@ For the secondary `‘national character set’ <https://www.oracle.com/pls/
 topic/lookup?ctx=dblatest&id=GUID-AA8D783D-7337-4A61-BD7D-5DB580C46D9A>`__
 used for NCHAR, NVARCHAR2, and NCLOB data types:
 
-- AL16UTF16 is supported by both the node-oracledb Thin and Thick modes
-- UTF8 is not supported by the node-oracledb Thin mode
+- AL16UTF16 is supported by both node-oracledb Thin and Thick modes
+- UTF8 is not supported by node-oracledb Thin mode
 
 To find the database's national character set, execute the query:
 
@@ -175,7 +175,7 @@ Setting the Client Locale
 Thick Mode Oracle Database National Language Support (NLS)
 ----------------------------------------------------------
 
-The node-oracledb Thick mode uses Oracle Database's National Language Support
+Node-oracledb Thick mode uses Oracle Database's National Language Support
 (NLS) functionality to assist in globalizing applications, for example to
 convert numbers and dates to strings in the locale specific format.
 
@@ -226,12 +226,12 @@ Thin Mode Locale-aware Number Conversion
 
 .. note::
 
-    All NLS environment variables are ignored by the node-oracledb Thin mode.
+    All NLS environment variables are ignored by node-oracledb Thin mode.
     Also, the ``ORA_TZFILE`` variable is ignored.
 
-In the node-oracledb Thin mode, fetch type handlers can be used to
-perform number localization. Fetch type handlers like the one used in the
-example below can also be used in node-oracledb Thick mode.
+In node-oracledb Thin mode, fetch type handlers can be used to perform number
+localization. Fetch type handlers like the one used in the example below can
+also be used in node-oracledb Thick mode.
 
 For example, to convert numbers to the German display format with '.' as the
 thousands separator and ',' as the decimal separator:
@@ -280,12 +280,12 @@ Thin Mode Locale-aware Date Conversion
 
 .. note::
 
-    All NLS environment variables are ignored by the node-oracledb Thin mode.
+    All NLS environment variables are ignored by node-oracledb Thin mode
     including the ``ORA_TZFILE`` variable.
 
-In the node-oracledb Thin mode, fetch type handlers can be used to
-perform date localization. Fetch type handlers like the one used in the
-example below can also be used in node-oracledb Thick mode.
+In node-oracledb Thin mode, fetch type handlers can be used to perform date
+localization. Fetch type handlers like the one used in the example below can
+also be used in node-oracledb Thick mode.
 
 For example, to convert dates:
 

@@ -62,6 +62,28 @@ Overview of node-oracledb functional tests
         1.20.1 set valid appContext values in connection
         1.20.2 set invalid appContext values in connection
         1.20.3 ignore empty appContext array in connection
+        1.21 Empty and invalid SQL statement handling
+        1.21.1 empty string SQL statement
+        1.21.2 whitespace-only SQL statement
+        1.21.3 tabs and newlines only SQL statement
+        1.21.4 null SQL statement
+        1.21.5 undefined SQL statement
+        1.21.6 non-string SQL statement - number
+        1.21.7 non-string SQL statement - object
+        1.21.8 non-string SQL statement - array
+        1.21.9 single character invalid SQL
+        1.21.10 only semicolon SQL statement
+        1.21.11 multiple semicolons only
+        1.21.12 empty SQL with bind parameters
+        1.21.13 empty SQL with options
+        1.21.14 very long empty string
+        1.21.15 SQL with only comments
+        1.21.16 SQL with only block comments
+        1.21.17 incomplete SQL statement
+        1.21.18 SQL with only FROM keyword
+        1.21.19 SQL with special characters only
+        1.21.20 SQL with Unicode characters only
+        1.21.21 verify connection still works after empty SQL errors
 
   2. pool.js
     2.1 default setting
@@ -4795,7 +4817,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     217.15 test dequeue with wait timeout
     217.16 test buffer message payload - 32KB
     217.17 test large buffer message payload - 1MB
-    217.18 test enqueue/dequeue with BUFFERED delivery mode 
+    217.18 test enqueue/dequeue with BUFFERED delivery mode
     217.19 test enqueue/dequeue with PERSISTENT delivery mode
     217.20 test enqueue/dequeue with PERSISTENT_OR_BUFFERED delivery mode
     217.21 test enqueue/dequeue with mismatched delivery modes
@@ -4816,6 +4838,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     218.12 Enqueue and Dequeue with non-ASCII characters
     218.13 Enqueue and Dequeue with large payloads
     218.14 Negative - Dequeue from an unstarted queue
+    218.15 enqueue wrong BaseDbObject type
 
 219. aq3.js
     219.1 The read-only property "name" of AqQueue Class
@@ -5724,6 +5747,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         281.2.2 test dequeue with timeout
         281.2.3 test dequeue with correlation ID
         281.2.4 test visibility option
+        281.2.5 test multiple messages at once
 
 282. aq6.js
     282.1 msgId in QUEUE_PAYLOAD_TYPE as ‘RAW’

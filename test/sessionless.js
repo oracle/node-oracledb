@@ -58,7 +58,6 @@ describe('316. sessionless.js', function() {
     if (!(await testsUtil.checkPrerequisites(2306000000, 2306000000))) {
       this.skip();
     }
-    conn = await oracledb.getConnection(dbConfig);
   });
 
   beforeEach(async function() {

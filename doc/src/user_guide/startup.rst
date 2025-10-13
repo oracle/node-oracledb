@@ -20,7 +20,7 @@ use SQL commands to control the pluggable “PDB” databases.
 .. note::
 
     In this release, database start up and shut down functionality is only
-    supported in the node-oracledb Thick mode. See :ref:`enablingthick`.
+    supported in node-oracledb Thick mode. See :ref:`enablingthick`.
 
 .. _startupshutdownsimple:
 

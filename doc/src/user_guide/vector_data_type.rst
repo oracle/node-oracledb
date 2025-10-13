@@ -4,7 +4,7 @@
 Using VECTOR Data
 *****************
 
-Oracle Database 23ai introduced a new data type `VECTOR <https://docs.oracle.
+Oracle Database 23.4 introduced a new data type `VECTOR <https://docs.oracle.
 com/en/database/oracle/oracle-database/23/vecse/overview-ai-vector-search.
 html>`__ for artificial intelligence and machine learning search operations.
 The VECTOR data type is a homogeneous array of 8-bit signed integers, 8-bit

@@ -501,8 +501,8 @@ Constants for :ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``wait``.
       - 4294967295
       - Wait forever if no message is available.
 
-Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>`
-``deliveryMode``.
+Constants for :ref:`AqEnqOptions Class <aqenqoptionsclass>` and
+:ref:`AqDeqOptions Class <aqdeqoptionsclass>` ``deliveryMode``.
 
 .. constants-table::  Constants for the AqDeqOptions Class ``deliveryMode`` Property
 
@@ -757,6 +757,9 @@ Each of the configuration properties is described below.
 
     The default value is *86400* seconds.
 
+    The ``config_time_to_live`` key defined in a Centralized Configuration
+    Provider overrides this property.
+
     See :ref:`conncaching`.
 
     **Example**
@@ -883,7 +886,7 @@ Each of the configuration properties is described below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thin mode.
+        This property can only be used in node-oracledb Thin mode.
 
     **Example**
 
@@ -976,7 +979,7 @@ Each of the configuration properties is described below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     **Example**
@@ -1277,7 +1280,7 @@ Each of the configuration properties is described below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thin mode.
+        This property can only be used in node-oracledb Thin mode.
 
     **Example**
 
@@ -1341,7 +1344,7 @@ Each of the configuration properties is described below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     **Example**
@@ -1365,7 +1368,7 @@ Each of the configuration properties is described below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     **Example**
@@ -1518,7 +1521,7 @@ Each of the configuration properties is described below.
 
     .. note::
 
-        This property can only be used in the node-oracledb Thick mode. See
+        This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
     It is available when node-oracledb uses Oracle client libraries 18.3, or
@@ -2019,7 +2022,7 @@ Oracledb Methods
         :class: wy-table-responsive
         :align: center
         :widths: 13 7 12 18
-        :summary: The first column, Property, displays the property. The second column, Data Type, displays the data type of the property. The third column, node-oracledb Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
+        :summary: The first column, Property, displays the property. The second column, Data Type, displays the data type of the property. The third column, node-oracledb Mode, displays whether the property can be used in node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
 
         * - Property
           - Data Type
@@ -3049,7 +3052,7 @@ Oracledb Methods
         :class: wy-table-responsive
         :align: center
         :widths: 12 7 12 19
-        :summary: The first column, Property, displays the property. The second column, Type, displays the data type of the property. The third column, Mode, displays whether the property can be used in the node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
+        :summary: The first column, Property, displays the property. The second column, Type, displays the data type of the property. The third column, Mode, displays whether the property can be used in node-oracledb Thin mode, node-oracledb Thick mode, or both node-oracledb modes. The fourth column, Description, displays the description of the property.
 
         * - Property
           - Data Type
@@ -4297,8 +4300,8 @@ node-oracledb, allowing use of new features.
     Also, BLOB columns that were created with the ``IS JSON FORMAT OSON``
     check constraint are fetched in the same way as
     :ref:`columns of type JSON <json21fetch>` when this property is set to
-    *true*. The node-oracledb :ref:`Thick mode <enablingthick>` requires
-    Oracle Client 21c (or later).
+    *true*. Node-oracledb :ref:`Thick mode <enablingthick>` requires Oracle
+    Client 21c (or later).
 
     The default value is *false*.
 

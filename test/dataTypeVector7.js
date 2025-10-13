@@ -277,13 +277,14 @@ describe('309. dataTypeVector7.js', function() {
         async () => await connection.execute(
           `INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col)
             VALUES(1, :1)`, [sparseVec]),
-        /ORA-21560:|ORA-51803:/
+        /ORA-21560:|ORA-51803:|ORA-51835:/
         /*
            ORA-21560: argument at position 4 (vdim) is null, invalid, or
            out of range'
            ORA-51803: Vector dimension count must match the dimension count
            specified in the column definition (expected  dimensions, specified
            dimensions).
+           ORA-51835: Dimension count in vector input is invalid
          */
       );
       sparseVec = null;
@@ -875,10 +876,12 @@ describe('309. dataTypeVector7.js', function() {
         async () => await connection.execute(
           `INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col)
             VALUES(1, :1)`, [sparseVec]),
-        /ORA-51836:|ORA-21560:|ORA-51803:/
+        /ORA-51836:|ORA-21560:|ORA-51803:|ORA-51835:/
         /*
-          ORA-51803: Vector dimension count must match the dimension count specified in the column
-          definition (expected  dimensions, specified  dimensions).
+          ORA-51803: Vector dimension count must match the dimension count
+          specified in the column definition (expected  dimensions, specified
+          dimensions).
+          ORA-51835: Dimension count in vector input is invalid
         */
       );
 

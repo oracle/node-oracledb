@@ -271,6 +271,36 @@ describe('281. aq5.js', function() {
       assert(msg);
       assert.strictEqual(msg.payload.toString(), "Immediate Visibility Message");
     }); // 281.2.4
+
+    it('281.2.5 test multiple messages at once', async function() {
+      const queue = await conn.getQueue(objQueueName);
+
+      // Test messages with different priorities
+      const messages = [];
+      const messageCount = 20;
+      for (let i = 1; i <= messageCount; ++i) {
+        const message = {
+          payload: 'a'.repeat(i)
+        };
+        messages.push(message);
+      }
+
+      await queue.enqMany(messages);
+      await conn.commit();
+
+      // Dequeue with consumer name
+      const deqQueue = await conn.getQueue(objQueueName);
+      deqQueue.deqOptions.consumerName = CONSUMER_NAME;
+
+      // Should receive all the messages
+      const deqMsgs = await deqQueue.deqMany(messageCount);
+      let msgPos = 0;
+      for (const deqMsg of deqMsgs) {
+        assert.strictEqual(deqMsg.payload.toString(), messages[msgPos].payload);
+        msgPos++;
+      }
+      await conn.commit();
+    }); // 281.2.5
   });
 });
 

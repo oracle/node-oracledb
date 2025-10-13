@@ -83,7 +83,7 @@ describe('1. connection.js', function() {
 
     after(async function() {
       await connection.execute('DROP TABLE nodb_conn_dept1 PURGE');
-      await connection.release();
+      await connection.close();
     });
 
     const query = "SELECT department_id, department_name " +
@@ -134,7 +134,7 @@ describe('1. connection.js', function() {
 
     after(async function() {
       await connection.execute("DROP PROCEDURE nodb_bindingtest");
-      await connection.release();
+      await connection.close();
     });
 
     it('1.2.1 bind parameters in various ways', async function() {
@@ -196,7 +196,7 @@ describe('1. connection.js', function() {
     afterEach('drop table and release connection', async function() {
       oracledb.stmtCacheSize = defaultStmtCache;
       await connection.execute("DROP TABLE nodb_conn_emp4 PURGE");
-      await connection.release();
+      await connection.close();
     });
 
     it('1.3.1 stmtCacheSize = 0, which disable statement caching', async function() {
@@ -316,7 +316,7 @@ describe('1. connection.js', function() {
       delete credential.connectString;
 
       const connection = await oracledb.getConnection(credential);
-      await connection.release();
+      await connection.close();
     });
 
   });
@@ -478,7 +478,7 @@ describe('1. connection.js', function() {
 
     it('1.12.1 exception_on_close', async function() {
       const connection = await oracledb.getConnection(dbConfig);
-      await connection.release();
+      await connection.close();
       await assert.rejects(
         async () => await connection.execute('SELECT * FROM DUAL'),
         /NJS-003:/
@@ -527,7 +527,7 @@ describe('1. connection.js', function() {
           /ORA-01426:|ORA-01476:|ORA-00904:/ //ORA-01426: numeric overflow  | ORA-01476: divisor is equal to zero | ORA-00904: invalid identifier'
         );
       }));
-      await connection.release();
+      await connection.close();
     });
   }); //1.14
 
@@ -592,7 +592,7 @@ describe('1. connection.js', function() {
       const result = await connection.execute(query);
       assert(result);
       assert.deepStrictEqual(result.rows[0][0], connection.instanceName.toUpperCase());
-      connection.close();
+      await connection.close();
     });
   }); //1.17
 
@@ -1065,4 +1065,167 @@ describe('1. connection.js', function() {
       assert(connection);
     }); // 1.20.3
   }); // 1.20
+
+  describe('1.21 Empty and invalid SQL statement handling', function() {
+
+    let connection;
+
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async function() {
+      if (connection) {
+        await connection.close();
+      }
+    });
+
+    it('1.21.1 empty string SQL statement', async function() {
+      await assert.rejects(
+        async () => await connection.execute(''),
+        /NJS-107:|ORA-24373:/ // NJS-107: invalid cursor
+        // ORA-24373: invalid length specified for statement
+      );
+    });
+
+    it('1.21.2 whitespace-only SQL statement', async function() {
+      await assert.rejects(
+        async () => await connection.execute('   '),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.3 tabs and newlines only SQL statement', async function() {
+      await assert.rejects(
+        async () => await connection.execute('\t\n\r  \n'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.4 null SQL statement', async function() {
+      await assert.rejects(
+        async () => await connection.execute(null),
+        /NJS-005:/ // NJS-005: invalid value for parameter
+      );
+    });
+
+    it('1.21.5 undefined SQL statement', async function() {
+      await assert.rejects(
+        async () => await connection.execute(undefined),
+        /NJS-005:/ // NJS-005: invalid value for parameter
+      );
+    });
+
+    it('1.21.6 non-string SQL statement - number', async function() {
+      await assert.rejects(
+        async () => await connection.execute(123),
+        /NJS-005:/ // NJS-005: invalid value for parameter
+      );
+    });
+
+    it('1.21.7 non-string SQL statement - object', async function() {
+      await assert.rejects(
+        async () => await connection.execute({}),
+        /NJS-005:/ // NJS-005: invalid value for parameter
+      );
+    });
+
+    it('1.21.8 non-string SQL statement - array', async function() {
+      await assert.rejects(
+        async () => await connection.execute(['SELECT * FROM dual']),
+        /NJS-005:/ // NJS-005: invalid value for parameter
+      );
+    });
+
+    it('1.21.9 single character invalid SQL', async function() {
+      await assert.rejects(
+        async () => await connection.execute('X'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.10 only semicolon SQL statement', async function() {
+      await assert.rejects(
+        async () => await connection.execute(';'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.11 multiple semicolons only', async function() {
+      await assert.rejects(
+        async () => await connection.execute(';;;'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.12 empty SQL with bind parameters', async function() {
+      await assert.rejects(
+        async () => await connection.execute('', { id: 1 }),
+        /NJS-098:|ORA-24373:/
+        // NJS-098: 0 bind placeholders were used in the SQL statement but 1 bind values were provided
+        // ORA-24373: invalid length specified for statement
+      );
+    });
+
+    it('1.21.13 empty SQL with options', async function() {
+      await assert.rejects(
+        async () => await connection.execute('', {}, { outFormat: oracledb.OUT_FORMAT_OBJECT }),
+        /ORA-24373:|NJS-107:/
+        // NJS-107: invalid curso
+        // ORA-24373: invalid length specified for statement
+      );
+    });
+
+    it('1.21.14 very long empty string', async function() {
+      const longEmptyString = ' '.repeat(10000); // 10k spaces
+      await assert.rejects(
+        async () => await connection.execute(longEmptyString),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.15 SQL with only comments', async function() {
+      await assert.rejects(
+        async () => await connection.execute('-- This is just a comment'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.16 SQL with only block comments', async function() {
+      await assert.rejects(
+        async () => await connection.execute('/* This is just a comment */'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.17 incomplete SQL statement', async function() {
+      await assert.rejects(
+        async () => await connection.execute('SELECT'),
+        /ORA-00936:/ // ORA-00936: missing expression
+      );
+    });
+
+    it('1.21.18 SQL with only FROM keyword', async function() {
+      await assert.rejects(
+        async () => await connection.execute('FROM'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.19 SQL with special characters only', async function() {
+      await assert.rejects(
+        async () => await connection.execute('!@#$%^&*()'),
+        /ORA-00900:/ // ORA-00900: invalid SQL statement
+      );
+    });
+
+    it('1.21.20 SQL with Unicode characters only', async function() {
+      await assert.rejects(
+        async () => await connection.execute('こんにちは'),
+        /ORA-00900:|ORA-00911:/
+        // ORA-00900: invalid SQL statement
+        // ORA-00911: invalid character
+      );
+    });
+  });
 });

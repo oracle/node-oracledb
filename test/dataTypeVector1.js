@@ -1632,11 +1632,12 @@ describe('294. dataTypeVector1.js', function() {
           sql,
           binds
         ),
-        /ORA-51803:|ORA-21560:/
+        /ORA-51803:|ORA-21560:|ORA-51835:/
         /*
             ORA-51803: Vector dimension count must match the dimension count
             specified in the column definition (actual: , required: ).
             ORA-21560: argument at position 4 (vdim) is null, invalid, or out of range'
+            ORA-51835: Dimension count in vector input is invalid
          */
       );
     }
@@ -1778,11 +1779,12 @@ describe('294. dataTypeVector1.js', function() {
           sql,
           binds
         ),
-        /ORA-51803:|ORA-21560:/
+        /ORA-51803:|ORA-21560:|ORA-51835:/
         /*
             ORA-51803: Vector dimension count must match the dimension count
             specified in the column definition (actual: , required: ).
             ORA-21560: argument at position 4 (vdim) is null, invalid, or out of range'
+            ORA-51835: Dimension count in vector input is invalid
          */
       );
     }

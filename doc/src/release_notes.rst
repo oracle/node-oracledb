@@ -19,37 +19,44 @@ node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0..
 Common Changes
 ++++++++++++++
 
-#)  Improved connection pool's queueTimeout behavior to account for network
-    delays and pool expansion delays.
-
-#)  Ensured proper errors are raised when invalid parameter values are passed
-    for the :meth:`sodaOperation.limit()` and :meth:`sodaOperation.skip()`
-    methods in SODA operations.
-
-#)  Fixed bug that threw empty error message when NaN values were used
-    in JSON binds.
-
-#)  Added support for :attr:`deqOptions.deliveryMode` in
-    :ref:`Advanced Queuing <aq>`.
-
-#)  Added error ``NJS-174`` which is thrown if payload type does not match the
-    queue type in :ref:`Advanced Queuing <aq>`.
+#)  Added ``deliveryMode`` property in
+    :ref:`aqQueue.deqOptions <aqdeqoptionsclass>`.
 
 #)  Added a new extended :ref:`metadata <execmetadata>` information attribute
     ``dbColumnName`` for a fetched column which provides the actual database
     column name as opposed to the unique column name provided by the ``name``
     information attribute.
 
+#)  Added error ``NJS-174`` which is thrown if payload type does not match the
+    queue type in :ref:`Advanced Queuing <aq>`.
+
+#)  Added support for the ``config_time_to_live`` parameter for configurations
+    retrieved from :ref:`configurationprovider`.
+
+#)  Ensured proper errors are raised when invalid parameter values are passed
+    for the :meth:`sodaOperation.limit()` and :meth:`sodaOperation.skip()`
+    methods in SODA operations.
+
+#)  Improved connection pool's :attr:`queueTimeout <pool.queueTimeout>`
+    behavior to account for network delays and pool expansion delays.
+
 #)  Fixed bug when attempting to use collection-specific methods for
     :ref:`database objects <dbobjectclass>` which is not actually a collection.
+
+#)  Fixed bug that threw empty error message when NaN values were used
+    in JSON binds.
+
+#)  Connectivity and interoperability with Oracle Database and Oracle Client
+    libraries older than version 19 is deprecated and will be removed in a
+    future version of node-oracledb. Production use, and availability of
+    database and client software, is detailed in `Release Schedule of Current
+    Database Releases <https://support.oracle.com/epmos/faces/
+    DocumentDisplay?id=742060.1>`__.
 
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for the config_time_to_live parameter for configurations
-    retrieved from centralized configuration providers.
-    
-#)  Fixed bug validating the database host during connection.
+#)  Added support for :ref:`Oracle Advanced Queuing <aq>`.
 
 #)  Enabled proxy user to be passed with :ref:`external authentication <extauth>`
     in :meth:`oracledb.createPool()` for Thin mode.
@@ -59,16 +66,18 @@ Thin Mode Changes
     connection state.
     See `Issue #1749 <https://github.com/oracle/node-oracledb/issues/1749>`__.
 
-#)  Fixed bug which results in error ``ORA-01652: unable to extend temp segment``
-    when bind type CLOB or BLOB is used and bind value passed is not a LOB object.
+#)  Fixed bug which results in error ``ORA-01652: unable to extend temp
+    segment`` when bind type CLOB or BLOB is used and bind value passed is not
+    a :ref:`LOB object <lobclass>`.
 
-#) Added support for :ref:`Advanced Queuing <aq>` in Thin Mode.
+#)  Fixed bug validating the database host during connection.
 
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Added support for internal use of JSON in SODA with Oracle Client 23ai.
-    This allows for seamless transfer of extended data types in JSON values.
+#)  Added support for internal use of JSON in SODA with Oracle Client
+    version 23. This allows for seamless transfer of extended data types in
+    JSON values.
 
 #)  Added capability for :meth:`sodaDocument.getContent()` to return non-JSON
     content as a JavaScript Buffer.
@@ -76,10 +85,11 @@ Thick Mode Changes
 #)  Fixed memory leak when enqueuing to JSON queues with
     :ref:`Advanced Queuing <aq>`.
 
-#)  Internal code refactoring to optimize handling of SODA functions.
+#)  Fixed bug to ensure that :meth:`connection.getStatementInfo()` processes
+    the query metadata correctly.
 
-#)  Fixed bug to ensure that :meth:`connection.getStmtInfo()` processes the
-    query metadata correctly.
+#)  Internal code refactoring to optimize handling of
+    :ref:`SODA <sodaoverview>` functions.
 
 node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...v6.9.0>`__ (18 Jul 2025)
 ---------------------------------------------------------------------------------------------------------
@@ -87,7 +97,7 @@ node-oracledb `v6.9.0 <https://github.com/oracle/node-oracledb/compare/v6.8.0...
 Common Changes
 ++++++++++++++
 
-#)  Added support for Oracle Database 23ai
+#)  Added support for Oracle Database 23.6
     :ref:`Sessionless Transactions <sessionlesstxns>`.
 
 #)  Added support for :ref:`Transaction Guard <tg>` with the introduction of
@@ -414,8 +424,8 @@ Thin Mode Changes
     See `Issue #1694 <https://github.com/oracle/node-oracledb/issues/
     1694>`__.
 
-#)  Fixed bug that did not allow connection to Oracle Database 23ai instances
-    that have fast authentication disabled.
+#)  Fixed bug that did not allow connection to Oracle Database version 23
+    instances that have fast authentication disabled.
     See `Issue #1697 <https://github.com/oracle/node-oracledb/issues/1697>`__.
 
 #)  Fixed bug with statement cache which threw an ``NJS-111`` error when select
@@ -456,7 +466,7 @@ node-oracledb `v6.6.0 <https://github.com/oracle/node-oracledb/compare/v6.5.1...
 Common Changes
 ++++++++++++++
 
-#)  Added support for Oracle Database 23ai
+#)  Added support for Oracle Database 23.5
     :ref:`BINARY vector format <binaryvectors>`.
 
 #)  Added support for
@@ -547,28 +557,29 @@ node-oracledb `v6.5.0 <https://github.com/oracle/node-oracledb/compare/v6.4.0...
 Common Changes
 ++++++++++++++
 
-#)  Added comprehensive support for Oracle Database 23ai
+#)  Added comprehensive support for Oracle Database 23.4
     :ref:`VECTOR <vectors>` data type.
 
 #)  Incorporated changes to use end of data request flag set with data packets
-    available in Oracle Database 23ai to improve handling of the async reads.
+    available in Oracle Database version 23 to improve handling of the async
+    reads.
 
 #)  Added class :ref:`oracledb.JsonId <jsonid>` to represent JSON ID values
     returned by SODA in Oracle Database 23.4 and later in the ``_id``
     attribute of documents stored in native collections.
 
-#)  Added support for an Oracle Database 23ai JSON feature allowing for field
-    names with more than 255 UTF-8 encoded bytes.
+#)  Added support for an Oracle Database version 23 JSON feature allowing for
+    field names with more than 255 UTF-8 encoded bytes.
 
-#)  Added support for an Oracle Database 23ai JSON feature improving JSON
-    storage usage.
+#)  Added support for an Oracle Database version 23 JSON feature improving
+    JSON storage usage.
 
 #)  Updated error thrown during pool reconfiguration from ``ORA-24413`` to
     ``NJS-007`` when ``poolMax`` is *0*.
 
 #)  Error ``NJS-092`` is now thrown during
-    :meth:`pool reconfiguration <pool.reconfigure()>` if the ``poolMin`` value is
-    greater than the ``poolMax`` value.
+    :meth:`pool reconfiguration <pool.reconfigure()>` if the ``poolMin`` value
+    is greater than the ``poolMax`` value.
 
 #)  Added support for :ref:`binding BigInt values <binddatatypenotes>`.
     BigInts such as ``123n`` can be passed to :meth:`connection.execute()` and
@@ -577,10 +588,10 @@ Common Changes
     (Slawomir Osoba).
 
 #)  Test case improvements and additions for the supported Oracle Database
-    23ai features.
+    version 23 features.
 
 #)  Documentation updates and additions for the supported Oracle Database
-    23ai features.
+    version 23 features.
 
 Thin Mode Changes
 ++++++++++++++++++
@@ -596,9 +607,9 @@ Thin Mode Changes
 #)  Added support for easy connect string entries in tnsnames.ora.
     See `Issue #1644 <https://github.com/oracle/node-oracledb/issues/1644>`__.
 
-#)  Added support for Oracle Database 23ai feature that can improve the
+#)  Added support for Oracle Database version 23 feature that can improve the
     performance of connection creation by reducing the number of
-    round trips required for all connections created.
+    round-trips required for all connections created.
 
 #)  Error ``NJS-149: the bind variable placeholder "%s" cannot be used
     both before and after the RETURNING clause in a DML RETURNING statement``
@@ -610,7 +621,7 @@ Thin Mode Changes
 
 #)  Added support for :meth:`pool reconfiguration <pool.reconfigure()>`.
 
-#)  Added support for Oracle Database 23ai
+#)  Added support for Oracle Database version 23
     :ref:`Implicit Connection Pooling <implicitpool>` in Database Resident
     Connection Pooling (DRCP) and Proxy Resident Connection Pooling (PRCP).
 
@@ -928,10 +939,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for an Oracle Database 23ai feature that can improve the
-    performance of connection creation by reducing the number of round trips
-    required to create the second and subsequent connections to the same
-    database.
+#)  Added support for an Oracle Database version 23 feature that can improve
+    the performance of connection creation by reducing the number of
+    round-trips required to create the second and subsequent connections to
+    the same database.
 
 #)  Added support for fetching RAW columns as strings using
     ``oracledb.fetchAsString = [ oracledb.DB_TYPE_RAW ]``.
@@ -940,14 +951,14 @@ Thin Mode Changes
 #)  Added new ``sslAllowWeakDNMatch`` connection attribute in :ref:`createPool()
     <createpoolpoolattrssslallowweak>` and :ref:`getConnection()
     <getconnectiondbattrssslallowweak>` methods and support for
-    ``SSL_WEAK_DN_MATCH`` (an Oracle Database 23ai feature). If set, this
-    enables ``sslServerDNMatch`` / ``SSL_SERVER_DN_MATCH`` to check the
+    ``SSL_WEAK_DN_MATCH`` (an Oracle Database version 23 feature). If set,
+    this enables ``sslServerDNMatch`` / ``SSL_SERVER_DN_MATCH`` to check the
     database server certificate (but not the listener) and enables the service
     name to be used for partial DN matching. The search order is: the host
     name, then the Subject Alternative Name (SAN), and then the service name.
 
 #)  Added support to include database error cause/action URLs (introduced from
-    Oracle Database 23ai onwards) for ORA error messages.
+    Oracle Database version 23 onwards) for ORA error messages.
 
 #)  Added network connection optimization for multiple database hosts.
     If a host is found to be unreachable during connection, the host is added
@@ -983,7 +994,7 @@ Thin Mode Changes
     same certificate.
 
 #)  Fixed bug with duplicate data for queries that exceed 2016 columns (only
-    possible with Oracle Database 23ai).
+    possible with Oracle Database version 23).
 
 Thick Mode Changes
 ++++++++++++++++++
@@ -1189,7 +1200,7 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
     - Changed ``oracledb.DB_TYPE_*`` constants to be ``DbType`` objects
       instead of numbers.
 
-    - Added support for the Oracle Database 23ai BOOLEAN SQL type.
+    - Added support for the Oracle Database version 23 BOOLEAN SQL type.
 
     - Fixed type used when fetching NCLOB as a string.
 

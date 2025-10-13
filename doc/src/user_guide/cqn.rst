@@ -26,11 +26,10 @@ node-oracledb application for notifications to be received. This
 typically means that the machine running node-oracledb needs a fixed IP
 address. Note ``connection.subscribe()`` does not verify that this
 reverse connection is possible. If there is any problem sending a
-notification, then the callback method will not be invoked. The
-configuration options can include an
-:ref:`ipAddress <consubscribeoptipaddress>` and
-:ref:`port <consubscribeoptport>` on which to listen for
-notifications, otherwise the database chooses values.
+notification, then the callback method will not be invoked. Configuration
+options can include an :ref:`ipAddress <consubscribeoptipaddress>` and
+:ref:`port <consubscribeoptport>` on which to listen for notifications,
+otherwise the database chooses values.
 
 Alternatively, when using Oracle Database and Oracle client libraries
 19.4, or later, subscriptions can set the optional
