@@ -130,19 +130,20 @@ External Authentication
 =======================
 
 External Authentication allows applications to use an external password
-store (such as an `Oracle Wallet <https://www.oracle.com/pls/topic/lookup?
-ctx=dblatest&id=GUID-E3E16C82-E174-4814-98D5-EADF1BCB3C37>`__),
-the `Transport Layer Security (TLS) or Secure Socket Layer (SSL)
-<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-6AD89576-526F-
-4D6B-A539-ADF4B840819F>`__, or the `operating system <https://www.oracle.com/
-pls/topic/lookup?ctx=dblatest&id=GUID-37BECE32-58D5-43BF-A098-97936D66968F>`__
-to validate user access. With an external password store, your application can
-use an Oracle Wallet to authenticate users. External Authentication using TLS
-authenticates users with Public Key Infrastructure (PKI) certificates. With
-operating system authentication, user authentication can be performed if the
-user has an operating system account on their machine recognized by Oracle
-Database. One of the benefits of using external authentication is that
-database credentials do not need to be hard coded in the application.
+store (such as an `Oracle Wallet <https://docs.oracle.com/en/database/oracle/
+oracle-database/21/dbimi/using-oracle-wallet-manager.html#GUID-E3E16C82-E174-
+4814-98D5-EADF1BCB3C37>`__), the `Transport Layer Security (TLS) or Secure
+Socket Layer (SSL) <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+GUID-6AD89576-526F-4D6B-A539-ADF4B840819F>`__, or the `operating system
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-37BECE32-58D5-
+43BF-A098-97936D66968F>`__ to validate user access. With an external password
+store, your application can use an Oracle Wallet to authenticate users.
+External Authentication using TLS authenticates users with Public Key
+Infrastructure (PKI) certificates. With operating system authentication, user
+authentication can be performed if the user has an operating system account on
+their machine recognized by Oracle Database. One of the benefits of using
+external authentication is that database credentials do not need to be hard
+coded in the application.
 
 .. note::
 
@@ -522,8 +523,8 @@ following command::
 
     npm install oci-sdk
 
-See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
-examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+See `ocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/ocitokenauth.js>`__ for a runnable example using the OCI SDK.
 
 **Token Generation Using extensionOci Plugin**
 
@@ -577,8 +578,8 @@ application. For example:
         ... // OCI-specific authentication details
     }
 
-See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
-examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+See `ocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/ocitokenauth.js>`__ for a runnable example using the OCI SDK.
 The use of ``getToken()`` and ``accessTokenConfig`` is shown in subsequent
 examples.
 
@@ -673,8 +674,8 @@ generate tokens in the callback method. For example:
         });
     }
 
-See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
-examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+See `ocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/ocitokenauth.js>`__ for a runnable example using the OCI SDK.
 The callback and ``refresh`` parameter descriptions are detailed in the
 example above.
 
@@ -747,8 +748,8 @@ generate tokens in the callback method. For example:
         });
     }
 
-See `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
-examples/sampleocitokenauth.js>`__ for a runnable example using the OCI SDK.
+See `ocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/ocitokenauth.js>`__ for a runnable example using the OCI SDK.
 See :ref:`IAM Standalone Connections <iamstandalone>` for a description of
 the callback and ``refresh`` parameter.
 
@@ -1033,10 +1034,10 @@ application. For example:
         ... // Azure-specific authentication types
     }
 
-See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
-main/examples/sampleazuretokenauth.js>`__ for a runnable example using the
-Azure SDK. The use of ``getToken()`` and ``accessTokenConfig`` is shown in
-subsequent examples.
+See `azuretokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/azuretokenauth.js>`__ for a runnable example using the Azure SDK. The
+use of ``getToken()`` and ``accessTokenConfig`` is shown in subsequent
+examples.
 
 **Token Generation Using extensionAzure Plugin**
 
@@ -1132,10 +1133,10 @@ generate tokens in the callback method. For example:
         });
     }
 
-See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
-main/examples/sampleazuretokenauth.js>`__ for a runnable example using the
-Azure SDK. The callback and ``refresh`` parameter descriptions are detailed
-in the example above.
+See `azuretokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/azuretokenauth.js>`__ for a runnable example using the Azure SDK. The
+callback and ``refresh`` parameter descriptions are detailed in the example
+above.
 
 .. _oauthpool:
 
@@ -1206,10 +1207,10 @@ generate tokens in the callback method. For example:
         });
     }
 
-See `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/
-main/examples/sampleazuretokenauth.js>`__ for a runnable example using the
-Azure SDK. See :ref:`OAuth 2.0 Standalone Connections <oauthstandalone>` for a
-description of the callback and ``refresh`` parameter.
+See `azuretokenauth.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/azuretokenauth.js>`__ for a runnable example using the Azure SDK. See
+:ref:`OAuth 2.0 Standalone Connections <oauthstandalone>` for a description of
+the callback and ``refresh`` parameter.
 
 .. _oauthconnectstring:
 
