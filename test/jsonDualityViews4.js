@@ -110,13 +110,14 @@ describe('275. jsonDualityView4.js', function() {
   after(async function() {
     if (!isRunnable || dbConfig.test.isCmanTdm) return;
 
-    await testsUtil.dropTable(connection, 'student_class');
-    await testsUtil.dropTable(connection, 'student');
-    await testsUtil.dropTable(connection, 'class');
+    if (connection) {
+      await testsUtil.dropTable(connection, 'student_class');
+      await testsUtil.dropTable(connection, 'student');
+      await testsUtil.dropTable(connection, 'class');
+      await connection.close();
+    }
 
-    await connection.close();
-    await dbaConn.execute(`DROP USER njs_jsonDv4 CASCADE`);
-
+    if (dbaConn) await dbaConn.execute(`DROP USER njs_jsonDv4 CASCADE`);
     await dbaConn.close();
   });
 

@@ -235,6 +235,41 @@ connections exceeds ``poolMin`` and connections are idle for more than
 the :attr:`oracledb.poolTimeout` seconds, then the number of
 open connections does not fall below ``poolMin``.
 
+**In node-oracledb Thin mode**
+
+In node-oracledb Thin mode, you can use external authentication combined with
+proxy authentication when using a homogeneous pool. To use this, set the
+``externalAuth`` property to *true* and define the proxy user in the ``user``
+property of the :meth:`oracledb.createPool()`.
+
+In the following example, ``ssl_user`` (authenticated externally through SSL)
+is allowed to connect as a proxy for ``password_user``:
+
+.. code-block:: sql
+
+    CREATE USER password_user IDENTIFIED BY <password>;
+    GRANT CONNECT TO password_user;
+
+    CREATE USER ssl_user IDENTIFIED EXTERNALLY AS 'CN=ssl_user';
+    GRANT CONNECT TO ssl_user;
+
+    ALTER USER password_user GRANT CONNECT THROUGH ssl_user;
+
+You can then connect to Oracle Database using:
+
+.. code-block:: javascript
+
+    const proxyUserConnectionAttributes = {
+        walletLocation: "/opt/OracleCloud",
+        connectString: "tcps://localhost:2484/FREEPDB1",
+        walletPassword: wp,
+        externalAuth: true,
+        user: "[PASSWORD_USER]",
+    };
+    await oracledb.createPool(proxyUserConnectionAttributes);
+    const connection = await pool.getConnection();
+    await connection.close();
+
 .. _tlsextauth:
 
 External Authentication Using TLS

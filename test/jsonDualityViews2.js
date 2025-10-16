@@ -75,6 +75,7 @@ describe('273. jsonDualityView2.js', function() {
     const pwd = testsUtil.generateRandomPassword();
 
     dbaConn = await oracledb.getConnection(dbaCredential);
+
     await dbaConn.execute(`CREATE USER jsonDv2 IDENTIFIED BY ${pwd}`);
     await dbaConn.execute(`GRANT CREATE SESSION, RESOURCE, CONNECT,
       UNLIMITED TABLESPACE TO jsonDv2`);
@@ -87,9 +88,12 @@ describe('273. jsonDualityView2.js', function() {
   after(async function() {
     if (!isRunnable) return;
 
-    await connection.close();
-    await dbaConn.execute(`DROP USER jsonDv2 CASCADE`);
-    await dbaConn.close();
+    if (connection) await connection.close();
+
+    if (dbaConn) {
+      await dbaConn.execute(`DROP USER jsonDv2 CASCADE`);
+      await dbaConn.close();
+    }
   });
 
   it('273.1 without base table being available (use force option at view creation)', async function() {
@@ -339,6 +343,7 @@ describe('273. jsonDualityView2.js', function() {
       if (dbConfig.test.drcp) {
         this.skip();
       }
+
       await dbaConn.execute(createUser1);
       await dbaConn.execute(grantPriv1);
       await dbaConn.execute(createUser2);
@@ -358,10 +363,15 @@ describe('273. jsonDualityView2.js', function() {
       if (dbConfig.test.drcp) {
         return;
       }
-      await conn2.close();
-      await conn1.close();
-      await dbaConn.execute(`DROP USER njs_test1 CASCADE`);
-      await dbaConn.execute(`DROP USER njs_test2 CASCADE`);
+
+      if (conn2) await conn2.close();
+
+      if (conn1) await conn1.close();
+
+      if (dbaConn) {
+        await dbaConn.execute(`DROP USER njs_test1 CASCADE`);
+        await dbaConn.execute(`DROP USER njs_test2 CASCADE`);
+      }
     });
 
     it('273.9.1 Base table in one schema and View in another schema', async function() {
@@ -508,6 +518,7 @@ describe('273. jsonDualityView2.js', function() {
       if (dbConfig.test.drcp) {
         this.skip();
       }
+
       await dbaConn.execute(`CREATE USER njs_testuser1 IDENTIFIED BY ${pwd}`);
       await dbaConn.execute(`GRANT CREATE SESSION, RESOURCE, CREATE TABLE,
         UNLIMITED TABLESPACE TO njs_testuser1`);
@@ -518,7 +529,10 @@ describe('273. jsonDualityView2.js', function() {
       if (dbConfig.test.drcp) {
         return;
       }
-      await dbaConn.execute(`DROP USER njs_testuser1 CASCADE`);
+
+      if (dbaConn) {
+        await dbaConn.execute(`DROP USER njs_testuser1 CASCADE`);
+      }
     });
 
     it('273.10.1 redaction enabled on a base table', async function() {

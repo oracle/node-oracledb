@@ -81,6 +81,11 @@ Only node-oracledb :ref:`Thick mode <enablingthick>` supports the use of:
 - Visibility constant :data:`oracledb.AQ_VISIBILITY_IMMEDIATE` in
   :meth:`aqQueue.enqMany()` and :meth:`aqQueue.deqMany()` methods
 
+The ``payloadType`` attribute in :meth:`connection.getQueue()` must be
+specified when the payload is :ref:`JSON <aqjsonexample>` or
+:ref:`Named Oracle Objects <aqobjexample>`. This attribute need not be
+specified for :ref:`RAW <aqrawexample>` payload.
+
 Transactional Event Queues do not support the ``transformation``
 attribute of :attr:`aqQueue.enqOptions` and :attr:`aqQueue.deqOptions`, or
 :ref:`Recipient Lists <aqrecipientlists>`.

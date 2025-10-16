@@ -63,6 +63,8 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
 
+console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
+
 const queueName = "ADDR_QUEUE";
 const ADDR_TABLE = "ADDR_QUEUE_TAB";
 const DB_OBJECT = "USER_ADDRESS_TYPE";

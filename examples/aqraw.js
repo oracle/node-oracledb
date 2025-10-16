@@ -63,6 +63,8 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
   oracledb.initOracleClient(clientOpts);  // enable node-oracledb Thick mode
 }
 
+console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
+
 const queueName = "DEMO_RAW_QUEUE";
 const RAW_TABLE = "NODB_RAW_QUEUE_TAB";
 const AQ_USER = "NODB_SCHEMA_AQTEST1";

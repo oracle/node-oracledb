@@ -69,6 +69,7 @@ describe('274 jsonDualityView3.js', function() {
     };
 
     dbaConn = await oracledb.getConnection(dbaCredential);
+
     await dbaConn.execute(
       `CREATE USER njs_jsonDv3 IDENTIFIED BY ${pwd}`
     );
@@ -85,9 +86,12 @@ describe('274 jsonDualityView3.js', function() {
   after(async function() {
     if (!isRunnable || dbConfig.test.isCmanTdm) return;
 
-    await connection.close();
-    await dbaConn.execute(`DROP USER njs_jsonDv3 CASCADE`);
-    await dbaConn.close();
+    if (connection) await connection.close();
+
+    if (dbaConn) {
+      await dbaConn.execute(`DROP USER njs_jsonDv3 CASCADE`);
+      await dbaConn.close();
+    }
   });
 
   it('274.1 Define Columns of View with WITH READ WRITE or WITH READ ONLY annotations', async function() {
