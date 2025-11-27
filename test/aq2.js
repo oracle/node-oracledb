@@ -466,4 +466,3 @@ describe('218. aq2.js', function() {
     await conn.execute('DROP TYPE DIFFERENT_TYP');
   }); // 218.15
 });
-
