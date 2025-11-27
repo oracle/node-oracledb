@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -713,9 +713,9 @@ describe('102. bindTimestamp.js', function() {
       await negBindOut(id, oracledb.BLOB);
     });
 
-    it.skip('102.30 Negative - type and value mismatch, BUFFER', async function() {
+    it('102.30 Negative - type and value mismatch, BUFFER', async function() {
       const  id = caseIndex++;
-      await negBindOut(id, oracledb.DEFAULT);
+      await negBindOut(id, oracledb.BUFFER);
     });
 
     it('102.31 Negative - type and value mismatch, CLOB', async function() {

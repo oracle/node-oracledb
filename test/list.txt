@@ -5386,6 +5386,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         255.2.9 getStatistics - noneditable properties
         255.2.10 Connection queuing after decreasing poolMax
         255.2.11 Connection queuing after increasing poolMax
+        255.2.12 change maxLifetimeSession
     255.3 poolReconfigure JS layer properties
         255.3.1 change queueMax
         255.3.2 change queueTimeout
@@ -6487,3 +6488,14 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         319.7 Enqueue/Dequeue RAW Sharded Queue
         319.8 Enqueue/Dequeue JSON Sharded Queue
         319.9 Enqueue/Dequeue ADT Sharded Queue
+  320. lobMethods1.js
+    320.1 LOB content streamed from file
+        320.1.1 lob.trim() - Normal
+        320.1.2 lob.trim() - Value larger than the lob size
+        320.1.3 lob.trim() - Negative value
+        320.1.4 lob.trim() - out of bounds length
+    320.2 CLOB content written directly
+        320.2.1 lob.trim() - Normal
+        320.2.2 lob.trim() - Value larger than the lob size
+        320.2.3 lob.trim() - Negative value
+        320.2.4 lob.trim() - out of bounds length

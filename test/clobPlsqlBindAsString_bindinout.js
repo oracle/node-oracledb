@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -434,7 +434,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
       await connection.execute(proc_drop_76126);
     }); // 76.1.23
 
-    it.skip('76.1.24 named binding: maxSize smaller than string length( < 32K )', async function() {
+    it('76.1.24 named binding: maxSize smaller than string length( < 32K )', async function() {
       const sequence = insertID++;
       const specialStr = "76.1.24";
       const len = 300;
@@ -445,7 +445,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
       };
       await assert.rejects(
         async () => await connection.execute(sqlRun, bindVar),
-        /ORA-01460:/
+        /NJS-058:/
       );
     }); // 76.1.24
 
@@ -479,7 +479,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
       );
     }); // 76.1.26
 
-    it.skip('76.1.27 positional binding: maxSize smaller than string length( < 32K )', async function() {
+    it('76.1.27 positional binding: maxSize smaller than string length( < 32K )', async function() {
       const sequence = insertID++;
       const specialStr = "76.1.27";
       const len = 300;
@@ -488,7 +488,7 @@ describe('76. clobPlsqlBindAsString_bindinout.js', function() {
       const bindVar = [ sequence, { val: clobVal, dir: oracledb.BIND_INOUT, type: oracledb.STRING, maxSize: len - 1 } ];
       await assert.rejects(
         async () => await connection.execute(sql, bindVar),
-        /ORA-01460:/
+        /NJS-058:/
       );
     }); // 76.1.27
 

@@ -438,6 +438,7 @@ struct njsBaton {
     uint32_t lobType;
     uint32_t lobOffset;
     uint32_t lobAmount;
+    uint32_t newLobSize;
     uint32_t timeout;
     uint32_t qos;
     uint32_t operations;

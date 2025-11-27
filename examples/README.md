@@ -103,6 +103,7 @@ File Name                                                 | Description
 [`lobinserttemp.js`](lobinserttemp.js)                    | Writes data to a Temporary CLOB and then inserts it into the database
 [`lobplsqltemp.js`](lobplsqltemp.js)                      | Streams data into a Temporary CLOB and then passes it to PL/SQL
 [`lobselect.js`](lobselect.js)                            | Shows basic, non-streaming CLOB and BLOB queries
+[`lobselect2.js`](lobselect2.js)                          | Shows basic, non-streaming CLOB and BLOB operations
 [`lobstream1.js`](lobstream1.js)                          | Shows how to stream LOBs to files
 [`lobstream2.js`](lobstream2.js)                          | Shows using Stream data events to fetch a CLOB
 [`lowercasecolumns.js`](lowercasecolumns.js)              | Shows how a type handler can convert column names to lower case

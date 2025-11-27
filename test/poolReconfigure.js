@@ -805,7 +805,7 @@ describe('255. poolReconfigure.js', function() {
       }
       await assert.rejects(
         async () => await testsUtil.getPoolConnection(pool),
-        /NJS-040/
+        /NJS-040:/
       );
       // NJS-040: connection request timeout. Request exceeded queueTimeout of 500
 
@@ -987,6 +987,16 @@ describe('255. poolReconfigure.js', function() {
         await conns[conIndex].execute(`select user from dual`);
         await conns[conIndex].close();
       }
+    });
+
+    it('255.2.12 change maxLifetimeSession', async function() {
+      const config = {
+        maxLifetimeSession: 2
+      };
+
+      await pool.reconfigure(config);
+      assert.strictEqual(pool.maxLifetimeSession, 2);
+      checkOriginalPoolConfig(pool);
     });
   });
 

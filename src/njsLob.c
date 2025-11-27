@@ -43,8 +43,9 @@ NJS_NAPI_METHOD_DECL_SYNC(njsLob_getPieceSize);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_getType);
 NJS_NAPI_METHOD_DECL_ASYNC(njsLob_read);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_setPieceSize);
-NJS_NAPI_METHOD_DECL_ASYNC(njsLob_write);
 NJS_NAPI_METHOD_DECL_SYNC(njsLob_setDirFileName);
+NJS_NAPI_METHOD_DECL_ASYNC(njsLob_trim);
+NJS_NAPI_METHOD_DECL_ASYNC(njsLob_write);
 
 // asynchronous methods
 static NJS_ASYNC_METHOD(njsLob_closeAsync);
@@ -52,6 +53,7 @@ static NJS_ASYNC_METHOD(njsLob_getDataAsync);
 static NJS_ASYNC_METHOD(njsLob_getFileExistsAsync);
 static NJS_ASYNC_METHOD(njsLob_readAsync);
 static NJS_ASYNC_METHOD(njsLob_writeAsync);
+static NJS_ASYNC_METHOD(njsLob_trimAsync);
 
 // post asynchronous methods
 static NJS_ASYNC_POST_METHOD(njsLob_getDataPostAsync);
@@ -81,6 +83,7 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     {  "setDirFileName", NULL, njsLob_setDirFileName, NULL, NULL, NULL,
             napi_default, NULL},
+    { "trim", NULL, njsLob_trim, NULL, NULL, NULL, napi_default, NULL },
     { "write", NULL, njsLob_write, NULL, NULL, NULL, napi_default, NULL },
     { NULL, NULL, NULL, NULL, NULL, NULL, napi_default, NULL }
 };
@@ -588,6 +591,40 @@ static bool njsLob_writeAsync(njsBaton *baton)
     // set the lob length
     lob->length = NJS_MAX_NUM(lob->length,
             baton->lobOffset - 1 + baton->bufferSize);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_trim()
+//   Trim the LOB data down to the new size.
+//
+// PARAMETERS
+//   - newSize
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_trim, 1, NULL)
+{
+    NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[0],
+            &baton->newLobSize))
+    return njsBaton_queueWork(baton, env, "Trim", njsLob_trimAsync, NULL,
+            returnValue);
+}
+
+
+//-----------------------------------------------------------------------------
+// njsLob_trimAsync()
+//   Worker function for njsLob_trim().
+//-----------------------------------------------------------------------------
+static bool njsLob_trimAsync(njsBaton *baton)
+{
+    njsLob *lob = (njsLob*) baton->callingInstance;
+
+    if (dpiLob_trim(lob->handle, baton->newLobSize) < 0)
+        return njsBaton_setErrorDPI(baton);
+
+    // set the lob length
+    lob->length = baton->newLobSize;
 
     return true;
 }

@@ -19,6 +19,8 @@ node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0..
 Common Changes
 ++++++++++++++
 
+#) Added :meth:`lob.trim()` method to the :ref:`LOB object <lobclass>`.
+
 #)  Fixed bug which did not update the :attr:`lob.length` property correctly
     after a write operation was performed on the :ref:`LOB object <lobclass>`.
 

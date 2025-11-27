@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -524,7 +524,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       await executeSQL(proc_drop_79125);
     }); // 79.1.23
 
-    it.skip('79.1.24 named binding: maxSize smaller than buffer size ( < 32K )', async function() {
+    it('79.1.24 named binding: maxSize smaller than buffer size ( < 32K )', async function() {
       const sequence = insertID++;
       const size = 5000;
       const specialStr = "79.1.24";
@@ -541,8 +541,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
             sqlRun,
             bindVar);
         },
-        // ORA-01460: unimplemented or unreasonable conversion requested
-        /ORA-01460:/
+        /NJS-058:/
+        // NJS-058: maxSize of 4999 is too small for value of length 5000 in row 0
       );
     }); // 79.1.24
 
@@ -588,7 +588,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       );
     }); // 79.1.26
 
-    it.skip('79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )', async function() {
+    it('79.1.27 positional binding: maxSize smaller than buffer size ( < 32K )', async function() {
       const sequence = insertID++;
       const size = 500;
       const specialStr = "79.1.27";
@@ -602,8 +602,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
             "begin nodb_blob_in_out_791(:1, :2); end;",
             bindVar);
         },
-        // ORA-01460: unimplemented or unreasonable conversion requested
-        /ORA-01460:/
+        // NJS-058: maxSize of 4999 is too small for value of length 5000 in row 0
+        /NJS-058:/
       );
     }); // 79.1.27
 

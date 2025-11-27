@@ -46,6 +46,8 @@ Given the table:
 
     CREATE TABLE mylobs (id NUMBER, c CLOB, b BLOB);
 
+.. _insertlobexample:
+
 an ``INSERT`` example is:
 
 .. code-block:: javascript
@@ -114,7 +116,8 @@ Node.js or node-oracledb, it will need to be streamed to a
 :ref:`Lob <lobclass>`, as discussed in :ref:`Streaming
 Lobs <streamsandlobs>`.
 
-See :ref:`fetchinglob` for information on how to fetch CLOBs, BLOBs, and NCLOBs.
+See :ref:`fetchinglob` for information on how to fetch CLOBs, BLOBs, and
+NCLOBs.
 
 .. _insertbfile:
 
@@ -292,6 +295,58 @@ BLOB columns in individual queries can be fetched as buffers using
         const blob = result.rows[0][0];
         console.log(blob.toString());  // assuming printable characters
     }
+
+Various operations can be performed on a queried LOB which are detailed below.
+Consider the example.txt file whose contents were inserted into the CLOB
+column in this :ref:`example <insertlobexample>` contains the text - *This is
+an example text*, then you can use the following LOB methods.
+
+The :meth:`lob.getData()` can be used to return a portion or all of the data
+of a LOB. To get all of the CLOB data, use:
+
+.. code-block:: javascript
+
+    const clob = result.rows[0][0];
+    const clobData = await clob.getData();
+    console.log('The CLOB data is: ');
+    console.log(clobData);
+
+This prints::
+
+    The CLOB data is:
+    This is an example text
+
+Using the :attr:`lob.length` property, you can find the length of a
+queried LOB in characters (for CLOBs and NCLOBs) or bytes (for BLOBs).
+To check the length of the CLOB, use:
+
+.. code-block:: javascript
+
+    console.log('The CLOB length is', clob.length);
+
+This prints::
+
+    The CLOB length is 23
+
+The :meth:`lob.trim()` method can be used to trim the LOB to a new size. To
+trim the size of the CLOB to 4, use:
+
+.. code-block:: javascript
+
+    await clob.trim(4);
+    console.log('The trimmed CLOB is: ');
+    console.log(await clob.getData());
+    console.log('The trimmed CLOB length is', clob.length);
+
+This prints::
+
+    The trimmed CLOB is:
+    This
+
+    The trimmed CLOB length is 4
+
+See `lobselect2.js <https://github.com/oracle/node-oracledb/tree/main/examples/
+lobselect2.js>`__ for a runnable example.
 
 Getting LOBs as String or Buffer from PL/SQL
 ++++++++++++++++++++++++++++++++++++++++++++

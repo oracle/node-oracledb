@@ -353,3 +353,58 @@ Lob Methods
     .. versionchanged:: 6.9
 
         Support for this method was added in node-oracledb Thick mode.
+
+.. method:: lob.trim()
+
+    .. versionadded:: 7.0
+
+    **Promise**::
+
+        promise = trim(Number newSize);
+
+    Trims the non-BFILE LOB to the new size specified.
+
+    The parameters of ``lob.trim()`` are:
+
+    .. list-table-with-summary:: lob.trim() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``newSize``
+          - Number
+          - The size to which the LOB is to be trimmed.
+
+            Due to Node.js type limitations, the ``newSize`` value should be
+            set to less than 2 ^ 32. Larger values will wrap and provide
+            inaccurate results.
+
+            The default value is *0*.
+
+            If this parameter is not specified, then the LOB is trimmed to size 0 which is an empty LOB.
+
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        trim(function(Error error){});
+
+    The parameters of the callback function ``function(Error error)`` are:
+
+    .. list-table-with-summary::
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 15 30
+        :summary: The first column displays the callback function parameter.
+         The second column displays the description of the parameter.
+
+        * - Callback Function Parameter
+          - Description
+        * - Error ``error``
+          - If ``trim()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
