@@ -31,7 +31,7 @@ Autonomous Databases optionally. The wallet location can also be provided as a p
 - `NODE_ORACLEDB_CLIENT_LIB_DIR` provides an optional path for the Oracle Client libraries to be used on Windows and macOS platforms, when using Thick mode in node-oracledb.
 
 Review the examples and then run them individually.  For example, to see what
-  the file `example.js` does, navigate to the ``examples`` directory and use:
+  the file `example.js` does, navigate to the `examples` directory and use:
 
   ```
   node example.js
