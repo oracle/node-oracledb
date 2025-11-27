@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   308. bfileTypeTest.js
+ *   400. bfileTypeTest.js
  *
  * DESCRIPTION
  *   Test cases for BFILE type support.
@@ -40,7 +40,7 @@ const assert    = require('assert');
 const dbConfig  = require('../../dbconfig.js');
 const testsUtil = require('../../testsUtil.js');
 
-describe('308. bfileTestType.js', function() {
+describe('400. bfileTestType.js', function() {
   let conn, dbaConn;
   const bFileDir = process.env.BFILEDIR;
   let mkDirCmd, rmDirCmd;
@@ -214,25 +214,25 @@ describe('308. bfileTestType.js', function() {
     await dbaConn.close();
   });
 
-  it('308.1 metadata with BFILE column type', async function() {
+  it('400.1 metadata with BFILE column type', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE
     `);
     assert.equal(result.metaData[0].dbType, oracledb.DB_TYPE_BFILE);
     assert.equal(result.metaData[0].fetchType, oracledb.DB_TYPE_BFILE);
     assert.equal(result.metaData[0].name, "BFILECOL");
-  }); // 308.1
+  }); // 400.1
 
-  it('308.2 SELECT query with BFILE type', async function() {
+  it('400.2 SELECT query with BFILE type', async function() {
     const result = await conn.execute(`
           SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
     const lob = result.rows[0][0];
     const dirFile = lob.getDirFileName();
     assert.strictEqual(dirFile.dirName, dirAlias);
     assert.strictEqual(dirFile.fileName, "A.JPG");
-  }); // 308.2
+  }); // 400.2
 
-  it('308.3 SELECT using BFILENAME from dual', async function() {
+  it('400.3 SELECT using BFILENAME from dual', async function() {
     const fileName = 'A.JPG';
     const oldOutFormat = oracledb.outFormat;
 
@@ -245,19 +245,19 @@ describe('308. bfileTestType.js', function() {
     assert.strictEqual(dirFile.dirName, bFileDir);
     assert.strictEqual(dirFile.fileName, fileName);
     oracledb.outFormat = oldOutFormat;
-  }); // 308.3
+  }); // 400.3
 
-  it('308.4 INSERT using BFILENAME', async function() {
+  it('400.4 INSERT using BFILENAME', async function() {
     const dirName = "NONEXISTDIR";
     const fileName = "B.JPG";
 
     const sql = `INSERT INTO TBL_BFILE (ID, NAME, BFILECOL) VALUES
                 (:ID, :NAME, BFILENAME(:DIRNAME, :FILENAME))`;
-    await conn.execute (sql, [105, "TC308.5", dirName, fileName]);
+    await conn.execute (sql, [105, "TC400.5", dirName, fileName]);
     await conn.commit();
-  }); // 308.4
+  }); // 400.4
 
-  it('308.5 UPDATE using BFILENAME', async function() {
+  it('400.5 UPDATE using BFILENAME', async function() {
     const dirName = "NONEXISTDIR2";
     const fileName = "C.JPG";
     const sql = `UPDATE TBL_BFILE
@@ -266,10 +266,10 @@ describe('308. bfileTestType.js', function() {
       WHERE ID = :ID`;
     await conn.execute (sql, [dirName, fileName, 105]);
     await conn.commit();
-  }); // 308.5
+  }); // 400.5
 
-  it('308.6 OUT BIND WITH BFILE type', async function() {
-    const fileName = '308.6.JPG';
+  it('400.6 OUT BIND WITH BFILE type', async function() {
+    const fileName = '400.6.JPG';
     const sqlProc = `
         CREATE OR REPLACE PROCEDURE NODB_BFILEPROC(BFILEVAL OUT BFILE) AS
         BEGIN
@@ -286,18 +286,18 @@ describe('308. bfileTestType.js', function() {
     const dirFile = lob.getDirFileName();
     assert.equal(dirFile.dirName, dirAlias);
     assert.equal(dirFile.fileName, fileName);
-  }); // 308.6
+  }); // 400.6
 
-  it('308.7 fileExists on existing file', async function() {
+  it('400.7 fileExists on existing file', async function() {
     const result = await conn.execute(`
           SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
 
     const lob = result.rows[0][0];
     const exists = await lob.fileExists();
     assert.equal(exists, true);
-  }); // 308.7
+  }); // 400.7
 
-  it('308.8 Check BFILE existence in a loop', async function() {
+  it('400.8 Check BFILE existence in a loop', async function() {
     const result = await conn.execute(`
           SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
     const lob = result.rows[0][0];
@@ -306,9 +306,9 @@ describe('308. bfileTestType.js', function() {
       const exists = await lob.fileExists();
       assert.equal(exists, true);
     }
-  }); // 308.8
+  }); // 400.8
 
-  it('308.9 SELECT query with BFILE type and INSERT', async function() {
+  it('400.9 SELECT query with BFILE type and INSERT', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
     const lob = result.rows[0][0];
@@ -323,9 +323,9 @@ describe('308. bfileTestType.js', function() {
       type: oracledb.DB_TYPE_BFILE}});
     await conn.commit();
     assert.equal(result2.rowsAffected, 1);
-  }); // 308.9
+  }); // 400.9
 
-  it('308.10 setDirFileName()', async function() {
+  it('400.10 setDirFileName()', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
     const lob = result.rows[0][0];
@@ -338,9 +338,9 @@ describe('308. bfileTestType.js', function() {
     const newDirObj = lob.getDirFileName();
     assert.strictEqual(newDirObj.dirName, dirName);
     assert.strictEqual(newDirObj.fileName, fileName);
-  }); // 308.10
+  }); // 400.10
 
-  it('308.11 throws error for chunkSize', async function() {
+  it('400.11 throws error for chunkSize', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
     const lob = result.rows[0][0];
@@ -348,9 +348,9 @@ describe('308. bfileTestType.js', function() {
       () => lob.chunkSize,
       /NJS-155:/  // NJS-155: operation is not supported on BFILE LOBs
     );
-  }); // 308.11
+  }); // 400.11
 
-  it('308.12 accessing non-existent BFILE', async function() {
+  it('400.12 accessing non-existent BFILE', async function() {
     const result = await conn.execute(`
         SELECT BFILENAME(:dirName, :fileName) FROM TBL_BFILE`,
     { dirName: 'NON_EXISTENT_DIR', fileName: 'NON_EXISTENT_FILE.JPG' }
@@ -361,9 +361,9 @@ describe('308. bfileTestType.js', function() {
       async () => await lob.fileExists(),
       /ORA-22285:/ //ORA-22285: non-existent directory or file for FILEEXISTS operation
     );
-  }); // 308.12
+  }); // 400.12
 
-  it('308.13 reading BFILE content', async function() {
+  it('400.13 reading BFILE content', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]
     );
@@ -379,9 +379,9 @@ describe('308. bfileTestType.js', function() {
       assert.equal(content, 'abcdefghijklmnopqrstuvwxyz zyxwvutsrqponmlkjihgfedcba\r\n');
     else
       assert.equal(content, 'abcdefghijklmnopqrstuvwxyz zyxwvutsrqponmlkjihgfedcba\n');
-  }); // 308.13
+  }); // 400.13
 
-  it('308.14 updating BFILE with some other directory', async function() {
+  it('400.14 updating BFILE with some other directory', async function() {
     const dirName = "OTHER_DIR";
     const fileName = "OTHER_FILE.JPG";
     let result = await conn.execute(`
@@ -403,9 +403,9 @@ describe('308. bfileTestType.js', function() {
     dirFile = lob.getDirFileName();
     assert.strictEqual(dirFile.dirName, "OTHER_DIR");
     assert.strictEqual(dirFile.fileName, "OTHER_FILE.JPG");
-  }); // 308.14
+  }); // 400.14
 
-  it('308.15 deleting BFILE entry', async function() {
+  it('400.15 deleting BFILE entry', async function() {
     await conn.execute(`
         DELETE FROM TBL_BFILE WHERE ID = :ID`, [101]
     );
@@ -414,9 +414,9 @@ describe('308. bfileTestType.js', function() {
         SELECT COUNT(*) FROM TBL_BFILE WHERE ID = :ID`, [101]
     );
     assert.equal(result.rows[0][0], 0);
-  }); // 308.15
+  }); // 400.15
 
-  it('308.16 test BFILE methods on non-BFILE LOBs', async function() {
+  it('400.16 test BFILE methods on non-BFILE LOBs', async function() {
     const lobTypes = [
       oracledb.BLOB,
       oracledb.CLOB,
@@ -443,16 +443,16 @@ describe('308. bfileTestType.js', function() {
         /NJS-156/ // NJS-156: operation is only supported on BFILE LOBs
       );
     }
-  }); // 308.16
+  }); // 400.16
 
-  it('308.17 Insert BFILE with invalid directory', async function() {
+  it('400.17 Insert BFILE with invalid directory', async function() {
     const dirName = "INVALID_DIR";
     const fileName = "B.JPG";
 
     const sql = `INSERT INTO TBL_BFILE (ID, NAME, BFILECOL) VALUES
                 (:ID, :NAME, BFILENAME(:DIRNAME, :FILENAME))`;
 
-    await conn.execute (sql, [106, "TC308.16", dirName, fileName]);
+    await conn.execute (sql, [106, "TC400.16", dirName, fileName]);
     const result = await conn.execute(`
       SELECT BFILENAME(:dirName, :fileName) FROM TBL_BFILE`,
     { dirName: dirName, fileName: fileName }
@@ -463,9 +463,9 @@ describe('308. bfileTestType.js', function() {
       async () => await lob.fileExists(),
       /ORA-22285:/ //ORA-22285: non-existent directory or file for FILEEXISTS operation
     );
-  }); // 308.17
+  }); // 400.17
 
-  it('308.18 Test BFILE deletion with explicit commit', async function() {
+  it('400.18 Test BFILE deletion with explicit commit', async function() {
     // Insert a new row with BFILE
     await conn.execute(`
         INSERT INTO TBL_BFILE (ID, NAME, BFILECOL) VALUES
@@ -483,9 +483,9 @@ describe('308. bfileTestType.js', function() {
     const result = await conn.execute(`
         SELECT COUNT(*) FROM TBL_BFILE WHERE ID = :ID`, [107]);
     assert.equal(result.rows[0][0], 0);
-  });  // 308.18
+  });  // 400.18
 
-  it('308.19 simulate file permission errors from the other user', async function() {
+  it('400.19 simulate file permission errors from the other user', async function() {
     if (dbConfig.test.drcp) this.skip();
     const user = 'scott2';
     const pwd = testsUtil.generateRandomPassword();
@@ -527,9 +527,9 @@ describe('308. bfileTestType.js', function() {
     await conn2.execute(testsUtil.sqlDropTable(tableName));
     await conn2.close();
     await dbaConn.execute(`DROP USER ${user} CASCADE`);
-  }); // 308.19
+  }); // 400.19
 
-  it('308.20 verify BFILE is empty after deletion and insertion', async function() {
+  it('400.20 verify BFILE is empty after deletion and insertion', async function() {
     const fileName = 'E.JPG';
 
     await conn.execute(`DELETE FROM TBL_BFILE WHERE ID = :ID`, [105]);
@@ -547,9 +547,9 @@ describe('308. bfileTestType.js', function() {
     const dirFile = lob.getDirFileName();
     assert.strictEqual(dirFile.dirName, dirAlias);
     assert.strictEqual(dirFile.fileName, fileName);
-  }); // 308.20
+  }); // 400.20
 
-  it('308.21 BFILE Metadata Check for Null BFILE', async function() {
+  it('400.21 BFILE Metadata Check for Null BFILE', async function() {
     await conn.execute(`
       INSERT INTO TBL_BFILE (ID, NAME, BFILECOL) VALUES (:ID, :NAME, NULL)`,
     [109, "Null BFILE"]
@@ -560,9 +560,9 @@ describe('308. bfileTestType.js', function() {
       SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [109]);
     const lob = result.rows[0][0];
     assert.strictEqual(lob, null);
-  }); // 308.21
+  }); // 400.21
 
-  it('308.22 Test BFILE with temporary table', async function() {
+  it('400.22 Test BFILE with temporary table', async function() {
     const tempTableName = 'TEMP_BFILE_TABLE';
     // Create a temporary table with a BFILE column
     await conn.execute(`
@@ -659,9 +659,9 @@ describe('308. bfileTestType.js', function() {
       // Drop the temporary table
       await conn.execute(`DROP TABLE ${tempTableName} PURGE`);
     }
-  }); // 308.22
+  }); // 400.22
 
-  it('308.23 Negative:setDirFileName (empty dirName)', async function() {
+  it('400.23 Negative:setDirFileName (empty dirName)', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
     const lob = result.rows[0][0];
@@ -675,9 +675,9 @@ describe('308. bfileTestType.js', function() {
     },
     /NJS-004/
     );
-  }); // 308.23
+  }); // 400.23
 
-  it('308.24 Negative:setDirFileName (empty fileName)', async function() {
+  it('400.24 Negative:setDirFileName (empty fileName)', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
     const lob = result.rows[0][0];
@@ -691,9 +691,9 @@ describe('308. bfileTestType.js', function() {
     },
     /NJS-004/
     );
-  }); // 308.24
+  }); // 400.24
 
-  it('308.25 Negative: setDirFileName (missing dirName)', async function() {
+  it('400.25 Negative: setDirFileName (missing dirName)', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
     const lob = result.rows[0][0];
@@ -706,9 +706,9 @@ describe('308. bfileTestType.js', function() {
     },
     /NJS-005/
     );
-  }); // 308.25
+  }); // 400.25
 
-  it('308.26 Negative:setDirFileName (missing fileName)', async function() {
+  it('400.26 Negative:setDirFileName (missing fileName)', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
     const lob = result.rows[0][0];
@@ -721,9 +721,9 @@ describe('308. bfileTestType.js', function() {
     },
     /NJS-005/
     );
-  }); // 308.26
+  }); // 400.26
 
-  it('308.27 Negative:setDirFileName (fileName = null)', async function() {
+  it('400.27 Negative:setDirFileName (fileName = null)', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
     const lob = result.rows[0][0];
@@ -737,9 +737,9 @@ describe('308. bfileTestType.js', function() {
     },
     /NJS-004/
     );
-  }); // 308.27
+  }); // 400.27
 
-  it('308.28 Negative:setDirFileName (dirName = null)', async function() {
+  it('400.28 Negative:setDirFileName (dirName = null)', async function() {
     const result = await conn.execute(`
         SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [105]);
     const lob = result.rows[0][0];
@@ -753,6 +753,36 @@ describe('308. bfileTestType.js', function() {
     },
     /NJS-004/
     );
-  }); // 308.28
+  }); // 400.28
+
+  it('400.29 file open/close for non-existent BFILE', async function() {
+    // Insert a BFILE reference to a non-existent file
+    await conn.execute(`
+      INSERT INTO TBL_BFILE VALUES
+      (:ID, :NAME, BFILENAME(:BFILEDIR, :BFILENAME))`,
+    [110, "NonExistent", dirAlias, "non_existent_file.txt"]);
+    await conn.commit();
+
+    const result = await conn.execute(`
+      SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [110]);
+
+    assert(result.rows && result.rows.length > 0);
+    const bfile = result.rows[0][0];
+    assert(bfile, 'BFILE should not be null');
+
+    // Check if file exists
+    const exists = await bfile.fileExists();
+    assert.strictEqual(exists, false);
+
+    await assert.rejects(
+      async () => await bfile.getData(),
+      /ORA-22288:/ // ORA-22288: file or LOB operation FILEOPEN failed
+    );
+
+    await bfile.close();
+
+    await conn.execute(`DELETE FROM TBL_BFILE WHERE ID = :ID`, [110]);
+    await conn.commit();
+  }); // 400.29
 
 });

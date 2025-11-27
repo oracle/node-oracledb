@@ -113,4 +113,72 @@ describe('212. dbObject13.js', function() {
     }
   }); // 212.1
 
+  describe('212.2 PL/SQL Associative Array setElement', function() {
+    let conn;
+    const PKG = 'NODB_PKG_ASSOC_TEST';
+
+    before(async function() {
+      conn = await oracledb.getConnection(dbConfig);
+
+      let plsql = `
+      CREATE OR REPLACE PACKAGE ${PKG} AS
+        TYPE rec_type IS RECORD (
+          id NUMBER,
+          data VARCHAR2(100)
+        );
+        TYPE rec_array IS TABLE OF rec_type INDEX BY PLS_INTEGER;
+        
+        PROCEDURE get_sparse_array(p_out OUT rec_array);
+        PROCEDURE process_array(p_inout IN OUT rec_array);
+      END ${PKG};
+    `;
+      await conn.execute(plsql);
+
+      plsql = `
+      CREATE OR REPLACE PACKAGE BODY ${PKG} AS
+        PROCEDURE get_sparse_array(p_out OUT rec_array) AS
+        BEGIN
+          p_out(1).id := 10;
+          p_out(1).data := 'First';
+          p_out(5).id := 50;
+          p_out(5).data := 'Fifth';
+          p_out(10).id := 100;
+          p_out(10).data := 'Tenth';
+        END;
+        
+        PROCEDURE process_array(p_inout IN OUT rec_array) AS
+        BEGIN
+          NULL;
+        END;
+      END ${PKG};
+    `;
+      await conn.execute(plsql);
+    });
+
+    after(async function() {
+      const sql = `DROP PACKAGE ${PKG}`;
+      await conn.execute(sql);
+      await conn.close();
+    });
+
+    it('212.2.1 setElement on sparse associative array', async () => {
+      const result = await conn.execute(
+        `BEGIN ${PKG}.get_sparse_array(:out); END;`,
+        {
+          out: { type: `${PKG}.REC_ARRAY`, dir: oracledb.BIND_OUT }
+        }
+      );
+
+      const assocArray = result.outBinds.out;
+
+      assocArray.setElement(3, { ID: 30, DATA: 'Third' });
+      assert.strictEqual(assocArray.getElement(3).ID, 30);
+
+      assocArray.setElement(7, { ID: 70, DATA: 'Seventh' });
+      assert.strictEqual(assocArray.getElement(7).ID, 70);
+
+      assocArray.setElement(5, { ID: 55, DATA: 'Updated Fifth' });
+      assert.strictEqual(assocArray.getElement(5).ID, 55);
+    }); // 212.2.1
+  }); // 212.2
 });

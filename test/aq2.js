@@ -465,4 +465,107 @@ describe('218. aq2.js', function() {
     // Cleanup
     await conn.execute('DROP TYPE DIFFERENT_TYP');
   }); // 218.15
+
+  it('218.16 setPayloadObject with multiple enqueue/dequeue cycles', async function() {
+    const addrDataArray = [
+      { NAME: "Alice", ADDRESS: "123 Main St" },
+      { NAME: "Bob", ADDRESS: "456 Oak Ave" },
+      { NAME: "Charlie", ADDRESS: "789 Pine Rd" }
+    ];
+
+    // Enqueue multiple object messages
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+
+    for (const addrData of addrDataArray) {
+      const message = new queue1.payloadTypeClass(addrData);
+      await queue1.enqOne(message);
+      await conn.commit();
+    }
+
+    // Dequeue all messages
+    const queue2 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+
+    for (let i = 0; i < addrDataArray.length; i++) {
+      const msg = await queue2.deqOne();
+      await conn.commit();
+      assert(msg);
+      assert.strictEqual(msg.payload.NAME, addrDataArray[i].NAME);
+      assert.strictEqual(msg.payload.ADDRESS, addrDataArray[i].ADDRESS);
+    }
+  }); // 218.16
+
+  it('218.17 setPayloadObject through enqMany', async function() {
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+
+    const addresses = [
+      { NAME: "User1", ADDRESS: "Address1" },
+      { NAME: "User2", ADDRESS: "Address2" },
+      { NAME: "User3", ADDRESS: "Address3" }
+    ];
+
+    const msgArray = [];
+    for (let i = 0; i < addresses.length; i++) {
+      msgArray[i] = new queue1.payloadTypeClass(addresses[i]);
+    }
+    await queue1.enqMany(msgArray);
+
+    // Dequeue
+    const queue2 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+    const messages = await queue2.deqMany(5);
+
+    assert.strictEqual(messages.length, addresses.length);
+    for (let i = 0; i < messages.length; i++) {
+      assert(messages[i].payload.NAME);
+      assert(messages[i].payload.ADDRESS);
+    }
+  }); // 218.17
+
+  it('218.18 object payload with all message properties', async function() {
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+
+    const addrData = {
+      NAME: "TestUser",
+      ADDRESS: "Test Address 123"
+    };
+
+    const message = new queue1.payloadTypeClass(addrData);
+
+    // Enqueue with additional properties
+    await queue1.enqOne({
+      payload: message,
+      correlation: "obj_corr_1",
+      priority: 7,
+      expiration: 180
+    });
+    await conn.commit();
+
+    // Dequeue
+    const queue2 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+    const msg = await queue2.deqOne();
+    await conn.commit();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.NAME, addrData.NAME);
+    assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
+    assert.strictEqual(msg.correlation, "obj_corr_1");
+    assert.strictEqual(msg.priority, 7);
+  }); // 218.18
 });

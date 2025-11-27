@@ -562,4 +562,181 @@ describe('283. aq7.js', function() {
     const msg = await queue.deqOne();
     assert.deepStrictEqual(msg.payload, largeData);
   }); // 283.16
+
+  it('283.17 setPayloadJson with complex nested structures', async function() {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    const complexData = {
+      user: {
+        id: 1001,
+        name: "Test User",
+        preferences: {
+          theme: "dark",
+          notifications: true,
+          settings: {
+            email: "test@example.com",
+            phone: "123-456-7890"
+          }
+        }
+      },
+      metadata: {
+        created: new Date(2024, 0, 1),
+        tags: ["important", "test", "demo"]
+      }
+    };
+
+    await queue.enqOne({
+      payload: complexData,
+      correlation: "json_complex"
+    });
+    await conn.commit();
+
+    const queue2 = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+    const msg = await queue2.deqOne();
+    await conn.commit();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.user.id, 1001);
+    assert.strictEqual(msg.payload.user.name, "Test User");
+    assert.strictEqual(msg.payload.user.preferences.theme, "dark");
+    assert.deepStrictEqual(msg.payload.metadata.tags, ["important", "test", "demo"]);
+  }); // 283.17
+
+  it('283.18 setPayloadJson with array of objects', async function() {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    const arrayData = {
+      employees: [
+        { id: 1, name: "Emp1", dept: "IT" },
+        { id: 2, name: "Emp2", dept: "HR" },
+        { id: 3, name: "Emp3", dept: "Finance" }
+      ]
+    };
+
+    await queue.enqOne({
+      payload: arrayData
+    });
+    await conn.commit();
+
+    const queue2 = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+    const msg = await queue2.deqOne();
+    await conn.commit();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.employees.length, 3);
+    assert.strictEqual(msg.payload.employees[0].name, "Emp1");
+    assert.strictEqual(msg.payload.employees[2].dept, "Finance");
+  }); // 283.18
+
+  it('283.19 setPayloadJson through enqMany', async function() {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    const jsonMessages = [
+      { payload: { type: "order", orderId: 1001, amount: 150.50 } },
+      { payload: { type: "order", orderId: 1002, amount: 275.75 } },
+      { payload: { type: "order", orderId: 1003, amount: 99.99 } }
+    ];
+
+    await queue.enqMany(jsonMessages);
+    await conn.commit();
+
+    const queue2 = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+    Object.assign(queue2.deqOptions, {
+      navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+      wait: oracledb.AQ_DEQ_NO_WAIT
+    });
+
+    const msgs = await queue2.deqMany(5);
+    assert.strictEqual(msgs.length, 3);
+
+    for (let i = 0; i < msgs.length; i++) {
+      assert.strictEqual(msgs[i].payload.type, "order");
+      assert(msgs[i].payload.orderId > 1000);
+      assert(msgs[i].payload.amount > 0);
+    }
+  }); // 283.19
+
+  it('283.20 JSON payload with all message properties', async function() {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    const jsonData = {
+      transaction: {
+        id: "TXN_12345",
+        amount: 999.99,
+        status: "pending"
+      }
+    };
+
+    await queue.enqOne({
+      payload: jsonData,
+      correlation: "json_txn_corr",
+      priority: 8,
+      delay: 0,
+      expiration: 240
+    });
+    await conn.commit();
+
+    const queue2 = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+    const msg = await queue2.deqOne();
+    await conn.commit();
+
+    assert(msg);
+    assert.strictEqual(msg.payload.transaction.id, "TXN_12345");
+    assert.strictEqual(msg.payload.transaction.amount, 999.99);
+    assert.strictEqual(msg.correlation, "json_txn_corr");
+    assert.strictEqual(msg.priority, 8);
+  }); // 283.20
+
+  it('283.21 multiple JSON enqueue/dequeue cycles', async function() {
+    const queue = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+
+    // Cycle through different JSON structures
+    const messages = [
+      { payload: { simple: "string value" } },
+      { payload: { number: 12345 } },
+      { payload: { boolean: true } },
+      { payload: { array: [1, 2, 3, 4, 5] } },
+      { payload: { object: { nested: { deep: "value" } } } }
+    ];
+
+    for (const msg of messages) {
+      await queue.enqOne(msg);
+    }
+    await conn.commit();
+
+    const queue2 = await conn.getQueue(objQueueName,
+      { payloadType: oracledb.DB_TYPE_JSON }
+    );
+    Object.assign(queue2.deqOptions, {
+      navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+      wait: oracledb.AQ_DEQ_NO_WAIT
+    });
+
+    const deqMsgs = await queue2.deqMany(5);
+    assert.strictEqual(deqMsgs.length, 5);
+
+    assert.strictEqual(deqMsgs[0].payload.simple, "string value");
+    assert.strictEqual(deqMsgs[1].payload.number, 12345);
+    assert.strictEqual(deqMsgs[2].payload.boolean, true);
+    assert.deepStrictEqual(deqMsgs[3].payload.array, [1, 2, 3, 4, 5]);
+    assert.strictEqual(deqMsgs[4].payload.object.nested.deep, "value");
+  }); // 283.21
 });

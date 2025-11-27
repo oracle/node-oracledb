@@ -4778,6 +4778,8 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
 
 212. dbObject13.js
     212.1 examples/plsqlvarrayrecord.js
+    212.2 PL/SQL Associative Array setElement
+        212.2.1 setElement on sparse associative array
 
 213. dbObject14.js
     213.1 examples/selectvarray.js
@@ -4839,6 +4841,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     218.13 Enqueue and Dequeue with large payloads
     218.14 Negative - Dequeue from an unstarted queue
     218.15 enqueue wrong BaseDbObject type
+    218.16 setPayloadObject with multiple enqueue/dequeue cycles
+    218.17 setPayloadObject through enqMany
+    218.18 object payload with all message properties
 
 219. aq3.js
     219.1 The read-only property "name" of AqQueue Class
@@ -4855,6 +4860,19 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     219.12 Get priority attribute in deqOne
     219.13 Get state attribute in deqOne
     219.14 Verify state change on expiration
+    219.15 deliveryMode property in enqOptions and deqOptions
+    219.16 multiple deliveryMode values
+    219.17 condition property in deqOptions
+    219.18 navigation property values
+    219.19 mode property in deqOptions
+    219.20 wait property with different timeout values
+    219.21 msgId property after enqueue and in dequeue
+    219.22 originalMsgId property
+    219.23 enqTxnId property
+    219.24 getting and setting all deqOptions properties
+    219.25 getting and setting all enqOptions properties
+    219.26 message properties after enqMany
+    219.27 correlation with special characters
 
 220. examineOwnedProperties.js
     220.1 Only examine "owned" properties on objects
@@ -5542,6 +5560,9 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     267.17 enqueue and dequeue with recipient information processing
     267.18 process recipients with enqMany and varied recipient lists
     267.19 dequeue with recipient metadata processing
+    267.20 setRecipients with single recipient
+    267.21 setRecipients with multiple recipients in enqOne
+    267.22 setRecipients with enqMany
 
 268. procAndFuncs.js
     268.1 calling stored procedures
@@ -5778,6 +5799,11 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     283.14 concurrent enqueue/dequeue operations
     283.15 JSON with special characters and Unicode
     283.16 large JSON payload size limits
+    283.17 setPayloadJson with complex nested structures
+    283.18 setPayloadJson with array of objects
+    283.19 setPayloadJson through enqMany
+    283.20 JSON payload with all message properties
+    283.21 multiple JSON enqueue/dequeue cycles
 
 284. errorUrl.js
     284.1 checks for error URL in ORA error message

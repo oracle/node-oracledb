@@ -422,4 +422,337 @@ describe('219. aq3.js', function() {
     assert.strictEqual(msg, undefined);
     assert.strictEqual(queue2.deqOptions.wait, 1);
   }); // 219.14
+
+  it('219.15 deliveryMode property in enqOptions and deqOptions', async function() {
+    /* Enqueue with BUFFERED delivery mode */
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue1.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+
+    const messageString = 'Message with buffered delivery mode';
+    await queue1.enqOne(messageString);
+
+    // Verify enqOptions deliveryMode
+    assert.strictEqual(queue1.enqOptions.deliveryMode, oracledb.AQ_MSG_DELIV_MODE_BUFFERED);
+
+    /* Dequeue with matching delivery mode */
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+
+    const msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(msg.payload.toString(), messageString);
+    assert.strictEqual(msg.deliveryMode, oracledb.AQ_MSG_DELIV_MODE_BUFFERED);
+  }); // 219.15
+
+  it('219.16 multiple deliveryMode values', async function() {
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    // PERSISTENT mode
+    queue1.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT;
+    await queue1.enqOne('Persistent message');
+    assert.strictEqual(queue1.enqOptions.deliveryMode, oracledb.AQ_MSG_DELIV_MODE_PERSISTENT);
+
+    // PERSISTENT_OR_BUFFERED mode
+    queue1.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED;
+    await queue1.enqOne('Persistent or buffered message');
+    assert.strictEqual(queue1.enqOptions.deliveryMode, oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED);
+
+    // Dequeue messages
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED;
+
+    const msg1 = await queue2.deqOne();
+    assert(msg1);
+    const msg2 = await queue2.deqOne();
+    assert(msg2);
+  }); // 219.16
+
+  it('219.17 condition property in deqOptions', async function() {
+    // Immediate visibility with enqMany is not supported in Thin mode
+    if (oracledb.thin) this.skip();
+
+    /* Enqueue messages with different correlations */
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messages = [
+      { payload: "Message 1", correlation: "TYPE_A" },
+      { payload: "Message 2", correlation: "TYPE_B" },
+      { payload: "Message 3", correlation: "TYPE_A" }
+    ];
+
+    await queue1.enqMany(messages);
+
+    /* Dequeue with condition */
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.condition = "tab.user_data IS NOT NULL";
+
+    const msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(queue2.deqOptions.condition, "tab.user_data IS NOT NULL");
+  }); // 219.17
+
+  it('219.18 navigation property values', async function() {
+    // Immediate visibility with enqMany is not supported in Thin mode
+    if (oracledb.thin) this.skip();
+
+    // clear any existing messages
+    const clearQueue = await conn.getQueue(rawQueueName);
+    clearQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    clearQueue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+    let tempMsg;
+    do {
+      tempMsg = await clearQueue.deqOne();
+    } while (tempMsg);
+
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    // Enqueue multiple messages
+    await queue1.enqMany(["Msg1", "Msg2", "Msg3"]);
+
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    // FIRST_MSG navigation
+    queue2.deqOptions.navigation = oracledb.AQ_DEQ_NAV_FIRST_MSG;
+    let msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(msg.payload.toString(), "Msg1");
+    assert.strictEqual(queue2.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
+
+    // NEXT_MSG navigation (default) - continues from current position
+    queue2.deqOptions.navigation = oracledb.AQ_DEQ_NAV_NEXT_MSG;
+    msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(msg.payload.toString(), "Msg2");
+    assert.strictEqual(queue2.deqOptions.navigation, oracledb.AQ_DEQ_NAV_NEXT_MSG);
+  }); // 219.18
+
+  it('219.19 mode property in deqOptions', async function() {
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    await queue1.enqOne("Test message for mode");
+
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    // BROWSE mode
+    queue2.deqOptions.mode = oracledb.AQ_DEQ_MODE_BROWSE;
+    let msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(queue2.deqOptions.mode, oracledb.AQ_DEQ_MODE_BROWSE);
+
+    queue2.deqOptions.mode = oracledb.AQ_DEQ_MODE_REMOVE;
+    msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(queue2.deqOptions.mode, oracledb.AQ_DEQ_MODE_REMOVE);
+  }); // 219.19
+
+  it('219.20 wait property with different timeout values', async function() {
+    const clearQueue = await conn.getQueue(rawQueueName);
+    clearQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_ON_COMMIT;
+    clearQueue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+    let tempMsg;
+    do {
+      tempMsg = await clearQueue.deqOne();
+      if (tempMsg) await conn.commit();
+    } while (tempMsg);
+
+    clearQueue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    do {
+      tempMsg = await clearQueue.deqOne();
+    } while (tempMsg);
+
+    const queue = await conn.getQueue(rawQueueName);
+    queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    // test NO_WAIT
+    queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+    let msg = await queue.deqOne();
+    assert.strictEqual(msg, undefined, "Queue should be empty after clearing");
+    assert.strictEqual(queue.deqOptions.wait, oracledb.AQ_DEQ_NO_WAIT);
+
+    // test specific timeout
+    queue.deqOptions.wait = 2;
+    const startTime = Date.now();
+    msg = await queue.deqOne();
+    const elapsed = Date.now() - startTime;
+    assert.strictEqual(msg, undefined);
+    assert(elapsed >= 2000);
+    assert.strictEqual(queue.deqOptions.wait, 2);
+  }); // 219.20
+
+  it('219.21 msgId property after enqueue and in dequeue', async function() {
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const enqMsg = await queue1.enqOne("Test msgId");
+    assert(enqMsg.msgId);
+    assert(enqMsg.msgId instanceof Buffer);
+    assert(enqMsg.msgId.length > 0);
+
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.msgId = enqMsg.msgId;
+
+    const deqMsg = await queue2.deqOne();
+    assert(deqMsg);
+    assert(deqMsg.msgId);
+    assert(deqMsg.msgId instanceof Buffer);
+    assert.deepStrictEqual(deqMsg.msgId, enqMsg.msgId);
+  }); // 219.21
+
+  it('219.22 originalMsgId property', async function() {
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const enqMsg = await queue1.enqOne("Test originalMsgId");
+    assert(enqMsg.msgId);
+    assert(enqMsg.msgId instanceof Buffer);
+
+    if (enqMsg.originalMsgId) {
+      assert(enqMsg.originalMsgId instanceof Buffer);
+    }
+
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const deqMsg = await queue2.deqOne();
+    assert(deqMsg);
+    assert(deqMsg.msgId);
+    assert(deqMsg.msgId instanceof Buffer);
+
+    if (deqMsg.originalMsgId) {
+      assert(deqMsg.originalMsgId instanceof Buffer);
+    }
+  }); // 219.22
+
+  it('219.23 enqTxnId property', async function() {
+    const queue1 = await conn.getQueue(rawQueueName);
+
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_ON_COMMIT;
+
+    await queue1.enqOne("Test enqTxnId");
+    await conn.commit();
+
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_ON_COMMIT;
+
+    const msg = await queue2.deqOne();
+    await conn.commit();
+
+    assert(msg);
+    if (msg.enqTxnId !== null && msg.enqTxnId !== undefined) {
+      assert(msg.enqTxnId instanceof Buffer);
+    }
+  }); // 219.23
+
+  it('219.24 getting and setting all deqOptions properties', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+
+    // Test all setters and getters
+    queue.deqOptions.condition = "test_condition";
+    assert.strictEqual(queue.deqOptions.condition, "test_condition");
+
+    queue.deqOptions.consumerName = "test_consumer";
+    assert.strictEqual(queue.deqOptions.consumerName, "test_consumer");
+
+    queue.deqOptions.correlation = "test_correlation";
+    assert.strictEqual(queue.deqOptions.correlation, "test_correlation");
+
+    queue.deqOptions.mode = oracledb.AQ_DEQ_MODE_BROWSE;
+    assert.strictEqual(queue.deqOptions.mode, oracledb.AQ_DEQ_MODE_BROWSE);
+
+    queue.deqOptions.navigation = oracledb.AQ_DEQ_NAV_FIRST_MSG;
+    assert.strictEqual(queue.deqOptions.navigation, oracledb.AQ_DEQ_NAV_FIRST_MSG);
+
+    queue.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    assert.strictEqual(queue.deqOptions.visibility, oracledb.AQ_VISIBILITY_IMMEDIATE);
+
+    queue.deqOptions.wait = 10;
+    assert.strictEqual(queue.deqOptions.wait, 10);
+
+    queue.deqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+
+    assert(queue.deqOptions.deliveryMode !== undefined);
+
+    const testMsgId = Buffer.from([1, 2, 3, 4]);
+    queue.deqOptions.msgId = testMsgId;
+    assert.deepStrictEqual(queue.deqOptions.msgId, testMsgId);
+  }); // 219.24
+
+  it('219.25 getting and setting all enqOptions properties', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+
+    // Test all setters and getters
+    queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    assert.strictEqual(queue.enqOptions.visibility, oracledb.AQ_VISIBILITY_IMMEDIATE);
+
+    queue.enqOptions.deliveryMode = oracledb.AQ_MSG_DELIV_MODE_BUFFERED;
+    assert.strictEqual(queue.enqOptions.deliveryMode, oracledb.AQ_MSG_DELIV_MODE_BUFFERED);
+  }); // 219.25
+
+  it('219.26 message properties after enqMany', async function() {
+    // Skipping in Thin mode due to existing server-side issue with visibility
+    if (oracledb.thin) this.skip();
+
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const messages = [
+      { payload: "Msg1", correlation: "corr1", delay: 0, expiration: 100, priority: 1 },
+      { payload: "Msg2", correlation: "corr2", delay: 0, expiration: 200, priority: 2 },
+      { payload: "Msg3", correlation: "corr3", delay: 0, expiration: 300, priority: 3 }
+    ];
+
+    const enqMsgs = await queue1.enqMany(messages);
+
+    // Verify all messages have msgId
+    for (let i = 0; i < enqMsgs.length; i++) {
+      assert(enqMsgs[i].msgId);
+      assert(enqMsgs[i].msgId instanceof Buffer);
+    }
+
+    // Dequeue and verify properties
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const deqMsgs = await queue2.deqMany(3);
+    assert.strictEqual(deqMsgs.length, 3);
+
+    for (let i = 0; i < deqMsgs.length; i++) {
+      assert(deqMsgs[i].msgId);
+      assert(deqMsgs[i].msgId instanceof Buffer);
+      // Correlation should be preserved
+      assert(deqMsgs[i].correlation);
+      assert(deqMsgs[i].priority !== undefined);
+    }
+  }); // 219.26
+
+  it('219.27 correlation with special characters', async function() {
+    const queue1 = await conn.getQueue(rawQueueName);
+    queue1.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+
+    const correlationId = "test_corr_!@#$%^&*()";
+    const message = {
+      payload: "Test special chars",
+      correlation: correlationId
+    };
+
+    await queue1.enqOne(message);
+
+    const queue2 = await conn.getQueue(rawQueueName);
+    queue2.deqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
+    queue2.deqOptions.correlation = correlationId;
+
+    const msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(msg.correlation, correlationId);
+  }); // 219.27
 });

@@ -570,4 +570,100 @@ describe('267. aq4.js', function() {
     }
     await conn.commit();
   }); // 267.19
+
+  it('267.20 setRecipients with single recipient', async function() {
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+    const message = new queue1.payloadTypeClass(addrData);
+
+    await queue1.enqOne({
+      payload: message,
+      recipients: ["single_sub"]
+    });
+    await conn.commit();
+
+    const queue2 = await conn.getQueue(
+      objQueueName,
+      { payloadType: objType }
+    );
+    Object.assign(
+      queue2.deqOptions,
+      {
+        consumerName: "single_sub",
+        navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+        wait: oracledb.AQ_DEQ_NO_WAIT
+      }
+    );
+
+    const msg = await queue2.deqOne();
+    assert(msg);
+    assert.strictEqual(msg.payload.NAME, "scott");
+    await conn.commit();
+  }); // 267.20
+
+  it('267.21 setRecipients with multiple recipients in enqOne', async function() {
+    const queue1 = await conn.getQueue(
+      objQueueName,
+      {payloadType: objType}
+    );
+    const message = new queue1.payloadTypeClass(addrData);
+
+    const recipients = ["sub_a", "sub_b", "sub_c"];
+    await queue1.enqOne({
+      payload: message,
+      recipients: recipients
+    });
+    await conn.commit();
+
+    // Each recipient should be able to dequeue the message
+    for (const recipient of recipients) {
+      const queue2 = await conn.getQueue(
+        objQueueName,
+        { payloadType: objType }
+      );
+      Object.assign(
+        queue2.deqOptions,
+        {
+          consumerName: recipient,
+          navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+          wait: oracledb.AQ_DEQ_NO_WAIT
+        }
+      );
+
+      const msg = await queue2.deqOne();
+      assert(msg);
+      assert.strictEqual(msg.payload.NAME, "scott");
+      await conn.commit();
+    }
+  }); // 267.21
+
+  it('267.22 setRecipients with enqMany', async function() {
+    const msgList = [];
+    const queue1 = await conn.getQueue(objQueueName, {payloadType: objType});
+
+    for (let i = 0; i < addrDataArr.length; i++) {
+      const msg = new queue1.payloadTypeClass(addrDataArr[i]);
+      msgList[i] = {
+        payload: msg,
+        recipients: ["sub_enqmany1", "sub_enqmany2"]
+      };
+    }
+
+    await queue1.enqMany(msgList);
+
+    // Dequeue with first recipient
+    const queue2 = await conn.getQueue(objQueueName, {payloadType: objType});
+    Object.assign(
+      queue2.deqOptions,
+      {
+        consumerName: "sub_enqmany1",
+        navigation: oracledb.AQ_DEQ_NAV_FIRST_MSG,
+        wait: oracledb.AQ_DEQ_NO_WAIT
+      }
+    );
+    const msgs = await queue2.deqMany(5);
+    assert.strictEqual(msgs.length, addrDataArr.length);
+  }); // 267.22
 });

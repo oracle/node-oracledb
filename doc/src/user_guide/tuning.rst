@@ -194,6 +194,27 @@ in ``oraaccess.xml`` or with the global ``oracledb.prefetchRow``
 attribute will affect the whole application, so it should not be the
 first tuning choice.
 
+Choosing Values for ``prefetchRows`` and ``numRows``
+----------------------------------------------------
+
+Tuning the :ref:`prefetchRows <propexecprefetchrows>` property of
+:meth:`connection.execute()` and the ``numRows`` property of
+:meth:`resultset.getRows()` can significantly improve data retrieval.
+The ``prefetchRows`` property controls the number of rows node-oracledb
+fetches internally when a query is first executed. The ``numRows`` property
+determines the number of rows fetched for each call to
+:meth:`resultset.getRows()` in one :ref:`round-trip <roundtrips>`.
+
+The best practice is to set a higher ``prefetchRows`` value and a lower
+``numRows`` value for a result set with fewer rows to minimize round-trips,
+and use a lower ``prefetchRows`` value and higher ``numRows`` value for a
+result set that returns a large number of rows to limit memory usage.
+
+When using multiple REF CURSORS with different number of rows, it is
+recommended to set the lowest ``prefetchRows`` value applicable to all result
+sets and specify the expected number of rows for each result set in the
+``numRows`` property of :meth:`resultset.getRows()`.
+
 .. _roundtrips:
 
 Database Round-trips
