@@ -127,7 +127,6 @@ describe('212. dbObject13.js', function() {
           data VARCHAR2(100)
         );
         TYPE rec_array IS TABLE OF rec_type INDEX BY PLS_INTEGER;
-        
         PROCEDURE get_sparse_array(p_out OUT rec_array);
         PROCEDURE process_array(p_inout IN OUT rec_array);
       END ${PKG};
@@ -145,7 +144,6 @@ describe('212. dbObject13.js', function() {
           p_out(10).id := 100;
           p_out(10).data := 'Tenth';
         END;
-        
         PROCEDURE process_array(p_inout IN OUT rec_array) AS
         BEGIN
           NULL;

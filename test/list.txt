@@ -6499,3 +6499,26 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
         320.2.2 lob.trim() - Value larger than the lob size
         320.2.3 lob.trim() - Negative value
         320.2.4 lob.trim() - out of bounds length
+    320.3 getData() method tests
+        320.3.1 fetch complete CLOB content
+        320.3.2 fetch CLOB content by range
+        320.3.3 validate upper limit
+    320.4 getData() method
+        320.4.1 getData() method - CLOB
+        320.4.2 getData() method - BLOB
+    320.5 Temporary LOBs
+        320.5.1 Create and use temporary CLOB
+        320.5.2 Create and use temporary BLOB
+    320.6 LOB write() method additional tests
+        320.6.1 Multiple writes to same LOB
+        320.6.2 Write with specific offset in middle
+    320.7 LOB trim() method additional tests
+        320.7.1 Trim temporary LOB
+        320.7.2 Trim to zero length
+    320.8 LOB stream operations
+        320.8.1 CLOB large text operation
+        320.8.2 BLOB large binary operation
+        320.8.3 concurrent LOB operations
+    320.9 LOB edge cases
+        320.9.1 empty LOB operations
+        320.9.2 LOB length property updates

@@ -381,8 +381,8 @@ Lob Methods
           - The size to which the LOB is to be trimmed.
 
             Due to Node.js type limitations, the ``newSize`` value should be
-            set to less than 2 ^ 32. Larger values will wrap and provide
-            inaccurate results.
+            set to less than 2 ^ 32. Using values greater than or equal to
+            2 ^ 32 will result in an error being raised.
 
             The default value is *0*.
 
