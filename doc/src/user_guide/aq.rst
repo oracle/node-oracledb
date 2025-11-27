@@ -17,11 +17,6 @@ sending and receiving of various payloads, such as RAW values, JSON, JMS, and
 objects. TxEventQ queues use a highly optimized implementation of Advanced
 Queuing. They were previously called AQ Sharded Queues.
 
-.. note::
-
-    In this release, Transactional Event Queues are only supported in
-    node-oracledb Thick mode. See :ref:`enablingthick`.
-
 The same node-oracledb APIs are used for TxEventQ and AQ classic queues and
 were introduced in node-oracledb 4.0. With earlier versions, use AQ’s PL/SQL
 interface.
@@ -52,22 +47,21 @@ classic queues as detailed below.
       - Transactional Event Queues
     * - RAW
       - Supported
-      - Supported for single and array message enqueuing and dequeuing when using Oracle Client 19c (or later) and connected to Oracle Database 19c (or later).
+      - Supported for single and array message enqueuing and dequeuing when using Oracle Database 19c (or later). For node-oracledb Thick mode, Oracle Client libraries 19c (or later) are required.
     * - Named Oracle Objects
       - Supported
-      - Supported for single and array message enqueuing and dequeuing when using Oracle Client 19c (or later) and connected to Oracle Database 19c (or later).
+      - Supported for single and array message enqueuing and dequeuing when using Oracle Database 19c (or later). For node-oracledb Thick mode, Oracle Client libraries 19c (or later) are required.
     * - JSON
       - Supported when using Oracle Client libraries 21c (or later) and Oracle Database 21c (or later).
 
         Buffered messaging using the :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>` constant of :attr:`aqQueue.enqOptions` property is not supported for JSON payloads.
-      - Supported for single message enqueuing and dequeuing when using Oracle Client libraries 21c (or later) and Oracle Database 21c (or later).
+      - Supported for single message enqueuing and dequeuing when using Oracle Database 21c (or later). For node-oracledb Thick mode, Oracle Client libraries 21c (or later) are required.
 
-        Array enqueuing and dequeuing is not supported for JSON payloads.
+        Array message enqueuing and dequeuing is only supported in node-oracledb Thin mode.
 
         Buffered messaging using the :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>` constant of :attr:`aqQueue.enqOptions` property is not supported for JSON payloads.
-    * - JMS
-      - Supported
-      - Supported for single and array message enqueuing and dequeuing when using Oracle Client version 19 (or later) and Oracle Database version 23 (or later).
+
+Note that JMS payloads are supported only in classic AQ queues.
 
 **Usage Notes**
 
