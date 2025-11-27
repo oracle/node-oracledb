@@ -585,6 +585,10 @@ static bool njsLob_writeAsync(njsBaton *baton)
     if (dpiLob_writeBytes(lob->handle, baton->lobOffset, baton->bufferPtr,
             baton->bufferSize) < 0)
         return njsBaton_setErrorDPI(baton);
-    lob->dirtyLength = true;
+
+    // set the lob length
+    lob->length = NJS_MAX_NUM(lob->length,
+            baton->lobOffset - 1 + baton->bufferSize);
+
     return true;
 }

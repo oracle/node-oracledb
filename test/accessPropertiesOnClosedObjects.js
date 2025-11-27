@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -54,10 +54,10 @@ describe('223. accessPropertiesOnClosedObjects.js', () => {
 
     await Lob.close();
     assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-    assert.strictEqual(Lob.length, 0);
+    assert.strictEqual(Lob.length, undefined);
 
     await conn.close();
     assert.strictEqual(Lob.type, oracledb.DB_TYPE_BLOB);
-    assert.strictEqual(Lob.length, 0);
+    assert.strictEqual(Lob.length, undefined);
   }); // 223.2
 });

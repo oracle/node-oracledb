@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -730,7 +730,8 @@ describe('297. jsonDualityViews7.js', function() {
       let lob = await connection.createLob(oracledb.CLOB);
 
       // Write the buffer to the CLOB
-      await lob.write(JSON.stringify(arr));
+      const jsonBufStr = JSON.stringify(arr);
+      await lob.write(jsonBufStr);
 
       await connection.execute(
         `INSERT INTO vector
@@ -738,6 +739,7 @@ describe('297. jsonDualityViews7.js', function() {
         { id: 1,
           clob: lob
         });
+      assert.strictEqual(lob.length, jsonBufStr.length);
 
       lob.destroy();
       await connection.execute(`
@@ -778,7 +780,8 @@ describe('297. jsonDualityViews7.js', function() {
       const lob = await connection.createLob(oracledb.CLOB);
 
       // Write the buffer to the CLOB
-      await lob.write(JSON.stringify (arr));
+      const jsonBufStr = JSON.stringify(arr);
+      await lob.write(jsonBufStr);
 
       await connection.execute(
         `INSERT INTO vector
@@ -787,6 +790,7 @@ describe('297. jsonDualityViews7.js', function() {
           clob: lob
         }
       );
+      assert.strictEqual(lob.length, jsonBufStr.length);
 
       lob.destroy();
       await connection.execute(
@@ -824,7 +828,8 @@ describe('297. jsonDualityViews7.js', function() {
       let lob = await connection.createLob(oracledb.CLOB);
 
       // Write the buffer to the CLOB
-      await lob.write(JSON.stringify (arr));
+      const jsonBufStr = JSON.stringify(arr);
+      await lob.write(jsonBufStr);
 
       await connection.execute(
         `INSERT INTO vector
@@ -832,6 +837,7 @@ describe('297. jsonDualityViews7.js', function() {
         { id: 1,
           clob: lob
         });
+      assert.strictEqual(lob.length, jsonBufStr.length);
 
       lob.destroy();
       await connection.execute(`

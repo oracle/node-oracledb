@@ -55,9 +55,9 @@ describe('54. lobClose.js', function() {
     assert.strictEqual(lob.length, 0);
     assert.strictEqual(lob.type, oracledb.CLOB);
     await lob.close();
-    assert.strictEqual(typeof lob.chunkSize, 'number');
-    assert.strictEqual(typeof lob.pieceSize, 'number');
-    assert.strictEqual(lob.length, 0);
+    assert.strictEqual(lob.chunkSize, undefined);
+    assert.strictEqual(lob.pieceSize, undefined);
+    assert.strictEqual(lob.length, undefined);
     assert.strictEqual(lob.type, oracledb.CLOB);
   }); // 54.1
 

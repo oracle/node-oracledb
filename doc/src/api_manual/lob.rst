@@ -24,10 +24,22 @@ The properties of a Lob object are listed below.
     This read-only property is a number which corresponds to the size used by
     the Oracle LOB layer when accessing or modifying the LOB value.
 
+    The ``lob.chunkSize`` property returns *undefined* when a LOB is closed.
+
+    .. versionchanged:: 7.0
+
+        This property now returns *undefined* when a LOB is closed.
+
 .. attribute:: lob.length
 
     This read-only property is a number which specifies the length of a
     queried LOB in bytes (for BLOBs) or characters (for CLOBs and NCLOBs).
+
+    The ``lob.length`` property returns *undefined* when a LOB is closed.
+
+    .. versionchanged:: 7.0
+
+        This property now returns *undefined* when a LOB is closed.
 
 .. attribute:: lob.pieceSize
 
@@ -44,6 +56,12 @@ The properties of a Lob object are listed below.
     will be lost when internal buffers are resized.
 
     The maximum value for ``pieceSize`` is limited to the value of UINT_MAX.
+
+    The ``lob.pieceSize`` property returns *undefined* when a LOB is closed.
+
+    .. versionchanged:: 7.0
+
+        This property now returns *undefined* when a LOB is closed.
 
 .. attribute:: lob.type
 

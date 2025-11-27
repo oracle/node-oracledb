@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -228,6 +228,7 @@ describe('181. dataTypeXML.js', function() {
       values(:id, XMLType(:bv1), XMLType(:bv2))`;
     const bindValues = { id: ID, bv1: xml, bv2: {type: oracledb.CLOB, val: lob }};
     let result = await conn.execute(sql, bindValues);
+    assert.strictEqual(lob.length, largexml.length);
     assert.strictEqual(result.rowsAffected, 1);
 
     const bindVar = { id: ID };

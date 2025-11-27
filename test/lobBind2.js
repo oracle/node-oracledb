@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -110,6 +110,7 @@ describe("72. lobBind2.js", function() {
       const sql = "insert into nodb_tab_clob72 (id, content) values (:id, :bindvar)";
       const result = await connection.execute(sql, { id: seq, bindvar: lob});
       assert.strictEqual(result.rowsAffected, 1);
+      assert.strictEqual(lob.length, inStream.bytesRead);
       lob.destroy();
       await connection.commit();
       await verifyClobValue(seq, inFileName);

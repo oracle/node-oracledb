@@ -51,6 +51,9 @@
 #endif
 #endif
 
+// maximum of two numbers
+#define NJS_MAX_NUM(a, b) ((a) > (b) ? (a) : (b))
+
 // maximum length of error messages
 #define NJS_MAX_ERROR_MSG_LEN           256
 

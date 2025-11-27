@@ -1,5 +1,5 @@
 
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -435,12 +435,14 @@ describe('306. dataTypeVector6.js', function() {
 
     const arr = Array(65535).fill(2);
     const lob = await connection.createLob(oracledb.CLOB);
-    await lob.write(JSON.stringify(arr));
+    const jsonBufStr = JSON.stringify(arr);
+    await lob.write(jsonBufStr);
 
     await connection.execute(
       `INSERT INTO ${tableName} (IntCol, VectorCol) VALUES (:id, :clob)`,
       { id: 1, clob: lob }
     );
+    assert.strictEqual(lob.length, jsonBufStr.length);
 
     await lob.close();
     await connection.commit();
@@ -462,12 +464,14 @@ describe('306. dataTypeVector6.js', function() {
 
     const arr = Array(3).fill(2);
     const lob = await connection.createLob(oracledb.CLOB);
-    await lob.write(JSON.stringify(arr));
+    const jsonBufStr = JSON.stringify(arr);
+    await lob.write(jsonBufStr);
 
     await connection.execute(
       `INSERT INTO ${tableName} (IntCol, VectorInt8Col) VALUES(:IntCol, TO_VECTOR(:bindvar))`,
       [1, lob]
     );
+    assert.strictEqual(lob.length, jsonBufStr.length);
 
     await lob.close();
     await connection.commit();
@@ -489,12 +493,14 @@ describe('306. dataTypeVector6.js', function() {
 
     const arr = Array(3).fill(0.002253931947052479);
     const lob = await connection.createLob(oracledb.CLOB);
-    await lob.write(JSON.stringify(arr));
+    const jsonBufStr = JSON.stringify(arr);
+    await lob.write(jsonBufStr);
 
     await connection.execute(
       `INSERT INTO ${tableName} (IntCol, Vector64Col) VALUES(:IntCol, TO_VECTOR(:bindvar))`,
       [1, lob]
     );
+    assert.strictEqual(lob.length, jsonBufStr.length);
 
     await lob.close();
     await connection.commit();
@@ -516,12 +522,14 @@ describe('306. dataTypeVector6.js', function() {
 
     const arr = Array(3).fill(0.002253931947052479);
     const lob = await connection.createLob(oracledb.CLOB);
-    await lob.write(JSON.stringify(arr));
+    const jsonBufStr = JSON.stringify(arr);
+    await lob.write(jsonBufStr);
 
     await connection.execute(
       `INSERT INTO ${tableName} (IntCol, Vector32Col) VALUES(:IntCol, TO_VECTOR(:bindvar))`,
       [1, lob]
     );
+    assert.strictEqual(lob.length, jsonBufStr.length);
 
     await lob.close();
     await connection.commit();
@@ -543,12 +551,14 @@ describe('306. dataTypeVector6.js', function() {
 
     const arr = Array(65535).fill(12);
     const lob = await connection.createLob(oracledb.CLOB);
-    await lob.write(JSON.stringify(arr));
+    const jsonBufStr = JSON.stringify(arr);
+    await lob.write(jsonBufStr);
 
     await connection.execute(
       `INSERT INTO ${tableName} (IntCol, Vector64Col) VALUES (:id, :vec)`,
       { id: 1, vec: lob }
     );
+    assert.strictEqual(lob.length, jsonBufStr.length);
 
     await lob.close();
     await connection.commit();
@@ -578,24 +588,28 @@ describe('306. dataTypeVector6.js', function() {
 
     const arr1 = Array(65535).fill(2);
     let lob = await connection.createLob(oracledb.CLOB);
-    await lob.write(JSON.stringify(arr1));
+    const jsonBufStr1 = JSON.stringify(arr1);
+    await lob.write(jsonBufStr1);
 
     await connection.execute(
       `INSERT INTO ${tableName} (IntCol, VectorCol) VALUES (:id, :clob)`,
       { id: 1, clob: lob }
     );
+    assert.strictEqual(lob.length, jsonBufStr1.length);
 
     await lob.close();
     await connection.commit();
 
     const arr2 = Array(65535).fill(2.5);
     lob = await connection.createLob(oracledb.CLOB);
-    await lob.write(JSON.stringify(arr2));
+    const jsonBufStr2 = JSON.stringify(arr2);
+    await lob.write(jsonBufStr2);
 
     await connection.execute(
       `UPDATE ${tableName} SET VectorCol = :clob WHERE IntCol = :id`,
       { id: 1, clob: lob }
     );
+    assert.strictEqual(lob.length, jsonBufStr2.length);
 
     await lob.close();
     await connection.commit();

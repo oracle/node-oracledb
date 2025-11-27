@@ -13,6 +13,22 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
+node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0...v7.0.0>`__ (TBD)
+-----------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+#)  Fixed bug which did not update the :attr:`lob.length` property correctly
+    after a write operation was performed on the :ref:`LOB object <lobclass>`.
+
+#)  Ensured that the :attr:`lob.length`, :attr:`lob.chunkSize` and
+    :attr:`lob.pieceSize` properties return `undefined` for a closed
+    :ref:`LOB object <lobclass>`.
+
+#)  Internal code refactoring to optimize handling of
+    :ref:`LOB object <lobclass>` methods and attributes.
+
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------
 
