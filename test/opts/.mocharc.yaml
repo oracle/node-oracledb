@@ -300,3 +300,4 @@ spec:
   - test/sessionless.js
   - test/soda15.js
   - test/soda16.js
+  - test/teq.js

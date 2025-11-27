@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -39,6 +39,7 @@ Error.stackTraceLimit = 50;
 
 const fs = require('fs');
 const oracledb = require('oracledb');
+const path = require('path');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
 
@@ -127,7 +128,7 @@ async function run() {
 
     const blob = result.rows[0][0];
     console.log('Writing BLOB to lobselectout.jpg');
-    fs.writeFileSync(blobOutFileName, blob);
+    fs.writeFileSync(path.join(__dirname, blobOutFileName), blob);
 
   } catch (err) {
     console.error(err);

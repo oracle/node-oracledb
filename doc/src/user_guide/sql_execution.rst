@@ -91,7 +91,7 @@ are returned in the callback :ref:`result.rows <execrows>` property:
         `SELECT department_id, department_name
         FROM departments
         WHERE department_id = :did`,
-        [180],
+        [180],  // bind value for :did
         { maxRows: 10 }  // a maximum of 10 rows will be returned
     );
 
@@ -1145,7 +1145,7 @@ columns to have data returned in native format.
 
     const result = await connection.execute(
         `SELECT last_name, hire_date, salary, commission_pct FROM employees WHERE employee_id = :id`,
-        [178],
+        [178],  // bind value for :id
         {
             fetchTypeHandler: function(metaData) {
 
@@ -1179,9 +1179,10 @@ The output is::
     ]
 
 The date and salary columns are returned as strings, but the commission
-is a number. In node-oracledb Thick mode, the default date format can be
-set, for example, with the environment variable ``NLS_DATE_FORMAT``. Note
-that this variable will only be read if ``NLS_LANG`` is also set.
+percentage column is returned as a number. In node-oracledb Thick mode, the
+default date format can be set, for example, with the environment variable
+``NLS_DATE_FORMAT``. Note that this variable will only be read if ``NLS_LANG``
+is also set.
 
 In node-oracledb Thin mode, all NLS environment variables are ignored.
 Fetch type handlers need to be used for :ref:`date <thindate>` and

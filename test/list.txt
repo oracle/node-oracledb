@@ -6451,3 +6451,13 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     318.8 Performance and Stress Tests
         318.8.1 operations with large number of documents (1655ms)
         318.8.2 concurrent document operations
+    319. teq.js
+        319.1 Enqueue/Dequeue RAW message
+        319.2 Enqueue/Dequeue JSON message
+        319.3 Enqueue/Dequeue ADT (CARS_SQ)
+        319.4 Enqueue/Dequeue multiple RAW messages
+        319.5 Enqueue/Dequeue multiple JSON messages
+        319.6 Enqueue/Dequeue multiple ADT messages
+        319.7 Enqueue/Dequeue RAW Sharded Queue
+        319.8 Enqueue/Dequeue JSON Sharded Queue
+        319.9 Enqueue/Dequeue ADT Sharded Queue

@@ -567,7 +567,10 @@ describe('272. jsonDualityView1.js', function() {
                     }`;
       await assert.rejects(
         async () => await connection.execute(query),
-        /ORA-24558:/ //ORA-24558: syntax error encountered in the input string
+        /ORA-24558:|ORA-43411:/
+        // ORA-24558: syntax error encountered in the input string
+        // ORA-43411: Invalid directive 'unnest' for the column 'SCID'
+
       );
     });
 

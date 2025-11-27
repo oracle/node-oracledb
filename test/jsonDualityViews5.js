@@ -324,7 +324,10 @@ describe('276. jsonDualityView5.js', function() {
            {StudentClassId : scid,
       Class : class  {ClassId: clsid, Name: name}}}
     `),
-      /ORA-24558:/ /*ORA-24558: syntax error encountered in the input string */
+      /ORA-24558:|ORA-43411:/
+      // ORA-24558: syntax error encountered in the input string
+      // ORA-43411: Invalid directive 'unnest' for the column 'SCID'
+
     );
 
     await assert.rejects(

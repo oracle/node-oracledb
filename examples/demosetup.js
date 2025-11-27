@@ -35,6 +35,7 @@
 Error.stackTraceLimit = 50;
 
 const fs = require('fs');
+const path = require('path');
 
 //
 // Create a table for example queries
@@ -131,13 +132,14 @@ async function setupLobs(connection, insertData) {
     }
 
     if (insertData) {
-      const str = fs.readFileSync(clobInFileName, 'utf8');
+      const str = fs.readFileSync(path.join(__dirname, clobInFileName),
+        'utf8');
       await connection.execute(
         `INSERT INTO no_lobs (id, c) VALUES (:id, :c)`,
         { id: 1, c: str }
       );
 
-      const buf = fs.readFileSync(blobInFileName);
+      const buf = fs.readFileSync(path.join(__dirname, blobInFileName));
       await connection.execute(
         `INSERT INTO no_lobs (id, b) VALUES (:id, :b)`,
         { id: 2, b: buf },

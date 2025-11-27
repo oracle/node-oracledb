@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,6 +40,7 @@ Error.stackTraceLimit = 50;
 
 const fs = require('fs');
 const oracledb = require('oracledb');
+const path = require('path');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
 
@@ -80,7 +81,7 @@ async function run() {
     // Write into a temporary LOB.
     // An alternative would be to stream into it.
     const tempLob = await connection.createLob(oracledb.CLOB);
-    const data = fs.readFileSync(inFileName, 'utf8');
+    const data = fs.readFileSync(path.join(__dirname, inFileName), 'utf8');
     tempLob.write(data);
     tempLob.write("That's all!");
     tempLob.end();  //  indicate the app has no more data to insert

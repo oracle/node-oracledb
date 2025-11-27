@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -44,6 +44,7 @@ Error.stackTraceLimit = 50;
 
 const fs = require('fs');
 const oracledb = require('oracledb');
+const path = require('path');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
 
@@ -87,7 +88,7 @@ async function run() {
     let result;
 
     // Insert a CLOB
-    const str = fs.readFileSync(clobInFileName, 'utf8');
+    const str = fs.readFileSync(path.join(__dirname, clobInFileName), 'utf8');
     result = await connection.execute(
       `INSERT INTO no_lobs (id, c) VALUES (:id, :c)`,
       { id: 1, c: str }
@@ -98,7 +99,7 @@ async function run() {
       console.log('CLOB inserted from ' + clobInFileName);
 
     // Insert a BLOB
-    const buf = fs.readFileSync(blobInFileName);
+    const buf = fs.readFileSync(path.join(__dirname, blobInFileName));
     result = await connection.execute(
       `INSERT INTO no_lobs (id, b) VALUES (:id, :b)`,
       { id: 2, b: buf },

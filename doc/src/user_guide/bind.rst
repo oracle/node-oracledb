@@ -4,11 +4,13 @@
 Using Bind Variables
 ********************
 
-SQL and PL/SQL statements may contain bind parameters, which are
-colon-prefixed identifiers or numerals. These indicate where separately
-specified values are substituted in a statement when it is executed, or
-where values are to be returned after execution. For example, ``:country_id``
-and ``:country_name`` are the two bind variables in this SQL statement:
+SQL and PL/SQL statements that pass data to and from Oracle Database should
+use placeholders to indicate where data is supplied or returned in a secure
+manner. A bind variable placeholder is a colon-prefixed identifier (a
+character or number) that indicates where separately specified values are
+substituted in a statement when it is executed, or where values are to be
+returned after execution. For example, ``:country_id`` and ``:country_name``
+are the two bind variable placeholders in this SQL statement:
 
 .. code-block:: javascript
 
@@ -20,17 +22,18 @@ and ``:country_name`` are the two bind variables in this SQL statement:
    );
 
 As part of execution, the supplied bind variable values ``90`` and
-``"Tonga"`` are substituted for the placeholders by the database. This is
-called binding.
+``"Tonga"`` are substituted in place of the bind placeholders by the database.
+This is called binding.
 
-Using bind variables is important for scalability and security. They help
-avoid SQL Injection security problems because data is never treated as part of
+Using bind variables is important for scalability and security. They mitigate
+SQL injection-based security issues because data is never treated as part of
 an executable statement when it is parsed.
 
 Bind variables reduce parsing and execution costs when statements are executed
 more than once with different data values. If you do not use bind variables,
-Oracle must reparse and cache multiple statements. When using bind variables,
-Oracle Database may be able to reuse the statement execution plan and context.
+Oracle Database must reparse and cache multiple statements. When using bind
+variables, Oracle Database may be able to reuse the statement execution plan
+and context.
 
 .. important::
 
@@ -51,10 +54,10 @@ the statement text. It can never be executed directly. This means there
 is no need to escape bound data inserted into the database.
 
 If a statement is executed more than once with different values for the
-bind parameters, then Oracle can re-use context from the initial
-execution, generally improving performance. However, if similar
-statements contain hard coded values instead of bind parameters, Oracle
-sees that the statement text is different and will be less efficient.
+bind parameters, then Oracle Database can re-use context from the initial
+execution, generally improving performance. However, if similar statements
+contain hard-coded values instead of bind parameters, Oracle Database sees
+that the statement text is different and will be less efficient.
 
 Bind parameters can be used to substitute data values. They cannot be
 used for direct substitution of column or table names in dynamically
@@ -372,7 +375,7 @@ For statements that affect single rows, you may prefer to use
 Bind parameters for DML RETURNING statements can use ``oracledb.BLOB``,
 ``oracledb.CLOB``, ``oracledb.STRING``, ``oracledb.NUMBER`` or
 ``oracledb.DATE`` for the BIND_OUT :ref:`type <executebindparamtype>`.
-To bind named Oracle objects use the class name or
+To bind named Oracle Database objects use the class name or
 :ref:`DbObject <dbobjectclass>` prototype class for the bind type, as
 shown for object binds in :ref:`Fetching Oracle Database Objects and
 Collections <objects>`.

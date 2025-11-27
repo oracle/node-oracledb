@@ -7,9 +7,6 @@ To run the examples:
 
 - [Install node-oracledb](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#quickstart).
 
-- Ensure that you navigate to the `examples` directory in your terminal window
-  or IDE, where you are running the samples.
-
 - Review `dbconfig.js`.
 
 In your terminal window or IDE, set the following environment variables to
@@ -34,7 +31,7 @@ Autonomous Databases optionally. The wallet location can also be provided as a p
 - `NODE_ORACLEDB_CLIENT_LIB_DIR` provides an optional path for the Oracle Client libraries to be used on Windows and macOS platforms, when using Thick mode in node-oracledb.
 
 Review the examples and then run them individually.  For example, to see what
-  the file `example.js` does, use:
+  the file `example.js` does, navigate to the ``examples`` directory and use:
 
   ```
   node example.js
@@ -46,6 +43,9 @@ After running the examples, the demonstration objects can be dropped with
   ```
   node demodrop.js
   ```
+
+You can run the examples from anywhere by providing the full or relative path
+with the `node` command.
 
 Many examples can be run in either node-oracledb Thin (the default) or Thick
 modes.  Thin mode is a pure JavaScript implementation of node-oracledb.
