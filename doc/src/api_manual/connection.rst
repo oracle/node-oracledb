@@ -1440,7 +1440,7 @@ Connection Methods
 
             This property is a number. For `DML <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-2E008D4A-F6FD-4F34-9071-7E10419CA24D>`__ statements this contains the number of rows affected, for example the number of rows inserted. For non-DML statements such as queries and PL/SQL statements, ``rowsAffected`` is undefined.
 
-            Due to Node.js type limitations, the largest value shown will be 232 - 1, even if more rows were affected. Larger values will wrap.
+            Due to Node.js type limitations, the largest value shown will be 2 ^ 32 - 1, even if more rows were affected. Larger values will wrap.
         * - ``warning``
           - .. _execwarning:
 
@@ -1713,7 +1713,7 @@ Connection Methods
 
             It is only present if a DML statement was executed.
 
-            Due to Node.js type limitations, the largest value shown will be 232 - 1, even if more rows were affected. Larger values will wrap.
+            Due to Node.js type limitations, the largest value shown will be 2 ^ 32 - 1, even if more rows were affected. Larger values will wrap.
         * - ``warning``
           - Object
           - .. _execmanywarning:
@@ -2577,7 +2577,7 @@ Connection Methods
         * - Error ``error``
           - If ``subscribe()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Object ``result``
-          - For :ref:`CQN <cqn>` ``oracledb.SUBSCR_NAMESPACE_DBCHANGE`` subscriptions this contains a single property ``regId`` corresponding the value of ``REGID`` in the database view ``USER_CHANGE_NOTIFICATION_REGS`` or the value of ``REG_ID`` in ``USER_SUBSCR_REGISTRATIONS``. For :ref:`AQ <aq>` ``oracledb.SUBSCR_NAMESPACE_AQ`` subscriptions, ``regId`` is undefined. Due to Node.js type limitations, the largest ``regId`` shown will be 232 - 1. Larger values will wrap.
+          - For :ref:`CQN <cqn>` ``oracledb.SUBSCR_NAMESPACE_DBCHANGE`` subscriptions this contains a single property ``regId`` corresponding the value of ``REGID`` in the database view ``USER_CHANGE_NOTIFICATION_REGS`` or the value of ``REG_ID`` in ``USER_SUBSCR_REGISTRATIONS``. For :ref:`AQ <aq>` ``oracledb.SUBSCR_NAMESPACE_AQ`` subscriptions, ``regId`` is undefined. Due to Node.js type limitations, the largest ``regId`` shown will be 2 ^ 32 - 1. Larger values will wrap.
 
             .. versionadded:: 4.0
 

@@ -35,6 +35,10 @@ The properties of a Lob object are listed below.
     This read-only property is a number which specifies the length of a
     queried LOB in bytes (for BLOBs) or characters (for CLOBs and NCLOBs).
 
+    Due to Node.js type limitations, the largest ``length`` value will be
+    2 ^ 32 - 1, even if the actual LOB length is larger. Larger values will
+    wrap.
+
     The ``lob.length`` property returns *undefined* when a LOB is closed.
 
     .. versionchanged:: 7.0
@@ -223,6 +227,9 @@ Lob Methods
         promise = getData(Number offset, Number amount);
 
     Returns a portion (or all) of the data in the LOB.
+
+    Due to Node.js type limitations, this method will work correctly only with
+    LOBs of length less than 2 ^ 32.
 
     The parameters of ``lob.getData()`` are:
 

@@ -285,7 +285,7 @@ method chain. Only one terminal method can be used in each chain.
 
             The number of documents matching the SodaOperation criteria.
 
-            Due to Node.js type limitations, the largest ``count`` value will be 232 - 1, even if more rows exist. Larger values will wrap.
+            Due to Node.js type limitations, the largest ``count`` value will be 2 ^ 32 - 1, even if more rows exist. Larger values will wrap.
 
 .. method:: sodaOperation.getCursor()
 
@@ -461,7 +461,7 @@ method chain. Only one terminal method can be used in each chain.
 
             The number of documents removed from the collection.
 
-            Due to Node.js type limitations, the largest ``count`` value will be 232 - 1, even if Oracle Database removed more rows. Larger values will wrap.
+            Due to Node.js type limitations, the largest ``count`` value will be 2 ^ 32 - 1, even if Oracle Database removed more rows. Larger values will wrap.
 
 .. method:: sodaOperation.replaceOne()
 

@@ -225,7 +225,6 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsLob_getData, 2, NULL)
 static bool njsLob_getDataAsync(njsBaton *baton)
 {
     njsLob *lob = (njsLob*) baton->callingInstance;
-    bool ok = true;
     uint32_t len;
 
     // if the length is marked dirty, acquire it at this time
@@ -251,22 +250,22 @@ static bool njsLob_getDataAsync(njsBaton *baton)
         baton->bufferSize = len;
     } else if (dpiLob_getBufferSize(lob->handle, len,
             &baton->bufferSize) < 0) {
-        ok = njsBaton_setErrorDPI(baton);
+        return njsBaton_setErrorDPI(baton);
     }
 
     // allocate memory for the buffer
-    if (ok && baton->bufferSize > 0) {
+    if (baton->bufferSize > 0) {
         baton->bufferPtr = malloc(baton->bufferSize);
         if (!baton->bufferPtr)
-            ok = njsBaton_setErrorInsufficientMemory(baton);
+            return njsBaton_setErrorInsufficientMemory(baton);
     }
 
     // read from the LOB into the provided buffer
-    if (ok && baton->bufferSize > 0 && dpiLob_readBytes(lob->handle,
+    if (baton->bufferSize > 0 && dpiLob_readBytes(lob->handle,
             baton->lobOffset, len, baton->bufferPtr, &baton->bufferSize) < 0)
-        ok = njsBaton_setErrorDPI(baton);
+        return njsBaton_setErrorDPI(baton);
 
-    return ok;
+    return true;
 }
 
 
