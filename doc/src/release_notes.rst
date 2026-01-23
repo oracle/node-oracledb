@@ -37,6 +37,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
+    See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
+
 #)  Fixed bug that throws error in Thin mode when calling the same select
     statement with different fetchInfo settings.
     See `Issue #1747 <https://github.com/oracle/node-oracledb/issues/1747>`__.
