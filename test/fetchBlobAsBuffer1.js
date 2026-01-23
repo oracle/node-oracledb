@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -528,6 +528,47 @@ describe('87. fetchBlobAsBuffer1.js', function() {
         });
       });
     }); // 87.1.20
+
+    it('87.1.21 calling same select statement with different fetchInfo settings', async function() {
+      const id = insertID++;
+      const specialStr = '87.1.21';
+      const contentLength = 200;
+      const strBuf = random.getRandomString(contentLength, specialStr);
+      const content = Buffer.from(strBuf, "utf-8");
+
+      await insertIntoBlobTable1(id, content);
+      const sql = "SELECT ID, B from nodb_blob1 WHERE ID = " + id;
+      const stream = await connection.queryStream(sql);
+      let counter = 0;
+      await new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('end', stream.destroy);
+        stream.on('close', resolve);
+        stream.on('data', function(data) {
+          assert.deepStrictEqual(data[1], content);
+          counter++;
+        });
+      });
+      assert.strictEqual(counter, 1);
+      // call the same sql with different fetchInfo settings
+      const result = await connection.execute(
+        "SELECT ID, B from nodb_blob1 WHERE ID = :id",
+        { id: id },
+        {
+          fetchInfo: { B: { type: oracledb.DEFAULT } }
+        });
+
+      const lob = result.rows[0][1];
+      const blobData = await lob.getData();
+      assert.deepStrictEqual(blobData, content);
+      lob.destroy();
+
+      // call back with the sql settings from the first time
+      // check if it fetches back as a Buffer
+      const result2 = await connection.execute(sql);
+      assert.deepStrictEqual(result2.rows[0][1], content);
+
+    }); // 87.1.21
 
   }); // 87.1
 

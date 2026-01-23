@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -48,21 +48,21 @@ let arch;
 let thickModeErrMsg;
 
 // Log standard output with an 'oracledb' prefix
-function log(message) { // eslint-disable-line
+function log() {
   const args = Array.from(arguments);
   args.unshift('oracledb');
   console.log.apply(console, args);
 }
 
 // Log errors. It combines 'oracledb' with a stylized 'ERR' prefix
-function error(message) { // eslint-disable-line
+function error() {
   const args = Array.from(arguments);
   args.unshift('oracledb \x1b[31mERR!\x1b[0m');
   console.error.apply(console, args);
 }
 
 // Log warnings. It combines 'oracledb' with a stylized 'WARN' prefix
-function warn(message) { // eslint-disable-line
+function warn() {
   const args = Array.from(arguments);
   args.unshift('oracledb \x1b[31mWARN!\x1b[0m');
   console.error.apply(console, args);

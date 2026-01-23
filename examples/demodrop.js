@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -130,7 +130,7 @@ async function run() {
         console.log(s);
         await connection.execute(s);
       } catch (e) {
-        // do nothing
+        console.error(e);
       }
     }
 

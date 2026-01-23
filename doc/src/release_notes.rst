@@ -31,6 +31,13 @@ Common Changes
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed bug that throws error in Thin mode when calling the same select
+    statement with different fetchInfo settings.
+    See `Issue #1747 <https://github.com/oracle/node-oracledb/issues/1747>`__.
+
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------
 
