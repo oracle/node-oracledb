@@ -6578,3 +6578,13 @@ Overview of node-oracledb functional tests
       321.12.1 Invalid table name
       321.12.2 Empty column list
       321.12.3 Row is not an array
+
+  322. tracePoolEvents.js
+    322.1 Test pool events functionality
+      322.1.1 Pool events default behaviour with no instance set
+      322.1.2 Pool expand and connection acquire/release with traceHandler enabled
+      322.1.3 Pool close with traceHandler enabled
+      322.1.4 Pool events with traceHandler disabled
+      322.1.5 Pool shrink event when idle connections are destroyed in background
+      322.1.6 onWait event when pool is full and request is queued
+      322.1.7 onTimeout event when queued request times out

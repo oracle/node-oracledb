@@ -31,6 +31,10 @@ Common Changes
 #)  Fixed an issue where SQL statements were not included in OpenTelemetry
     trace spans for :meth:`connection.executeMany()`.
 
+#)  Added new methods in TraceHandlerBase class for pool events which can
+    be used for tracking connection pool statistics and metrics for
+    OpenTelemetry support.
+
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
@@ -46,8 +50,11 @@ Thin Mode Changes
     different :ref:`fetchInfo <propexecfetchinfo>` settings.
     See `Issue #1747 <https://github.com/oracle/node-oracledb/issues/1747>`__.
 
-#)  Added an error when dbObject attributes with locators are accessed in Thin
+#)  Added error when dbObject attributes with locators are accessed in Thin
     mode.
+
+#)  Added callback as part of parameters when creating connection pool in Thin
+    mode. The callback can call pool events inside the connection pool methods.
 
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------

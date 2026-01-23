@@ -303,3 +303,4 @@ spec:
   - test/teq.js
   - test/lobMethods.js
   - test/directPathLoad.js
+  - test/tracePoolEvents.js
