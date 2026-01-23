@@ -150,7 +150,7 @@ describe('1. OCI Object Storage', function() {
           .split('?')[0];
         try {
           originalContent = fs.readFileSync(configPath, 'utf8');
-        } catch (err) {
+        } catch {
           originalContent = null; // File doesn't exist
         }
       }

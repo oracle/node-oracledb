@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -181,7 +181,7 @@ describe('10. nullColumnValues.js', function() {
 
     async function fetchRowFromRS(rs) {
       let accessCount = 0;
-      while (true) { // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;

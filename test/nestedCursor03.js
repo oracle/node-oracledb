@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -111,7 +111,6 @@ describe('234. nestedCursor03.js', () => {
 
   async function traverse_results(resultSet) {
     const fetchedRows = [];
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const row = await resultSet.getRow();
       if (!row) {

@@ -1175,7 +1175,7 @@ describe('294. dataTypeVector1.js', function() {
       FROM user_tablespaces
       WHERE tablespace_name = '${tablespaceName}'`;
     result = await connection.execute(sql);
-    assert.strictEqual(result.rows[0][1], 'AUTO' || result.rows[0][1] === 'MANUAL');
+    assert(result.rows[0][1] === 'AUTO' || result.rows[0][1] === 'MANUAL');
   }); // 294.46
 
   it('294.47 Test fuzzing of vector datatype', async function() {

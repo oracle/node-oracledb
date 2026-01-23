@@ -30,7 +30,9 @@
     "url": "git://github.com/oracle/node-oracledb.git"
   },
   "devDependencies": {
-    "eslint": "8.15.0",
+    "@eslint/js": "9.39.1",
+    "eslint": "9.39.1",
+    "globals": "15.15.0",
     "mocha": "10.2.0"
   },
   "scripts": {

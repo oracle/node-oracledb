@@ -200,7 +200,6 @@ async function instancePrincipalAuthentication(accessTokenConfig) {
 //---------------------------------------------------------------------------
 function hookFn(options) {
   if (options.tokenAuthConfigOci) {
-    // eslint-disable-next-line no-unused-vars
     options.accessToken = async function callbackFn(refresh, config) {
       return await getToken(config);
     };

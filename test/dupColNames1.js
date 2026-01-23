@@ -82,7 +82,6 @@ describe('246. dupColNames1.js', function() {
 
   const traverse_rows = async function(resultSet) {
     const fetchedRows = [];
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const row = await resultSet.getRow();
       if (!row) {
@@ -95,7 +94,6 @@ describe('246. dupColNames1.js', function() {
 
   const traverse_results = async function(resultSet) {
     const fetchedRows = [];
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       const row = await resultSet.getRow();
       if (!row) {

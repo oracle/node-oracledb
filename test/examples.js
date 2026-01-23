@@ -608,7 +608,7 @@ describe('3. examples.js', function() {
       const rs = result.resultSet;
       assert.strictEqual((rs.metaData[0]).name, 'EMPLOYEES_NAME');
       let rowCount = 1;
-      while (true) {    // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;
@@ -627,7 +627,7 @@ describe('3. examples.js', function() {
       assert.strictEqual((result.resultSet.metaData[0]).name, 'EMPLOYEES_ID');
       assert.strictEqual((result.resultSet.metaData[1]).name, 'EMPLOYEES_NAME');
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(numRows);
         if (rows.length == 0)
           break;

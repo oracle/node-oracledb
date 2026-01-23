@@ -91,7 +91,6 @@ async function servicePrincipalCredentials(params) {
 
 function hookFn(options) {
   if (options.tokenAuthConfigAzure) {
-    // eslint-disable-next-line no-unused-vars
     options.accessToken = async function callbackFn(refresh, config) {
       return await getToken(config);
     };

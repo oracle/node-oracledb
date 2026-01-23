@@ -121,7 +121,7 @@ async function run() {
           where sid = sys_context('USERENV', 'SID')
         `);
       console.log(`Execute this SQL statement as a DBA user in SQL*Plus:\n ${result.rows[0]}`);
-    } catch (err) {
+    } catch {
       console.error(`As a DBA user in SQL*Plus, use ALTER SYSTEM KILL SESSION
         to terminate the ${dbConfig.user} session now`);
     }

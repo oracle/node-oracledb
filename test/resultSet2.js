@@ -78,7 +78,7 @@ describe('55. resultSet2.js', function() {
         "SELECT * FROM nodb_rs2_emp WHERE employees_id > :1",
         [200],
         { resultSet: true });
-      while (true) {      // eslint-disable-line
+      while (true) {
         const row = await result.resultSet.getRow();
         if (!row)
           break;
@@ -107,7 +107,7 @@ describe('55. resultSet2.js', function() {
         "SELECT * FROM nodb_rs2_emp WHERE employees_id > :1",
         [200],
         { resultSet: true });
-      while (true) {      // eslint-disable-line
+      while (true) {
         if (getRow) {
           const row = await result.resultSet.getRow();
           if (!row)
@@ -138,7 +138,7 @@ describe('55. resultSet2.js', function() {
           out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
         });
       const rs = result.outBinds.out;
-      while (true) {      // eslint-disable-line
+      while (true) {
         if (getRow) {
           const row = await rs.getRow();
           if (!row)
@@ -174,7 +174,7 @@ describe('55. resultSet2.js', function() {
     });
 
     async function fetchRowFromRS(rs) {
-      while (true) {      // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;
@@ -224,7 +224,7 @@ describe('55. resultSet2.js', function() {
         { resultSet: true });
       const rs = result.resultSet;
       await connection.execute("TRUNCATE TABLE nodb_rs2_emp");
-      while (true) {      // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;
@@ -326,7 +326,7 @@ describe('55. resultSet2.js', function() {
         [],
         { resultSet: true });
       const rs = result.resultSet;
-      while (true) {      // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(numRows);
         if (rows.length == 0)
           break;
@@ -342,7 +342,7 @@ describe('55. resultSet2.js', function() {
           out: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
         });
       const rs = result.outBinds.out;
-      while (true) {      // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(numRows);
         if (rows.length == 0)
           break;

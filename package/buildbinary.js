@@ -52,14 +52,14 @@ const nodeVersion = process.version;
 let njsGitSha;
 try {
   njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
-} catch (err) {
+} catch {
   njsGitSha = 'unknown NJS SHA';
 }
 
 let odpiGitSha;
 try {
   odpiGitSha = execSync('git --git-dir=./odpi/.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
-} catch (err) {
+} catch {
   odpiGitSha = 'unknown ODPI-C SHA';
 }
 

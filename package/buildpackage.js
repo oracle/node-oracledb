@@ -47,7 +47,7 @@ let areBinariesAvailable = true;
 let njsGitSha;
 try {
   njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
-} catch (err) {
+} catch {
   njsGitSha = 'unknown NJS SHA';
 }
 

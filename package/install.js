@@ -85,7 +85,7 @@ function checkVersion() {
 function checkThickMode() {
   try {
     fs.statSync(nodbUtil.RELEASE_DIR + '/' + nodbUtil.BINARY_FILE);
-  } catch (err) {
+  } catch {
     errors.throwErr(errors.ERR_NO_BINARY_AVAILABLE, process.platform + ' ' + process.arch);
   }
 }

@@ -86,7 +86,7 @@ function removeFileorDir(fileOrDirPath) {
       // Remove the file or the symlink synchronously
       fs.unlinkSync(fileOrDirPath);
     }
-  } catch (err) {
+  } catch {
     throw new Error('Invalid File or Directory: ' + `'${fileOrDirPath}'`);
   }
 }

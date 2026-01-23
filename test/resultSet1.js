@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -267,7 +267,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100 });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -286,7 +286,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100 });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -305,7 +305,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100 });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -324,7 +324,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100 });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -343,7 +343,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_ARRAY });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -364,7 +364,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_OBJECT });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -385,7 +385,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100 });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -468,7 +468,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100 });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;
@@ -487,7 +487,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_ARRAY });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;
@@ -507,7 +507,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100, outFormat: oracledb.OUT_FORMAT_OBJECT });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;
@@ -557,7 +557,7 @@ describe('12. resultSet1.js', function() {
         [],
         { resultSet: true, fetchArraySize: 100 });
       const rs = result.resultSet;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const rows = await rs.getRows(nRows);
         if (rows.length == 0)
           break;
@@ -598,7 +598,7 @@ describe('12. resultSet1.js', function() {
 
       async function fetchRowFromRS(rs) {
         let accessCount = 0;
-        while (true) {     // eslint-disable-line
+        while (true) {
           const rows = await rs.getRows(nRows);
           if (rows.length == 0)
             break;
@@ -803,7 +803,7 @@ describe('12. resultSet1.js', function() {
         },
         { maxRows: 10 });
       const rs = result.outBinds.out;
-      while (true) {     // eslint-disable-line
+      while (true) {
         const row = await rs.getRow();
         if (!row)
           break;
