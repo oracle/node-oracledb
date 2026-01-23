@@ -672,7 +672,7 @@ describe('306. dataTypeVector6.js', function() {
     const value = new Float32Array([-Infinity, -Infinity, -Infinity, -Infinity, -Infinity]);
     await assert.rejects(
       async () => await connection.execute("SELECT :1 FROM dual", [value]),
-      /OCI-51805:|ORA-51805:/
+      /OCI-51805:|ORA-51805:|ORA-51807:/
     );
   });
 
