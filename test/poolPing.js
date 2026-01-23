@@ -232,7 +232,7 @@ describe("73. poolPing.js", function() {
   }); // 73.22
 });
 
-describe('73_1 poolPingTimeout', function() {
+describe('73.23 poolPingTimeout', function() {
   let newSessions = 0, pool;
 
   afterEach(async function() {
@@ -247,7 +247,7 @@ describe('73_1 poolPingTimeout', function() {
     cb();
   }
 
-  it('73_1.1 larger pingTimeout to simulate healthy conns',
+  it('73.23.1 larger pingTimeout to simulate healthy conns',
     async function() {
       const largePingTimeout = 240000; // 4 min
       const iter = 3;
