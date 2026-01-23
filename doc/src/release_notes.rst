@@ -19,29 +19,31 @@ node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0..
 Common Changes
 ++++++++++++++
 
-#) Added :meth:`lob.trim()` method to the :ref:`LOB object <lobclass>`.
+#)  Added :meth:`lob.trim()` method to the :ref:`LOB object <lobclass>`.
 
 #)  Fixed bug which did not update the :attr:`lob.length` property correctly
     after a write operation was performed on the :ref:`LOB object <lobclass>`.
 
-#)  Ensured that the :attr:`lob.length`, :attr:`lob.chunkSize` and
+#)  Ensured that the :attr:`lob.length`, :attr:`lob.chunkSize`, and
     :attr:`lob.pieceSize` properties return `undefined` for a closed
     :ref:`LOB object <lobclass>`.
+
+#)  Fixed an issue where SQL statements were not included in OpenTelemetry
+    trace spans for :meth:`connection.executeMany()`.
 
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
-#) Fixed an issue where SQL statements were not included in OpenTelemetry
-   trace spans for :meth:`connection.executeMany()`
-
 Thin Mode Changes
 +++++++++++++++++
+
+#)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
     See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
 
-#)  Fixed bug that throws error in Thin mode when calling the same select
-    statement with different fetchInfo settings.
+#)  Fixed bug that throws an error when calling the same select statement with
+    different :ref:`fetchInfo <propexecfetchinfo>` settings.
     See `Issue #1747 <https://github.com/oracle/node-oracledb/issues/1747>`__.
 
 #)  Added an error when dbObject attributes with locators are accessed in Thin

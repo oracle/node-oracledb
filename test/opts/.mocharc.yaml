@@ -302,3 +302,4 @@ spec:
   - test/soda16.js
   - test/teq.js
   - test/lobMethods.js
+  - test/directPathLoad.js

@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -93,7 +93,7 @@ describe('310. dataTypeVector8.js', function() {
       const sparseVector = resultSparse.rows[0][0];
       assert.deepStrictEqual(sparseVector.dense(), new Float64Array([0, 0, 1, 0, 2]));
 
-      // indices array will be float32 irrepspective of vector column
+      // indices array will be float32 irrespective of vector column
       assert.deepStrictEqual(sparseVector.indices, new Uint32Array([2, 4]));
       assert.deepStrictEqual(sparseVector.values, new Float64Array([1, 2]));
 

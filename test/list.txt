@@ -6524,3 +6524,50 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     320.9 LOB edge cases
         320.9.1 empty LOB operations
         320.9.2 LOB length property updates
+  321. Direct Path Load Tests
+    321.1 Testing all Basic Types
+        321.1.1 Load and verify values
+    321.2 Vector and JSON types
+        321.2.1 Float32 Vector and JSON
+    321.3 directPathLoad Comprehensive Tests
+        321.3.1 basic direct path load with array of arrays
+        321.3.2 test with empty data
+        321.3.3 test with null values
+        321.3.5 test with wrong number of columns
+        321.3.6 test string data that exceeds maximum length
+        321.3.7 test data is committed on success
+    321.4 directPathLoad Interval Data Types
+        321.4.1 Load IntervalDS and IntervalYM
+        321.4.2 Load NULL intervals
+        321.4.3 Load negative intervals
+    321.5 directPathLoad Large LOB (CLOB/BLOB)
+        321.5.1 Load small CLOB values
+        321.5.2 Load NULL CLOB
+        321.5.3 Load small BLOB value
+        321.5.4 BLOB 250 bytes
+        321.5.5 BLOB 251 bytes
+        321.5.6 BLOB 1000KB
+        321.5.7 Load NULL BLOB
+    321.6 directPathLoad Structured Data Tests
+        321.6.1 Structured row object load
+        321.6.2 Empty structured input
+        321.6.3 High precision decimal NUMBER load
+        321.6.4 NULL in NOT NULL column
+        321.6.5 Wrong number of columns
+        321.6.6 empty string in RAW/FIXED CHAR columns
+    321.7 Character semantics and Unicode
+        321.7.1 Load multi-byte UTF-8 characters
+        321.7.2 CHAR column stores value correctly
+    321.8 NUMBER edge cases
+        321.8.1 values exceeding JS numeric precision
+        321.8.2 NaN and Infinity
+    321.9 Timestamp and time zone types
+        321.9.1 Load TIMESTAMP WITH TIME ZONE
+    321.10 Constraint violations
+        321.10.1 Duplicate primary key rows
+    321.11 Partial batch failure handling
+        321.11.1 batch with one bad row
+    321.12 API defensive validation
+        321.12.1 Invalid table name
+        321.12.2 Empty column list
+        321.12.3 Row is not an array

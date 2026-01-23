@@ -871,6 +871,73 @@ Connection Methods
 
     See :ref:`osontype` for an example.
 
+.. method:: connection.directPathLoad()
+
+    .. versionadded:: 7.0
+
+    **Promise**::
+
+        promise = directPathLoad(String schema, String table, Array columns, Array data);
+
+    Performs a direct path load into the specified table.
+
+    The parameters of the ``connection.directPathLoad()`` are:
+
+    .. _connectiondirectpathload:
+
+    .. list-table-with-summary:: connection.directPathLoad() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 20
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``schema``
+          - String
+          - The name of the database schema.
+        * - ``table``
+          - String
+          - The name of the table into which data is to be loaded.
+        * - ``columns``
+          - Array
+          - The name of the columns to be populated.
+        * - ``data``
+          - Array
+          - The data to be loaded.
+
+    .. note::
+
+        This method can only be used in node-oracledb Thin mode.
+
+    See :ref:`directpathloads` for more information.
+
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        directPathLoad(String schema, String table, Array columns, Array data, function(Error error){});
+
+    See :ref:`connectiondirectpathload` for information on the ``schema``,
+    ``table``, ``columns``, and ``data`` parameters.
+
+    The parameter of the callback function ``function(Error error)`` is:
+
+    .. list-table-with-summary::
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 15 30
+        :summary: The first column displays the callback function parameter.
+         The second column displays the description of the parameter.
+
+        * - Callback Function Parameter
+          - Description
+        * - Error ``error``
+          - If ``directPathLoad()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+
 .. method:: connection.encodeOSON()
 
     .. versionadded:: 6.4

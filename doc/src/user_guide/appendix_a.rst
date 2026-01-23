@@ -197,6 +197,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Client Result Caching (CRC) (see :ref:`clientresultcache`)
       - No
       - Yes
+    * - Direct Path Loads (see :ref:`directpathloads`)
+      - Yes
+      - No
     * - In-band notifications
       - Yes
       - Yes

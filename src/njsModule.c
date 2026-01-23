@@ -338,7 +338,7 @@ static napi_value njsModule_initOracleClient(napi_env env,
     napi_value args[3];
     bool ok;
 
-    // iniitialize ODPI-C
+    // initialize ODPI-C
     libDir = configDir = errorUrl = driverName = NULL;
     libDirLength = configDirLength = errorUrlLength = driverNameLength = 0;
     if (!njsUtils_validateArgs(env, info, 3, args, &globals, NULL, NULL, NULL))

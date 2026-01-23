@@ -27,7 +27,7 @@
  *
  * DESCRIPTION
  *   This suite tests the data binding, including:
- *     The cases uses PL/SQL to test in-bind, out-bind and in-out-bind.
+ *     The cases use PL/SQL to test in-bind, out-bind and in-out-bind.
  *     The cases take bind value in OBJECT and ARRAY formats.
  *
  *****************************************************************************/

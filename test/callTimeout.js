@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -27,8 +27,8 @@
  *
  * DESCRIPTION
  *   Test "Connection.callTimeout" property.
- *   This test requries NODE_ORACLEDB_QA environment variable to be true.
- *   Because test cases use the hard-code variables TIME_OUT and
+ *   This test requires NODE_ORACLEDB_QA environment variable to be true.
+ *   Because test cases use the hard-coded variables TIME_OUT and
  *   DB_OP_TIME which are not stable in all network situations.
  *
  *****************************************************************************/

@@ -328,3 +328,98 @@ attribute names in the JavaScript objects
 
 See `examples/plsqlrecord.js <https://github.com/oracle/node-oracledb/tree/
 main/examples/plsqlrecord.js>`__ for a runnable sample.
+
+.. _directpathloads:
+
+Direct Path Loads
+=================
+
+Direct Path Loads allow data being inserted into Oracle Database to bypass
+code layers such as the database buffer cache. Also, there are no INSERT
+statements used. This can be very efficient for ingestion of huge amounts of
+data but, as a consequence of the architecture, there are restrictions on when
+Direct Path Loads can be used. For more information, see Oracle Database
+documentation such as SQL*Loader `Direct Path Loads <https://www.oracle.com
+/pls/topic/lookup?ctx=dblatest&id=GUID-0D576DEF-7918-4DD2-A184-
+754D217C021F>`__ and Oracle Call Interface `Direct Path Load Interface
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-596F5F9B-47A1-
+48DB-8702-FEED7BE038B9>`__.
+
+The end-to-end insertion time when using Direct Path Loads for smaller data
+sets may not be faster than when using :meth:`connection.executeMany()`,
+however there can still be a reduced load on the database.
+
+.. note::
+
+    Direct Path Loads are only supported in node-oracledb Thin mode.
+
+Direct Path Loading is performed by the :meth:`connection.directPathLoad()`
+method. For example, if you have the table:
+
+.. code-block:: sql
+
+    CREATE TABLE directPathLoadTable (
+        id NUMBER(9),
+        name  VARCHAR2(20)
+    );
+
+Then you can load data into the table using the following code:
+
+.. code-block:: javascript
+
+    const schema = "hr";
+    const table = "directPathLoadTable";
+    const columns = ['id', 'name'];
+    const data = [
+      [1, 'John Doe'],
+      [2, 'Jane Smith'],
+      [3, 'Bob Johnson']
+    ];
+
+    const result = await connection.directPathLoad(schema, table, columns, data);
+
+The records are always implicitly committed.
+
+To load into VECTOR columns, pass an appropriate TypedArray or JavaScript
+array value. For example, if you have the table:
+
+.. code-block:: sql
+
+    CREATE TABLE directPathLoadTable (
+        id NUMBER(9),
+        name  VARCHAR2(20),
+        v64 VECTOR(3, FLOAT64)
+    );
+
+Then you can load data into the table using the following code:
+
+.. code-block:: javascript
+
+    const float64arr1 = new Float64Array([7.7, 8.8, 9.9]);
+    const float64arr2 = new Float64Array([23.6, 12.2, 15.7]);
+
+    const schema = "hr";
+    const table = "directPathLoadTable";
+    const columns = ['id', 'name', 'v64'];
+    const data = [
+      [1, 'John Doe', float64arr1],
+      [2, 'Jane Smith', float64arr2]
+    ];
+
+    const result = await connection.directPathLoad(schema, table, columns, data);
+
+For more on vectors, see :ref:`vectors`.
+
+See `examples/directpathload.js <https://github.com/oracle/node-oracledb/tree/
+main/examples/directpathload.js>`__ for a runnable sample.
+
+**Notes on Direct Path Loads**
+
+- Data is always implicitly committed.
+- Data being inserted into CLOB or BLOB columns must be strings or bytes, not
+  node-oracledb :ref:`LOB Objects <lobclass>`.
+- Insertion of node-oracledb :ref:`DbObject Objects <dbobjectclass>` is
+  not supported.
+
+Review Oracle Database documentation for database requirements and
+restrictions.

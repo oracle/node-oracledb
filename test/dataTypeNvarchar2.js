@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -26,7 +26,7 @@
  *   25. dataTypeNvarchar2.js
  *
  * DESCRIPTION
- *    Testing Oracle data type support - VARCHAR2.
+ *    Testing Oracle data type support - NVARCHAR2.
  *
  *****************************************************************************/
 'use strict';

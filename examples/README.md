@@ -82,6 +82,7 @@ File Name                                                 | Description
 [`dbobjassocarray.js`](dbobjassocarray.js)                | Tests Associative Array-type dbObjects indexed by integer
 [`demodrop.js`](demodrop.js)                              | Drops the schema objects created by the examples
 [`demosetup.js`](demosetup.js)                            | Used to create common schema objects for the examples
+[`directpathload.js`](directpathload.js)                  | Show usage of directPathLoad api in thin mode
 [`dmlrupd.js`](dmlrupd.js)                                | Example of DML RETURNING where multiple rows are matched
 [`em_batcherrors.js`](em_batcherrors.js)                  | `executeMany()` example showing handling data errors
 [`em_dmlreturn1.js`](em_dmlreturn1.js)                    | `executeMany()` example of DML RETURNING that returns single values

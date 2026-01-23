@@ -26,7 +26,7 @@
  *   300. bigInt.js
  *
  * DESCRIPTION
- *   Test cases related to use of bigInts for binding and fetching.
+ *   Test cases related to use of BigInts for binding and fetching.
  *
  *****************************************************************************/
 'use strict';
