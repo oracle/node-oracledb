@@ -19,6 +19,12 @@ release all connections and terminate the connection pool by calling the
 
 See :ref:`Connection Pooling <connpooling>` for more information.
 
+.. note::
+
+    Starting from node-oracledb 7.0 onwards, Pool objects support
+    :ref:`Explicit Resource Management <explicitresourcemgmtoverview>` that
+    was introduced in Node.js version 24.
+
 .. _poolproperties:
 
 Pool Properties

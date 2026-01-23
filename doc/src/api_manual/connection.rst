@@ -10,6 +10,12 @@ A *Connection* object is obtained by a *Pool* class
 
 The connection is used to access an Oracle database.
 
+.. note::
+
+    Starting from node-oracledb 7.0 onwards, Connection objects support
+    :ref:`Explicit Resource Management <explicitresourcemgmtoverview>` that
+    was introduced in Node.js version 24.
+
 .. _connectionproperties:
 
 Connection Properties

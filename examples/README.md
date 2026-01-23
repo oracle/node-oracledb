@@ -124,6 +124,7 @@ File Name                                                 | Description
 [`raw.js`](raw.js)                                        | Shows using a Buffer to insert and select a RAW
 [`refcursor.js`](refcursor.js)                            | Shows using a ResultSet to fetch rows from a REF CURSOR
 [`refcursortoquerystream.js`](refcursortoquerystream.js)  | Converts a REF CURSOR returned from `execute()` to a query stream.
+[`resourceMgmt.js`](resourceMgmt.js)                      | Example for using Explicit Resource Management feature of Node.js
 [`resultset1.js`](resultset1.js)                          | Executes a query and uses a ResultSet to fetch rows with `getRow()`
 [`resultset2.js`](resultset2.js)                          | Executes a query and uses a ResultSet to fetch batches of rows with `getRows()`
 [`resultsettoquerystream.js`](resultsettoquerystream.js)  | Converts a ResultSet returned from `execute()` into a Readable Stream.

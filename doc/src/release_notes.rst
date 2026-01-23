@@ -21,6 +21,13 @@ Common Changes
 
 #)  Added :meth:`lob.trim()` method to the :ref:`LOB object <lobclass>`.
 
+#)  Added support for
+    :ref:`Explicit Resource Management <explicitresourcemgmtoverview>` which
+    was introduced in `Node.js version 24 <https://nodejs.org/en/blog/release/
+    v24.0.0>`__ to :ref:`Connection <connectionclass>`,
+    :ref:`Pool <poolclass>`, and :ref:`Resultset <resultsetclass>` objects.
+    See `Issue #1631 <https://github.com/oracle/node-oracledb/issues/1631>`__.
+
 #)  Fixed bug which did not update the :attr:`lob.length` property correctly
     after a write operation was performed on the :ref:`LOB object <lobclass>`.
 

@@ -1,12 +1,16 @@
 .. _programstyles:
 
-**************************
-Node.js Programming Styles
-**************************
+**************************************************
+Node.js Programming Styles and Resource Management
+**************************************************
 
 Node-oracledb supports :ref:`callbacks <callbackoverview>`,
 :ref:`Promises <promiseoverview>`, and :ref:`Async/Await <asyncawaitoverview>`
 Node.js styles of programming. The latter is recommended.
+:ref:`Explicit Resource Management <explicitresourcemgmtoverview>` is also
+supported for :ref:`Connection <connectionclass>`, :ref:`Pool <poolclass>` and
+:ref:`Resultset <resultsetclass>` objects from node-oracledb version 7.0
+onwards.
 
 .. _asyncawaitoverview:
 
@@ -222,3 +226,99 @@ Node-oracledb supports callbacks.
 With Oracle’s sample HR schema, the output is::
 
     [ [ 103, 60, 'IT' ] ]
+
+.. _explicitresourcemgmtoverview:
+
+Using Node.js Explicit Resource Management with node-oracledb
+=============================================================
+
+Node-oracledb supports Node.js `Explicit Resource Management <https://tc39.es/
+proposal-explicit-resource-management/>`__ which enables an application to
+automatically manage clean up of resources when they are no longer needed.
+This helps prevent memory leaks and eliminates the need for repetitive
+"try...finally" blocks.
+
+Explicit resource management was introduced in Node.js version 24 and is
+available for :ref:`Connection <connectionclass>`, :ref:`Pool <poolclass>`,
+and :ref:`Resultset <resultsetclass>` objects from node-oracledb 7.0 onwards.
+
+To use explicit resource management, you must use the ``await using`` syntax
+in your code. Using a standalone connection, for example:
+
+.. code-block:: javascript
+
+    const oracledb = require('oracledb');
+
+    const mypw = ... // the hr schema password
+
+    async function(run){
+        await using connection = await oracledb.getConnection({
+            user : "hr",
+            password: mypw,
+            connectString : "localhost/FREEPDB1"
+        });
+
+        const { resultSet } = await connection.execute(
+            `SELECT department_id, department_name FROM departments
+             ORDER BY department_id`,
+            [], // no bind variables
+            {
+              resultSet: true,
+            }
+        );
+
+        await using rs = resultSet;
+        let row;
+        let i = 1;
+
+        while ((row = await rs.getRow())) {
+          console.log("getRow(): row " + i++);
+          console.log(row);
+        }
+    }
+    run();
+
+See `resourceMgmt.js <https://github.com/oracle/node-oracledb/tree/main/
+examples/resourceMgmt.js>`__ for a runnable example.
+
+For connection pools, it is recommended to also create connections with the
+``await using`` syntax. This will ensure that there are no busy or leaked
+connections when the connection pool goes out of scope. An example of using
+explicit resource management with a connection pool is shown below:
+
+.. code-block:: javascript
+
+    const oracledb = require('oracledb');
+
+    const mypw = ... // the hr schema password
+
+    async function(run){
+        await using pool = await oracledb.createPool({
+            user : "hr",
+            password: mypw,
+            connectString : "localhost/FREEPDB1",
+            poolMin: 1,
+            poolMax: 5
+        });
+
+        await using connection = await pool.getConnection();
+
+        const { resultSet } = await connection.execute(
+            `SELECT department_id, department_name FROM departments
+             ORDER BY department_id`,
+            [], // no bind variables
+            {
+              resultSet: true,
+            }
+        );
+
+        await using rs = resultSet;
+        let row;
+        let i = 1;
+
+        while ((row = await rs.getRow())) {
+          console.log("getRow(): row " + i++);
+          console.log(row);
+        }
+    }
+    run();

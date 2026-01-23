@@ -23,6 +23,14 @@ CURSOR “out” bind parameter.
 See :ref:`Fetching Rows with Result Sets <resultsethandling>` for more
 information on ResultSets.
 
+.. note::
+
+.. note::
+
+    Starting from node-oracledb 7.0 onwards, ResultSet objects support
+    :ref:`Explicit Resource Management <explicitresourcemgmtoverview>` that
+    was introduced in Node.js version 24.
+
 .. _resultsetproperties:
 
 ResultSet Properties

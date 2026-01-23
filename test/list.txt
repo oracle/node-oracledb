@@ -6588,3 +6588,27 @@ Overview of node-oracledb functional tests
       322.1.5 Pool shrink event when idle connections are destroyed in background
       322.1.6 onWait event when pool is full and request is queued
       322.1.7 onTimeout event when queued request times out
+
+  323. explicitResourceMgmtInner.js
+  (called from explicitResourceMgmt.js, when Node.js version >= 24)
+    323.1 Connection with await using
+      323.1.1 basic connection is closed at scope exit
+      323.1.2 connection close with SQL error
+      323.1.3 manual close inside await using results in closed connection
+      323.1.4 connection object unusable after block
+    323.2 Pool with await using
+      323.2.1 pool is closed at scope exit
+      323.2.2 pool closes even when error is thrown
+      323.2.3 create connection in the pool also with await using
+    323.3 ResultSet with await using
+      323.3.1 resultSet is closed at scope exit
+      323.3.2 resultSet close does not close connection
+    323.4 Combined scenarios
+      323.4.1 pool, connection and resultSet are all closed
+      323.4.2 resources are cleaned up when error occurs mid-scope
+      323.4.3 parallel connections are all closed
+    323.5 Edge cases and error scenarios
+      323.5.1 double close inside await using throws
+      323.5.2 manual double close throws
+    323.6 pool dispose with busy connections
+      323.6.1 pool dispose throws when connections are busy

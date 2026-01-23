@@ -304,3 +304,4 @@ spec:
   - test/lobMethods.js
   - test/directPathLoad.js
   - test/tracePoolEvents.js
+  - test/explicitResourceMgmt.js

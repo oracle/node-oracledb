@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -130,6 +130,7 @@ describe('322. tracePoolEvents.js', function() {
     });
 
     it('322.1.2 Pool expand and connection acquire/release with traceHandler enabled', async function() {
+      if (!oracledb.thin) this.skip(); // This does not work in Thick mode for now
       traceInstance.enable();
       oracledb.traceHandler.setTraceInstance(traceInstance);
 
@@ -200,6 +201,7 @@ describe('322. tracePoolEvents.js', function() {
     });
 
     it('322.1.5 Pool shrink event when idle connections are destroyed in background', async function() {
+      if (!oracledb.thin) this.skip(); // This does not work in Thick mode for now
       traceInstance.enable();
       oracledb.traceHandler.setTraceInstance(traceInstance);
 
