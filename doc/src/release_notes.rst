@@ -87,6 +87,8 @@ Common Changes
     Database Releases <https://support.oracle.com/epmos/faces/
     DocumentDisplay?id=742060.1>`__.
 
+#)  Fixed NJS-089 error to display the correct driver mode.
+
 Thin Mode Changes
 +++++++++++++++++
 
