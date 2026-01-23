@@ -31,6 +31,9 @@ Common Changes
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
+#) Fixed an issue where SQL statements were not included in OpenTelemetry
+   trace spans for :meth:`connection.executeMany()`
+
 Thin Mode Changes
 +++++++++++++++++
 
