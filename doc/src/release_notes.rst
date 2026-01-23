@@ -41,6 +41,9 @@ Thin Mode Changes
     statement with different fetchInfo settings.
     See `Issue #1747 <https://github.com/oracle/node-oracledb/issues/1747>`__.
 
+#)  Added an error when dbObject attributes with locators are accessed in Thin
+    mode.
+
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------
 

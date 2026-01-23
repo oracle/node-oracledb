@@ -34,6 +34,7 @@
 const oracledb = require ('oracledb');
 const assert   = require ('assert');
 const dbConfig = require ('./dbconfig.js');
+const testUtil = require('./testsUtil.js');
 
 describe('197. dbObjectsNestedTable.js', ()  => {
   let connection = null;
@@ -42,22 +43,27 @@ describe('197. dbObjectsNestedTable.js', ()  => {
     connection = await oracledb.getConnection (dbConfig);
 
     let sql = `CREATE TYPE nodb_test197_typ IS TABLE OF VARCHAR2(30)`;
-    await connection.execute (sql);
-    await connection.commit ();
+    testUtil.createType(connection, "nodb_test197_typ", sql);
+    await connection.commit();
 
-    sql = `CREATE TABLE nodb_test197_TAB (
+    sql = `CREATE TABLE nodb_test197_tab (
              ID NUMBER, DEPT_NAMES nodb_test197_typ)
           NESTED TABLE dept_names store as dnames_nt`;
-    await connection.execute (sql);
-    await connection.commit ();
+    await testUtil.createTable(connection, "nodb_test197_tab", sql);
+    sql = `CREATE TABLE nodb_test197_tab_locator (
+             ID NUMBER, DEPT_NAMES nodb_test197_typ)
+          NESTED TABLE dept_names store as dnames_nt_loc return as locator`;
+    await testUtil.createTable(connection, "nodb_test197_tab_locator", sql);
+    await connection.commit();
 
   });
 
   after (async () => {
-    await connection.execute (`drop table nodb_test197_tab purge`);
-    await connection.execute (`drop type nodb_test197_typ`);
-    await connection.commit ();
-    await connection.close ();
+    await testUtil.dropTable(connection, "nodb_test197_tab");
+    await testUtil.dropTable(connection, "nodb_test197_tab_locator");
+    await testUtil.dropType(connection, "nodb_test197_typ");
+    await connection.commit();
+    await connection.close();
   });
 
   it('197.1 Insert into table with Nested-table + getValues',
@@ -340,5 +346,22 @@ describe('197. dbObjectsNestedTable.js', ()  => {
     const obj = new objClass ([ "One", "Two", "Three", "Four" ]);
     assert.throws(() => obj.getElement (4), /NJS-132:/);
   }); // 197.13
+
+  it('197.14 Testing with nested table returned as locator', async () => {
+    let sql = `INSERT INTO NODB_TEST197_TAB_LOCATOR VALUES ( :id, :v )`;
+    const objClass = await connection.getDbObjectClass("NODB_TEST197_TYP");
+    const id = 19711;
+
+    const obj = new objClass(["One", "Two", "Three", "Four"]);
+    await connection.execute(sql, { id: id, v: { val: obj } });
+    await connection.commit();
+
+    sql = `SELECT * FROM NODB_TEST197_TAB_LOCATOR WHERE ID = :id`;
+    const result = await connection.execute(sql, { id: id });
+    const resObj = result.rows[0][1];
+    if (oracledb.thin)
+      await assert.rejects(async () => await resObj.getValues(), /NJS-089:/);
+    else await assert.deepStrictEqual(resObj.getValues(), obj.getValues());
+  });
 
 });

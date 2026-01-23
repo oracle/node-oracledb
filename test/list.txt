@@ -4678,6 +4678,7 @@ oracledb.OUT_FORMAT_OBJECT and resultSet =  true
     197.11 Insert into table and use trim()
     197.12 Negative - use setElement() on an out-of-range index
     197.13 Negative - use getElement() on an out-of-range index
+    197.14 Testing with nested table returned as locator
 
 200. dbObject1.js
     200.1 Object Data Insertion and Retrieval
