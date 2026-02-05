@@ -65,8 +65,8 @@ See the [examples][7] directory.  Start with [examples/example.js][8].
 
 ## Help
 
-Questions about node-oracledb can be posted on [GitHub][3] or [Slack][5] ([link
-to join Slack][6]).
+Questions and issues with node-oracledb can be posted on [GitHub][3] or
+[Slack][5] ([link to join Slack][6]).
 
 ## <a name="testing"></a> Tests
 
@@ -84,7 +84,7 @@ vulnerability disclosure process.
 
 ## License
 
-Copyright (c) 2015, 2025, Oracle and/or its affiliates.
+Copyright (c) 2015, 2026, Oracle and/or its affiliates.
 
 This software is dual-licensed to you under the Universal Permissive License
 (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
