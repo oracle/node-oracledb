@@ -1,0 +1,130 @@
+name: Build node-oracledb packages
+
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+
+jobs:
+  build_linux_binaries:
+    name: Build binaries for Linux
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: x64
+            container: node:20
+          - os: ubuntu-24.04-arm
+            platform: arm64
+            container: node:20
+    container: ${{ matrix.container }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install build dependencies
+        run: apt-get update && apt-get install -y build-essential python3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build binary artifacts
+        run: npm run buildbinary
+
+      - name: Upload binary artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracledb_linux_${{ matrix.platform }}
+          path: package/Staging/
+
+  build_macos_binaries:
+    name: Build binary for macOS ${{ matrix.platform }}
+    runs-on: macos-14 # macOS ARM64
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build binary artifacts
+        run: npm run buildbinary
+
+      - name: Upload binary artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracledb_macos_arm64
+          path: package/Staging/
+
+  build_windows_binaries:
+    name: Build binary for Windows x64
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build binary artifacts
+        run: npm run buildbinary
+
+      - name: Upload binary artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oracledb_windows_x64
+          path: package/Staging/
+
+  combine_artifacts:
+    name: Combine binary artifacts and build package
+    needs: [build_linux_binaries, build_macos_binaries, build_windows_binaries]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: package/
+
+      - name: Merge binary files
+        run: |
+          mkdir -p package/Staging
+          for dir in package/oracledb_*; do
+            mv "$dir"/* package/Staging/ || true
+          done
+
+      - name: Build package
+        run: npm run buildpackage
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-oracledb-package
+          path: oracledb-*.tgz
