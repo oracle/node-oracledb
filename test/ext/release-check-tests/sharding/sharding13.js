@@ -23,48 +23,67 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
 const assert = require('assert');
-const { shardingConfig } = require('./shardingSetup.js');
 const ShardingSetup = require('./shardingSetup.js');
 
-describe('13. UUID (RAW) Sharding Keys', () => {
-  let shardingSetup;
-  const tableName = 'nodeShdTable';
+describe('13. RAW (UUID-style) Sharding Keys', function() {
+  this.timeout(0);
 
-  before(async function() {
-    if (oracledb.thin) this.skip();
-    this.timeout(300000);
+  const setup = new ShardingSetup('sharding13');
 
-    shardingSetup = new ShardingSetup();
-    await shardingSetup.setupSharding('RAW');
-  });
+  before(async () => {
+    await setup.setupBaseObjects();
 
-  after(async function() {
-    if (shardingSetup) {
-      await shardingSetup.cleanup();
-    }
-  });
-
-  it('13.1 routes using UUID RAW(16)', async () => {
-    const key = Buffer.from('010408', 'hex'); // Davis
-
-    const conn = await oracledb.getConnection({
-      ...shardingConfig,
-      shardingKey: [key]
-    });
-
-    const result = await conn.execute(
-      `SELECT cust_code FROM ${tableName} WHERE cust_code = :1`,
-      [key]
+    await setup.createShardedTable(
+      'cust_uuid',
+      'cust_uuid RAW(16) NOT NULL'
     );
 
-    assert.strictEqual(result.rows.length, 1);
-    assert.strictEqual(
-      Buffer.compare(result.rows[0][0], key),
-      0
+    const uuid1 = Buffer.from('00112233445566778899aabbccddeeff', 'hex');
+    const uuid2 = Buffer.from('ffeeddccbbaa99887766554433221100', 'hex');
+
+    await setup.insertRow(
+      {
+        cust_id: 1,
+        cust_name: 'UUIDUser1',
+        cust_uuid: uuid1
+      },
+      [uuid1]
     );
 
-    await conn.close();
+    await setup.insertRow(
+      {
+        cust_id: 2,
+        cust_name: 'UUIDUser2',
+        cust_uuid: uuid2
+      },
+      [uuid2]
+    );
+  });
+
+  after(async () => {
+    await setup.cleanup();
+  });
+
+  async function queryByUUID(buf) {
+    const result = await setup.query(
+      `SELECT cust_id, cust_name FROM ${setup.tableName} WHERE cust_uuid = :u`,
+      { u: buf },
+      [buf]
+    );
+    return result.rows[0];
+  }
+
+  it('13.1 routes using RAW UUID value', async () => {
+    const uuid = Buffer.from('00112233445566778899aabbccddeeff', 'hex');
+    const row = await queryByUUID(uuid);
+    assert.deepStrictEqual(row, [1, 'UUIDUser1']);
+  });
+
+  it('13.2 routes using another RAW UUID value', async () => {
+    const uuid = Buffer.from('ffeeddccbbaa99887766554433221100', 'hex');
+    const row = await queryByUUID(uuid);
+    assert.deepStrictEqual(row, [2, 'UUIDUser2']);
   });
 });
+

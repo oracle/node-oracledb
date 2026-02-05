@@ -23,41 +23,66 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
 const assert = require('assert');
-const ShardingSetup = require('./shardingSetup');
+const ShardingSetup = require('./shardingSetup.js');
 
-describe('11. TIMESTAMP Sharding Keys', () => {
-  let setup;
+describe('11. TIMESTAMP Sharding Keys', function() {
+  this.timeout(0);
 
-  before(async function() {
-    if (oracledb.thin) this.skip();
-    this.timeout(300000);
-    setup = new ShardingSetup();
-    await setup.setupSharding('TIMESTAMP');
+  const setup = new ShardingSetup('sharding11');
+
+  before(async () => {
+    await setup.setupBaseObjects();
+
+    await setup.createShardedTable(
+      'signup_ts',
+      'signup_ts TIMESTAMP NOT NULL'
+    );
+
+    await setup.insertRow(
+      {
+        cust_id: 1,
+        cust_name: 'Alice',
+        signup_ts: new Date('2024-01-01T10:15:30.123Z')
+      },
+      [new Date('2024-01-01T10:15:30.123Z')]
+    );
+
+    await setup.insertRow(
+      {
+        cust_id: 2,
+        cust_name: 'Bob',
+        signup_ts: new Date('2024-02-10T05:00:00.999Z')
+      },
+      [new Date('2024-02-10T05:00:00.999Z')]
+    );
   });
 
-  after(() => setup.cleanup());
+  after(async () => {
+    await setup.cleanup();
+  });
 
-  async function query(ts) {
-    const c = await oracledb.getConnection({
-      ...require('./shardingSetup').shardingConfig,
-      shardingKey: [ts]
-    });
-
-    const r = await c.execute(
-      'SELECT COUNT(*) FROM nodeShdTable WHERE signup_ts = :1',
+  async function queryByTimestamp(ts) {
+    const result = await setup.query(
+      `SELECT cust_id, cust_name FROM ${setup.tableName} WHERE signup_ts = :ts`,
+      { ts },
       [ts]
     );
-    await c.close();
-    assert.strictEqual(r.rows[0][0], 1);
+    return result.rows[0];
   }
 
   it('11.1 routes using TIMESTAMP with milliseconds', async () => {
-    await query(new Date('2014-07-02T10:15:30.123Z'));
+    const row = await queryByTimestamp(
+      new Date('2024-01-01T10:15:30.123Z')
+    );
+    assert.deepStrictEqual(row, [1, 'Alice']);
   });
 
   it('11.2 routes using different TIMESTAMP value', async () => {
-    await query(new Date('2013-10-21T05:45:00.999Z'));
+    const row = await queryByTimestamp(
+      new Date('2024-02-10T05:00:00.999Z')
+    );
+    assert.deepStrictEqual(row, [2, 'Bob']);
   });
 });
+

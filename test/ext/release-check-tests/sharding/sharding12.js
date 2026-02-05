@@ -23,58 +23,78 @@
  *****************************************************************************/
 'use strict';
 
-const oracledb = require('oracledb');
 const assert = require('assert');
-const ShardingSetup = require('./shardingSetup');
+const oracledb = require('oracledb');
+const ShardingSetup = require('./shardingSetup.js');
 
-describe('12. NVARCHAR2 (Unicode) Sharding Keys', () => {
-  let setup;
+describe('12. NVARCHAR2 (Unicode) Sharding Keys', function() {
+  this.timeout(0);
 
-  before(async function() {
-    if (oracledb.thin) this.skip();
-    this.timeout(300000);
-    setup = new ShardingSetup();
-    await setup.setupSharding('NVARCHAR');
-  });
+  const setup = new ShardingSetup('sharding12');
+  const NV_TYPE = oracledb.DB_TYPE_NVARCHAR || oracledb.DB_TYPE_NCHAR;
 
-  after(() => setup.cleanup());
+  before(async () => {
+    await setup.setupBaseObjects();
 
-  async function query(val, expectedId) {
-    const conn = await oracledb.getConnection({
-      ...require('./shardingSetup').shardingConfig,
-      shardingKey: [val]
-    });
-
-    const result = await conn.execute(
-      `
-    SELECT cust_id, cust_name_n
-    FROM nodeShdTable
-    WHERE cust_name_n = :val
-    `,
-      {
-        val: {
-          val,
-          type: oracledb.DB_TYPE_NVARCHAR,
-          maxSize: 100
-        }
-      }
+    await setup.createShardedTable(
+      'cust_name_n',
+      'cust_name_n NVARCHAR2(50) NOT NULL'
     );
 
-    await conn.close();
+    await setup.insertRow(
+      {
+        cust_id: 10,
+        cust_name: 'TokyoUser',
+        cust_name_n: '東京'
+      },
+      ['東京']
+    );
 
-    assert.ok(result.rows.length === 1, 'Expected exactly one row');
-    assert.deepStrictEqual(result.rows[0], [expectedId, val]);
+    await setup.insertRow(
+      {
+        cust_id: 20,
+        cust_name: 'EmojiUser',
+        cust_name_n: '😀'
+      },
+      ['😀']
+    );
+
+    await setup.insertRow(
+      {
+        cust_id: 30,
+        cust_name: 'MixedUser',
+        cust_name_n: 'User-测试'
+      },
+      ['User-测试']
+    );
+  });
+
+  after(async () => {
+    await setup.cleanup();
+  });
+
+  async function queryByName(val) {
+    const result = await setup.query(
+      `SELECT cust_id, cust_name_n FROM ${setup.tableName} WHERE cust_name_n = :n`,
+      { n: { val, type: NV_TYPE } },
+      [val]
+    );
+    return result.rows[0];
   }
 
   it('12.1 routes Unicode (CJK)', async () => {
-    await query('東京', 10);
+    const row = await queryByName('東京');
+    assert.deepStrictEqual(row, [10, '東京']);
   });
 
   it('12.2 routes Unicode (emoji)', async () => {
-    await query('😀', 100);
+    const row = await queryByName('😀');
+    assert.deepStrictEqual(row, [20, '😀']);
   });
 
   it('12.3 routes mixed Unicode + ASCII', async () => {
-    await query('User-测试', 16);
+    const row = await queryByName('User-测试');
+    assert.deepStrictEqual(row, [30, 'User-测试']);
   });
 });
+
