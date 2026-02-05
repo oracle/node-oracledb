@@ -4897,16 +4897,19 @@ Overview of node-oracledb functional tests
 
   224. booleanBind.js
     224.1 IN bind boolean value
-    224.2 Negative: IN bind boolean value for 12.1 DB
-    224.3 IN bind value "false"
-    224.4 IN bind value "null"
-    224.5 Negative - IN bind value type mismatch
-    224.6 OUT bind value "false"
-    224.7 OUT bind value "true"
-    224.8 IN bind array with boolean data
-    224.9 OUT bind array with boolean data
-    224.10 INOUT bind record with boolean data
-    224.11 OUT bind value "null"
+    224.2 IN bind value "false"
+    224.3 IN bind value "null"
+    224.4 Negative - IN bind value type mismatch
+    224.5 OUT bind value "false"
+    224.6 OUT bind value "true"
+    224.7 IN bind array with boolean data
+    224.8 OUT bind array with boolean data
+    224.9 INOUT bind record with boolean data
+    224.10 OUT bind value "null"
+    224.11 OUT bind value NOT "true"
+    224.12 OUT bind value NOT "false"
+    224.13 OUT bind value bool_to_int(FALSE)
+    224.14 OUT bind value bool_to_int(TRUE)
 
   226. dbType01.js
     226.1 DB_TYPE_VARCHAR

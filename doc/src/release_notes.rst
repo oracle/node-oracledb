@@ -48,6 +48,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug when decoding PL/SQL booleans in Oracle Database 12.1.
+
 #)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.

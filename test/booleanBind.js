@@ -42,6 +42,7 @@ describe('224. booleanBind.js', function()  {
 
   var  conn;
   var  isRunnable = false;
+  let isThickModeUnsupported = false;
 
   const pkgName = 'NODB_PKG_TEST_BOOLEANS';
   before(async function() {
@@ -148,6 +149,13 @@ describe('224. booleanBind.js', function()  {
     conn = await oracledb.getConnection(dbConfig);
     await conn.execute(plsqlPkg);
     await conn.execute(plsqlPkgBody);
+
+    const serverVersion = conn.oracleServerVersion;
+    if (!oracledb.thin && serverVersion < 1202000000) {
+      // For server versions less than 12.2 thick mode throws an error
+      // ORA-06502: PL/SQL: numeric or value error
+      isThickModeUnsupported = true;
+    }
   }); // before()
 
   after(async function() {
@@ -161,9 +169,6 @@ describe('224. booleanBind.js', function()  {
   }); // after()
 
   it('224.1 IN bind boolean value', async function() {
-    if (conn.oracleServerVersion < 1202000000)
-      this.skip();
-
     const  binds = {
       inval: true,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
@@ -175,9 +180,6 @@ describe('224. booleanBind.js', function()  {
   }); // 224.1
 
   it('224.2 IN bind value "false"', async function() {
-    if (conn.oracleServerVersion < 1202000000)
-      this.skip();
-
     const  binds = {
       inval: false,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
@@ -215,8 +217,9 @@ describe('224. booleanBind.js', function()  {
   });
 
   it('224.5 OUT bind value "false"', async function() {
-    if (conn.oracleServerVersion < 1202000000)
+    if (isThickModeUnsupported) {
       this.skip();
+    }
 
     const  binds = {
       inval: 12,
@@ -229,8 +232,9 @@ describe('224. booleanBind.js', function()  {
   }); // 224.5
 
   it('224.6 OUT bind value "true"', async function() {
-    if (conn.oracleServerVersion < 1202000000)
+    if (isThickModeUnsupported) {
       this.skip();
+    }
 
     const  binds = {
       inval: 9,
@@ -294,4 +298,52 @@ describe('224. booleanBind.js', function()  {
     const  result = await conn.execute(sql, binds);
     assert.strictEqual(null, result.outBinds.outval);
   }); // 224.10
+
+  it('224.11 OUT bind value NOT "true"', async function() {
+    if (isThickModeUnsupported) {
+      this.skip();
+    }
+
+    const  binds = {
+      outval: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+    };
+    const  sql = `declare v boolean := TRUE; begin :outval := NOT v; end;`;
+
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual(false, result.outBinds.outval);
+  }); // 224.11
+
+  it('224.12 OUT bind value NOT "false"', async function() {
+    if (isThickModeUnsupported) {
+      this.skip();
+    }
+
+    const  binds = {
+      outval: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_BOOLEAN }
+    };
+    const  sql = `declare v boolean := FALSE; begin :outval := NOT v; end;`;
+
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual(true, result.outBinds.outval);
+  }); // 224.12
+
+  it('224.13 OUT bind value bool_to_int(FALSE)', async function() {
+    const  binds = {
+      outval: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+    };
+    const  sql = `begin :outval := sys.diutil.bool_to_int(FALSE); end;`;
+
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual(0, result.outBinds.outval);
+  }); // 224.13
+
+  it('224.14 OUT bind value bool_to_int(TRUE)', async function() {
+    const  binds = {
+      outval: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER }
+    };
+    const  sql = `begin :outval := sys.diutil.bool_to_int(TRUE); end;`;
+
+    const  result = await conn.execute(sql, binds);
+    assert.strictEqual(1, result.outBinds.outval);
+  }); // 224.14
 });
