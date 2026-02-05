@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -280,7 +280,7 @@ describe('161. changePassword.js', function() {
 
   }); // 161.6
 
-  it.skip('161.7 Negative: basic case. invalid parameter', async function() {
+  it('161.7 Negative: basic case. invalid parameter', async function() {
     const tpass = 123;
     const credential = {
       user: myUser,

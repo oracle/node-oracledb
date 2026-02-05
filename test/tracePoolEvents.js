@@ -230,6 +230,10 @@ describe('322. tracePoolEvents.js', function() {
     });
 
     it('322.1.6 onPoolWait event when pool is full and request is queued', async function() {
+      // See https://github.com/oracle/node-oracledb/issues/959
+      if (!oracledb.thin && oracledb.oracleClientVersion < 1800000000)
+        this.skip();
+
       traceInstance.enable();
       oracledb.traceHandler.setTraceInstance(traceInstance);
 
@@ -265,6 +269,10 @@ describe('322. tracePoolEvents.js', function() {
     });
 
     it('322.1.7 onPoolRequestTimeout event when queued request times out', async function() {
+      // See https://github.com/oracle/node-oracledb/issues/959
+      if (!oracledb.thin && oracledb.oracleClientVersion < 1800000000)
+        this.skip();
+
       traceInstance.enable();
       oracledb.traceHandler.setTraceInstance(traceInstance);
 

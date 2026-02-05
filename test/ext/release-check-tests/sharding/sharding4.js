@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. All rights reserved. */
 /******************************************************************************
  *
  * You may not use the identified files except in compliance with the Apache
@@ -117,11 +117,8 @@ describe('4. String Sharding Keys', () => {
       connectString: shardingConfig.connectString,
       homogeneous: false
     };
-    console.log("Before pool creation");
 
     const pool = await oracledb.createPool(poolConfig);
-
-    console.log("After pool creation");
 
     const connConfig = {
       user: shardingConfig.user,
@@ -129,10 +126,8 @@ describe('4. String Sharding Keys', () => {
       shardingKey: ["Steve"]
     };
 
-    console.log("Before get Connection");
     const conn = await pool.getConnection(connConfig);
 
-    console.log("After get Connection");
     const sql = `SELECT cust_id, cust_name FROM ${tableName} WHERE cust_name = :1`;
     const binds = ['Steve'];
     const result = await conn.execute(sql, binds);
