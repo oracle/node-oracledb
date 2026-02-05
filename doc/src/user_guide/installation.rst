@@ -1441,6 +1441,37 @@ Your new package can be :ref:`self-hosted <selfhost>` for use within your
 company, or it can be used directly from the file system to install
 node-oracledb.
 
+.. _installghactions:
+
+Creating a node-oracledb Package Using GitHub Actions
+-----------------------------------------------------
+
+The node-oracledb GitHub repository has a builder Action that uses GitHub
+infrastructure to build node-oracledb packages for Linux (x86_64 and ARM),
+macOS ARM, and Windows architecture with Node.js 20.
+
+1. Fork the `node-oracledb repository <https://github.com/oracle/node-oracledb
+   /fork>`__. Additionally, fork the `ODPI-C repository <https://github.com/
+   oracle/odpi/fork>`__, keeping the default name.
+
+2. In your node-oracledb fork, go to the Actions tab
+   ``https://github.com/<your name>/node-oracledb/actions/``. If this is
+   your first time using Actions, confirm enabling them.
+
+3. In the "All workflows" list on the left-hand side, select the "Build
+   node-oracledb packages" entry.
+
+4. Navigate to the "Run workflow" drop-down, select the branch to build from
+   (for example, "main"), and run the workflow.
+
+5. When the build has completed, download the "node-oracledb-package" artifact,
+   unzip it, and extract the oracledb-<version>.tgz file to any folder. Then
+   run:
+
+   .. code-block:: shell
+
+       npm install  oracledb-<version>.tgz
+
 .. _selfhost:
 
 Hosting Your Own node-oracledb Packages
