@@ -38,9 +38,9 @@ Common Changes
 #)  Fixed an issue where SQL statements were not included in OpenTelemetry
     trace spans for :meth:`connection.executeMany()`.
 
-#)  Added new methods in TraceHandlerBase class for pool events which can
-    be used for tracking connection pool statistics and metrics for
-    OpenTelemetry support.
+#)  Added new methods in :ref:`TraceHandlerBase class <tracehandlerbaseclass>`
+    for pool events which can be used for tracking connection pool statistics
+    and metrics for :ref:`OpenTelemetry <opentelemetry>` support.
 
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.

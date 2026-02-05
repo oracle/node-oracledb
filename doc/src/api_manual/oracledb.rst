@@ -4524,6 +4524,294 @@ TraceHandlerBase Methods
           - Object
           - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
 
+.. method:: onPoolAcquire()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolAcquire(Object pool);
+
+    Called when a connection is successfully acquired from the pool. This
+    method is useful for tracking the number of connections that are currently
+    checked out from the connection pool and in use. Note that this is a
+    synchronous method.
+
+	The parameters of the ``onPoolAcquire()`` method are:
+
+    .. _onpoolacquire:
+
+    .. list-table-with-summary:: onPoolAcquire() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolClose()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolClose(Object pool);
+
+    Called when a pool is closed. This method is useful for tracking shutdown
+    events or resetting counters. Note that this is a synchronous method.
+
+	The parameters of the ``onPoolClose()`` method are:
+
+    .. _onpoolclose:
+
+    .. list-table-with-summary:: onPoolClose() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolConnectionHit()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolConnectionHit(Object pool);
+
+    Called when a requested connection is obtained from the pool's free list
+    (cache hit). This method is useful for analyzing connection reuse. Note
+    that this is a synchronous method.
+
+	The parameters of the ``onPoolConnectionHit()`` method are:
+
+    .. _onpoolconnectionhit:
+
+    .. list-table-with-summary:: onPoolConnectionHit() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolConnectionMiss()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolConnectionMiss(Object pool);
+
+    Called when a connection request requires creating a new connection (cache
+    miss). This method is useful for analyzing connection reuse. Note that
+    this is a synchronous method.
+
+	The parameters of the ``onPoolConnectionMiss()`` method are:
+
+    .. _onpoolconnectionmiss:
+
+    .. list-table-with-summary:: onPoolConnectionMiss() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolExpand()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolExpand(Object pool);
+
+    Called when a pool expands by creating new connections. This method is
+    useful to track pool growth or initialization activity. Note that this is
+    a synchronous method.
+
+	The parameters of the ``onPoolExpand()`` method are:
+
+    .. _onpoolexpand:
+
+    .. list-table-with-summary:: onPoolExpand() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolRelease()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolRelease(Object pool);
+
+    Called when a connection is released back to the pool. This method is
+    useful for monitoring returned or idle connections. Note that this is a
+    synchronous method.
+
+	The parameters of the ``onPoolRelease()`` method are:
+
+    .. _onpoolrelease:
+
+    .. list-table-with-summary:: onPoolRelease() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolRequestTimeout()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolRequestTimeout(Object pool);
+
+    Called when a queued connection request times out before it can be served.
+    This method is useful for tracking request timeouts or failures. Note that
+    this is a synchronous method.
+
+	The parameters of the ``onPoolRequestTimeout()`` method are:
+
+    .. _onpoolrequesttimeout:
+
+    .. list-table-with-summary:: onPoolRequestTimeout() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolShrink()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolShrink(Object pool);
+
+    Called when a pool shrinks and a connection is removed, such as during
+    timeouts or pool resizing. This method is useful for monitoring resource
+    cleanup or shrink events. Note that this is a synchronous method.
+
+	The parameters of the ``onPoolRequestShrink()`` method are:
+
+    .. _onpoolshrink:
+
+    .. list-table-with-summary:: onPoolShrink() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
+.. method:: onPoolWait()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        onPoolWait(Object pool);
+
+    Called when a connection request is queued because the pool cannot grow
+    further. This method is useful for monitoring queued requests. Note that
+    this is a synchronous method.
+
+	The parameters of the ``onPoolWait()`` method are:
+
+    .. _onpoolwait:
+
+    .. list-table-with-summary:: onPoolWait() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays
+         the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pool``
+          - Object
+          - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
+
 .. _tracehandler:
 
 TraceHandler Methods
