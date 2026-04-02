@@ -4012,8 +4012,8 @@ Oracledb Methods
           - String
           - The centralized configuration provider extension that needs to be
             accessed. The value can be the string "ociobject", "ocivault",
-            "azure", or "azurevault" which are the pre-supplied node-oracledb
-            configuration provider extensions.
+            "azure", "azurevault", or "awss3" which are the pre-supplied
+            node-oracledb configuration provider extensions.
         * - ``fn``
           - Function
           - The hook function that needs to be registered. This hook

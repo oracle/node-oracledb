@@ -1953,6 +1953,52 @@ following OCI modules:
 See :ref:`ocivault` for information on using this configuration provider with
 node-oracledb.
 
+.. _awss3modules:
+
+Install Modules for Amazon Simple Storage Service (S3)
+------------------------------------------------------
+
+For node-oracledb to work with Amazon S3, you must install the following AWS
+modules:
+
+1. Install the `AWS SDK for JavaScript S3 Client <https://www.npmjs.com/
+   package/@aws-sdk/client-s3>`__ module using:
+
+   .. code-block:: shell
+
+        npm install aws-sdk/client-s3
+
+2. Install the `AWS SDK Credential Providers <https://www.npmjs.com/package/
+   @aws-sdk/credential-providers>`__ module using:
+
+   .. code-block:: shell
+
+        npm install aws-sdk/credential-providers
+
+3. Install the `AWS Shared Configuration File Loader <https://www.npmjs.com/
+   package/@smithy/shared-ini-file-loader>`__ module using:
+
+   .. code-block:: shell
+
+        npm smithy/shared-ini-file-loader
+
+4. Install the `AWS Node HTTP Handler <https://www.npmjs.com/package/@smithy/
+   node-http-handler>`__ module using:
+
+   .. code-block:: shell
+
+        npm install smithy/node-http-handler
+
+5. Install the `HTTP and HTTPS Agent <https://www.npmjs.com/package/
+   hpagent>`__ module using:
+
+   .. code-block:: shell
+
+        npm install hpagent
+
+See :ref:`awss3` for information on using this configuration provider with
+node-oracledb.
+
 .. _cloudnativemodules:
 
 Installing Cloud Native Authentication Modules for node-oracledb

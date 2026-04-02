@@ -194,3 +194,26 @@ To load the ``azurevault`` plugin in your application, use:
     require('oracledb/plugins/configProviders/azurevault');
 
 See :ref:`azurekeyvault` for more information.
+
+.. _awss3plugin:
+
+Amazon Simple Storage Service (S3) Centralized Configuration Provider Plugin
+----------------------------------------------------------------------------
+
+.. versionadded:: 7.0
+
+``awss3`` is a plugin that can be loaded in your application to provide access
+to configuration information stored in :ref:`AWS S3 <awss3>`.
+
+This plugin is implemented as a :ref:`centralized configuration provider hook
+function <configproviderhookfn>` to handle connection strings which have the
+prefix ``config-awss3``, see :ref:`Amazon S3 connection strings
+<connstringawss3>`.
+
+To load the ``awss3`` plugin in your application, use:
+
+.. code-block:: javascript
+
+    require('oracledb/plugins/configProviders/awss3');
+
+See :ref:`awss3` for more information.

@@ -295,10 +295,11 @@ A :ref:`Centralized Configuration Provider <configurationprovider>` URL
 connection string allows node-oracledb configuration information to be stored
 centrally in :ref:`OCI Object Storage <ociobjstorage>`,
 :ref:`OCI Vault <ocivault>`, :ref:`local file <fileconfigprovider>`,
-:ref:`Azure App Configuration <azureappconfig>`, or in a
-:ref:`Azure Key Vault <azurekeyvault>`. Using a provider URL, node-oracledb
-will access the information stored in the configuration provider
-and use it to connect to Oracle Database.
+:ref:`Azure App Configuration <azureappconfig>`,
+:ref:`Azure Key Vault <azurekeyvault>`, or
+:ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`. Using a
+provider URL, node-oracledb will access the information stored in the
+configuration provider and use it to connect to Oracle Database.
 
 The database connect descriptor and any database credentials stored in a
 configuration provider will be used by any language driver that accesses the
@@ -308,8 +309,8 @@ other sections.
 
 The Centralized Configuration Provider URL must begin with
 "config-<configuration-provider>://" where the configuration-provider value
-can be set to *ociobject*, *ocivault*, *file*, *azure*, or *azurevault*
-depending on the location of your configuration information.
+can be set to *ociobject*, *ocivault*, *file*, *azure*, *azurevault*, or
+*awss3* depending on the location of your configuration information.
 
 For example, consider the following connection configuration stored in
 :ref:`OCI Object Storage <ociobjstorage>`:
@@ -456,6 +457,7 @@ The following configuration providers are supported by node-oracledb:
 - :ref:`Oracle Cloud Infrastructure (OCI) Vault <ocivault>`
 - :ref:`Microsoft Azure App Configuration <azureappconfig>`
 - :ref:`Microsoft Azure Key Vault <azurekeyvault>`
+- :ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`
 
 .. _configurationinformation:
 
@@ -483,7 +485,7 @@ below.
 
         The password of the database user.
 
-        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, and :ref:`File <fileconfigprovider>` configuration providers, the value is an object which contains the following parameters:
+        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`File <fileconfigprovider>`, and :ref:`AWS S3 <awss3>` configuration providers, the value is an object which contains the following parameters:
 
         - ``type``: The possible values of this required parameter are *ocivault*, *azurevault*, *base64*, and *text*.
 
@@ -495,7 +497,7 @@ below.
 
         .. warning::
 
-            Storing passwords of type *base64* or *text* in the JSON file for File, OCI Object Storage, and Azure App Configuration  configuration providers should only ever be used in development or test environments. It can be used with Azure Vault and OCI Vault configuration providers.
+            Storing passwords of type *base64* or *text* in the JSON file for File, OCI Object Storage, Azure App, and AWS S3 configuration providers should only ever be used in development or test environments. It can be used with Azure Vault and OCI Vault configuration providers.
       - Optional
     * - ``connect_descriptor``
       - The database :ref:`connect descriptor <embedtns>`.
@@ -506,6 +508,8 @@ below.
         For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, and :ref:`File <fileconfigprovider>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
 
         For :ref:`Azure App Configuration <azureappconfig>`, this parameter is the reference to the Azure Key Vault and Secret that contains the wallet as the value.
+
+        For :ref:`AWS S3 <awss3>`, this parameter is not supported.
       - Optional
     * - ``config_time_to_live``
       - The number of seconds that node-oracledb should keep the configuration information cached. See :ref:`conncaching`.
@@ -1124,6 +1128,134 @@ below.
       - Required
     * - <options>=<values>
       - The authentication method and its corresponding parameters to access the Azure Key Vault Configuration provider. You can specify one of the following authentication methods: Default Azure Credential, Service Principal with Client Secret, Service Principal with Client Certificate, and Managed Identity. See :ref:`azureappauthmethods` for more information on these authentication methods and their corresponding parameters.
+      - Optional
+
+.. _awss3:
+
+Using an Amazon Web Service (AWS) Simple Storage Service (S3) Centralized Configuration Provider
+------------------------------------------------------------------------------------------------
+
+The Amazon Web Service (AWS) `Simple Storage Service (S3) configuration
+provider <https://docs.aws.amazon.com/AmazonS3/latest/userguide/
+Welcome.html>`__ enables the storage and management of Oracle Database
+connection information as JSON. This configuration provider support was
+introduced in node-oracledb 7.0.
+
+Before using AWS S3, you must set the following environment variables:
+
+- *AWS_REGION* which specifies the AWS S3 bucket region.
+
+- *HTTPS_PROXY* which specifies the proxy value that is required in a
+  protected environment.
+
+- *AWS_PROFILE* which specifies the name of the AWS profile to use from
+  ~/.aws/credentials.
+
+- *AWS_ACCESS_KEY_ID* which explicitly specifies the Access Key ID. This is
+  required when authenticating using environment variables.
+
+- *AWS_SECRET_ACCESS_KEY* which explicitly specifies the Secret Access Key.
+  This is required when authenticating using environment variables.
+
+To use an AWS S3, you must:
+
+1. Upload a JSON file that contains the connection information into an S3
+   Bucket. See :ref:`Connection Information for AWS S3 Centralized
+   Configuration Provider <awss3configparams>`.
+
+   Also, see `Uploading objects <https://docs.aws.amazon.com/AmazonS3/latest/
+   userguide/upload-objects.html>`__ for the steps.
+
+2. Install the required AWS S3 modules. See :ref:`awss3modules`.
+
+3. Load the :ref:`awss3 <awss3plugin>` plugin in your application using
+   ``require('oracledb/plugins/configProviders/awss3')``.
+
+4. :ref:`Use an AWS S3 connection string URL <connstringawss3>` in the
+   ``connectString`` property of connection and pool creation methods.
+
+Note that node-oracledb caches configurations by default, see
+:ref:`conncaching`.
+
+.. _awss3configparams:
+
+**Connection Information for AWS S3 Configuration Provider**
+
+The connection information stored in a JSON file must contain a
+``connect_descriptor`` key. Optionally, you can specify the database user
+name, password, and node-oracledb properties. For details on the information
+that can be stored in this configuration provider, see
+:ref:`_configuration_information`.
+
+.. _exampleawss3:
+
+An example of a JSON file that can be used with AWS S3 Configuration Provider is:
+
+.. code-block:: json
+
+    {
+        "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+                (host=adb.region.oraclecloud.com))(connect_data=(service_name=dbsvcname))
+                (security=(ssl_server_dn_match=yes)))",
+
+        "user": "scott",
+        "password": {
+            "type": "base64",
+            "value": "dGlnZXI="
+        },
+        "njs": {
+            "stmtCacheSize": 30,
+            "prefetchRows": 2,
+            "poolMin": 2,
+            "poolMax": 10
+        }
+    }
+
+This encodes the password as base64.
+
+.. _connstringawss3:
+
+**AWS S3 Centralized Configuration Provider connectString Syntax**
+
+The ``connectString`` parameter for :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()` calls should use a connection string URL in the
+format::
+
+    config-awss3://s3://<bucketName>/<keyName>?<options>
+
+For example, a connection string to access AWS S3 and connect to Oracle
+Database is:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-awss3://s3://my-bucket/sample.json?aws_region=us-east-1"
+    });
+
+The parameters of the connection string URL format are detailed in the table
+below.
+
+.. list-table-with-summary:: Connection String Parameters for AWS S3
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 15 25 15
+    :name: _connection_string_for_aws_s3
+    :summary: The first row displays the name of the connection string parameter. The second row displays the description of the connection string parameter. The third row displays whether the connection string parameter is required or optional.
+
+    * - Parameter
+      - Description
+      - Required or Optional
+    * - config-awss3
+      - Indicates that the configuration provider is AWS S3.
+      - Required
+    * - <bucketName>
+      - The AWS S3 bucket name where the JSON file is stored.
+      - Required
+    * - <keyName>
+      - The JSON file name.
+      - Required
+    * - <options>
+      - The region of the AWS S3 bucket.
       - Optional
 
 .. _conncaching:
@@ -2954,13 +3086,14 @@ creation.
 
 Pre-supplied node-oracledb plugins such as :ref:`OCI Object Storage
 (ociobject) <ociobjectplugin>`, :ref:`OCI Vault (ocivault) <ocivaultplugin>`,
-:ref:`Azure App Configuration (azure) <azureplugin>`, and
-:ref:`Azure Key Vault (azurevault) <azurevaultplugin>` make use of
-:meth:`oracledb.registerConfigurationProviderHook()`. These plugins use the
-information found in a connection method's ``connectString`` property which
-allows node-oracledb to access the required information from the configuration
-provider, and connect to Oracle Database with this information. For the
-complete plugin implementation, see the respective folders of the
+:ref:`Azure App Configuration (azure) <azureplugin>`,
+:ref:`Azure Key Vault (azurevault) <azurevaultplugin>`, and
+:ref:`Amazon Web Service (AWS) Simple Storage Service (AWS S3) <awss3>` make
+use of :meth:`oracledb.registerConfigurationProviderHook()`. These plugins use
+the information found in a connection method's ``connectString`` property
+which allows node-oracledb to access the required information from the
+configuration provider, and connect to Oracle Database with this information.
+For the complete plugin implementation, see the respective folders of the
 configuration providers in the `plugins/configProviders <https://github.com/
 oracle/node-oracledb/tree/main/plugins/configProviders>`__ directory of the
 node-oracledb package. Also, you can define your own plugins for centralized

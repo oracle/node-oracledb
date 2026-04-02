@@ -28,6 +28,9 @@ Common Changes
     :ref:`Pool <poolclass>`, and :ref:`Resultset <resultsetclass>` objects.
     See `Issue #1631 <https://github.com/oracle/node-oracledb/issues/1631>`__.
 
+#)  Added support for :ref:`AWS Simple Storage Service (S3) <awss3>`
+    Centralized Configuration Provider.
+
 #)  Fixed bug which did not update the :attr:`lob.length` property correctly
     after a write operation was performed on the :ref:`LOB object <lobclass>`.
 
