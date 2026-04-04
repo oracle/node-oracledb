@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,7 +32,7 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const dbConfig = require('../../dbconfig.js');
+const dbConfig = require('../../../dbconfig.js');
 
 describe('throwErrorInRelease.js', function() {
   it('Github issue 562', async function() {

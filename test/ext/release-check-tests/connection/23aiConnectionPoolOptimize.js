@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -43,7 +43,7 @@
 Error.stackTraceLimit = 50;
 
 const oracledb = require('oracledb');
-const dbConfig = require('../../dbconfig.js');
+const dbConfig = require('../../../dbconfig.js');
 
 async function createCloseConns(num) {
   const promises = [];

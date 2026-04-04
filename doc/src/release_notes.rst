@@ -19,6 +19,10 @@ node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0..
 Common Changes
 ++++++++++++++
 
+#)  Added new connection properties :attr:`connection.pdbName`,
+    :attr:`connection.dbUniqueName` that provide the Pluggable database name and
+    database unique name.
+
 #)  Added :meth:`lob.trim()` method to the :ref:`LOB object <lobclass>`.
 
 #)  Added support for

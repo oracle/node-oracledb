@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -31,8 +31,8 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const dbConfig = require('../../dbconfig.js');
-const random = require('../../random.js');
+const dbConfig = require('../../../dbconfig.js');
+const random = require('../../../random.js');
 
 describe('brk.js', function() {
   this.timeout(100000);

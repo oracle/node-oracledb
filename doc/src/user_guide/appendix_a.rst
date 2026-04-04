@@ -423,7 +423,7 @@ See :ref:`tnsadmin` and :ref:`oraaccess` for more information.
 Connection Strings
 ++++++++++++++++++
 
-Node-oracledb Thin mode accepts :ref:` Oracle Net Services connection strings
+Node-oracledb Thin mode accepts :ref:`Oracle Net Services connection strings
 <connectionstrings>` in the same formats as the Oracle Client libraries used by
 Thick mode does, but not all Oracle Net keywords will be supported.
 

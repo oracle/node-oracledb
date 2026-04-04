@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -154,4 +154,48 @@ describe('307. traceCalls.js', function() {
     }); // 307.1.5
 
   }); // 307.1
+
+  describe('307.2 connectTraceConfig', () => {
+    let connection;
+
+    before(async () => {
+      connection = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async () => {
+      if (connection) {
+        await connection.close();
+      }
+    });
+
+    it('307.2.1 exposes connection level trace details', function() {
+      const traceConfig = connection.connectTraceConfig;
+
+      assert(traceConfig, 'Expected connectTraceConfig to return value');
+      assert.strictEqual(typeof traceConfig, 'object');
+
+      if (dbConfig.user) {
+        assert.strictEqual(traceConfig.user, dbConfig.user);
+      } else if (dbConfig.username) {
+        assert.strictEqual(traceConfig.user, dbConfig.username);
+      }
+
+      const cfgConnectString = dbConfig.connectString || dbConfig.connectionString;
+      if (cfgConnectString) {
+        assert.strictEqual(traceConfig.connectString, cfgConnectString);
+      }
+
+      const commonProps = ['serviceName', 'instanceName', 'pdbName', 'dbName', 'domainName'];
+      for (const prop of commonProps) {
+        assert(Object.prototype.hasOwnProperty.call(traceConfig, prop), `Missing property ${prop}`);
+      }
+
+      if (oracledb.thin) {
+        const thinProps = ['hostName', 'port', 'protocol', 'dbUniqueName'];
+        for (const prop of thinProps) {
+          assert(Object.prototype.hasOwnProperty.call(traceConfig, prop), `Missing thin property ${prop}`);
+        }
+      }
+    });
+  });
 });

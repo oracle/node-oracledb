@@ -29,9 +29,6 @@ const util = require("node:util");
 const { base } = require("../base.js");
 const oracledb = require("oracledb");
 
-const process = require('node:process');
-process.loadEnvFile();
-
 let S3Client, GetObjectCommand, fromNodeProviderChain, loadSharedConfigFiles, NodeHttpHandler, HttpsProxyAgent;
 let myAgentHandler;
 

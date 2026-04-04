@@ -646,3 +646,9 @@ testsUtil.cmanTdmCheck = async function() {
   await connection.close();
   return (!process.env.NODE_ORACLEDB_PROXY_SESSION_USER && result.rows[0][0] != null);
 };
+
+// function to check if Database is running in a multitenant
+testsUtil.isMultiTenantConfig = async (conn) => {
+  const res = await conn.execute(`SELECT CDB FROM V$DATABASE`);
+  return (res.rows[0][0] === 'YES');
+};

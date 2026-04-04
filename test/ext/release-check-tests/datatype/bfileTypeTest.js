@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -37,8 +37,8 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
-const dbConfig  = require('../../dbconfig.js');
-const testsUtil = require('../../testsUtil.js');
+const dbConfig  = require('../../../dbconfig.js');
+const testsUtil = require('../../../testsUtil.js');
 
 describe('400. bfileTestType.js', function() {
   let conn, dbaConn;

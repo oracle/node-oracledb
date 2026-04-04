@@ -150,6 +150,20 @@ The properties of a *Connection* object are listed below.
 
         SELECT UPPER(NAME) FROM V$DATABASE;
 
+.. attribute:: connection.dbUniqueName
+
+    .. versionadded:: 7.0
+
+    This read-only property is a string that identifies a globally unique name
+    for the database. This property returns the same value as the SQL
+    expression::
+
+        SELECT UPPER(SYS_CONTEXT('USERENV', 'DB_UNIQUE_NAME')) FROM DUAL;
+
+    .. note::
+
+        This property can only be used in node-oracledb Thin mode.
+
 .. attribute:: connection.dbOp
 
     .. versionadded:: 4.1
@@ -291,6 +305,23 @@ The properties of a *Connection* object are listed below.
     will only be accurate if node-oracledb is also using Oracle Database 18,
     or later, client libraries. Otherwise it will show the base release such
     as “18.0.0.0.0” instead of “18.3.0.0.0”.
+
+.. attribute:: connection.pdbName
+
+    .. versionadded:: 7.0
+
+    This read-only property is a string that identifies the name of the
+    pluggable database associated with the connection. This property returns
+    the same value as the SQL expression::
+
+        SELECT UPPER(SYS_CONTEXT('USERENV', 'CON_NAME')) FROM DUAL;
+
+    When a PDB name is queried in a non-container database (non-CDB), it
+    returns the database's global name which is the same as the database name
+    (dbName). The database global name can be queried using this SQL
+    expression::
+
+        SELECT * FROM global_name;
 
 .. attribute:: connection.port
 

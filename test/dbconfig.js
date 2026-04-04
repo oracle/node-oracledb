@@ -33,6 +33,8 @@
  *   2. Set these environment variables:
  *      NODE_ORACLEDB_USER, NODE_ORACLEDB_PASSWORD, NODE_ORACLEDB_CONNECTIONSTRING,
  *      NODE_ORACLEDB_DBA_PRIVILEGE,
+ *      NODE_ORACLEDB_PDB1,
+ *      NODE_ORACLEDB_PDB2,
  *      NODE_ORACLEDB_DBA_USER, NODE_ORACLEDB_DBA_PASSWORD
  *      If required:
  *      NODE_ORACLEDB_EXTERNALAUTH,
@@ -151,6 +153,14 @@ if (process.env.NODE_PRINT_DEBUG_MESSAGE) {
   if (printDebugMsg.toLowerCase() == 'true') {
     config.test.printDebugMsg = true;
   }
+}
+
+if (process.env.NODE_ORACLEDB_PDB1) {
+  config.test.NODE_ORACLEDB_PDB1 = process.env.NODE_ORACLEDB_PDB1;
+}
+
+if (process.env.NODE_ORACLEDB_PDB2) {
+  config.test.NODE_ORACLEDB_PDB2 = process.env.NODE_ORACLEDB_PDB2;
 }
 
 config.createUser = () => {

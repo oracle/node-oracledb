@@ -53,6 +53,7 @@ NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getMaxOpenCursors);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getMaxIdentifierLength);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersion);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getOracleServerVersionString);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getPdbName);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getQueue);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getServiceName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getSodaDatabase);
@@ -171,6 +172,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL, NULL, NULL, napi_default, NULL },
     { "getOracleServerVersionString", NULL,
             njsConnection_getOracleServerVersionString, NULL, NULL, NULL,
+            napi_default, NULL },
+    { "getPdbName", NULL, njsConnection_getPdbName, NULL, NULL, NULL,
             napi_default, NULL },
     { "getQueue", NULL, njsConnection_getQueue, NULL, NULL, NULL,
             napi_default, NULL },
@@ -1498,6 +1501,24 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getOracleServerVersionString, 0, NULL)
     return true;
 }
 
+//-----------------------------------------------------------------------------
+// njsConnection_getPdbName()
+//   Get the Pluggable Database Name of the current connection.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getPdbName, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (conn->handle) {
+        if (dpiConn_getPdbName(conn->handle, &value, &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
+    }
+    return true;
+}
 
 //-----------------------------------------------------------------------------
 // njsConnection_getQueue()

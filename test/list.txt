@@ -4652,6 +4652,9 @@ Overview of node-oracledb functional tests
     193.9 transactionInProgress = false on a connection for query
     193.10 transactionInProgress = true on a connection
     193.11 maximum identifier length
+    193.12 Oracle Database pdbname associated with the connection
+    193.13 Oracle Database DB_UNIQUE_NAME associated with the connection
+    193.14 Oracle Database pdbname changed dynamically for a connection
 
   196. getDataOfLob.js
     196.1 getData() works on CLOB
@@ -6168,6 +6171,9 @@ Overview of node-oracledb functional tests
       307.1.3 getConnection behaviour with a custom instance disabling trace
       307.1.4 test getConnection fail behaviour with custom instance enabling trace
       307.1.5 test getConnection fail behaviour with custom instance disabling trace
+
+    307.2 connectTraceConfig
+      307.2.1 exposes connection level trace details
 
   308. Inband Notification
     308.1 Standalone Connection

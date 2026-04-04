@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -32,8 +32,8 @@
 'use strict';
 
 const oracledb = require('oracledb');
-const dbConfig = require('../../dbconfig.js');
-const testsUtil = require('../../testsUtil.js');
+const dbConfig = require('../../../dbconfig.js');
+const testsUtil = require('../../../testsUtil.js');
 
 describe('1. fastauth.js', function() {
 

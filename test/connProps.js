@@ -37,13 +37,19 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testsUtil = require('./testsUtil.js');
 
+async function getGlobalName(connection) {
+  const globalNameQuery = "SELECT * FROM global_name";
+  const globalNameResult = await connection.execute(globalNameQuery);
+  return globalNameResult.rows[0][0];
+}
+
 describe('193. connProps.js', function() {
 
   let isRunnable = false;
+  let dbaConnection;
 
   before(async function() {
-    const preps = await testsUtil.checkPrerequisites();
-    if (preps && dbConfig.test.DBA_PRIVILEGE) {
+    if (dbConfig.test.DBA_PRIVILEGE) {
       isRunnable = true;
     }
 
@@ -56,7 +62,7 @@ describe('193. connProps.js', function() {
         connectString: dbConfig.connectString,
         privilege: oracledb.SYSDBA,
       };
-      const dbaConnection = await oracledb.getConnection(dbaConfig);
+      dbaConnection = await oracledb.getConnection(dbaConfig);
       const conn = await oracledb.getConnection(dbConfig);
 
       const user = await testsUtil.getUser(conn);
@@ -64,9 +70,15 @@ describe('193. connProps.js', function() {
       await dbaConnection.execute(sql);
 
       await conn.close();
-      await dbaConnection.close();
+
     }
   }); // before()
+
+  after (async function() {
+    if (dbaConnection) {
+      await dbaConnection.close();
+    }
+  });
 
   it('193.1 the default values of clientInfo and dbOp are null', async () => {
     const conn = await oracledb.getConnection(dbConfig);
@@ -179,13 +191,8 @@ describe('193. connProps.js', function() {
   }); // 193.5
 
   it('193.6 Oracle Database dbname associated with the connection', async () => {
-    let query;
-    if (!oracledb.thin) {
-      // on thick mode for CDB based DB's, the CDB name is returned.
-      query = `SELECT upper(NAME) FROM v$database`;
-    } else {
-      query = "SELECT GLOBAL_NAME FROM GLOBAL_NAME";
-    }
+    const query = "SELECT upper(NAME) FROM v$database";
+
     const conn = await oracledb.getConnection(dbConfig);
     const result = await conn.execute(query);
     assert.deepStrictEqual(result.rows[0][0], conn.dbName.toUpperCase());
@@ -242,4 +249,99 @@ describe('193. connProps.js', function() {
       assert.strictEqual(typeof conn.maxIdentifierLength, "number");
     await conn.close();
   }); // 193.11
+
+  it('193.12 Oracle Database pdbname associated with the connection', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+
+    if (conn.oracleServerVersion < 1202000000) {
+      await conn.close();
+      this.skip();
+    }
+
+    let expectedPdbName;
+    let actualPdbName = conn.pdbName;
+
+    if (!await testsUtil.isMultiTenantConfig(conn)) {
+      expectedPdbName = await getGlobalName(conn);
+    } else {
+      const conNameQuery = "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM dual";
+      const conNameResult = await conn.execute(conNameQuery);
+      expectedPdbName = conNameResult.rows[0][0];
+      actualPdbName = actualPdbName.split('.')[0];
+    }
+
+    assert.deepStrictEqual(expectedPdbName.toUpperCase(), actualPdbName.toUpperCase());
+    await conn.close();
+  }); // 193.12
+
+  it('193.13 Oracle Database DB_UNIQUE_NAME associated with the connection', async function() {
+    if (dbConfig.test.mode === 'thick') this.skip();
+
+    if (!await testsUtil.checkPrerequisites()) {
+      this.skip();
+    }
+
+    const conn = await oracledb.getConnection(dbConfig);
+    const query = `SELECT upper(value) FROM v$parameter WHERE name = 'db_unique_name'`;
+    const result = await conn.execute(query);
+
+    // Remove domain name from the pdbName returned.
+    assert.deepStrictEqual(result.rows[0][0], conn.dbUniqueName.toUpperCase());
+    await conn.close();
+  }); // 193.13
+
+  it('193.14 Oracle Database pdbname changed dynamically for a connection', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+
+    if (!await testsUtil.isMultiTenantConfig(conn) || conn.oracleServerVersion < 1202000000) {
+      // skip test for DB versions 12.1 and non-CDB based.
+      await conn.close();
+      this.skip();
+    }
+
+    // check PDBName with DBA connection.
+    let query = "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM dual";
+    let result = await dbaConnection.execute(query);
+    let actualPdbName = dbaConnection.pdbName.split('.')[0].toUpperCase();
+    assert.deepStrictEqual(result.rows[0][0], actualPdbName);
+
+    // change to root container
+    query = "ALTER SESSION SET CONTAINER = CDB$ROOT;";
+    result = await dbaConnection.execute(query);
+    if (oracledb.thin) {
+      query = "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM dual";
+      result = await dbaConnection.execute(query);
+      actualPdbName = dbaConnection.pdbName.split(".")[0].toUpperCase();
+      assert.deepStrictEqual(result.rows[0][0], actualPdbName);
+    } else {
+      // For CDB$ROOT, pdbname is coming from the database property GLOBAL_NAME,
+      // which is stored in the data dictionary.
+      const expectedPdbName = await getGlobalName(dbaConnection);
+      assert.deepStrictEqual(dbaConnection.pdbName, expectedPdbName);
+    }
+
+    // change to container pdb1
+    if (dbConfig.test.NODE_ORACLEDB_PDB1) {
+      // change the container
+      query = `ALTER SESSION SET CONTAINER = ${dbConfig.test.NODE_ORACLEDB_PDB1}`;
+      await dbaConnection.execute(query);
+      query = "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM dual";
+      result = await dbaConnection.execute(query);
+      actualPdbName = dbaConnection.pdbName.split(".")[0].toUpperCase();
+      assert.deepStrictEqual(result.rows[0][0], actualPdbName);
+    }
+
+    // change to container pdb2
+    if (dbConfig.test.NODE_ORACLEDB_PDB2) {
+      query = `ALTER SESSION SET CONTAINER = ${dbConfig.test.NODE_ORACLEDB_PDB2}`;
+      await dbaConnection.execute(query);
+      query = "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM dual";
+      result = await dbaConnection.execute(query);
+      actualPdbName = dbaConnection.pdbName.split(".")[0].toUpperCase();
+      assert.deepStrictEqual(result.rows[0][0], actualPdbName);
+    }
+
+    await conn.close();
+  }); // 193.14
+
 });
