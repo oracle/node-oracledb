@@ -20,8 +20,8 @@ Common Changes
 ++++++++++++++
 
 #)  Added new connection properties :attr:`connection.pdbName`,
-    :attr:`connection.dbUniqueName` that provide the Pluggable database name and
-    database unique name.
+    :attr:`connection.dbUniqueName` that provide the pluggable database name
+    and database unique name respectively.
 
 #)  Added :meth:`lob.trim()` method to the :ref:`LOB object <lobclass>`.
 
@@ -35,6 +35,10 @@ Common Changes
 #)  Added support for :ref:`AWS Simple Storage Service (S3) <awss3>`
     Centralized Configuration Provider.
 
+#)  Added new methods in :ref:`TraceHandlerBase class <tracehandlerbaseclass>`
+    for pool events which can be used for tracking connection pool statistics
+    and metrics for :ref:`OpenTelemetry <opentelemetry>` support.
+
 #)  Fixed bug which did not update the :attr:`lob.length` property correctly
     after a write operation was performed on the :ref:`LOB object <lobclass>`.
 
@@ -45,22 +49,21 @@ Common Changes
 #)  Fixed an issue where SQL statements were not included in OpenTelemetry
     trace spans for :meth:`connection.executeMany()`.
 
-#)  Added new methods in :ref:`TraceHandlerBase class <tracehandlerbaseclass>`
-    for pool events which can be used for tracking connection pool statistics
-    and metrics for :ref:`OpenTelemetry <opentelemetry>` support.
-
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Fixed bug to avoid calling ``fetchTypeHandler`` more than once when LOB objects are used.
+#)  Added support for :ref:`Direct Path Loads <directpathloads>`.
+
+#)  Added support for Oracle AI Database 26ai's pipelining feature.
+
+#)  Fixed bug to avoid calling ``fetchTypeHandler`` more than once when LOB
+    objects are used.
     See `Issue #1769 <https://github.com/oracle/node-oracledb/issues/1769>`__.
 
 #)  Fixed bug when decoding PL/SQL booleans in Oracle Database 12.1.
-
-#)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
     See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
@@ -69,19 +72,17 @@ Thin Mode Changes
     different :ref:`fetchInfo <propexecfetchinfo>` settings.
     See `Issue #1747 <https://github.com/oracle/node-oracledb/issues/1747>`__.
 
-#)  Added error when dbObject attributes with locators are accessed in Thin
-    mode.
+#)  Added error message when dbObject attributes with locators are accessed in
+    Thin mode.
 
 #)  Added callback as part of parameters when creating connection pool in Thin
     mode. The callback can call pool events inside the connection pool methods.
 
-#)  Added support for Oracle AI Database 26ai's pipelining feature in thin mode.
-
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Improved sparse vector handling so empty sparse vectors can be bound and
-    fetched without raising ORA errors.
+#)  Improved sparse vector handling so that empty sparse vectors can be bound
+    and fetched without raising ORA errors.
 
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------

@@ -4537,7 +4537,7 @@ TraceHandlerBase Methods
     checked out from the connection pool and in use. Note that this is a
     synchronous method.
 
-	The parameters of the ``onPoolAcquire()`` method are:
+    The parameters of the ``onPoolAcquire()`` method are:
 
     .. _onpoolacquire:
 
@@ -4568,7 +4568,7 @@ TraceHandlerBase Methods
     Called when a pool is closed. This method is useful for tracking shutdown
     events or resetting counters. Note that this is a synchronous method.
 
-	The parameters of the ``onPoolClose()`` method are:
+    The parameters of the ``onPoolClose()`` method are:
 
     .. _onpoolclose:
 
@@ -4600,7 +4600,7 @@ TraceHandlerBase Methods
     (cache hit). This method is useful for analyzing connection reuse. Note
     that this is a synchronous method.
 
-	The parameters of the ``onPoolConnectionHit()`` method are:
+    The parameters of the ``onPoolConnectionHit()`` method are:
 
     .. _onpoolconnectionhit:
 
@@ -4632,7 +4632,7 @@ TraceHandlerBase Methods
     miss). This method is useful for analyzing connection reuse. Note that
     this is a synchronous method.
 
-	The parameters of the ``onPoolConnectionMiss()`` method are:
+    The parameters of the ``onPoolConnectionMiss()`` method are:
 
     .. _onpoolconnectionmiss:
 
@@ -4664,7 +4664,7 @@ TraceHandlerBase Methods
     useful to track pool growth or initialization activity. Note that this is
     a synchronous method.
 
-	The parameters of the ``onPoolExpand()`` method are:
+    The parameters of the ``onPoolExpand()`` method are:
 
     .. _onpoolexpand:
 
@@ -4696,7 +4696,7 @@ TraceHandlerBase Methods
     useful for monitoring returned or idle connections. Note that this is a
     synchronous method.
 
-	The parameters of the ``onPoolRelease()`` method are:
+    The parameters of the ``onPoolRelease()`` method are:
 
     .. _onpoolrelease:
 
@@ -4728,7 +4728,7 @@ TraceHandlerBase Methods
     This method is useful for tracking request timeouts or failures. Note that
     this is a synchronous method.
 
-	The parameters of the ``onPoolRequestTimeout()`` method are:
+    The parameters of the ``onPoolRequestTimeout()`` method are:
 
     .. _onpoolrequesttimeout:
 
@@ -4760,7 +4760,7 @@ TraceHandlerBase Methods
     timeouts or pool resizing. This method is useful for monitoring resource
     cleanup or shrink events. Note that this is a synchronous method.
 
-	The parameters of the ``onPoolRequestShrink()`` method are:
+    The parameters of the ``onPoolRequestShrink()`` method are:
 
     .. _onpoolshrink:
 
@@ -4792,7 +4792,7 @@ TraceHandlerBase Methods
     further. This method is useful for monitoring queued requests. Note that
     this is a synchronous method.
 
-	The parameters of the ``onPoolWait()`` method are:
+    The parameters of the ``onPoolWait()`` method are:
 
     .. _onpoolwait:
 
