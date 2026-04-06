@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -971,31 +971,31 @@ describe('312. dataTypeIntervalDS.js', function() {
   }); // 312.52
 
   it('312.53 - interval sorting in queries', async function() {
-    // Test ORDER BY with IntervalDS column
-    await conn.execute(`
-      CREATE TABLE IntervalDSSortTest (
+    const TABLE = 'IntervalDSSortTest';
+    const createSql = `
+      CREATE TABLE ${TABLE} (
         Id NUMBER,
         IntervalCol INTERVAL DAY TO SECOND
-      )
-    `);
+      )`;
+    // Test ORDER BY with IntervalDS column
+    await testsUtil.createTable(conn, TABLE, createSql);
 
-    await conn.executeMany(`
-      INSERT INTO IntervalDSSortTest VALUES (:1, TO_DSINTERVAL(:2))
-    `, [
-      [1, '1 06:00:00'],
-      [2, '0 12:30:00'],
-      [3, '2 00:00:00']
-    ]);
+    await conn.executeMany(`INSERT INTO ${TABLE} VALUES (:1, TO_DSINTERVAL(:2))`,
+      [
+        [1, '1 06:00:00'],
+        [2, '0 12:30:00'],
+        [3, '2 00:00:00']
+      ]);
 
     const result = await conn.execute(`
-      SELECT Id FROM IntervalDSSortTest ORDER BY IntervalCol
+      SELECT Id FROM ${TABLE} ORDER BY IntervalCol
     `);
     assert.deepStrictEqual(
       result.rows.map(row => row[0]),
       [2, 1, 3] // Expected order: 12h30m, 1d6h, 2d
     );
 
-    await testsUtil.dropTable(conn, 'IntervalDSSortTest');
+    await testsUtil.dropTable(conn, TABLE);
   }); // 312.53
 
   it('312.54 - interval arithmetic with multiple operations', async function() {

@@ -55,6 +55,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug to avoid calling ``fetchTypeHandler`` more than once when LOB objects are used.
+    See `Issue #1769 <https://github.com/oracle/node-oracledb/issues/1769>`__.
+
 #)  Fixed bug when decoding PL/SQL booleans in Oracle Database 12.1.
 
 #)  Added support for :ref:`Direct Path Loads <directpathloads>`.
@@ -71,6 +74,8 @@ Thin Mode Changes
 
 #)  Added callback as part of parameters when creating connection pool in Thin
     mode. The callback can call pool events inside the connection pool methods.
+
+#)  Added support for Oracle AI Database 26ai's pipelining feature in thin mode.
 
 Thick Mode Changes
 ++++++++++++++++++

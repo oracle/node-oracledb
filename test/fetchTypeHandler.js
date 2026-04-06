@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -625,4 +625,62 @@ describe('271. fetchTypeHandler.js', function() {
       );
       await connection.execute(testsUtil.sqlDropTable(TABLE));
     });
+
+  it('271.26 simulate LOB double invocation + metadata mutation race (GH issue 1769)', async function() {
+    const sql = `
+      select 'A' as "COL_A", to_clob('B') as "COL_B"
+      from dual
+    `;
+    const fetchTypeHandler = function(metadata) {
+      metadata.name = `${metadata.name}_tail`;
+      if (metadata.dbType === oracledb.DB_TYPE_CLOB) {
+        return {
+          converter: async (lob) => {
+            if (lob === null) {
+              return lob;
+            }
+            return await lob.getData();
+          }
+        };
+      }
+    };
+
+    const result = await connection.execute(
+      sql,
+      [],
+      { fetchTypeHandler }
+    );
+
+    assert.deepStrictEqual(
+      result.metaData.map((m) => m.name),
+      [ 'COL_A_tail', 'COL_B_tail' ]
+    );
+    assert.deepStrictEqual(result.rows[0], [ 'A', 'B' ]);
+  });
+
+  it(`271.27 simulate LOB double invocation + metadata
+    mutation race (GH issue 1769) - fetchTypeHandler returns STRING`, async function() {
+    const sql = ` -- fetch CLOB as string
+      select 'A' as "COL_A", to_clob('B') as "COL_B"
+      from dual
+    `;
+    const fetchTypeHandler = function(metadata) {
+      metadata.name = `${metadata.name}_tail`;
+      if (metadata.dbType === oracledb.DB_TYPE_CLOB) {
+        return { type: oracledb.STRING };
+      }
+    };
+
+    const result = await connection.execute(
+      sql,
+      [],
+      { fetchTypeHandler }
+    );
+
+    assert.deepStrictEqual(
+      result.metaData.map((m) => m.name),
+      [ 'COL_A_tail', 'COL_B_tail' ]
+    );
+    assert.deepStrictEqual(result.rows[0], [ 'A', 'B' ]);
+  });
 });

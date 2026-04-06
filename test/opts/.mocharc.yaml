@@ -305,3 +305,4 @@ spec:
   - test/directPathLoad.js
   - test/tracePoolEvents.js
   - test/explicitResourceMgmt.js
+  - test/pipeline.js

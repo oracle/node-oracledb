@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -177,6 +177,43 @@ testsUtil.dropTable = async function(conn, tableName) {
   const plsql = testsUtil.sqlDropTable(tableName);
   await conn.execute(plsql);
 };
+
+testsUtil.sqlDropProcedure = function(procedureName) {
+  return `
+    DECLARE
+        e_proc_missing EXCEPTION;
+        PRAGMA EXCEPTION_INIT(e_proc_missing, -4043);
+    BEGIN
+        EXECUTE IMMEDIATE ('DROP PROCEDURE ${procedureName}');
+    EXCEPTION
+        WHEN e_proc_missing THEN NULL;
+    END;
+  `;
+};
+
+testsUtil.sqlDropFunction = function(functionName) {
+  return `
+    DECLARE
+        e_func_missing EXCEPTION;
+        PRAGMA EXCEPTION_INIT(e_func_missing, -4043);
+    BEGIN
+        EXECUTE IMMEDIATE ('DROP FUNCTION ${functionName}');
+    EXCEPTION
+        WHEN e_func_missing THEN NULL;
+    END;
+  `;
+};
+
+testsUtil.dropProcedure = async function(conn, procedureName) {
+  const plsql = testsUtil.sqlDropProcedure(procedureName);
+  await conn.execute(plsql);
+};
+
+testsUtil.dropFunction = async function(conn, functionName) {
+  const plsql = testsUtil.sqlDropFunction(functionName);
+  await conn.execute(plsql);
+};
+
 
 testsUtil.dropType = async function(conn, typeName) {
   const plsql = testsUtil.sqlDropType(typeName);
