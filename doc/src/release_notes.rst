@@ -72,6 +72,12 @@ Thin Mode Changes
 #)  Added callback as part of parameters when creating connection pool in Thin
     mode. The callback can call pool events inside the connection pool methods.
 
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Improved sparse vector handling so empty sparse vectors can be bound and
+    fetched without raising ORA errors.
+
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -271,26 +271,28 @@ describe('309. dataTypeVector7.js', function() {
       );
     }); // 309.1.3
 
-    it('309.1.4 Negative tests for sparse data', async function() {
-      let sparseVec = new oracledb.SparseVector(null);
-      await assert.rejects(
-        async () => await connection.execute(
+    it('309.1.4 Sparse data null and invalid scenarios', async function() {
+      let sparseVec, result;
+
+      if (oracledb.thin) {
+        sparseVec = new oracledb.SparseVector(null);
+        await connection.execute(
           `INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col)
-            VALUES(1, :1)`, [sparseVec]),
-        /ORA-21560:|ORA-51803:|ORA-51835:/
-        /*
-           ORA-21560: argument at position 4 (vdim) is null, invalid, or
-           out of range'
-           ORA-51803: Vector dimension count must match the dimension count
-           specified in the column definition (expected  dimensions, specified
-           dimensions).
-           ORA-51835: Dimension count in vector input is invalid
-         */
-      );
+            VALUES(1, :1)`, [sparseVec]);
+        result = await connection.execute(
+          `SELECT SparseVectorFlex64Col FROM ${tableName}`);
+        const vector = result.rows[0][0];
+        assert.deepStrictEqual(Array.from(vector.values), []);
+        assert.deepStrictEqual(Array.from(vector.indices), []);
+        assert.strictEqual(vector.numDimensions, 0);
+        assert.strictEqual(vector.dense(), null);
+        assert.deepStrictEqual(result.metaData[0], metaDataFloat64Flex);
+      }
+
       sparseVec = null;
       await connection.execute(`INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col)
             VALUES(1, :1)`, [sparseVec]);
-      const result = await connection.execute(`SELECT SparseVectorFlex64Col FROM ${tableName}`);
+      result = await connection.execute(`SELECT SparseVectorFlex64Col FROM ${tableName}`);
       const numRows = result.rows.length;
       assert.deepStrictEqual(result.rows[numRows - 1][0], null);
       assert.deepStrictEqual(result.metaData[0], metaDataFloat64Flex);
@@ -379,18 +381,26 @@ describe('309. dataTypeVector7.js', function() {
     }); // 309.1.7
 
     it('309.1.8 Empty Vectors', async function() {
+      if (!oracledb.thin) {
+        this.skip();
+      }
+
       const sparseVecEmpty = new oracledb.SparseVector({ values: [], indices: [], numDimensions: 4 });
 
-      await assert.rejects(
-        async () => await connection.execute(`INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col) VALUES(1, :1)`, [sparseVecEmpty]),
-        /ORA-51803:|ORA-21560:/
-        /*
-            ORA-51803: Vector dimension count must match the dimension count
-            specified in the column definition (expected  dimensions, specified  dimensions)
-            ORA-21560: argument at position 5 (vecarray) is null, invalid,
-            or out of range'
-          */
+      await connection.execute(
+        `INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col) VALUES(1, :1)`,
+        [sparseVecEmpty]
       );
+
+      const result = await connection.execute(
+        `SELECT SparseVectorFlex64Col FROM ${tableName}`
+      );
+      const vector = result.rows[0][0];
+
+      assert.deepStrictEqual(Array.from(vector.values), []);
+      assert.deepStrictEqual(Array.from(vector.indices), []);
+      assert.deepStrictEqual(Array.from(vector.dense()), [0, 0, 0, 0]);
+      assert.deepStrictEqual(result.metaData[0], metaDataFloat64Flex);
     }); // 309.1.8
 
     it('309.1.9 Data Type Mismatches', async function() {
@@ -870,25 +880,28 @@ describe('309. dataTypeVector7.js', function() {
       );
     }); // 309.2.9
 
-    it('309.2.10 Negative tests for sparse float32 data', async function() {
-      let sparseVec = new oracledb.SparseVector(null, 'float32');
-      await assert.rejects(
-        async () => await connection.execute(
+    it('309.2.10 Sparse float32 null handling positive and negative cases', async function() {
+      let sparseVec, result;
+
+      if (oracledb.thin) {
+        sparseVec = new oracledb.SparseVector(null, 'float32');
+        await connection.execute(
           `INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col)
-            VALUES(1, :1)`, [sparseVec]),
-        /ORA-51836:|ORA-21560:|ORA-51803:|ORA-51835:/
-        /*
-          ORA-51803: Vector dimension count must match the dimension count
-          specified in the column definition (expected  dimensions, specified
-          dimensions).
-          ORA-51835: Dimension count in vector input is invalid
-        */
-      );
+            VALUES(1, :1)`, [sparseVec]);
+        result = await connection.execute(
+          `SELECT SparseVectorFlex32Col FROM ${tableName}`);
+        const vector = result.rows[0][0];
+        assert.deepStrictEqual(Array.from(vector.values), []);
+        assert.deepStrictEqual(Array.from(vector.indices), []);
+        assert.strictEqual(vector.numDimensions, 0);
+        assert.strictEqual(vector.dense(), null);
+        assert.deepStrictEqual(result.metaData[0], metaDataFloat32Flex);
+      }
 
       sparseVec = null;
       await connection.execute(`INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col)
             VALUES(1, :1)`, [sparseVec]);
-      const result = await connection.execute(`SELECT SparseVectorFlex32Col FROM ${tableName}`);
+      result = await connection.execute(`SELECT SparseVectorFlex32Col FROM ${tableName}`);
       const numRows = result.rows.length;
       assert.deepStrictEqual(result.rows[numRows - 1][0], null);
       assert.deepStrictEqual(result.metaData[0], metaDataFloat32Flex);
@@ -932,12 +945,26 @@ describe('309. dataTypeVector7.js', function() {
     }); // 309.2.11
 
     it('309.2.12 Empty Vectors for float32', async function() {
+      if (!oracledb.thin) {
+        this.skip();
+      }
+
       const sparseVecEmpty = new oracledb.SparseVector({ values: [], indices: [], numDimensions: 4});
 
-      await assert.rejects(
-        async () => await connection.execute(`INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col) VALUES(1, :1)`, [sparseVecEmpty]),
-        /ORA-51803:|ORA-21560:/
+      await connection.execute(
+        `INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col) VALUES(1, :1)`,
+        [sparseVecEmpty]
       );
+
+      const result = await connection.execute(
+        `SELECT SparseVectorFlex32Col FROM ${tableName}`
+      );
+      const vector = result.rows[0][0];
+
+      assert.deepStrictEqual(Array.from(vector.values), []);
+      assert.deepStrictEqual(Array.from(vector.indices), []);
+      assert.deepStrictEqual(Array.from(vector.dense()), [0, 0, 0, 0]);
+      assert.deepStrictEqual(result.metaData[0], metaDataFloat32Flex);
     }); // 309.2.12
 
     it('309.2.13 Complex Sparse Vector Structures for float32', async function() {

@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -833,6 +833,7 @@ static bool njsVariable_getVectorInfo(napi_env env, napi_value value,
             baton->jsContext.jsSparseVectorConstructor, &isSparse))
     if (isSparse)
     {
+        vectorInfo->isSparse = 1;
         // get indices
         NJS_CHECK_NAPI(env, napi_get_named_property(env, value, "_indices",
                 &temp))
@@ -858,6 +859,7 @@ static bool njsVariable_getVectorInfo(napi_env env, napi_value value,
         NJS_CHECK_NAPI(env, napi_get_value_uint32(env, temp, &numDim))
         vectorInfo->numDimensions = numDim;
     } else {
+        vectorInfo->isSparse = 0;
         status = njsVariable_updateVectorInfoFromTypeInfo(env, value, false,
                 baton, vectorInfo);
         if (!status) {

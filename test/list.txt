@@ -6194,7 +6194,7 @@ Overview of node-oracledb functional tests
       309.1.1 bind and read the sparse data
       309.1.2 Different object format for sparse data
       309.1.3 Different dense arrays format for sparse data
-      309.1.4 Negative tests for sparse data
+      309.1.4 Sparse data null and invalid scenarios
       309.1.5 String type for sparse data
       309.1.6 bind Uint8Array should work
       309.1.7 boundary values for sparse vector dimensions
@@ -6222,7 +6222,7 @@ Overview of node-oracledb functional tests
       309.2.7 Update on float32 sparse vectors
       309.2.8 Conversion between float32 and float64
       309.2.9 Different dense arrays format for sparse float32 data
-      309.2.10 Negative tests for sparse float32 data
+      309.2.10 Sparse float32 null handling positive and negative cases
       309.2.11 Boundary values for sparse float32 vector dimensions
       309.2.12 Empty Vectors for float32
       309.2.13 Complex Sparse Vector Structures for float32

@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -644,7 +644,7 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
     if (dpiVector_getValue(vector, &vectorInfo) < 0) {
         return njsBaton_setErrorDPI(baton);
     }
-    if (vectorInfo.numSparseValues) {
+    if (vectorInfo.isSparse) {
         // For sparse number of non-zero elements.
         numElem = vectorInfo.numSparseValues;
     } else {
@@ -674,19 +674,23 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
             return njsBaton_setErrorUnsupportedVectorFormat
                             (baton, vectorInfo.format);
     }
-    if (vectorInfo.numSparseValues) {
+    if (vectorInfo.isSparse) {
         // Create values property.
         byteLength = elementLength * numElem;
         NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, byteLength,
                 &destData, &arrBuf))
-        memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+        if (byteLength > 0) {
+            memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+        }
         NJS_CHECK_NAPI(env, napi_create_typedarray(env, type,
                 numElem, arrBuf, bufferOffset, &valueArray))
 
         //Create indices property.
         NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, 4 * numElem,
                 &destDataIndices, &arrBufIndices))
-        memcpy(destDataIndices, vectorInfo.sparseIndices, 4 * numElem);
+        if (numElem > 0) {
+            memcpy(destDataIndices, vectorInfo.sparseIndices, 4 * numElem);
+        }
         NJS_CHECK_NAPI(env, napi_create_typedarray(env, napi_uint32_array,
                 numElem, arrBufIndices, bufferOffset, &indexArray))
 
@@ -703,7 +707,9 @@ bool njsBaton_getVectorValue(njsBaton *baton, dpiVector *vector,
         byteLength = elementLength * numElem;
         NJS_CHECK_NAPI(env, napi_create_arraybuffer(env, byteLength,
                 &destData, &arrBuf))
-        memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+        if (byteLength > 0) {
+            memcpy(destData, vectorInfo.dimensions.asPtr, byteLength);
+        }
         NJS_CHECK_NAPI(env, napi_create_typedarray(env, type, numElem, arrBuf,
                 bufferOffset, value))
     }
