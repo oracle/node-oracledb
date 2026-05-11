@@ -509,7 +509,14 @@ describe('325. sqlAssert.js', function() {
       assert.strictEqual(oracledb.isSimpleSqlName(input), false);
     });
 
-    it('325.7.3 simple_sql_name accepts combining marks', async () => {
+    it('325.7.3 simple_sql_name accepts combining marks', async function() {
+      const charset = await testsUtil.getDBCharSet(conn);
+      if (charset !== 'AL32UTF8') {
+        // DBMS_ASSERT.SIMPLE_SQL_NAME() can behave differently for combining
+        // marks on older database character sets.
+        this.skip();
+      }
+
       const rawName = `NJS_DECOMPOSED_${Date.now()}a\u0301`;
       const simpleResult = await conn.execute(
         `BEGIN
