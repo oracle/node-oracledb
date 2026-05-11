@@ -20,14 +20,14 @@ Common Changes
 ++++++++++++++
 
 #)  Added :meth:`connection.appContext()` and
-    :meth:`connection.clearAppContext()` methods to the :ref:`Connection`
-    object.
+    :meth:`connection.clearAppContext()` methods to the
+    :ref:`Connection <connectionclass>` object.
 
-#)  Added connect string parser that resolves Oracle Database Easy Connect strings,
-    merges njs-prefixed query parameters, and injects descriptor overrides so that
-    the Thin and Thick modes behave consistently. Pool and connection creation in
-    both the modes now run through this helper, guarded by a new
-    `oracledb.thickModeDSNPassthrough` switch.
+#)  Added connect string parser that resolves Oracle Database Easy Connect
+    strings, merges njs-prefixed query parameters, and injects descriptor
+    overrides so that the Thin and Thick modes behave consistently. Pool and
+    connection creation in both the modes now run through this helper, guarded
+    by a new :attr:`oracledb.thickModeDSNPassthrough` switch.
 
 #)  Added new connection properties :attr:`connection.pdbName`,
     :attr:`connection.dbUniqueName` that provide the pluggable database name

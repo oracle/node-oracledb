@@ -296,10 +296,10 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database 21c JSON data type (see :ref:`json21ctype`)
       - Yes
       - Yes
-    * - Oracle Database version 23 JSON-Relational Duality Views (see :ref:`jsondualityviews`)
+    * - Oracle AI Database 26ai JSON-Relational Duality Views (see :ref:`jsondualityviews`)
       - Yes
       - Yes
-    * - Oracle Database version 23 BOOLEAN data type (see :ref:`oracledbconstantsdbtype`)
+    * - Oracle AI Database 26ai BOOLEAN data type (see :ref:`oracledbconstantsdbtype`)
       - Yes
       - Yes
     * - ROWID, UROWID data types (see :ref:`oracledbconstantsdbtype`)
@@ -317,7 +317,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - NCHAR, NVARCHAR2, NCLOB data types (see :ref:`oracledbconstantsdbtype`)
       - Yes
       - Yes
-    * - Oracle Database 23c VECTOR data type (see :ref:`oracledbconstantsdbtype`)
+    * - Oracle AI Database 26ai VECTOR data type (see :ref:`oracledbconstantsdbtype`)
       - Yes
       - Yes
     * - Bind PL/SQL Boolean
