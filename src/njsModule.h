@@ -961,6 +961,9 @@ bool njsUtils_getNamedPropertyShardingKey(napi_env env, napi_value value,
 bool njsUtils_getNamedPropertyAppContext(napi_env env, napi_value value,
         const char *name, uint32_t *numAppContextEntries,
         dpiAppContext **appContextEntries);
+bool njsUtils_parseKeyValueEntries(napi_env env, napi_value value,
+        const char *namespaceName, uint32_t namespaceNameLength,
+        uint32_t *numEntries, dpiAppContext **entries);
 bool njsUtils_getNamedPropertyString(napi_env env, napi_value value,
         const char *name, char **result, size_t *resultLength);
 bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,

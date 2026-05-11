@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -76,6 +76,8 @@ NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setExternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setInternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setModule);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setTag);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_appContext);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_clearAppContext);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_shutdown);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_startSessionlessTransaction);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_startup);
@@ -132,9 +134,13 @@ static NJS_NAPI_FINALIZE(njsConnection_finalize);
 
 // properties defined by the class
 static const napi_property_descriptor njsClassProperties[] = {
+    { "appContext", NULL, njsConnection_appContext, NULL, NULL, NULL,
+            napi_default, NULL },
     { "breakExecution", NULL, njsConnection_breakExecution, NULL, NULL, NULL,
             napi_default, NULL },
     { "changePassword", NULL, njsConnection_changePassword, NULL, NULL,
+            NULL, napi_default, NULL },
+    { "clearAppContext", NULL, njsConnection_clearAppContext, NULL, NULL,
             NULL, napi_default, NULL },
     { "close", NULL, njsConnection_close, NULL, NULL, NULL,
             napi_default, NULL },
@@ -2482,6 +2488,85 @@ static bool njsConnection_startupAsync(njsBaton *baton)
     return true;
 }
 
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_clearAppContext, 1, NULL)
+{
+    size_t namespaceLen;
+    char *namespaceName = NULL;
+    napi_status status;
+    bool ok = false;
+    njsConnection *conn = (njsConnection*) callingInstance;
+
+    NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, args[0],
+            NULL, 0, &namespaceLen))
+    namespaceName = (char*) malloc(namespaceLen + 1);
+    if (!namespaceName)
+        return njsUtils_throwInsufficientMemory(env);
+
+    status = napi_get_value_string_utf8(env, args[0], namespaceName,
+            namespaceLen + 1, &namespaceLen);
+    if (status != napi_ok) {
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
+    } else if (dpiConn_clearAppContext(conn->handle, namespaceName,
+            (uint32_t) namespaceLen) < 0) {
+        njsUtils_throwErrorDPI(env, globals);
+    } else {
+        ok = true;
+    }
+
+    NJS_FREE_AND_CLEAR(namespaceName);
+    return ok;
+}
+
+
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_appContext, 2, NULL)
+{
+    size_t namespaceLen;
+    char *namespaceName = NULL;
+    napi_status status;
+    bool result = false;
+    dpiAppContext *appContextEntries = NULL;
+    uint32_t numAppContextEntries = 0;
+    njsConnection *conn = (njsConnection *)callingInstance;
+
+    NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, args[0],
+            NULL, 0, &namespaceLen))
+    namespaceName = (char *) malloc(namespaceLen + 1);
+    if (!namespaceName)
+        return njsUtils_throwInsufficientMemory(env);
+
+    status = napi_get_value_string_utf8(env, args[0], namespaceName,
+            namespaceLen + 1, &namespaceLen);
+    if (status != napi_ok) {
+        njsUtils_genericThrowError(env, __FILE__, __LINE__);
+    } else {
+        bool parsed = njsUtils_parseKeyValueEntries(env, args[1],
+                namespaceName, (uint32_t) namespaceLen,
+                &numAppContextEntries, &appContextEntries);
+        if (parsed) {
+            if (numAppContextEntries == 0) {
+                result = true;
+            } else if (dpiConn_setAppContext(conn->handle,
+                    numAppContextEntries, appContextEntries) < 0) {
+                result = njsUtils_throwErrorDPI(env, globals);
+            } else {
+                result = true;
+            }
+        } else {
+            result = false;
+        }
+    }
+
+    NJS_FREE_AND_CLEAR(namespaceName);
+    if (appContextEntries) {
+        for (uint32_t i = 0; i < numAppContextEntries; i++) {
+            NJS_FREE_AND_CLEAR(appContextEntries[i].name);
+            NJS_FREE_AND_CLEAR(appContextEntries[i].value);
+        }
+        free(appContextEntries);
+    }
+
+    return result;
+}
 
 //-----------------------------------------------------------------------------
 // njsConnection_subscribe()

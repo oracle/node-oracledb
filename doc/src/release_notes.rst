@@ -19,6 +19,10 @@ node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0..
 Common Changes
 ++++++++++++++
 
+#)  Added :meth:`connection.appContext()` and
+    :meth:`connection.clearAppContext()` methods to the :ref:`Connection`
+    object.
+
 #)  Added connect string parser that resolves Oracle Database Easy Connect strings,
     merges njs-prefixed query parameters, and injects descriptor overrides so that
     the Thin and Thick modes behave consistently. Pool and connection creation in

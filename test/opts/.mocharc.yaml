@@ -307,3 +307,4 @@ spec:
   - test/explicitResourceMgmt.js
   - test/pipeline.js
   - test/sqlAssert.js
+  - test/appContext.js
