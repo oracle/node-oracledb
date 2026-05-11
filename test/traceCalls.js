@@ -182,7 +182,11 @@ describe('307. traceCalls.js', function() {
 
       const cfgConnectString = dbConfig.connectString || dbConfig.connectionString;
       if (cfgConnectString) {
-        assert.strictEqual(traceConfig.connectString, cfgConnectString);
+        if (!oracledb.thickModeDSNPassthrough) {
+          assert.ok(/\(DESCRIPTION=/.test(traceConfig.connectString));
+        } else {
+          assert.strictEqual(traceConfig.connectString, cfgConnectString);
+        }
       }
 
       const commonProps = ['serviceName', 'instanceName', 'pdbName', 'dbName', 'domainName'];

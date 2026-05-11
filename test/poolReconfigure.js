@@ -880,8 +880,11 @@ describe('255. poolReconfigure.js', function() {
       assert.strictEqual(poolStatistics.events, false);
       assert.strictEqual(poolStatistics.externalAuth, false);
       assert.strictEqual(poolStatistics.homogeneous, true);
-      assert.strictEqual(poolStatistics.connectString, dbConfig.connectString);
-
+      if (!oracledb.thickModeDSNPassthrough) {
+        assert.ok(/\(DESCRIPTION=/.test(pool.connectString));
+      } else {
+        assert.strictEqual(poolStatistics.connectString, dbConfig.connectString);
+      }
       // reconfigure for later use
       await pool.reconfigure({enableStatistics: false});
     });

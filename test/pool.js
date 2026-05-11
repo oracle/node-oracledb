@@ -908,7 +908,11 @@ describe('2. pool.js', function() {
         poolIncrement: 0,
       };
       pool = await oracledb.createPool(config);
-      assert.strictEqual(pool.connectString, config.connectString);
+      if (!oracledb.thickModeDSNPassthrough) {
+        assert.ok(/\(DESCRIPTION=/.test(pool.connectString));
+      } else {
+        assert.strictEqual(pool.connectString, config.connectString);
+      }
     });  // 2.15.14
 
     it('2.15.15 externalAuth - true and non-empty password', async function() {

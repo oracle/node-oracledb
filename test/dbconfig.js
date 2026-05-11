@@ -46,6 +46,11 @@
 
 const oracledb = require('oracledb');
 
+const thickDSNPassthroughEnv = process.env.NODE_ORACLEDB_THICK_DSN_PASSTHROUGH;
+if (thickDSNPassthroughEnv && thickDSNPassthroughEnv.toLowerCase() === 'false') {
+  oracledb.thickModeDSNPassthrough = false;
+}
+
 const config = {
   test: {
     externalAuth: false,
