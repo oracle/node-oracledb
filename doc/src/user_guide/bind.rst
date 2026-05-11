@@ -69,7 +69,9 @@ Bind parameters can be :ref:`IN <inbind>`, :ref:`OUT <outbind>`, or
 
 Bind variables cannot be used in `DDL <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=GUID-FD9A8CB4-6B9A-44E5-B114-EFB8DA76FC88>`__
-statements, for example ``CREATE TABLE`` or ``ALTER`` commands.
+statements, for example ``CREATE TABLE`` or ``ALTER`` commands. To build
+secure SQL statements when bind variables cannot be used, see
+:ref:`buildandvalidatesql`.
 
 Sets of values can bound for use in :meth:`connection.executeMany()`,
 see :ref:`Batch Statement Execution and Bulk Loading <batchexecution>`.

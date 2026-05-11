@@ -72,6 +72,9 @@ This is correct:
     ``await connection.execute (`SELECT * FROM mytab WHERE mycol = :mybv`,
     [101])``.
 
+For information on validating SQL table names, column names, or identifiers
+that are provided dynamically, see :ref:`buildandvalidatesql`.
+
 .. _select:
 
 SELECT Statements
@@ -1479,6 +1482,201 @@ To get the automatically inserted identifier in node-oracledb, use a
 
 Instead of using application generated identifiers, you may prefer to
 use ROWIDs, see :ref:`lastRowid <execlastrowid>`.
+
+.. _buildandvalidatesql:
+
+Dynamic SQL Construction and Validation
+=======================================
+
+When dynamically building SQL statements, you can use the methods
+:meth:`oracledb.enquoteName()`, :meth:`oracledb.enquoteLiteral()`,
+:meth:`oracledb.isQualifiedSqlName()`, and :meth:`oracledb.isSimpleSqlName()`
+to help prevent SQL injection. These methods are detailed in the subsequent
+sections.
+
+.. _validatesimplesql:
+
+Validating Simple SQL Names
+---------------------------
+
+The method :meth:`oracledb.isSimpleSqlName()` checks whether the input value
+is a valid simple SQL name. This method first trims any leading and trailing
+whitespaces from the input string, and then validates the trimmed value.
+
+If the input value is not quoted, the first character must be a Unicode letter
+and the remaining characters may be Unicode letters, Unicode combining marks,
+Unicode digits, or the characters '_', '$', and '#'. A quoted name may contain
+any characters except embedded double quotes and the NUL character. Quoted
+names must not be empty.
+
+Some valid and invalid SQL names are shown in the following example:
+
+.. code-block:: javascript
+
+    // Valid Simple SQL Names
+    console.log(oracledb.isSimpleSqlName("employee_id")); // true
+    console.log(oracledb.isSimpleSqlName("Salary"));      // true
+    console.log(oracledb.isSimpleSqlName("dept2"));       // true
+    console.log(oracledb.isSimpleSqlName(' "EMP" '));     // true (contains whitespace outside the quotes)
+
+    // Invalid Simple SQL Names
+    console.log(oracledb.isSimpleSqlName("123column"));  // false (starts with a number)
+    console.log(oracledb.isSimpleSqlName("first-name")); // false (contains hyphen)
+    console.log(oracledb.isSimpleSqlName("first name")); // false (contains space)
+    console.log(oracledb.isSimpleSqlName(""));           // false (empty string)
+    console.log(oracledb.isSimpleSqlName(' "EMP"X '));   // false (extra characters outside quotes)
+
+.. _validatequalifiedsql:
+
+Validating Qualified SQL Names
+------------------------------
+
+The :meth:`oracledb.isQualifiedSqlName()` method checks whether the input
+value contains a valid qualified SQL name. This method first trims any
+leading and trailing whitespaces from the input string, and then validates the
+trimmed value.
+
+The name must be one or more simple SQL names separated by periods, with
+optional whitespace around the periods. One optional '@' database link section
+is allowed, optional whitespace is also allowed around '@', and the database
+link name can itself be dotted.
+
+Some valid and invalid SQL names are shown in the following example:
+
+.. code-block:: javascript
+
+    // Valid Qualified SQL Names
+    console.log(oracledb.isQualifiedSqlName("HR.employees"));     // true
+    console.log(oracledb.isQualifiedSqlName("SALES.Order"));      // true
+    console.log(oracledb.isQualifiedSqlName("MYSCHEMA.MyTable")); // true
+    console.log(oracledb.isQualifiedSqlName("HR.employees@db1")); // true
+
+    // Invalid Qualified SQL Names
+    console.log(oracledb.isQualifiedSqlName("HR..Employees"));  // false (contains double dot)
+    console.log(oracledb.isQualifiedSqlName("HR.123Orders"));   // false (object name starts with number)
+    console.log(oracledb.isQualifiedSqlName("HR.Orders-2026")); // false (contains hyphen)
+
+.. _quoteidentifiers:
+
+Quoting SQL Identifiers
+-----------------------
+
+The :meth:`oracledb.enquoteName()` method is used to safely quote SQL
+identifiers such as table names or column names. It can be used when you need
+to dynamically include identifiers in your SQL statement. For example, if your
+application allows users to provide an arbitrary column name to filter query
+results, you could use :meth:`~oracledb.enquoteName()` to quote the supplied
+name, for example:
+
+.. code-block:: javascript
+
+    // User input
+    const col = "DEPARTMENT_NAME";
+    const val = "SALES";
+
+    const safeCol = oracledb.enquoteName(col);
+
+    const sql = `SELECT * FROM departments WHERE ${safeCol} = :1`;
+    const result = await connection.execute(sql, [val]);
+
+The default value of the ``capitalize`` parameter in
+:meth:`~oracledb.enquoteName()` is *true*. So, by default alphabetic
+characters are converted to uppercase before quoting in
+:meth:`~oracledb.enquoteName()`. If you set the ``capitalize`` parameter to
+*false*, then the case of the input value is preserved. For example:
+
+.. code-block:: javascript
+
+    oracledb.enquoteName("Department_Name") // Returns "DEPARTMENT_NAME"
+    oracledb.enquoteName("Department_Name", false) // Returns "Department_Name"
+
+The following example shows how a user input that is not validated alters the
+intended query from the EMPLOYEES table, and instead returns rows from the
+table DEPARTMENTS:
+
+.. code-block:: javascript
+
+    const col = "* FROM departments --"  // SQL Injection
+
+    const sql = `SELECT ${col} FROM employees`;
+    console.log(sql);
+
+    const result = await connection.execute(sql);
+
+    for (const row of result.rows) {
+      console.log(row);
+    }
+
+This shows the SQL statement has been altered unexpectedly::
+
+    SELECT * FROM departments -- FROM employees
+
+Records are shown from a table that the user should not be accessing::
+
+    (10, 'ADMINISTRATION', 200, 1700)
+    (20, 'MARKETING', 201, 1800)
+    (30, 'PURCHASING', 114, 1700)
+    (40, 'HUMAN RESOURCES', 203, 2400)
+
+The SQL Injection can be prevented by using :meth:`oracledb.enquoteName()` as
+shown below:
+
+.. code-block:: javascript
+
+    const col = "* FROM departments --"  // SQL Injection
+    const safeCol = oracledb.enquoteName(col);
+
+    const sql = `SELECT ${safeCol} FROM employees`;
+    console.log(sql);
+
+    const result = await connection.execute(sql);
+
+    for (const row of result.rows) {
+      console.log(row);
+    }
+
+This shows the SQL statement is now::
+
+    SELECT "* FROM DEPARTMENTS --" FROM employees
+
+which throws an error::
+
+    ORA-00904: "* FROM DEPARTMENTS --": invalid identifier
+
+Note that :meth:`oracledb.enquoteName()` rejects any input containing a double
+quote and returns the error ``NJS-183: invalid SQL name: embedded double
+quotes are not allowed``. The input is quoted as a single identifier, and the
+SQL name syntax is not validated.
+
+Applications can first check whether the input value is a valid SQL name using
+:meth:`oracledb.isSimpleSqlName()` or :meth:`oracledb.isQualifiedSqlName()`.
+If not valid, then use :meth:`oracledb.enquoteName()` to enclose the input
+value in quotes as a single identifier.
+
+.. _quoteliterals:
+
+Quoting Literals
+----------------
+
+For literal values, use bind variables whenever possible. When including
+literal values dynamically in SQL statements, use
+:meth:`oracledb.enquoteLiteral()` to enclose the value in single quotes and
+double any embedded single quotes. For example:
+
+.. code-block:: javascript
+
+    const val = oracledb.enquoteLiteral("O'Reilly");
+
+    // Build SQL using the quoted literal
+    const sql = `SELECT * FROM EMPLOYEES WHERE LAST_NAME = ${val}`;
+    console.log(sql);
+
+This prints::
+
+    SELECT * FROM EMPLOYEES WHERE LAST_NAME = 'O''Reilly'
+
+Note how the single quote in "O'Reilly" is automatically escaped (''), so the
+SQL remains valid.
 
 .. _cursors1000:
 

@@ -2964,6 +2964,8 @@ Oracledb Methods
     This synchronous method returns the input value as a string that can safely
     be included in a SQL statement as a string literal.
 
+    See :ref:`quoteliterals` for more information.
+
     The parameters of the ``oracledb.enquoteLiteral()`` method are:
 
     .. _enquoteliteral:
@@ -3001,6 +3003,8 @@ Oracledb Methods
 
     This synchronous method returns the input string enclosed in double quotes
     so it can be included in a SQL statement as an identifier.
+
+    See :ref:`quoteidentifiers` for more information.
 
     The parameters of the ``oracledb.enquoteName()`` method are:
 
@@ -4074,6 +4078,8 @@ Oracledb Methods
     This synchronous method returns whether the input string is a qualified SQL
     name.
 
+    See :ref:`validatequalifiedsql` for more information.
+
     The parameters of the ``oracledb.isQualifiedSqlName()`` method are:
 
     .. _isqualifiedsqlname:
@@ -4109,6 +4115,8 @@ Oracledb Methods
 
     This synchronous method returns whether the input string is a simple SQL
     name.
+
+    See :ref:`validatesimplesql` for more information.
 
     The parameters of the ``oracledb.isSimpleSqlName()`` method are:
 

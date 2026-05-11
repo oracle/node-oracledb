@@ -23,7 +23,7 @@ Common Changes
     merges njs-prefixed query parameters, and injects descriptor overrides so that
     the Thin and Thick modes behave consistently. Pool and connection creation in
     both the modes now run through this helper, guarded by a new
-    oracledb.thickModeDSNPassthroughswitch.
+    `oracledb.thickModeDSNPassthrough` switch.
 
 #)  Added new connection properties :attr:`connection.pdbName`,
     :attr:`connection.dbUniqueName` that provide the pluggable database name
@@ -61,7 +61,8 @@ Common Changes
 #)  Added methods :meth:`oracledb.isSimpleSqlName()` and
     :meth:`oracledb.isQualifiedSqlName()` to validate simple and qualified SQL
     names, and methods :meth:`oracledb.enquoteLiteral()` and
-    :meth:`oracledb.enquoteName()` to safely quote SQL literals and identifiers.
+    :meth:`oracledb.enquoteName()` to safely quote SQL literals and
+    identifiers. See :ref:`buildandvalidatesql` for more information.
 
 Thin Mode Changes
 +++++++++++++++++
