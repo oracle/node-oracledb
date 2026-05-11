@@ -781,7 +781,7 @@ describe('324. pipeline.js', function() {
       await conn.execute(sql);
     }; // doDropProc()
 
-    before(async () => {
+    before(async function() {
       if (!dbConfig.test.DBA_PRIVILEGE) this.skip();
       const dbaConfig = {
         user: dbConfig.test.DBA_user,
