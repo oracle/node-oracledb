@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -325,6 +325,7 @@ static bool njsPool_createPostAsync(njsBaton *baton, napi_env env,
         if (!njsTokenCallback_startNotifications(pool->accessTokenCallback,
                 env))
             return false;
+        baton->accessTokenCallback = NULL;
     }
 
     return true;
@@ -340,8 +341,17 @@ static void njsPool_finalize(napi_env env, void *finalizeData,
 {
     njsPool *pool = (njsPool*) finalizeData;
 
+    if (pool->accessTokenCallback) {
+        if (pool->accessTokenCallback->notificationsStarted) {
+            njsTokenCallback_stopNotifications(pool->accessTokenCallback);
+        } else {
+            // Free the previous token data memory when the new token is
+            // undefined
+            njsTokenCallback_free(env, pool->accessTokenCallback);
+        }
+        pool->accessTokenCallback = NULL;
+    }
     if (pool->handle) {
-        NJS_FREE_AND_CLEAR(pool->accessTokenCallback);
         dpiPool_release(pool->handle);
         pool->handle = NULL;
     }

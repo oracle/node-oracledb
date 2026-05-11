@@ -96,6 +96,9 @@ Thick Mode Changes
 #)  Improved sparse vector handling so that empty sparse vectors can be bound
     and fetched without raising ORA errors.
 
+#)  Addressed potential memory leak issues for resultsets, token callbacks and
+    Advanced Queuing (AQ).
+
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------
 

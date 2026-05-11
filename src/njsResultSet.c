@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -116,10 +116,20 @@ static void njsResultSet_finalize(napi_env env, void *finalizeData,
         void *finalizeHint)
 {
     njsResultSet *rs = (njsResultSet*) finalizeData;
+    uint32_t i;
 
     if (rs->handle) {
         dpiStmt_release(rs->handle);
         rs->handle = NULL;
+    }
+    // free the queryVars and nested buffers when an explicit close is not
+    // called and the JS garbage collector does the clean-up
+    if (!rs->isNested && rs->queryVars) {
+        for (i = 0; i < rs->numQueryVars; i++)
+            njsVariable_free(&rs->queryVars[i]);
+        free(rs->queryVars);
+        rs->queryVars = NULL;
+        rs->numQueryVars = 0;
     }
     free(rs);
 }

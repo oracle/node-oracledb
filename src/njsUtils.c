@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -603,6 +603,7 @@ bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,
         const char *name, uint32_t *resultNumElems, char ***resultElems,
         uint32_t **resultElemLengths)
 {
+    napi_status status;
     uint32_t arrayLength, i, *tempLengths;
     napi_value array, element;
     char **tempStrings;
@@ -622,22 +623,36 @@ bool njsUtils_getNamedPropertyStringArray(napi_env env, napi_value value,
     tempStrings = calloc(arrayLength, sizeof(char*));
     if (!tempStrings)
         return njsUtils_throwInsufficientMemory(env);
-    *resultElems = tempStrings;
     tempLengths = calloc(arrayLength, sizeof(uint32_t));
-    if (!tempLengths)
+    if (!tempLengths) {
+        free(tempStrings);
         return njsUtils_throwInsufficientMemory(env);
-    *resultElemLengths = tempLengths;
+    }
 
     // populate the results
-    *resultNumElems = arrayLength;
     for (i = 0; i < arrayLength; i++) {
-        NJS_CHECK_NAPI(env, napi_get_element(env, array, i, &element))
+        status = napi_get_element(env, array, i, &element);
+        if (status != napi_ok) {
+            while (i > 0)
+                free(tempStrings[--i]);
+            free(tempStrings);
+            free(tempLengths);
+            return njsUtils_genericThrowError(env, __FILE__, __LINE__);
+        }
         if (!njsUtils_copyStringFromJS(env, element, &tempStrings[i],
-                &tempLength))
+                &tempLength)) {
+            while (i > 0)
+                free(tempStrings[--i]);
+            free(tempStrings);
+            free(tempLengths);
             return false;
+        }
         tempLengths[i] = (uint32_t) tempLength;
     }
 
+    *resultNumElems = arrayLength;
+    *resultElems = tempStrings;
+    *resultElemLengths = tempLengths;
     return true;
 }
 

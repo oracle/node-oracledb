@@ -1,4 +1,4 @@
-// Copyright (c) 2019, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2019, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -775,6 +775,7 @@ struct njsTokenCallback {
     napi_ref jsCallback;
     napi_ref jsAccessTokenConfig;
     napi_env env;
+    bool notificationsStarted;
     bool result;
 };
 
@@ -1022,6 +1023,7 @@ bool njsVariable_setScalarValue(njsVariable *var, uint32_t pos, napi_env env,
 //-----------------------------------------------------------------------------
 int njsTokenCallback_eventHandler(njsTokenCallback *callback,
         dpiAccessToken *accessToken);
+bool njsTokenCallback_free(napi_env env, njsTokenCallback *callback);
 bool njsTokenCallback_new(njsBaton *baton, napi_env env,
         napi_value userCallback, napi_value accessTokenConfig);
 bool njsTokenCallback_startNotifications(njsTokenCallback *callback,

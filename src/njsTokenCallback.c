@@ -1,4 +1,4 @@
-// Copyright (c) 2022, Oracle and/or its affiliates.
+// Copyright (c) 2022, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -71,6 +71,33 @@ int njsTokenCallback_eventHandler(njsTokenCallback *callback,
 
 
 //-----------------------------------------------------------------------------
+// njsTokenCallback_free()
+//   Frees the token callback and any state owned by it.
+//-----------------------------------------------------------------------------
+bool njsTokenCallback_free(napi_env env, njsTokenCallback *callback)
+{
+    if (!callback)
+        return true;
+
+    if (callback->notificationsStarted) {
+        uv_mutex_destroy(&callback->mutex);
+        callback->notificationsStarted = false;
+    }
+    NJS_DELETE_REF_AND_CLEAR(callback->jsPool);
+    NJS_DELETE_REF_AND_CLEAR(callback->jsCallback);
+    NJS_DELETE_REF_AND_CLEAR(callback->jsAccessTokenConfig);
+    if (callback->accessToken) {
+        NJS_FREE_AND_CLEAR(callback->accessToken->token)
+        NJS_FREE_AND_CLEAR(callback->accessToken->privateKey)
+        NJS_FREE_AND_CLEAR(callback->accessToken)
+    }
+    NJS_FREE_AND_CLEAR(callback);
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
 // njsTokenCallback_new()
 //   This method allocates memory to structure accessTokenCallback.
 //-----------------------------------------------------------------------------
@@ -120,6 +147,7 @@ bool njsTokenCallback_startNotifications(njsTokenCallback *callback,
     uv_async_init(loop, &callback->async,
             njsTokenCallback_processNotification);
     callback->async.data = callback;
+    callback->notificationsStarted = true;
 
     return true;
 }
@@ -196,9 +224,9 @@ static bool njsTokenCallback_returnAccessTokenHelper(njsTokenCallback *callback,
 
     NJS_CHECK_NAPI(env, napi_typeof(env, payloadObj, &actualType))
     if (actualType == napi_undefined) {
-        accessToken->token = NULL;
+        NJS_FREE_AND_CLEAR(accessToken->token)
+        NJS_FREE_AND_CLEAR(accessToken->privateKey)
         accessToken->tokenLength = 0;
-        accessToken->privateKey = NULL;
         accessToken->privateKeyLength = 0;
     } else if (actualType == napi_string) {
         if (!njsUtils_copyStringFromJS(env, payloadObj,
@@ -295,15 +323,6 @@ static void njsTokenCallback_onStopNotifications(uv_handle_t *handle)
 static bool njsTokenCallback_onStopNotificationsHelper(napi_env env,
         njsTokenCallback *callback)
 {
-    // perform cleanup
-    uv_mutex_destroy(&callback->mutex);
-    NJS_DELETE_REF_AND_CLEAR(callback->jsPool);
-    NJS_DELETE_REF_AND_CLEAR(callback->jsCallback);
-    if (callback->accessToken) {
-        NJS_FREE_AND_CLEAR(callback->accessToken->token)
-        NJS_FREE_AND_CLEAR(callback->accessToken->privateKey)
-        NJS_FREE_AND_CLEAR(callback->accessToken)
-    }
-
+    njsTokenCallback_free(env, callback);
     return true;
 }
