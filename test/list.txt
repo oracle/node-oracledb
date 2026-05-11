@@ -5244,6 +5244,11 @@ Overview of node-oracledb functional tests
       248.2.9 negative test: username = empty string
       248.2.10 negative test: username = NaN
       248.2.11 negative test: username in array
+    248.3 combo key decryption
+      248.3.1 decrypts using AES-128 combo key
+      248.3.2 decrypts using AES-192 combo key
+      248.3.3 decrypts using AES-256 combo key
+      248.3.4 rejects unsupported combo key length
 
   249. rsGetAllRows1.js
     249.1 ResultSet & getRows()

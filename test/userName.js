@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -33,9 +33,11 @@
 
 const oracledb  = require('oracledb');
 const assert    = require('assert');
+const crypto    = require('crypto');
 const dbConfig  = require('./dbconfig.js');
 const assist    = require('./dataTypeAssist.js');
 const testsUtil = require('./testsUtil.js');
+const encryptDecrypt = require('../lib/thin/protocol/encryptDecrypt.js');
 
 describe('248. userName.js', function() {
   const dbaCredential = {
@@ -419,5 +421,33 @@ describe('248. userName.js', function() {
     }); // 248.2.11
 
   }); // 248.2
+
+
+  describe('248.3 combo key decryption', function() {
+    const plaintext = Buffer.from('00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff', 'hex');
+    const iv = Buffer.alloc(16, 0);
+
+    const cases = [
+      { name: 'AES-128 combo key', key: Buffer.from(Array.from({ length: 16 }, (_, i) => (i + 1) & 0xFF)), alg: 'aes-128-cbc' },
+      { name: 'AES-192 combo key', key: Buffer.from(Array.from({ length: 24 }, (_, i) => (i * 3) & 0xFF)), alg: 'aes-192-cbc' },
+      { name: 'AES-256 combo key', key: Buffer.from(Array.from({ length: 32 }, (_, i) => (i * 5) & 0xFF)), alg: 'aes-256-cbc' }
+    ];
+
+    cases.forEach((testCase, index) => {
+      it(`248.3.${index + 1} decrypts using ${testCase.name}`, function() {
+        const cipher = crypto.createCipheriv(testCase.alg, testCase.key, iv);
+        cipher.setAutoPadding(false);
+        const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+        const decrypted = encryptDecrypt.decrypt(testCase.key, ciphertext);
+        assert.deepStrictEqual(decrypted, plaintext);
+      });
+    });
+
+    it('248.3.4 rejects unsupported combo key length', function() {
+      const badKey = Buffer.alloc(20, 0xAB);
+      const ciphertext = Buffer.alloc(16, 0);
+      assert.throws(() => encryptDecrypt.decrypt(badKey, ciphertext), /NJS-188:/);
+    });
+  });
 
 });

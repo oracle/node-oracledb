@@ -71,6 +71,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed Thin mode authentication failures caused by "Invalid key length" errors
+    when validating encrypted server responses.
+    See `Issue #1770 <https://github.com/oracle/node-oracledb/issues/1770>`__.
+
 #)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
 #)  Added support for Oracle AI Database 26ai :ref:`Pipelining <pipelining>`.
