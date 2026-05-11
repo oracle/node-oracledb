@@ -2953,6 +2953,95 @@ Oracledb Methods
         * - Pool ``pool``
           - The newly created connection pool. If ``createPool()`` fails, ``pool`` will be NULL. If the pool will be accessed via the :ref:`pool cache <connpoolcache>`, this parameter can be omitted. See :ref:`Pool class <poolclass>` for more information.
 
+.. method:: oracledb.enquoteLiteral()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        enquoteLiteral(String value);
+
+    This synchronous method returns the input value as a string that can safely
+    be included in a SQL statement as a string literal.
+
+    The parameters of the ``oracledb.enquoteLiteral()`` method are:
+
+    .. _enquoteliteral:
+
+    .. list-table-with-summary:: oracledb.enquoteLiteral() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays the
+         description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``value``
+          - String
+          - The value to be converted to a SQL string literal.
+
+            Embedded single quote characters are doubled. Non-string values fail standard parameter validation.
+
+    Use :ref:`bind variables <bind>` for values whenever possible. Use
+    :meth:`oracledb.enquoteLiteral()` when a SQL string literal must be
+    constructed explicitly.
+
+.. method:: oracledb.enquoteName()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        enquoteName(String name[, Boolean capitalize]);
+
+    This synchronous method returns the input string enclosed in double quotes
+    so it can be included in a SQL statement as an identifier.
+
+    The parameters of the ``oracledb.enquoteName()`` method are:
+
+    .. _enquotename:
+
+    .. list-table-with-summary:: oracledb.enquoteName() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays the
+         description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``name``
+          - String
+          - The string to be quoted for identifier use.
+
+            Any input containing a double quote character is rejected with the error ``NJS-183: invalid SQL name: embedded double quotes are not allowed``.
+
+            Non-string values fail standard parameter validation.
+        * - ``capitalize``
+          - Boolean
+          - Indicates whether the input string should be converted to uppercase using locale-independent Unicode rules before quoting.
+
+            The default value is *true*.
+
+    Uppercasing is done in the Node.js client and can differ from Oracle
+    Database ``DBMS_ASSERT.ENQUOTE_NAME()`` behavior for some characters,
+    because Oracle applies server-side rules that can depend on database or
+    session settings.
+
+    To validate an existing SQL name without changing it, use
+    :meth:`oracledb.isSimpleSqlName()` or
+    :meth:`oracledb.isQualifiedSqlName()`. Use :meth:`oracledb.enquoteName()`
+    to quote raw identifier text.
+
 .. method:: oracledb.getConnection()
 
     **Promise**::
@@ -3973,6 +4062,78 @@ Oracledb Methods
     because those libraries still need to be in the operating system search
     path, such as from running ``ldconfig`` or set in the environment
     variable ``LD_LIBRARY_PATH``.
+
+.. method:: oracledb.isQualifiedSqlName()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        isQualifiedSqlName(String name);
+
+    This synchronous method returns whether the input string is a qualified SQL
+    name.
+
+    The parameters of the ``oracledb.isQualifiedSqlName()`` method are:
+
+    .. _isqualifiedsqlname:
+
+    .. list-table-with-summary:: oracledb.isQualifiedSqlName() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays the
+         description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``name``
+          - String
+          - The string to be validated.
+
+            Leading and trailing whitespace is ignored. Each component must be a valid simple SQL name. Components may be separated by dots, and one optional trailing '@' database link name is allowed; the database link name can itself be dotted.
+
+            Invalid SQL name strings return *false*. Non-string values fail standard parameter validation.
+
+.. method:: oracledb.isSimpleSqlName()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        isSimpleSqlName(String name);
+
+    This synchronous method returns whether the input string is a simple SQL
+    name.
+
+    The parameters of the ``oracledb.isSimpleSqlName()`` method are:
+
+    .. _issimplesqlname:
+
+    .. list-table-with-summary:: oracledb.isSimpleSqlName() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the parameter. The second column
+         displays the data type of the parameter. The third column displays the
+         description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``name``
+          - String
+          - The string to be validated.
+
+            Leading and trailing whitespace is ignored. Valid names are either unquoted identifiers that begin with a Unicode letter and then use Unicode letters, Unicode combining marks, Unicode digits, '_', '$', or '#', or quoted identifiers enclosed in double quotes with no embedded double quotes or the NUL character ('\u0000').
+
+            Invalid SQL name strings return *false*. Non-string values fail standard parameter validation.
 
 .. method:: oracledb.registerConfigurationProviderHook()
 

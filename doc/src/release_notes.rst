@@ -52,6 +52,11 @@ Common Changes
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
+#)  Added methods :meth:`oracledb.isSimpleSqlName()` and
+    :meth:`oracledb.isQualifiedSqlName()` to validate simple and qualified SQL
+    names, and methods :meth:`oracledb.enquoteLiteral()` and
+    :meth:`oracledb.enquoteName()` to safely quote SQL literals and identifiers.
+
 Thin Mode Changes
 +++++++++++++++++
 

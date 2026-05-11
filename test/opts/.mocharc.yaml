@@ -306,3 +306,4 @@ spec:
   - test/tracePoolEvents.js
   - test/explicitResourceMgmt.js
   - test/pipeline.js
+  - test/sqlAssert.js

@@ -6697,3 +6697,24 @@ Overview of node-oracledb functional tests
     324.6 pipeline implicit results
       324.6.1 returns implicit results rows with addExecute() in pipeline
       324.6.2 does not return implicit results rows with addFetch*() in pipeline
+
+  325. sqlAssert.js
+    325.1 enquotes literals
+    325.2 enquotes names
+    325.3 validates simple SQL names
+    325.4 validates qualified SQL names
+    325.5 Injection-focused helper tests
+      325.5.1 safely encloses literal attack payloads
+      325.5.2 rejects simple-name attack payloads
+      325.5.3 quotes raw exotic single identifiers safely
+      325.5.4 rejects qualified-name attack payloads
+    325.6 Functional integration tests
+      325.6.1 safe dynamic SQL
+      325.6.2 safe dynamic SQL with raw exotic identifier
+      325.6.3 stores literal attack payloads as data
+      325.6.4 blocks identifier injection attempts
+    325.7 DBMS_ASSERT comparisons
+      325.7.1 qualified_sql_name dotted dblink
+      325.7.2 simple_sql_name rejects superscript digits
+      325.7.3 simple_sql_name accepts combining marks
+      325.7.4 enquote_name uppercase behavior differs from Oracle NLS behavior
