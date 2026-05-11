@@ -39,6 +39,7 @@ User Guide
     user_guide/startup.rst
     user_guide/tracing.rst
     user_guide/extensions.rst
+    user_guide/pipeline.rst
     user_guide/globalization.rst
     user_guide/exception_handling.rst
     user_guide/troubleshooting.rst
@@ -68,6 +69,7 @@ API Manual
     api_manual/sodadb.rst
     api_manual/sodadocument.rst
     api_manual/sodacursor.rst
+    api_manual/pipeline.rst
     api_manual/errors.rst
     api_manual/deprecations.rst
 

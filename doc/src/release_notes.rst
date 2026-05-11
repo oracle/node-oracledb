@@ -57,7 +57,7 @@ Thin Mode Changes
 
 #)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
-#)  Added support for Oracle AI Database 26ai's pipelining feature.
+#)  Added support for Oracle AI Database 26ai :ref:`Pipelining <pipelining>`.
 
 #)  Fixed bug to avoid calling ``fetchTypeHandler`` more than once when LOB
     objects are used.

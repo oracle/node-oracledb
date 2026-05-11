@@ -239,6 +239,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Application Continuity (AC) and Transparent Application Continuity (TAC) (see :ref:`appcontinuity`)
       - No
       - Yes
+    * - Oracle AI Database 26ai Pipelining (see :ref:`pipelining`)
+      - Yes
+      - No
     * - End-to-end monitoring and tracing attributes (see :ref:`tracingsql`)
       - Yes
       - Yes

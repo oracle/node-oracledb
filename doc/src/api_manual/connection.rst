@@ -2358,6 +2358,135 @@ Connection Methods
         * - Error ``error``
           - If ``rollback()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
+.. method:: connection.runPipeline()
+
+    .. versionadded:: 7.0
+
+    **Promise**::
+
+        promise = runPipeline(Pipeline pipeline [, Boolean continueOnError]);
+
+    Runs all of the operations in the pipeline and returns an array,
+    each entry corresponding to an operation executed in the pipeline.
+
+    .. note::
+
+        True pipelining requires Oracle AI Database 26ai, or later.
+
+        When you connect to an older Oracle Database version or use
+        node-oracledb Thick mode, operations are sequentially executed by
+        node-oracledb. Each operation concludes before the next is sent to the
+        database. There is no reduction in round-trips and no performance
+        benefit. This approach is recommended for code portability when
+        upgrading to a latest database version that supports pipelining.
+
+    See :ref:`pipelining` for more information.
+
+    The parameters of the ``connection.runPipeline()`` method are:
+
+    .. _runpipeline:
+
+    .. list-table-with-summary:: connection.runPipeline() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :summary: The first column displays the name of the parameter. The
+         second column displays the data type of the parameter. The third
+         column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``pipeline``
+          - Object
+          - .. _pipelinerunpipeline:
+
+            The pipeline to be run.
+        * - ``continueOnError``
+          - Boolean
+          - .. _continueonerror:
+
+            Determines whether operations should continue to run after an error has occurred.
+
+            If this parameter is set to *true*, the pipeline operations continue to run after the error occurs and the error is stored as a corresponding pipeline operation result. If this parameter is set to *false*, then an error will be raised as soon as it occurs in any pipeline operation and all subsequent operations will be terminated.
+
+            The default value is *false*.
+
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        runPipeline(Pipeline pipeline [, Boolean continueOnError], function(Error error, Array results) {});
+
+    See :ref:`runpipeline` for information on the ``pipeline`` and
+    ``continueOnError`` parameters.
+
+    The parameters of the callback function ``function(Error error, Array results)`` are:
+
+    .. list-table-with-summary::
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 15 30
+        :summary: The first column displays the callback function parameter. The
+         second column displays the description of the parameter.
+
+        * - Callback Function Parameter
+          - Description
+        * - Error ``error``
+          - If ``runPipeline()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+        * - Array ``results``
+          - The array that contains the results of the executed pipeline operations.
+
+            See :ref:`runpipelineresultobj` for information on its properties.
+
+    **runPipeline() callback: result Object Properties**
+
+    The properties of result object from the ``runPipeline()`` callback are
+    described below.
+
+    .. _runpipelineresultobj:
+
+    .. list-table-with-summary:: runPipeline() callback: result Object Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 15 30
+        :summary: The first column displays the name of the property. The
+         second column displays the description of the property.
+
+        * - Property
+          - Description
+        * - ``implicitResults``
+          - An array that will be defined if the statement executed in the operation returned Implicit Results.
+
+            See :ref:`Implicit Results <implicitresults>` for more information.
+        * - ``error``
+          - An :ref:`error <errorobj>` object that gives information about any error that was encountered when running the operation.
+
+            This property is only available if :ref:`continueOnError <continueonerror>` is set to *true* in :meth:`connection.runPipeline()`.
+        * - ``lastRowid``
+          - A string that identifies the ROWID of a row affected by an INSERT, UPDATE, DELETE, or MERGE statement executed in the operation.
+
+            If more than one row was affected, only the ROWID of the last row is returned.
+        * - ``metaData``
+          - An array describing each column in a query executed by the operation.
+
+            For SELECT statements, this contains an array of objects describing details of columns for the select list. For non-queries, this property is undefined. See :ref:`extended metadata <execmetadata>` for details on the information attributes.
+        * - ``outBinds``
+          - .. _resultobjrunpipeline:
+
+            An array or object that contains the output values of OUT and IN OUT binds used in an operation.
+        * - ``rows``
+          - An array that contains the rows that were fetched by the operation, if a query was executed.
+        * - ``rowsAffected``
+          - The number of rows that were affected by the operation.
+
+            For DML statements this contains the number of rows affected, for example, the number of rows inserted. For non-DML statements such as queries and PL/SQL statements, rowsAffected is undefined.
+        * - ``warning``
+          - An :ref:`error <errorobj>` object that gives information about any warning that was encountered when running the operation.
+
 .. method:: connection.shutdown()
 
     .. versionadded:: 5.0
