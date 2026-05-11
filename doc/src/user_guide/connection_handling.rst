@@ -4164,7 +4164,7 @@ Fast Application Notification (FAN)
 Users of `Oracle Database FAN <https://www.oracle.com/pls/topic/lookup?ctx=
 dblatest&id=GUID-EB0E1525-D3B3-469C-BE22-A569C76864A6>`__
 must connect to a FAN-enabled database service. The application should
-have :attr:`oracledb.events` is set to *true*. This value can also be
+have :attr:`oracledb.events` set to *true*. This value can also be
 changed via :ref:`Oracle Client Configuration <oraaccess>`.
 
 .. note::
@@ -4172,18 +4172,24 @@ changed via :ref:`Oracle Client Configuration <oraaccess>`.
     In this release, FAN is only supported in node-oracledb Thick mode. See
     :ref:`enablingthick`.
 
+FAN can be enabled for on-premises databases and `Oracle Autonomous AI
+Database on Dedicated Exadata Infrastructure (ADB-D) <https://docs.oracle.com/
+en/cloud/paas/autonomous-database/dedicated/adbaa/>`__. FAN is not supported in
+`Oracle Autonomous AI Database Serverless (ADB-S) <https://docs.oracle.com/en/
+cloud/paas/autonomous-database/serverless/adbsb/index.html>`__.
+
 FAN support is useful for planned and unplanned outages. It provides
 immediate notification to node-oracledb following outages related to the
-database, computers, and networks. Without FAN, node-oracledb can hang
+database, database servers, and networks. Without FAN, node-oracledb can hang
 until a TCP timeout occurs and a network error is returned, which might
 be several minutes.
 
-FAN allows node-oracledb to provide high availability features without
-the application being aware of an outage. Unused, idle connections in a
-connection pool will be automatically cleaned up. A future
-``pool.getConnection()`` call will establish a fresh connection to a
-surviving database instance without the application being aware of any
-service disruption.
+FAN allows node-oracledb to provide high availability features without the
+application being aware of an outage or upcoming planned maintenance. Unused,
+idle connections in a :ref:`connection pool <connpooling>` will be
+automatically cleaned up. A future :meth:`pool.getConnection()` call will
+establish a fresh connection to a surviving database instance without the
+application being aware of any service disruption.
 
 To handle errors that affect active connections, you can add application
 logic to re-connect (this will connect to a surviving database instance)
@@ -4191,11 +4197,11 @@ and replay application logic without having to return an error to the
 application user. Alternatively, use :ref:`Application
 Continuity <appcontinuity>`.
 
-FAN benefits users of Oracle Database’s clustering technology (:ref:`Oracle
-RAC <connectionrac>`) because connections to surviving database
-instances can be immediately made. Users of Oracle’s Data Guard with a
-broker will get FAN events generated when the standby database goes
-online. Standalone databases will send FAN events when the database
+FAN benefits users of Oracle Database’s clustering technology :ref:`Oracle
+RAC <connectionrac>` because notifications are sent when a surviving database
+instance is up and ready to accept new connections. Users of Oracle's Data
+Guard with a broker will get FAN events generated when the standby database
+goes online. Standalone databases will send FAN events when the database
 restarts.
 
 For a more information on FAN see the `technical paper on Fast
@@ -4229,8 +4235,8 @@ applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf>`__.
 
 .. _appcontinuity:
 
-Application Continuity
-----------------------
+Application Continuity and Transparent Application Continuity
+-------------------------------------------------------------
 
 Node-oracledb OLTP applications can take advantage of continuous
 availability with the Oracle Database features Application Continuity (AC)
@@ -4252,8 +4258,9 @@ Applications Using Autonomous Database - Dedicated <https://www.oracle.com
 /technetwork/database/options/clustering/applicationcontinuity/continuous-
 service-for-apps-on-atpd-5486113.pdf>`__.
 
-When AC or TAC are configured on the database service, they are transparently
-available to node-oracledb applications.
+When AC or TAC is configured on the database service, node-oracledb
+applications can rely on Application Continuity to orchestrate recovery
+following an unplanned outage.
 
 .. _tg:
 
@@ -4276,10 +4283,18 @@ See `Oracle Database Development Guide <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=GUID-6C5880E5-C45F-4858-A069-A28BB25FD1DB>`__ for more
 information about using Transaction Guard.
 
+.. important::
+
+    If your application connects to an AC or TAC-enabled service, then do not
+    use Transaction Guard explicitly. AC, TAC, or TAF already handles the
+    commit outcome and replay. Use TG only when you cannot enable AC, TAC, or
+    TAF but still need commit outcome certainty after failures.
+
 When an error occurs during a commit, the Node.js application can acquire the
-logical transaction ID (``ltxid``) from the connection and then call a
-procedure to determine the outcome of the commit for this logical transaction
-ID.
+logical transaction ID (``ltxid``) from the terminated connection and then
+call a procedure to determine the outcome of the commit for this logical
+transaction ID. Ensure that you retrieve ``ltxid`` before the transaction
+fails and before a new connection is acquired.
 
 To use Transaction Guard in node-oracledb in a single-instance database,
 perform the following steps:
@@ -4341,7 +4356,8 @@ In the Node.js application code:
   not, do not proceed with Transaction Guard.
 
 - Use the connection attribute :attr:`connection.ltxid` to find the
-  logical transaction ID.
+  logical transaction ID from the failed connection. The ``ltxid`` attribute
+  must be retrieved before the transaction fails.
 
 - Call the `DBMS_APP_CONT.GET_LTXID_OUTCOME <https://www.oracle.com/pls/topic/
   lookup?ctx=dblatest&id=GUID-03CEB530-D3A5-40B1-87C8-5BF1BB5D5D54>`__ PL/SQL
@@ -4349,7 +4365,7 @@ In the Node.js application code:
   indicating if the last transaction was committed and whether the last
   call was completed successfully or not.
 
-- Take any necessary action to re-do uncommitted work.
+- Take any necessary action to redo uncommitted work.
 
 See `transactionguard.js <https://github.com/oracle/node-oracledb/tree/main/
 examples/transactionguard.js>`__ for an example of using Transaction Guard.
