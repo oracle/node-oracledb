@@ -35,39 +35,36 @@ const {
 } = require("../awsCommon.js");
 const oracledb = require("oracledb");
 
-let S3Client, GetObjectCommand;
+let SecretsManagerClient, GetSecretValueCommand;
 
-class AWSS3Provider extends base {
+class AWSSecretsManagerProvider extends base {
   constructor(provider_arg, urlExtendedPart) {
     super(urlExtendedPart);
-    const url = new URL(provider_arg);
-    this._addParam("bucket", url.hostname);
-    this._addParam("key", url.pathname.substring(1));
+    if (provider_arg) {
+      this._addParam("secretname", provider_arg);
+    }
   }
 
   init() {
     initAwsCommon();
-    ({ S3Client, GetObjectCommand } = require("@aws-sdk/client-s3"));
+    ({ SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager"));
     this.requestHandler = initAwsRequestHandler(this.paramMap);
   }
 
-  async dataFromStream(stream) {
-    const chunks = [];
-    return await new Promise((resolve, reject) => {
-      stream.on("data", (chunk) => chunks.push(chunk));
-      stream.on("end", () => {
-        try {
-          const data = Buffer.concat(chunks).toString("utf-8");
-          resolve(data);
-        } catch (error) {
-          reject(new Error(`Rejected with error: ${error.message}`));
-        }
-      });
-      stream.on("error", (error) => {
-        reject(new Error(`Stream error: ${error.message}`));
-      });
-    });
-  };
+  resolveSecretString(response) {
+    let secretString = response.SecretString;
+    if (!secretString && response.SecretBinary) {
+      secretString = Buffer.from(response.SecretBinary, "base64").toString(
+        "utf-8"
+      );
+    }
+
+    if (!secretString) {
+      throw new Error("Secret payload is empty");
+    }
+
+    return secretString;
+  }
 
   async returnConfig() {
     const fetchRegion = await resolveRegion(this.paramMap);
@@ -78,52 +75,65 @@ class AWSS3Provider extends base {
       fetchRegion
     );
 
-    const s3Client = new S3Client({
+    const secretsManagerClient = new SecretsManagerClient({
       region: fetchRegion,
       credentials: this.credential,
       requestHandler: this.requestHandler,
     });
 
-    const params = {
-      Bucket: this.paramMap.get("bucket"),
-      Key: this.paramMap.get("key"),
+    const secretIdentifier = this.paramMap.get("secretname");
+    if (!secretIdentifier) {
+      throw new Error(
+        "Secret identifier not provided for AWS Secrets Manager ConfigProvider."
+      );
+    }
+
+    const input = {
+      SecretId: secretIdentifier,
     };
 
+    const versionId = this.paramMap.get("versionid");
+    if (versionId) {
+      input.VersionId = versionId;
+    }
+
     try {
-      const cmd = new GetObjectCommand(params);
-      const resp = await s3Client.send(cmd);
+      const command = new GetSecretValueCommand(input);
+      const response = await secretsManagerClient.send(command);
 
-      if (!resp.Body) {
-        throw new Error(`S3 response body is empty for key: ${params.Key}`);
+      const secretString = this.resolveSecretString(response);
+
+      try {
+        return JSON.parse(secretString);
+      } catch {
+        return secretString;
       }
-
-      const data = await this.dataFromStream(resp.Body);
-      return JSON.parse(data);
     } catch (e) {
-      const errmsg = util.format(
-        "Failed to retrieve or parse config: %s\n%s",
-        e.message,
-        e.stack
+      throw new Error(
+        `Failed to retrieve configuration from AWS Secrets Manager: ${e.message}`
       );
-      throw new Error(errmsg);
     } finally {
-      s3Client.destroy();
+      secretsManagerClient.destroy();
     }
   }
 }
 
-module.exports = AWSS3Provider;
 
 async function hookFn(args) {
-  const configProvider = new AWSS3Provider(
+  const configProvider = new AWSSecretsManagerProvider(
     args.provider_arg,
     args.urlExtendedPart
   );
+
+  if (args.paramMap) {
+    configProvider.paramMap = args.paramMap;
+  }
+
   try {
     configProvider.init();
   } catch (err) {
     const errmsg = util.format(
-      "AWS Config Provider failed to load required modules: %s\n%s",
+      "AWS Secrets Manager Config Provider failed to load required modules: %s\n%s",
       err.message,
       err.stack
     );
@@ -131,8 +141,7 @@ async function hookFn(args) {
   }
 
   const cfg = await configProvider.returnConfig();
-  // Return config object
   return [cfg, null];
 }
 
-oracledb.registerConfigurationProviderHook("awss3", hookFn);
+oracledb.registerConfigurationProviderHook("awssecretsmanager", hookFn);

@@ -1499,6 +1499,8 @@ centralized configuration providers are detailed in this section:
 
 - :ref:`Azure App Centralized Configuration Provider <azureappauthmethods>`
 
+- :ref:`AWS S3 and Secrets Manager Configuration Providers <awsauthmethods>`
+
 .. _ociobjectstorageauthmethods:
 
 OCI Object Storage and OCI Vault Configuration Provider Authentication Methods
@@ -1608,3 +1610,39 @@ parameter *AZURE_MANAGED_IDENTITY_CLIENT_ID*. For more information on these
 parameters, see `Authentication Parameters for Azure App Configuration Store
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1EECAD82-6CE5-
 4F4F-A844-C75C7AA1F907>`__.
+
+.. _awsauthmethods:
+
+AWS S3 and AWS Secrets Manager Configuration Providers Authentication
+---------------------------------------------------------------------
+
+An Amazon Web Service (AWS) authentication method can be used to access the
+:ref:`AWS Simple Storage Service (S3) <awss3>` and
+:ref:`AWS Secrets Manager <awssecretsmanager>` centralized configuration
+providers. The authentication to these configuration providers can be set by
+specifying the following AWS access keys:
+
+- AWS_ACCESS_KEY_ID: Specifies the Access Key ID.
+
+- AWS_SECRET_ACCESS_KEY: Specifies the Secret Access Key.
+
+- AWS_SESSION_TOKEN: Specifies a unique identifier for temporary credentials.
+
+See `AWS Access Keys <https://docs.aws.amazon.com/sdkref/latest/guide/feature-
+static-credentials.html>`__ for more information.
+
+These AWS Access Keys can be defined in:
+
+- A shared configuration file which can be stored in a default location
+  *~/.aws/config*. See `Format of the config file <https://docs.aws.amazon.com
+  /sdkref/latest/guide/file-format.html#file-format-config>`__ for more
+  information.
+
+- A shared credentials file which can be stored in a default location
+  *~/.aws/credetials*. See `Format of the credentials file <https://docs.aws.
+  amazon.com/sdkref/latest/guide/file-format.html#file-format-creds>`__ for
+  more information.
+
+- Environment variables. See `Using Environment Variables <https://docs.aws.
+  amazon.com/sdkref/latest/guide/environment-variables.html>`__ for more
+  information.

@@ -316,10 +316,11 @@ connection string allows node-oracledb configuration information to be stored
 centrally in :ref:`OCI Object Storage <ociobjstorage>`,
 :ref:`OCI Vault <ocivault>`, :ref:`local file <fileconfigprovider>`,
 :ref:`Azure App Configuration <azureappconfig>`,
-:ref:`Azure Key Vault <azurekeyvault>`, or
-:ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`. Using a
-provider URL, node-oracledb will access the information stored in the
-configuration provider and use it to connect to Oracle Database.
+:ref:`Azure Key Vault <azurekeyvault>`,
+:ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`, or
+:ref:`AWS Secrets Manager <awssecretsmanager>`. Using a provider URL,
+node-oracledb will access the information stored in the configuration provider
+and use it to connect to Oracle Database.
 
 The database connect descriptor and any database credentials stored in a
 configuration provider will be used by any language driver that accesses the
@@ -329,8 +330,9 @@ other sections.
 
 The Centralized Configuration Provider URL must begin with
 "config-<configuration-provider>://" where the configuration-provider value
-can be set to *ociobject*, *ocivault*, *file*, *azure*, *azurevault*, or
-*awss3* depending on the location of your configuration information.
+can be set to *ociobject*, *ocivault*, *file*, *azure*, *azurevault*, *awss3*,
+or *awssecretsmanager* depending on the location of your configuration
+information.
 
 For example, consider the following connection configuration stored in
 :ref:`OCI Object Storage <ociobjstorage>`:
@@ -614,6 +616,7 @@ The following configuration providers are supported by node-oracledb:
 - :ref:`Microsoft Azure App Configuration <azureappconfig>`
 - :ref:`Microsoft Azure Key Vault <azurekeyvault>`
 - :ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`
+- :ref:`AWS Secrets Manager <awssecretsmanager>`
 
 To use Centralized Configuration Provider functionality in node-oracledb Thick
 mode, you should set :attr:`oracledb.thickModeDSNPassthrough` to *false*.
@@ -652,7 +655,7 @@ below.
 
         The password of the database user.
 
-        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`File <fileconfigprovider>`, and :ref:`AWS S3 <awss3>` configuration providers, the value is an object which contains the following parameters:
+        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`File <fileconfigprovider>`, :ref:`AWS S3 <awss3>` configuration providers, and :ref:`AWS Secrets Manager <awssecretsmanager>`, the value is an object which contains the following parameters:
 
         - ``type``: The possible values of this required parameter are *ocivault*, *azurevault*, *base64*, and *text*.
 
@@ -664,7 +667,7 @@ below.
 
         .. warning::
 
-            Storing passwords of type *base64* or *text* in the JSON file for File, OCI Object Storage, Azure App, and AWS S3 configuration providers should only ever be used in development or test environments. It can be used with Azure Vault and OCI Vault configuration providers.
+            Storing passwords of type *base64* or *text* in the JSON file for File, OCI Object Storage, Azure App, and AWS S3 configuration providers should only ever be used in development or test environments. It can be used with Azure Vault, OCI Vault, and AWS Secrets Manager configuration providers.
       - Optional
     * - ``connect_descriptor``
       - The database :ref:`connect descriptor <embedtns>`.
@@ -672,11 +675,9 @@ below.
     * - ``wallet_location``
       - The reference to the wallet.
 
-        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, and :ref:`File <fileconfigprovider>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
+        For :ref:`File <fileconfigprovider>`,:ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`AWS S3 <awss3>`, and :ref:`AWS Secrets Manager <awssecretsmanager>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
 
         For :ref:`Azure App Configuration <azureappconfig>`, this parameter is the reference to the Azure Key Vault and Secret that contains the wallet as the value.
-
-        For :ref:`AWS S3 <awss3>`, this parameter is not supported.
       - Optional
     * - ``config_time_to_live``
       - The number of seconds that node-oracledb should keep the configuration information cached. See :ref:`conncaching`.
@@ -1318,11 +1319,9 @@ Before using AWS S3, you must set the following environment variables:
 - *AWS_PROFILE* which specifies the name of the AWS profile to use from
   ~/.aws/credentials.
 
-- *AWS_ACCESS_KEY_ID* which explicitly specifies the Access Key ID. This is
-  required when authenticating using environment variables.
-
-- *AWS_SECRET_ACCESS_KEY* which explicitly specifies the Secret Access Key.
-  This is required when authenticating using environment variables.
+When setting the above environment variables, you must authenticate with the
+*AWS_ACCESS_KEY_ID*, *AWS_SECRET_ACCESS_KEY*, and *AWS_SESSION_TOKEN*
+environment variables. See :ref:`awsauthmethods`.
 
 To use an AWS S3, you must:
 
@@ -1424,6 +1423,137 @@ below.
     * - <options>
       - The region of the AWS S3 bucket.
       - Optional
+
+.. _awssecretsmanager:
+
+Using an AWS Secrets Manager Centralized Configuration Provider
+---------------------------------------------------------------
+
+The Amazon Web Service (AWS) `Secrets Manager configuration provider
+<https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html>`__
+enables the storage and management of Oracle Database connection information
+as JSON. This configuration provider support was introduced in node-oracledb
+7.0.
+
+To use an AWS Secrets Manager, you must:
+
+1. Enter and save the connection information as a secret in AWS Secrets
+   Manager console. The connection information must be entered as a JSON
+   object. See :ref:`Connection Information for AWS Secrets Manager
+   Centralized Configuration Provider <awssecretsmanagerconfigparams>`.
+
+   Also, see `Create an AWS Secrets Manager secret <https://docs.aws.amazon.
+   com/secretsmanager/latest/userguide/create_secret.html>`__ for the steps.
+
+2. Install the required AWS Secrets Manager modules. See
+   :ref:`awssecretsmanagermodules`.
+
+3. Load the :ref:`awssecretsmanager <awssecretsmanagerplugin>` plugin in your
+   application using
+   ``require('oracledb/plugins/configProviders/awssecretsmanager')``.
+
+4. :ref:`Use an AWS Secrets Manager connection string URL
+   <connstringawssecretsmanager>` in the ``connectString`` property of
+   connection and pool creation methods.
+
+Note that node-oracledb caches configurations by default, see
+:ref:`conncaching`.
+
+.. _awssecretsmanagerconfigparams:
+
+**Connection Information for AWS Secrets Manager Configuration Provider**
+
+The connection information stored in a JSON file must contain a
+``connect_descriptor`` key. Optionally, you can specify the database user
+name, password, and node-oracledb properties. For details on the information
+that can be stored in this configuration provider, see
+:ref:`_configuration_information`.
+
+.. _exampleawssecretsmanager:
+
+An example of a JSON file that can be used with AWS Secrets Manager
+Configuration Provider is:
+
+.. code-block:: json
+
+    {
+        "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+                (host=adb.region.oraclecloud.com))(connect_data=(service_name=dbsvcname))
+                (security=(ssl_server_dn_match=yes)))",
+
+        "user": "scott",
+        "password": {
+            "type": "base64",
+            "value": "***xyz"
+        },
+        "njs": {
+            "stmtCacheSize": 30,
+            "prefetchRows": 2,
+            "poolMin": 2,
+            "poolMax": 10
+        }
+    }
+
+This encodes the password as base64.
+
+.. _connstringawssecretsmanager:
+
+**AWS Secrets Manager Centralized Configuration Provider connectString Syntax**
+
+The ``connectString`` parameter for :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()` calls should use a connection string URL in the
+format::
+
+    config-awssecretsmanager://<secret_name>[?aws_region=<region>&aws_profile=<profile>&versionid=<version-id>&https_proxy=<proxy-host-or-url>&https_proxy_port=<proxy-port>]
+
+For example, a connection string to access AWS Secrets Manager and connect to
+Oracle Database is:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString : "config-awssecretsmanager://my-db-secret?aws_region=us-east-1&aws_profile=prod&versionid=1234ab...xz"
+    });
+
+The parameters of the connection string URL format are detailed in the table
+below.
+
+.. list-table-with-summary:: Connection String Parameters for AWS Secrets Manager
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 15 25 15
+    :name: _connection_string_for_aws_secrets_manager
+    :summary: The first row displays the name of the connection string parameter. The second row displays the description of the connection string parameter. The third row displays whether the connection string parameter is required or optional.
+
+    * - Parameter
+      - Description
+      - Required or Optional
+    * - config-awssecretsmanager
+      - Indicates that the configuration provider is AWS Secrets Manager.
+      - Required
+    * - <secret_name>
+      - The AWS Secrets Manager secret name or secret Amazon Resource Name (ARN).
+      - Required
+    * - aws_region=<region>
+      - The AWS region to use for the Secrets Manager client.
+      - Optional
+    * - aws_profile=<profile>
+      - The AWS profile to use when resolving AWS credentials and region from local AWS configuration files.
+      - Optional
+    * - versionid=<version-id>
+      - The specific AWS Secrets Manager secret version to retrieve. If not specified, AWS Secrets Manager returns the *AWSCURRENT* version.
+      - Optional
+    * - https_proxy=<proxy-host-or-url>
+      - The HTTPS proxy host or full proxy URL for AWS SDK traffic. If the value does not include a URL scheme, *http://* is added automatically.
+      - Optional
+    * - https_proxy_port=<proxy-port>
+      - The proxy port. This is used only when the ``https_proxy`` value does not already include a port.
+      - Optional
+
+Note that *AWS_REGION*, *HTTPS_PROXY*, and *AWS_PROFILE* environment variables
+can also be set instead of the corresponding connection string parameters. If
+you set these, then you need to set the authentication environment variables.
+See :ref:`awsauthmethods`.
 
 .. _conncaching:
 

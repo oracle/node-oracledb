@@ -1966,28 +1966,28 @@ modules:
 
    .. code-block:: shell
 
-        npm install aws-sdk/client-s3
+        npm install @aws-sdk/client-s3
 
 2. Install the `AWS SDK Credential Providers <https://www.npmjs.com/package/
    @aws-sdk/credential-providers>`__ module using:
 
    .. code-block:: shell
 
-        npm install aws-sdk/credential-providers
+        npm install @aws-sdk/credential-providers
 
 3. Install the `AWS Shared Configuration File Loader <https://www.npmjs.com/
    package/@smithy/shared-ini-file-loader>`__ module using:
 
    .. code-block:: shell
 
-        npm smithy/shared-ini-file-loader
+        npm install @smithy/shared-ini-file-loader
 
 4. Install the `AWS Node HTTP Handler <https://www.npmjs.com/package/@smithy/
    node-http-handler>`__ module using:
 
    .. code-block:: shell
 
-        npm install smithy/node-http-handler
+        npm install @smithy/node-http-handler
 
 5. Install the `HTTP and HTTPS Agent <https://www.npmjs.com/package/
    hpagent>`__ module using:
@@ -1998,6 +1998,52 @@ modules:
 
 See :ref:`awss3` for information on using this configuration provider with
 node-oracledb.
+
+.. _awssecretsmanagermodules:
+
+Install Modules for AWS Secrets Manager
+---------------------------------------
+
+For node-oracledb to work with AWS Secrets Manager, you must install the
+following AWS modules:
+
+1. Install the `AWS SDK for Client Secrets Manager <https://www.npmjs.com/
+   package/@aws-sdk/client-secrets-manager>`__ module using:
+
+   .. code-block:: shell
+
+        npm install @aws-sdk/client-secrets-manager
+
+2. Install the `AWS SDK Credential Providers <https://www.npmjs.com/package/
+   @aws-sdk/credential-providers>`__ module using:
+
+   .. code-block:: shell
+
+        npm install @aws-sdk/credential-providers
+
+3. Install the `AWS Shared Configuration File Loader <https://www.npmjs.com/
+   package/@smithy/shared-ini-file-loader>`__ module using:
+
+   .. code-block:: shell
+
+        npm install @smithy/shared-ini-file-loader
+
+5. Install the `AWS Node HTTP Handler <https://www.npmjs.com/package/@smithy/
+   node-http-handler>`__ module using:
+
+   .. code-block:: shell
+
+        npm install @smithy/node-http-handler
+
+6. Install the `HTTP and HTTPS Agent <https://www.npmjs.com/package/
+   hpagent>`__ module using:
+
+   .. code-block:: shell
+
+        npm install hpagent
+
+See :ref:`awssecretsmanager` for information on using this configuration
+provider with node-oracledb.
 
 .. _cloudnativemodules:
 

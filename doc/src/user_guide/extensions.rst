@@ -217,3 +217,27 @@ To load the ``awss3`` plugin in your application, use:
     require('oracledb/plugins/configProviders/awss3');
 
 See :ref:`awss3` for more information.
+
+.. _awssecretsmanagerplugin:
+
+AWS Secrets Manager Centralized Configuration Provider Plugin
+-------------------------------------------------------------
+
+.. versionadded:: 7.0
+
+``awssecretsmanager`` is a plugin that can be loaded in your application to
+provide access to configuration information stored in
+:ref:`AWS Secrets Manager <awssecretsmanager>`.
+
+This plugin is implemented as a :ref:`centralized configuration provider hook
+function <configproviderhookfn>` to handle connection strings which have the
+prefix ``config-awssecretsmanager``, see :ref:`AWS Secrets Manager connection
+strings <connstringawssecretsmanager>`.
+
+To load the ``awssecretsmanager`` plugin in your application, use:
+
+.. code-block:: javascript
+
+    require('oracledb/plugins/configProviders/awssecretsmanager');
+
+See :ref:`awssecretsmanager` for more information.

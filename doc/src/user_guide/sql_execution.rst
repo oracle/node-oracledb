@@ -671,12 +671,12 @@ Using Fetch Type Handlers
 Other than common data type conversions using the global ``fetchAsString`` and
 ``fetchAsBuffer`` settings, you may need more flexibility to modify the
 fetched column data. In such cases, a fetch type handler introduced in
-node-oracledb 6.0 can be specified for queries. The fetch type handler
-asks the database to perform a conversion of the column data type to the
-desired data type before the data is returned from the database to
-node-oracledb. If the database does not support the conversion of data types,
-an error will be returned. Also, fetch type handlers allow you to change
-column names, for example, to lowercase.
+node-oracledb 6.0 can be specified for queries. The fetch type handler asks
+the database to perform a conversion of the column data type to the desired
+data type before the data is returned from the database to node-oracledb.
+If the database does not support the conversion of data types, an error will
+be returned. Also, fetch type handlers allow you to change column names,
+for example, to lowercase.
 The fetch type handler functionality replaces the deprecated
 :ref:`fetchInfo <propexecfetchinfo>` property.
 
@@ -700,8 +700,8 @@ arguments. The first object argument contains the ``annotations``,
 ``domainSchema``, ``isJson``, ``name``, ``nullable``, ``precision``, and
 ``scale`` attributes. See :attr:`oracledb.fetchTypeHandler` for more
 information on these attributes. The second object argument contains the
-:ref:`metadata <execmetadata>` list of all the result columns fetched using the
-SELECT statement.
+:ref:`metadata <execmetadata>` list of all the result columns fetched using
+the SELECT statement.
 
 The function is called once for each column that is going to be fetched. The
 function is expected to return either nothing or an object containing:
@@ -812,11 +812,10 @@ Using Fetch Type Handlers with Converters
 
 Node-oracledb "converters" can be used with fetch type handlers to change the
 returned data. The converter is a function which accepts the value that will be
-returned by :meth:`connection.execute()` for a particular row and column
-and returns the value that will actually be returned by
-``connection.execute()``. The converter function runs within the
-:meth:`connection.execute()` or :meth:`resultSet.getRows()` functions
-and can make database calls.
+returned by :meth:`connection.execute()` for a particular row and column and
+returns the value that will actually be returned by ``connection.execute()``.
+The converter function runs within the :meth:`connection.execute()` or the
+:meth:`resultSet.getRows()` methods and can make database calls.
 
 For example:
 
@@ -1747,4 +1746,4 @@ here are possible solutions:
    when statements are internally released. The majority of your
    connections may use less than *open_cursors* cursors, but if one
    connection is at the limit and it then tries to execute a new
-   statement, that connection will get *ORA-1000*.
+   statement, that connection will get an *ORA-1000* error.

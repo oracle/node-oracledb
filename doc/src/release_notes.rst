@@ -29,32 +29,38 @@ Common Changes
     :meth:`oracledb.enquoteName()` to safely quote SQL literals and
     identifiers. See :ref:`buildandvalidatesql` for more information.
 
-#)  Added new connection properties :attr:`connection.pdbName`,
+#)  Added new connection properties :attr:`connection.pdbName` and
     :attr:`connection.dbUniqueName` that provide the pluggable database name
     and database unique name respectively.
 
 #)  Added :meth:`lob.trim()` method to the :ref:`LOB object <lobclass>`.
 
 #)  Added support for
-    :ref:`Explicit Resource Management <explicitresourcemgmtoverview>` which
-    was introduced in `Node.js version 24 <https://nodejs.org/en/blog/release/
-    v24.0.0>`__ to :ref:`Connection <connectionclass>`,
+    :ref:`Explicit Resource Management <explicitresourcemgmtoverview>`
+    (introduced in `Node.js version 24 <https://nodejs.org/en/blog/release/
+    v24.0.0>`__) to :ref:`Connection <connectionclass>`,
     :ref:`Pool <poolclass>`, and :ref:`Resultset <resultsetclass>` objects.
     See `Issue #1631 <https://github.com/oracle/node-oracledb/issues/1631>`__.
 
 #)  Added support for :ref:`AWS Simple Storage Service (S3) <awss3>`
     Centralized Configuration Provider.
 
-#)  Token-based Authentication can now include proxy session users by supplying
-    user name inside braces (for example ``user: "[session_user]"``) alongside
-    an :ref:`authentication tokens <tokenbasedauthentication>` when using
-    external authentication.
+#)  Added support for :ref:`AWS Secrets Manager <awssecretsmanager>`
+    Centralized Configuration Provider.
 
-#)  Added connect string parser that resolves Oracle Database Easy Connect
-    strings, merges njs-prefixed query parameters, and injects descriptor
-    overrides so that the Thin and Thick modes behave consistently. Pool and
-    connection creation in both the modes now run through this helper, guarded
-    by a new :attr:`oracledb.thickModeDSNPassthrough` switch.
+#)  :ref:`Token-based Authentication <tokenbasedauthentication>` can now
+    include proxy session users by supplying user name inside square brackets
+    (for example, ``user: "[session_user]"``) alongside an authentication
+    token when using external authentication.
+
+#)  Added new attribute :attr:`oracledb.thickModeDSNPassthrough` to determine
+    the intended connect string parse handling. When set to *false*,
+    node-oracledb Thick mode behaves similar to Thin mode when resolving
+    Oracle Database Easy Connect strings, processing "njs." prefixed query
+    parameters, and applying descriptor overrides. Connection and pool
+    creation in both modes can use this parsing to ensure consistent behavior.
+    The default value *true* retains the old Thick mode behavior of passing
+    the connect string directly down to the Oracle Client libraries.
 
 #)  Added new methods in :ref:`TraceHandlerBase class <tracehandlerbaseclass>`
     for pool events which can be used for tracking connection pool statistics
@@ -62,7 +68,7 @@ Common Changes
 
 #)  Fixed issue to generate the correct SSL_SERVER_CERT_DN entry from an
     Easy Connect string.
-    See `Issue #1772<https://github.com/oracle/node-oracledb/issues/1772>`__
+    See `Issue #1772 <https://github.com/oracle/node-oracledb/issues/1772>`__
     (Slawomir Osoba).
 
 #)  Fixed bug which did not update the :attr:`lob.length` property correctly
@@ -96,17 +102,18 @@ Thin Mode Changes
     objects are used.
     See `Issue #1769 <https://github.com/oracle/node-oracledb/issues/1769>`__.
 
-#)  Fixed Thin mode authentication failures caused by "Invalid key length" errors
-    when validating encrypted server responses.
+#)  Fixed Thin mode authentication failures caused by "Invalid key length"
+    errors when validating encrypted server responses.
     See `Issue #1770 <https://github.com/oracle/node-oracledb/issues/1770>`__.
 
 #)  Fixed bug when decoding PL/SQL booleans in Oracle Database 12.1.
 
-#)  Added error message when dbObject attributes with locators are accessed in
-    Thin mode.
+#)  Added error message when :ref:`dbObject attributes <dbobjectproperties>`
+    with locators are accessed in Thin mode.
 
-#)  Added callback as part of parameters when creating connection pool in Thin
-    mode. The callback can call pool events inside the connection pool methods.
+#)  Added callback as part of parameters when creating
+    :ref:`connection pool <connpooling>` in Thin mode. The callback can call
+    pool events inside the connection pool methods.
 
 Thick Mode Changes
 ++++++++++++++++++
