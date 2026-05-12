@@ -19,23 +19,15 @@ node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0..
 Common Changes
 ++++++++++++++
 
-#)  Fixed issue to generate the correct SSL_SERVER_CERT_DN entry from an Easy Connect String.
-    See Issue #1772<https://github.com/oracle/node-oracledb/issues/1772>__(Slawomir Osoba).
-
-#)  Token-based Authentication can now include proxy session users by supplying
-    user name inside braces (for example ``user: "[session_user]"``) alongside
-    an :ref:`authentication tokens <tokenbasedauthentication>` when using
-    external authentication.
-
 #)  Added :meth:`connection.appContext()` and
     :meth:`connection.clearAppContext()` methods to the
     :ref:`Connection <connectionclass>` object.
 
-#)  Added connect string parser that resolves Oracle Database Easy Connect
-    strings, merges njs-prefixed query parameters, and injects descriptor
-    overrides so that the Thin and Thick modes behave consistently. Pool and
-    connection creation in both the modes now run through this helper, guarded
-    by a new :attr:`oracledb.thickModeDSNPassthrough` switch.
+#)  Added methods :meth:`oracledb.isSimpleSqlName()` and
+    :meth:`oracledb.isQualifiedSqlName()` to validate simple and qualified SQL
+    names, and methods :meth:`oracledb.enquoteLiteral()` and
+    :meth:`oracledb.enquoteName()` to safely quote SQL literals and
+    identifiers. See :ref:`buildandvalidatesql` for more information.
 
 #)  Added new connection properties :attr:`connection.pdbName`,
     :attr:`connection.dbUniqueName` that provide the pluggable database name
@@ -53,9 +45,25 @@ Common Changes
 #)  Added support for :ref:`AWS Simple Storage Service (S3) <awss3>`
     Centralized Configuration Provider.
 
+#)  Token-based Authentication can now include proxy session users by supplying
+    user name inside braces (for example ``user: "[session_user]"``) alongside
+    an :ref:`authentication tokens <tokenbasedauthentication>` when using
+    external authentication.
+
+#)  Added connect string parser that resolves Oracle Database Easy Connect
+    strings, merges njs-prefixed query parameters, and injects descriptor
+    overrides so that the Thin and Thick modes behave consistently. Pool and
+    connection creation in both the modes now run through this helper, guarded
+    by a new :attr:`oracledb.thickModeDSNPassthrough` switch.
+
 #)  Added new methods in :ref:`TraceHandlerBase class <tracehandlerbaseclass>`
     for pool events which can be used for tracking connection pool statistics
     and metrics for :ref:`OpenTelemetry <opentelemetry>` support.
+
+#)  Fixed issue to generate the correct SSL_SERVER_CERT_DN entry from an
+    Easy Connect string.
+    See `Issue #1772<https://github.com/oracle/node-oracledb/issues/1772>`__
+    (Slawomir Osoba).
 
 #)  Fixed bug which did not update the :attr:`lob.length` property correctly
     after a write operation was performed on the :ref:`LOB object <lobclass>`.
@@ -70,28 +78,12 @@ Common Changes
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
-#)  Added methods :meth:`oracledb.isSimpleSqlName()` and
-    :meth:`oracledb.isQualifiedSqlName()` to validate simple and qualified SQL
-    names, and methods :meth:`oracledb.enquoteLiteral()` and
-    :meth:`oracledb.enquoteName()` to safely quote SQL literals and
-    identifiers. See :ref:`buildandvalidatesql` for more information.
-
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Fixed Thin mode authentication failures caused by "Invalid key length" errors
-    when validating encrypted server responses.
-    See `Issue #1770 <https://github.com/oracle/node-oracledb/issues/1770>`__.
 
 #)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
 #)  Added support for Oracle AI Database 26ai :ref:`Pipelining <pipelining>`.
-
-#)  Fixed bug to avoid calling ``fetchTypeHandler`` more than once when LOB
-    objects are used.
-    See `Issue #1769 <https://github.com/oracle/node-oracledb/issues/1769>`__.
-
-#)  Fixed bug when decoding PL/SQL booleans in Oracle Database 12.1.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
     See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
@@ -99,6 +91,16 @@ Thin Mode Changes
 #)  Fixed bug that throws an error when calling the same select statement with
     different :ref:`fetchInfo <propexecfetchinfo>` settings.
     See `Issue #1747 <https://github.com/oracle/node-oracledb/issues/1747>`__.
+
+#)  Fixed bug to avoid calling ``fetchTypeHandler`` more than once when LOB
+    objects are used.
+    See `Issue #1769 <https://github.com/oracle/node-oracledb/issues/1769>`__.
+
+#)  Fixed Thin mode authentication failures caused by "Invalid key length" errors
+    when validating encrypted server responses.
+    See `Issue #1770 <https://github.com/oracle/node-oracledb/issues/1770>`__.
+
+#)  Fixed bug when decoding PL/SQL booleans in Oracle Database 12.1.
 
 #)  Added error message when dbObject attributes with locators are accessed in
     Thin mode.

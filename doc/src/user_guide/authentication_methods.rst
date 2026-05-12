@@ -467,6 +467,11 @@ Cloud Infrastructure (OCI) Identity and Access Management
 Token-based authentication can be used for both standalone connections
 and connection pools.
 
+From node-oracledb 7.0 onwards, you can optionally specify a proxy user in the
+``user`` property by enclosing the name in square brackets, for example
+"[proxyuser]". This can be set in both standalone connections and connection
+pools when using OAuth 2.0 and OCI IAM token-based authentication.
+
 .. _iamtokenbasedauthentication:
 
 IAM Token-Based Authentication
@@ -606,7 +611,8 @@ using IAM token-based authentication.
         await oracledb.getConnection({
             accessToken    : tokenCallback,  // the callback returns the token object
             externalAuth   : true,           // must specify external authentication
-            connectString  : '...'           // Oracle Autonomous Database connection string
+            connectString  : '...',          // Oracle Autonomous Database connection string
+            user           : "[proxyuser]"   // optionally specify the proxy user
         });
     }
 
@@ -703,7 +709,8 @@ for example:
             accessToken   : tokenCallback,     // the callback returning the token
             externalAuth  : true,              // must specify external authentication
             homogeneous   : true,              // must use an homogeneous pool
-            connectString : connect_string     // Oracle Autonomous Database connection string
+            connectString : connect_string,    // Oracle Autonomous Database connection string
+            user          : "[proxyuser]"      // optionally specify the proxy user
         });
     }
 
@@ -1067,7 +1074,8 @@ authentication, for example:
         await oracledb.getConnection({
             accessToken   : tokenCallback,    // the callback returning the token
             externalAuth  : true,             // must specify external authentication
-            connectString : connect_string    // Oracle Autonomous Database connection string
+            connectString : connect_string,   // Oracle Autonomous Database connection string
+            user          : "[proxyuser]"     // optionally specify the proxy user
         });
     }
 
@@ -1162,7 +1170,8 @@ authentication, for example:
             accessToken   : tokenCallback,        // the callback returning the token
             externalAuth  : true,                 // must specify external authentication
             homogeneous   : true,                 // must use an homogeneous pool
-            connectString : '...'                 // Oracle Autonomous Database connection string
+            connectString : '...',                // Oracle Autonomous Database connection string
+            user          : "[proxyuser]"         // optionally specify the proxy user
         });
     }
 

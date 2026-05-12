@@ -2111,7 +2111,7 @@ Oracledb Methods
 
             When the callback is first invoked, the ``refresh`` parameter will be set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
-            For token-based authentication, the ``externalAuth`` and ``homogeneous`` pool attributes must be set to *true*. The ``user`` (or ``username``) and ``password`` attributes should not be set.
+            For token-based authentication, the ``externalAuth`` and ``homogeneous`` pool attributes must be set to *true*. The ``password`` attribute should not be set. The ``user`` (or ``username``) attribute can be optionally set to a proxy user enclosed in square brackets, for example "[proxyuser]".
 
             See :ref:`Token-Based Authentication <tokenbasedauthentication>` for more information.
 
@@ -3234,7 +3234,7 @@ Oracledb Methods
 
             For each connection, the callback is invoked with the ``refresh`` parameter set to *false*. This indicates that the application can provide a token from its own application managed cache, or it can generate a new token if there is no cached value. Node-oracledb checks whether the returned token has expired. If it has expired, then the callback function will be invoked a second time with ``refresh`` set to *true*. In this case, the function must externally acquire a token, optionally add it to the application’s cache, and return the token.
 
-            For token-based authentication, the ``externalAuth`` connection attribute must be set to *true*. The ``user`` (or ``username``) and ``password`` attributes should not be set.
+            For token-based authentication, the ``externalAuth`` connection attribute must be set to *true*. The ``password`` attribute should not be set. The ``user`` (or ``username``) attribute can be optionally set to a proxy user enclosed in square brackets, for example "[proxyuser]".
 
             See :ref:`Token-Based Authentication <tokenbasedauthentication>` for more information.
 
