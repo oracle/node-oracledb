@@ -442,10 +442,10 @@ To use node-oracledb Thick mode with Oracle Instant Client zip files:
    later. Oracle Instant Client 19 will connect to Oracle Database 11.2 or
    later.
 
-   Oracle Database versions 23 and 19 are Long Term Support Releases. Note
-   32-bit clients are not available on any platform for Oracle Database
-   version 23, however you can use older 32-bit clients to connect to this
-   version of the database.
+   Oracle Database 26ai and 19c are Long Term Support Releases. Note 32-bit
+   clients are not available on any platform for Oracle Database 26ai, however
+   you can use older 32-bit clients to connect to this version of the
+   database.
 
    It is recommended to keep up to date with the latest Oracle Instant Client
    release updates of your desired major version.
@@ -562,14 +562,14 @@ To use node-oracledb with Oracle Instant Client RPMs:
     It is recommended to keep up to date with the latest Oracle Instant Client
     release updates of your desired major version.
 
-    Oracle Database versions 23 and 19 are Long Term Support Releases. Oracle
+    Oracle Database 26ai and 19c are Long Term Support Releases. Oracle
     Instant Client version 23 will connect to Oracle Database 19 or later.
     Oracle Instant Client version 19 will connect to Oracle Database 11.2 or
     later.
 
     Note 32-bit clients are not available on any platform for Oracle Database
-    version 23, however you can use older 32-bit clients to connect to this
-    version of the database.
+    26ai, however you can use older 32-bit clients to connect to this version
+    of the database.
 
 1b. Alternatively, install Instant Client from Oracle's yum server.
 
@@ -679,8 +679,8 @@ libraries from a local Oracle Database or full Oracle Client installation
 
 The libraries must be either 32-bit or 64-bit, matching your Python
 architecture. Note 32-bit clients are not available on any platform for Oracle
-Database version 23, however you can use older 32-bit clients to connect to
-this version of the database.
+Database 26ai, however you can use older 32-bit clients to connect to this
+version of the database.
 
 The ``ORACLE_HOME`` can be either a database home or a full Oracle
 client installation installed with Oracle’s ``runInstaller``.
