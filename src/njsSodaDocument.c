@@ -180,7 +180,9 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsSodaDocument_getContent, 0, NULL)
                 (uint32_t*) &mediaTypeLength) < 0)
             return njsUtils_throwErrorDPI(env, globals);
 
-        if (strcmp(mediaType, "application/json") == 0) {
+        if (mediaTypeLength == sizeof("application/json") - 1 &&
+                strncmp(mediaType, "application/json",
+                        mediaTypeLength) == 0) {
             if (!encoding || strcmp(encoding, "UTF-8") == 0) {
                 NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
                         returnValue))

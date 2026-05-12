@@ -124,6 +124,9 @@ Thick Mode Changes
 #)  Addressed potential memory leak issues for resultsets, token callbacks and
     Advanced Queuing (AQ).
 
+#)  Added guardrails against buffer overflows while fetching data from SODA
+    documents.
+
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------
 
