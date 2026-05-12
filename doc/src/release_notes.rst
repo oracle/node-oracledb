@@ -120,8 +120,6 @@ Thin Mode Changes
 
 #)  Fixed bug when decoding PL/SQL booleans in Oracle Database 12.1.
 
-#)  Improved validation of VECTOR data decode in Thin mode.
-
 #)  Added error message when :ref:`dbObject attributes <dbobjectproperties>`
     with locators are accessed in Thin mode.
 

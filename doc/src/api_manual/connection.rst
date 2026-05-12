@@ -780,7 +780,7 @@ Connection Methods
     database operations are executed on the connection without any end user
     security context.
 
-    Se :ref:`deepdatasecurity`.
+    See :ref:`deepdatasecurity`.
 
     Currently, this method is only relevant to node-oracledb's Thin mode.
 

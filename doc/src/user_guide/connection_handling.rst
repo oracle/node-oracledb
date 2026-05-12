@@ -1993,7 +1993,7 @@ For example:
 The following attributes can be defined in an EndUserSecurityContext object:
 
 - ``databaseAccessToken``: A token that authenticates your application with
-  the database. This token is issued by your Identity and  Access Management
+  the database. This token is issued by your Identity and Access Management
   (IAM) system. This attribute is required.
 
 - ``endUserToken``: A token that identifies the end user. This token is issued
@@ -2110,7 +2110,7 @@ An example of using an end user security context is:
 .. code-block:: javascript
 
     // Create an end user security context
-    const context = new oracledb.EndUserSecurityContext {
+    const context = new oracledb.EndUserSecurityContext({
       databaseAccessToken: "db-token-plain",
       endUserToken: "user-token-plain",
       dataRoles: ["HR_DYNAMIC_ROLE", "FINANCE_DYNAMIC_ROLE"],
@@ -2118,7 +2118,7 @@ An example of using an end user security context is:
         region: ["us", "uk"],
         department: "finance",
       },
-    };
+    });
 
     // Create a standalone connection
     const connection = await oracledb.getConnection({

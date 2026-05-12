@@ -86,4 +86,4 @@ The properties of the ``options`` parameter are:
       - Object
       - The attribute-value pairs provided by the application that can be referenced at runtime by authorization policies (for example, in data grant predicates) and application logic.
 
-        These attribute are contained in JSON objects conforming to a JSON schema of an END USER CONTEXT declared in the database.
+        These attributes are contained in JSON objects conforming to a JSON schema of an END USER CONTEXT declared in the database.
