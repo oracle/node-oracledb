@@ -185,6 +185,22 @@ required to open a connection. For example, to return an error after 15 seconds
 if a connection cannot be established to the database, use
 ``"mydbmachine.example.com/orclpdb1?connect_timeout=15"``.
 
+**Node-oracledb Settings in Easy Connect Strings**
+
+Some node-oracledb connection method API parameters can alternatively be
+passed as Easy Connect parameters with a "njs."  prefix.  For example, to set
+the statement cache size used by connections:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com/orclpdb1?njs.stmtCacheSize=50"
+    });
+
+See :ref:`njsparams` for the usable attributes.
+
 .. _embedtns:
 
 Connect Descriptors
@@ -200,6 +216,10 @@ For example:
         password      : mypw,  // mypw contains the hr schema password
         connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
     });
+
+Any ``DESCRIPTION``, ``CONNECT_DATA`` and ``SECURITY`` parameters of a connect
+descriptor that are not recognized by node-oracledb are passed to the database
+unchanged.
 
 .. _tnsnames:
 
@@ -415,6 +435,142 @@ This can be referenced in node-oracledb:
         connectString : "finance"
     });
 
+.. _njsparams:
+
+Node-oracledb Parameters Settable in Easy Connect Strings
+---------------------------------------------------------
+
+Some node-oracledb connection and pool creation parameters can be set in
+:ref:`Easy Connect strings <easyconnect>`. This is an alternative to
+passing explicit arguments to :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()`. This allows application behavior to be changed
+without needing application code to be updated.
+
+The connection and pool creation parameters are set in an Easy Connect String
+by using a "njs." prefix before the parameter name and are listed in the
+:ref:`_params_ez_table` table.
+
+The parameter names set in the Easy Connect are similar to the node-oracledb
+method parameter names, but have a "njs."  prefix. For example:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com:1984/orclpdb1?njs.stmtCacheSize=30&njs.driverName=myDriver"
+    });
+
+is the same as:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "mydbmachine.example.com:1984/orclpdb1",
+        stmtCacheSize : 30,
+        driverName    : "myDriver"
+    });
+
+If a parameter is specified multiple times in an Easy Connect string, then the
+last value of that parameter is used. For example, in
+"localhost/orclpdb?njs.stmtCacheSize=10&njs.stmtCacheSize=20", the statement
+cache size is set to *20*.
+
+The parameters that are defined in an Easy Connect string will take precedence
+over the value passed as the equivalent node-oracledb API parameter. For
+example, if the ``poolMax`` and ``retry_count`` parameter were set in the
+``connectString`` property of :meth:`oracledb.createPool()` to
+"mydbmachine.example.com:1984/orclpdb1?**njs.poolMax=10&retry_count=20&**"
+and the ``poolMax`` and ``retryCount`` parameters were set to *5* and *10* in
+:meth:`oracledb.createPool()`, then maximum number of connections in a pool
+and retry count are set to the values in the Easy Connect String, that is *10*
+and *20* respectively.
+
+Parameters that apply to :ref:`pool creation <connpooling>` will be ignored if
+they are used in the context of :ref:`standalone connections
+<standaloneconnection>`.  Parameters with unknown names will be ignored in both
+cases.
+
+The connection and pool creation parameters settable in Easy Connect strings
+with prefix "njs." are:
+
+.. list-table-with-summary:: Usable Node-oracledb parameters Easy Connect Strings
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :width: 100%
+    :name:  _params_ez_table
+    :summary: The first column displays the node-oracledb parameter name. The second column displays the type of the parameter. The third column displays whether the parameter can be used in standalone and pool connection creation.
+
+    * - Node-oracledb Parameter Name
+      - Type
+      - Notes
+    * - ``driverName``
+      - String
+      - Standalone and pool connection creation
+    * - ``edition``
+      - String
+      - Standalone and pool connection creation
+    * - ``events``
+      - Boolean
+      - Standalone and pool connection creation
+    * - ``externalAuth``
+      - Boolean
+      - Standalone and pool connection creation
+    * - ``homogeneous``
+      - Boolean
+      - Pool connection creation only
+    * - ``machine``
+      - String
+      - Standalone and pool connection creation
+    * - ``maxLifetimeSession``
+      - Number
+      - Pool connection creation only
+    * - ``osUser``
+      - String
+      - Standalone and pool connection creation
+    * - ``poolIncrement``
+      - Number
+      - Pool connection creation only
+    * - ``poolMax``
+      - Number
+      - Pool connection creation only
+    * - ``poolMaxPerShard``
+      - Number
+      - Pool connection creation only
+    * - ``poolMin``
+      - Number
+      - Pool connection creation only
+    * - ``poolPingInterval``
+      - Number
+      - Pool connection creation only
+    * - ``poolPingTimeout``
+      - Number
+      - Pool connection creation only
+    * - ``poolTimeout``
+      - Number
+      - Pool connection creation only
+    * - ``program``
+      - String
+      - Standalone and pool connection creation
+    * - ``queueTimeout``
+      - Number
+      - Pool connection creation only
+    * - ``sodaMetaDataCache``
+      - Boolean
+      - Pool connection creation only
+    * - ``stmtCacheSize``
+      - Number
+      - Standalone and pool connection creation
+    * - ``terminal``
+      - String
+      - Standalone and pool connection creation
+
+Note that these parameters can only be used with the prefix "njs." in Easy
+Connect strings and not in :ref:`Connect Descriptors <embedtns>`.
+
 .. _authentication:
 
 Authenticating to Oracle Database
@@ -458,6 +614,17 @@ The following configuration providers are supported by node-oracledb:
 - :ref:`Microsoft Azure App Configuration <azureappconfig>`
 - :ref:`Microsoft Azure Key Vault <azurekeyvault>`
 - :ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`
+
+To use Centralized Configuration Provider functionality in node-oracledb Thick
+mode, you should set :attr:`oracledb.thickModeDSNPassthrough` to *false*.
+
+Note: In Thick mode, when :attr:`oracledb.thickModeDSNPassthrough` is *true*,
+it is the Oracle Client libraries that access the configuration provider when
+node-oracledb connection or pool creation methods are invoked. Any
+node-oracledb parameter section will be ignored. Any Oracle Client Interface
+parameter section should be removed from the configuration because its values
+may be different to those that node-oracledb assumes, and will cause undefined
+behavior.
 
 .. _configurationinformation:
 
@@ -1485,11 +1652,22 @@ An application context stores user-specific information on the database that
 can enable or prevent a user from accessing data. See `About Application
 Contexts <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
 6745DB10-F540-45D7-9761-9E8F342F1435>`__ in the Oracle Database documentation.
-Node-oracledb supports application contexts from version 6.9 onwards.
 
 An application context has a namespace and a key-value pair. The namespace
 *CLIENTCONTEXT* is reserved for use with client session-based application
-contexts. Single or multiple application context values can be set when
+contexts. In node-oracledb, you can set an application context during
+:ref:`connection creation <appcontextconncreate>` or on a
+:ref:`connection <appcontextconnobjcreate>` object.
+
+.. _appcontextconncreate:
+
+Setting Application Contexts During Connection Creation
+-------------------------------------------------------
+
+Node-oracledb supports setting application contexts during connection creation
+from version 6.9 onwards.
+
+Single or multiple application context values can be set when
 connecting to the database by using the
 :ref:`appContext <getconnectiondbattrsappcontext>` property in
 :meth:`oracledb.getConnection()` in both node-oracledb Thin and Thick modes.
@@ -1549,6 +1727,89 @@ Note that :ref:`Database Resident Connection Pooling (DRCP) <drcp>` does not
 support setting or working with application contexts. You also cannot set
 application contexts with application-side connection pools in Thick mode.
 The application context setting is ignored in these cases.
+
+.. _appcontextconnobjcreate:
+
+Setting Application Contexts on a Connection Object
+---------------------------------------------------
+
+From node-oracledb version 7.0 onwards, you can set an application context on
+a :ref:`Connection <connectionclass>` object after it has been created. This
+can be done with the :meth:`connection.appContext()` method by setting the
+namespace and key-value pairs for an application context as shown in the
+example below:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+      user: "hr",
+      password: mypw, // contains the hr schema password
+      connectString: "mydbmachine.example.com/orclpdb1",
+    });
+
+    connection.appContext("CLIENTCONTEXT", // namespace
+      [
+        { traceCtx: "12" },  // key-value pairs
+        { version: "1" },
+      ]);
+
+Application context values set on a connection can be queried in your
+applications, for example:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(
+        `SELECT SYS_CONTEXT('CLIENTCONTEXT', 'traceCtx') AS ctx_val FROM dual`
+    );
+
+    console.log(result.rows[0]);
+
+This query prints ``[ '12' ]``.
+
+The application context can be seen in the Oracle Database table `V$CONTEXT
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-0DC7F6C7-B5F9-
+4467-9518-0B98876588B3>`__ by a DBA with the following query:
+
+.. code-block:: sql
+
+    SELECT attribute, value FROM v$context WHERE namespace = 'CLIENTCONTEXT';
+
+Setting an empty ``namespace`` parameter and specifying the key-value pairs
+will raise the error ``NJS-184: The namespace can not be empty for Application
+Context``.
+
+The ``NJS-005`` error is raised when you set the ``namespace`` parameter to
+*null* or *undefined*, and also when you set non-array values in the
+``keyValues`` parameter.
+
+To clear the application context set on a connection, use
+:meth:`connection.clearAppContext()`. This clears all key-value information in
+a namespace of the application context. For example:
+
+.. code-block:: javascript
+
+    connection.clearAppContext("CLIENTCONTEXT");
+
+Querying the application context values after using
+:meth:`connection.clearAppContext()` set on a connection, will return
+``[ null ]``.
+
+**Behavior Differences in Thin and Thick Modes**
+
+A namespace other than "CLIENTCONTEXT" will raise the ``ORA-28267`` error
+in both Thin and Thick modes. In node-oracledb Thin mode, this error is raised
+by :meth:`connection.execute()`, while in Thick mode, it is raised by
+:meth:`connection.appContext()`.
+
+In node-oracledb Thin mode, if an empty array is passed to the ``keyValues``
+parameter, the call to :meth:`connection.appContext()` succeeds, but an
+``ORA-01031`` error is raised on a subsequent call to
+:meth:`connection.execute()`. In Thick mode, no error is raised and
+:meth:`connection.execute()` succeeds, but querying the application context
+returns *null* if no key-value pairs were set in ``keyValues``, or returns
+previously set values if they exist. To clear application context values, it
+is recommended to use :meth:`connection.clearAppContext()` instead of passing
+an empty array to the ``keyValues`` parameter.
 
 .. _pooled-connections:
 .. _connpooling:

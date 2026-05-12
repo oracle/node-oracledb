@@ -1880,6 +1880,60 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.terminal = 'myterminal';
 
+.. attribute:: oracledb.thickModeDSNPassthrough
+
+    .. versionadded:: 7.0
+
+    This property is a boolean that determines whether the connection strings
+    passed in the ``connectString`` property of
+    :meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()` in
+    node-oracledb Thick mode will be parsed by Oracle Client libraries or
+    node-oracledb itself.
+
+    This property must be called before any standalone connection or pool is
+    created.
+
+    The default value is *true*.
+
+    When ``thickModeDSNPassthrough`` is set to the default value *true*, the
+    behavior of node-oracledb 6.10 and earlier versions occurs, that is,
+    node-oracledb Thick mode passes connect strings unchanged to the Oracle
+    Client libraries to handle. Those libraries have their own heuristics for
+    locating the optional tnsnames.ora, if used.
+
+    When ``thickModeDSNPassthrough`` is set to the value *false*,
+    node-oracledb Thick mode behaves similarly to Thin mode in regard to
+    connection string parameter handling and locating any optional
+    tnsnames.ora configuration file. This can be helpful for applications that
+    may be run in either mode:
+
+    - The search path used to locate and read any optional :ref:`tnsnames.ora
+      <tnsadmin>` file is handled in the node-oracledb driver. Different
+      :ref:`tnsnames.ora <tnsadmin>` files can be used by each connection.
+      Note loading of optional Thick mode files such as ``sqlnet.ora`` and
+      ``oraaccess.xml`` is always handled by Oracle Client libraries
+      regardless of the value of ``thickModeDSNPassthrough`` because it is
+      those libraries that use these files.
+
+    - All connect strings will be parsed by the node-oracledb driver and a
+      generated connect descriptor is sent to Oracle Client libraries.
+      Parameters unrecognized by node-oracledb in :ref:`Easy Connect strings
+      <easyconnect>` are discarded. For :ref:`Connect Descriptors <embedtns>`
+      passed explicitly as the ``connectString`` parameter value or stored in
+      a :ref:`tnsnames.ora <tnsadmin>` file, node-oracledb parses and
+      re-serializes the descriptor in order to apply supported overrides.
+      Parameters that are recognized and unrecognized by node-oracledb will be
+      passed unchanged to Oracle Client libraries.
+
+    See :ref:`setthickmodedsnpassthrough` for more information.
+
+    **Example**
+
+    .. code-block:: javascript
+
+        const oracledb = require('oracledb');
+        oracledb.thickModeDSNPassthrough = false;
+
 .. attribute:: oracledb.thin
 
     .. versionadded:: 6.0

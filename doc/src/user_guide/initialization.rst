@@ -453,7 +453,6 @@ In node-oracledb Thin mode, you must specify the directory that contains the
 
 On Windows, if you use backslashes in the ``configDir`` string, you will need
 to double them.
-
 .. note::
 
     In Thin mode, you must explicitly set the directory because traditional
@@ -498,6 +497,78 @@ explicitly specified or a default location will be used.  Do one of:
   - When using libraries from a local Oracle Database or full client
     installation, in ``$ORACLE_HOME/network/admin`` or
     ``$ORACLE_BASE_HOME/network/admin``.
+
+.. _setthickmodedsnpassthrough:
+
+Setting thickModeDSNPassthrough
++++++++++++++++++++++++++++++++
+
+The :attr:`oracledb.thickModeDSNPassthrough` property determines whether the
+connection strings passed in the ``connectString`` property of
+:meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()` in
+node-oracledb Thick mode will be parsed by Oracle Client libraries or
+node-oracledb itself. This property must be set before creating a standalone
+connection or pool connection. For example:
+
+.. code-block:: javascript
+
+    const oracledb = require('oracledb');
+    oracledb.thickModeDSNPassthrough = false;
+
+When :attr:`oracledb.thickModeDSNPassthrough` is *true*, it is left to the
+underlying Oracle Client libraries to locate and read any optional
+tnsnames.ora configuration in Thick mode. This was the existing behavior of
+Thick mode in node-oracledb versions prior to 7.0, and is the default behavior
+starting from node-oracledb 7.0 onwards.
+
+Setting :attr:`oracledb.thickModeDSNPassthrough` to *false* makes Thick mode
+use the same heuristics as Thin mode regarding connection string parameter
+handling and reading any optional tnsnames.ora configuration file:
+
+- The search path used to locate and read any optional
+  :ref:`tnsnames.ora <tnsadmin>` file is handled in the node-oracledb driver.
+  Different :ref:`tnsnames.ora <tnsadmin>` files can be used by each
+  connection.
+
+- All connect strings will be parsed by the node-oracledb driver and a
+  generated connect descriptor is sent to Oracle Client libraries. Parameters
+  unrecognized by node-oracledb in :ref:`Easy Connect strings <easyconnect>`
+  are discarded. For :ref:`Connect Descriptors <embedtns>` passed explicitly
+  as the ``connectString`` parameter value or stored in a
+  :ref:`tnsnames.ora <tnsadmin>` file, node-oracledb parses and re-serializes
+  the descriptor in order to apply supported overrides. Parameters that are
+  recognized and unrecognized by node-oracledb will be passed unchanged to
+  Oracle Client libraries. If any connection parameters are defined in
+  :meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()` and are
+  not defined in the ``connectString`` parameter, then those connection
+  parameters will be added to the connect descriptor before it is passed to
+  Oracle Client libraries. Consider the following example:
+
+  .. code-block:: javascript
+
+      const connection = await oracledb.getConnection({
+        user            : "hr",
+        password        : mypw,  // mypw contains the hr schema password
+        connectString   : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))",
+        sdu             : 8192,
+        retryCount      : 5,
+        sslServerCertDN : 'CN=mydb'
+    });
+
+  In the example, the ``sdu`` and ``retryCount`` parameters will be added to
+  the DESCRIPTION section of the connect descriptor, if not already present,
+  before it is passed to Oracle Client libraries. Similarly, the
+  ``sslServerCertDN`` parameter will be added to the SECURITY section of the
+  connect descriptor. If these parameters are defined in a connect descriptor
+  and in the connection creation methods, the values specified in the connect
+  descriptor take precedence.
+
+Note that the files such as sqlnet.ora and oraaccess.xml are only used by
+Thick mode. They are always located and read by Oracle Client libraries
+regardless of the :attr:`oracledb.thickModeDSNPassthrough` value. For these
+files, the directory search heuristic is determined by the Oracle Client
+libraries at the time :meth:`oracledb.initOracleClient()` is called, as
+detailed in the above section.
 
 .. _environmentvariables:
 

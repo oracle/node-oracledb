@@ -484,6 +484,42 @@ The properties of a *Connection* object are listed below.
 Connection Methods
 ==================
 
+.. method:: connection.appContext()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        appContext(String namespaceName, Array keyValues);
+
+    This synchronous method sets an application context on a connection.
+
+    See :ref:`appcontextconnobjcreate`.
+
+    The parameters of the ``connection.appContext()`` are:
+
+    .. _appcontextparams:
+
+    .. list-table-with-summary:: connection.appContext() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``namespaceName``
+          - String
+          - The namespace of the application context to be set.
+        * - ``keyValues``
+          - Array
+          - An array of objects that contains the key-value pairs.
+
+            The key-value pair consists of the name of the attribute and an associated value.
+
 .. method:: connection.beginSessionlessTransaction()
 
     .. versionadded:: 6.9
@@ -702,6 +738,38 @@ Connection Methods
           - Description
         * - Error ``error``
           - If ``changePassword()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+
+.. method:: connection.clearAppContext()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        clearAppContext(String namespaceName);
+
+    This synchronous method clears the application context set on a
+    connection.
+
+    See :ref:`appcontextconnobjcreate`.
+
+    The parameters of the ``connection.clearAppContext()`` are:
+
+    .. _clearappcontext:
+
+    .. list-table-with-summary:: connection.clearAppContext() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``namespaceName``
+          - String
+          - The namespace of the application context to be cleared.
 
 .. method:: connection.close()
 
