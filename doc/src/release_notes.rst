@@ -87,6 +87,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added :meth:`conn.setEndUserSecurityContext()` and
+    :meth:`conn.clearEndUserSecurityContext()` methods to the
+    :ref:`Connection <connectionclass>`.
+
 #)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
 #)  Added support for Oracle AI Database 26ai :ref:`Pipelining <pipelining>`.

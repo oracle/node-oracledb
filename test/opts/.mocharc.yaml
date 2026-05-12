@@ -308,3 +308,4 @@ spec:
   - test/pipeline.js
   - test/sqlAssert.js
   - test/appContext.js
+  - test/securityContext.js
