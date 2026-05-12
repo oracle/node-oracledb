@@ -2403,13 +2403,16 @@ static bool njsConnection_shutdownAsync(njsBaton *baton)
 NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_startSessionlessTransaction, 4, NULL)
 {
     void *buf;
+    size_t len;
+
     baton->sessionlessTransactionId = calloc(1,
         sizeof(dpiSessionlessTransactionId));
+    if (!baton->sessionlessTransactionId)
+        return njsBaton_setErrorInsufficientMemory(baton);
 
-    NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[0], &(buf),
-        (size_t*)&baton->sessionlessTransactionId->length));
-    strncpy(baton->sessionlessTransactionId->value, buf,
-        baton->sessionlessTransactionId->length);
+    NJS_CHECK_NAPI(env, napi_get_buffer_info(env, args[0], &buf, &len));
+    baton->sessionlessTransactionId->length = (uint32_t) len;
+    memcpy(baton->sessionlessTransactionId->value, buf, len);
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[1],
             &baton->sessionlessTimeout));
     NJS_CHECK_NAPI(env, napi_get_value_uint32(env, args[2],

@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -600,7 +600,23 @@ describe('316. sessionless.js', function() {
       );
     });
 
-    it('316.6.3 unicode characters in transactionId', async function() {
+    it('316.6.3 oversized/zero Buffer transactionId behavior', async function() {
+      let transactionId = Buffer.alloc(65, 'X');
+
+      await assert.rejects(
+        async () => await conn.beginSessionlessTransaction({transactionId, timeout: 5}),
+        /NJS-153:/ // NJS-153: size of the transaction ID must be non-zero and must not exceed 64. Its current size is 65.
+      );
+
+      transactionId = Buffer.alloc(0);
+
+      await assert.rejects(
+        async () => await conn.beginSessionlessTransaction({transactionId, timeout: 5}),
+        /NJS-153:/ // NJS-153: size of the transaction ID must be non-zero and must not exceed 64. Its current size is 0.
+      );
+    });
+
+    it('316.6.4 unicode characters in transactionId', async function() {
       const unicodeTransactionId = '316.6.3_测试_🚀';
 
       await conn.beginSessionlessTransaction({transactionId: unicodeTransactionId, timeout: 5});
@@ -614,7 +630,7 @@ describe('316. sessionless.js', function() {
       assert.strictEqual(res.rows.length, 1);
     });
 
-    it('316.6.4 unicode transaction ID with special Oracle characters', async function() {
+    it('316.6.5 unicode transaction ID with special Oracle characters', async function() {
       const specialIds = [
         "316.1.26_'单引号'",
         '316.1.26_"双引号"',
@@ -639,7 +655,7 @@ describe('316. sessionless.js', function() {
       }
     });
 
-    it('316.6.5 white-space only transactionId', async function() {
+    it('316.6.6 white-space only transactionId', async function() {
       const whitespaceId = '   '; // Only spaces
 
       await conn.beginSessionlessTransaction({transactionId: whitespaceId, timeout: 5});

@@ -6451,9 +6451,10 @@ Overview of node-oracledb functional tests
     316.6 Transaction ID Validation
       316.6.1 different transactionId formats
       316.6.2 empty transactionId behavior
-      316.6.3 unicode characters in transactionId
-      316.6.4 unicode transaction ID with special Oracle characters
-      316.6.5 white-space only transactionId
+      316.6.3 oversized/zero Buffer transactionId behavior
+      316.6.4 unicode characters in transactionId
+      316.6.5 unicode transaction ID with special Oracle characters
+      316.6.6 white-space only transactionId
     316.7 Advanced Database Operations
       316.7.1 with savepoints
       316.7.2 sessionless transaction with large operations
