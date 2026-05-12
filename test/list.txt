@@ -4557,6 +4557,9 @@ Overview of node-oracledb functional tests
       184.2.11 Acquire connection from pool twice with different multi-tag using matchAnyTag
       184.2.12 Acquire connection from pool twice with first connection's tag set to ""
       184.2.13 Acquire connection from pool twice with different tag after setting first connection's tag
+      184.2.14 Acquire connection with matchAnyTag preserves multibyte tag bytes
+      184.2.15 Acquire connection with matchAnyTag preserves unicode tag bytes for varied tags
+      184.2.16 Acquire connection with matchAnyTag preserves multibyte tag bytes across repeated cycles
     184.3 Change connection's tag before the connection is closed
       184.3.1 Setting connection's tag to undefined triggers error NJS-004
       184.3.2 Setting connection's tag to random object triggers error NJS-004
@@ -6270,6 +6273,7 @@ Overview of node-oracledb functional tests
     310.1 SPARSE Vector Tests
       310.1.1 Insert and Query SPARSE Vector
       310.1.2 Query SPARSE Vector in Multiple Formats
+      310.1.3 insert and fetch sparse vector at maximum dimension count
     310.2 DENSE Vector Tests
       310.2.1 Insert and Query DENSE Vector
     310.3 FROM_VECTOR SPARSE Tests

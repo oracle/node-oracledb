@@ -448,7 +448,7 @@ static bool njsPool_getConnectionAsync(njsBaton *baton)
         baton->tag = malloc(params.outTagLength);
         if (!baton->tag)
             return njsBaton_setErrorInsufficientMemory(baton);
-        strncpy(baton->tag, params.outTag, params.outTagLength);
+        memcpy(baton->tag, params.outTag, params.outTagLength);
         baton->tagLength = params.outTagLength;
     }
     baton->newSession = params.outNewSession;

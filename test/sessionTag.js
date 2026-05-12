@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,6 +40,11 @@ const tag1 = "LANGUAGE=FRENCH";
 const tag2 = "LANGUAGE=GERMAN";
 const tagBad = "XXX=YYY";
 const tagMulti = "LANGUAGE=FRENCH;USER_TZ=UTC";
+const tagMultiByte = "LANGUAGE=FRANÇAIS;USER_TZ=UTC";
+const tagHindi = "LANGUAGE=हिंदी;USER_TZ=UTC";
+const tagJapanese = "LANGUAGE=日本語;USER_TZ=UTC";
+const tagEmoji = "LANGUAGE=emoji😀;USER_TZ=UTC";
+const tagLongUnicode = `LANGUAGE=${"é😀".repeat(20)};USER_TZ=UTC`;
 
 async function showConnTags(conn) {
   const result = await conn.execute(`
@@ -661,6 +666,78 @@ async function dropTable() {
       assert.strictEqual(callbackRequestedTag, null);
       assert.strictEqual(callbackActualTag, null);
       await conn.close();
+    });
+
+    it('184.2.14 Acquire connection with matchAnyTag preserves multibyte tag bytes', async function() {
+      pool = await oracledb.createPool({
+        ...dbConfig,
+        poolMax: 1,
+        sessionCallback: simpleTagFixup,
+      });
+      let conn = await pool.getConnection({tag: tagMultiByte});
+      await conn.close();
+
+      resetTag();
+      conn = await pool.getConnection({tag: tag1, matchAnyTag: true});
+      assert.strictEqual(pool.connectionsOpen, 1);
+      assert.strictEqual(pool.connectionsInUse, 1);
+      assert.strictEqual(callbackRequestedTag, tag1);
+      assert.strictEqual(callbackActualTag, tagMultiByte);
+      assert.strictEqual(Buffer.byteLength(callbackActualTag, 'utf8'),
+        Buffer.byteLength(tagMultiByte, 'utf8'));
+      await conn.close();
+    });
+
+    it('184.2.15 Acquire connection with matchAnyTag preserves unicode tag bytes for varied tags', async function() {
+      const stressTags = [
+        tagMultiByte,
+        tagHindi,
+        tagJapanese,
+        tagEmoji,
+        tagLongUnicode
+      ];
+
+      pool = await oracledb.createPool({
+        ...dbConfig,
+        poolMax: 1,
+        sessionCallback: simpleTagFixup,
+      });
+
+      for (const expectedTag of stressTags) {
+        let conn = await pool.getConnection({tag: expectedTag});
+        await conn.close();
+
+        resetTag();
+        conn = await pool.getConnection({tag: tag1, matchAnyTag: true});
+        assert.strictEqual(callbackRequestedTag, tag1);
+        assert.strictEqual(callbackActualTag, expectedTag);
+        assert.strictEqual(Buffer.byteLength(callbackActualTag, 'utf8'),
+          Buffer.byteLength(expectedTag, 'utf8'));
+        await conn.close();
+      }
+    });
+
+    it('184.2.16 Acquire connection with matchAnyTag preserves multibyte tag bytes across repeated cycles', async function() {
+      const loops = 12;
+
+      pool = await oracledb.createPool({
+        ...dbConfig,
+        poolMax: 1,
+        sessionCallback: simpleTagFixup,
+      });
+
+      for (let i = 0; i < loops; i++) {
+        let conn = await pool.getConnection({tag: tagEmoji});
+        await conn.close();
+
+        resetTag();
+        conn = await pool.getConnection({tag: tag1, matchAnyTag: true});
+        assert.strictEqual(callbackRequestedTag, tag1);
+        assert.strictEqual(callbackActualTag, tagEmoji);
+        assert.strictEqual(Buffer.byteLength(callbackActualTag, 'utf8'),
+          Buffer.byteLength(tagEmoji, 'utf8'));
+        await conn.close();
+      }
     });
   });
 

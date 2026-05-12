@@ -101,6 +101,27 @@ describe('310. dataTypeVector8.js', function() {
       const denseVector = resultDense.rows[0][0];
       assert.deepStrictEqual(denseVector, new Float64Array([0, 0, 1.0, 0, 2.0]));
     }); // 310.1.2
+
+    it('310.1.3 insert and fetch sparse vector at maximum dimension count', async function() {
+      const numDimensions = 65_535;
+      await createTable(`a VECTOR(${numDimensions}, FLOAT32, SPARSE)`);
+      const sparseVec = new oracledb.SparseVector({
+        values: new Float32Array([1.5, 2.5]),
+        indices: [0, numDimensions - 1],
+        numDimensions
+      });
+
+      const vector = await insertAndQueryVector(
+        `INSERT INTO ${tableName} VALUES (:1)`,
+        sparseVec,
+        `SELECT * FROM ${tableName}`
+      );
+
+      assert.strictEqual(vector.numDimensions, numDimensions);
+      assert.deepStrictEqual(vector.indices,
+        new Uint32Array([0, numDimensions - 1]));
+      assert.deepStrictEqual(vector.values, new Float32Array([1.5, 2.5]));
+    }); // 310.1.3
   }); // 310.1
 
   describe('310.2 DENSE Vector Tests', function() {

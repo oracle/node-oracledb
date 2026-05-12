@@ -1789,4 +1789,27 @@ describe('294. dataTypeVector1.js', function() {
       );
     }
   }); // 294.71
+
+  it('294.72 insert and fetch vector at maximum dimension count', async function() {
+    const numElements = 65_535;// max supported elements
+    const vector = new Float32Array(numElements);
+    for (let i = 0; i < numElements; i++) {
+      vector[i] = i % 1024;
+    }
+
+    await connection.execute(
+      `INSERT INTO ${tableName} (IntCol, VectorFlex32Col)
+       VALUES (2, :1)`,
+      [vector]
+    );
+
+    const result = await connection.execute(
+      `SELECT VectorFlex32Col FROM ${tableName} WHERE IntCol = 2`
+    );
+    const fetchedVector = result.rows[0][0];
+    assert.strictEqual(fetchedVector.length, numElements);
+    assert.strictEqual(fetchedVector[0], vector[0]);
+    assert.strictEqual(fetchedVector[numElements - 2], vector[numElements - 2]);
+    assert.strictEqual(fetchedVector[numElements - 1], vector[numElements - 1]);
+  }); // 294.72
 }); //294
