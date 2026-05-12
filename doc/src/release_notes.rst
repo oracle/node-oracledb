@@ -19,6 +19,11 @@ node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0..
 Common Changes
 ++++++++++++++
 
+#)  Token-based Authentication can now include proxy session users by supplying
+    user name inside braces (for example ``user: "[session_user]"``) alongside
+    an :ref:`authentication tokens <tokenbasedauthentication>` when using
+    external authentication.
+
 #)  Added :meth:`connection.appContext()` and
     :meth:`connection.clearAppContext()` methods to the
     :ref:`Connection <connectionclass>` object.
