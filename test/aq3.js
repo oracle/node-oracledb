@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -105,22 +105,30 @@ describe('219. aq3.js', function() {
     );
   }); // 219.1
 
-  it.skip('219.2 The read-only property "payloadType"', async function() {
+  it('219.2 The read-only property "payloadType"', async function() {
     const queue = await conn.getQueue(rawQueueName);
 
     const t = queue.payloadType;
     assert.strictEqual(t, oracledb.DB_TYPE_RAW);
-
-    queue.payloadType = oracledb.DB_TYPE_OBJECT;
-    console.log(queue);
+    assert.throws(
+      () => {
+        queue.payloadType = oracledb.DB_TYPE_OBJECT;
+      },
+      "TypeError: Cannot assign to read only property 'payloadType' of object '#<AqQueue>"
+    );
   }); // 219.2
 
-  it.skip('219.3 The read-only property "payloadTypeName"', async function() {
+  it('219.3 The read-only property "payloadTypeName"', async function() {
     const queue = await conn.getQueue(rawQueueName);
 
     const t = queue.payloadTypeName;
     assert.strictEqual(t, 'RAW');
-    queue.payloadTypeName = 'Foobar';
+    assert.throws(
+      () => {
+        queue.payloadTypeName = 'Foobar';
+      },
+      "TypeError: Cannot assign to read only property 'payloadTypeName' of object '#<AqQueue>"
+    );
   }); // 219.3
 
   it('219.4 Negative - Set "maxMessages" argument to be -5', async function() {

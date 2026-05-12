@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -132,13 +132,16 @@ describe('218. aq2.js', function() {
     assert.strictEqual(msg.payload.ADDRESS, addrData.ADDRESS);
   }); // 218.1
 
-  it.skip('218.2 The read-only property "payloadTypeClass"', async function() {
+  it('218.2 The read-only property "payloadTypeClass"', async function() {
     const queue = await conn.getQueue(objQueueName, { payloadType: objType });
     const t = queue.payloadTypeClass;
     assert(t);
-    queue.payloadTypeClass = {'foo': 'bar'};
-
-    console.log(queue);
+    assert.throws(
+      () => {
+        queue.payloadTypeClass = {'foo': 'bar'};
+      },
+      "TypeError: Cannot assign to read only property 'payloadTypeClass' of object '#<AqQueue>"
+    );
   }); // 218.2
 
   it('218.3 Negative - enqueue a raw JavaScript object directly', async function() {

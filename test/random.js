@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -68,7 +68,8 @@ random.getRandomInt = function(min, max) {
 
 random.getIntArray = function(N) {
   const arr = Array.apply(null, Array(N));
-  // The map() method creates a new array with the results of calling a provided function on every element in this array.
+  // The map() method creates a new array with the results of calling a
+  // provided function on every element in this array.
   //   let new_array = arr.map(callback[, thisArg])
   // Parameters
   //  callback
