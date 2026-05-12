@@ -928,9 +928,9 @@ Overview of node-oracledb functional tests
       55.11.1 INTERVAL YEAR TO MONTH data type
       55.11.2 INTERVAL DAY TO SECOND data type
     55.12 bind a cursor BIND_INOUT
-      55.12.1 has not supported binding a cursor with BIND_INOUT
+      55.12.1 binding a cursor with BIND_INOUT
     55.13 Negative - Invalid Ref Cursor
-      55.13.1
+      55.13.1 Fetch an invalid ref cursor
 
   56. fetchAs.js
     56.1 property value check
@@ -4639,6 +4639,7 @@ Overview of node-oracledb functional tests
     192.1 implicit results with rows fetched
     192.2 implicit Results with Result Sets
     192.3 multiple options, outFormat is OBJECT
+    192.4 releases multiple implicit result set entries
 
   193. connProps.js
     193.1 the default values of clientInfo and dbOp are null

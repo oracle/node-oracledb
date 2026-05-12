@@ -180,6 +180,7 @@ static void njsBaton_executeAsync(napi_env env, void *data)
 //-----------------------------------------------------------------------------
 void njsBaton_free(njsBaton *baton, napi_env env)
 {
+    njsImplicitResult *currImplicitResult;
     uint32_t i;
 
     // free and clear strings
@@ -325,18 +326,19 @@ void njsBaton_free(njsBaton *baton, napi_env env)
 
     // free implicit results
     while (baton->implicitResults) {
-        if (baton->implicitResults->stmt) {
-            dpiStmt_release(baton->implicitResults->stmt);
-            baton->implicitResults->stmt = NULL;
+        currImplicitResult = baton->implicitResults;
+        baton->implicitResults = currImplicitResult->next;
+        if (currImplicitResult->stmt) {
+            dpiStmt_release(currImplicitResult->stmt);
+            currImplicitResult->stmt = NULL;
         }
-        if (baton->implicitResults->queryVars) {
-            for (i = 0; i < baton->implicitResults->numQueryVars; i++)
-                njsVariable_free(&baton->implicitResults->queryVars[i]);
-            free(baton->implicitResults->queryVars);
-            baton->implicitResults->queryVars = NULL;
+        if (currImplicitResult->queryVars) {
+            for (i = 0; i < currImplicitResult->numQueryVars; i++)
+                njsVariable_free(&currImplicitResult->queryVars[i]);
+            free(currImplicitResult->queryVars);
+            currImplicitResult->queryVars = NULL;
         }
-        free(baton->implicitResults);
-        baton->implicitResults = baton->implicitResults->next;
+        free(currImplicitResult);
     }
 
     // remove references to JS objects

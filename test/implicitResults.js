@@ -194,4 +194,14 @@ describe('192. implicitResults.js', function() {
     await conn.close();
   }); // 192.3
 
+  it('192.4 releases multiple implicit result set entries', async () => {
+    const conn = await oracledb.getConnection(dbConfig);
+    const results = await conn.execute(queryImpres, [], { resultSet: true });
+
+    assert.strictEqual(results.implicitResults.length, 2);
+    await results.implicitResults[0].close();
+    await results.implicitResults[1].close();
+    await conn.close();
+  }); // 192.4
+
 });

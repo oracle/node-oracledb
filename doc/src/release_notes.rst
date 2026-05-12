@@ -62,6 +62,10 @@ Common Changes
     mode behavior of passing the connect string directly down to the Oracle
     Client libraries.
 
+#)  Normalized :ref:`interval year-to-month <intervalyeartomonth>` and
+    :ref:`interval day-to-second <intervaldaytosecond>` database column type
+    values.
+
 #)  Added new methods in :ref:`TraceHandlerBase class <tracehandlerbaseclass>`
     for pool events which can be used for tracking connection pool statistics
     and metrics for :ref:`OpenTelemetry <opentelemetry>` support.
@@ -88,20 +92,16 @@ Common Changes
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
-#)  Normalized :ref:`interval year-to-month <intervalyeartomonth>` and
-    :ref:`interval day-to-second <intervaldaytosecond>` database column type
-    values.
-
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Added :meth:`conn.setEndUserSecurityContext()` and
-    :meth:`conn.clearEndUserSecurityContext()` methods to the
-    :ref:`Connection <connectionclass>`.
 
 #)  Added support for :ref:`Direct Path Loads <directpathloads>`.
 
 #)  Added support for Oracle AI Database 26ai :ref:`Pipelining <pipelining>`.
+
+#)  Added :meth:`conn.setEndUserSecurityContext()` and
+    :meth:`conn.clearEndUserSecurityContext()` methods to the
+    :ref:`Connection <connectionclass>`.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
     See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
@@ -130,6 +130,8 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Fixed potential crash when multiple implicit resultsets are closed.
+
 #)  Improved sparse vector handling so that empty sparse vectors can be bound
     and fetched without raising ORA errors.
 
@@ -139,7 +141,8 @@ Thick Mode Changes
 #)  Added guardrails against buffer overflows while fetching data from SODA
     documents.
 
-#)  Improved Token callback error handling.
+#)  Improved Token callback error handling and validation for undefined access
+    token callback arguments.
 
 #)  Dropped support for Oracle Client libraries earlier than 19c.
 

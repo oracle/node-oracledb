@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -482,7 +482,7 @@ describe('55. resultSet2.js', function() {
 
   }); // 55.11
 
-  describe.skip('55.12 bind a cursor BIND_INOUT', function() {
+  describe('55.12 bind a cursor BIND_INOUT', function() {
 
     before('prepare table nodb_rs2_emp', async function() {
       await setUp(connection, tableName);
@@ -492,7 +492,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.12.1 has not supported binding a cursor with BIND_INOUT', async function() {
+    it('55.12.1 binding a cursor with BIND_INOUT', async function() {
       const proc =
           "CREATE OR REPLACE PROCEDURE nodb_rs2_get_emp_inout (p_in IN NUMBER, p_out IN OUT SYS_REFCURSOR) \
              AS \
@@ -502,14 +502,15 @@ describe('55. resultSet2.js', function() {
                  WHERE employees_id > p_in; \
              END; ";
       await connection.execute(proc);
-      await assert.rejects(async () => {
-        await connection.execute(
-          "BEGIN nodb_rs2_get_emp_inout(:in, :out); END;",
-          {
-            in: 200,
-            out: { type: oracledb.CURSOR, dir: oracledb.BIND_INOUT }
-          });
-      }, /NJS-007:/);
+      const result = await connection.execute(
+        "BEGIN nodb_rs2_get_emp_inout(:in, :out); END;",
+        {
+          in: 200,
+          out: { type: oracledb.CURSOR, dir: oracledb.BIND_INOUT }
+        });
+      const rows = await result.outBinds.out.getRows();
+      assert.equal(rows.length, 100);
+      await result.outBinds.out.close();
       await connection.execute("DROP PROCEDURE nodb_rs2_get_emp_inout");
     });
 
@@ -533,7 +534,7 @@ describe('55. resultSet2.js', function() {
       await clearUp(connection, tableName);
     });
 
-    it('55.13.1 ', async function() {
+    it('55.13.1 Fetch an invalid ref cursor', async function() {
       await assert.rejects(async () => {
         await connection.execute(
           "BEGIN get_invalid_refcur ( :p ); END; ",
