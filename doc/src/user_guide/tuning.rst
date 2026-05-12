@@ -576,9 +576,9 @@ statements being executed by the application. :ref:`SODA <sodaoverview>`
 internally makes SQL calls, so tuning the cache is also beneficial for
 SODA applications.
 
-In node-oracledb Thick mode with Oracle Client libraries 12c, or later,
-the statement cache size can be automatically tuned with
-the :ref:`Oracle Client Configuration <oraaccess>` ``oraaccess.xml`` file.
+In node-oracledb Thick mode, the statement cache size can be automatically
+tuned with the :ref:`Oracle Client Configuration <oraaccess>`
+``oraaccess.xml`` file.
 
 For manual tuning use views like ``V$SYSSTAT``:
 

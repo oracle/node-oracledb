@@ -910,8 +910,8 @@ examples/xmltypeInDbObject.js>`__ for a runnable example.
 Oracle Database Object Type Limitations
 =======================================
 
-PL/SQL collections and records can only be bound when both Oracle client
-libraries and Oracle Database are 12.1, or higher.
+PL/SQL collections and records can only be bound when Oracle Database version
+is 12.1, or later.
 
 PL/SQL Collection associative array (Index-by) types with INDEX BY
 VARCHAR2, or VARCHAR2 sub-types, cannot be used natively by

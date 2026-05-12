@@ -41,17 +41,17 @@ See [Getting Started with Node-oracledb][1] and [Quick Start Node-oracledb Insta
   **Thick mode**: Some advanced Oracle Database functionality is currently only
   available when optional Oracle Client libraries are loaded by
   node-oracledb. Libraries are available in the free [Oracle Instant
-  Client][15] packages. Node-oracledb can use Oracle Client
-  libraries 11.2 through 23ai.
+  Client][15] packages. Node-oracledb can use Oracle Client libraries version
+  19 and later.
 
 - Oracle Database
 
   **Thin mode**: Oracle Database 12.1 (or later) is required.
 
-  **Thick mode**: Oracle Database 9.2 (or later) is required, depending on the
+  **Thick mode**: Oracle Database 11.2 (or later) is required, depending on the
   Oracle Client library version.  Oracle Database's standard client-server
   version interoperability allows connection to both older and newer
-  databases. For example when node-oracledb uses Oracle Client 19c libraries,
+  databases. For example, when node-oracledb uses Oracle Client 19c libraries,
   then it can connect to Oracle Database 11.2 or later.
 
 ## Documentation

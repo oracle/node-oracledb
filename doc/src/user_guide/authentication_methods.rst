@@ -220,8 +220,6 @@ connection should be ``HR``, use:
 
     await connection.close();
 
-Note this last case needs Oracle Client libraries version 18 or later.
-
 Using ``externalAuth`` in the ``connAttrs`` parameter of a
 ``pool.getConnection()`` call is not possible. The connections from a
 *Pool* object are always obtained in the manner in which the pool was
@@ -1400,11 +1398,11 @@ node-oracledb's pre-supplied :ref:`extensionOci <extensionociplugin>` plugin.
 
 **Step 1: Create an OCI Compute Instance**
 
-An `OCI compute instance <https://docs.oracle.com/en-us/iaas/compute-cloud-at-
-customer/topics/compute/compute-instances.htm>`__ is a virtual machine running
-within OCI that provides compute resources for your application. This compute
-instance will be used to authenticate access to Oracle Cloud services when
-using Instance Principal Authentication.
+An `OCI compute instance <https://docs.oracle.com/en-us/iaas/Content/Compute/
+home.htm>`__ is a virtual machine running within OCI that provides compute
+resources for your application. This compute instance will be used to
+authenticate access to Oracle Cloud services when using Instance Principal
+Authentication.
 
 To create an OCI compute instance, see the steps in `Creating an Instance
 <https://docs.oracle.com/en-us/iaas/Content/Compute/Tasks/

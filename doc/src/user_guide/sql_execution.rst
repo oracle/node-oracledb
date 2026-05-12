@@ -1716,8 +1716,8 @@ here are possible solutions:
 
    Incorrectly sizing the statement cache will reduce application efficiency.
 
-   To help set the cache size, you can turn on auto-tuning with Oracle Client
-   libraries 12.1 or later, using an :ref:`oraaccess.xml <oraaccess>` file.
+   To help set the cache size in nocde-oracledb Thick mode, you can turn on
+   auto-tuning by using an :ref:`oraaccess.xml <oraaccess>` file.
 
    For more information, see the :ref:`Statement Caching <stmtcache>`
    documentation.

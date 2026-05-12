@@ -234,9 +234,7 @@ The properties of a *Connection* object are listed below.
     Transaction Guard as a means of ensuring that transactions are not
     duplicated. See :ref:`tg` for more information.
 
-    This property is only available with Oracle Database 12.1 or later. In
-    node-oracledb Thick mode, Oracle Client libraries 12.1 or later are
-    additionally required.
+    This property is only available with Oracle Database 12.1 or later.
 
 .. attribute:: connection.maxIdentifierLength
 
@@ -246,11 +244,8 @@ The properties of a *Connection* object are listed below.
     in bytes supported by the database to which the connection has been
     established.  See `Database Object Naming Rules
     <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&
-    id=GUID-75337742-67FD-4EC0-985F-741C93D918DA>`__. The value may be
-    *undefined*, *30*, or *128*. The value *undefined* indicates the size
-    cannot be reliably determined by node-oracledb, which occurs when using
-    Oracle Client libraries 12.1 (or older) to connect to Oracle Database
-    12.2, or later.
+    id=GUID-75337742-67FD-4EC0-985F-741C93D918DA>`__. The value may be *30* or
+    *128*.
 
 .. attribute:: connection.maxOpenCursors
 
@@ -381,10 +376,9 @@ The properties of a *Connection* object are listed below.
         This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
-    When node-oracledb Thick mode is using Oracle Client libraries 12.2 or
-    later, the tag must be a `multi-property tag <https://www.oracle.com/pls/
-    topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__
-    with name=value pairs like “k1=v1;k2=v2”.
+    For node-oracledb Thick mode, the tag must be a `multi-property tag
+    <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-
+    E83C-4177-A79A-B8BA29DC662C>`__ with name=value pairs like “k1=v1;k2=v2”.
 
     An empty string represents not having a tag set.
 
@@ -1521,7 +1515,7 @@ Connection Methods
 
             .. versionadded:: 4.0
 
-            Implicit Results requires Oracle Database 12.1 or later, and Oracle Client 12.1 or later.
+            Implicit Results requires Oracle Database 12.1 or later.
         * - ``lastRowid``
           - .. _execlastrowid:
 
@@ -1548,7 +1542,7 @@ Connection Methods
             - ``domainName``: The name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a data use case domain, this attribute value is `undefined`. `Data use case domains <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4743FDE1-7C6E-471B-BC9D-442383CCA2F9>`__ are supported from Oracle Database 26ai onwards. If node-oracledb Thick mode is used, Oracle Client version 23 or later is also required.
             - ``domainSchema``: The schema name of the `data use case domain <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-17D3A9C6-D993-4E94-BF6B-CACA56581F41>`__ associated with the fetched column. If the column does not have a data use case domain, this attribute value is `undefined`. `Data use case domains <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-4743FDE1-7C6E-471B-BC9D-442383CCA2F9>`__ are supported from Oracle Database 26ai onwards. If node-oracledb Thick mode is used, Oracle Client version 23 or later is also required.
             - ``fetchType``: One of the :ref:`Node-oracledb Type Constant <oracledbconstantsnodbtype>` values.
-            - ``isJson``: Indicates if the column is known to contain JSON data. This will be ``true`` for JSON columns (from Oracle Database 21c) and for LOB and VARCHAR2 columns where "IS JSON" constraint is enabled (from Oracle Database 19c). This property will be ``false`` for all the other columns. It will also be ``false`` for any column when Oracle Client 18c or earlier is used in Thick mode or the Oracle Database version is earlier than 19c.
+            - ``isJson``: Indicates if the column is known to contain JSON data. This will be ``true`` for JSON columns (from Oracle Database 21c) and for LOB and VARCHAR2 columns where "IS JSON" constraint is enabled (from Oracle Database 19c). This property will be ``false`` for all the other columns. It will also be ``false`` for any column when the Oracle Database version is earlier than 19c.
             - ``isOson``: Indicates if the column is known to contain binary encoded OSON data. This attribute will be ``true`` in Thin mode and while using Oracle Client version 21c (or later) in Thick mode when the "IS JSON FORMAT OSON" check constraint is enabled on BLOB and RAW columns. It will be set to ``false`` for all other columns. It will also be set to ``false`` for any column when the Thick mode uses Oracle Client versions earlier than 21c. Note that the "IS JSON FORMAT OSON" check constraint is available from Oracle Database 19c onwards.
             - ``isSparseVector``: Indicates if the column is known to contain a sparse vector. This will be ``true`` for vector columns containing sparse vectors.
             - ``name``: The unique column name chosen by node-oracledb. It follows Oracle’s standard name-casing rules. It will commonly be uppercase, since most applications create tables using unquoted, case-insensitive names. If the query does not contain duplicate columns, this value will be the same as the actual database column name. If the query contains duplicate columns, the this attribute will create unique column names by appending an underscore and a unique number.
@@ -1755,7 +1749,7 @@ Connection Methods
 
             The default value is *false*.
 
-            This feature works when node-oracledb is using version 12, or later, of the Oracle Client library, and using Oracle Database 12, or later.
+            This feature works when node-oracledb is using Oracle Database version 12, or later.
         * - ``keepInStmtCache``
           - Boolean
           - .. _executemanyoptkeepinstmtcache:
@@ -2085,9 +2079,9 @@ Connection Methods
         This method is only supported in node-oracledb Thick mode. See
         :ref:`enablingthick`.
 
-    SODA can be used with Oracle Database 18.3 and above, when node-oracledb
-    uses Oracle Client 18.5 or Oracle Client 19.3, or later. The SODA bulk
-    insert methods :meth:`sodaCollection.insertMany()` and
+    SODA can be used with Oracle Database 18.3 and later, when node-oracledb
+    uses Oracle Client 19.3 or later. The SODA bulk insert methods
+    :meth:`sodaCollection.insertMany()` and
     :meth:`sodaCollection.insertManyAndGet()` are in Preview status.
 
     See :ref:`Simple Oracle Document Access (SODA) <sodaoverview>` for more

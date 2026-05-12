@@ -4,11 +4,10 @@
 API: SodaCollection Class
 *************************
 
-SODA can be used with Oracle Database 18.3 and above, when node-oracledb
-uses Oracle Client 18.5 or Oracle Client 19.3, or later. The SODA bulk
-insert methods :meth:`sodaCollection.insertMany()` and
-:meth:`sodaCollection.insertManyAndGet()`
-are in Preview status.
+SODA can be used with Oracle Database 18.3 and later versions, when
+node-oracledb uses Oracle Client 19.3, or later. The SODA bulk insert methods
+:meth:`sodaCollection.insertMany()` and
+:meth:`sodaCollection.insertManyAndGet()` are in Preview status.
 
 .. note::
 
@@ -347,8 +346,6 @@ SodaCollection Methods
 
     This method is in Preview status and should not be used in production.
 
-    It requires Oracle Client 18.5 or higher.
-
     **Callback**:
 
     If you are using the callback programming style::
@@ -384,8 +381,8 @@ SodaCollection Methods
 
     This method is in Preview status and should not be used in production.
 
-    It requires Oracle Client 18.5 or higher. Use of the ``hint`` property
-    requires Oracle Client 21.3 or higher (or Oracle Client 19 from 19.11).
+    Use of the ``hint`` property requires Oracle Client 21.3 or later (or
+    Oracle Client 19 from 19.11).
 
     This method accepts an options parameter from node-oracledb 5.2 onwards.
 

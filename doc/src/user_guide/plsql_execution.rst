@@ -347,7 +347,7 @@ Implicit Results
 Oracle Implicit Results allow queries in PL/SQL to be returned to
 Node.js without requiring REF CURSORS or :ref:`bind variables <bind>`.
 Implicit Results requires node-oracledb 4.0, Oracle Database 12.1 or
-later, and Oracle Client 12.1 or later.
+later.
 
 PL/SQL code uses ``DBMS_SQL.RETURN_RESULT()`` to return query results.
 These are accessible in the ``execute()`` callback

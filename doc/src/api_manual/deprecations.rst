@@ -22,6 +22,9 @@ first.
     * - Name
       - Version Deprecated or Desupported
       - Alternative
+    * - Oracle Client libraries older than version 19 are desupported.
+      - Desupported in 7.0
+      - Upgrade the Oracle Client library to 19c or later.
     * - Connectivity and interoperability with Oracle Database and Oracle Client libraries older than version 19
       - Deprecated in 6.10
       - Upgrade the database and client library versions.

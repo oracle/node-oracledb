@@ -1454,12 +1454,12 @@ Each of the configuration properties is described below.
     The default value is *1*.
 
     With fixed-size :ref:`homogeneous <createpoolpoolattrshomogeneous>`
-    pools (where ``poolMin`` equals ``poolMax``), and when using Oracle Client
-    18c (or later) for node-oracledb Thick mode, you may wish to evaluate
-    setting ``poolIncrement`` greater than 1. This can expedite regrowth when
-    the number of :attr:`connections established <pool.connectionsOpen>` has
-    become lower than ``poolMin``, for example, when network issues cause
-    connections to become unusable and get them dropped from the pool.
+    pools (where ``poolMin`` equals ``poolMax``), and when using node-oracledb
+    Thick mode, you may wish to evaluate setting ``poolIncrement`` greater
+    than 1. This can expedite regrowth when the number of
+    :attr:`connections established <pool.connectionsOpen>` has become lower
+    than ``poolMin``, for example, when network issues cause connections to
+    become unusable and get them dropped from the pool.
 
     This property may be overridden when
     :meth:`creating a connection pool <oracledb.createPool()>`.
@@ -1523,9 +1523,6 @@ Each of the configuration properties is described below.
 
         This property can only be used in node-oracledb Thick mode. See
         :ref:`enablingthick`.
-
-    It is available when node-oracledb uses Oracle client libraries 18.3, or
-    later.
 
     **Example**
 
@@ -1605,9 +1602,6 @@ Each of the configuration properties is described below.
     :meth:`oracledb.createPool()`.
 
     See :ref:`Connection Pool Pinging <connpoolpinging>` for more discussion.
-
-    It was disabled when using Oracle Client 12.2 (and later) until
-    node-oracledb 3.0.
 
     **Example**
 
@@ -2145,7 +2139,7 @@ Oracledb Methods
           - Both
           - .. _createpoolpoolattrsaccesstokenconfig:
 
-            An object containing the Azure-specific or OCI-specific parameters that need to be set when using the :ref:`Azure Software Development Kit (SDK) <oauthtokengeneration>` or :ref:`Oracle Cloud Infrastructure (OCI) SDK <iamtokengeneration>` for token generation. This property should only be specified when the :ref:`accessToken <createpoolpoolattrsaccesstoken>` property is a callback function. For more information on the Azure-specific parameters, see `sampleazuretokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/sampleazuretokenauth.js>`__  and for the OCI-specific parameters, see `sampleocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/sampleocitokenauth.js>`__.
+            An object containing the Azure-specific or OCI-specific parameters that need to be set when using the :ref:`Azure Software Development Kit (SDK) <oauthtokengeneration>` or :ref:`Oracle Cloud Infrastructure (OCI) SDK <iamtokengeneration>` for token generation. This property should only be specified when the :ref:`accessToken <createpoolpoolattrsaccesstoken>` property is a callback function. For more information on the Azure-specific parameters, see `azuretokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/azuretokenauth.js>`__  and for the OCI-specific parameters, see `ocitokenauth.js <https://github.com/oracle/node-oracledb/tree/main/examples/ocitokenauth.js>`__.
 
             For OAuth2.0 token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. For IAM token-based authentication and when using node-oracledb Thick mode, Oracle Client libraries 19.14 (or later), or 21.5 (or later) are required.
 
@@ -2329,7 +2323,7 @@ Oracledb Methods
 
             The number of seconds that a pooled connection can exist in a pool after first being created. A value of *0* means there is no limit defined for the connection in a pool and no connections will be terminated. Connections become candidates for termination when they are acquired or released back to the pool, and have existed for longer than ``maxLifetimeSession`` seconds. Connections that are in active use will not be closed.
 
-            In node-oracledb Thick mode, Oracle Client libraries 12.1 or later must be used. Note that when using node-oracledb in Thick mode with Oracle Client libraries prior to 21c, pool shrinkage is only initiated when the pool is accessed. So, pools in fully dormant applications will not shrink until the application is next used.
+            Note that when using node-oracledb in Thick mode with Oracle Client libraries prior to 21c, pool shrinkage is only initiated when the pool is accessed. So, pools in fully dormant applications will not shrink until the application is next used.
 
             The default value is *0*.
 
@@ -2587,9 +2581,9 @@ Oracledb Methods
 
             The session callback is called before ``pool.getConnection()`` returns so it can be used for logging or to efficiently set session state, such as with ALTER SESSION statements. Make sure any session state is set and ``connection.tag`` is updated in the ``sessionCallback`` function prior to it calling its own ``callback()`` function otherwise the session will not be correctly set when ``getConnection()`` returns. The connection passed into ``sessionCallback`` should be passed out through ``callback()`` so it is returned from the application’s ``pool.getConnection()`` call.
 
-            When node-oracledb Thick mode is using Oracle Client libraries 12.2 or later, tags are `multi-property tags <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__ with name=value pairs like “k1=v1;k2=v2”.
+            For node-oracledb Thick mode, tags are `multi-property tags <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__ with name=value pairs like “k1=v1;k2=v2”.
 
-            When node-oracledb Thick mode is using Oracle Client libraries 12.2 or later, ``sessionCallback`` can be a string containing the name of a PL/SQL procedure to be called when ``pool.getConnection()`` requests a :ref:`tag <getconnectiondbattrstag>`, and that tag does not match the connection’s actual tag. When the application uses :ref:`DRCP connections <drcp>`, a PL/SQL callback can avoid the :ref:`round-trip <roundtrips>` calls that a Node.js function would require to set session state. For non-DRCP connections, the PL/SQL callback will require a round-trip from the application.
+            In node-oracledb Thick mode, ``sessionCallback`` can be a string containing the name of a PL/SQL procedure to be called when ``pool.getConnection()`` requests a :ref:`tag <getconnectiondbattrstag>`, and that tag does not match the connection’s actual tag. When the application uses :ref:`DRCP connections <drcp>`, a PL/SQL callback can avoid the :ref:`round-trip <roundtrips>` calls that a Node.js function would require to set session state. For non-DRCP connections, the PL/SQL callback will require a round-trip from the application.
 
             The PL/SQL procedure declaration is:
 

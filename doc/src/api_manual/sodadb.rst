@@ -14,10 +14,10 @@ documents in those collections.
     In this release, SODA is only supported in node-oracledb Thick mode. See
     :ref:`enablingthick`.
 
-SODA can be used with Oracle Database 18.3 and above, when node-oracledb
-uses Oracle Client 18.5 or Oracle Client 19.3, or later. The SODA bulk
-insert methods :meth:`sodaCollection.insertMany()`
-and :meth:`sodaCollection.insertManyAndGet()` are in Preview status.
+SODA can be used with Oracle Database 18.3 and later versions, when
+node-oracledb uses Oracle Client 19.3, or later. The SODA bulk insert methods
+:meth:`sodaCollection.insertMany()` and
+:meth:`sodaCollection.insertManyAndGet()` are in Preview status.
 
 A SODA database is equivalent to an Oracle Database user, see `Overview
 of SODA <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-

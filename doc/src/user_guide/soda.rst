@@ -128,10 +128,10 @@ Note:
 Node-oracledb SODA Requirements
 ===============================
 
-SODA is available to Node.js applications using Oracle Database 18.3 and
-above, when node-oracledb uses Oracle Client 18.5 or Oracle Client 19.3,
-or later. The SODA bulk insert methods :meth:`sodaCollection.insertMany()`
-and :meth:`sodaCollection.insertManyAndGet()` are in Preview status.
+SODA is available to Node.js applications using Oracle Database 18.3 and later
+versions, when node-oracledb uses Oracle Client 19.3, or later. The SODA bulk
+insert methods :meth:`sodaCollection.insertMany()` and
+:meth:`sodaCollection.insertManyAndGet()` are in Preview status.
 
 To execute SODA operations, Oracle Database users require the SODA_APP
 role granted to them by a DBA:
@@ -187,7 +187,7 @@ in the metadata for the field sqlType* or *ORA-40659: Data type does not
 match the specification in the collection metadata*.
 
 If you use Oracle Client libraries 19 with Oracle Database 21 and
-accidently create a collection with unusable metadata, then you can drop
+accidentally create a collection with unusable metadata, then you can drop
 the collection by running a command like
 ``SELECT DBMS_SODA.DROP_COLLECTION('myCollection') FROM DUAL;`` in
 SQL*Plus.

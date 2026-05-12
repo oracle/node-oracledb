@@ -120,10 +120,9 @@ installing the patch itself will not work.
 
 **Using a New Time Zone File in Instant Client**
 
-From Oracle Instant Client 12.2, you can use an external time zone file,
-allowing you to update time zone information without updating the complete
-Instant Client installation. Changing the file in earlier versions of Instant
-Client is not possible.
+You can use an external time zone file, allowing you to update time zone
+information without updating the complete Instant Client installation.
+Changing the file in earlier versions of Instant Client is not possible.
 
 To change the time zone file, do one of the following:
 

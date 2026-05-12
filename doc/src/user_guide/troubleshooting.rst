@@ -124,7 +124,7 @@ DPI-1072
     * - Message
       - ``DPI-1072: the Oracle Client library version is unsupported``
     * - Cause
-      - The connection to Oracle Database failed because the Oracle Client library version used is not supported by node-oracledb Thick mode. The Thick mode needs Oracle Client libraries 11.2 or later. Note that version 19 is not supported on Windows 7.
+      - The connection to Oracle Database failed because the Oracle Client library version used is not supported by node-oracledb Thick mode. The Thick mode needs Oracle Client libraries 19 or later. Note that version 19 is not supported on Windows 7.
     * - Action
       - Review the installation requirements. You can either:
 

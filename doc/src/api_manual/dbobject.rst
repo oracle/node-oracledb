@@ -225,9 +225,7 @@ it is to convert that DbObject to and from a JavaScript object.
 
 .. method:: dbObject.copy()
 
-    Creates a copy of the object and returns it. For Thick mode, this method
-    requires Oracle Client libraries 12.2 or higher, if you are copying
-    :ref:`PL/SQL collection VARRAY types <plsqlvarray>`.
+    Creates a copy of the object and returns it.
 
     .. versionadded:: 6.8
 

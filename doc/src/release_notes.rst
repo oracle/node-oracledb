@@ -53,18 +53,22 @@ Common Changes
     (for example, ``user: "[session_user]"``) alongside an authentication
     token when using external authentication.
 
-#)  Added new attribute :attr:`oracledb.thickModeDSNPassthrough` to determine
-    the intended connect string parse handling. When set to *false*,
-    node-oracledb Thick mode behaves similar to Thin mode when resolving
-    Oracle Database Easy Connect strings, processing "njs." prefixed query
-    parameters, and applying descriptor overrides. Connection and pool
-    creation in both modes can use this parsing to ensure consistent behavior.
-    The default value *true* retains the old Thick mode behavior of passing
-    the connect string directly down to the Oracle Client libraries.
+#)  Added new attribute :attr:`oracledb.thickModeDSNPassthrough` to control
+    connect string parsing. When set to *false*, Thick mode behaves similar to
+    Thin mode when resolving Oracle Database Easy Connect strings, processing
+    "njs." prefixed query parameters, and applying descriptor overrides.
+    Connection and pool creation in both modes can use this parsing to ensure
+    consistent behavior. The default value *true* retains the previous Thick
+    mode behavior of passing the connect string directly down to the Oracle
+    Client libraries.
 
 #)  Added new methods in :ref:`TraceHandlerBase class <tracehandlerbaseclass>`
     for pool events which can be used for tracking connection pool statistics
     and metrics for :ref:`OpenTelemetry <opentelemetry>` support.
+
+#)  Improved documentation to clarify the use of the ``libDir`` property with
+    :meth:`oracledb.initOracleClient()` on Linux and related platforms.
+    See `Issue #1771 <https://github.com/oracle/node-oracledb/issues/1771>`__.
 
 #)  Fixed issue to generate the correct SSL_SERVER_CERT_DN entry from an
     Easy Connect string.
@@ -130,6 +134,8 @@ Thick Mode Changes
 
 #)  Added guardrails against buffer overflows while fetching data from SODA
     documents.
+
+#)  Dropped support for Oracle Client libraries earlier than 19c.
 
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------

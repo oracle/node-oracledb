@@ -24,6 +24,9 @@ To change from the default Thin mode to the Thick mode:
 1. Oracle Client libraries must be available to handle communication to your
    database. These need to be installed separately, see :ref:`installation`.
 
+   Node-oracledb supports Oracle Client libraries version 19 or later.
+   Previous versions of node-oracledb supported older Oracle Client versions.
+
    Oracle Client libraries from one of the following can be used:
 
    - An `Oracle Instant Client <https://www.oracle.com/database/technologies/
@@ -80,9 +83,9 @@ More details and options are shown in the following sections:
   the Oracle Client libraries are loaded immediately from that directory. If
   you call :meth:`~oracledb.initOracleClient()` but do *not* set the ``libDir``
   attribute, the Oracle Client libraries are loaded immediately using the
-  search heuristics discussed in later sections. If you set ``libDir`` on
-  Linux and related platforms, you must still have configured the system
-  library search path to include that directory before starting Node.js.
+  search heuristics discussed in later sections. Never set ``libDir`` on Linux
+  and related platforms. Instead you must configure the system library search
+  path to include the directory before starting Node.js.
 
 - Once the Thick mode is enabled, you cannot go back to the Thin mode except by
   removing calls to :meth:`~oracledb.initOracleClient()` and restarting the
@@ -358,14 +361,13 @@ See :ref:`usingconfigfiles` to understand how node-oracledb locates the files.
 Optional Oracle Client Configuration File
 -----------------------------------------
 
-If the Oracle Client Libraries used by node-oracledb Thick mode are version
-12, or later, then an optional `oraaccess.xml <https://www.oracle.com/pls/
-topic/lookup?ctx=dblatest&id=GUID-9D12F489-EC02-46BE-8CD4-5AECED0E2BA2>`__
-file can be used to configure some behaviors of those libraries, such as
-statement caching and prefetching. This can be useful if the application
-cannot be altered. The file is read when node-oracledb starts. The file is
-read from the same directory as the :ref:`Optional Oracle Net Configuration
-<tnsadmin>` files.
+In node-oracledb Thick mode, an optional `oraaccess.xml <https://www.oracle.
+com/pls/topic/lookup?ctx=dblatest&id=GUID-9D12F489-EC02-46BE-8CD4-
+5AECED0E2BA2>`__ file can be used to configure some behaviors of those
+libraries, such as statement caching and prefetching. This can be useful if
+the application cannot be altered. The file is read when node-oracledb starts.
+The file is read from the same directory as the :ref:`Optional Oracle Net
+Configuration <tnsadmin>` files.
 
 .. note::
 
@@ -488,7 +490,7 @@ explicitly specified or a default location will be used.  Do one of:
 
   - For Oracle Instant Client ZIP files, the ``network/admin`` subdirectory of
     Instant Client, for example
-    ``/opt/oracle/instantclient_23_5/network/admin``.
+    ``/opt/oracle/instantclient_23_26/network/admin``.
 
   - For Oracle Instant Client RPMs, the ``network/admin`` subdirectory of
     Instant Client, for example

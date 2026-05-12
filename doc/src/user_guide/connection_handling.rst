@@ -2272,9 +2272,9 @@ is called and both the following are true:
 Pool shrinkage happens when the application returns connections to the pool,
 and they are then unused for more than :attr:`~oracledb.poolTimeout`
 seconds. Any excess connections above ``poolMin`` will be closed. When
-node-oracledb Thick mode is using using Oracle Client 19 or earlier, this pool
-shrinkage is only initiated when the pool is accessed, so a pool in a
-completely idle application will not shrink.
+node-oracledb Thick mode is using Oracle Client 19, this pool shrinkage is
+only initiated when the pool is accessed, so a pool in a completely idle
+application will not shrink.
 
 For pools created with :ref:`External Authentication <extauth>`, with
 :ref:`homogeneous <createpoolpoolattrshomogeneous>` set to *false*, or
@@ -2308,8 +2308,7 @@ usage. The pool attributes should be adjusted to handle the desired workload
 within the bounds of resources available to Node.js and the database.
 
 When the values of ``poolMin`` and ``poolMax`` are the same, ``poolIncrement``
-can be set greater than zero. (In Thick mode this needs Oracle Client 18c or
-later).  This value changes how a :ref:`homogeneous pool
+can be set greater than zero. This value changes how a :ref:`homogeneous pool
 <createpoolpoolattrshomogeneous>` grows when the number of :attr:`connections
 established <pool.connectionsOpen>` has become lower than ``poolMin``, for
 example if network issues have caused connections to become unusable and they
@@ -2329,12 +2328,10 @@ for defensive programming to mitigate against unforeseeable problems that may
 occur with connections. If a connection was created ``maxLifetimeSession`` or
 longer seconds ago, then it will be a candidate for being closed.
 
-In node-oracledb Thick mode, Oracle Client libraries 12.1, or later, are
-needed to use
-:ref:`maxLifetimeSession <createpoolpoolattrsmaxlifetimesession>`. Note that
-when using node-oracledb in Thick mode with Oracle Client libraries prior to
-21c, pool shrinkage is only initiated when the pool is accessed. So, pools in
-fully dormant applications will not shrink until the application is next used.
+Note that when using node-oracledb in Thick mode with Oracle Client libraries
+prior to 21c, pool shrinkage is only initiated when the pool is accessed. So,
+pools in fully dormant applications will not shrink until the application is
+next used.
 
 If both :ref:`poolTimeout <createpoolpoolattrspooltimeout>` and
 :ref:`maxLifetimeSession <createpoolpoolattrsmaxlifetimesession>` properties
@@ -2914,9 +2911,8 @@ validation checks help provide tolerance against this situation so that
 statement execution using a connection is more likely to succeed.
 
 Each time ``getConnection()`` is called, a lightweight connection validity
-check occurs. (In node-oracledb Thick mode, this requires Oracle Client library
-version 12.2 or later).  The lightweight check allows node-oracledb to detect
-and replace connections that have become unusable due to some network errors.
+check occurs. The lightweight check allows node-oracledb to detect and replace
+connections that have become unusable due to some network errors.
 
 An additional internal check performed by ``getConnection()`` can be configured
 during pool creation.  This extra check helps detect errors such as the
@@ -2979,9 +2975,7 @@ to use appropriate statement execution error checking.
 For ultimate scalability, disable explicit pool pinging by setting
 ``poolPingInterval`` to a negative value, and make sure the firewall, database
 resource manager, or user profile are not expiring idle connections. See
-:ref:`Preventing Premature Connection Closing <connectionpremclose>`.  When
-using node-oracledb Thick mode, use use Oracle client 12.2 (or later)
-libraries.
+:ref:`Preventing Premature Connection Closing <connectionpremclose>`.
 
 In all cases, when a bad connection is released back to the pool with
 :meth:`connection.close()`, the connection is automatically destroyed.
@@ -3108,19 +3102,17 @@ already initialized connection with the requested tag could be low, so
 most ``pool.getConnection()`` calls would return a connection needing
 its session reset, and tag management will just add overhead.
 
-When node-oracledb is using Oracle Client libraries 12.2 or later, then
-node-oracledb uses ‘multi-property tags’ and the tag string must be of
-the form of one or more “name=value” pairs separated by a semi-colon,
-for example ``"loc=uk;lang=cy"``. The Oracle `session
-pool <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9662FFB
--EAEF-495C-96FC-49C6D1D9625C>`__ used by node-oracledb has various heuristics
-to determine which connection is returned to the application. Refer to the
-`multi-property tags documentation <https://www.oracle.com/pls/topic/lookup?
-ctx=dblatest&id=GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__.
-The callback function can parse the requested multi-property tag and
-compare it with the connection’s actual properties in
-:attr:`connection.tag` to determine what exact state to
-set and what value to update ``connection.tag`` to.
+Node-oracledb Thick mode uses ‘multi-property tags’ and the tag string must be
+of the form of one or more “name=value” pairs separated by a semi-colon, for
+example ``"loc=uk;lang=cy"``. The Oracle `session pool <https://www.oracle.com
+/pls/topic/lookup?ctx=dblatest&id=GUID-F9662FFB-EAEF-495C-96FC-
+49C6D1D9625C>`__ used by node-oracledb has various heuristics to determine
+which connection is returned to the application. Refer to the `multi-property
+tags documentation <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
+GUID-DFA21225-E83C-4177-A79A-B8BA29DC662C>`__. The callback function can parse
+the requested multi-property tag and compare it with the connection’s actual
+properties in :attr:`connection.tag` to determine what exact state to set and
+what value to update ``connection.tag`` to.
 
 .. _sessionfixupnode:
 
@@ -3254,14 +3246,12 @@ PL/SQL Session Tagging Callback
 When using :ref:`DRCP <drcp>`, tagging is most efficient when using a
 PL/SQL callback.
 
-When node-oracledb is using Oracle Client libraries 12.2 or later,
-``sessionCallback`` can be a string containing the name of a PL/SQL
-procedure that is called when the requested tag does not match the
-actual tag in the connection. When the application uses :ref:`DRCP
-connections <drcp>`, a PL/SQL callback can avoid the
-:ref:`round-trip <roundtrips>` calls that a Node.js function would require
-to set session state. For non-DRCP connections, the PL/SQL callback will
-require a round-trip from the application.
+The ``sessionCallback`` can be a string containing the name of a PL/SQL
+procedure that is called when the requested tag does not match the actual tag
+in the connection. When the application uses :ref:`DRCP connections <drcp>`, a
+PL/SQL callback can avoid the :ref:`round-trip <roundtrips>` calls that a
+Node.js function would require to set session state. For non-DRCP connections,
+the PL/SQL callback will require a round-trip from the application.
 
 After a PL/SQL callback completes and ``pool.getConnection()`` returns,
 :attr:`connection.tag` will have the same property values
@@ -4595,10 +4585,9 @@ Guard with a broker will get FAN events generated when the standby database
 goes online. Standalone databases will send FAN events when the database
 restarts.
 
-For a more information on FAN see the `technical paper on Fast
-Application Notification <https://www.oracle.com/technetwork/database/options
-/clustering/applicationcontinuity/learnmore/fastapplicationnotification12c-
-2538999.pdf>`__.
+For a more information on FAN see the `technical paper on Fast Application
+Notification <https://www.oracle.com/technetwork/database/options/clustering/
+overview/fastapplicationnotification12c-2980342.pdf>`__.
 
 .. _connectionrlb:
 
@@ -4662,8 +4651,7 @@ From version 6.9 onwards, node-oracledb supports `Transaction Guard
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F7E968E4-EE8F-
 4563-91F3-CD44B5D2E747>`__ which enables Node.js applications to verify the
 success or failure of the last transaction in the event of an unplanned
-outage. This feature requires Oracle Database 12.1 or later. For node-oracledb
-Thick mode, Oracle Client 12.1 or later is additionally required.
+outage. This feature requires Oracle Database 12.1 or later.
 
 Using Transaction Guard helps to
 
@@ -4806,13 +4794,12 @@ To limit the amount of time taken to execute statements on connections:
   id=GUID-4A19D81A-75F0-448E-B271-24E5187B5909>`__ and `SQLNET.SEND_TIMEOUT
   <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-48547756-9C0B
   -4D14-BE85-E7ADDD1A3A66>`__ in a ``sqlnet.ora`` file. Or you can use the
-  :attr:`connection.callTimeout` attribute which is available when
-  node-oracledb uses Oracle Client libraries version 18, or later. The
-  necessary out-of-band break setting is automatically configured when using
-  Oracle Client 19 and Oracle Database 19, or later. With older Oracle
-  versions on systems that drop (or in-line) out-of-band breaks, you may need
-  to add `DISABLE_OOB=ON <https://www.oracle.com/pls/topic/lookup?ctx=dblatest
-  &id=GUID-42E939DC-EF37-49A0-B4F0-14158F0E55FD>`__ to a ``sqlnet.ora`` file.
+  :attr:`connection.callTimeout` attribute. The necessary out-of-band break
+  setting is automatically configured when using Oracle Client 19 and Oracle
+  Database 19, or later. With older Oracle versions on systems that drop
+  (or in-line) out-of-band breaks, you may need to add `DISABLE_OOB=ON
+  <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-42E939DC-EF37
+  -49A0-B4F0-14158F0E55FD>`__ to a ``sqlnet.ora`` file.
 
 The :attr:`connection.callTimeout` attribute is a millisecond timeout for
 executing database calls on a connection. The ``connection.callTimeout``
@@ -5367,8 +5354,7 @@ to the application.
 
 Sharding is configured in Oracle Database, see the `Oracle Globally
 Distributed Database <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=
-SHARD>`__ manual. It requires Oracle Database and Oracle Client libraries
-12.2, or later.
+SHARD>`__ manual. It requires Oracle Database 12.2, or later.
 
 .. note::
 
@@ -5387,8 +5373,7 @@ then further partitioned by a sharding key.
 
 When creating a :ref:`connection pool <poolclass>`, the property
 :attr:`~oracledb.poolMaxPerShard` can be set. This is used to balance
-connections in the pool equally across shards. It requires Oracle Client
-libraries 18.3 or later.
+connections in the pool equally across shards.
 
 When connected to a shard, queries only returns data from that shard.
 For queries that need to access data from multiple shards, connections

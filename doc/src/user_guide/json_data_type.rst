@@ -67,11 +67,11 @@ The output is::
         }
     ]
 
-Using Oracle Client Libraries 19c or Earlier
---------------------------------------------
+Using Oracle Client Libraries 19c
+---------------------------------
 
-If node-oracledb Thick mode uses Oracle Client Libraries 19c (or earlier),
-querying an Oracle Database 21c (or later), then JSON column returns a
+If node-oracledb Thick mode uses Oracle Client Libraries 19c, querying an
+Oracle Database 21c (or later), then JSON column returns a
 :ref:`Lob Class <lobclass>` BLOB. You can stream the Lob or use
 :meth:`lob.getData()`:
 

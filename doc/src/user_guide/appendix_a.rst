@@ -34,10 +34,10 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - node-oracledb Thick Mode
     * - Oracle Client version
       - Not applicable
-      - Release 11.2 and later
+      - Release 19 and later. Older node-oracledb versions supported older Client versions.
     * - Oracle Database version
       - Release 12.1 and later
-      - Release 9.2 and later depending on the Oracle Client library version
+      - Release 11.2 and later depending on the Oracle Client library version
     * - Oracle Client/Database version interoperability
       - Not applicable - Connects directly to database version 12.1 and later
       - Yes

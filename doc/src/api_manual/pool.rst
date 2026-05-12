@@ -130,11 +130,10 @@ values.
     have existed for longer than ``maxLifetimeSession`` seconds. Connections
     that are in active use will not be closed.
 
-    In node-oracledb Thick mode, Oracle Client libraries 12.1 or later must
-    be used. Note that when using node-oracledb in Thick mode with Oracle
-    Client libraries prior to 21c, pool shrinkage is only initiated when the
-    pool is accessed. So, pools in fully dormant applications will not shrink
-    until the application is next used.
+    Note that when using node-oracledb in Thick mode with Oracle Client
+    libraries prior to 21c, pool shrinkage is only initiated when the pool is
+    accessed. So, pools in fully dormant applications will not shrink until
+    the application is next used.
 
     The default value is *0*.
 

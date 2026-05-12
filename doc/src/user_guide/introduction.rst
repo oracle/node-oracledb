@@ -8,9 +8,7 @@ The `node-oracledb <https://www.npmjs.com/package/oracledb>`__ add-on for
 Node.js is a database driver for high performance Oracle Database applications
 written in JavaScript or Typescript.  You can easily write complex
 applications, or build sophisticated web services that expose `REST
-<https://blogs.oracle.com/oraclemagazine/post/
-build-rest-apis-for-nodejs-part-1>`__ or `GraphQL <https://blogs.oracle.
-com/opal/post/demo-graphql-with-oracle-database-and-node-oracledb>`__
+<https://blogs.oracle.com/connect/build-rest-apis-for-nodejs-part-1>`__
 endpoints. Node-oracledb runs in Node.js, typically as a mid-tier application
 server or service. Node-oracledb applications will not run directly in a
 browser. It is distributed under an open-source :ref:`license <license>`.
@@ -29,7 +27,7 @@ hosted at `github.com/oracle/node-oracledb <https://github.com/oracle/
 node-oracledb>`__.
 
 This module is currently tested with Node.js 16, 18, 20, 22, and 23 against
-Oracle Database 23, 21, 19, 12, and 11.2 on Oracle Linux x86_64 (releases 7
+Oracle Database 26, 21, 19, 12, and 11.2 on Oracle Linux x86_64 (releases 7
 and 8), Oracle Linux ARM (aarch64, release 8), Windows, and macOS.
 Node-oracledb may run on other platforms, and with other Node.js versions, if
 they are `Node-API <https://nodejs.org/api/n-api.html>`__ version 4
@@ -106,7 +104,7 @@ program makes calls to node-oracledb functions. Internally, node-oracledb
 dynamically loads Oracle Client libraries. Connections from node-oracledb
 Thick mode to Oracle Database are established by the Oracle Client libraries
 over the Oracle Net protocol. Depending on the version of the libraries, this
-mode of node-oracledb can connect to Oracle Database 9.2 or later. The
+mode of node-oracledb can connect to Oracle Database 11.2 or later. The
 database can be on the same machine as Node.js, or it can be remote.
 
 To use node-oracledb Thick mode, the Oracle Client libraries must be installed
@@ -115,8 +113,9 @@ of `Oracle Instant Client <https://www.oracle.com/database/technologies/
 instant-client.html>`__, from a full Oracle Client installation (such as
 installed by Oracle's GUI installer), or even from an Oracle Database
 installation (if Node.js is running on the same machine as the database).
-Oracle's standard client-server version interoperability allows connection to
-both older and newer databases from different Oracle Client library versions.
+Node-oracledb supports Oracle Client libraries version 19 or later. Oracle's
+standard client-server version interoperability allows connection to both
+older and newer databases from different Oracle Client library versions.
 
 Some behaviors of the Oracle Client libraries can optionally be configured
 with an ``oraaccess.xml`` file, for example to enable auto-tuning of a
