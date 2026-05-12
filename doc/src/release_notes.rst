@@ -135,6 +135,8 @@ Thick Mode Changes
 #)  Added guardrails against buffer overflows while fetching data from SODA
     documents.
 
+#)  Improved Token callback error handling.
+
 #)  Dropped support for Oracle Client libraries earlier than 19c.
 
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)

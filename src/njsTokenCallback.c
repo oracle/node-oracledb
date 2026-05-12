@@ -58,8 +58,10 @@ int njsTokenCallback_eventHandler(njsTokenCallback *callback,
     callback->result = false;
     uv_async_send(&callback->async);
     njsTokenCallback_waitOnBarrier(callback);
-    if (!callback->result)
+    if (!callback->result) {
+        uv_mutex_unlock(&callback->mutex);
         return DPI_FAILURE;
+    }
     tokenRefresh->token = callback->accessToken->token;
     tokenRefresh->tokenLength = callback->accessToken->tokenLength;
     tokenRefresh->privateKey = callback->accessToken->privateKey;
