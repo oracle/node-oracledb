@@ -624,7 +624,7 @@ describe('311. dataTypeIntervalYM.js', function() {
         },
       ]
     );
-    assert.deepStrictEqual(result.rows[0][0], new oracledb.IntervalYM({ years: 5, months: 12 }));
+    assert.deepStrictEqual(result.rows[0][0], new oracledb.IntervalYM({ years: 6, months: 0 }));
   }); // 311.35
 
   it('311.36 Negative - inserting a POJO instead of an IntervalYM object for an IntervalYM bind', async function() {
@@ -722,7 +722,7 @@ describe('311. dataTypeIntervalYM.js', function() {
       }))
     );
 
-    assert.deepStrictEqual(result.rows[0][0], new oracledb.IntervalYM({ months: 25, years: 0 }));
+    assert.deepStrictEqual(result.rows[0][0], new oracledb.IntervalYM({ months: 1, years: 2 }));
     assert.deepStrictEqual(result.rows[0][1], new oracledb.IntervalYM({ years: 0, months: -25 }));
     assert.deepStrictEqual(result.rows[0][2], new oracledb.IntervalYM({ years: 1, months: 15 }));
     assert.deepStrictEqual(result.rows[0][3], new oracledb.IntervalYM({ years: -1, months: -15 }));
@@ -838,4 +838,31 @@ describe('311. dataTypeIntervalYM.js', function() {
       /ORA-01867:/  // ORA-01867: the interval is invalid
     );
   }); // 311.45
+
+  it('311.46 - validate INTERVAL YM lower bound negative years', async function() {
+    const result = await connection.execute(`SELECT TO_YMINTERVAL('-9999-11') FROM DUAL`);
+    assert.deepStrictEqual(result.rows[0][0],
+      new oracledb.IntervalYM({ years: -9999, months: -11 }));
+  }); // 311.46
+
+  it('311.47 - reject INTERVAL YM with invalid month > 11', async function() {
+    await assert.rejects(
+      connection.execute(`SELECT TO_YMINTERVAL('1-13') FROM DUAL`),
+      /ORA-01843:/ // ORA-01843: There is an invalid month using format 'PyYmM'.
+    );
+  }); // 311.47
+
+  it('311.48 - INTERVAL YM extreme positive year value (upper bound)', async function() {
+    const result = await connection.execute(`SELECT TO_YMINTERVAL('9999-11') FROM DUAL`);
+    assert.deepStrictEqual(result.rows[0][0],
+      new oracledb.IntervalYM({ years: 9999, months: 11 }));
+  }); // 311.48
+
+  it('311.49 - INTERVAL YM with zero normalization', async function() {
+    const zeroYM = new oracledb.IntervalYM({ years: 0, months: 0 });
+    const result = await connection.execute(`SELECT :1 FROM DUAL`,
+      [{ dir: oracledb.BIND_IN, type: oracledb.DB_TYPE_INTERVAL_YM, val: zeroYM }]
+    );
+    assert.deepStrictEqual(result.rows[0][0], zeroYM);
+  }); // 311.49
 });

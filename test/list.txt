@@ -6322,6 +6322,10 @@ Overview of node-oracledb functional tests
     311.43 leading/trailing whitespace
     311.44 different precision specifications
     311.45 fractional months
+    311.46 - validate INTERVAL YM lower bound negative years (301ms)
+    311.47 - reject INTERVAL YM with invalid month > 11 (605ms)
+    311.48 - INTERVAL YM extreme positive year value (upper bound) (301ms)
+    311.49 - INTERVAL YM with zero normalization
 
   312. dataTypeIntervalDS.js
     312.1 - binding in an interval
@@ -6378,6 +6382,12 @@ Overview of node-oracledb functional tests
     312.52 - string values in constructor attributes
     312.53 - interval sorting in queries
     312.54 - interval arithmetic with multiple operations
+    312.55 - validate INTERVAL DS lower bound negative values
+    312.56 - validate INTERVAL DS with maximum valid time components
+    312.57 - reject invalid INTERVAL DS with minutes > 59
+    312.58 - reject invalid INTERVAL DS with negative fractional seconds beyond range
+    312.59 - INTERVAL DS precision rounding edge case
+
 
   313. dbObjectsNested.js
     313.1 Nested DbObjects

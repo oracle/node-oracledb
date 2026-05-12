@@ -65,6 +65,9 @@ used in subsequent sections.
 If you specify non-integer values in the attributes of IntervalYM object, then
 the ``NJS-007`` error is raised.
 
+Note that node-oracledb normalizes the months value when it exceeds or falls
+below its standard value.
+
 You can insert IntervalYM objects into an INTERVAL YEAR TO MONTH column by
 binding as ``oracledb.DB_TYPE_INTERVAL_YM``, for example:
 
@@ -138,6 +141,9 @@ The above example is used in subsequent sections.
 
 If you specify non-integer values in the attributes of IntervalDS object, then
 the ``NJS-007`` error is raised.
+
+Note that node-oracledb normalizes the hours, minutes, and seconds values when
+they exceed or fall below their standard values.
 
 You can insert IntervalDS objects into an INTERVAL DAY TO SECOND column by
 binding as ``oracledb.DB_TYPE_INTERVAL_DS``, for example:

@@ -88,6 +88,10 @@ Common Changes
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
+#)  Normalized :ref:`interval year-to-month <intervalyeartomonth>` and
+    :ref:`interval day-to-second <intervaldaytosecond>` database column type
+    values.
+
 Thin Mode Changes
 +++++++++++++++++
 
