@@ -1941,6 +1941,210 @@ previously set values if they exist. To clear application context values, it
 is recommended to use :meth:`connection.clearAppContext()` instead of passing
 an empty array to the ``keyValues`` parameter.
 
+.. _deepdatasecurity:
+
+Deep Data Security
+==================
+
+Oracle Deep Data Security is a database-enforced data authorization framework
+which enables you to specify application-level security requirements directly
+at the database layer. Deep Data Security ensures fine-grained and end-to-end
+user access control at the row, column, and cell levels. Deep Data Security
+requires Oracle Database 26ai.
+
+.. note::
+
+    Oracle Deep Data Security is only supported in node-oracledb Thin mode.
+
+With Deep Data Security, an application sends a specific set of identity and
+authorization details called end user security context to the database. The
+details that can be defined in an end user security context are an end user
+identity, a database access token, data roles, and end user context
+attributes. These parameters are detailed in the subsequent sections. The end
+user security context can be defined on a connection. Once defined, the
+database uses these end user details to authorize and grant access to the
+data. See `Oracle Deep Data Security <https://www.oracle.com/pls/topic/lookup?
+ctx=dblatest&id=GUID-E239A5C4-0C0D-4FF0-98DD-2E374F79C63C>`__ in the Oracle
+Deep Data Security Configuration Guide for more information.
+
+Creating an End User Security Context
+-------------------------------------
+
+An End User Security Context can be created for a user managed by an external
+Identity and Access Management (IAM) system such as Oracle Cloud Infrastructure
+(OCI) IAM or Microsoft Entra ID, or a user locally created in Oracle Database.
+
+To create an end user security context for a user, you must create an
+EndUserSecurityContext object using the
+:ref:`Oracledb EndUserSecurityContext class <endusersecuritycontextclass>`.
+For example:
+
+.. code-block:: javascript
+
+    const user_context = new oracledb.EndUserSecurityContext({
+        databaseAccessToken: "<db_token_issued_by_an_IAM>",
+        endUserToken: "<end_user_token>",
+        dataRoles: [<names_of_roles>],
+        attributes: {
+          <"attribute_name">: <value>
+        },
+    });
+
+The following attributes can be defined in an EndUserSecurityContext object:
+
+- ``databaseAccessToken``: A token that authenticates your application with
+  the database. This token is issued by your Identity and  Access Management
+  (IAM) system. This attribute is required.
+
+- ``endUserToken``: A token that identifies the end user. This token is issued
+  by your IAM system after user authentication. This attribute must be
+  specified for users managed by external IAM systems. Do not set this
+  attribute if the ``endUserName`` and ``key`` attributes are defined.
+
+- ``endUserName``: The name of a local database user created in Oracle
+  Database that has the ``CREATE END USER SECURITY CONTEXT`` database
+  privilege set. This attribute must be specified for users managed by Oracle
+  Database. Do not set this attribute if the ``endUserToken`` attribute is
+  set.
+
+- ``key``: The lookup identifier that the database maps to stored context
+  attributes. You must set this attribute if the ``endUserName`` attribute is
+  specified.
+
+- ``dataRoles``: The names of data roles granted to the application or local
+  database user. This attribute is optional. If ``endUserName`` and ``key``
+  are specified, then only data roles enabled by default with the application
+  identity are used. Any data roles explicitly provided by the application are
+  not accepted and will raise an error.
+
+- ``attributes``: The attribute-value pairs conforming to the END USER CONTEXT
+  schema defined in the database. These can be referenced at runtime by
+  authorization policies (for example, in data grant predicates) and
+  application logic. This attribute is optional.
+
+.. note::
+
+    Note that you must set either the ``endUserToken`` attribute, or both
+    ``endUserName`` and ``key`` in the EndUserSecurityContext object. Setting
+    both of these parameters will raise an error.
+
+For detailed information on these attributes, see this
+:ref:`table <_end_user_security_context_parameters>`.
+
+Setting an End User Security Context
+------------------------------------
+
+To set an end user security context on a connection, use
+:meth:`connection.setEndUserSecurityContext()`. This method must be called
+after creating a standalone connection using :meth:`oracledb.getConnection()`,
+or after acquiring a connection from a pool using
+:meth:`pool.getConnection()`.
+
+Once :meth:`~connection.setEndUserSecurityContext()` is called, the specified
+security context applies to all the subsequent database operations executed on
+that connection for that end user.
+
+An example of setting an end user security context for a standalone
+connection is shown below:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+      user: "hr",
+      password: mypw, // contains the hr schema password
+      connectString: "mydbmachine.example.com/orclpdb1",
+    });
+
+    connection.setEndUserSecurityContext(user_context);
+
+An example of setting an end user security context for a connection pool is:
+
+.. code-block:: javascript
+
+    const pool = await oracledb.createPool({
+      user          : "hr",
+      password      : mypw,  // mypw contains the hr schema password
+      connectString : "mydbmachine.example.com/orclpdb1",
+      poolIncrement: 1,
+      poolMin: 1,
+      poolMax: 5
+    });
+
+    const connection = await pool.getConnection();
+
+    connection.setEndUserSecurityContext(user_context);
+
+Using :meth:`connection.setEndUserSecurityContext()` in node-oracledb Thick
+mode will raise the error ``NJS-089: setting End User Security Context is not
+supported by node-oracledb in Thick mode``.
+
+Clearing an End User Security Context
+-------------------------------------
+
+To clear an end user security context set by a previous call to
+:meth:`connection.setEndUserSecurityContext()`, use
+:meth:`connection.clearEndUserSecurityContext()`. For example:
+
+.. code-block:: javascript
+
+    connection.clearEndUserSecurityContext();
+
+This reverts the connection to its original state in which subsequent database
+operations are executed on the connection without any end user security
+context.
+
+Using this method in node-oracledb Thick mode will raise the error ``NJS-089:
+clearing End User Security Context is not supported by node-oracledb in Thick
+mode``.
+
+Calling :meth:`connection.clearEndUserSecurityContext()` without previously
+setting an end user security context using
+:meth:`connection.setEndUserSecurityContext()` has no effect and does not
+raise an error.
+
+Example of Using End User Security Context
+------------------------------------------
+
+An example of using an end user security context is:
+
+.. code-block:: javascript
+
+    // Create an end user security context
+    const context = new oracledb.EndUserSecurityContext {
+      databaseAccessToken: "db-token-plain",
+      endUserToken: "user-token-plain",
+      dataRoles: ["HR_DYNAMIC_ROLE", "FINANCE_DYNAMIC_ROLE"],
+      attributes: {
+        region: ["us", "uk"],
+        department: "finance",
+      },
+    };
+
+    // Create a standalone connection
+    const connection = await oracledb.getConnection({
+      user: "hr",
+      password: mypw, // contains the hr schema password
+      connectString: "mydbmachine.example.com/orclpdb1",
+      walletPassword: WALLET_PASSWORD,
+      walletLocation: WALLET_LOCATION
+    });
+
+    // Set the end user security context on a connection
+    connection.setEndUserSecurityContext(context);
+
+    // Execute a database operation within the end user security context
+    const result1 = await connection.execute(`SELECT 1 FROM dual`);
+
+    // Clear the end user security context
+    // Subsequent database operations run without the end user security context
+    connection.clearEndUserSecurityContext();
+
+    // Execute a database operation without the end user security context
+    const result2 = await connection.execute(`SELECT 2 FROM dual`);
+
+    // Close the connection
+    await connection.close();
+
 .. _pooled-connections:
 .. _connpooling:
 

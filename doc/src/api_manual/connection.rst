@@ -765,6 +765,25 @@ Connection Methods
           - String
           - The namespace of the application context to be cleared.
 
+.. method:: connection.clearEndUserSecurityContext()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        clearEndUserSecurityContext();
+
+    This synchronous method clears the end user security context specified on
+    a connection.
+
+    This reverts the connection to its original state in which subsequent
+    database operations are executed on the connection without any end user
+    security context.
+
+    Se :ref:`deepdatasecurity`.
+
+    Currently, this method is only relevant to node-oracledb's Thin mode.
+
 .. method:: connection.close()
 
     .. versionadded:: 1.9
@@ -2548,6 +2567,41 @@ Connection Methods
             For DML statements this contains the number of rows affected, for example, the number of rows inserted. For non-DML statements such as queries and PL/SQL statements, rowsAffected is undefined.
         * - ``warning``
           - An :ref:`error <errorobj>` object that gives information about any warning that was encountered when running the operation.
+
+.. method:: connection.setEndUserSecurityContext()
+
+    .. versionadded:: 7.0
+
+    .. code-block:: javascript
+
+        setEndUserSecurityContext(Object context);
+
+    This synchronous method sets the end user security context on a connection
+    using the specified context.
+
+    Once this method is called, the specified end user security context is
+    applicable to all database operations performed on the connection.
+
+    See :ref:`deepdatasecurity`.
+
+    Currently, this method is only relevant to node-oracledb's Thin mode.
+
+    The parameters of the ``connection.setEndUserSecurityContext()`` are:
+
+    .. list-table-with-summary:: connection.setEndUserSecurityContext() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``context``
+          - Object
+          - The end user security context to be set on the connection.
 
 .. method:: connection.shutdown()
 

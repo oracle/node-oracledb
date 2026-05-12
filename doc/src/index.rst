@@ -62,6 +62,7 @@ API Manual
     api_manual/dbobject.rst
     api_manual/lob.rst
     api_manual/pool.rst
+    api_manual/endusersecuritycontext.rst
     api_manual/statistics.rst
     api_manual/resultset.rst
     api_manual/sodacollection.rst
