@@ -84,6 +84,9 @@ Overview of node-oracledb functional tests
       1.21.19 SQL with special characters only
       1.21.20 SQL with Unicode characters only
       1.21.21 verify connection still works after empty SQL errors
+    1.22 ORA_SDTZ environment variable handling
+      1.22.1 accepts valid ORA_SDTZ values
+      1.22.2 rejects invalid ORA_SDTZ values on the server
 
   2. pool.js
     2.1 default setting
@@ -6822,3 +6825,9 @@ Overview of node-oracledb functional tests
       327.7.1 OBO token-backed context visible in the database session
       327.7.2 Different OBO user tokens map to different XS users
       327.7.3 OBO tokens with direct HR table access
+
+  328. authMessage.js
+    328.1 allows valid ORA_SDTZ timezone values
+    328.2 quotes ORA_SDTZ values that contain SQL metacharacters
+    328.3 formats the local timezone when ORA_SDTZ is not set
+    328.4 formats the local timezone when ORA_SDTZ is empty

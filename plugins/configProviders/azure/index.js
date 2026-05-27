@@ -29,6 +29,7 @@ let ClientSecretCredential, ClientCertificateCredential, ChainedTokenCredential,
 const util = require('node:util');
 const { base } = require("../base.js");
 const oracledb = require('oracledb');
+
 class AzureProvider extends base {
   constructor(provider_arg, urlExtendedPart) {
     super(urlExtendedPart);
@@ -96,7 +97,7 @@ class AzureProvider extends base {
     return credential;
   }
   async returnConfig() {
-    const configObject = {};
+    let configObject = {};
     const label = this.paramMap.get("label");
     try {
       this.credential =  await this.returnAzureCredential();
@@ -115,10 +116,8 @@ class AzureProvider extends base {
     const params = (await this.retrieveParamValueFromAzureConfigurationProvider(client, label, 'njs'));
     if (params) {
       const obj = JSON.parse(params);
-      for (const key in obj) {
-        var val = obj[key];
-        configObject[key] = val;
-      }
+      const spreadNjs = { ...obj };
+      configObject = { ...configObject, ...spreadNjs };
     } else {
       configObject['njs'] = null;
     }

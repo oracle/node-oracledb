@@ -60,6 +60,7 @@ static NJS_ASYNC_METHOD(njsPool_reconfigureAsync);
 static NJS_ASYNC_METHOD(njsPool_setAccessTokenAsync);
 
 // post asynchronous methods
+static NJS_ASYNC_POST_METHOD(njsPool_closePostAsync);
 static NJS_ASYNC_POST_METHOD(njsPool_createPostAsync);
 static NJS_ASYNC_POST_METHOD(njsPool_getConnectionPostAsync);
 
@@ -123,8 +124,8 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_close, 0, NULL)
     pool->accessTokenCallback = NULL;
     baton->dpiPoolHandle = pool->handle;
     pool->handle = NULL;
-    return njsBaton_queueWork(baton, env, "Close", njsPool_closeAsync, NULL,
-            returnValue);
+    return njsBaton_queueWork(baton, env, "Close", njsPool_closeAsync,
+            njsPool_closePostAsync, returnValue);
 }
 
 
@@ -136,16 +137,33 @@ static bool njsPool_closeAsync(njsBaton *baton)
 {
     njsPool *pool = (njsPool*) baton->callingInstance;
 
-    pool->accessTokenCallback = baton->accessTokenCallback;
-    if (baton->accessTokenCallback) {
-        njsTokenCallback_stopNotifications(baton->accessTokenCallback);
-        baton->accessTokenCallback = NULL;
-    }
     if (dpiPool_close(baton->dpiPoolHandle, DPI_MODE_POOL_CLOSE_FORCE) < 0) {
         njsBaton_setErrorDPI(baton);
         pool->handle = baton->dpiPoolHandle;
         baton->dpiPoolHandle = NULL;
+        pool->accessTokenCallback = baton->accessTokenCallback;
+        baton->accessTokenCallback = NULL;
         return false;
+    }
+
+    return true;
+}
+
+
+//-----------------------------------------------------------------------------
+// njsPool_closePostAsync()
+//   Post-processing function for njsPool_close().
+//   Perform token callback cleanup on the main thread.
+//   njsTokenCallback_stopNotifications() calls uv_close() on the callback's
+//   uv_async_t handle and triggers N-API cleanup, so it must run on the
+//   main thread.
+//-----------------------------------------------------------------------------
+static bool njsPool_closePostAsync(njsBaton *baton, napi_env env,
+        napi_value *result)
+{
+    if (baton->accessTokenCallback) {
+        njsTokenCallback_stopNotifications(baton->accessTokenCallback);
+        baton->accessTokenCallback = NULL;
     }
 
     return true;

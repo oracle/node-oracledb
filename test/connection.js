@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1227,5 +1227,87 @@ describe('1. connection.js', function() {
         // ORA-00911: invalid character
       );
     });
+  });
+
+  describe('1.22 ORA_SDTZ environment variable handling', function() {
+    let defaultORA_SDTZ;
+
+    before(function() {
+      if (!oracledb.thin) {
+        this.skip();
+      }
+    });
+
+    beforeEach(function() {
+      defaultORA_SDTZ = process.env.ORA_SDTZ;
+    });
+
+    afterEach(function() {
+      if (defaultORA_SDTZ === undefined) {
+        delete process.env.ORA_SDTZ;
+      } else {
+        process.env.ORA_SDTZ = defaultORA_SDTZ;
+      }
+    });
+
+    async function assertConnectionSucceeds(timezone) {
+      let connection;
+      process.env.ORA_SDTZ = timezone;
+      try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute('select 1 from dual');
+        assert.strictEqual(result.rows[0][0], 1);
+      } finally {
+        if (connection) {
+          await connection.close();
+        }
+      }
+    }
+
+    async function assertConnectionRejectsOnServer(timezone) {
+      let connection;
+      process.env.ORA_SDTZ = timezone;
+      try {
+        connection = await oracledb.getConnection(dbConfig);
+        assert.fail(`connection unexpectedly succeeded for ${timezone}`);
+      } catch (err) {
+        assert.match(err.message, /ORA-/);
+      } finally {
+        if (connection) {
+          await connection.close();
+        }
+      }
+    }
+
+    it('1.22.1 accepts valid ORA_SDTZ values', async function() {
+      const timezones = [
+        '+05:30',
+        '-08:00',
+        'UTC',
+        'Europe/Paris',
+        'America/Los_Angeles',
+        'LOCAL',
+        'DBTIMEZONE'
+      ];
+
+      for (const timezone of timezones) {
+        await assertConnectionSucceeds(timezone);
+      }
+    });
+
+    it('1.22.2 rejects invalid ORA_SDTZ values on the server',
+      async function() {
+        const timezones = [
+          '+99:99',
+          'Invalid/Timezone',
+          'America Los_Angeles',
+          "UTC'; DROP TABLE nodb_conn_sdtz; --",
+          "'; DROP TABLE nodb_conn_sdtz; --"
+        ];
+
+        for (const timezone of timezones) {
+          await assertConnectionRejectsOnServer(timezone);
+        }
+      });
   });
 });

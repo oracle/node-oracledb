@@ -144,6 +144,9 @@ Thick Mode Changes
 #)  Improved Token callback error handling and validation for undefined access
     token callback arguments.
 
+#)  Fixed a crash that could occur when closing a pool configured with an
+    access token callback.
+
 #)  Dropped support for Oracle Client libraries earlier than 19c.
 
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
