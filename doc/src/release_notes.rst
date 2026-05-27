@@ -127,6 +127,9 @@ Thin Mode Changes
     :ref:`connection pool <connpooling>` in Thin mode. The callback can call
     pool events inside the connection pool methods.
 
+#)  Added error ``NJS-192`` for unsupported database character sets in
+    node-oracledb Thin mode.
+
 Thick Mode Changes
 ++++++++++++++++++
 
