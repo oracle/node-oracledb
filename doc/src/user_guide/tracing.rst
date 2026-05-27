@@ -687,7 +687,7 @@ In the above sample code, the ``enhancedDatabaseReporting`` property is set to
 
 The types of OpenTelemetry data and metrics for Oracle Database are listed
 `here <https://github.com/open-telemetry/semantic-conventions/blob/main/docs/
-database/oracledb.md>`__.
+db/oracledb.md>`__.
 
 The tracing parameters and methods that can be used by the OpenTelemetry
 JavaScript project to generate telemetry data were introduced in node-oracledb

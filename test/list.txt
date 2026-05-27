@@ -5954,13 +5954,18 @@ Overview of node-oracledb functional tests
       291.1.1 Verify dbDomain and Annotations
 
   292. passwordExpiryWarning.js
-    292.1 password expiry warning
-    292.2 password expiry warning on homogeneous pool
-    292.3 password expiry warning on heterogeneous pool
-    292.4 with poolMin=0 with regular user and password
-    292.5 with poolMin=0 with password in grace time
-    292.6 with poolMin=1 with password in grace time
-    292.7 no warning after password change on new connection
+    292.1 Basic Password Expiry Warning Tests
+      292.1.1 password expiry warning
+      292.1.2 password expiry warning on a homogeneous pool
+      292.1.3 password expiry warning on a heterogeneous pool
+      292.1.4 with poolMin=0 with regular user and password
+      292.1.5 with poolMin=0 with password in grace time
+      292.1.6 with poolMin=1 with password in grace time
+      292.1.7 no warning after password change on new connection
+    292.2 Pool Expansion Password Expiry Warning Tests
+      292.2.1 password expiry warning on pool expansion
+      292.2.2 password expiry warning on sequential pool expansion
+      292.2.3 pool expansion with mixed warning states
 
   293. plsqlWarnings.js
     293.1 Warning on executing PL/SQL procedure

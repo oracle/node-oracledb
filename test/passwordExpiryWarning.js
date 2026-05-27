@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -37,11 +37,10 @@ const dbConfig  = require('./dbconfig.js');
 const assert    = require('assert');
 const testsUtil = require('./testsUtil.js');
 
-
-describe('292. passwordExpiryWarning.js', function() {
-  const userName = 'testUser292';
-  const password = 'testUser292';
-  const newPassword = 'testnew292';
+describe('292.1 Basic Password Expiry Warning Tests', function() {
+  const userName = 'testUser292A';
+  const password = 'testUser292A';
+  const newPassword = 'testnew292A';
 
   const plsql = `
     BEGIN
@@ -58,7 +57,7 @@ describe('292. passwordExpiryWarning.js', function() {
       EXECUTE IMMEDIATE('GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE \n
           TO ${userName}');
       EXECUTE IMMEDIATE('CREATE PROFILE SHORT_LIFE_PROFILE1 LIMIT \n
-          PASSWORD_LIFE_TIME 1/24/60/60 PASSWORD_GRACE_TIME 1/24/60');
+          PASSWORD_LIFE_TIME 1/24/60/20 PASSWORD_GRACE_TIME 1/24');
       EXECUTE IMMEDIATE('ALTER USER ${userName} profile SHORT_LIFE_PROFILE1');
     END;
    `;
@@ -78,7 +77,7 @@ describe('292. passwordExpiryWarning.js', function() {
 
     const connAsDBA = await oracledb.getConnection(dbaCredential);
     await connAsDBA.execute(plsql);
-    await testsUtil.sleep(2000);
+    await testsUtil.sleep(4000);
     await connAsDBA.close();
   });
 
@@ -103,7 +102,7 @@ describe('292. passwordExpiryWarning.js', function() {
     }
   });
 
-  it('292.1 password expiry warning', async () => {
+  it('292.1.1 password expiry warning', async () => {
     const credentials = {
       user: userName,
       password: password,
@@ -120,9 +119,9 @@ describe('292. passwordExpiryWarning.js', function() {
       assert.strictEqual(conn.warning.code, 'ORA-28002');
       assert.strictEqual(conn.warning.errorNum, 28002);
     }
-  }); // 292.1
+  }); // 292.1.1
 
-  it('292.2 password expiry warning on a homogeneous pool', async () => {
+  it('292.1.2 password expiry warning on a homogeneous pool', async () => {
     const credentials = {
       user: userName,
       password: password,
@@ -143,9 +142,9 @@ describe('292. passwordExpiryWarning.js', function() {
     } else {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28002:"), true);
     }
-  }); // 292.2
+  }); // 292.1.2
 
-  it('292.3 password expiry warning on a heterogeneous pool', async function() {
+  it('292.1.3 password expiry warning on a heterogeneous pool', async function() {
     if (oracledb.thin) {
       this.skip();
     }
@@ -171,9 +170,9 @@ describe('292. passwordExpiryWarning.js', function() {
     } else {
       assert.strictEqual(conn.warning.message.startsWith("ORA-28002:"), true);
     }
-  }); // 292.3
+  }); // 292.1.3
 
-  it('292.4 with poolMin=0 with regular user and password', async function() {
+  it('292.1.4 with poolMin=0 with regular user and password', async function() {
     const credentials = {
       user: dbConfig.user,
       password: dbConfig.password,
@@ -189,10 +188,9 @@ describe('292. passwordExpiryWarning.js', function() {
     const conn = await pool.getConnection();
     conns.push(conn);
     assert.strictEqual(conn.warning, undefined);
-  }); //292.4
+  }); //292.1.4
 
-
-  it('292.5 with poolMin=0 with password in grace time', async function() {
+  it('292.1.5 with poolMin=0 with password in grace time', async function() {
     const credentials = {
       user: userName,
       password: password,
@@ -223,9 +221,9 @@ describe('292. passwordExpiryWarning.js', function() {
     assert.strictEqual(conn2.warning, undefined);
     await conn2.close();
     conns =  [];
-  }); // 292.5
+  }); // 292.1.5
 
-  it('292.6 with poolMin=1 with password in grace time', async function() {
+  it('292.1.6 with poolMin=1 with password in grace time', async function() {
     const credentials = {
       user: userName,
       password: password,
@@ -256,9 +254,9 @@ describe('292. passwordExpiryWarning.js', function() {
     assert.strictEqual(conn2.warning, undefined);
     await conn2.close();
     conns = [];
-  }); // 292.6
+  }); // 292.1.6
 
-  it('292.7 no warning after password change on new connection', async () => {
+  it('292.1.7 no warning after password change on new connection', async () => {
     const credentials = {
       user: userName,
       password: password,
@@ -284,6 +282,186 @@ describe('292. passwordExpiryWarning.js', function() {
     const conn1 = await oracledb.getConnection(newCredentials);
     conns.push(conn1);
     assert.strictEqual(conn1.warning, undefined);
-  }); // 292.7
+  }); // 292.1.7
+});
+
+describe('292.2 Pool Expansion Password Expiry Warning Tests', function() {
+  const userName = 'testUser292B';
+  const password = 'testUser292B';
+
+  const plsql = `
+    BEGIN
+      DECLARE
+        e_user_missing EXCEPTION;
+        PRAGMA EXCEPTION_INIT(e_user_missing, -01918);
+      BEGIN
+        EXECUTE IMMEDIATE('DROP USER ${userName} CASCADE');
+      EXCEPTION
+        WHEN e_user_missing
+          THEN NULL;
+      END;
+      EXECUTE IMMEDIATE('CREATE USER ${userName} IDENTIFIED BY ${password}');
+      EXECUTE IMMEDIATE('GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE \n
+          TO ${userName}');
+      EXECUTE IMMEDIATE('CREATE PROFILE SHORT_LIFE_PROFILE2 LIMIT \n
+          PASSWORD_LIFE_TIME 1/24/60/20 PASSWORD_GRACE_TIME 1/24');
+      EXECUTE IMMEDIATE('ALTER USER ${userName} profile SHORT_LIFE_PROFILE2');
+    END;
+   `;
+
+  const dbaCredential = {
+    user: dbConfig.test.DBA_user,
+    password: dbConfig.test.DBA_password,
+    connectString: dbConfig.connectString,
+    privilege: oracledb.SYSDBA
+  };
+
+  let pool;
+  let conns = [];
+
+  before(async function() {
+    if (!dbConfig.test.DBA_PRIVILEGE || dbConfig.test.drcp) this.skip();
+
+    const connAsDBA = await oracledb.getConnection(dbaCredential);
+    await connAsDBA.execute(plsql);
+    // Sleep 4 seconds - puts password into grace period where warnings appear
+    await testsUtil.sleep(4000);
+    await connAsDBA.close();
+  });
+
+  after(async function() {
+    if (!dbConfig.test.DBA_PRIVILEGE || dbConfig.test.drcp) return;
+
+    const connAsDBA = await oracledb.getConnection(dbaCredential);
+    await connAsDBA.execute (`ALTER USER ${userName} PROFILE DEFAULT`);
+    await connAsDBA.execute (`DROP PROFILE SHORT_LIFE_PROFILE2`);
+    await connAsDBA.execute(`DROP USER ${userName} CASCADE`);
+    await connAsDBA.close();
+  });
+
+  afterEach(async function() {
+    for (const conn of conns) {
+      await conn.close();
+    }
+    conns = [];
+    if (pool) {
+      await pool.close(0);
+      pool = null;
+    }
+  });
+
+  it('292.2.1 password expiry warning on pool expansion', async function() {
+    const credentials = {
+      user: userName,
+      password: password,
+      connectString: dbConfig.connectString,
+      poolMin: 2,
+      poolMax: 10,
+      poolIncrement: 2,
+      poolTimeout: 60,
+      homogeneous: true
+    };
+
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const expectedCode = isDB23ai ? 'ORA-28098' : 'ORA-28002';
+    pool = await oracledb.createPool(credentials);
+    await testsUtil.checkAndWait(100, 50,
+      () => pool.connectionsOpen === credentials.poolMin);
+
+    for (let i = 0; i < credentials.poolMin; i++) {
+      conns.push(await pool.getConnection());
+    }
+
+    const numConnections = 4; // More than poolMin (2)
+
+    const connectionPromises = [];
+    for (let i = 0; i < numConnections; i++) {
+      connectionPromises.push(pool.getConnection());
+    }
+
+    const expandedConnections = await Promise.all(connectionPromises);
+    conns.push(...expandedConnections);
+
+    for (const conn of expandedConnections) {
+      assert.strictEqual(conn.warning?.code, expectedCode);
+    }
+  }); // 292.2.1
+
+  it('292.2.2 password expiry warning on sequential pool expansion', async function() {
+    const credentials = {
+      user: userName,
+      password: password,
+      connectString: dbConfig.connectString,
+      poolMin: 1,
+      poolMax: 8,
+      poolIncrement: 1,
+      poolTimeout: 60,
+      homogeneous: true
+    };
+
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
+    const expectedCode = isDB23ai ? 'ORA-28098' : 'ORA-28002';
+    pool = await oracledb.createPool(credentials);
+    await testsUtil.checkAndWait(100, 50,
+      () => pool.connectionsOpen === credentials.poolMin);
+
+    // Get the initial poolMin connection
+    const conn1 = await pool.getConnection();
+    conns.push(conn1);
+
+    // Verify initial connection has warning
+    assert.strictEqual(conn1.warning.code, expectedCode);
+
+    // get additional connections to force expansion
+    const conn2 = await pool.getConnection();
+    const conn3 = await pool.getConnection();
+    const conn4 = await pool.getConnection();
+
+    conns.push(conn2, conn3, conn4);
+
+    // Verify that expanded connections also have warnings
+    const expandedConns = [conn2, conn3, conn4];
+
+    for (const conn of expandedConns) {
+      assert.strictEqual(conn.warning?.code, expectedCode);
+    }
+  }); // 292.2.2
+
+  it('292.2.3 pool expansion with mixed warning states', async function() {
+    if (oracledb.thin) {
+      this.skip();
+    }
+
+    const normalCredentials = {
+      user: dbConfig.user,
+      password: dbConfig.password,
+      connectString: dbConfig.connectString,
+      poolMin: 1,
+      poolMax: 5,
+      poolIncrement: 1,
+      poolTimeout: 60,
+      homogeneous: false
+    };
+
+    pool = await oracledb.createPool(normalCredentials);
+
+    // Get connection with normal credentials (no warning expected)
+    const normalConn = await pool.getConnection();
+    conns.push(normalConn);
+    assert.strictEqual(normalConn.warning, undefined);
+
+    // Get connection with expiring password credentials
+    const expiringConn = await pool.getConnection({
+      user: userName,
+      password: password
+    });
+    conns.push(expiringConn);
+
+    const isDB23ai = await testsUtil.checkPrerequisites(undefined, 2300000000);
+
+    // Verify the connection with expiring password has warning
+    const expectedCode = isDB23ai ? 'ORA-28098' : 'ORA-28002';
+    assert.strictEqual(expiringConn.warning.code, expectedCode);
+  }); // 292.2.3
 
 });
