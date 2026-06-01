@@ -63,7 +63,7 @@ specific language governing permissions and limitations under the License.
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#instnoderpms)
 
-### <a name="instosx"></a> 3.3 Node-oracledb Installation on Apple macOS (Intel x86)
+### <a name="instosx"></a> 3.3 Node-oracledb Installation on Apple macOS
 
 [View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/installation.html#instosx)
 
