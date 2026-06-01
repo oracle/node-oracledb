@@ -146,6 +146,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Bequeath connections
       - No
       - Yes
+    * - Oracle Database 26ai Deep Data Security (see :ref:`deepdatasecurity`)
+      - Yes
+      - No
     * - Lightweight Directory Access Protocol (LDAP) connections
       - No
       - Yes
@@ -583,11 +586,21 @@ from node-oracledb Thick mode in the following ways:
 - Not all the parameters of the :meth:`oracledb.createPool()` method are
   applicable to both node-oracledb modes. Each mode ignores unrecognized
   parameters. The parameters that are supported in Thin mode include
-  ``accessToken``, ``connectString``, ``connectionString``,
-  ``enableStatistics``, ``password``, ``poolAlias``, ``poolIncrement``,
-  ``poolMax``, ``poolMin``, ``poolPingInterval``, ``poolTimeout``,
-  ``queueMax``, ``queueRequests``, ``queueTimeout``, ``stmtCacheSize``,
-  ``user``, and ``username`` parameters.
+  ``accessToken``, ``accessTokenConfig``, ``appContext``, ``configDir``,
+  ``connectionIdPrefix``, ``connectString``, ``connectionString``,
+  ``connectTimeout``, ``driverName``, ``edition``, ``enableStatistics``,
+  ``expireTime``, ``externalAuth``, ``homogeneous``, ``httpsProxy``,
+  ``httpsProxyPort``, ``machine``, ``maxLifetimeSession``,
+  ``networkCompression``, ``networkCompressionThreshold``, ``osUser``,
+  ``password``, ``poolAlias``, ``poolIncrement``, ``poolMax``, ``poolMin``,
+  ``poolPingInterval``, ``poolPingTimeout``, ``poolTimeout``, ``privilege``,
+  ``program``, ``queueMax``, ``queueRequests``, ``queueTimeout``,
+  ``retryCount``, ``retryDelay``, ``sdu``, ``sessionCallback``,
+  ``sourceRoute``, ``sslAllowWeakDNMatch``, ``sslServerCertDN``,
+  ``sslServerDNMatch``, ``stmtCacheSize``, ``terminal``,
+  ``tokenAuthConfigAzure``, ``tokenAuthConfigOci``,
+  ``transportConnectTimeout``, ``user``, ``username``, ``useSNI``,
+  ``walletContent``, ``walletLocation``, and ``walletPassword`` parameters.
 
 - Node-oracledb Thin mode only supports homogeneous pools.
 
@@ -683,13 +696,12 @@ Supported Database Data Types in Thin and Thick Modes
 
 Node-oracledb Thin and Thick modes support different Oracle Database data
 types. The following table lists the types that are supported in the
-node-oracledb driver. See `Oracle Database Types <https://docs.oracle.
-com/en/database/oracle/oracle-database/21/sqlrf/Data-Types.html#GUID-A3C0D836-
-BADB-44E5-A5D4-265BA5968483>`__ and `PL/SQL Types <https://docs.oracle.com/en
-/database/oracle/oracle-database/21/lnpls/plsql-data-types.html#GUID-391C58FD-
-16AF-486C-AF28-173E309CDBA5>`__. The node-oracledb database type shown is the
-common one. In some node-oracledb APIs you may use other types, for example
-when binding numeric values.
+node-oracledb driver. See `Oracle Database Types <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-A3C0D836-BADB-44E5-A5D4-265BA5968483>`__ and
+`PL/SQL Types <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+391C58FD-16AF-486C-AF28-173E309CDBA5>`__. The node-oracledb database type
+shown is the common one. In some node-oracledb APIs you may use other types,
+for example when binding numeric values.
 
 .. list-table-with-summary::  Oracle Database Data Types Supported
     :header-rows: 1
@@ -798,6 +810,9 @@ when binding numeric values.
       - Thick mode only
     * - XMLType
       - DB_TYPE_XMLTYPE
+      - Yes
+    * - VECTOR
+      - DB_TYPE_VECTOR
       - Yes
 
 .. _testingmode:

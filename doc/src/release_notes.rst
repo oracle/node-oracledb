@@ -48,8 +48,8 @@ Common Changes
 #)  Added support for :ref:`AWS Secrets Manager <awssecretsmanager>`
     Centralized Configuration Provider.
 
-#)  :ref:`Token-based Authentication <tokenbasedauthentication>` can now
-    include proxy session users by supplying user name inside square brackets
+#)  Enabled :ref:`Token-based Authentication <tokenbasedauthentication>` with
+    proxy session users by supplying proxy user name inside square brackets
     (for example, ``user: "[session_user]"``) alongside an authentication
     token when using external authentication.
 
@@ -75,7 +75,7 @@ Common Changes
     See `Issue #1771 <https://github.com/oracle/node-oracledb/issues/1771>`__.
 
 #)  Fixed issue to generate the correct SSL_SERVER_CERT_DN entry from an
-    Easy Connect string.
+    :ref:`Easy Connect string <easyconnect>`.
     See `Issue #1772 <https://github.com/oracle/node-oracledb/issues/1772>`__
     (Slawomir Osoba).
 
@@ -86,11 +86,16 @@ Common Changes
     :attr:`lob.pieceSize` properties return `undefined` for a closed
     :ref:`LOB object <lobclass>`.
 
-#)  Fixed an issue where SQL statements were not included in OpenTelemetry
+#)  Fixed issue where SQL statements were not included in OpenTelemetry
     trace spans for :meth:`connection.executeMany()`.
 
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
+
+#)  Hardened protocol and network handling code by introducing security
+    guardrails for secure AI usage.
+
+#)  Multiple documentation and test updates and improvements.
 
 Thin Mode Changes
 +++++++++++++++++
@@ -99,8 +104,8 @@ Thin Mode Changes
 
 #)  Added support for Oracle AI Database 26ai :ref:`Pipelining <pipelining>`.
 
-#)  Added :meth:`conn.setEndUserSecurityContext()` and
-    :meth:`conn.clearEndUserSecurityContext()` methods to the
+#)  Added :meth:`connection.setEndUserSecurityContext()` and
+    :meth:`connection.clearEndUserSecurityContext()` methods to the
     :ref:`Connection <connectionclass>`.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
@@ -133,16 +138,17 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
-#)  Fixed potential crash when multiple implicit resultsets are closed.
+#)  Fixed potential crash when multiple
+    :ref:`implicit resultsets <implicitresults>` are closed.
 
-#)  Improved sparse vector handling so that empty sparse vectors can be bound
-    and fetched without raising ORA errors.
+#)  Improved :ref:`sparse vector <sparsevectors>` handling so that empty
+    sparse vectors can be bound and fetched without raising ORA errors.
 
-#)  Addressed potential memory leak issues for resultsets, token callbacks and
-    Advanced Queuing (AQ).
+#)  Addressed potential memory leak issues for resultsets, token callbacks
+    and Advanced Queuing (AQ).
 
-#)  Added guardrails against buffer overflows while fetching data from SODA
-    documents.
+#)  Added guardrails against buffer overflows while fetching data from
+    :ref:`SODA documents <sodadocumentclass>`.
 
 #)  Improved Token callback error handling and validation for undefined access
     token callback arguments.
@@ -151,6 +157,9 @@ Thick Mode Changes
     access token callback.
 
 #)  Dropped support for Oracle Client libraries earlier than 19c.
+
+#)  Dropped support for pre-built macOS Intel x86-64 binaries from the
+    node-oracledb installation.
 
 node-oracledb `v6.10.0 <https://github.com/oracle/node-oracledb/compare/v6.9.0...v6.10.0>`__ (16 Oct 2025)
 -----------------------------------------------------------------------------------------------------------

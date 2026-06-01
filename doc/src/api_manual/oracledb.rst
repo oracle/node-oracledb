@@ -989,28 +989,6 @@ Each of the configuration properties is described below.
         const oracledb = require('oracledb');
         oracledb.events = false;
 
-.. attribute:: oracledb.extendedMetaData
-
-    .. desupported:: 6.0
-
-    Extended metadata is now always returned
-
-    .. versionadded:: 1.10
-
-    This property is a boolean that determines whether additional metadata is
-    available for queries and for REF CURSORs returned from PL/SQL blocks.
-
-    The default value for ``extendedMetaData`` is *false*. With this value,
-    the :ref:`result.metaData <execmetadata>` and :attr:`resultSet.metaData`
-    objects only include column names.
-
-    If ``extendedMetaData`` is *true* then ``metaData`` will contain
-    additional attributes. These are listed in :ref:`Result Object
-    Properties <execmetadata>`.
-
-    This property may be overridden in an :ref:`execute() <executeoptions>`
-    call.
-
 .. attribute:: oracledb.externalAuth
 
     This property is a boolean value. If this property is *true* in
@@ -2116,24 +2094,6 @@ Oracledb Methods
             .. versionchanged:: 5.5
 
                 The ``accessToken`` property was extended to allow OAuth 2.0 token-based authentication in node-oracledb 5.5. For OAuth 2.0, the property should be a string, or a callback. For node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used. The callback usage supports both OAuth 2.0 and IAM token-based authentication.
-        * - ``accessTokenCallback``
-          - Object
-          - NA
-          - .. _createpoolpoolattrsaccesstokencallback:
-
-            This optional attribute is a Node.js callback function. It gets called by the connection pool if the pool needs to grow and create new connections but the current token has expired.
-
-            The callback function must return a JavaScript object with attributes ``token`` and ``privateKey`` for IAM. See :ref:`Connection Pool Creation with Access Tokens for IAM <iampool>`.
-
-            .. versionadded:: 5.4
-
-            It should be used with Oracle Client libraries 19.14 (or later), or 21.5 (or later).
-
-            .. deprecated:: 5.5
-
-            .. desupported:: 6.0
-
-            Use :ref:`accessToken <createpoolpoolattrsaccesstoken>` with a callback instead.
         * - ``accessTokenConfig``
           - Object
           - Both

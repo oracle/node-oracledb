@@ -374,13 +374,13 @@ the equivalent connection or pool creation parameters, or set the
       - Sample Thin Mode Value
       - Sample Thick Mode Value
     * - CLIENT_DRIVER
-      - "node-oracledb thn : 6.9.0"
-      - "node-oracledb thk : 6.9.0"
+      - "node-oracledb thn : 7.0.0"
+      - "node-oracledb thk : 7.0.0"
     * - CLIENT_OCI_LIBRARY
       - "Unknown"
       - The Oracle Client or Instant Client type, such as "Full Instant Client"
     * - CLIENT_VERSION
-      - "6.9.0.0.0" (the node-oracledb version number with an extra .0.0)
+      - "7.0.0.0.0" (the node-oracledb version number with an extra .0.0)
       - The Oracle Client library version number
     * - OSUSER
       - "myusername"

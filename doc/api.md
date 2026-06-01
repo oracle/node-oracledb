@@ -1738,55 +1738,55 @@ The input value or variable to be used for an IN or IN OUT bind variable.
 
 ### <a name="extauth"></a> 17.4 External Authentication
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#extauth)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#extauth)
 
 ### <a name="tokenbasedauthentication"></a> 17.5 Token-Based Authentication
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#tokenbasedauthentication)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#tokenbasedauthentication)
 
 #### <a name="oauthtokenbasedauthentication"></a> 17.5.1 OAuth 2.0 Token-Based Authentication
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthtokenbasedauthentication)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#oauthtokenbasedauthentication)
 
 ##### <a name="oauthtokengeneration"></a> 17.5.1.1 OAuth 2.0 Token Generation
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthtokengeneration)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#oauthtokengeneration)
 
 ##### <a name="oauthstandalone"></a> 17.5.1.2 OAuth 2.0 Standalone Connections
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthstandalone)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#oauthstandalone)
 
 ##### <a name="oauthpool"></a> 17.5.1.3 OAuth 2.0 Connection Pooling
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthpool)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#oauthpool)
 
 ##### <a name="oauthconnectstring"></a> 17.5.1.4 OAuth 2.0 Connection Strings
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#oauthconnectstring)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#oauthconnectstring)
 
 #### <a name="tokenbasedauth"></a> <a name="iamtokenbasedauthentication"></a> 17.5.2 IAM Token-Based Authentication
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamtokenbasedauthentication)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#iamtokenbasedauthentication)
 
 ##### <a name="tokengen"></a> <a name="iamtokengeneration"></a> 17.5.2.1 IAM Token Generation
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamtokengeneration)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#iamtokengeneration)
 
 ##### <a name="tokenread"></a> <a name="iamtokenextraction"></a> 17.5.2.2 IAM Token and Private Key Extraction
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamtokenextraction)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#iamtokenextraction)
 
 ##### <a name="tokenbasedstandaloneconn"></a> <a name="iamstandalone"></a> 17.5.2.3 IAM Standalone Connections
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamstandalone)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#iamstandalone)
 
 ##### <a name="settingpooltokens"></a> <a name="tokenbasedpool"></a> <a name="iampool"></a> 17.5.2.4 IAM Connection Pooling
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iampool)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#iampool)
 
 ##### <a name="tokenbasedconnstrings"></a> <a name="iamconnectstring"></a> 17.5.2.5 IAM Connection Strings
 
-[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/connection_handling.html#iamconnectstring)
+[View latest documentation](https://node-oracledb.readthedocs.io/en/latest/user_guide/authentication_methods.html#iamconnectstring)
 
 ### <a name="drcp"></a> 17.6 Database Resident Connection Pooling (DRCP)
 

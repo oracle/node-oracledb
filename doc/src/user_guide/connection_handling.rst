@@ -217,6 +217,12 @@ For example:
         connectString : "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=mymachine.example.com)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=orcl)))"
     });
 
+When a connect descriptor is specified in the ``connectString`` property as
+shown in the example above, the maximum length of the ``DESCRIPTION``
+parameter is *4096* bytes and its maximum nesting depth (maximum level of
+sub-sections inside the DESCRIPTION section + 1) is *64*. If either limit is
+exceeded, an error is raised.
+
 Any ``DESCRIPTION``, ``CONNECT_DATA`` and ``SECURITY`` parameters of a connect
 descriptor that are not recognized by node-oracledb are passed to the database
 unchanged.
@@ -685,7 +691,7 @@ below.
         .. versionadded:: 6.10
       - Optional
     * - ``njs``
-      - The node-oracledb specific properties. The properties that can be stored in OCI Object Storage include ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``, ``poolPingInterval``, ``poolPingTimeout``, ``stmtCacheSize``, ``prefetchRows``, and ``lobPrefetch``.
+      - The node-oracledb specific properties. The properties that can be stored include ``poolMin``, ``poolMax``, ``poolIncrement``, ``poolTimeout``, ``poolPingInterval``, ``poolPingTimeout``, ``stmtCacheSize``, ``prefetchRows``, and ``lobPrefetch``.
       - Optional
 
 **Precedence of Properties**
@@ -755,7 +761,7 @@ Provider is:
         "user": "scott",
         "password": {
           "type": "base64",
-          "value": "dGlnZXI="
+          "value": "***xyz"
         }
         "njs": {
             "stmtCacheSize": 30,
@@ -827,7 +833,7 @@ Multiple alias names can be defined in a JSON file as shown below:
             "user": "scott",
             "password": {
               "type": "base64",
-              "value": "dGlnZXI="
+              "value": "***xyz"
             }
         }
     }
@@ -1367,7 +1373,7 @@ An example of a JSON file that can be used with AWS S3 Configuration Provider is
         "user": "scott",
         "password": {
             "type": "base64",
-            "value": "dGlnZXI="
+            "value": "***xyz"
         },
         "njs": {
             "stmtCacheSize": 30,
@@ -2053,6 +2059,8 @@ connection is shown below:
       user: "hr",
       password: mypw, // contains the hr schema password
       connectString: "mydbmachine.example.com/orclpdb1",
+      walletLocation: "/opt/OracleCloud/MYDB", // location of pem file
+      walletPassword: wp
     });
 
     connection.setEndUserSecurityContext(user_context);
@@ -2067,7 +2075,9 @@ An example of setting an end user security context for a connection pool is:
       connectString : "mydbmachine.example.com/orclpdb1",
       poolIncrement: 1,
       poolMin: 1,
-      poolMax: 5
+      poolMax: 5,
+      walletLocation: "/opt/OracleCloud/MYDB",
+      walletPassword: wp
     });
 
     const connection = await pool.getConnection();

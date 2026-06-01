@@ -1375,15 +1375,6 @@ Connection Methods
           - .. _propexecobjpojo:
 
             Overrides :attr:`oracledb.dbObjectAsPojo`.
-        * - ``extendedMetaData``
-          - Boolean
-          - .. _propexecextendedmetadata:
-
-            Overrides :attr:`oracledb.extendedMetaData`.
-
-            .. desupported:: 6.0
-
-            Extended metadata is now always returned.
         * - ``fetchArraySize``
           - Number
           - .. _propexecfetcharraysize:

@@ -10,8 +10,8 @@ Oracle Client libraries. The database can be on the same machine as Node.js, or
 it can be remote.
 
 Pre-built 'Thick' mode binaries for common architectures (Windows 64-bit, Linux
-x86_64, Linux ARM (aarch64), macOS Intel, and macOS ARM64) are included in the
-node-oracledb installation as a convenience. Thick mode provides some
+x86_64, Linux ARM (aarch64), and macOS ARM64) are included in the node-oracledb
+installation as a convenience. Thick mode provides some
 :ref:`additional functionality <featuresummary>`. To use Thick mode, Oracle
 Client libraries version 19, or later, need to be manually installed.
 Node-oracledb Thick mode can connect to Oracle Database 11.2 or later,
@@ -288,8 +288,8 @@ Install Node.js
 Install node-oracledb
 ---------------------
 
-1. Install node-oracledb using the ``npm`` package manager, which is included
-   in Node.js:
+1. In a terminal window, install node-oracledb using the ``npm`` package
+   manager, which is included in Node.js:
 
    .. code-block:: shell
 
@@ -745,8 +745,8 @@ Download the `Node.js package <https://nodejs.org>`__ for macOS and install it.
 Install node-oracledb
 ---------------------
 
-1. Install node-oracledb using the ``npm`` package manager, which is included
-   in Node.js:
+1. In a terminal window, install node-oracledb using the ``npm`` package
+   manager, which is included in Node.js:
 
    .. code-block:: shell
 
@@ -816,8 +816,10 @@ Thin mode connecting directly to Oracle Database so no further installation
 steps are required.  However, to use additional node-oracledb features
 available in :ref:`Thick mode <featuresummary>`, you need to install Oracle
 Client libraries.  Thick mode uses a binary add-on installed with node-oracledb
-that loads these libraries.  This binary is available for macOS Intel and
-macOS ARM64 (from node-oracledb version 6.6 onwards).
+that loads these libraries.  This binary is available for macOS ARM64 (from
+node-oracledb version 6.6 onwards).  The binary for macOS Intel x86-64 has
+been removed from the node-oracledb installation from node-oracledb 7.0
+version onwards.
 
 You can get the libraries from either the Oracle Instant Client **Basic** or
 **Basic Light** package.  The steps below show installing **Basic**.
@@ -978,10 +980,8 @@ Node.js and npm directories to the path is selected.
 Install node-oracledb
 ---------------------
 
-1. Open a terminal window.
-
-2. Install node-oracledb using the ``npm`` package manager, which is
-   included in Node.js:
+1. In a terminal window, install node-oracledb using the ``npm`` package
+   manager, which is included in Node.js:
 
    .. code-block:: shell
 
@@ -994,7 +994,7 @@ Install node-oracledb
 
         npm config set proxy http://myproxy.example.com:80/
 
-3. You can now run applications.
+2. You can now run applications.
 
    Runnable samples are available from GitHub. To try them follow these steps:
 
@@ -1201,15 +1201,15 @@ Installing node-oracledb Without Internet Access
 
 On a machine with internet access, download the node-oracledb package from
 `npm <https://www.npmjs.com/package/oracledb>`__, for example from
-`https://registry.npmjs.com/oracledb/-/oracledb-6.0.0.tgz <https://registry.
-npmjs.com/oracledb/-/oracledb-6.0.0.tgz>`__
+`https://registry.npmjs.com/oracledb/-/oracledb-7.0.0.tgz <https://registry.
+npmjs.com/oracledb/-/oracledb-7.0.0.tgz>`__.
 
 Transfer the file to the desired machine and install it, for
 example with:
 
 .. code-block:: shell
 
-    npm install your_dir_path/oracledb-6.0.0.tgz
+    npm install your_dir_path/oracledb-7.0.0.tgz
 
 Then follow the node-oracledb installation instructions for your operating
 system.
@@ -1355,7 +1355,7 @@ Alternatively, use the command:
     npm install oracle/node-oracledb#main
 
 To install from a tag, replace ``main`` with the tag name like:
-``oracle/node-oracledb#v6.0.0``.
+``oracle/node-oracledb#v7.0.0``.
 
 This will install node-oracledb and build the optional Thick mode binary.
 
@@ -1368,14 +1368,14 @@ Users without ``git`` can compile pre-bundled source code using a
 ``package.json`` dependency like::
 
     "dependencies": {
-        "oracledb": "https://github.com/oracle/node-oracledb/releases/download/v6.0.0/oracledb-src-6.0.0.tgz"
+        "oracledb": "https://github.com/oracle/node-oracledb/releases/download/v7.0.0/oracledb-src-7.0.0.tgz"
     },
 
 Or install with:
 
 .. code-block:: shell
 
-    npm install https://github.com/oracle/node-oracledb/releases/download/v6.0.0/oracledb-src-6.0.0.tgz
+    npm install https://github.com/oracle/node-oracledb/releases/download/v7.0.0/oracledb-src-7.0.0.tgz
 
 This will install node-oracledb and build the optional Thick mode binary.
 
@@ -1462,17 +1462,17 @@ Hosting Your Own node-oracledb Packages
 You can host node-oracledb packages locally.
 
 Download the node-oracledb package from npm, for example from
-`https://registry.npmjs.com/oracledb/-/oracledb-6.0.0.tgz <https://registry.
-npmjs.com/oracledb/-/oracledb-6.0.0.tgz>`__. Alternatively, if you want to
+`https://registry.npmjs.com/oracledb/-/oracledb-7.0.0.tgz <https://registry.
+npmjs.com/oracledb/-/oracledb-7.0.0.tgz>`__. Alternatively, if you want to
 build your own binaries and node-oracledb package, see :ref:`compilepackage`.
 
 If you make the package accessible on your local web server, for example
-at www.example.com/oracledb-6.0.0.tgz, then your ``package.json``
+at www.example.com/oracledb-7.0.0.tgz, then your ``package.json``
 would contain::
 
     . . .
     "dependencies": {
-        "oracledb": "https://www.example.com/oracledb-6.0.0.tgz"
+        "oracledb": "https://www.example.com/oracledb-7.0.0.tgz"
     },
     . . .
 
@@ -1480,7 +1480,7 @@ Or you would install with:
 
 .. code-block:: shell
 
-    npm install https://www.example.com/oracledb-6.0.0.tgz
+    npm install https://www.example.com/oracledb-7.0.0.tgz
 
 .. _docker:
 
@@ -1528,7 +1528,7 @@ Include node-oracledb as a normal dependency in your application
       "start": "node server.js"
     },
     "dependencies": {
-      "oracledb" : "^6"
+      "oracledb" : "^7"
     },
     . . .
 
@@ -1739,7 +1739,7 @@ For either Dockerfile, the ``package.json`` is::
             "myapp"
         ],
         "dependencies": {
-            "oracledb" : "^6"
+            "oracledb" : "^7"
         },
         "author": "Me",
         "license": "UPL"

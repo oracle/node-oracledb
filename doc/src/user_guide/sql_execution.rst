@@ -1022,13 +1022,55 @@ fractional part when fetched.
 
     Oracle Database DATE and TIMESTAMP types are now returned as JavaScript
     date types in the application's timezone, and no longer fetched or bound as
-    TIMESTAMP WITH LOCAL TIME ZONE.  The connection session time zone no longer
-    impacts these types.  This behavior aligns with other Oracle Database tools
-    and drivers. Handling of TIMESTAMP WITH TIMEZONE and TIMESTAMP WITH LOCAL
-    TIMEZONE has not changed.  For DATE and TIMESTAMP compatibility with
-    node-oracledb 5.5, use a :ref:`fetch type handler <fetchtypehandler>` and
-    set the return ``type`` attribute to ``oracledb.DB_TYPE_TIMESTAMP_LTZ``.
-    Also use a similar type when binding if compatibility is needed.
+    TIMESTAMP WITH LOCAL TIME ZONE. The connection session time zone no longer
+    impacts these types. This behavior aligns with other Oracle Database tools
+    and drivers. For DATE and TIMESTAMP compatibility with node-oracledb 5.5,
+    use a :ref:`fetch type handler <fetchtypehandler>` and set the return
+    ``type`` attribute to ``oracledb.DB_TYPE_TIMESTAMP_LTZ``. Also, use a
+    similar type when binding if compatibility is needed.
+
+    Handling of TIMESTAMP WITH TIME ZONE has not changed. TIMESTAMP WITH LOCAL
+    TIME ZONE columns continue to use the corresponding database types, but
+    their JavaScript Date representation can differ from the node-oracledb 5.5
+    behavior. To return TIMESTAMP WITH LOCAL TIME ZONE values in a specific
+    time zone representation, use a
+    :ref:`fetch type handler <fetchtypehandler>` with a
+    :ref:`converter <converterfunc>` as shown in the
+    :ref:`example <timestampconvexample>` below.
+
+.. _timestampconvexample:
+
+An example of using a fetch type handler with a converter to return TIMESTAMP
+WITH LOCAL TIME ZONE values using a America/New York time zone representation
+is shown below:
+
+.. code-block:: javascript
+
+    oracledb.fetchTypeHandler = function(metaData) {
+      if (metaData.dbType === oracledb.DB_TYPE_TIMESTAMP_LTZ) {
+        const myConverter = (val) => {
+          if (val !== null) {
+            val = val.toLocaleString('en-US', {
+              timeZone: 'America/New_York'
+            });
+          }
+          return val;
+        };
+
+        return { converter: myConverter };
+      }
+    };
+
+The fetch type handler is called once for each column in the SELECT query. For
+each TIMESTAMP WITH LOCAL TIME ZONE column, the database returns the value as
+a JavaScript Date. The converter is then called in Node.js for each of those
+values, allowing the application to format the value in the desired time zone.
+Using it in a query:
+
+.. code-block:: javascript
+
+    const result = await connection.execute(`SELECT * FROM time_table`);
+    console.log(result.rows);
 
 To make applications more portable, it is recommended to set the client system
 time zone (for example, the ``TZ`` environment variable or the Windows
@@ -1493,6 +1535,12 @@ When dynamically building SQL statements, you can use the methods
 to help prevent SQL injection. These methods are detailed in the subsequent
 sections.
 
+.. IMPORTANT::
+
+    When constructing SQL statements dynamically, do not concatenate or
+    interpolate data values into SQL text. Instead, use bind variables for all
+    data values. See :ref:`bind`.
+
 .. _validatesimplesql:
 
 Validating Simple SQL Names
@@ -1565,7 +1613,8 @@ identifiers such as table names or column names. It can be used when you need
 to dynamically include identifiers in your SQL statement. For example, if your
 application allows users to provide an arbitrary column name to filter query
 results, you could use :meth:`~oracledb.enquoteName()` to quote the supplied
-name, for example:
+name. For the data value itself, you would continue to use the
+:ref:`bind variable <bind>` syntax. For example:
 
 .. code-block:: javascript
 
@@ -1657,10 +1706,10 @@ value in quotes as a single identifier.
 Quoting Literals
 ----------------
 
-For literal values, use bind variables whenever possible. When including
-literal values dynamically in SQL statements, use
+When including literal values dynamically in SQL statements, use
 :meth:`oracledb.enquoteLiteral()` to enclose the value in single quotes and
-double any embedded single quotes. For example:
+double any embedded single quotes. Note that quoting literals should only be
+done when :ref:`bind variables <bind>` cannot be used. For example:
 
 .. code-block:: javascript
 
