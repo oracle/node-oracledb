@@ -681,7 +681,7 @@ below.
     * - ``wallet_location``
       - The reference to the wallet.
 
-        For :ref:`File <fileconfigprovider>`,:ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`AWS S3 <awss3>`, and :ref:`AWS Secrets Manager <awssecretsmanager>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
+        For :ref:`File <fileconfigprovider>`, :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`AWS S3 <awss3>`, and :ref:`AWS Secrets Manager <awssecretsmanager>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
 
         For :ref:`Azure App Configuration <azureappconfig>`, this parameter is the reference to the Azure Key Vault and Secret that contains the wallet as the value.
       - Optional
@@ -4825,7 +4825,7 @@ requests across RAC instances.
 
 For a more information on RLB, see the `technical paper on Fast Application
 Notification <https://www.oracle.com/technetwork/database/options/clustering/
-applicationcontinuity/learnmore/fastapplicationnotification12c-2538999.pdf>`__.
+overview/fastapplicationnotification12c-2980342.pdf>`__.
 
 .. _appcontinuity:
 

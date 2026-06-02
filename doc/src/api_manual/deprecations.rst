@@ -33,13 +33,13 @@ first.
     * - Property :ref:`fetchInfo <propexecfetchinfo>`
       - Deprecated in 6.0
       - Use :ref:`fetchTypeHandler <fetchtypehandler>` functionality
-    * - Property :attr:`oracledb.extendedMetaData`
+    * - Property ``oracledb.extendedMetaData``
       - Desupported in 6.0
       - Extended metadata is now always returned
-    * - Property :ref:`extendedMetaData <propexecextendedmetadata>` of ``connection.execute()`` ``Options`` Parameter
+    * - Property ``extendedMetaData`` of ``connection.execute()`` ``Options`` Parameter
       - Desupported in 6.0
       - Extended metadata is now always returned
-    * - Property :ref:`accessTokenCallback <createpoolpoolattrsaccesstokencallback>`
+    * - Property ``accessTokenCallback``
       - Desupported in 6.0
 
         Deprecated in 5.5

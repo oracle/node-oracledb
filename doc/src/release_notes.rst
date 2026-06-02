@@ -1339,8 +1339,7 @@ node-oracledb `v6.0.0 <https://github.com/oracle/node-oracledb/compare/v5.5.0...
 #)  Type and Metadata changes:
 
     - Query extended metadata is now always available.  The
-      ``oracledb.extendedMetaData`` and
-      :ref:`equivalent execution attribute <propexecextendedmetadata>` values
+      ``oracledb.extendedMetaData`` and equivalent execution attribute values
       are ignored.
 
     - Query column metadata now always returns unique column names regardless

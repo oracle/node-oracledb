@@ -2448,9 +2448,10 @@ Connection Methods
         When you connect to an older Oracle Database version or use
         node-oracledb Thick mode, operations are sequentially executed by
         node-oracledb. Each operation concludes before the next is sent to the
-        database. There is no reduction in round-trips and no performance
-        benefit. This approach is recommended for code portability when
-        upgrading to a latest database version that supports pipelining.
+        database. Requests are not queued on the database server, so the
+        latency and throughput benefits of true pipelining are not available.
+        This approach is recommended for code portability when upgrading to a
+        latest database version that supports pipelining.
 
     See :ref:`pipelining` for more information.
 

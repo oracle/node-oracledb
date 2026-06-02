@@ -672,9 +672,7 @@ Pool Methods
     .. versionadded:: 5.4
 
     This method can be used to set an IAM access token and private key after
-    pool creation. It is useful if the IAM token is known to have expired,
-    and you are not using
-    :ref:`accessTokenCallback <createpoolpoolattrsaccesstokencallback>`.
+    pool creation. It is useful if the IAM token is known to have expired.
 
     It can also be useful in tests to set an expired token so that token
     expiry code paths can be tested.

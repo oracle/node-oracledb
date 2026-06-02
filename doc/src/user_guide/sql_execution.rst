@@ -627,10 +627,7 @@ case-insensitive column names. You can use a
 :ref:`fetch type handler <columncase>` to change the column names to
 lowercase.
 
-The :attr:`oracledb.extendedMetadata` property and the
-:meth:`connection.execute()` option
-:ref:`extendedMetaData <propexecextendedmetadata>` are desupported. Extended
-metadata is now always returned.
+Extended metadata is now always returned.
 
 .. _changefetcheddata:
 

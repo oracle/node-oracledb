@@ -536,8 +536,7 @@ Upgrading from node-oracledb 5.5 to 6.0
   :ref:`accessToken <createpoolpoolattrsaccesstoken>` instead.
 
 - Extended metadata is now always returned for queries. The
-  ``oracledb.extendedMetaData`` and equivalent
-  :ref:`execution attribute <propexecextendedmetadata>` values are
+  ``oracledb.extendedMetaData`` and equivalent execution attribute values are
   ignored.
 
 - The node-oracledb Thin and Thick modes may return different errors in some

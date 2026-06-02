@@ -1430,7 +1430,7 @@ Creating a node-oracledb Package Using GitHub Actions
 
 The node-oracledb GitHub repository has a builder Action that uses GitHub
 infrastructure to build node-oracledb packages for Linux (x86_64 and ARM),
-macOS ARM, and Windows architecture with Node.js 20.
+macOS ARM, and Windows architecture with Node.js 24.
 
 1. Fork the `node-oracledb repository <https://github.com/oracle/node-oracledb
    /fork>`__. Additionally, fork the `ODPI-C repository <https://github.com/
