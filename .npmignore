@@ -2,7 +2,7 @@
 .nycrc
 .gitattributes
 .gitmodules
-.eslintrc
+eslint.config.js
 .readthedocs.yaml
 *-ci.yml
 INSTALL.md

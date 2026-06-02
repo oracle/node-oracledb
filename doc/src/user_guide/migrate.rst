@@ -62,6 +62,11 @@ Upgrading from node-oracledb 6.10 to 7.0
   you can set and clear an :ref:`end user security context <deepdatasecurity>`
   on a connection.
 
+- The interval datatypes (:ref:`interval year-to-month <intervalyeartomonth>`
+  and :ref:`interval day-to-second <intervaldaytosecond>`) are now normalized
+  before being sent to the database. This prevents invalid data from being
+  stored in the database.
+
 - The support for Oracle Client libraries earlier than 19c was dropped.
 
 - Pre-built Thick mode binaries for macOS Intel x86-64 are no longer included

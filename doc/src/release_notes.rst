@@ -92,8 +92,7 @@ Common Changes
 #)  Internal code refactoring to optimize handling of
     :ref:`LOB object <lobclass>` methods and attributes.
 
-#)  Hardened protocol and network handling code by introducing security
-    guardrails for secure AI usage.
+#)  Improved internal handling of protocol and network code.
 
 #)  Multiple documentation and test updates and improvements.
 
@@ -106,7 +105,9 @@ Thin Mode Changes
 
 #)  Added :meth:`connection.setEndUserSecurityContext()` and
     :meth:`connection.clearEndUserSecurityContext()` methods to the
-    :ref:`Connection <connectionclass>`.
+    :ref:`Connection <connectionclass>` to work with
+    :ref:`Oracle Deep Data Security <deepdatasecurity>` feature introduced in
+    Oracle AI Database 26ai.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
     See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
@@ -147,14 +148,13 @@ Thick Mode Changes
 #)  Addressed potential memory leak issues for resultsets, token callbacks
     and Advanced Queuing (AQ).
 
-#)  Added guardrails against buffer overflows while fetching data from
-    :ref:`SODA documents <sodadocumentclass>`.
-
 #)  Improved Token callback error handling and validation for undefined access
     token callback arguments.
 
 #)  Fixed a crash that could occur when closing a pool configured with an
     access token callback.
+
+#)  Improved data handling of :ref:`SODA documents <sodadocumentclass>`.
 
 #)  Dropped support for Oracle Client libraries earlier than 19c.
 
