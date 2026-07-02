@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -128,6 +128,18 @@ describe('35. dataTypeTimestamp3.js', function() {
         binds,
         options);
       assert(typeof result.outBinds.bv, "string");
+    });
+
+    it('35.3.4 fetches fractional time zone offsets correctly', async function() {
+      // GitHub issue #1776: the minute portion of a negative time zone
+      // offset was subtracted instead of added (e.g. -03:30 became -02:30)
+      const result = await connection.execute(
+        `SELECT TIMESTAMP '2021-06-15 12:00:00.000 -03:30',
+                TIMESTAMP '2021-06-15 12:00:00.000 +05:30' FROM DUAL`);
+      assert.strictEqual(result.rows[0][0].getTime(),
+        Date.UTC(2021, 5, 15, 15, 30, 0));
+      assert.strictEqual(result.rows[0][1].getTime(),
+        Date.UTC(2021, 5, 15, 6, 30, 0));
     });
   });
 });
