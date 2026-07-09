@@ -1963,24 +1963,26 @@ requires Oracle Database 26ai.
     Oracle Deep Data Security is only supported in node-oracledb Thin mode.
 
 With Deep Data Security, an application sends a specific set of identity and
-authorization details called end user security context to the database. The
-details that can be defined in an end user security context are an end user
-identity, a database access token, data roles, and end user context
-attributes. These parameters are detailed in the subsequent sections. The end
-user security context can be defined on a connection. Once defined, the
-database uses these end user details to authorize and grant access to the
-data. See `Oracle Deep Data Security <https://www.oracle.com/pls/topic/lookup?
-ctx=dblatest&id=GUID-E239A5C4-0C0D-4FF0-98DD-2E374F79C63C>`__ in the Oracle
-Deep Data Security Configuration Guide for more information.
+authorization details called end-user security context payload to the
+database. The details that can be defined in an end-user security context
+payload are an end-user identity, a database-access token, data roles, and
+end-user context attributes. These parameters are detailed in the subsequent
+sections. The end-user security context payload can be defined on a
+connection. Once defined, the database uses these end-user details to
+authorize and grant access to the data. See `Oracle Deep Data Security
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-E239A5C4-0C0D-
+4FF0-98DD-2E374F79C63C>`__ in the Oracle Deep Data Security Configuration
+Guide for more information.
 
-Creating an End User Security Context
--------------------------------------
+Creating an End-User Security Context Payload
+---------------------------------------------
 
-An End User Security Context can be created for a user managed by an external
-Identity and Access Management (IAM) system such as Oracle Cloud Infrastructure
-(OCI) IAM or Microsoft Entra ID, or a user locally created in Oracle Database.
+An End-User Security Context Payload can be created for a user managed by an
+external Identity and Access Management (IAM) system such as Oracle Cloud
+Infrastructure (OCI) IAM or Microsoft Entra ID, or a user locally created in
+Oracle Database.
 
-To create an end user security context for a user, you must create an
+To create an end-user security context payload for a user, you must create an
 EndUserSecurityContext object using the
 :ref:`Oracledb EndUserSecurityContext class <endusersecuritycontextclass>`.
 For example:
@@ -2000,7 +2002,8 @@ The following attributes can be defined in an EndUserSecurityContext object:
 
 - ``databaseAccessToken``: A token that authenticates your application with
   the database. This token is issued by your Identity and Access Management
-  (IAM) system. This attribute is required.
+  (IAM) system and can either be an On-Behalf-Of (OBO) token or a Client
+  Credentials token. This attribute is required.
 
 - ``endUserToken``: A token that identifies the end user. This token is issued
   by your IAM system after user authentication. This attribute must be
@@ -2018,14 +2021,24 @@ The following attributes can be defined in an EndUserSecurityContext object:
   ``endUserName``. Do not set this attribute if the ``endUserToken`` attribute
   is set.
 
-- ``dataRoles``: The names of data roles granted to the application or local
-  database user. This attribute is optional. For local database users, these
-  data roles can be used to distinguish sessions for the same local user.
+- ``dataRoles``: The names of data roles granted to the application. These
+  data roles are created with a ``CREATE DATA ROLE`` statement in the database
+  and granted to application identity created with
+  ``CREATE APPLICATION IDENTITY`` statement in the database. During end-user
+  security context creation, the database determines the application identity
+  based on the database-access token provided by the client in the end-user
+  security context payload. This attribute is optional. For local database
+  users, these data roles can be used to distinguish sessions for the same
+  local user.
 
-- ``attributes``: The attribute-value pairs conforming to the END USER CONTEXT
-  schema defined in the database. These can be referenced at runtime by
-  authorization policies (for example, in data grant predicates) and
-  application logic. This attribute is optional.
+- ``attributes``: The attribute-value pairs provided by the application for an
+  END USER CONTEXT declared in the database. The attribute-value pairs for
+  each context must conform to the JSON schema of that END USER CONTEXT. These
+  can be referenced at runtime by authorization policies (for example, in data
+  grant predicates) and application logic. This attribute is optional.
+
+For detailed information on these attributes, see this
+:ref:`table <_end_user_security_context_parameters>`.
 
 .. note::
 
@@ -2034,13 +2047,10 @@ The following attributes can be defined in an EndUserSecurityContext object:
     optional with ``endUserName``. Setting ``endUserToken`` together with
     ``endUserName`` or ``key`` raises an error.
 
-For detailed information on these attributes, see this
-:ref:`table <_end_user_security_context_parameters>`.
+Setting an End-User Security Context Payload
+--------------------------------------------
 
-Setting an End User Security Context
-------------------------------------
-
-To set an end user security context on a connection, use
+To set an end-user security context payload on a connection, use
 :meth:`connection.setEndUserSecurityContext()`. This method must be called
 after creating a standalone connection using :meth:`oracledb.getConnection()`,
 or after acquiring a connection from a pool using
@@ -2050,7 +2060,7 @@ Once :meth:`~connection.setEndUserSecurityContext()` is called, the specified
 security context applies to all the subsequent database operations executed on
 that connection for that end user.
 
-An example of setting an end user security context for a standalone
+An example of setting an end-user security context payload on a standalone
 connection is shown below:
 
 .. code-block:: javascript
@@ -2065,7 +2075,8 @@ connection is shown below:
 
     connection.setEndUserSecurityContext(user_context);
 
-An example of setting an end user security context for a connection pool is:
+An example of setting an end-user security context payload on a connection
+pool is:
 
 .. code-block:: javascript
 
@@ -2088,10 +2099,10 @@ Using :meth:`connection.setEndUserSecurityContext()` in node-oracledb Thick
 mode will raise the error ``NJS-089: setting End User Security Context is not
 supported by node-oracledb in Thick mode``.
 
-Clearing an End User Security Context
--------------------------------------
+Clearing an End-User Security Context Payload
+---------------------------------------------
 
-To clear an end user security context set by a previous call to
+To clear an end-user security context payload set by a previous call to
 :meth:`connection.setEndUserSecurityContext()`, use
 :meth:`connection.clearEndUserSecurityContext()`. For example:
 
@@ -2100,7 +2111,7 @@ To clear an end user security context set by a previous call to
     connection.clearEndUserSecurityContext();
 
 This reverts the connection to its original state in which subsequent database
-operations are executed on the connection without any end user security
+operations are executed on the connection without any end-user security
 context.
 
 Using this method in node-oracledb Thick mode will raise the error ``NJS-089:
@@ -2108,22 +2119,22 @@ clearing End User Security Context is not supported by node-oracledb in Thick
 mode``.
 
 Calling :meth:`connection.clearEndUserSecurityContext()` without previously
-setting an end user security context using
+setting an end-user security context payload using
 :meth:`connection.setEndUserSecurityContext()` has no effect and does not
 raise an error.
 
-Example of Using End User Security Context
+Example of Using End-User Security Context
 ------------------------------------------
 
-An example of using an end user security context is:
+An example of using an end-user security context is:
 
 .. code-block:: javascript
 
-    // Create an end user security context
+    // Create an end-user security context payload
     const context = new oracledb.EndUserSecurityContext({
       databaseAccessToken: "db-token-plain",
       endUserToken: "user-token-plain",
-      dataRoles: ["HR_DYNAMIC_ROLE", "FINANCE_DYNAMIC_ROLE"],
+      dataRoles: ["HCM_ROLE"],
       attributes: {
         region: ["us", "uk"],
         department: "finance",
@@ -2139,17 +2150,17 @@ An example of using an end user security context is:
       walletLocation: WALLET_LOCATION
     });
 
-    // Set the end user security context on a connection
+    // Set the end-user security context payload on a connection
     connection.setEndUserSecurityContext(context);
 
-    // Execute a database operation within the end user security context
+    // Execute a database operation within the end-user security context
     const result1 = await connection.execute(`SELECT 1 FROM dual`);
 
-    // Clear the end user security context
-    // Subsequent database operations run without the end user security context
+    // Clear the end-user security context payload on the connection
+    // Subsequent database operations run without the end-user security context
     connection.clearEndUserSecurityContext();
 
-    // Execute a database operation without the end user security context
+    // Execute a database operation without the end-user security context
     const result2 = await connection.execute(`SELECT 2 FROM dual`);
 
     // Close the connection
