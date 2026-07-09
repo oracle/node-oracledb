@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -109,7 +109,7 @@ describe("256. executeQueue.js", function() {
     it('256.1.3 break() not constrained by queue', async function() {
 
       // Skip for older versions since this test might hang unless DISABLE_OOB=ON is in sqlnet.ora
-      if (connection.oracleServerVersion <= 1900000000 || testsUtil.getClientVersion() <= 1900000000) {
+      if (connection.oracleServerVersion <= 1900000000) {
         this.skip();
       }
 

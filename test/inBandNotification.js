@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -26,7 +26,9 @@
  *  308. inBandNotification.js
  *  No special setup is required but the test makes use of debugging packages
  *  that are not intended for normal use.
- *  dbms_tg_dbg.set_session_drainable, here debug package (dbms_tg_dbg) is used to simulate an inband notification.
+ *  dbms_tg_dbg.set_session_drainable, here debug package (dbms_tg_dbg) is
+ *  used to simulate an inband notification. (Not to be used in newer
+ *  Oracle AI Database 26ai versions)
  */
 
 'use strict';
@@ -46,18 +48,28 @@ describe('308. Inband Notification', function() {
   } : null;
 
   let dbaConn;
+  const pkg = 'dbms_tg_dbg';
 
   before(async function() {
-    isRunnable = await testsUtil.checkPrerequisites(1800000000, 1800000000);
+    const currDbVersion = await testsUtil.getMajorDBVersion();
+
+    // the package 'dbms_tg_dbg' is not available for use in the latest
+    // Oracle AI Database 26ai versions
+    if (testsUtil.versionStringCompare(currDbVersion, '23.26') >= 0)
+      isRunnable = false;
+    else
+      isRunnable = await testsUtil.checkPrerequisites(1800000000, 1800000000);
+
     if (!dbConfig.test.DBA_PRIVILEGE || !isRunnable) this.skip();
+
     dbaConn = await oracledb.getConnection(DBA_config);
-    await dbaConn.execute(`GRANT EXECUTE ON dbms_tg_dbg TO ${dbConfig.user}`);
+    await dbaConn.execute(`GRANT EXECUTE ON ${pkg} TO ${dbConfig.user}`);
     await dbaConn.execute(`GRANT SELECT ON v_$session TO ${dbConfig.user}`);
   });
 
   after(async function() {
     if (dbConfig.test.DBA_PRIVILEGE && isRunnable) {
-      await dbaConn.execute(`REVOKE EXECUTE ON dbms_tg_dbg FROM ${dbConfig.user}`);
+      await dbaConn.execute(`REVOKE EXECUTE ON ${pkg} FROM ${dbConfig.user}`);
       await dbaConn.execute(`REVOKE SELECT ON v_$session FROM ${dbConfig.user}`);
       await dbaConn.close();
     }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -26,8 +26,8 @@
  *   286. listIndexes.js
  *
  * DESCRIPTION
- *   Test Oracle Advanced Queueing (AQ).
- *   Test cases for JSON payload type with AQ.
+ *   Test Oracle SODA listIndexes.
+ *   Test cases for listing of SODA Indexes.
  *
  *****************************************************************************/
 'use strict';
@@ -47,7 +47,7 @@ describe('286. listIndexes.js', function() {
     // or version 21.3 (or higher) is needed
     runnable = runnable && (testsUtil.getClientVersion() >= 1913000000 ||
       (testsUtil.getClientVersion() >= 2100000000 && testsUtil.getClientVersion() >= 2103000000));
-    if (!oracledb.thin && testsUtil.getClientVersion() >= 1803000000) {
+    if (!oracledb.thin) {
       await sodaUtil.cleanup();
     }
     if (!runnable) {

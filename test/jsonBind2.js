@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -26,7 +26,8 @@
  *   254. jsonBind2.js
  *
  * DESCRIPTION
- *   Test cases to store and fetch JSON data from BLOB , CLOB and VARCHAR2 column
+ *   Test cases to store and fetch JSON data from BLOB , CLOB and VARCHAR2
+ *   column
  *****************************************************************************/
 'use strict';
 
@@ -53,7 +54,7 @@ describe('254. jsonBind2.js', function() {
     await conn.close();
   });
 
-  describe('254.1 Map javascript object into BLOB', function() {
+  describe('254.1 Map JavaScript object into BLOB', function() {
 
     const tableName = "jsonBind_tab1";
     const rsSelect = `SELECT obj_data from ` + tableName;
@@ -221,7 +222,7 @@ describe('254. jsonBind2.js', function() {
     });
   });
 
-  describe('254.2 Map javascript object into VARCHAR2', function() {
+  describe('254.2 Map JavaScript object into VARCHAR2', function() {
 
     const tableName = 'jsonBind_tab2';
     const rsSelect = `SELECT obj_data from ` + tableName;
@@ -377,7 +378,7 @@ describe('254. jsonBind2.js', function() {
     });
   });
 
-  describe('254.3 Map javascript object into CLOB', function() {
+  describe('254.3 Map JavaScript object into CLOB', function() {
 
     const tableName = 'jsonBind_tab3';
     const rsSelect = `SELECT obj_data from ` + tableName;

@@ -306,7 +306,7 @@ describe('193. connProps.js', function() {
     assert.deepStrictEqual(result.rows[0][0], actualPdbName);
 
     // change to root container
-    query = "ALTER SESSION SET CONTAINER = CDB$ROOT;";
+    query = "ALTER SESSION SET CONTAINER = CDB$ROOT";
     result = await dbaConnection.execute(query);
     if (oracledb.thin) {
       query = "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM dual";

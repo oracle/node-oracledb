@@ -49,11 +49,13 @@ describe('244.dataTypeJson.js', function() {
   const default_stmtCacheSize = oracledb.stmtCacheSize;
 
   before(async function() {
-    connection = await oracledb.getConnection(dbConfig);
-
-    if (testsUtil.getClientVersion() >= 2100000000 && connection.oracleServerVersion >= 2100000000) {
+    if (await testsUtil.checkPrerequisites(2100000000, 2100000000)) {
       isRunnable = true;
     }
+
+    if (!isRunnable) this.skip();
+
+    connection = await oracledb.getConnection(dbConfig);
 
     // Check if we are running the latest Oracle Server and Client versions
     // for vector and long field names support
@@ -65,14 +67,13 @@ describe('244.dataTypeJson.js', function() {
     isOracle_23_6 = connection.oracleServerVersion >= 2306000000
       && (oracledb.thin || oracledb.oracleClientVersion >= 2306000000);
 
-    if (!isRunnable) {
-      this.skip();
-    }
-
   }); // before()
 
   after(async function() {
-    await connection.close();
+    if (!isRunnable) return;
+
+    if (connection)
+      await connection.close();
   });  // after()
 
   describe('244.1 testing JSON data in various lengths', function() {
