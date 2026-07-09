@@ -75,10 +75,6 @@ The properties of the ``options`` parameter are:
     * - ``key``
       - String
       - An optional lookup identifier that the database maps to stored context attributes. This attribute may be specified with ``endUserName`` and should not be set when ``endUserToken`` is specified.
-
-        .. versionchanged:: 7.0.1
-
-            This attribute was made optional.
     * - ``dataRoles``
       - Array
       - The names of data roles granted to the application or local database user. These data roles are created with a ``CREATE DATA ROLE`` statement in the database.

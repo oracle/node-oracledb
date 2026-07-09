@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -632,5 +632,48 @@ describe('217. aq1.js', function() {
     // Message should not be available yet due to delay
     const msg = await queue2.deqOne();
     assert.strictEqual(msg, undefined);
-  }); // 218.22
+  }); // 217.22
+
+  it('217.23 Test validations for AQ enqOptions/deqOptions', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+
+    // deqOptions
+    assert.throws(() => queue.deqOptions.consumerName = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.deqOptions.correlation = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.deqOptions.transformation = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.deqOptions.deliveryMode = 0, /NJS-004:/);
+    assert.throws(() => queue.deqOptions.mode = 0, /NJS-004:/);
+    assert.throws(() => queue.deqOptions.navigation = 0, /NJS-004:/);
+    assert.throws(() => queue.deqOptions.visibility = 0, /NJS-004:/);
+
+    // enqOptions
+    assert.throws(() => queue.enqOptions.transformation = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.enqOptions.deliveryMode = 0, /NJS-004:/);
+    assert.throws(() => queue.enqOptions.visibility = 0, /NJS-004:/);
+  });
+
+  it('217.24 Test validations for AQ message properties', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", correlation: "A".repeat(129)});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", exceptionQueue: "A".repeat(129)});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", recipients: Array(1025)});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", recipients: ["A".repeat(129)]});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", delay: "0"});
+    }, /NJS-007:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", expiration: -2});
+    }, /ORA-25209:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", priority: "1"});
+    }, /NJS-007:/);
+  });
 });

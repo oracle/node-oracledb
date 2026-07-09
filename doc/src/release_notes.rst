@@ -22,17 +22,19 @@ Common Changes
 #)  Fixed mismatch between the descriptor override key table and the public
     connection option names.
 
-#)  Added support to use the operating system trust store when the
+#)  Fixed bug to use the operating system trust store when the
     ``walletLocation`` property is set to the keyword SYSTEM.
+
+#)  Fixed bug to throw proper validation errors in AQ with ``consumerName``,
+    ``correlation``, ``recipients``, ``transformation``, and
+    ``exceptionQueue`` properties.
 
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Modified
-    :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>` to
-    make the ``key`` attribute optional when ``endUserName`` is specified. The
-    ``key`` attribute can only be used with ``endUserName`` and not with the
-    ``endUserToken`` attribute.
+#)  Fixed bug to make the ``key`` attribute optional when ``endUserName`` is
+    specified in
+    :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`.
 
 #)  Improved error message handling.
 
