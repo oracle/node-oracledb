@@ -2734,6 +2734,12 @@ Oracledb Methods
 
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
 
+            If the value specified is the keyword SYSTEM, then the operating system trust store is used, which is similar to the behavior of not setting this property.
+
+            .. versionchanged:: 7.0.1
+
+              Added support for the keyword SYSTEM.
+
             .. versionadded:: 6.0
         * - ``walletPassword``
           - String
@@ -3689,6 +3695,12 @@ Oracledb Methods
             The directory where the wallet can be found. In node-oracledb Thin mode, this must be the directory that contains the PEM-encoded wallet file.
 
             For node-oracledb Thick mode, use an :ref:`Easy Connect string <easyconnect>` or a :ref:`Connect Descriptor string <embedtns>` instead.
+
+            If the value specified is the keyword SYSTEM, then the operating system trust store is used, which is similar to the behavior of not setting this property.
+
+            .. versionchanged:: 7.0.1
+
+              Added support for the keyword SYSTEM.
 
             .. versionadded:: 6.0
         * - ``walletPassword``
