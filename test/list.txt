@@ -704,6 +704,7 @@ Overview of node-oracledb functional tests
       32.3.1 SELECT query - original data
       35.3.2 SELECT query - formatted data for comparison
       35.3.3 returns scalar types from PL/SQL block
+      35.3.4 fetches fractional time zone offsets correctly
 
   36. dataTypeTimestamp4.js
     36.1 Testing JavaScript Date with database TIMESTAMP (4) WITH TIME ZONE

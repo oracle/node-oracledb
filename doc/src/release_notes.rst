@@ -49,6 +49,11 @@ Thin Mode Changes
 Thick Mode Changes
 ++++++++++++++++++
 
+#)  Fixed bug to correct the timezone offset calculation for negative
+    fractional offsets.
+    See `Issue #1776 <https://github.com/oracle/node-oracledb/issues/1776>`__.
+    (Slawomir Osoba)(HeyParth).
+
 #)  Fixed bug to allow a proxy user to be used with
     :ref:`token-based authentication <tokenbasedauthentication>` when creating
     standalone connections (`ODPI-C <https://github.com/oracle/odpi>`__
