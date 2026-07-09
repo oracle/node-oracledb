@@ -19,9 +19,11 @@ node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...
 Common Changes
 ++++++++++++++
 
-- Fixed mismatch between the descriptor override key table and the public
-  connection option names.
+#)  Fixed mismatch between the descriptor override key table and the public
+    connection option names.
 
+#)  Added support to use the operating system trust store when the
+    ``walletLocation`` property is set to the keyword SYSTEM.
 
 node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0...v7.0.0>`__ (2 Jun 2025)
 -----------------------------------------------------------------------------------------------------------
