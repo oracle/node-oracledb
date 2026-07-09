@@ -25,6 +25,11 @@ Common Changes
 #)  Added support to use the operating system trust store when the
     ``walletLocation`` property is set to the keyword SYSTEM.
 
+Thin Mode Changes
++++++++++++++++++
+
+#)  Improved error message handling.
+
 node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0...v7.0.0>`__ (2 Jun 2025)
 -----------------------------------------------------------------------------------------------------------
 
@@ -213,7 +218,7 @@ Common Changes
     Database Releases <https://support.oracle.com/epmos/faces/
     DocumentDisplay?id=742060.1>`__.
 
-#)  Fixed NJS-089 error to display the correct driver mode.
+#)  Fixed `NJS-089` error to display the correct driver mode.
 
 Thin Mode Changes
 +++++++++++++++++
