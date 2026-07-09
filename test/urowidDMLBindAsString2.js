@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -27,8 +27,12 @@
  *
  * DESCRIPTION
  *   Testing urowid binding as String with DML.
- *   The Universal ROWID (UROWID) is a datatype that can store both logical and physical rowids of Oracle tables. Logical rowids are primary key-based logical identifiers for the rows of Index-Organized Tables (IOTs).
- *   To use columns of the UROWID datatype, the value of the COMPATIBLE initialization parameter must be set to 8.1 or higher.
+ *   The Universal ROWID (UROWID) is a datatype that can store both logical
+ *   and physical rowids of Oracle tables. Logical rowids are primary
+ *   key-based logical identifiers for the rows of
+ *   Index-Organized Tables (IOTs).
+ *   To use columns of the UROWID datatype, the value of the COMPATIBLE
+ *   initialization parameter must be set to 8.1 or higher.
  *
  *****************************************************************************/
 'use strict';
@@ -518,11 +522,13 @@ describe('115. urowidDMLBindAsString2.js', function() {
       c: { val: urowid, dir: oracledb.BIND_IN, type: oracledb.STRING },
       o: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 100 }
     };
-    try {
-      await connection.execute("insert into " + tableName_normal + " (ID, content) values (:i, :c) returning content into :o", bindVar);
-    } catch (err) {
-      assert.strictEqual(err.message, "NJS-016: buffer is too small for OUT binds");
-    }
+
+    await assert.rejects(async () =>
+      await connection.execute(
+        "insert into " + tableName_normal + " (ID, content)\
+          values (:i, :c) returning content into :o", bindVar),
+    /NJS-016:/ /* NJS-016: buffer is too small for OUT binds */
+    );
 
   };
 

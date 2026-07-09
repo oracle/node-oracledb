@@ -148,10 +148,11 @@ coded in the application.
 .. note::
 
     Connecting to Oracle Database using external authentication with an Oracle
-    Wallet, TLS, or the operating system is supported in node-oracledb Thick
+    Wallet, or the operating system is only supported in node-oracledb Thick
     mode. See :ref:`enablingthick`.
 
-    Node-oracledb Thin mode only supports external authentication with TLS.
+    Both the Thin and Thick modes of node-oracledb supports external
+    authentication with TLS.
     See :ref:`tlsextauth` for more information.
 
 **In node-oracledb Thick Mode**
