@@ -192,7 +192,7 @@ You can pass the following parameters to
   you do not specify the ``transactionId`` value, a unique `universally-unique
   identifier (UUID) <https://www.rfc-editor.org/rfc/rfc4122.txt>`__ is
   generated and returned by
-  :meth:`~Connection.beginSessionlessTransaction`. An example is
+  :meth:`~connection.beginSessionlessTransaction`. An example is
   "36b8f84d-df4e-4d49-b662-bcde71a8764f".
 
 - ``timeout``: This parameter determines the duration before which this

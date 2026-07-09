@@ -323,7 +323,7 @@ SodaCollection Methods
         * - Error ``error``
           - If ``getDataGuide()`` succeeds, ``error`` is NULL. It is not an error if no document is replaced. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``
-          - The SodaDocument containing JSON content which can be accessed from the document as normal with :meth:`sodaDocument.getContents()`, :meth:`sodaDocument.getContentAsString()`, or :meth:`sodaDocument.getContentAsBuffer()`.
+          - The SodaDocument containing JSON content which can be accessed from the document as normal with :meth:`sodaDocument.getContent()`, :meth:`sodaDocument.getContentAsString()`, or :meth:`sodaDocument.getContentAsBuffer()`.
 
 .. method:: sodaCollection.insertMany()
 

@@ -5401,7 +5401,7 @@ example, using OpenSSL::
 
 Once the PEM file has been created, you can use it by passing its directory
 location as the ``walletLocation`` property to
-:meth:`oracledb.getconnection()` or :meth:`oracledb.createPool()`. Instead of
+:meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()`. Instead of
 storing and reading the content from the ``ewallet.pem`` file which is
 specified in the ``walletLocation`` property, you can use the
 ``walletContent`` property to directly specify the security credentials

@@ -516,9 +516,9 @@ If the ``connection.execute()`` option
 :ref:`resultSet <propexecresultset>` is set to *true*, or when using
 :meth:`connection.queryStream()`, then each nested cursor
 in a fetched row is returned as a :ref:`ResultSet <resultsetclass>`
-object. You can recursively call :meth:`resultSet.getRow()`,
-:meth:`resultSet.getRows()`, or
-:meth:`resultSet.toQueryStream()` on the ResultSet to
+object. You can recursively call :meth:`resultset.getRow()`,
+:meth:`resultset.getRows()`, or
+:meth:`resultset.toQueryStream()` on the ResultSet to
 fetch each nested cursor’s data.
 
 For example:
@@ -646,7 +646,7 @@ using :ref:`fetch type handlers <fetchtypehandler>`, or by using
 Using :attr:`~oracledb.fetchAsString` or :attr:`~oracledb.fetchAsBuffer` Properties
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-The global :attr:`~oracledb.fetchAsString`and :attr:`~oracledb.fetchAsBuffer`
+The global :attr:`~oracledb.fetchAsString` and :attr:`~oracledb.fetchAsBuffer`
 properties are convenience settings which can be used by an application for
 common data type conversions.
 
@@ -812,7 +812,7 @@ returned data. The converter is a function which accepts the value that will be
 returned by :meth:`connection.execute()` for a particular row and column and
 returns the value that will actually be returned by ``connection.execute()``.
 The converter function runs within the :meth:`connection.execute()` or the
-:meth:`resultSet.getRows()` methods and can make database calls.
+:meth:`resultset.getRows()` methods and can make database calls.
 
 For example:
 
@@ -1751,7 +1751,7 @@ here are possible solutions:
    connection, and its cursor will remain open. This makes statement
    re-execution very efficient.
 
-   The cache size is settable with the :attr:`oracle.stmtCacheSize`
+   The cache size is settable with the :attr:`oracledb.stmtCacheSize`
    attribute. The size you choose will depend on your knowledge of the
    locality of the statements, and of the resources available to the
    application. Are statements re-executed? Will they still be in the cache

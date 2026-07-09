@@ -1442,7 +1442,7 @@ node-oracledb `v5.4.0 <https://github.com/oracle/node-oracledb/compare/v5.3.0...
     <iamtokenbasedauthentication>` when establishing pool based connections
     and standalone connections.
 
-#)  Added code to capture the :attr:`error stack <stack>`. PR #1467
+#)  Added code to capture the :attr:`error stack <error.stack>`. PR #1467
     (Slawomir Osoba).
 
 #)  Added code to keep the method name in internally bound functions.
@@ -1757,10 +1757,11 @@ node-oracledb `v4.2.0 <https://github.com/oracle/node-oracledb/compare/v4.1.0...
     support for Continuous Query Notification (CQN) and other subscription
     based notifications.
 
-#)  Added :attr:`result.lastRowid` to ``execute()``. It contains the ROWID of
-    the last row affected by an INSERT, UPDATE, DELETE or MERGE statement.
+#)  Added `result.lastRowid <execlastrowid>` to ``execute()``. It contains the
+    ROWID of the last row affected by an INSERT, UPDATE, DELETE or MERGE
+    statement.
 
-#)  Changed the Error object :attr:`offset` to be 32-bit, allowing the
+#)  Changed the Error object :attr:`error.offset` to be 32-bit, allowing the
     :ref:`batchErrors <executemanyoptbatcherrors>` mode of ``executeMany()``
     to show row ``offset`` values up to (2^32)-1 (`ODPI-C change
     <https://github.com/oracle/odpi/commit/294d5966cd513d0c29fdeec3

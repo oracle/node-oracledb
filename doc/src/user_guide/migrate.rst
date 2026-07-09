@@ -596,8 +596,8 @@ Changing an existing application that currently uses :ref:`Thick mode
    the ``ORACLE_SID`` environment variable is not used in node-oracledb Thin
    mode.
 
-8. Remove calls to :attr:`oracledb.oracleclientVersion()` and
-   :attr:`oracledb.oracleclientVersionString` which are only available in
+8. Remove calls to :attr:`oracledb.oracleClientVersion()` and
+   :attr:`oracledb.oracleClientVersionString` which are only available in
    the node-oracledb Thick mode. Oracle Client libraries are not used
    in Thin mode.
 

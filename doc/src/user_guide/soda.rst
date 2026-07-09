@@ -390,7 +390,7 @@ of the accessor methods :meth:`~sodaDocument.getContent()`,
 use depends on the media type, and how you want to use it in the
 application. By default, the media type is ‘application/json’.
 
-The :meth:`SodaCollection.find()` method creates a SodaOperation object
+The :meth:`sodaCollection.find()` method creates a SodaOperation object
 used with method chaining to specify desired properties of documents
 that a terminal method like :meth:`~sodaOperation.getOne()`
 or :meth:`~sodaOperation.remove()` then applies to.
@@ -987,7 +987,7 @@ types and data lengths. In SODA, it can be useful for exploring the
 schema of a collection.
 
 To get a data guide in SODA, the collection must be JSON-only and have a
-:meth:`JSON Search index <sodacollection.createIndex()>` where the
+:meth:`JSON Search index <sodaCollection.createIndex()>` where the
 ``"dataguide"`` option is ``"on"``. Data guides are returned from
 :meth:`sodaCollection.getDataGuide()` as JSON
 content in a :ref:`SodaDocument <sodadocumentclass>`. The data guide is

@@ -29,9 +29,8 @@ for more information.
 :ref:`pooled connections <connpooling>` can be created in node-oracledb Thin
 and Thick modes using database authentication. This can be done by specifying
 the database username and the associated password in the ``user`` and
-``password`` parameters of :meth:`oracledb.connect()`,
-:meth:`oracledb.create_pool()`, :meth:`oracledb.connect_async()`, or
-:meth:`oracledb.create_pool_async()`. An example is:
+``password`` parameters of :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()`. An example is:
 
 .. code-block:: javascript
 
