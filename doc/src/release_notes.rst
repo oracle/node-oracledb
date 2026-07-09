@@ -46,6 +46,14 @@ Thin Mode Changes
 
 #)  Improved error message handling.
 
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Fixed bug to allow a proxy user to be used with
+    :ref:`token-based authentication <tokenbasedauthentication>` when creating
+    standalone connections (`ODPI-C <https://github.com/oracle/odpi>`__
+    change).
+
 node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0...v7.0.0>`__ (2 Jun 2025)
 -----------------------------------------------------------------------------------------------------------
 

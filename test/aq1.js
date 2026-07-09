@@ -488,7 +488,7 @@ describe('217. aq1.js', function() {
 
   it('217.17 test large buffer message payload - 1MB', async function() {
     // 1 MB message does not work in Oracle Databases 19c or earlier
-    if (await conn.oracleServerVersion < 2304000000)
+    if (conn.oracleServerVersion < 2304000000)
       this.skip();
 
     const queue = await conn.getQueue(rawQueueName);

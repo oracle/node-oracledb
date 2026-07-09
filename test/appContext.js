@@ -202,7 +202,10 @@ FROM dual`),
 
     // Keys longer than 128 characters raise ERR_APP_CONTEXT_KEY_TOO_LONG.
     // Values longer than 4 * 1000 characters raise ERR_APP_CONTEXT_VALUE_TOO_LONG.
-    it("326.1.3 check Max values for key and value", async () => {
+    it("326.1.3 check Max values for key and value", async function() {
+      // This test requires Oracle Database 19c or later
+      if (connection.oracleServerVersion <= 1900000000) this.skip();
+
       const MAXK = 128;
       const MAXV = (4 * 1000);
       const maxKeyName = "A".repeat(MAXK);
@@ -350,7 +353,7 @@ FROM dual`),
   });
 
   describe("326.2 appContext with reserved keyword for OpenTelemetry Context Propagation", () => {
-    it("326.2.1  check OpenTelemetry spans propagation ", async () => {
+    it("326.2.1 check OpenTelemetry spans propagation", async () => {
       // Enable context propagation on server
       await connection.execute("alter session set sql_trace=true");
 
@@ -384,8 +387,8 @@ FROM dual`),
     }); // 326.2.1
   }); // 326.2
 
-  describe("326.3 appContext with pool ", () => {
-    it("326.3.1  check appContext is retained with Pool acquire and release ", async () => {
+  describe("326.3 appContext with pool", () => {
+    it("326.3.1 check appContext is retained with Pool acquire and release", async () => {
       const namespace = "CLIENTCONTEXT";
       let poolConnection;
       let secondConnection;

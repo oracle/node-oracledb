@@ -47,15 +47,12 @@ describe('286. listIndexes.js', function() {
     // or version 21.3 (or higher) is needed
     runnable = runnable && (testsUtil.getClientVersion() >= 1913000000 ||
       (testsUtil.getClientVersion() >= 2100000000 && testsUtil.getClientVersion() >= 2103000000));
+    if (!runnable) this.skip();
+
+    conn = await oracledb.getConnection(dbconfig);
+    if (conn.oracleServerVersion < 1800000000) this.skip();
     if (!oracledb.thin) {
       await sodaUtil.cleanup();
-    }
-    if (!runnable) {
-      this.skip();
-    }
-    conn = await oracledb.getConnection(dbconfig);
-    if (conn.oracleServerVersion < 1800000000) {
-      this.skip();
     }
   }); // before
 

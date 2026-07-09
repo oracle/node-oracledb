@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -97,134 +97,123 @@ describe('242. dbObject18.js', () => {
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.9
 
-    it('242.1.10 negative: set oracledb.dbObjectAsPojo to invalid value: null', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = null;
-        },
-        /NJS-004/
-      );
+    it('242.1.10 negative: set oracledb.dbObjectAsPojo to invalid value: null', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = null;
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.10
 
-    it('242.1.11 negative: set oracledb.dbObjectAsPojo to invalid value: 0', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = 0;
-        },
-        /NJS-004/
-      );
+    it('242.1.11 negative: set oracledb.dbObjectAsPojo to invalid value: 0', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = 0;
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.11
 
-    it('242.1.12 negative: set oracledb.dbObjectAsPojo to invalid value: number', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = -1234567890.0123;
-        },
-        /NJS-004/
-      );
+    it('242.1.12 negative: set oracledb.dbObjectAsPojo to invalid value: number', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = -1234567890.0123;
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.12
 
-    it('242.1.13 negative: set oracledb.dbObjectAsPojo to invalid value: string true', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = 'true';
-        },
-        /NJS-004/
-      );
+    it('242.1.13 negative: set oracledb.dbObjectAsPojo to invalid value: string true', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = 'true';
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.13
 
-    it('242.1.14 negative: set oracledb.dbObjectAsPojo to invalid value: string false', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = 'false';
-        },
-        /NJS-004/
-      );
+    it('242.1.14 negative: set oracledb.dbObjectAsPojo to invalid value: string false', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = 'false';
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.14
 
-    it('242.1.15 negative: set oracledb.dbObjectAsPojo to invalid value: undefined', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = undefined;
-        },
-        /NJS-004/
+    it('242.1.15 negative: set oracledb.dbObjectAsPojo to invalid value: undefined', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = undefined;
+      },
+      /NJS-004/
       );
       // NJS-004: invalid value for property dbObjectAsPojo
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.15
 
-    it('242.1.16 negative: set oracledb.dbObjectAsPojo to invalid value: NaN', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = NaN;
-        },
-        /NJS-004/
-      );
+    it('242.1.16 negative: set oracledb.dbObjectAsPojo to invalid value: NaN', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = NaN;
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.16
 
-    it('242.1.17 negative: set oracledb.dbObjectAsPojo to invalid value: empty string', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = '';
-        },
-        /NJS-004/
-      );
+    it('242.1.17 negative: set oracledb.dbObjectAsPojo to invalid value: empty string', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = '';
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.17
 
-    it('242.1.18 negative: set oracledb.dbObjectAsPojo to invalid value: empty json', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = {};
-        },
-        /NJS-004/
-      );
+    it('242.1.18 negative: set oracledb.dbObjectAsPojo to invalid value: empty json', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = {};
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.18
 
-    it('242.1.19 negative: set oracledb.dbObjectAsPojo to invalid value: oracledb.DATE type', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = oracledb.DATE;
-        },
-        /NJS-004/
-      );
+    it('242.1.19 negative: set oracledb.dbObjectAsPojo to invalid value: oracledb.DATE type', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = oracledb.DATE;
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.19
 
-    it('242.1.20 negative: set oracledb.dbObjectAsPojo to invalid value: array', async () => {
-      await assert.rejects(
-        async () => { //eslint-disable-line
-          oracledb.dbObjectAsPojo = [ true ];
-        },
-        /NJS-004/
-      );
+    it('242.1.20 negative: set oracledb.dbObjectAsPojo to invalid value: array', () => {
+      assert.throws(() => {
+        oracledb.dbObjectAsPojo = [ true ];
+      },
+      /NJS-004/
       // NJS-004: invalid value for property dbObjectAsPojo
+      );
 
       assert.strictEqual(oracledb.dbObjectAsPojo, false);
     }); // 242.1.20
@@ -344,11 +333,11 @@ describe('242. dbObject18.js', () => {
     }); // before()
 
     after(async () => {
+      oracledb.dbObjectAsPojo = false;
       await testsUtil.dropTable(conn, TABLE);
       await testsUtil.dropType(conn, TEAM_T);
       await testsUtil.dropType(conn, PLAYER_T);
       await conn.close();
-      oracledb.dbObjectAsPojo = false;
     }); // after()
 
     it('242.3.1 set oracledb.dbObjectAsPojo = true and dbObjectAsPojo:false in bind option', async () => {

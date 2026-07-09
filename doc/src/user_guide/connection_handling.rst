@@ -2058,7 +2058,9 @@ or after acquiring a connection from a pool using
 
 Once :meth:`~connection.setEndUserSecurityContext()` is called, the specified
 security context applies to all the subsequent database operations executed on
-that connection for that end user.
+that connection for that end user. You must set the end-user security context
+on a connection before calling :meth:`connection.execute()` or any other
+method that performs a database operation using that context.
 
 When an :ref:`EndUserSecurityContext <endusersecuritycontextclass>` instance
 is passed to :meth:`connection.setEndUserSecurityContext()`, node-oracledb
@@ -2103,6 +2105,52 @@ Using :meth:`connection.setEndUserSecurityContext()` in node-oracledb Thick
 mode will raise the error ``NJS-089: setting End User Security Context is not
 supported by node-oracledb in Thick mode``.
 
+.. _awaitendusersecuritycontext:
+
+End-user security context changes must not be interleaved with pending
+operations on the same connection. When end-user security context is set on a
+connection, use ``await`` to make sure each database operation has completed
+before changing the end-user security context on the same connection. For
+example:
+
+.. code-block:: javascript
+
+    // Set the end-user security context for the first operation
+    connection.setEndUserSecurityContext(contextA);
+
+    // Execute the operation using contextA
+    const firstOperation = await connection.execute(`SELECT 1 FROM dual`);
+
+    // Change the end-user security context only after the first operation has
+    // completed
+    connection.setEndUserSecurityContext(contextB);
+
+    // Execute the operation using contextB
+    const secondOperation = await connection.execute(sql);
+
+Do not use Promise concurrency methods such as ``Promise.all()`` or
+``Promise.any()`` to run operations on the same connection while changing the
+end-user security context. Otherwise, an earlier operation may still be
+pending when the context is changed, and it may be executed using the later
+context as shown in the example below.
+
+.. code-block:: javascript
+
+    // Set the end-user security context to contextA
+    connection.setEndUserSecurityContext(contextA);
+
+    // This operation is intended to use contextA
+    const firstOperation = connection.execute(`SELECT 1 FROM dual`);
+
+    // Changing the end-user security context before the first operation
+    // completes may cause it to execute with the new context, contextB
+    connection.setEndUserSecurityContext(contextB);
+
+    // Start the second operation which may use contextB
+    const secondOperation = connection.execute(`SELECT 2 FROM dual`);
+
+    await Promise.all([firstOperation, secondOperation]);
+
 Clearing an End-User Security Context Payload
 ---------------------------------------------
 
@@ -2130,6 +2178,13 @@ Calling :meth:`connection.clearEndUserSecurityContext()` without previously
 setting an end-user security context payload using
 :meth:`connection.setEndUserSecurityContext()` has no effect and does not
 raise an error.
+
+Do not call :meth:`~connection.clearEndUserSecurityContext()` while an earlier
+operation on the same connection is still pending. Otherwise, a pending
+operation that was started with an end-user security context may be executed
+without that context. As described :ref:`above <awaitendusersecuritycontext>`,
+use ``await`` to allow each operation to complete before changing the end-user
+security context on the same connection.
 
 Example of Using End-User Security Context
 ------------------------------------------

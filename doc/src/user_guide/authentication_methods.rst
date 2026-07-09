@@ -630,7 +630,9 @@ private key used by node-oracledb for authentication. This function
 If the returned token is found to have expired, then ``tokenCallback()``
 will be called a second time. If the second invocation of
 ``tokenCallback()`` also returns an expired token, then the connection
-will fail.
+will fail. You can optionally specify a proxy user in the ``user`` property of
+:meth:`oracledb.getConnection()` by enclosing the name in square brackets as
+shown in the example above.
 
 The ``refresh`` parameter is set internally by the node-oracledb driver
 depending on the status and validity of the authentication token provided by
@@ -708,7 +710,8 @@ for example:
             externalAuth  : true,              // must specify external authentication
             homogeneous   : true,              // must use an homogeneous pool
             connectString : connect_string,    // Oracle Autonomous Database connection string
-            user          : "[proxyuser]"      // optionally specify the proxy user
+            user          : "[proxyuser]"      // optionally specify the proxy user (applicable
+                                               // only in Thin mode)
         });
     }
 
@@ -718,7 +721,9 @@ the callback and ``refresh`` parameter. With connection pools, the
 callback function which will be invoked at the time the pool is created
 (even if ``poolMin`` is 0). It is also called when the pool needs to
 expand (causing new connections to be created) and the current token has
-expired.
+expired. In node-oracledb Thin mode, you can optionally specify a proxy user
+in the ``user`` property of :meth:`oracledb.createPool()` by enclosing the
+name in square brackets as shown in the example above.
 
 If you set the
 :ref:`accessTokenConfig <createpoolpoolattrsaccesstokenconfig>` property
@@ -1092,7 +1097,9 @@ used by node-oracledb for authentication. This function
 If the returned token is found to have expired, then ``tokenCallback()``
 will be called a second time. If the second invocation of
 ``tokenCallback()`` also returns an expired token, then the connection
-will fail.
+will fail. You can optionally specify a proxy user in the ``user`` property of
+:meth:`oracledb.getConnection()` by enclosing the name in square brackets as
+shown in the example above.
 
 The ``refresh`` parameter is set internally by the node-oracledb driver
 depending on the status and validity of the authentication token provided by
@@ -1169,7 +1176,8 @@ authentication, for example:
             externalAuth  : true,                 // must specify external authentication
             homogeneous   : true,                 // must use an homogeneous pool
             connectString : '...',                // Oracle Autonomous Database connection string
-            user          : "[proxyuser]"         // optionally specify the proxy user
+            user          : "[proxyuser]"         // optionally specify the proxy user (applicable
+                                                  // only in Thin mode)
         });
     }
 
@@ -1179,7 +1187,10 @@ pools, the :ref:`accessToken <createpoolpoolattrsaccesstoken>`
 attribute sets a callback function which will be invoked at the time the
 pool is created (even if ``poolMin`` is 0). It is also called when the
 pool needs to expand (causing new connections to be created) and the
-current token has expired.
+current token has expired. In node-oracledb Thin mode, you can optionally
+specify a proxy user in the ``user`` property of
+:meth:`oracledb.createPool()` by enclosing the name in square brackets as
+shown in the example above.
 
 If you set the
 :ref:`accessTokenConfig <createpoolpoolattrsaccesstokenconfig>` property
