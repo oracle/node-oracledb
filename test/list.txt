@@ -6764,68 +6764,6 @@ Overview of node-oracledb functional tests
     326.3 appContext with pool
       326.3.1  check appContext with Pool acquire and release
 
-  327. securityContext.js
-    327.1 setEndUserSecurityContext()
-      327.1.1 Security context from plain object
-      327.1.2 Case and embedded quotes in endUserName
-      327.1.3 Encoded security context larger than 252 bytes
-      327.1.4 EndUserSecurityContext instance input
-      327.1.5 Missing parameter
-      327.1.6 Invalid parameter value
-      327.1.7 Encoded security context exceeding the supported size
-      327.1.8 Non-TCPS protocol with security context
-      327.1.9 endUserName without key
-      327.1.10 Context with only endUserToken
-      327.1.11 Context with endUserName and key but without endUserToken
-      327.1.12 Extra parameters to setEndUserSecurityContext
-      327.1.13 Non-object parameter values
-      327.1.14 Invalid connection for setEndUserSecurityContext
-      327.1.15 Extra parameters to setEndUserSecurityContext
-      327.1.16 Thin mode disabled on the connection
-    327.2 clearEndUserSecurityContext()
-      327.2.1 Security context clearing on the driver implementation
-      327.2.2 New security context after clearing
-      327.2.3 Extra parameters to clearEndUserSecurityContext
-      327.2.4 Invalid connection for clearEndUserSecurityContext
-      327.2.5 Clearing without a previously set security context
-    327.3 EndUserSecurityContext attributes normalization
-      327.3.1 Scalar and array attribute values
-      327.3.2 Null and undefined attribute values
-      327.3.3 Non-object attribute containers
-      327.3.4 Data role entries and array copy
-      327.3.5 Source dataRoles mutation after constructor
-    327.4 pooled connections
-      327.4.1 Set and clear on pooled connections
-      327.4.2 Pooled connection close and reuse with security context
-    327.5 EndUserSecurityContext constructor
-      327.5.1 Non-object constructor input
-      327.5.2 Missing or empty databaseAccessToken
-      327.5.3 Non-string endUserToken values
-      327.5.4 Non-string endUserName values
-      327.5.5 Non-string key values
-      327.5.6 Non-array dataRoles
-      327.5.7 Optional fields omitted in payloadForWire
-      327.5.8 Repeated payloadForWire calls
-      327.5.9 Non-string databaseAccessToken values
-      327.5.10 Missing both endUserToken and endUserName
-      327.5.11 Empty endUserToken
-      327.5.12 Whitespace-only token strings
-    327.6 token-backed security contexts
-      327.6.1 Configured tokens across pooled connection close and reuse
-      327.6.2 Configured tokens, attributes, and dataRoles across pooled reuse
-      327.6.3 Token-backed context visible in the database session
-      327.6.4 Different user tokens in database session users
-      327.6.5 clearEndUserSecurityContext and schema user in the database session
-      327.6.6 Token switching and clearEndUserSecurityContext in live XS session
-      327.6.7 Security context across pooled connection close and reacquire
-      327.6.8 Multiple security contexts before the first round-trip
-      327.6.9 clearEndUserSecurityContext before the first round-trip
-      327.6.10 Simultaneous live sessions with different user tokens
-    327.7 OBO token-backed security contexts
-      327.7.1 OBO token-backed context visible in the database session
-      327.7.2 Different OBO user tokens map to different XS users
-      327.7.3 OBO tokens with direct HR table access
-
   328. authMessage.js
     328.1 allows valid ORA_SDTZ timezone values
     328.2 quotes ORA_SDTZ values that contain SQL metacharacters

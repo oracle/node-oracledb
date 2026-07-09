@@ -2005,7 +2005,7 @@ The following attributes can be defined in an EndUserSecurityContext object:
 - ``endUserToken``: A token that identifies the end user. This token is issued
   by your IAM system after user authentication. This attribute must be
   specified for users managed by external IAM systems. Do not set this
-  attribute if the ``endUserName`` and ``key`` attributes are defined.
+  attribute if the ``endUserName`` or the ``key`` attribute is defined.
 
 - ``endUserName``: The name of a local database user created in Oracle
   Database that has the ``CREATE END USER SECURITY CONTEXT`` database
@@ -2014,14 +2014,13 @@ The following attributes can be defined in an EndUserSecurityContext object:
   set.
 
 - ``key``: The lookup identifier that the database maps to stored context
-  attributes. You must set this attribute if the ``endUserName`` attribute is
-  specified.
+  attributes. This attribute is optional and may be specified with
+  ``endUserName``. Do not set this attribute if the ``endUserToken`` attribute
+  is set.
 
 - ``dataRoles``: The names of data roles granted to the application or local
-  database user. This attribute is optional. If ``endUserName`` and ``key``
-  are specified, then only data roles enabled by default with the application
-  identity are used. Any data roles explicitly provided by the application are
-  not accepted and will raise an error.
+  database user. This attribute is optional. For local database users, these
+  data roles can be used to distinguish sessions for the same local user.
 
 - ``attributes``: The attribute-value pairs conforming to the END USER CONTEXT
   schema defined in the database. These can be referenced at runtime by
@@ -2030,9 +2029,10 @@ The following attributes can be defined in an EndUserSecurityContext object:
 
 .. note::
 
-    Note that you must set either the ``endUserToken`` attribute, or both
-    ``endUserName`` and ``key`` in the EndUserSecurityContext object. Setting
-    both of these parameters will raise an error.
+    Note that you must set either the ``endUserToken`` or ``endUserName``
+    attribute in the EndUserSecurityContext object. The ``key`` attribute is
+    optional with ``endUserName``. Setting ``endUserToken`` together with
+    ``endUserName`` or ``key`` raises an error.
 
 For detailed information on these attributes, see this
 :ref:`table <_end_user_security_context_parameters>`.

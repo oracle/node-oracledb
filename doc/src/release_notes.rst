@@ -28,6 +28,12 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Modified
+    :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>` to
+    make the ``key`` attribute optional when ``endUserName`` is specified. The
+    ``key`` attribute can only be used with ``endUserName`` and not with the
+    ``endUserToken`` attribute.
+
 #)  Improved error message handling.
 
 node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0...v7.0.0>`__ (2 Jun 2025)

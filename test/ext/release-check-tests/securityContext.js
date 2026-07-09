@@ -34,7 +34,7 @@
 const oracledb = require("oracledb");
 const assert = require("assert");
 const fs = require("fs");
-const dbConfig = require("./dbconfig.js");
+const dbConfig = require('../../dbconfig.js');
 
 (oracledb.thin ? describe : describe.skip)("327. securityContext.js", () => {
   let connection;
@@ -183,8 +183,6 @@ const dbConfig = require("./dbconfig.js");
       const context = {
         databaseAccessToken: "db-token-plain",
         endUserToken: "user-token-plain",
-        endUserName: "plain-user",
-        key: "context-key",
         dataRoles: ["role1", "role2"],
         attributes: {
           region: ["us", "uk"],
@@ -205,8 +203,6 @@ const dbConfig = require("./dbconfig.js");
         ver: "1.0",
         database_access_token: "db-token-plain",
         end_user_token: "user-token-plain",
-        end_user_name: "plain-user",
-        end_user_contextid: "context-key",
         data_roles: ["role1", "role2"],
         attributes: [
           { name: "region", values: ["us", "uk"] },
@@ -225,7 +221,6 @@ const dbConfig = require("./dbconfig.js");
       const quotedName = 'User "CaseSensitive" Name';
       const context = {
         databaseAccessToken: "db-token-quotes",
-        endUserToken: "user-token-quotes",
         endUserName: quotedName,
         key: "quotes-key",
       };
@@ -339,13 +334,23 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("327.1.9 endUserName without key", () => {
-      assert.throws(
-        () => makeSecurityContext({
-          databaseAccessToken: "db-token-name-only",
-          endUserName: "name-only-user",
-        }),
-        /NJS-005:/,
+    it("327.1.9 Context with endUserName and dataRoles but without key", () => {
+      const context = {
+        databaseAccessToken: "db-token-name-only",
+        endUserName: "name-only-user",
+        dataRoles: ["role-one", "role-two"],
+      };
+
+      const payload = payloadForWire(makeSecurityContext(context));
+      assert.deepStrictEqual(payload, {
+        ver: "1.0",
+        database_access_token: "db-token-name-only",
+        end_user_name: "name-only-user",
+        data_roles: ["role-one", "role-two"],
+      });
+      assert.strictEqual(
+        Object.hasOwn(payload, "end_user_contextid"),
+        false,
       );
     });
 
@@ -590,13 +595,10 @@ const dbConfig = require("./dbconfig.js");
       const firstContext = {
         databaseAccessToken: "db-token-one",
         endUserToken: "token-one",
-        endUserName: "user-one",
-        key: "key-one",
       };
 
       const secondContext = {
         databaseAccessToken: "db-token-two",
-        endUserToken: "token-two",
         endUserName: "user-two",
         key: "key-two",
       };
@@ -618,7 +620,6 @@ const dbConfig = require("./dbconfig.js");
       assert.strictEqual(secondContextArg, secondSecurityContext);
 
       const secondPayload = payloadForWire(secondSecurityContext);
-      assert.strictEqual(secondPayload.end_user_token, "token-two");
       assert.strictEqual(secondPayload.end_user_name, "user-two");
       assert.strictEqual(secondPayload.end_user_contextid, "key-two");
       assert.strictEqual(secondPayload.database_access_token, "db-token-two");
@@ -780,8 +781,6 @@ const dbConfig = require("./dbconfig.js");
       const context = {
         databaseAccessToken: "db-token-pool",
         endUserToken: "user-token-pool",
-        endUserName: "pooled-user",
-        key: "pool-key",
         attributes: {
           region: "emea",
         },
@@ -994,7 +993,32 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("327.5.6 Non-array dataRoles", () => {
+    it("327.5.6 endUserToken with endUserName is rejected", () => {
+      assert.throws(
+        () =>
+          new oracledb.EndUserSecurityContext({
+            databaseAccessToken: "db-token-mixed",
+            endUserToken: "user-token-mixed",
+            endUserName: "named-user",
+            key: "named-key",
+          }),
+        /NJS-005:/,
+      );
+    });
+
+    it("327.5.7 key with endUserToken is rejected", () => {
+      assert.throws(
+        () =>
+          new oracledb.EndUserSecurityContext({
+            databaseAccessToken: "db-token-token-key",
+            endUserToken: "user-token-token-key",
+            key: "contextid",
+          }),
+        /NJS-005:/,
+      );
+    });
+
+    it("327.5.8 Non-array dataRoles", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1006,7 +1030,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("327.5.7 Optional fields omitted in payloadForWire", () => {
+    it("327.5.9 Optional fields omitted in payloadForWire", () => {
       const securityContext = new oracledb.EndUserSecurityContext({
         databaseAccessToken: "db-token-minimal",
         endUserToken: "user-token-minimal",
@@ -1019,7 +1043,7 @@ const dbConfig = require("./dbconfig.js");
       });
     });
 
-    it("327.5.8 Repeated payloadForWire calls", () => {
+    it("327.5.10 Repeated payloadForWire calls", () => {
       const securityContext = new oracledb.EndUserSecurityContext({
         databaseAccessToken: "db-token-repeat-payload",
         endUserToken: "user-token-repeat-payload",
@@ -1036,7 +1060,7 @@ const dbConfig = require("./dbconfig.js");
       });
     });
 
-    it("327.5.9 Non-string databaseAccessToken values", () => {
+    it("327.5.11 Non-string databaseAccessToken values", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1047,7 +1071,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("327.5.10 Missing both endUserToken and endUserName", () => {
+    it("327.5.12 Missing both endUserToken and endUserName", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1057,7 +1081,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("327.5.11 Empty endUserToken", () => {
+    it("327.5.13 Empty endUserToken", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1068,7 +1092,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("327.5.12 Whitespace-only token strings", () => {
+    it("327.5.14 Whitespace-only token strings", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1088,7 +1112,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("325.5.13 Null-valued endUserToken is rejected", () => {
+    it("327.5.15 Null-valued endUserToken is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1099,7 +1123,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("325.5.14 Null-valued endUserName is rejected", () => {
+    it("327.5.16 Null-valued endUserName is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1111,7 +1135,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("325.5.15 Empty key is rejected", () => {
+    it("327.5.17 Empty key is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1123,7 +1147,7 @@ const dbConfig = require("./dbconfig.js");
       );
     });
 
-    it("325.5.16 Whitespace-only key is rejected", () => {
+    it("327.5.18 Whitespace-only key is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({

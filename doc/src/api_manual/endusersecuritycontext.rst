@@ -61,12 +61,12 @@ The properties of the ``options`` parameter are:
 
         An OBO token is obtained from an IAM using the end user token as an assertion. This access token can only be used when ``endUserToken`` is specified.
 
-        A Client Credentials token is obtained from an IAM using the application's token. This access token can be used when either the ``endUserToken``, or ``endUserName`` and ``key`` are specified.
+        A Client Credentials token is obtained from an IAM using the application's token. This access token can be used when either ``endUserToken`` or ``endUserName`` is specified.
     * - ``endUserToken``
       - String
       - The unique identification of an end user managed by an external IAM system. This contains the end user token issued by IAM systems after user authentication.
 
-        This attribute should not be set when ``endUserName`` is specified.
+        This attribute should not be set when ``endUserName`` or ``key`` is specified.
     * - ``endUserName``
       - String
       - The unique identification of an end user managed by Oracle Database. This contains the name of a local database user created in Oracle Database that has the ``CREATE END USER SECURITY CONTEXT`` database privilege set.
@@ -74,14 +74,18 @@ The properties of the ``options`` parameter are:
         This attribute should not be set when ``endUserToken`` is specified.
     * - ``key``
       - String
-      - The lookup identifier that the database maps to stored context attributes.
+      - An optional lookup identifier that the database maps to stored context attributes. This attribute may be specified with ``endUserName`` and should not be set when ``endUserToken`` is specified.
+
+        .. versionchanged:: 7.0.1
+
+            This attribute was made optional.
     * - ``dataRoles``
       - Array
       - The names of data roles granted to the application or local database user. These data roles are created with a ``CREATE DATA ROLE`` statement in the database.
 
         For external IAM systems, these data roles are mapped to roles managed in your IAM system.
 
-        If ``endUserName`` and ``key`` are specified, then only data roles enabled by default with the application identity are used. Any data roles explicitly provided by the application are not accepted and will raise an error.
+        For local database users, these data roles can be used to distinguish sessions for the same local user.
     * - ``attributes``
       - Object
       - The attribute-value pairs provided by the application that can be referenced at runtime by authorization policies (for example, in data grant predicates) and application logic.
