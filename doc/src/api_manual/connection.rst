@@ -776,6 +776,10 @@ Connection Methods
     This synchronous method clears the end user security context specified on
     a connection.
 
+    This method only clears the security context reference associated with the
+    connection. It does not modify or clear the original
+    :ref:`EndUserSecurityContext <endusersecuritycontextclass>` instance.
+
     This reverts the connection to its original state in which subsequent
     database operations are executed on the connection without any end user
     security context.

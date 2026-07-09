@@ -520,7 +520,7 @@ const dbConfig = require('../../dbconfig.js');
       assert.strictEqual(callArgs[0][0], securityContext);
     });
 
-    it("327.1.18 Replacing thin security context clears previous payload", () => {
+    it("327.1.18 Replacing thin security context keeps a direct reference", () => {
       const impl = Object.create(Object.getPrototypeOf(connection._impl));
       impl._protocol = {
         caps: {
@@ -537,21 +537,17 @@ const dbConfig = require('../../dbconfig.js');
         endUserToken: "user-token-replace-two",
       });
 
-      let clearCount = 0;
-      const originalClear = firstSecurityContext.clearEncodedPayload.bind(
-        firstSecurityContext
-      );
-      firstSecurityContext.clearEncodedPayload = () => {
-        clearCount++;
-        originalClear();
-      };
-
       impl.setEndUserSecurityContext(firstSecurityContext);
+      const firstPayload = payloadForWire(firstSecurityContext);
       impl.setEndUserSecurityContext(secondSecurityContext);
 
-      assert.strictEqual(clearCount, 1);
       assert.strictEqual(impl.securityContext, secondSecurityContext);
+      assert.deepStrictEqual(payloadForWire(firstSecurityContext), firstPayload);
       assert(Buffer.isBuffer(secondSecurityContext.getDeobfuscatedValue()));
+      assert.deepStrictEqual(
+        payloadForWire(impl.securityContext),
+        payloadForWire(secondSecurityContext),
+      );
     });
   });
 
@@ -641,7 +637,29 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.2.5 Clearing without a previously set security context", () => {
+    it("327.2.5 Clearing thin security context preserves caller-owned payload", () => {
+      const impl = Object.create(Object.getPrototypeOf(connection._impl));
+      impl._protocol = {
+        caps: {
+          supportsEndUserSecurityContext: true,
+        },
+      };
+
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-clear-preserve",
+        endUserToken: "user-token-clear-preserve",
+      });
+
+      const originalPayload = payloadForWire(securityContext);
+
+      impl.setEndUserSecurityContext(securityContext);
+      impl.clearEndUserSecurityContext();
+
+      assert.deepStrictEqual(payloadForWire(securityContext), originalPayload);
+      assert.strictEqual(impl.securityContext, null);
+    });
+
+    it("327.2.6 Clearing without a previously set security context", () => {
       const stub = createStubConnection();
       const callArgs = [];
       stub._impl.clearEndUserSecurityContext = (...args) => {
@@ -1060,7 +1078,7 @@ const dbConfig = require('../../dbconfig.js');
       });
     });
 
-    it("327.5.11 Non-string databaseAccessToken values", () => {
+    it("327.5.12 Non-string databaseAccessToken values", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1071,7 +1089,7 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.12 Missing both endUserToken and endUserName", () => {
+    it("327.5.13 Missing both endUserToken and endUserName", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1081,7 +1099,7 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.13 Empty endUserToken", () => {
+    it("327.5.14 Empty endUserToken", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1092,7 +1110,7 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.14 Whitespace-only token strings", () => {
+    it("327.5.15 Whitespace-only token strings", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1112,7 +1130,7 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.15 Null-valued endUserToken is rejected", () => {
+    it("327.5.16 Null-valued endUserToken is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1123,7 +1141,7 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.16 Null-valued endUserName is rejected", () => {
+    it("327.5.17 Null-valued endUserName is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1135,7 +1153,7 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.17 Empty key is rejected", () => {
+    it("327.5.18 Empty key is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1147,7 +1165,7 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.18 Whitespace-only key is rejected", () => {
+    it("327.5.19 Whitespace-only key is rejected", () => {
       assert.throws(
         () =>
           new oracledb.EndUserSecurityContext({
@@ -1687,6 +1705,65 @@ const dbConfig = require('../../dbconfig.js');
       assert.notStrictEqual(sessionUser1, sessionUser2);
       assert.strictEqual(sessionContext1.CURRENT_USER, "XS$NULL");
       assert.strictEqual(sessionContext2.CURRENT_USER, "XS$NULL");
+    });
+
+    it("327.6.11 Shared security context survives clear on another connection", async function() {
+      if (!process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+            !process.env.NODE_ORACLEDB_USER_TOKEN) {
+        this.skip();
+      }
+      const midtierToken = readTokenFromEnv("NODE_ORACLEDB_MIDTIER_TOKEN");
+      const userToken = readTokenFromEnv("NODE_ORACLEDB_USER_TOKEN");
+
+      const conn1 = await oracledb.getConnection(dbConfig);
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1, conn2);
+
+      const sharedContext = makeSecurityContext({
+        databaseAccessToken: midtierToken,
+        endUserToken: userToken,
+      });
+
+      conn1.setEndUserSecurityContext(sharedContext);
+      conn2.setEndUserSecurityContext(sharedContext);
+
+      const firstSessionContext = await getXsSessionContext(conn2);
+      assert(getSessionXsUser(firstSessionContext));
+      assert.strictEqual(firstSessionContext.CURRENT_USER, "XS$NULL");
+
+      conn1.clearEndUserSecurityContext();
+
+      const secondSessionContext = await getXsSessionContext(conn2);
+      assert(getSessionXsUser(secondSessionContext));
+      assert.strictEqual(secondSessionContext.CURRENT_USER, "XS$NULL");
+    });
+
+    it("327.6.12 Shared security context survives close on another connection", async function() {
+      if (!process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+            !process.env.NODE_ORACLEDB_USER_TOKEN) {
+        this.skip();
+      }
+      const midtierToken = readTokenFromEnv("NODE_ORACLEDB_MIDTIER_TOKEN");
+      const userToken = readTokenFromEnv("NODE_ORACLEDB_USER_TOKEN");
+
+      const conn1 = await oracledb.getConnection(dbConfig);
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1, conn2);
+
+      const sharedContext = makeSecurityContext({
+        databaseAccessToken: midtierToken,
+        endUserToken: userToken,
+      });
+
+      conn1.setEndUserSecurityContext(sharedContext);
+      conn2.setEndUserSecurityContext(sharedContext);
+
+      await conn1.close();
+      connectionsToClose.splice(connectionsToClose.indexOf(conn1), 1);
+
+      const sessionContext = await getXsSessionContext(conn2);
+      assert(getSessionXsUser(sessionContext));
+      assert.strictEqual(sessionContext.CURRENT_USER, "XS$NULL");
     });
 
   });

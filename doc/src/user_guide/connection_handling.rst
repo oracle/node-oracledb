@@ -2060,6 +2060,10 @@ Once :meth:`~connection.setEndUserSecurityContext()` is called, the specified
 security context applies to all the subsequent database operations executed on
 that connection for that end user.
 
+When an :ref:`EndUserSecurityContext <endusersecuritycontextclass>` instance
+is passed to :meth:`connection.setEndUserSecurityContext()`, node-oracledb
+keeps a reference to that object.
+
 An example of setting an end-user security context payload on a standalone
 connection is shown below:
 
@@ -2113,6 +2117,10 @@ To clear an end-user security context payload set by a previous call to
 This reverts the connection to its original state in which subsequent database
 operations are executed on the connection without any end-user security
 context.
+
+Calling :meth:`connection.clearEndUserSecurityContext()` removes the reference
+from the connection but does not modify the
+:ref:`EndUserSecurityContext <endusersecuritycontextclass>` instance.
 
 Using this method in node-oracledb Thick mode will raise the error ``NJS-089:
 clearing End User Security Context is not supported by node-oracledb in Thick
