@@ -1,67 +1,71 @@
-/* Added code to display tables without horizontal scrollbars, add an extra line between two paragraphs, and define the line spacing */
+/* Display tables without horizontal scrollbars, add an extra line between
+   two paragraphs in a table, and define the line spacing in tables */
 .wy-table-responsive table td, .wy-table-responsive table th {
     white-space: pre-wrap;
     line-height: 10pt;
 }
 
-/*Added code to correct the font size of bullets in a table */
+/* Correct the font size of bullets in a table */
 .wy-table-responsive table td p {
     font-size: 11pt;
 }
 
-/*Added code to remove the line spacing between bullet lists in a table */
+/* Remove the line spacing between bullet lists in a table */
 .wy-table-responsive table td ul {
     line-height: 0pt;
     margin-bottom: 0pt;
 }
 
-/* Added code to remove the extra white line displayed at the bottom of the code-block in a table */
+/* Remove the extra white line displayed at the bottom of the code-block in
+   a table */
 .wy-table-responsive table td div {
     line-height: 0pt;
     margin-bottom: 0pt;
 }
 
-/* Added code to remove the extra lines displayed in a warning block in a table */
+/* Remove the extra lines displayed in a warning block in a table */
 .wy-table-responsive table td div.warning {
     line-height: 0pt;
     margin-bottom: 0pt;
 }
 
-/* Added code to wrap the code-blocks that are used in a table*/
+/* Wrap the code-blocks that are used in a table */
 .wy-table-responsive table td pre {
     white-space: pre-wrap !important;
 }
 
-/* Added code to align the row headers of tables using the stub-column property to the top and left */
+/* Align table row headers (stub-column cells) to the top and left */
 .wy-table-responsive table th.stub {
     vertical-align: top;
     text-align: left;
 }
 
-/* Added code to add whitespace between the figure and the figure caption */
+/* Add whitespace between the figure and the figure caption */
 figcaption {
     margin-top: 10pt;
 }
 
-/* Added code to add whitespace between the bullet point and text after bullet */
+/* Add whitespace between the bullet point and text after bullet */
 li p {
     padding-left: 5pt;
 }
 
-/* Added code to align code blocks in ordered and unordered lists and remove the extra whitespace after code blocks */
+/* Align code-blocks in ordered and unordered lists and remove the extra
+   whitespace after code-blocks */
 li div.highlight-default.notranslate, li div.highlight-shell.notranslate, li div.highlight-sql.notranslate {
     margin-top: 5pt;
     margin-left: 5pt;
     margin-bottom: 5pt;
 }
 
-/* Added code to make the deprecated, versionadded, versionmodified, and desupported directives bold and font smaller */
+/* Make the deprecated, versionadded, versionmodified, and desupported
+   directives bold and the font smaller */
 .versionmodified {
     font-size: 11pt;
     font-weight: bold;
 }
 
-/* Added code to override the default content width in ReadtheDocs and break long words */
+/* Override the default content width in ReadtheDocs and break long words */
 .wy-nav-content {
     max-width: none;
     word-break: break-word;
