@@ -1915,8 +1915,8 @@ will raise the error ``NJS-184: The namespace can not be empty for Application
 Context``.
 
 The ``NJS-005`` error is raised when you set the ``namespace`` parameter to
-*null* or *undefined*, and also when you set non-array values in the
-``keyValues`` parameter.
+*null* or *undefined*, and also when you set non-array values, including
+*null* and *undefined*, in the ``keyValues`` parameter.
 
 To clear the application context set on a connection, use
 :meth:`connection.clearAppContext()`. This clears all key-value information in

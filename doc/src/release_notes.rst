@@ -19,6 +19,10 @@ node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...
 Common Changes
 ++++++++++++++
 
+#)  Fixed :meth:`connection.appContext()` to raise an error ``NJS-005`` when the
+    ``keyValues`` parameter is set to *null* or *undefined* instead of
+    treating those values as an empty array.
+
 #)  Fixed mismatch between the descriptor override key table and the public
     connection option names.
 

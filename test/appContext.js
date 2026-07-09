@@ -144,8 +144,14 @@ FROM dual`),
         connection.appContext("", [{ traceCtx: "empty_ns_value" }]);
       }, /NJS-184/); // ERR_APP_CONTEXT_EMPTY_NAMESPACE
 
-      connection.appContext(nameSpaceName, null);
-      connection.appContext(nameSpaceName, undefined);
+      assert.throws(() => {
+        connection.appContext(nameSpaceName, null);
+      }, /NJS-005:/);
+
+      assert.throws(() => {
+        connection.appContext(nameSpaceName, undefined);
+      }, /NJS-005:/);
+
       connection.appContext(nameSpaceName, []);
 
       // Non-array keyValues should raise NJS-005 for parameter 2.
