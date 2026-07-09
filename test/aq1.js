@@ -406,7 +406,7 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg2.payload.toString(), "Low Priority Message");
   }); // 217.12
 
-  it('217.13 test correlation', async function() {
+  it('217.13 test correlation and default priority', async function() {
     const queue = await conn.getQueue(rawQueueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -427,6 +427,7 @@ describe('217. aq1.js', function() {
     // Access correlationId directly from the dequeued message object
     assert.strictEqual(msg.correlation, correlationId);
     assert.strictEqual(msg.payload.toString(), "Correlated Message");
+    assert.strictEqual(msg.priority, 0); // default priority value
   }); // 217.13
 
   it('217.14 test message ordering in transaction group', async function() {

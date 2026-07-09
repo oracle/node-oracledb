@@ -314,7 +314,7 @@ AqQueue Methods
           - The unique identifier of the message.
         * - ``numAttempts``
           - Integer
-          - The number of attempts that were made to dequeue the message.
+          - The number of attempts that were made to dequeue the message. This is a read-only attribute.
         * - ``originalMsgId``
           - Buffer
           - The unique identifier of the message in the last queue that generated it.
@@ -323,7 +323,7 @@ AqQueue Methods
           - The payload of the message, depending on the value of :attr:`aqQueue.payloadType`. Note that enqueued Strings are returned as UTF-8 encoded Buffers.
         * - ``priority``
           - Integer
-          - The priority of the message when it was enqueued. A smaller number indicates a higher priority. The priority can be any integer, including negative numbers.
+          - The priority of the message when it was enqueued. A smaller number indicates a higher priority. The priority can be any integer, including negative numbers. The default priority value is *0*.
         * - ``state``
           - Integer
           - The state of the message at the time of the dequeue. It is one of the following constants: :ref:`oracledb.AQ_MSG_STATE_READY <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_WAITING <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_PROCESSED <oracledbconstantsaq>`, or :ref:`oracledb.AQ_MSG_STATE_EXPIRED <oracledbconstantsaq>`.

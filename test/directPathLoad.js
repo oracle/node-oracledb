@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -35,7 +35,7 @@
 const oracledb = require("oracledb");
 const assert = require("assert");
 const dbconfig = require("./dbconfig.js");
-const testUtil = require("./testsUtil.js");
+const testsUtil = require("./testsUtil.js");
 
 (oracledb.thin ? describe : describe.skip)("321. Direct Path Load Tests", () => {
   let conn;
@@ -64,13 +64,13 @@ const testUtil = require("./testsUtil.js");
         RawData raw(100),
         LongData clob,
         LongRawData blob${closeSql}`;
-      await testUtil.createTable(conn, tableName, sql);
+      await testsUtil.createTable(conn, tableName, sql);
       oracledb.fetchAsBuffer = [ oracledb.BLOB ];
       oracledb.fetchAsString = [ oracledb.CLOB ];
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
       oracledb.fetchAsBuffer = [];
       oracledb.fetchAsString = [];
@@ -159,13 +159,13 @@ const testUtil = require("./testsUtil.js");
     const tableName = "nodb_dp_vec_js";
 
     before(async function() {
-      compatible = testUtil.versionStringCompare(await testUtil.getMajorDBVersion(), '23.0');
+      compatible = testsUtil.versionStringCompare(await testsUtil.getMajorDBVersion(), '23.0');
       if (compatible < 0) this.skip();
 
       conn = await oracledb.getConnection(dbconfig);
 
       // Setup
-      await testUtil.createTable(conn, tableName, `
+      await testsUtil.createTable(conn, tableName, `
         create table ${tableName} (
         id number,
         charCol varchar2(100),
@@ -178,7 +178,7 @@ const testUtil = require("./testsUtil.js");
 
     after(async () => {
       if (compatible < 0) return;
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -223,7 +223,7 @@ const testUtil = require("./testsUtil.js");
       conn = await oracledb.getConnection(dbconfig);
 
       // Setup table with comprehensive columns
-      await testUtil.createTable(conn, tableName, `
+      await testsUtil.createTable(conn, tableName, `
         create table ${tableName} (
         ID number,
         FIRSTNAME varchar2(100),
@@ -238,7 +238,7 @@ const testUtil = require("./testsUtil.js");
 
     after(async () => {
       if (conn) {
-        await testUtil.dropTable(conn, tableName);
+        await testsUtil.dropTable(conn, tableName);
         await conn.close();
       }
       oracledb.fetchAsBuffer = [];
@@ -381,7 +381,7 @@ const testUtil = require("./testsUtil.js");
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
 
-      await testUtil.createTable(conn, tableName,
+      await testsUtil.createTable(conn, tableName,
         `create table ${tableName} (
           id number,
           intervalDS INTERVAL DAY TO SECOND,
@@ -392,7 +392,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -467,7 +467,7 @@ const testUtil = require("./testsUtil.js");
 
       oracledb.fetchAsString = [ oracledb.CLOB ];
 
-      await testUtil.createTable(conn, tableName,
+      await testsUtil.createTable(conn, tableName,
         `create table ${tableName} (
           id number,
           clobCol clob,
@@ -484,7 +484,7 @@ const testUtil = require("./testsUtil.js");
 
     after(async () => {
       oracledb.fetchAsString = [];
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -616,7 +616,7 @@ const testUtil = require("./testsUtil.js");
 
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
-      await testUtil.createTable(conn, tableName,
+      await testsUtil.createTable(conn, tableName,
         `CREATE TABLE ${tableName} (
           id         NUMBER       NOT NULL,
           firstname  VARCHAR2(100) NOT NULL,
@@ -633,7 +633,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -732,7 +732,7 @@ const testUtil = require("./testsUtil.js");
 
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
-      await testUtil.createTable(conn, tableName, `
+      await testsUtil.createTable(conn, tableName, `
       CREATE TABLE ${tableName} (
         id NUMBER,
         vchar VARCHAR2(10 CHAR),
@@ -742,7 +742,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -750,7 +750,10 @@ const testUtil = require("./testsUtil.js");
       await conn.execute(`TRUNCATE TABLE ${tableName}`);
     });
 
-    it("321.7.1 Load multi-byte UTF-8 characters", async () => {
+    it("321.7.1 Load multi-byte UTF-8 characters", async function() {
+      const charset = await testsUtil.getDBCharSet(conn);
+      if (charset !== 'AL32UTF8') this.skip();
+
       const data = [
         [1, "नमस्ते", "हेलो"],
         [2, "😀😀", "OK"]
@@ -788,7 +791,7 @@ const testUtil = require("./testsUtil.js");
 
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
-      await testUtil.createTable(conn, tableName, `
+      await testsUtil.createTable(conn, tableName, `
       CREATE TABLE ${tableName} (
         id NUMBER,
         num38 NUMBER(38),
@@ -798,7 +801,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -847,7 +850,7 @@ const testUtil = require("./testsUtil.js");
 
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
-      await testUtil.createTable(conn, tableName, `
+      await testsUtil.createTable(conn, tableName, `
       CREATE TABLE ${tableName} (
         id NUMBER,
         ts TIMESTAMP,
@@ -857,7 +860,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -887,7 +890,7 @@ const testUtil = require("./testsUtil.js");
 
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
-      await testUtil.createTable(conn, tableName, `
+      await testsUtil.createTable(conn, tableName, `
       CREATE TABLE ${tableName} (
         id NUMBER PRIMARY KEY,
         name VARCHAR2(20) UNIQUE
@@ -896,7 +899,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -929,7 +932,7 @@ const testUtil = require("./testsUtil.js");
 
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
-      await testUtil.createTable(conn, tableName, `
+      await testsUtil.createTable(conn, tableName, `
       CREATE TABLE ${tableName} (
         id NUMBER NOT NULL,
         name VARCHAR2(10) NOT NULL
@@ -938,7 +941,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 
@@ -974,7 +977,7 @@ const testUtil = require("./testsUtil.js");
 
     before(async () => {
       conn = await oracledb.getConnection(dbconfig);
-      await testUtil.createTable(conn, tableName,
+      await testsUtil.createTable(conn, tableName,
         `CREATE TABLE ${tableName}(
           ID NUMBER,
           NAME VARCHAR2(100)
@@ -982,7 +985,7 @@ const testUtil = require("./testsUtil.js");
     });
 
     after(async () => {
-      await testUtil.dropTable(conn, tableName);
+      await testsUtil.dropTable(conn, tableName);
       await conn.close();
     });
 

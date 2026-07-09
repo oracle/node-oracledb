@@ -4824,7 +4824,7 @@ Overview of node-oracledb functional tests
     217.10 get numAttempts attribute
     217.11 get numAttempts attribute
     217.12 test priority attribute in enqueue
-    217.13 test correlation
+    217.13 test correlation and default priority
     217.14 test message ordering in transaction group
     217.15 test dequeue with wait timeout
     217.16 test buffer message payload - 32KB

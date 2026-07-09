@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,8 +40,8 @@ const testsUtil = require('./testsUtil.js');
 
 describe('224. booleanBind.js', function()  {
 
-  var  conn;
-  var  isRunnable = false;
+  let conn;
+  let isRunnable = false;
   let isThickModeUnsupported = false;
 
   const pkgName = 'NODB_PKG_TEST_BOOLEANS';
@@ -169,6 +169,10 @@ describe('224. booleanBind.js', function()  {
   }); // after()
 
   it('224.1 IN bind boolean value', async function() {
+    if (isThickModeUnsupported) {
+      this.skip();
+    }
+
     const  binds = {
       inval: true,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
@@ -180,6 +184,10 @@ describe('224. booleanBind.js', function()  {
   }); // 224.1
 
   it('224.2 IN bind value "false"', async function() {
+    if (isThickModeUnsupported) {
+      this.skip();
+    }
+
     const  binds = {
       inval: false,
       outval: { dir: oracledb.BIND_OUT, type: oracledb.STRING, maxSize: 10 }
