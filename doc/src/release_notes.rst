@@ -32,6 +32,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for connecting to accounts whose password only carries the
+    legacy 10G (case-insensitive, DES) password verifier, matching Thick mode.
+    Previously, such connections failed with ``NJS-116``. See
+    :ref:`pwverifier`.
+
 #)  Fixed bug where database object types with more than 100 attributes
     are truncated or an error is thrown.
     See `Issue #1782 <https://github.com/oracle/node-oracledb/issues/1782>`__.

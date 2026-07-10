@@ -152,24 +152,13 @@ NJS-116
     :summary: The first row displays the NJS-116 error message. The second row displays the probable cause for the NJS-116 error. The third row displays the possible solution to resolve the NJS-116 error.
 
     * - Message
-      - ``NJS-116: password verifier type 0x939 is not supported by node-oracledb in Thin mode.``
+      - ``NJS-116: password verifier type <verifier-type> is not supported by node-oracledb in Thin mode.``
     * - Cause
-      - Connecting to Oracle Database with node-oracledb Thin mode failed because your user account was only created with a 10G password verifier. Node-oracledb Thin mode supports password verifiers 11G and later. See :ref:`pwverifier`.
+      - Connecting to Oracle Database with node-oracledb Thin mode failed because your user account uses a password verifier that node-oracledb Thin mode does not support. Node-oracledb Thin and Thick modes support password verifiers 10G and later. See :ref:`pwverifier`.
     * - Action
-      - You can either:
-
-        - Database administrators can verify if your username only uses the 10G password verifier with this query:
-
-          .. code-block:: sql
-
-                SELECT USERNAME FROM DBA_USERS
-                WHERE ( PASSWORD_VERSIONS = '10G '
-                OR PASSWORD_VERSIONS = '10G HTTP ')
-                AND USERNAME <> 'ANONYMOUS';
-
-          If your username uses the 10G password verifier, then you need to upgrade your password verifier in Oracle Database to 11G or later to use node-oracledb Thin mode. To upgrade your password verifier, see `Finding and Resetting User Passwords That Use the 10G Password Verifier <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D7B09DFE-F55D-449A-8F8A-174D89936304>`__ for the detailed steps.
-
-        - Or :ref:`enable Thick mode <enablingthick>` since node-oracledb Thick mode supports password verifiers 10G and later.
+      - Reset the account's password so that Oracle Database generates a
+        password verifier supported by node-oracledb Thin mode (10G or later),
+        or :ref:`enable Thick mode <enablingthick>`.
 
 .. _oraerr:
 

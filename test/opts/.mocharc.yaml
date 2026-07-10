@@ -310,3 +310,4 @@ spec:
   - test/appContext.js
   - test/dbObject22.js
   - test/endUserSecurityContext.js
+  - test/verifier10G.js

@@ -6775,3 +6775,6 @@ Overview of node-oracledb functional tests
   328. endUserSecurityContext.js
     328.1 EndUserSecurityContext attributes
       328.1.1 ignores non-enumerable nested attribute properties
+
+  329. verifier10G.js
+    329.1 connects in Thin mode to a 10G-only password verifier account
