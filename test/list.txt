@@ -6831,3 +6831,6 @@ Overview of node-oracledb functional tests
     328.2 quotes ORA_SDTZ values that contain SQL metacharacters
     328.3 formats the local timezone when ORA_SDTZ is not set
     328.4 formats the local timezone when ORA_SDTZ is empty
+
+  329. verifier10G.js
+    329.1 connects in Thin mode to a 10G-only password verifier account

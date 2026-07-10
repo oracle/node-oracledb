@@ -309,3 +309,4 @@ spec:
   - test/sqlAssert.js
   - test/appContext.js
   - test/securityContext.js
+  - test/verifier10G.js

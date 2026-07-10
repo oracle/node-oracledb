@@ -13,6 +13,17 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
+node-oracledb v7.1.0 (unreleased)
+-----------------------------------------
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Added support for connecting to accounts whose password only carries the
+    legacy 10G (case-insensitive, DES) password verifier, matching Thick mode.
+    Previously, such connections failed with ``NJS-116``. See
+    :ref:`pwverifier`.
+
 node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0...v7.0.0>`__ (2 Jun 2025)
 -----------------------------------------------------------------------------------------------------------
 

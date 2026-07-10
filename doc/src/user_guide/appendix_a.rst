@@ -559,10 +559,9 @@ versions. The password verifier can be 10G (case-insensitive Oracle password
 verifier), 11G (SHA-1-based password verifier), and 12C (SHA-2-based SHA-512
 password verifier).
 
-Node-oracledb Thin mode supports password verifiers 11G and later.
-Node-oracledb Thick mode supports password verifiers 10G and later. To view
-all the password verifiers configured for the user accounts, use the following
-query:
+Node-oracledb Thin and Thick modes support password verifiers 10G and later.
+To view all the password verifiers configured for the user accounts, use the
+following query:
 
 .. code-block:: sql
 
@@ -570,10 +569,6 @@ query:
 
 The ``PASSWORD_VERSIONS`` column lists all the password verifiers that exist
 for the user.
-
-If you try to connect to any supported Oracle Database with node-oracledb Thin
-mode, but the user account is created only with the 10G password verifier,
-then the connection will fail with the :ref:`njs116` error.
 
 .. _pooldiff:
 
