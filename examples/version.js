@@ -70,8 +70,7 @@ async function run() {
     // console.log("Oracle Database version       :", connection.oracleServerVersion); // numeric version format
 
     const result = await connection.execute(
-      `SELECT UNIQUE CLIENT_DRIVER
-       FROM V$SESSION_CONNECT_INFO
+      `SELECT UNIQUE CLIENT_DRIVER FROM V$SESSION_CONNECT_INFO
        WHERE SID = SYS_CONTEXT('USERENV', 'SID')`);
     console.log("CLIENT_DRIVER                 :", result.rows[0][0].replace(': ', ''));
 

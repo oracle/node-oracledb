@@ -3135,6 +3135,8 @@ function record the following:
     * - ``poolMaxPerShard``
       - :attr:`~pool.poolMaxPerShard`
       - The maximum number of connections in the pool that can be used for any given shard in a sharded database.
+
+        This attribute is only supported in node-oracledb Thick mode. In Thick mode, the default value is *0*. In Thin mode, this attribute returns *undefined*.
     * - ``poolMin``
       - :attr:`~pool.poolMin`
       - The minimum number of connections a connection pool maintains, even when there is no activity to the target database.
@@ -3162,6 +3164,8 @@ function record the following:
     * - ``sodaMetaDataCache``
       - :attr:`~pool.sodaMetaDataCache`
       - Determines whether the pool has a metadata cache enabled for SODA collection access.
+
+        This attribute is only supported in node-oracledb Thick mode. In Thick mode, the default value is *false*. In Thin mode, this attribute returns *undefined*.
     * - ``stmtCacheSize``
       - :attr:`~pool.stmtCacheSize`
       - The number of statements to be cached in the statement cache of each connection.
