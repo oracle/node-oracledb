@@ -54,7 +54,7 @@ environments.
 
 The Connection properties :attr:`~connection.action`,
 :attr:`~connection.module`, :attr:`~connection.clientId`,
-:attr:`~connection.clientInfo`, :attr:`~connection.ecId`, and
+:attr:`~connection.clientInfo`, :attr:`~connection.ecid`, and
 :attr:`~connection.dbOp` set metadata for `end-to-end tracing
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-246A5A52-E666
 -4DBC-BDF6-98B83260A7AD>`__. The values can be tracked in database views,

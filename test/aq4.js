@@ -1,4 +1,4 @@
-/* Copyright (c) 2022, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2022, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -196,7 +196,7 @@ describe('267. aq4.js', function() {
           recipients: [1, 3, 5]
         });
       },
-      /NJS-007:/
+      /NJS-004:/
     );
   }); // 267.3
 
@@ -213,7 +213,7 @@ describe('267. aq4.js', function() {
           recipients: [1, "abc", new Date(2022, 5, 17)]
         });
       },
-      /NJS-007:/
+      /NJS-004:/
     );
   }); // 267.4
 
@@ -230,7 +230,7 @@ describe('267. aq4.js', function() {
           recipients: [ null ]
         });
       },
-      /NJS-007:/
+      /NJS-004:/
     );
   }); // 267.5
 
@@ -247,7 +247,7 @@ describe('267. aq4.js', function() {
           recipients: [ undefined ]
         });
       },
-      /NJS-007:/
+      /NJS-004:/
     );
   }); // 267.6
 
@@ -367,7 +367,7 @@ describe('267. aq4.js', function() {
         }
         await queue1.enqMany(msgList);
       },
-      /NJS-007:/
+      /NJS-004:/
     );
   }); // 267.11
 

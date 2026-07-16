@@ -26,9 +26,9 @@ oracledb>`__, and `yum.oracle.com <https://yum.oracle.com/oracle-linux-nodejs
 hosted at `github.com/oracle/node-oracledb <https://github.com/oracle/
 node-oracledb>`__.
 
-This module is currently tested with Node.js 16, 18, 20, 22, and 23 against
-Oracle Database 26, 21, 19, 12, and 11.2 on Oracle Linux x86_64 (releases 7
-and 8), Oracle Linux ARM (aarch64, release 8), Windows, and macOS.
+This module is currently tested with Node.js 18, 20, 22, and 23 against
+Oracle Database 26, 21, 19, 12, and 11.2 on Oracle Linux x86_64 (release 8),
+Oracle Linux ARM (aarch64, release 8), Windows, and macOS.
 Node-oracledb may run on other platforms, and with other Node.js versions, if
 they are `Node-API <https://nodejs.org/api/n-api.html>`__ version 4
 compatible. Previous versions of node-oracledb may work with older versions of

@@ -922,12 +922,9 @@ bool njsUtils_getDateValue(uint32_t varTypeNum, napi_env env,
     NJS_CHECK_NAPI(env, napi_create_uint32(env,
             timestamp->fsecond / (1000 * 1000), &args[7]))
     if (!useLocal) {
-        tzOffset = timestamp->tzHourOffset * 60;
-        if (tzOffset < 0) {
-            tzOffset -= timestamp->tzMinuteOffset;
-        } else {
-            tzOffset += timestamp->tzMinuteOffset;
-        }
+         // tzMinuteOffset carries the same sign as tzHourOffset (e.g. for
+         // -03:30, tzHourOffset is -3 and tzMinuteOffset is -30)
+        tzOffset = timestamp->tzHourOffset * 60 + timestamp->tzMinuteOffset;
     }
     NJS_CHECK_NAPI(env, napi_create_int32(env, tzOffset,
             &args[8]))

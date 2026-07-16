@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -34,7 +34,6 @@
 const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
 
 describe('214. dbObject15.js', () => {
 
@@ -133,15 +132,7 @@ describe('214. dbObject15.js', () => {
   }); // 214.1
 
   describe('214.2 Copy function with VARRAY DbObject collection type', function() {
-    let isRunnable = true;
     before(async function() {
-      // Skip the copy tests for varrays for Oracle  Client libraries <= 12.1
-      // as the contents are not copied correctly.
-      if (testsUtil.getClientVersion() < 1202000000) {
-        isRunnable = false;
-        this.skip();
-      }
-
       conn = await oracledb.getConnection(dbConfig);
 
       let plsql = `
@@ -162,8 +153,6 @@ describe('214. dbObject15.js', () => {
     }); // before()
 
     after(async () => {
-      if (!isRunnable) return;
-
       let sql = `DROP TYPE ${TEAM_T} FORCE`;
       await conn.execute(sql);
 

@@ -380,7 +380,14 @@ describe('325. sqlAssert.js', function() {
   });
 
   describe('325.6 Functional integration tests', function() {
-    const tablePrefix = 'njs_sql_assert_fn_';
+    let tablePrefix;
+
+    before(() => {
+      if (conn.oracleServerVersion < 1900000000)
+        tablePrefix = 'sql_assert_'; //keep the variable length under 30
+      else
+        tablePrefix = 'njs_sql_assert_fn_';
+    });
 
     it('325.6.1 safe dynamic SQL', async () => {
       const rawTableName = `${tablePrefix}${Date.now()}`;

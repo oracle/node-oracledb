@@ -72,7 +72,8 @@ Only node-oracledb :ref:`Thick mode <enablingthick>` supports the use of:
 
 - :ref:`Advanced Queuing Notifications <aqnotifications>`
 
-- Visibility constant :data:`oracledb.AQ_VISIBILITY_IMMEDIATE` in
+- Visibility constant
+  :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>` in
   :meth:`aqQueue.enqMany()` and :meth:`aqQueue.deqMany()` methods
 
 The ``payloadType`` attribute in :meth:`connection.getQueue()` must be

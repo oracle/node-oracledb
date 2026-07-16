@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -771,10 +771,6 @@ describe('58. properties.js', function() {
     });
 
     it('58.3.9 callTimeout', function() {
-      // An exception will occur if node-oracledb Thick mode is not using
-      // Oracle Client library version 18.1 or later.
-      if (testsUtil.getClientVersion() < 1801000000) this.skip();
-
       const origCallTimeout = connection.callTimeout;
       assert.strictEqual(typeof origCallTimeout, 'number');
 

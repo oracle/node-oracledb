@@ -75,7 +75,7 @@ internal buffers allocated for ``prefetchRows`` and ``arraysize`` are separate,
 so increasing both settings will require more Node.js process memory.  Queries
 that return LOBs and similar types will never prefetch rows, so the
 ``prefetchRows`` value is ignored in those cases. Note when using
-:meth:`getRows(numRows) <resultset.getrows()>`, where ``numRows`` is greater
+:meth:`getRows(numRows) <resultset.getRows()>`, where ``numRows`` is greater
 than 0, then tuning of "array fetching" is based on the ``numRows`` value
 instead of ``fetchArraySize``.
 

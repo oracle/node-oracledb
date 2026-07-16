@@ -225,7 +225,7 @@ testsUtil.dropDomain = async function(conn, domainName) {
   await conn.execute(plsql);
 };
 
-testsUtil.checkPrerequisites = async function(clientVersion = 1805000000, serverVersion = 1805000000) {
+testsUtil.checkPrerequisites = async function(clientVersion = 1900000000, serverVersion = 1805000000) {
   if (!oracledb.thin && testsUtil.getClientVersion() < clientVersion) return false;
   const connection = await oracledb.getConnection(dbConfig);
   const version = connection.oracleServerVersion;
@@ -343,7 +343,8 @@ testsUtil.getDBCompatibleVersion = async function() {
   return compatibleVersion;
 };
 
-// Get the major version (e.g., '23.1') from the database server version string (e.g., `23.1.0.23.0`)
+// Get the major version (e.g., '23.1') from the database server version
+// string (e.g., `23.1.0.23.0`)
 testsUtil.getMajorDBVersion = async function() {
   let connection, majorDBVersion;
   try {

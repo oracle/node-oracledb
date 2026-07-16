@@ -60,9 +60,13 @@ AqQueue Properties
         * - ``consumerName``
           - String
           - This read/write property is the name of the consumer that is dequeuing messages. Only messages matching the consumer name will be accessed. If the queue is not set up for multiple consumers, then this attribute should not be set.
+
+            The maximum length of this property is 128 characters. If the value exceeds the limit, the ``NJS-193`` error is raised.
         * - ``correlation``
           - String
           - This read/write property is the correlation to use when dequeuing. Special pattern-matching characters, such as the percent sign (%) and the underscore (_), can be used. If multiple messages satisfy the pattern, the order of dequeuing is indeterminate.
+
+            The maximum length of this property is 128 characters. If the value exceeds the limit, the ``NJS-193`` error is raised.
         * - ``deliveryMode``
           - Integer
           - This write-only property is the delivery mode when dequeuing messages. It can be one of the following constants: :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_DELIV_MODE_BUFFERED <oracledbconstantsaq>`, or :ref:`oracledb.AQ_MSG_DELIV_MODE_PERSISTENT_OR_BUFFERED <oracledbconstantsaq>`.
@@ -84,6 +88,8 @@ AqQueue Properties
           - This read/write property is the transformation that will take place on messages when they are dequeued. The transformation must be created using dbms_transform.
 
             This attribute is only supported in node-oracledb :ref:`Thick mode <enablingthick>` and is not supported in Transactional Event Queues (TxEventQ).
+
+            The maximum length of this property is 128 characters. If the value exceeds the limit, the ``NJS-193`` error is raised.
         * - ``visibility``
           - Integer
           - This read/write property defines whether the dequeue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
@@ -134,6 +140,8 @@ AqQueue Properties
           - This read/write property is the transformation that will take place when messages are enqueued. The transformation must be created using dbms_transform.
 
             This attribute is only supported in node-oracledb :ref:`Thick mode <enablingthick>` and is not supported in Transactional Event Queues (TxEventQ).
+
+            The maximum length of this property is 128 characters. If the value exceeds the limit, the ``NJS-193`` error is raised.
         * - ``visibility``
           - Integer
           - This read/write property defines whether the enqueue occurs in the current transaction or as a separate transaction. It can be one of the following constants: :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>`, :ref:`oracledb.AQ_VISIBILITY_ON_COMMIT <oracledbconstantsaq>`.
@@ -306,7 +314,7 @@ AqQueue Methods
           - The unique identifier of the message.
         * - ``numAttempts``
           - Integer
-          - The number of attempts that were made to dequeue the message.
+          - The number of attempts that were made to dequeue the message. This is a read-only attribute.
         * - ``originalMsgId``
           - Buffer
           - The unique identifier of the message in the last queue that generated it.
@@ -315,7 +323,7 @@ AqQueue Methods
           - The payload of the message, depending on the value of :attr:`aqQueue.payloadType`. Note that enqueued Strings are returned as UTF-8 encoded Buffers.
         * - ``priority``
           - Integer
-          - The priority of the message when it was enqueued. A smaller number indicates a higher priority. The priority can be any integer, including negative numbers.
+          - The priority of the message when it was enqueued. A smaller number indicates a higher priority. The priority can be any integer, including negative numbers. The default priority value is *0*.
         * - ``state``
           - Integer
           - The state of the message at the time of the dequeue. It is one of the following constants: :ref:`oracledb.AQ_MSG_STATE_READY <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_WAITING <oracledbconstantsaq>`, :ref:`oracledb.AQ_MSG_STATE_PROCESSED <oracledbconstantsaq>`, or :ref:`oracledb.AQ_MSG_STATE_EXPIRED <oracledbconstantsaq>`.
@@ -450,12 +458,16 @@ AqQueue Methods
         * - ``correlation``
           - String
           - The correlation of the message to be enqueued.
+
+            The maximum length of this attribute is 128 characters. If the value exceeds the limit, the ``NJS-193`` error is raised.
         * - ``delay``
           - Number
           - The number of seconds to delay the message before it can be dequeued.
         * - ``exceptionQueue``
           - String
           - The name of an exception queue in which to place the message if an exception takes place.
+
+            The maximum length of this attribute is 128 characters. If the value exceeds the limit, the ``NJS-193`` error is raised.
         * - ``expiration``
           - Number
           - The number of seconds the message is available to be dequeued before it expires. This attribute is an offset from the ``delay`` attribute. Expiration processing requires the queue monitor to be running.
@@ -468,6 +480,8 @@ AqQueue Methods
         * - ``recipients``
           - Array of strings
           - An array of strings where each string is a recipients name. This allows a limited set of recipients to dequeue each message. The recipients associated with the message overrides the queue subscriber list, if there is one. The recipient names need not be in the subscriber list but can be, if desired.
+
+            The maximum array length of this property is 1024. The maximum length of each individual recipient name is 128 characters. If these values exceed the limits, then the ``NJS-193`` error is raised.
 
             To dequeue a message, the ``consumerName`` attribute can be set to one of the recipient names. The original message recipient list is not available on dequeued messages. All recipients have to dequeue a message before it gets removed from the queue.
 

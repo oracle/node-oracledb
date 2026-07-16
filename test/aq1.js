@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -406,7 +406,7 @@ describe('217. aq1.js', function() {
     assert.strictEqual(msg2.payload.toString(), "Low Priority Message");
   }); // 217.12
 
-  it('217.13 test correlation', async function() {
+  it('217.13 test correlation and default priority', async function() {
     const queue = await conn.getQueue(rawQueueName);
     queue.enqOptions.visibility = oracledb.AQ_VISIBILITY_IMMEDIATE;
 
@@ -427,6 +427,7 @@ describe('217. aq1.js', function() {
     // Access correlationId directly from the dequeued message object
     assert.strictEqual(msg.correlation, correlationId);
     assert.strictEqual(msg.payload.toString(), "Correlated Message");
+    assert.strictEqual(msg.priority, 0); // default priority value
   }); // 217.13
 
   it('217.14 test message ordering in transaction group', async function() {
@@ -488,7 +489,7 @@ describe('217. aq1.js', function() {
 
   it('217.17 test large buffer message payload - 1MB', async function() {
     // 1 MB message does not work in Oracle Databases 19c or earlier
-    if (await conn.oracleServerVersion < 2304000000)
+    if (conn.oracleServerVersion < 2304000000)
       this.skip();
 
     const queue = await conn.getQueue(rawQueueName);
@@ -632,5 +633,48 @@ describe('217. aq1.js', function() {
     // Message should not be available yet due to delay
     const msg = await queue2.deqOne();
     assert.strictEqual(msg, undefined);
-  }); // 218.22
+  }); // 217.22
+
+  it('217.23 Test validations for AQ enqOptions/deqOptions', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+
+    // deqOptions
+    assert.throws(() => queue.deqOptions.consumerName = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.deqOptions.correlation = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.deqOptions.transformation = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.deqOptions.deliveryMode = 0, /NJS-004:/);
+    assert.throws(() => queue.deqOptions.mode = 0, /NJS-004:/);
+    assert.throws(() => queue.deqOptions.navigation = 0, /NJS-004:/);
+    assert.throws(() => queue.deqOptions.visibility = 0, /NJS-004:/);
+
+    // enqOptions
+    assert.throws(() => queue.enqOptions.transformation = "A".repeat(129), /NJS-193:/);
+    assert.throws(() => queue.enqOptions.deliveryMode = 0, /NJS-004:/);
+    assert.throws(() => queue.enqOptions.visibility = 0, /NJS-004:/);
+  });
+
+  it('217.24 Test validations for AQ message properties', async function() {
+    const queue = await conn.getQueue(rawQueueName);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", correlation: "A".repeat(129)});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", exceptionQueue: "A".repeat(129)});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", recipients: Array(1025)});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", recipients: ["A".repeat(129)]});
+    }, /NJS-193:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", delay: "0"});
+    }, /NJS-007:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", expiration: -2});
+    }, /ORA-25209:/);
+    await assert.rejects(async () => {
+      await queue.enqOne({payload: "Testing", priority: "1"});
+    }, /NJS-007:/);
+  });
 });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -45,14 +45,14 @@ describe('241. dbType04.js', function() {
 
   before(async function() {
 
-    conn = await oracledb.getConnection(dbConfig);
-
-    if (testsUtil.getClientVersion() >= 2100000000 && conn.oracleServerVersion >= 2100000000) {
+    if (await testsUtil.checkPrerequisites(2100000000, 2100000000)) {
       isRunnable = true;
     }
     if (!isRunnable) {
       this.skip();
     }
+
+    conn = await oracledb.getConnection(dbConfig);
 
     const sql = `
       create table ${TABLE} (
@@ -67,11 +67,7 @@ describe('241. dbType04.js', function() {
 
   after(async function() {
 
-    if (!isRunnable) {
-      if (conn)
-        await conn.close();
-      return;
-    }
+    if (!isRunnable) return;
 
     const sql = `drop table ${TABLE} purge`;
     await conn.execute(sql);

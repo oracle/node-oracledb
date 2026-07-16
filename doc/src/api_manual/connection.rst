@@ -776,6 +776,10 @@ Connection Methods
     This synchronous method clears the end user security context specified on
     a connection.
 
+    This method only clears the security context reference associated with the
+    connection. It does not modify or clear the original
+    :ref:`EndUserSecurityContext <endusersecuritycontextclass>` instance.
+
     This reverts the connection to its original state in which subsequent
     database operations are executed on the connection without any end user
     security context.
@@ -1602,7 +1606,7 @@ Connection Methods
 
             This property is an object. For ``SELECT`` statements, when the :ref:`resultSet <executeoptions>` option is *true*, use the ``resultSet`` object to fetch rows. See :ref:`ResultSet Class <resultsetclass>` and :ref:`Fetching Rows with ResultSets <resultsethandling>`.
 
-            When using this option, :meth:`resultSet.close()` must be called when the ResultSet is no longer needed. This is true whether or not rows have been fetched from the ResultSet.
+            When using this option, :meth:`resultset.close()` must be called when the ResultSet is no longer needed. This is true whether or not rows have been fetched from the ResultSet.
         * - ``rows``
           - .. _execrows:
 
@@ -2935,7 +2939,7 @@ Connection Methods
     This detaches the transaction from the connection, allowing it to be
     resumed later with the transaction identifier that was specified when
     creating the sessionless transaction. Also, the timeout value defined in
-    :meth:`Connection.beginSessionlessTransaction()` comes into effect and
+    :meth:`connection.beginSessionlessTransaction()` comes into effect and
     determines how long the transaction can stay suspended.
 
     See :ref:`sessionlesstxns`.

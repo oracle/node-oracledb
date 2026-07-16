@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -57,14 +57,14 @@ describe('243. dbObject19.js', () => {
   }); // before()
 
   after(async () => {
+    // restore dbObjectAsPojo to default value
+    oracledb.dbObjectAsPojo = false;
+    assert.strictEqual(oracledb.dbObjectAsPojo, false);
+
     const sql = `DROP TYPE ${TYPE} FORCE`;
     await conn.execute(sql);
 
     await conn.close();
-
-    // restore dbObjectAsPojo to default value
-    oracledb.dbObjectAsPojo = false;
-    assert.strictEqual(oracledb.dbObjectAsPojo, false);
   }); // after()
 
   describe('243.1 set global attribute oracledb.dbObjectAsPojo to true', () => {

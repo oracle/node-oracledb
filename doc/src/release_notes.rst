@@ -13,6 +13,52 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
+node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...v7.0.1>`__ (TBD)
+-----------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+#)  Fixed :meth:`connection.appContext()` to raise an error ``NJS-005`` when
+    the ``keyValues`` parameter is set to *null* or *undefined* instead of
+    treating those values as an empty array.
+
+#)  Fixed mismatch between the descriptor override key table and the public
+    connection option names.
+
+#)  Fixed bug to use the operating system trust store when the
+    ``walletLocation`` property is set to the keyword SYSTEM.
+
+#)  Fixed bug to throw proper validation errors in AQ with ``consumerName``,
+    ``correlation``, ``recipients``, ``transformation``, and
+    ``exceptionQueue`` properties.
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed bug with sharing
+    :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`
+    across connections.
+
+#)  Fixed bug to make the ``key`` attribute optional when ``endUserName`` is
+    specified in
+    :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`.
+
+#)  Improved error message handling.
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Fixed bug to correct the timezone offset calculation for negative
+    fractional offsets.
+    See `Issue #1776 <https://github.com/oracle/node-oracledb/issues/1776>`__.
+    (Slawomir Osoba)(HeyParth).
+
+#)  Fixed bug to allow a proxy user to be used with
+    :ref:`token-based authentication <tokenbasedauthentication>` when creating
+    standalone connections (`ODPI-C <https://github.com/oracle/odpi>`__
+    change).
+
 node-oracledb `v7.0.0 <https://github.com/oracle/node-oracledb/compare/v6.10.0...v7.0.0>`__ (2 Jun 2025)
 -----------------------------------------------------------------------------------------------------------
 
@@ -201,7 +247,7 @@ Common Changes
     Database Releases <https://support.oracle.com/epmos/faces/
     DocumentDisplay?id=742060.1>`__.
 
-#)  Fixed NJS-089 error to display the correct driver mode.
+#)  Fixed `NJS-089` error to display the correct driver mode.
 
 Thin Mode Changes
 +++++++++++++++++
@@ -1425,7 +1471,7 @@ node-oracledb `v5.4.0 <https://github.com/oracle/node-oracledb/compare/v5.3.0...
     <iamtokenbasedauthentication>` when establishing pool based connections
     and standalone connections.
 
-#)  Added code to capture the :attr:`error stack <stack>`. PR #1467
+#)  Added code to capture the :attr:`error stack <error.stack>`. PR #1467
     (Slawomir Osoba).
 
 #)  Added code to keep the method name in internally bound functions.
@@ -1740,10 +1786,11 @@ node-oracledb `v4.2.0 <https://github.com/oracle/node-oracledb/compare/v4.1.0...
     support for Continuous Query Notification (CQN) and other subscription
     based notifications.
 
-#)  Added :attr:`result.lastRowid` to ``execute()``. It contains the ROWID of
-    the last row affected by an INSERT, UPDATE, DELETE or MERGE statement.
+#)  Added `result.lastRowid <execlastrowid>` to ``execute()``. It contains the
+    ROWID of the last row affected by an INSERT, UPDATE, DELETE or MERGE
+    statement.
 
-#)  Changed the Error object :attr:`offset` to be 32-bit, allowing the
+#)  Changed the Error object :attr:`error.offset` to be 32-bit, allowing the
     :ref:`batchErrors <executemanyoptbatcherrors>` mode of ``executeMany()``
     to show row ``offset`` values up to (2^32)-1 (`ODPI-C change
     <https://github.com/oracle/odpi/commit/294d5966cd513d0c29fdeec3

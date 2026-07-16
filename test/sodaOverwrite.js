@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -44,9 +44,8 @@ describe('189. sodaOverwrite.js', function() {
 
     const isSodaRunnable = await testsUtil.isSodaRunnable();
 
-    const clientVersion = testsUtil.getClientVersion();
     let isClientOK;
-    if (clientVersion < 2000000000) {
+    if (testsUtil.getClientVersion() < 2000000000) {
       isClientOK = false;
     } else {
       isClientOK = true;

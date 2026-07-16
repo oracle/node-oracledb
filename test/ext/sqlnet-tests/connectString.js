@@ -48,6 +48,7 @@ describe('1. Connect string checks', function() {
       throw new Error('Hostname is not Set! Set env variable NODE_ORACLEDB_HOST');
     if (!process.env.NODE_ORACLEDB_SERVICENAME)
       throw new Error('servicename is not Set! Set env variable NODE_ORACLEDB_SERVICENAME');
+
   });
   const host = process.env.NODE_ORACLEDB_HOST;
   const svcName = process.env.NODE_ORACLEDB_SERVICENAME;
@@ -107,6 +108,44 @@ describe('1. Connect string checks', function() {
         return true;
       },
       );
+    });
+
+    it('3.2 session-level https_proxy with protocol as tcp', async function() {
+      await assert.rejects(async () => {
+        await oracledb.getConnection({
+          user: dbConfig.user,
+          password: dbConfig.password,
+          connectString: 'tcp://' + host + '/' + svcName,
+          httpsProxy: 'abcde'
+        });
+      },
+      (err) => {
+        assert.deepStrictEqual(err.message, 'NJS-512: invalid connection string parameters.\nhttps proxy requires protocol as tcps ');
+        return true;
+      },
+      );
+    });
+
+    it('3.3 thickModeDSNPassthrough false with option-level https_proxy and protocol as tcp', async function() {
+      const oldThickModeDSNPassthrough = oracledb.thickModeDSNPassthrough;
+      oracledb.thickModeDSNPassthrough = false;
+      try {
+        await assert.rejects(async () => {
+          await oracledb.getConnection({
+            user: dbConfig.user,
+            password: dbConfig.password,
+            connectString: 'tcp://' + host + '/' + svcName,
+            httpsProxy: 'abcde'
+          });
+        },
+        (err) => {
+          assert.deepStrictEqual(err.message, 'NJS-512: invalid connection string parameters.\nhttps proxy requires protocol as tcps ');
+          return true;
+        },
+        );
+      } finally {
+        oracledb.thickModeDSNPassthrough = oldThickModeDSNPassthrough;
+      }
     });
 
   });

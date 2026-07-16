@@ -24,6 +24,10 @@ sys.path.append(os.path.abspath("_ext"))
 extensions = ["table_with_summary", "oracle_desupported", "constants_table",
               'sphinx_rtd_theme']
 
+# turn on nitpicky mode
+nitpicky = True
+keep_warnings = True
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['.templates']
 

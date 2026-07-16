@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1047,11 +1047,6 @@ describe('255. poolReconfigure.js', function() {
     it('255.3.3 change maxPerShard', async function() {
       if (oracledb.thin) this.skip();
 
-      // maxPerShard is supported only >= 18.3
-      if (testsUtil.getClientVersion() < 1803000000) {
-        this.skip();
-      }
-
       const maxPerShard = 10;
       const config = {
         poolMaxPerShard: maxPerShard
@@ -1064,11 +1059,6 @@ describe('255. poolReconfigure.js', function() {
 
     it('255.3.4 change maxPerShard in thin mode', async function() {
       if (!oracledb.thin) this.skip();
-
-      // maxPerShard is supported only >= 18.3
-      if (testsUtil.getClientVersion() < 1803000000) {
-        this.skip();
-      }
 
       const maxPerShard = 10;
       const config = {

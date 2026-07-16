@@ -79,8 +79,6 @@ async function dropTable() {
   before(async function() {
     let isRunnable = true;
 
-    if (testsUtil.getClientVersion() < 1202000100) isRunnable = false;
-
     const connection = await oracledb.getConnection(dbConfig);
     const serverVersion = connection.oracleServerVersion;
     if (serverVersion < 1202000100) isRunnable = false;
@@ -338,7 +336,7 @@ async function dropTable() {
     });
 
     it('184.1.9 Acquire connection from pool twice with different multi-tag using matchAnyTag', async function() {
-      if (testsUtil.getClientVersion() < 1202000000 || dbConfig.test.drcp) this.skip();
+      if (dbConfig.test.drcp) this.skip();
       // for DRCP, if connection with tag1 is still not available then
       // new connection with tag2 will be created. This increases connection
       // open count and it causes inconsistency in expected result.

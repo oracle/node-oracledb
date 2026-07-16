@@ -145,7 +145,13 @@ describe('319. teq.js', function() {
     }
 
     // Kill remaining sessions for the user
-    const dbaConn = await oracledb.getConnection(dbConfig);
+    const dbaCredential = {
+      user: dbConfig.test.DBA_user,
+      password: dbConfig.test.DBA_password,
+      connectString: dbConfig.connectString,
+      privilege: oracledb.SYSDBA
+    };
+    const dbaConn = await oracledb.getConnection(dbaCredential);
     await dbaConn.execute(`
       BEGIN
         FOR r IN (SELECT sid, serial# FROM v$session WHERE username = '${TEQ_USER.toUpperCase()}') LOOP
@@ -161,8 +167,7 @@ describe('319. teq.js', function() {
   it('319.1 Enqueue/Dequeue RAW message', async function() {
     const queue = await conn.getQueue('RAW_TEQ');
     await queue.enqOne({
-      payload: Buffer.from('Hello RAW TEQ', 'utf8'),
-      recipients: ['py_sub']
+      payload: Buffer.from('Hello RAW TEQ', 'utf8')
     });
     await conn.commit();
 
@@ -176,7 +181,7 @@ describe('319. teq.js', function() {
     const queue = await conn.getQueue('JSON_TEQ', { payloadType: oracledb.DB_TYPE_JSON });
     const payload = { id: 1, type: 'json', msg: 'Hello JSON TEQ' };
 
-    await queue.enqOne({ payload, recipients: ['py_sub'] });
+    await queue.enqOne({ payload });
     await conn.commit();
 
     queue.deqOptions.consumerName = 'py_sub';
@@ -189,7 +194,7 @@ describe('319. teq.js', function() {
     const car = { CARNO: 10, MAKE: 'Tesla', YEAR: 2025, PRICE: 55000, COLOR: 'Red' };
     const carObj = new queue.payloadTypeClass(car);
 
-    await queue.enqOne({ payload: carObj, recipients: ['py_sub'] });
+    await queue.enqOne({ payload: carObj });
     await conn.commit();
 
     queue.deqOptions.consumerName = 'py_sub';
@@ -201,8 +206,7 @@ describe('319. teq.js', function() {
   it('319.4 Enqueue/Dequeue multiple RAW messages', async function() {
     const queue = await conn.getQueue('RAW_TEQ');
     const messages = ['M1', 'M2', 'M3'].map(m => ({
-      payload: Buffer.from(m, 'utf8'),
-      recipients: ['py_sub']
+      payload: Buffer.from(m, 'utf8')
     }));
 
     await queue.enqMany(messages);
@@ -222,7 +226,7 @@ describe('319. teq.js', function() {
       { id: 1, msg: 'J1' },
       { id: 2, msg: 'J2' },
       { id: 3, msg: 'J3' }
-    ].map(p => ({ payload: p, recipients: ['py_sub'] }));
+    ].map(p => ({ payload: p }));
 
     await queue.enqMany(msgs);
     await conn.commit();
@@ -238,7 +242,7 @@ describe('319. teq.js', function() {
     const cars = [
       { CARNO: 1, MAKE: 'Tesla', YEAR: 2025, PRICE: 55000, COLOR: 'Red' },
       { CARNO: 2, MAKE: 'Audi', YEAR: 2024, PRICE: 45000, COLOR: 'Blue' }
-    ].map(c => ({ payload: new queue.payloadTypeClass(c), recipients: ['py_sub'] }));
+    ].map(c => ({ payload: new queue.payloadTypeClass(c) }));
 
     await queue.enqMany(cars);
     await conn.commit();
@@ -252,7 +256,7 @@ describe('319. teq.js', function() {
 
   it('319.7 Enqueue/Dequeue RAW Sharded Queue', async function() {
     const queue = await conn.getQueue('RAW_SHQ');
-    await queue.enqOne({ payload: Buffer.from('RAW SHQ', 'utf8'), recipients: ['py_sub'] });
+    await queue.enqOne({ payload: Buffer.from('RAW SHQ', 'utf8') });
     await conn.commit();
 
     queue.deqOptions.consumerName = 'py_sub';
@@ -263,7 +267,7 @@ describe('319. teq.js', function() {
   it('319.8 Enqueue/Dequeue JSON Sharded Queue', async function() {
     const queue = await conn.getQueue('JSON_SHQ', { payloadType: oracledb.DB_TYPE_JSON });
     const payload = { id: 99, msg: 'Hello JSON SHQ' };
-    await queue.enqOne({ payload, recipients: ['py_sub'] });
+    await queue.enqOne({ payload });
     await conn.commit();
 
     queue.deqOptions.consumerName = 'py_sub';
@@ -276,7 +280,7 @@ describe('319. teq.js', function() {
     const car = { CARNO: 5, MAKE: 'BMW', YEAR: 2023, PRICE: 60000, COLOR: 'Black' };
     const carObj = new queue.payloadTypeClass(car);
 
-    await queue.enqOne({ payload: carObj, recipients: ['py_sub'] });
+    await queue.enqOne({ payload: carObj });
     await conn.commit();
 
     queue.deqOptions.consumerName = 'py_sub';
