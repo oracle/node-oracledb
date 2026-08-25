@@ -62,8 +62,6 @@ const njsClassDef njsClassDefResultSet = {
 };
 
 // other methods used internally
-static void njsResultSet_freeQueryVars(njsVariable *queryVars,
-        uint32_t numQueryVars);
 static bool njsResultSet_setFetchTypes(napi_env env, njsResultSet *rs,
         napi_value allMetadata);
 
@@ -111,23 +109,6 @@ static bool njsResultSet_closeAsync(njsBaton *baton)
 
 
 //-----------------------------------------------------------------------------
-// njsResultSet_freeQueryVars()
-//   Frees the query variables.
-//-----------------------------------------------------------------------------
-static void njsResultSet_freeQueryVars(njsVariable *queryVars,
-        uint32_t numQueryVars)
-{
-    uint32_t i;
-
-    if (!queryVars)
-        return;
-    for (i = 0; i < numQueryVars; i++)
-        njsVariable_free(&queryVars[i]);
-    free(queryVars);
-}
-
-
-//-----------------------------------------------------------------------------
 // njsResultSet_finalize()
 //   Invoked when the njsResultSet object is garbage collected.
 //-----------------------------------------------------------------------------
@@ -143,7 +124,7 @@ static void njsResultSet_finalize(napi_env env, void *finalizeData,
     // free the queryVars and nested buffers when an explicit close is not
     // called and the JS garbage collector does the clean-up
     if (!rs->isNested) {
-        njsResultSet_freeQueryVars(rs->queryVars, rs->numQueryVars);
+        njsUtils_freeQueryVars(rs->queryVars, rs->numQueryVars);
         rs->queryVars = NULL;
         rs->numQueryVars = 0;
     }
@@ -261,7 +242,7 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
 
     // clear variables if result set was closed
     if (!rs->handle && !rs->isNested) {
-        njsResultSet_freeQueryVars(rs->queryVars, rs->numQueryVars);
+        njsUtils_freeQueryVars(rs->queryVars, rs->numQueryVars);
         rs->queryVars = NULL;
         rs->numQueryVars = 0;
     }

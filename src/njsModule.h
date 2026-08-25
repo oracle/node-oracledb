@@ -945,6 +945,7 @@ bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,
 bool njsUtils_createBaton(napi_env env, napi_callback_info info,
         size_t numArgs, napi_value *args, const njsClassDef *classDef,
         njsBaton **baton);
+void njsUtils_freeQueryVars(njsVariable *queryVars, uint32_t numQueryVars);
 bool njsUtils_genericNew(napi_env env, const njsClassDef *classDef,
         napi_ref constructorRef, napi_value *instanceObj, void **instance);
 bool njsUtils_genericThrowError(napi_env env, const char *fileName,
