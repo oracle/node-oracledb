@@ -185,6 +185,12 @@ required to open a connection. For example, to return an error after 15 seconds
 if a connection cannot be established to the database, use
 ``"mydbmachine.example.com/orclpdb1?connect_timeout=15"``.
 
+The TLS certificate Distinguished Name (DN) validation parameters are aliases
+for the corresponding SSL parameters. For example, ``tls_server_dn_match``,
+``tls_server_cert_dn``, and ``tls_allow_weak_dn_match`` can be used instead of
+``ssl_server_dn_match``, ``ssl_server_cert_dn``, and
+``ssl_allow_weak_dn_match`` respectively.
+
 **Node-oracledb Settings in Easy Connect Strings**
 
 Some node-oracledb connection method API parameters can alternatively be

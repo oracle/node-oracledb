@@ -442,21 +442,39 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
+    :widths: 17 13 20
     :summary: The first column displays the keyword. The second column displays the equivalent connection parameter. The third column displays the notes.
 
     * - Oracle Net Keyword
       - Equivalent Connection Parameter
       - Description
-    * - SSL_SERVER_CERT_DN
+    * - SSL_ALLOW_WEAK_DN_MATCH or TLS_ALLOW_WEAK_DN_MATCH
+      - :ref:`sslAllowWeakDNMatch <getconnectiondbattrssslallowweak>`
+      - Determines whether the connection should use the DN matching behavior of the older Oracle Database versions prior to Oracle AI Database 26ai.
+
+        The SSL_ALLOW_WEAK_DN_MATCH is considered a temporary solution to enable the behavior of SSL_SERVER_DN_MATCH prior to Oracle AI Database 26ai. See `Strict DN Matching with Both Listener and Server Certificates <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-87017-2>`__ for more information.
+
+        .. versionchanged:: 7.1
+
+          The TLS alias support was added in node-oracledb Thin mode.
+    * - SSL_SERVER_CERT_DN or TLS_SERVER_CERT_DN
       - :ref:`sslServerCertDN <getconnectiondbattrssslcert>`
       - The distinguished name (DN) that should be matched with the server.
 
         **Note**: If specified, this value is used for any verification. Otherwise, the hostname will be used.
-    * - SSL_SERVER_DN_MATCH
+
+        .. versionchanged:: 7.1
+
+          The TLS alias support was added in node-oracledb Thin mode.
+    * - SSL_SERVER_DN_MATCH or TLS_SERVER_DN_MATCH
       - :ref:`sslServerDNMatch <getconnectiondbattrssslmatch>`
       - Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
 
         **Note**: In Thin mode, parsing the parameter supports case insensitive on/yes/true values similar to the Thick mode. Any other value is treated as disabling it.
+
+        .. versionchanged:: 7.1
+
+          The TLS alias support was added in node-oracledb Thin mode.
     * - WALLET_LOCATION
       - :ref:`walletLocation <getconnectiondbattrswalletloc>`
       - The directory where the wallet can be found.

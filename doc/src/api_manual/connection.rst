@@ -187,10 +187,9 @@ The properties of a *Connection* object are listed below.
     The value is available in the ``ECID`` column of the ``V$SESSION`` view.
     It is also shown in audit logs.
 
-    .. note::
+    .. versionchanged:: 7.1
 
-        This property can only be used in node-oracledb Thick mode. See
-        :ref:`enablingthick`.
+        Support for this property was added in node-oracledb Thin mode.
 
 .. attribute:: connection.externalName
 

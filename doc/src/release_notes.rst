@@ -38,11 +38,11 @@ Thin Mode Changes
 #)  Fixed a bug where end-to-end tracing attributes set by PL/SQL were not
     synchronized with the Thin mode connection.
 
-#) Added support for tls_* TLS certificate DN-validation parameters alongside
-   the existing ssl_* parameters in Thin mode.
+#)  Added support for tls_* TLS certificate DN-validation parameters alongside
+    the existing ssl_* parameters in Thin mode.
 
-#) Added support for using the ``ssl_allow_weak_dn_match`` property with Easy
-   Connect strings.
+#)  Added support for using the ``ssl_allow_weak_dn_match`` property with Easy
+    Connect strings.
 
 #)  Fixed bug to return proper metadata if ``fetchTypeHandler`` updates
     column names.
