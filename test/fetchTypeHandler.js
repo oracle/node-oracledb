@@ -679,4 +679,128 @@ describe('271. fetchTypeHandler.js', function() {
     );
     assert.deepStrictEqual(result.rows[0], [ 'A', 'B' ]);
   });
+
+  it('271.28 toggles CLOB between STRING and LOB locator', async function() {
+    // Bug 39902100: Thick mode raises ORA-03106 when a cached statement
+    // fetches a CLOB expression first as a String and then as a LOB locator.
+    // Skip in Thick mode until this issue is fixed.
+    if (!oracledb.thin)
+      this.skip();
+
+    const content = 'C'.repeat(2048);
+    const sql = `SELECT TO_CLOB(:1) AS C_DATA FROM dual`;
+    const defaultOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const stringOptions = {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      fetchTypeHandler: (metadata) => {
+        if (metadata.dbType === oracledb.DB_TYPE_CLOB)
+          return { type: oracledb.STRING };
+      }
+    };
+
+    // Cache the CLOB with the String define.
+    let result = await connection.execute(sql, [content], stringOptions);
+    assert.strictEqual(result.rows[0].C_DATA, content);
+
+    // Switch the cached cursor back to a LOB locator define.
+    result = await connection.execute(sql, [content], defaultOptions);
+    assert(result.rows[0].C_DATA &&
+      typeof result.rows[0].C_DATA.getData === 'function');
+    assert.strictEqual(await result.rows[0].C_DATA.getData(), content);
+    await result.rows[0].C_DATA.close();
+
+    // Switch the cached cursor back to the String define.
+    result = await connection.execute(sql, [content], stringOptions);
+    assert.strictEqual(result.rows[0].C_DATA, content);
+  }); // 271.28
+
+  it('271.29 toggles NCLOB between STRING and LOB locator', async function() {
+    // Skip in Thick mode until Bug 39902100 is fixed.
+    if (!oracledb.thin)
+      this.skip();
+
+    const content = 'N'.repeat(2048);
+    const sql = `SELECT TO_NCLOB(:1) AS NC_DATA FROM dual`;
+    const defaultOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const stringOptions = {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      fetchTypeHandler: (metadata) => {
+        if (metadata.dbType === oracledb.DB_TYPE_NCLOB)
+          return { type: oracledb.STRING };
+      }
+    };
+
+    // Cache the NCLOB with the String define.
+    let result = await connection.execute(sql, [content], stringOptions);
+    assert.strictEqual(result.rows[0].NC_DATA, content);
+
+    // Switch the cached cursor back to a LOB locator define.
+    result = await connection.execute(sql, [content], defaultOptions);
+    assert(result.rows[0].NC_DATA &&
+      typeof result.rows[0].NC_DATA.getData === 'function');
+    assert.strictEqual(await result.rows[0].NC_DATA.getData(), content);
+    await result.rows[0].NC_DATA.close();
+
+    // Switch the cached cursor back to the String define.
+    result = await connection.execute(sql, [content], stringOptions);
+    assert.strictEqual(result.rows[0].NC_DATA, content);
+  }); // 271.29
+
+  it('271.30 toggles JSON between STRING and default object', async function() {
+    if (!oracledb.thin || !(await testsUtil.checkPrerequisites(2100000000, 2100000000)))
+      this.skip();
+
+    const content = 'J'.repeat(2048);
+    const expectedValue = { value: content };
+    const sql = `SELECT JSON_OBJECT('value' VALUE :1 RETURNING JSON) AS J_DATA FROM dual`;
+    const defaultOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const stringOptions = {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      fetchTypeHandler: (metadata) => {
+        if (metadata.dbType === oracledb.DB_TYPE_JSON)
+          return { type: oracledb.STRING };
+      }
+    };
+
+    // Cache the JSON column with the String define.
+    let result = await connection.execute(sql, [content], stringOptions);
+    assert.deepStrictEqual(JSON.parse(result.rows[0].J_DATA), expectedValue);
+
+    // Switch the cached cursor back to the default JSON define.
+    result = await connection.execute(sql, [content], defaultOptions);
+    assert.deepStrictEqual(result.rows[0].J_DATA, expectedValue);
+
+    // Switch the cached cursor back to the String define.
+    result = await connection.execute(sql, [content], stringOptions);
+    assert.deepStrictEqual(JSON.parse(result.rows[0].J_DATA), expectedValue);
+  }); // 271.30
+
+  it('271.31 toggles VECTOR between STRING and default vector', async function() {
+    if (!oracledb.thin || !(await testsUtil.checkPrerequisites(2304000000, 2304000000)))
+      this.skip();
+
+    const values = Array.from({ length: 600 }, (_, i) => i % 10);
+    const content = `[${values.join(',')}]`;
+    const sql = `SELECT TO_VECTOR(:1) AS V_DATA FROM dual`;
+    const defaultOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+    const stringOptions = {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      fetchTypeHandler: (metadata) => {
+        if (metadata.dbType === oracledb.DB_TYPE_VECTOR)
+          return { type: oracledb.STRING };
+      }
+    };
+
+    // Cache the VECTOR column with the String define.
+    let result = await connection.execute(sql, [content], stringOptions);
+    assert.deepStrictEqual(JSON.parse(result.rows[0].V_DATA), values);
+
+    // Switch the cached cursor back to the default VECTOR define.
+    result = await connection.execute(sql, [content], defaultOptions);
+    assert.deepStrictEqual(Array.from(result.rows[0].V_DATA), values);
+
+    // Switch the cached cursor back to the String define.
+    result = await connection.execute(sql, [content], stringOptions);
+    assert.deepStrictEqual(JSON.parse(result.rows[0].V_DATA), values);
+  }); // 271.31
 });

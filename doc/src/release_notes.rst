@@ -70,6 +70,10 @@ Thin Mode Changes
 #)  Fixed bug when a :ref:`DbObject <dbobjectclass>` instance contains an attribute
     of type ``SYS.XMLTYPE`` with a ``null`` value.
 
+#)  Fixed bug where repeated Thin mode executions of the same SQL statement
+    with different LOB fetch type settings could reuse stale statement cache
+    define information.
+
 Thick Mode Changes
 ++++++++++++++++++
 

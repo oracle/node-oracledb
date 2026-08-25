@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,8 +36,10 @@
 const oracledb = require('oracledb');
 const assert   = require('assert');
 const fs       = require('fs');
+const util     = require('util');
 const dbConfig = require('./dbconfig.js');
 const random   = require('./random.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('87. fetchBlobAsBuffer1.js', function() {
 
@@ -1908,5 +1910,207 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // 87.5.16
 
   }); // 87.5
+
+  describe('87.6 fetch BLOB columns by toggling fetch type', function() {
+    let conn;
+    const tableName = 'NODB_BLOB_TOGGLE';
+    const tableSql = `
+      CREATE TABLE ${tableName} (
+        ID NUMBER PRIMARY KEY,
+        B_DATA BLOB
+      )
+    `;
+    const content = Buffer.from('X'.repeat(64 * 1024));
+
+    beforeEach(async function() {
+      oracledb.stmtCacheSize = defaultStmtCache;
+      conn = await oracledb.getConnection(dbConfig);
+    });
+
+    afterEach(async function() {
+      if (conn) {
+        await testsUtil.dropTable(conn, tableName);
+        await conn.close();
+        conn = null;
+      }
+      oracledb.stmtCacheSize = defaultStmtCache;
+    });
+
+    function createFetchTypeHandler() {
+      return function(metadata) {
+        if (metadata.dbType === oracledb.DB_TYPE_BLOB)
+          return { type: oracledb.DB_TYPE_RAW };
+      };
+    }
+
+    async function assertBlobLocator(lob, message) {
+      assert(lob instanceof oracledb.Lob, message);
+      assert.deepStrictEqual(await lob.getData(), content);
+      await lob.close();
+    }
+
+    async function assertRoundTrips(sid, rtBefore, thinExpected, message) {
+      const rtAfter = await testsUtil.getRoundTripCount(sid);
+      const expected = oracledb.thin ? thinExpected : 2;
+      const mode = oracledb.thin ? 'Thin' : 'Thick';
+      assert.strictEqual(rtAfter - rtBefore, expected,
+        util.format('%s: %s mode should take %d round trips', message, mode,
+          expected));
+    }
+
+    it('87.6.1 toggles between BUFFER and LOB locator using fetchInfo', async function() {
+      const sql = `SELECT B_DATA FROM ${tableName} WHERE ID = 1`;
+      const defaultOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+      const bufferOptions = {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        fetchInfo: { B_DATA: { type: oracledb.BUFFER } }
+      };
+
+      await testsUtil.createTable(conn, tableName, tableSql);
+      await conn.execute(
+        `INSERT INTO ${tableName} (ID, B_DATA) VALUES (1, :1)`,
+        [content]
+      );
+
+      let result = await conn.execute(sql, [], bufferOptions);
+      assert.deepStrictEqual(result.rows[0].B_DATA, content);
+
+      result = await conn.execute(sql, [], defaultOptions);
+      await assertBlobLocator(result.rows[0].B_DATA,
+        'default fetch should return LOB locator');
+
+      result = await conn.execute(sql, [], bufferOptions);
+      assert.deepStrictEqual(result.rows[0].B_DATA, content);
+
+      result = await conn.execute(sql, [], defaultOptions);
+      await assertBlobLocator(result.rows[0].B_DATA,
+        'second default fetch should return LOB locator');
+    }); // 87.6.1
+
+    it('87.6.2 toggles between BUFFER and LOB locator using fetchTypeHandler', async function() {
+      // Round-trip checks need V$SESSTAT access and a stable direct connection.
+      if (!dbConfig.test.DBA_PRIVILEGE || (await testsUtil.cmanTdmCheck()))
+        this.skip();
+
+      const sql = `SELECT B_DATA FROM ${tableName} WHERE ID = 1`;
+      const defaultOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+      const fetchTypeHandlerOptions = {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        fetchTypeHandler: createFetchTypeHandler()
+      };
+
+      await testsUtil.createTable(conn, tableName, tableSql);
+      await conn.execute(
+        `INSERT INTO ${tableName} (ID, B_DATA) VALUES (1, :1)`,
+        [content]
+      );
+
+      const sid = await testsUtil.getSid(conn);
+
+      // Cache the BLOB with the default LOB locator define.
+      let rtBefore = await testsUtil.getRoundTripCount(sid);
+      let result = await conn.execute(sql, [], defaultOptions);
+      await assertRoundTrips(sid, rtBefore, 2,
+        'default fetch');
+      await assertBlobLocator(result.rows[0].B_DATA,
+        'default fetch should return LOB locator');
+
+      // Switch the cached cursor to the Buffer define.
+      rtBefore = await testsUtil.getRoundTripCount(sid);
+      result = await conn.execute(sql, [], fetchTypeHandlerOptions);
+      await assertRoundTrips(sid, rtBefore, 2,
+        'first fetchTypeHandler fetch');
+      assert.deepStrictEqual(result.rows[0].B_DATA, content);
+
+      // Reuse the cached Buffer define.
+      rtBefore = await testsUtil.getRoundTripCount(sid);
+      result = await conn.execute(sql, [], fetchTypeHandlerOptions);
+      await assertRoundTrips(sid, rtBefore, 1,
+        'cached fetchTypeHandler fetch');
+      assert.deepStrictEqual(result.rows[0].B_DATA, content);
+
+      // Switch the cached cursor back to a LOB locator define.
+      rtBefore = await testsUtil.getRoundTripCount(sid);
+      result = await conn.execute(sql, [], defaultOptions);
+      await assertRoundTrips(sid, rtBefore, 2,
+        'switching to default fetch');
+      await assertBlobLocator(result.rows[0].B_DATA,
+        'default fetch should return LOB locator');
+
+      // Reuse the cached LOB locator define.
+      rtBefore = await testsUtil.getRoundTripCount(sid);
+      result = await conn.execute(sql, [], defaultOptions);
+      await assertRoundTrips(sid, rtBefore, 1,
+        'cached default fetch');
+      await assertBlobLocator(result.rows[0].B_DATA,
+        'cached default fetch should return LOB locator');
+
+      // Switch the cached cursor back to the Buffer define.
+      rtBefore = await testsUtil.getRoundTripCount(sid);
+      result = await conn.execute(sql, [], fetchTypeHandlerOptions);
+      await assertRoundTrips(sid, rtBefore, 2,
+        'switching to fetchTypeHandler fetch');
+      assert.deepStrictEqual(result.rows[0].B_DATA, content);
+
+      // Reuse the cached Buffer define.
+      rtBefore = await testsUtil.getRoundTripCount(sid);
+      result = await conn.execute(sql, [], fetchTypeHandlerOptions);
+      await assertRoundTrips(sid, rtBefore, 1,
+        'cached fetchTypeHandler fetch');
+      assert.deepStrictEqual(result.rows[0].B_DATA, content);
+    }); // 87.6.2
+
+    it('87.6.3 toggling fetch type does not leak open cursors', async function() {
+      // Open-cursor checks require V$SESSTAT access and a direct connection.
+      if (!dbConfig.test.DBA_PRIVILEGE || (await testsUtil.cmanTdmCheck()))
+        this.skip();
+
+      const sql = `SELECT B_DATA FROM ${tableName} WHERE ID = 1`;
+      const defaultOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+      const fetchTypeHandlerOptions = {
+        outFormat: oracledb.OUT_FORMAT_OBJECT,
+        fetchTypeHandler: createFetchTypeHandler()
+      };
+      const dbaConfig = {
+        user: dbConfig.test.DBA_user,
+        password: dbConfig.test.DBA_password,
+        connectString: dbConfig.connectString,
+        privilege: oracledb.SYSDBA
+      };
+
+      await testsUtil.createTable(conn, tableName, tableSql);
+      await conn.execute(
+        `INSERT INTO ${tableName} (ID, B_DATA) VALUES (1, :1)`,
+        [content]
+      );
+
+      const sid = await testsUtil.getSid(conn);
+      const sysDBAConn = await oracledb.getConnection(dbaConfig);
+      try {
+        const openCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+
+        for (let i = 0; i < 20; i++) {
+          const options = (i % 2 === 0) ? defaultOptions :
+            fetchTypeHandlerOptions;
+          const result = await conn.execute(sql, [], options);
+          if (i % 2 === 0) {
+            await assertBlobLocator(result.rows[0].B_DATA,
+              'default fetch should return LOB locator');
+          } else {
+            assert.deepStrictEqual(result.rows[0].B_DATA, content);
+          }
+        }
+
+        const newOpenCount = await testsUtil.getOpenCursorCount(sysDBAConn, sid);
+        // The cached query and LOB data-access cursors remain open; replaced
+        // query cursors do not accumulate with each fetch-type switch.
+        assert(newOpenCount - openCount <= 2,
+          `toggling fetch type should not leak server cursors: ${openCount} -> ${newOpenCount}`);
+      } finally {
+        await sysDBAConn.close();
+      }
+    }); // 87.6.3
+
+  }); // 87.6
 
 });

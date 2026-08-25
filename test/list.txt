@@ -2106,6 +2106,10 @@ Overview of node-oracledb functional tests
       87.5.14 works with setting oracledb.maxRows < actual number of rows in the table
       87.5.15 works with setting oracledb.maxRows > actual number of rows in the table
       87.5.16 override oracledb.fetchAsBuffer with fetchInfo set to oracledb.DEFAULT
+    87.6 fetch BLOB columns by toggling fetch type
+      87.6.1 toggles between BUFFER and LOB locator using fetchInfo
+      87.6.2 toggles between BUFFER and LOB locator using fetchTypeHandler
+      87.6.3 toggling fetch type does not leak open cursors
 
   88. fetchBlobAsBuffer2.js
     88.1 fetch BLOB columns by setting fetchInfo option
@@ -5643,6 +5647,10 @@ Overview of node-oracledb functional tests
     271.25 Verify fetchTypeHandler rowsetMetadata list
     271.26 simulate LOB double invocation + metadata mutation race (GH issue 1769)
     271.27 simulate LOB double invocation + metadata mutation race (GH issue 1769) - fetchTypeHandler returns STRING
+    271.28 toggles CLOB between STRING and LOB locator
+    271.29 toggles NCLOB between STRING and LOB locator
+    271.30 toggles JSON between STRING and default object
+    271.31 toggles VECTOR between STRING and default vector
 
   272. jsonDualityViews1.js
     272.1 JSON Relational Duality View
@@ -6727,6 +6735,7 @@ Overview of node-oracledb functional tests
       324.3.38 When an operation with db objects is tried, error is thrown
       324.3.39 error in middle with continueOnError
       324.3.40 CLOB handling in pipeline
+      324.3.41 LOB fetchLobs should not leak cached fetch mode into the next execute
     324.4 Negative scenarios
       324.4.1 runPipeline invalid args
       324.4.2 addOperations with warning

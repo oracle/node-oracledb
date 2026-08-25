@@ -1885,6 +1885,56 @@ describe('324. pipeline.js', function() {
 
       assert.strictEqual(data, clobData);
     }); // 324.3.40
+
+    it('324.3.41 LOB fetchLobs should not leak cached fetch mode into the next execute', async function() {
+      const conn = await oracledb.getConnection(dbConfig);
+      const TEST_TAB = 'PIPE_LOB_TAB_REUSE';
+      const sql = `SELECT c FROM ${TEST_TAB} WHERE id = 1`;
+      const originalFetchAsString = [...oracledb.fetchAsString];
+      const originalFetchAsBuffer = [...oracledb.fetchAsBuffer];
+
+      try {
+        oracledb.fetchAsString = [];
+        oracledb.fetchAsBuffer = [];
+
+        await testsUtil.createTable(conn, TEST_TAB,
+          `CREATE TABLE ${TEST_TAB} (id NUMBER, c CLOB)`);
+        await conn.execute(`INSERT INTO ${TEST_TAB} VALUES (1, 'LOB_DATA')`);
+        await conn.commit();
+
+        const sharedOptions = { outFormat: oracledb.OUT_FORMAT_OBJECT };
+        const pipeline = new oracledb.Pipeline();
+        pipeline.addFetchOne(
+          sql,
+          [],
+          sharedOptions,
+          false
+        );
+        pipeline.addFetchOne(
+          sql,
+          [],
+          sharedOptions
+        );
+
+        const results = await conn.runPipeline(pipeline);
+        assert.strictEqual(results.length, 2);
+        assert.strictEqual(results[0].rows[0].C, 'LOB_DATA');
+        assert.strictEqual(await results[1].rows[0].C.getData(), 'LOB_DATA');
+
+        const postPipeline = await conn.execute(
+          sql,
+          [],
+          sharedOptions
+        );
+
+        assert.strictEqual(await postPipeline.rows[0].C.getData(), 'LOB_DATA');
+      } finally {
+        oracledb.fetchAsString = originalFetchAsString;
+        oracledb.fetchAsBuffer = originalFetchAsBuffer;
+        await testsUtil.dropTable(conn, TEST_TAB);
+        await conn.close();
+      }
+    }); // 324.3.41
   }); // 324.3
 
   describe('324.4 Negative scenarios', () => {
