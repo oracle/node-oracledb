@@ -1632,7 +1632,7 @@ describe('294. dataTypeVector1.js', function() {
           sql,
           binds
         ),
-        /ORA-51803:|ORA-21560:|ORA-51835:/
+        /ORA-51803:|ORA-21560:|ORA-51835:|ORA-51862:/
         /*
             ORA-51803: Vector dimension count must match the dimension count
             specified in the column definition (actual: , required: ).
@@ -1779,7 +1779,7 @@ describe('294. dataTypeVector1.js', function() {
           sql,
           binds
         ),
-        /ORA-51803:|ORA-21560:|ORA-51835:/
+        /ORA-51803:|ORA-21560:|ORA-51835:|ORA-51862:/
         /*
             ORA-51803: Vector dimension count must match the dimension count
             specified in the column definition (actual: , required: ).
