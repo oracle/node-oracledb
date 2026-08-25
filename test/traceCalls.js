@@ -206,7 +206,7 @@ describe('307. traceCalls.js', function() {
 
 describe('307.3 CLIENTCONTEXT trace propagation', function() {
   const traceHandler = oracledb.traceHandler;
-  const traceParentValue = '00-0000000000000000000000000000feed-000000000000beef-01';
+  const traceParentValue = '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
 
   class EnterFnTraceHandler extends traceHandler.TraceHandlerBase {
     constructor() {
@@ -284,4 +284,5 @@ describe('307.3 CLIENTCONTEXT trace propagation', function() {
     );
     assert.deepStrictEqual(result.rows[0], ['userValue2', traceParentValue]);
   });
+
 });

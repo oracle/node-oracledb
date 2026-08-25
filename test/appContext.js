@@ -453,5 +453,113 @@ FROM dual`),
         }
       }
     }); // 326.3.1
+
+    it("326.3.2 trace context and action persist until explicitly cleared", async () => {
+      const traceParentValue =
+        "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01";
+      let singleSessionPool;
+      let firstConnection;
+      let reassignedConnection;
+
+      try {
+        // A single physical session makes reuse deterministic.
+        singleSessionPool = await oracledb.createPool({
+          ...dbConfig,
+          poolMin: 0,
+          poolMax: 1,
+          poolIncrement: 1,
+        });
+        firstConnection = await singleSessionPool.getConnection();
+
+        // Seed the physical session with a traceparent in both places.
+        firstConnection.appContext("CLIENTCONTEXT", [
+          { "ora$opentelem$tracectx": traceParentValue },
+        ]);
+        firstConnection.action = traceParentValue;
+
+        const firstSessionResult = await firstConnection.execute(
+          "SELECT SYS_CONTEXT('USERENV', 'SID') FROM dual",
+        );
+        const sessionId = firstSessionResult.rows[0][0];
+
+        // The first SQL carries the configured values to the database session.
+        let result = await firstConnection.execute(
+          `SELECT SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx'), action
+             FROM v$session
+            WHERE sid = SYS_CONTEXT('USERENV', 'SID')`,
+        );
+        assert.deepStrictEqual(result.rows[0], [traceParentValue, traceParentValue]);
+
+        // The values remain visible through later SQL on the same connection.
+        await firstConnection.execute("SELECT 1 FROM dual");
+        const sameConnectionSysContextResult = await firstConnection.execute(
+          "SELECT SYS_CONTEXT('USERENV', 'ACTION'), SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx') FROM dual",
+        );
+        assert.deepStrictEqual(sameConnectionSysContextResult.rows[0], [
+          traceParentValue,
+          traceParentValue,
+        ]);
+
+        // Return the physical session without explicitly clearing its state.
+        await firstConnection.close();
+        firstConnection = null;
+
+        reassignedConnection = await singleSessionPool.getConnection();
+        await reassignedConnection.execute("SELECT 42 FROM dual");
+
+        // The reassigned connection exposes the stale trace context and action.
+        result = await reassignedConnection.execute(
+          `SELECT SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx'), action
+             FROM v$session
+            WHERE sid = SYS_CONTEXT('USERENV', 'SID')`,
+        );
+        assert.deepStrictEqual(result.rows[0], [traceParentValue, traceParentValue]);
+
+        const staleSysContextResult = await reassignedConnection.execute(
+          "SELECT SYS_CONTEXT('USERENV', 'ACTION'), SYS_CONTEXT('CLIENTCONTEXT', 'ORA$OPENTELEM$TRACECTX'), SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx') FROM dual",
+        );
+        assert.deepStrictEqual(staleSysContextResult.rows[0], [
+          traceParentValue,
+          traceParentValue,
+          traceParentValue,
+        ]);
+
+        const reassignedSessionResult = await reassignedConnection.execute(
+          "SELECT SYS_CONTEXT('USERENV', 'SID') FROM dual",
+        );
+        assert.strictEqual(reassignedSessionResult.rows[0][0], sessionId);
+
+        // Clear the attributes on the reassigned connection. This does not rely
+        // on a later pool checkout selecting the same physical session.
+        reassignedConnection.clearAppContext("CLIENTCONTEXT");
+        reassignedConnection.action = "";
+        await reassignedConnection.execute("SELECT 84 FROM dual");
+
+        result = await reassignedConnection.execute(
+          `SELECT SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx'), action
+             FROM v$session
+            WHERE sid = SYS_CONTEXT('USERENV', 'SID')`,
+        );
+        assert.deepStrictEqual(result.rows[0], [null, null]);
+
+        const clearedSysContextResult = await reassignedConnection.execute(
+          "SELECT SYS_CONTEXT('USERENV', 'ACTION'), SYS_CONTEXT('CLIENTCONTEXT', 'ORA$OPENTELEM$TRACECTX'), SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx') FROM dual",
+        );
+        assert.deepStrictEqual(clearedSysContextResult.rows[0], [null, null, null]);
+      } finally {
+        if (reassignedConnection) {
+          reassignedConnection.clearAppContext("CLIENTCONTEXT");
+          reassignedConnection.action = "";
+          await reassignedConnection.close();
+        } else if (firstConnection) {
+          firstConnection.clearAppContext("CLIENTCONTEXT");
+          firstConnection.action = "";
+          await firstConnection.close();
+        }
+        if (singleSessionPool) {
+          await singleSessionPool.close();
+        }
+      }
+    }); // 326.3.2
   });
 });

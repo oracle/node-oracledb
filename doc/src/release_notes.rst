@@ -36,7 +36,7 @@ Thin Mode Changes
     are truncated or an error is thrown.
     See `Issue #1782 <https://github.com/oracle/node-oracledb/issues/1782>`__.
 
-#)  Returned `undefined` instead of `null ` as the default value for the
+#)  Returned `undefined` instead of `null` as the default value for the
     ``enqTime`` property in
     :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>`.
 

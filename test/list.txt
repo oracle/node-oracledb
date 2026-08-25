@@ -6765,6 +6765,7 @@ Overview of node-oracledb functional tests
       326.2.1  check OpenTelemetry spans propagation
     326.3 appContext with pool
       326.3.1  check appContext with Pool acquire and release
+      326.3.2 trace context and action persist until explicitly cleared
 
   327. dbObject22.js
     327.1.1 fetches a DbObject with 99 attributes
