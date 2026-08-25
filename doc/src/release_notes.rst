@@ -37,9 +37,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
-#)  Added support for database :ref:`OpenTelemetry <opentelemetry>` trace
-    propagation with the :attr:`connection.databaseOpenTelemetryTracing`
-    property.
+#)  Added support for reading and setting database
+    :ref:`OpenTelemetry <opentelemetry>` trace propagation with the
+    :attr:`connection.databaseOpenTelemetryTracing` property.
 
 #)  Added support for updating the :attr:`connection.ecid` end-to-end tracing
     attribute in Thin mode.

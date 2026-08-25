@@ -131,13 +131,13 @@ The properties of a *Connection* object are listed below.
 
     .. versionadded:: 7.1
 
-    This write-only property is a boolean that determines whether
-    OpenTelemetry trace context is propagated to the database for operations
-    executed on the connection.
+    This read/write property is a boolean that enables or disables database
+    server-side OpenTelemetry traces.
 
     .. note::
 
-        This property can only be used in node-oracledb Thin mode.
+        This property can only be used in node-oracledb Thin mode with Oracle
+        AI Database 26ai (version 23.26.2) or later.
 
     See :ref:`opentelemetry` for more information.
 
