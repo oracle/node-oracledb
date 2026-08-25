@@ -4206,6 +4206,8 @@ Overview of node-oracledb functional tests
     159.1 set the end-to-end tracing attribute - module
     159.2 set the tracing attribute - action
     159.3 set the tracing attribure - clientId
+    159.4 preserves PL/SQL-set tracing attributes when setting end-to-end attributes
+
 
   160. editionTest.js
     160.1 Default. No edition. Direct connection.

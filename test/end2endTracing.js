@@ -77,4 +77,67 @@ describe('159. end2endTracing.js', function() {
     await verify(sql, testValue);
 
   });
+
+  it('159.4 preserves PL/SQL-set tracing attributes when setting end-to-end attributes', async function() {
+    const action = '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
+    const clientId = 'CLIENTID-PLSQL';
+    const clientInfo = 'CLIENTINFO-PLSQL';
+    const module = 'MODULE-PLSQL';
+
+    const attributes = {
+      dbOp: 'DBOP',
+      ecid: 'ECID',
+      clientId: 'CLIENTID',
+      clientInfo: 'CLIENTINFO',
+      module: 'MODULE',
+    };
+
+    const expected = {
+      action,
+      clientId,
+      clientInfo,
+      module,
+      ecid: null,
+    };
+
+    const verifyAttributes = async function() {
+      const result = await conn.execute(
+        `select sys_context('userenv', 'action'),
+                sys_context('userenv', 'client_identifier'),
+                sys_context('userenv', 'client_info'),
+                sys_context('userenv', 'module'),
+                (select ecid
+                   from v$session
+                  where sid = sys_context('userenv', 'sid'))
+           from dual`,
+      );
+
+      assert.deepStrictEqual(result.rows[0], [
+        expected.action,
+        expected.clientId,
+        expected.clientInfo,
+        expected.module,
+        expected.ecid,
+      ]);
+    };
+
+    await conn.execute(
+      `begin
+        DBMS_APPLICATION_INFO.SET_MODULE(:module, :action);
+        DBMS_APPLICATION_INFO.SET_CLIENT_INFO(:clientInfo);
+        DBMS_SESSION.SET_IDENTIFIER(:clientId);
+      end;`,
+      { action, clientId, clientInfo, module },
+    );
+
+    await verifyAttributes();
+
+    for (const [name, value] of Object.entries(attributes)) {
+      conn[name] = value;
+      if (name !== 'dbOp') {
+        expected[name] = value;
+      }
+      await verifyAttributes();
+    }
+  });
 });

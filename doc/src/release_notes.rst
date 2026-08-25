@@ -32,6 +32,12 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for updating the :attr:`connection.ecid` end-to-end tracing
+    attribute in Thin mode.
+
+#)  Fixed a bug where end-to-end tracing attributes set by PL/SQL were not
+    synchronized with the Thin mode connection.
+
 #) Added support for tls_* TLS certificate DN-validation parameters alongside
    the existing ssl_* parameters in Thin mode.
 
