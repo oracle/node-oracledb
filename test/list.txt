@@ -6198,8 +6198,9 @@ Overview of node-oracledb functional tests
       307.2.1 exposes connection level trace details
     307.3 CLIENTCONTEXT trace propagation
       307.3.1 sets trace context in CLIENTCONTEXT when userContext.traceParent exists
-      307.3.2 sets trace context in CLIENTCONTEXT when userContext.traceParent is populated during onBeginRoundTrip
+      307.3.2 omits tracestate when it has no value during onBeginRoundTrip
       307.3.3 preserves existing CLIENTCONTEXT entries when trace handler appends traceParent
+      307.3.4 sets tracestate when populated during onBeginRoundTrip
 
   308. Inband Notification
     308.1 Standalone Connection

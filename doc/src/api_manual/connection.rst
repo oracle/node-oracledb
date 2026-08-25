@@ -127,6 +127,20 @@ The properties of a *Connection* object are listed below.
     `ALTER SESSION SET CURRENT_SCHEMA <https://www.oracle.com/pls/topic/lookup?
     ctx=dblatest&id=GUID-DC7B8CDD-4F89-40CC-875F-F70F673711D4>`__.
 
+.. attribute:: connection.databaseOpenTelemetryTracing
+
+    .. versionadded:: 7.1
+
+    This write-only property is a boolean that determines whether
+    OpenTelemetry trace context is propagated to the database for operations
+    executed on the connection.
+
+    .. note::
+
+        This property can only be used in node-oracledb Thin mode.
+
+    See :ref:`opentelemetry` for more information.
+
 .. attribute:: connection.dbDomain
 
     .. versionadded:: 6.3

@@ -204,9 +204,10 @@ describe('307. traceCalls.js', function() {
   });
 });
 
-describe('307.3 CLIENTCONTEXT trace propagation', function() {
+describe('307.3 CLIENTCONTEXT trace propagation', () => {
   const traceHandler = oracledb.traceHandler;
   const traceParentValue = '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01';
+  const traceContextValue = `traceparent: ${traceParentValue}\r\n`;
 
   class EnterFnTraceHandler extends traceHandler.TraceHandlerBase {
     constructor() {
@@ -217,20 +218,26 @@ describe('307.3 CLIENTCONTEXT trace propagation', function() {
     onEnterFn(traceContext) {
       const self = traceContext.additionalConfig?.self;
       if (self?.appContext) {
-        self.appContext('CLIENTCONTEXT', [{ora$opentelem$tracectx: traceParentValue}]);
+        self.appContext('CLIENTCONTEXT', [{
+          ora$opentelem$tracectx: traceContextValue,
+        }]);
       }
     }
   }
 
   class BeginRoundTripTraceHandler extends traceHandler.TraceHandlerBase {
-    constructor() {
+    constructor(traceState) {
       super();
       this.enable();
+      this.traceState = traceState;
     }
 
     onBeginRoundTrip(traceContext) {
       const userContext = traceContext.userContext || {};
       userContext.traceParent = traceParentValue;
+      if (this.traceState !== undefined) {
+        userContext.traceState = this.traceState;
+      }
       traceContext.userContext = userContext;
     }
   }
@@ -266,13 +273,13 @@ describe('307.3 CLIENTCONTEXT trace propagation', function() {
   it('307.3.1 sets trace context in CLIENTCONTEXT when userContext.traceParent exists', async () => {
     await createConnectionWithHandler(new EnterFnTraceHandler());
     const resultValue = await fetchTraceParentValue();
-    assert.strictEqual(resultValue, traceParentValue);
+    assert.strictEqual(resultValue, traceContextValue);
   });
 
-  (oracledb.thin ? it : it.skip)('307.3.2 sets trace context in CLIENTCONTEXT when userContext.traceParent is populated during onBeginRoundTrip', async () => {
-    await createConnectionWithHandler(new BeginRoundTripTraceHandler());
+  (oracledb.thin ? it : it.skip)('307.3.2 omits tracestate when it has no value during onBeginRoundTrip', async () => {
+    await createConnectionWithHandler(new BeginRoundTripTraceHandler(''));
     const resultValue = await fetchTraceParentValue();
-    assert.strictEqual(resultValue, traceParentValue);
+    assert.strictEqual(resultValue, traceContextValue);
   });
 
   (oracledb.thin ? it : it.skip)('307.3.3 preserves existing CLIENTCONTEXT entries when trace handler appends traceParent', async () => {
@@ -282,7 +289,19 @@ describe('307.3 CLIENTCONTEXT trace propagation', function() {
     const result = await connection.execute(
       "SELECT SYS_CONTEXT('CLIENTCONTEXT', 'usertrace'), SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx') FROM dual"
     );
-    assert.deepStrictEqual(result.rows[0], ['userValue2', traceParentValue]);
+    assert.deepStrictEqual(result.rows[0], ['userValue2', traceContextValue]);
+  });
+
+  (oracledb.thin ? it : it.skip)('307.3.4 sets tracestate when populated during onBeginRoundTrip', async () => {
+    const traceState = 'congo=t61rcWkgMzE';
+    const expectedTraceContext =
+      `${traceContextValue}tracestate: ${traceState}\r\n`;
+
+    await createConnectionWithHandler(
+      new BeginRoundTripTraceHandler(traceState),
+    );
+    const resultValue = await fetchTraceParentValue();
+    assert.strictEqual(resultValue, expectedTraceContext);
   });
 
 });

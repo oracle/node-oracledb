@@ -383,6 +383,17 @@ FROM dual`),
         { outFormat: oracledb.OUT_FORMAT_OBJECT },
       );
       assert.strictEqual(result.rows[0].CTX_VAL, traceContext);
+
+      // Clear the trace context before executing SQL unrelated to this trace.
+      connection.appContext("clientcontext", [
+        { ora$opentelem$tracectx: "" },
+      ]);
+      const clearedResult = await connection.execute(
+        `SELECT SYS_CONTEXT('clientcontext', :attr) AS ctx_val FROM dual`,
+        { attr: "ora$opentelem$tracectx" },
+        { outFormat: oracledb.OUT_FORMAT_OBJECT },
+      );
+      assert.strictEqual(clearedResult.rows[0].CTX_VAL, null);
       connection.clearAppContext("clientcontext");
     }); // 326.2.1
   }); // 326.2

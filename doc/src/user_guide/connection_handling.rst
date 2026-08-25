@@ -1936,6 +1936,37 @@ Querying the application context values after using
 :meth:`connection.clearAppContext()` set on a connection, will return
 ``[ null ]``.
 
+Application context values remain associated with the database connection
+until they are cleared or replaced. When a context is specific to a SQL
+statement, applications should clear the previous context and set the new
+context value before executing that statement. Otherwise, a later statement
+can use stale context from an earlier statement. This is particularly
+important for OpenTelemetry trace propagation using the
+``ora$opentelem$tracectx`` ``CLIENTCONTEXT`` attribute: a stale
+``traceparent`` can incorrectly associate a SQL statement with the trace of an
+earlier operation.
+
+For example, refresh the context before executing SQL that requires a new
+trace context:
+
+.. code-block:: javascript
+
+    connection.clearAppContext("CLIENTCONTEXT");
+    connection.appContext("CLIENTCONTEXT", [{
+      ora$opentelem$tracectx: currentTraceContext,
+    }]);
+    await connection.execute("SELECT * FROM employees");
+
+Before executing SQL that is not associated with an OpenTelemetry trace, clear
+the trace context so it is not applied to that SQL statement:
+
+.. code-block:: javascript
+
+    connection.appContext("CLIENTCONTEXT", [{
+      ora$opentelem$tracectx: '',
+    }]);
+    await connection.execute("SELECT * FROM departments");
+
 **Behavior Differences in Thin and Thick Modes**
 
 A namespace other than "CLIENTCONTEXT" will raise the ``ORA-28267`` error

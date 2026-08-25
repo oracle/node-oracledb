@@ -685,6 +685,19 @@ In the above sample code, the ``enhancedDatabaseReporting`` property is set to
     Use the ``enhancedDatabaseReporting`` property carefully since bind values
     may contain sensitive information.
 
+In node-oracledb Thin mode, OpenTelemetry trace context can also be
+propagated to the database by setting the
+:attr:`connection.databaseOpenTelemetryTracing` property to *true*. This lets
+supported Oracle Database versions receive the trace context for operations
+executed on the connection. For example:
+
+.. code-block:: javascript
+
+    connection.databaseOpenTelemetryTracing = true;
+
+Set it to *false* to disable database OpenTelemetry trace propagation for the
+connection.
+
 The types of OpenTelemetry data and metrics for Oracle Database are listed
 `here <https://github.com/open-telemetry/semantic-conventions/blob/main/docs/
 db/oracledb.md>`__.
