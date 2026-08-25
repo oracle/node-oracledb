@@ -6775,3 +6775,5 @@ Overview of node-oracledb functional tests
   328. endUserSecurityContext.js
     328.1 EndUserSecurityContext attributes
       328.1.1 ignores non-enumerable nested attribute properties
+      328.1.2 rejects unsupported nested JSON values
+      328.1.3 rejects unsupported nested field names

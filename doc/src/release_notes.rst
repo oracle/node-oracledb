@@ -43,6 +43,10 @@ Thin Mode Changes
 #)  Fixed bug to make JSON serialization to include only enumerable JavaScript object
     properties.
 
+#)  Fixed :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`
+    attribute handling to reject unsupported non-JSON JavaScript values such as
+    ``BigInt``, ``Symbol``, and ``function`` with NJS errors.
+
 Thick Mode Changes
 ++++++++++++++++++
 

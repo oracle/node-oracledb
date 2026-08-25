@@ -83,5 +83,98 @@ describe('328. endUserSecurityContext.js', function() {
         {name: 'EUC.HCM', values: {p1: 327, p2: 'visible'}},
       ]);
     }); // 328.1.1
+
+    it('328.1.2 rejects unsupported nested JSON values', function() {
+      const invalidValues = [
+        123n,
+        Symbol('not-json'),
+        () => {},
+      ];
+
+      for (const invalidValue of invalidValues) {
+        assert.throws(
+          () =>
+            new oracledb.EndUserSecurityContext({
+              databaseAccessToken: 'db-token-invalid-json',
+              endUserToken: 'user-token-invalid-json',
+              attributes: {
+                'EUC.HCM': {
+                  invalidValue,
+                },
+              },
+            }),
+          /NJS-194:/,
+        );
+        assert.throws(
+          () =>
+            new oracledb.EndUserSecurityContext({
+              databaseAccessToken: 'db-token-invalid-json-array',
+              endUserToken: 'user-token-invalid-json-array',
+              attributes: {
+                'EUC.HCM': [invalidValue],
+              },
+            }),
+          /NJS-194:/,
+        );
+      }
+
+      for (const invalidValue of [NaN, Infinity, -Infinity]) {
+        assert.throws(
+          () =>
+            new oracledb.EndUserSecurityContext({
+              databaseAccessToken: 'db-token-invalid-json-number',
+              endUserToken: 'user-token-invalid-json-number',
+              attributes: {
+                'EUC.HCM': {
+                  invalidValue,
+                },
+              },
+            }),
+          /NJS-195:/,
+        );
+        assert.throws(
+          () =>
+            new oracledb.EndUserSecurityContext({
+              databaseAccessToken: 'db-token-invalid-json-number-array',
+              endUserToken: 'user-token-invalid-json-number-array',
+              attributes: {
+                'EUC.HCM': [invalidValue],
+              },
+            }),
+          /NJS-195:/,
+        );
+      }
+    }); // 328.1.2
+
+    it('328.1.3 rejects unsupported nested field names', function() {
+      const invalidFieldNames = [
+        '__proto__',
+        'constructor',
+        'prototype',
+      ];
+
+      for (const fieldName of invalidFieldNames) {
+        const hcm = {
+          p1: 123,
+          p2: 'invalid-field-name',
+        };
+        Object.defineProperty(hcm, fieldName, {
+          enumerable: true,
+          value: 'invalid',
+        });
+
+        assert.throws(
+          () =>
+            new oracledb.EndUserSecurityContext({
+              databaseAccessToken: 'db-token-invalid-field-name',
+              endUserToken: 'user-token-invalid-field-name',
+              attributes: {
+                'EUC.HCM': hcm,
+              },
+            }),
+          /NJS-196:/,
+        );
+      }
+    }); // 328.1.3
   }); // 328.1
 });
