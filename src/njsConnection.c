@@ -61,6 +61,7 @@ NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_getStatementInfo);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getStmtCacheSize);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTag);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTransactionInProgress);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getTxnPriority);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_getWarning);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_isHealthy);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_ping);
@@ -76,6 +77,7 @@ NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setExternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setInternalName);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setModule);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setTag);
+NJS_NAPI_METHOD_DECL_SYNC(njsConnection_setTxnPriority);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_appContext);
 NJS_NAPI_METHOD_DECL_SYNC(njsConnection_clearAppContext);
 NJS_NAPI_METHOD_DECL_ASYNC(njsConnection_shutdown);
@@ -195,6 +197,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             NULL },
     { "getTransactionInProgress", NULL, njsConnection_getTransactionInProgress,
             NULL, NULL, NULL, napi_default, NULL },
+    { "getTxnPriority", NULL, njsConnection_getTxnPriority, NULL, NULL,
+            NULL, napi_default, NULL },
     { "getWarning", NULL, njsConnection_getWarning, NULL, NULL, NULL,
             napi_default, NULL },
     { "isHealthy", NULL, njsConnection_isHealthy, NULL, NULL, NULL,
@@ -225,6 +229,8 @@ static const napi_property_descriptor njsClassProperties[] = {
             napi_default, NULL },
     { "setTag", NULL, njsConnection_setTag, NULL, NULL, NULL, napi_default,
             NULL },
+    { "setTxnPriority", NULL, njsConnection_setTxnPriority, NULL, NULL,
+            NULL, napi_default, NULL },
     { "shutdown", NULL, njsConnection_shutdown, NULL, NULL, NULL,
             napi_default, NULL },
     { "startSessionlessTransaction", NULL,
@@ -460,6 +466,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_connect, 1, &njsClassDefConnection)
             &baton->numAppContextEntries,
             &baton->appContextEntries))
         return false;
+    if (!njsUtils_getNamedPropertyString(env, args[0], "txnPriority",
+            &baton->txnPriority, &baton->txnPriorityLength))
+        return false;
     return njsBaton_queueWork(baton, env, "Connect",
             njsConnection_connectAsync, njsConnection_connectPostAsync,
             returnValue);
@@ -498,6 +507,10 @@ static bool njsConnection_connectAsync(njsBaton *baton)
     // App Context
     params.appContext = baton->appContextEntries;
     params.numAppContext = baton->numAppContextEntries;
+
+    commonParams.transactionPriority = baton->txnPriority;
+    commonParams.transactionPriorityLength =
+            (uint32_t) baton->txnPriorityLength;
 
     commonParams.edition = baton->edition;
     commonParams.editionLength = (uint32_t) baton->editionLength;
@@ -1861,6 +1874,27 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getTransactionInProgress, 0, NULL)
     return true;
 }
 
+//-----------------------------------------------------------------------------
+// njsConnection_getTxnPriority()
+//   Get accessor of "txnPriority" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getTxnPriority, 0, NULL)
+{
+    njsConnection *conn = (njsConnection*) callingInstance;
+    uint32_t valueLength;
+    const char *value;
+
+    if (conn->handle) {
+        if (dpiConn_getTransactionPriority(conn->handle, &value,
+                &valueLength) < 0)
+            return njsUtils_throwErrorDPI(env, globals);
+        NJS_CHECK_NAPI(env, napi_create_string_utf8(env, value, valueLength,
+                returnValue))
+    }
+
+    return true;
+}
+
 
 //-----------------------------------------------------------------------------
 // njsConnection_getWarning()
@@ -2358,6 +2392,15 @@ static bool njsConnection_setTextAttribute(napi_env env, void *instance,
     return true;
 }
 
+//-----------------------------------------------------------------------------
+// njsConnection_setTxnPriority()
+//   Set accessor of "txnPriority" property.
+//-----------------------------------------------------------------------------
+NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_setTxnPriority, 1, NULL)
+{
+    return njsConnection_setTextAttribute(env, callingInstance, globals,
+            args[0], dpiConn_setTransactionPriority);
+}
 
 //-----------------------------------------------------------------------------
 // njsConnection_shutdown()

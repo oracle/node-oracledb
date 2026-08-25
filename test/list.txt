@@ -505,6 +505,7 @@ Overview of node-oracledb functional tests
     18.9 Continuous Query Notification Constants
     18.10 Pool Status Constants
     18.11 Simple Oracle Document Access (SODA) Constants
+    18.12 Transaction Priority Constants
 
   19. fetchTimestampAsString.js
     19.1 TIMESTAMP
@@ -6796,3 +6797,28 @@ Overview of node-oracledb functional tests
       328.1.1 ignores non-enumerable nested attribute properties
       328.1.2 rejects unsupported nested JSON values
       328.1.3 rejects unsupported nested field names
+
+  329. txnPriority.js
+    329.1 initial value comes from connect piggyback
+    329.2 standalone getConnection() reflects connect-time value
+    329.3 createPool() reflects pool create-time value
+    329.4 pooled acquire does not override pool create value
+    329.5 reused pooled session keeps changed value until reset
+    329.6 setter queues only the last value until a roundtrip
+    329.7 invalid setter value is rejected immediately
+    329.8 standalone getConnection() rejects invalid connect-time value
+    329.9 pool rejects invalid pool create-time value
+    329.10 invalid poolMin 0 priority fails at pool creation
+    329.11 public APIs reject invalid txnPriority values
+    329.12 standalone getConnection() accepts reset constant
+    329.13 createPool() accepts reset constant
+    329.14 reset constant restores transaction priority after roundtrip
+    329.15 default HIGH-priority session waits for blocker session
+    329.16 high priority session rolls back low priority blocker session
+    329.17 pool getConnection() does not set txnPriority
+    329.18 public API rejects setting txnPriority on closed connection
+    329.19 getter reflects ALTER SESSION txnPriority changes
+    329.20 setter is rejected during an active transaction and recovers
+    329.21 setter piggybacks on execute roundtrip
+    329.22 valid pending setter syncs back even when SQL execution fails
+    329.23 setter accepts case-insensitive txnPriority values

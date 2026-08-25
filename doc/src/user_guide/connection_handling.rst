@@ -74,6 +74,9 @@ An example passing credentials is:
 
     run();
 
+You can set ``txnPriority`` when creating a standalone connection. See
+:ref:`Transaction Priority <txnpriority>`.
+
 Connections must be released with :meth:`connection.close()` when they are no
 longer needed. Make sure to release connections in all code paths including in
 error handlers.
@@ -2388,6 +2391,9 @@ grow up to five connections:
       poolMin: 1,
       poolMax: 5
     });
+
+In node-oracledb Thin mode, you can set ``txnPriority`` when creating a
+connection pool. See :ref:`Transaction Priority <txnpriority>`.
 
 Note that in node-oracledb Thick mode, the number of
 :ref:`worker threads <workerthreads>` should be sized correctly before

@@ -186,4 +186,11 @@ describe('18. constants.js', function() {
     assert.strictEqual(5001, oracledb.SODA_COLL_MAP_MODE);
   });
 
+  it('18.12 Transaction Priority Constants', () => {
+    assert.strictEqual('HIGH', oracledb.TXN_PRIORITY_HIGH);
+    assert.strictEqual('MEDIUM', oracledb.TXN_PRIORITY_MEDIUM);
+    assert.strictEqual('LOW', oracledb.TXN_PRIORITY_LOW);
+    assert.strictEqual('', oracledb.TXN_PRIORITY_DEFAULT);
+  });
+
 });

@@ -431,6 +431,9 @@ Pool Methods
     the pool is at its maximum limit, the ``getConnection()`` call results
     in an error, such as *ORA-24418: Cannot open further sessions*.
 
+    You can set a transaction priority for a connection after it is acquired
+    from a pool. See :ref:`txnpriority` for more information.
+
     By default pools are created with :ref:`homogeneous
     <createpoolpoolattrshomogeneous>` set to *true*. The
     user name and password are supplied when the pool is created. Each time

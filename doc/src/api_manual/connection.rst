@@ -453,6 +453,25 @@ The properties of a *Connection* object are listed below.
     value is *False*, then the specified connection does not have an active
     transaction.
 
+.. attribute:: connection.txnPriority
+
+    .. versionadded:: 7.1
+
+    This read/write property is a string that specifies the transaction
+    priority associated with the connection.
+
+    Use one of the
+    :ref:`transaction priority constants <oracledbconstantstxnpriority>`.
+
+    After setting this property, the new value is sent to the database on the
+    next :ref:`round-trips <roundtrips>`. Until then, this property continues
+    to return the current value known to the database.
+
+    After a connection is created, the initial value of this property is the
+    value returned by the database for the connection.
+
+    See :ref:`txnpriority` for more information.
+
 .. attribute:: connection.user
 
     .. versionadded:: 6.7

@@ -113,6 +113,11 @@ Common Changes
     ``correlation``, ``recipients``, ``transformation``, and
     ``exceptionQueue`` properties.
 
+#)  Added :attr:`connection.txnPriority` and support for specifying
+    ``txnPriority`` when creating standalone connections and pools. In Thick
+    mode, setting ``txnPriority`` when creating a pool is currently not
+    supported.
+
 Thin Mode Changes
 +++++++++++++++++
 

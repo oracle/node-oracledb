@@ -703,6 +703,32 @@ Constants for the :ref:`vectorFormat <execmetadata>` attribute.
 
     The ``oracledb.VECTOR_FORMAT_BINARY`` constant was added.
 
+.. _oracledbconstantstxnpriority:
+
+Transaction Priority Constants
+------------------------------
+
+.. versionadded:: 7.1
+
+Constants for the :attr:`connection.txnPriority` property, and the
+``txnPriority`` property of :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()`.
+
+.. constants-table:: Transaction Priority Constants
+
+    * - ``oracledb.TXN_PRIORITY_HIGH``
+      - "HIGH"
+      - Sets high transaction priority.
+    * - ``oracledb.TXN_PRIORITY_MEDIUM``
+      - "MEDIUM"
+      - Sets medium transaction priority.
+    * - ``oracledb.TXN_PRIORITY_LOW``
+      - "LOW"
+      - Sets low transaction priority.
+    * - ``oracledb.TXN_PRIORITY_DEFAULT``
+      - ""
+      - Resets the transaction priority to the database default.
+
 .. _oracledbproperties:
 
 Oracledb Properties
@@ -2676,6 +2702,20 @@ Oracledb Methods
             See :ref:`iamtokenbasedauthentication` for more information.
 
             .. versionadded:: 6.8
+        * - ``txnPriority``
+          - String
+          - Thin
+          - .. _createpoolpoolattrstxnpriority:
+
+            Specifies the transaction priority to use for connections created in a pool.
+
+            Use one of the :ref:`transaction priority constants <oracledbconstantstxnpriority>`.
+
+            If this property is not set, then the default value from the database is used by connections created in the pool.
+
+            See :ref:`txnpriority` for more information.
+
+            .. versionadded:: 7.1
         * - ``transportConnectTimeout``
           - Number
           - Thin
@@ -3652,6 +3692,20 @@ Oracledb Methods
               The default value was changed from *60.0* seconds to *20.0* seconds.
 
             .. versionadded:: 6.0
+        * - ``txnPriority``
+          - String
+          - Both
+          - .. _getconnectiondbattrstxnpriority:
+
+            Specifies the transaction priority to use when creating a standalone connection.
+
+            Use one of the :ref:`transaction priority constants <oracledbconstantstxnpriority>`.
+
+            If this property is not set, then the default value from the database is used by the standalone connection.
+
+            See :ref:`txnpriority` for more information.
+
+            .. versionadded:: 7.1
         * - ``user``, ``username``
           - String
           - Both

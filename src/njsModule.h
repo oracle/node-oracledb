@@ -365,6 +365,8 @@ struct njsBaton {
     size_t tokenLength;
     char *privateKey;
     size_t privateKeyLength;
+    char *txnPriority;
+    size_t txnPriorityLength;
 
     // various buffers (requires free)
     uint32_t numBindNames;

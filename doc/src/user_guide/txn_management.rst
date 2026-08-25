@@ -86,6 +86,96 @@ Database will always commit an open transaction when a `DDL
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FD9A8CB4-
 6B9A-44E5-B114-EFB8DA76FC88>`__ statement is executed.
 
+.. _txnpriority:
+
+Transaction Priority
+====================
+
+Transaction priority is set at the database session level and applies to
+transactions in that session. When a higher-priority transaction is blocked by
+a lower-priority transaction, Oracle Database can automatically roll back the
+lower-priority transaction, allowing the higher-priority transaction to
+proceed. Transaction Priority is available from Oracle AI Database 26ai. For
+more information on transaction priority, see `Priority Transactions
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8B71D725-24E9-
+4AE1-B9FA-BAC291923EAC>`__.
+
+From node-oracledb version 7.1 onwards, the transaction priority can be set
+on connections. The transaction priority must be set when the connection has
+no active transactions. Applications that use low or medium priority
+transactions must be prepared for the database to roll back a transaction that
+blocks a higher-priority transaction.
+
+You can set the transaction priority when creating standalone connection by
+using the ``txnPriority`` property in
+:meth:`oracledb.getConnection()`, for example:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,
+        connectString : "localhost/FREEPDB1",
+        txnPriority   : oracledb.TXN_PRIORITY_HIGH
+    });
+
+The possible values for ``txnPriority`` are
+*oracledb.TXN_PRIORITY_HIGH*, *oracledb.TXN_PRIORITY_MEDIUM*,
+*oracledb.TXN_PRIORITY_LOW*, and *oracledb.TXN_PRIORITY_DEFAULT*. See
+:ref:`Transaction Priority Constants <oracledbconstantstxnpriority>` for
+more details. The *HIGH*, *MEDIUM*, and *LOW* values of these constants are
+case-insensitive. Invalid values are rejected during standalone or pool
+connection creation with the error ``NJS-538``.
+
+In node-oracledb Thin mode, you can also set the ``txnPriority`` value when
+creating a connection pool. For example:
+
+.. code-block:: javascript
+
+    const pool = await oracledb.createPool({
+        user          : "hr",
+        password      : mypw,
+        connectString : "localhost/FREEPDB1",
+        txnPriority   : oracledb.TXN_PRIORITY_HIGH
+    });
+
+After acquiring a connection from a pool, you can set the
+:attr:`connection.txnPriority` property before starting a transaction.
+
+When a pooled connection is released to the pool and later acquired again, it
+retains the priority already associated with that connection. To change or
+reset the priority of that connection, you can set the
+:attr:`connection.txnPriority` property after acquiring the connection. The
+new value takes effect on the next :ref:`round-trip <roundtrips>`. For
+example:
+
+.. code-block:: javascript
+
+    const connection = await pool.getConnection();
+    connection.txnPriority = oracledb.TXN_PRIORITY_HIGH;
+    await connection.ping();
+
+Also, you can use the :attr:`connection.txnPriority` property to set the
+transaction priority on an existing connection before starting a transaction.
+For example:
+
+.. code-block:: javascript
+
+    connection.txnPriority = oracledb.TXN_PRIORITY_LOW;
+
+After setting this property, the new value is sent to the database on the
+next :ref:`round-trips <roundtrips>`. Until then, this property continues
+to return the current value known to the database.
+
+To reset the priority to the database default, set
+:attr:`connection.txnPriority`, or the ``txnPriority`` option in
+:meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()` to
+``oracledb.TXN_PRIORITY_DEFAULT``:
+
+.. code-block:: javascript
+
+    connection.txnPriority = oracledb.TXN_PRIORITY_DEFAULT;
+
 .. _distributedtxns:
 
 Distributed Transactions

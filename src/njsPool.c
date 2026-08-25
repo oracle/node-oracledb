@@ -219,6 +219,9 @@ NJS_NAPI_METHOD_IMPL_ASYNC(njsPool_create, 1, &njsClassDefPool)
     if (!njsUtils_getNamedPropertyBool(env, args[0], "sodaMetaDataCache",
             &baton->sodaMetadataCache))
         return false;
+    if (!njsUtils_getNamedPropertyString(env, args[0], "txnPriority",
+            &baton->txnPriority, &baton->txnPriorityLength))
+        return false;
     if (!njsUtils_getNamedProperty(env, args[0], "accessTokenFn",
             &callback))
         return false;
@@ -281,6 +284,9 @@ static bool njsPool_createAsync(njsBaton *baton)
     if (baton->sodaMetadataCache)
         commonParams.sodaMetadataCache = 1;
     commonParams.stmtCacheSize = baton->stmtCacheSize;
+    commonParams.transactionPriority = baton->txnPriority;
+    commonParams.transactionPriorityLength =
+            (uint32_t) baton->txnPriorityLength;
 
     // set token based auth parameters
     if (baton->token) {
