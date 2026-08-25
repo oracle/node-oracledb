@@ -32,6 +32,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed bug to return proper metadata if ``fetchTypeHandler`` updates
+    column names.
+    See `Issue #1779 <https://github.com/oracle/node-oracledb/issues/1779>`__.
+
 #)  Fixed bug where database object types with more than 100 attributes
     are truncated or an error is thrown.
     See `Issue #1782 <https://github.com/oracle/node-oracledb/issues/1782>`__.

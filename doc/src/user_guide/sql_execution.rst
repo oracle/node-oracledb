@@ -734,6 +734,11 @@ For example, to tell the database to return numbers as strings:
 
     console.log("Result as an array of JSON values (String):", result.rows);
 
+The ``rowsetMetaData`` argument contains metadata for all fetched columns and
+can be referenced by the fetch type handler. However, it is read-only and must
+not be modified.
+Changing ``rowsetMetaData`` may lead to unexpected behavior.
+
 This prints the following output::
 
     MetaData of the NAME column: {

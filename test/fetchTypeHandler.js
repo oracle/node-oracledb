@@ -627,35 +627,31 @@ describe('271. fetchTypeHandler.js', function() {
     });
 
   it('271.26 simulate LOB double invocation + metadata mutation race (GH issue 1769)', async function() {
-    const sql = `
-      select 'A' as "COL_A", to_clob('B') as "COL_B"
-      from dual
-    `;
+    const sql = `select 'A' as "COL_A", to_clob('B') as "COL_B" from dual`;
+
     const fetchTypeHandler = function(metadata) {
       metadata.name = `${metadata.name}_tail`;
       if (metadata.dbType === oracledb.DB_TYPE_CLOB) {
-        return {
-          converter: async (lob) => {
-            if (lob === null) {
-              return lob;
-            }
-            return await lob.getData();
-          }
-        };
+        return { converter: async (lob) => lob ? await lob.getData() : lob };
       }
     };
 
-    const result = await connection.execute(
-      sql,
-      [],
-      { fetchTypeHandler }
-    );
+    const options = { fetchTypeHandler };
+
+    // Initial execution (Populates statement cache)
+    await connection.execute(sql, [], options);
+
+    // Cache Hit (Verifies first reuse)
+    await connection.execute(sql, [], options);
+
+    // Cache Verification (Ensures mutations didn't compound to _tail_tail)
+    const result = await connection.execute(sql, [], options);
 
     assert.deepStrictEqual(
       result.metaData.map((m) => m.name),
-      [ 'COL_A_tail', 'COL_B_tail' ]
+      ['COL_A_tail', 'COL_B_tail']
     );
-    assert.deepStrictEqual(result.rows[0], [ 'A', 'B' ]);
+    assert.deepStrictEqual(result.rows[0], ['A', 'B']);
   });
 
   it(`271.27 simulate LOB double invocation + metadata

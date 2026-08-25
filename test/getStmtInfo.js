@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -499,13 +499,20 @@ describe('162. getStmtInfo.js', function() {
   it('162.37 Duplicate column aliases', async function() {
     const sql = `SELECT 1 a, 'abc' a FROM dual`;
 
-    const info = await conn.getStatementInfo(sql);
-    assert.strictEqual(info.metaData[0].name, 'A');
-    assert.strictEqual(info.metaData[0].dbColumnName, 'A');
-    assert.strictEqual(info.metaData[1].name, 'A_1');
-    assert.strictEqual(info.metaData[1].dbColumnName, 'A');
-    const result = await conn.execute(sql);
-    assert.deepStrictEqual(result.rows[0], [1, 'abc']);
+    const verify = async () => {
+      const info = await conn.getStatementInfo(sql);
+      assert.strictEqual(info.metaData[0].name, 'A');
+      assert.strictEqual(info.metaData[0].dbColumnName, 'A');
+      assert.strictEqual(info.metaData[1].name, 'A_1');
+      assert.strictEqual(info.metaData[1].dbColumnName, 'A');
+      const result = await conn.execute(sql);
+      assert.deepStrictEqual(result.rows[0], [1, 'abc']);
+    };
+
+    // First time with statement cache miss
+    await verify();
+    // Second time with statement cache hit.
+    await verify();
   });
 
   it('162.38 Simple table columns without aliases', async function() {

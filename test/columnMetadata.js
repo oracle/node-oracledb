@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -392,11 +392,20 @@ describe('9. columnMetadata.js', function() {
   describe('9.5 duplicate column alias', function() {
 
     it('9.5.1 works when using duplicate column alias', async function() {
-      const result = await connection.execute("SELECT 1 a, 'abc' a FROM dual");
-      assert.strictEqual(result.metaData[0].name, 'A');
-      assert.strictEqual(result.metaData[0].dbColumnName, 'A');
-      assert.strictEqual(result.metaData[1].name, 'A_1');
-      assert.strictEqual(result.metaData[1].dbColumnName, 'A');
+      const sql = "SELECT 1 a, 'abc' a FROM dual";
+      const verifyDuplicateAliasMetadata = (result) => {
+        assert.strictEqual(result.metaData[0].name, 'A');
+        assert.strictEqual(result.metaData[0].dbColumnName, 'A');
+        assert.strictEqual(result.metaData[1].name, 'A_1');
+        assert.strictEqual(result.metaData[1].dbColumnName, 'A');
+      };
+
+      let result = await connection.execute(sql);
+      verifyDuplicateAliasMetadata(result);
+
+      // Cached statement should retain the metadata.
+      result = await connection.execute(sql);
+      verifyDuplicateAliasMetadata(result);
     });
   });
 

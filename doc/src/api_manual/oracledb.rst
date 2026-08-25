@@ -1222,6 +1222,11 @@ Each of the configuration properties is described below.
             }
         }
 
+    The ``rowsetMetaData`` argument contains metadata for all fetched columns
+    and can be referenced by the fetch type handler. However, it is read-only
+    and must not be modified.
+    Changing ``rowsetMetaData`` may lead to unexpected behavior.
+
 .. attribute:: oracledb.lobPrefetchSize
 
     This property is a number and is temporarily disabled. Setting it has no
