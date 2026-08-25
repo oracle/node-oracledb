@@ -68,6 +68,37 @@ describe('1. implicitPool1.js', function() {
     return result.rows;
   };
 
+  const createCallbacksPackage = async (conn) => {
+    await conn.execute(`
+      CREATE OR REPLACE PACKAGE ora_cpool_state AS
+        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2,
+        connection_class VARCHAR2);
+        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2,
+        connection_class VARCHAR2);
+      END ora_cpool_state;
+    `);
+    await conn.execute(`
+      CREATE OR REPLACE PACKAGE BODY ora_cpool_state AS
+        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2,
+        connection_class VARCHAR2) IS
+        BEGIN
+          INSERT INTO ${dbConfig.user}.TestImplicitPoolCallbacks VALUES (
+            (SELECT COUNT(*) + 1 FROM ${dbConfig.user}.TestImplicitPoolCallbacks), 'G'
+          );
+          COMMIT;
+        END;
+        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2,
+        connection_class VARCHAR2) IS
+        BEGIN
+          INSERT INTO ${dbConfig.user}.TestImplicitPoolCallbacks VALUES (
+            (SELECT COUNT(*) + 1 FROM ${dbConfig.user}.TestImplicitPoolCallbacks), 'R'
+          );
+          COMMIT;
+        END;
+      END ora_cpool_state;
+    `);
+  };
+
   if (process.env.NODE_ORACLEDB_IMPL_CONNECTIONSTRING) {
     implicitConnString = process.env.NODE_ORACLEDB_IMPL_CONNECTIONSTRING;
     // Check if using TRANSACTION boundary
@@ -132,36 +163,7 @@ describe('1. implicitPool1.js', function() {
     await connection.commit();
 
     // Create PL/SQL package for implicit callbacks
-    await connection.execute(`
-      CREATE OR REPLACE PACKAGE ora_cpool_state AS
-        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2,
-        connection_class VARCHAR2);
-        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2,
-        connection_class VARCHAR2);
-      END ora_cpool_state;
-    `);
-
-    await connection.execute(`
-      CREATE OR REPLACE PACKAGE BODY ora_cpool_state AS
-        PROCEDURE ora_cpool_state_get_callback(service VARCHAR2,
-        connection_class VARCHAR2) IS
-        BEGIN
-          INSERT INTO ${dbConfig.user}.TestImplicitPoolCallbacks VALUES (
-            (SELECT COUNT(*) + 1 FROM ${dbConfig.user}.TestImplicitPoolCallbacks), 'G'
-          );
-          COMMIT;
-        END;
-
-        PROCEDURE ora_cpool_state_rls_callback(service VARCHAR2,
-        connection_class VARCHAR2) IS
-        BEGIN
-          INSERT INTO ${dbConfig.user}.TestImplicitPoolCallbacks VALUES (
-            (SELECT COUNT(*) + 1 FROM ${dbConfig.user}.TestImplicitPoolCallbacks), 'R'
-          );
-          COMMIT;
-        END;
-      END ora_cpool_state;
-    `);
+    await createCallbacksPackage(connection);
   });
 
   after(async function() {
@@ -270,10 +272,11 @@ describe('1. implicitPool1.js', function() {
       assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
 
       // Closing after an implicit release must remain a no-op for the server
-      // session and must not prevent the client connection from being closed.
+      // session from the application's perspective and must not prevent the
+      // client connection from being closed. Thick mode may acquire and
+      // release a server session while performing the explicit close.
       await conn.close();
       conn = null;
-      assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
     }); // 1.7
 
     it('1.8 Fetch And Txn', async function() {
@@ -585,12 +588,12 @@ describe('1. implicitPool1.js', function() {
       assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
     }); // 1.18
 
-    it('1.19 partial ResultSet fetch retains the session until ResultSet close', async function() {
+    it('1.19 partial ResultSet fetch retains the session until its boundary', async function() {
       await clearCallbacks(connection);
       const result = await conn.execute(
         `SELECT IntCol FROM TestNumbers ORDER BY IntCol`,
         [],
-        { resultSet: true }
+        { resultSet: true, keepInStmtCache: false }
       );
 
       const rows = await result.resultSet.getRows(1);
@@ -600,6 +603,9 @@ describe('1. implicitPool1.js', function() {
       assert.deepStrictEqual(await getCallbacks(connection), [['G']]);
 
       await result.resultSet.close();
+      assert.deepStrictEqual(await getCallbacks(connection), [['G']]);
+      if (transactionBoundary) await conn.commit();
+      else await conn.ping();
       assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
     }); // 1.19
 
@@ -761,12 +767,12 @@ describe('1. implicitPool1.js', function() {
       await conn.execute(testsUtil.sqlDropTable('lobTable'));
     }); // 2.4
 
-    it('2.5 partial ResultSet fetch from a pool retains the session until ResultSet close', async function() {
+    it('2.5 partial ResultSet fetch from a pool retains the session until its boundary', async function() {
       await clearCallbacks(connection);
       const result = await conn.execute(
         `SELECT IntCol FROM TestNumbers ORDER BY IntCol`,
         [],
-        { resultSet: true }
+        { resultSet: true, keepInStmtCache: false }
       );
 
       const rows = await result.resultSet.getRows(1);
@@ -774,7 +780,173 @@ describe('1. implicitPool1.js', function() {
       assert.deepStrictEqual(await getCallbacks(connection), [['G']]);
 
       await result.resultSet.close();
+      assert.deepStrictEqual(await getCallbacks(connection), [['G']]);
+      if (transactionBoundary) await conn.commit();
+      else await conn.ping();
       assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
     }); // 2.5
+  });
+
+  describe('3. Session State Restore Tests', function() {
+    const restorePoolName = process.env.NODE_ORACLEDB_IMPLICIT_RESTORE_POOL ||
+      'NJS_IMPLICIT_RESTORE';
+    const restoreConnectString = (boundary, restore) => implicitConnString
+      .replace(/\(POOL_BOUNDARY=[^)]+\)/i,
+        `(POOL_BOUNDARY=${boundary})(POOL_NAME=${restorePoolName})` +
+        `(POOL_SESSION_STATE_RESTORE=${restore})`);
+
+    const getState = async (conn) => {
+      const result = await conn.execute(`SELECT
+        sys_context('userenv', 'sid'),
+        sys_context('userenv', 'current_schema'),
+        sys_context('userenv', 'client_info'),
+        (SELECT value FROM nls_session_parameters
+         WHERE parameter = 'NLS_DATE_FORMAT')
+        FROM dual`);
+      return result.rows[0];
+    };
+
+    const releaseAtBoundary = async (conn, boundary) => {
+      if (boundary === 'TRANSACTION') await conn.commit();
+    };
+
+    const resetAndClose = async (conn, originalNls) => {
+      conn.clientInfo = '';
+      await conn.execute(
+        `ALTER SESSION SET NLS_DATE_FORMAT = '${originalNls}'`);
+      await conn.close();
+    };
+
+    const openRestoreConnection = async (boundary, restore) =>
+      await oracledb.getConnection({
+        user: dbConfig.user,
+        password: dbConfig.password,
+        connectString: restoreConnectString(boundary, restore),
+        stmtCacheSize: 0
+      });
+
+    const prepareForStateRead = async (conn, boundary) => {
+      if (boundary === 'TRANSACTION') {
+        await conn.execute(`UPDATE TestTempTable SET VALUE = VALUE
+          WHERE IntCol = -1`);
+        await conn.commit();
+      }
+    };
+
+    const assertAlternatingCallbacks = async (boundary) => {
+      const pairCount = boundary === 'TRANSACTION' ? 8 : 4;
+      const expected = Array.from({ length: pairCount },
+        () => [['G'], ['R']]).flat();
+      assert.deepStrictEqual(await getCallbacks(connection), expected);
+    };
+
+    const testRestoreOn = async (boundary) => {
+      const connA = await openRestoreConnection(boundary, 'ON');
+      const originalNlsA = (await getState(connA))[3];
+      await releaseAtBoundary(connA, boundary);
+      const connB = await openRestoreConnection(boundary, 'ON');
+      const originalNlsB = (await getState(connB))[3];
+      await releaseAtBoundary(connB, boundary);
+
+      connA.clientInfo = `nodb_restore_a_${boundary}`;
+      await connA.execute(
+        "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
+      await releaseAtBoundary(connA, boundary);
+      connB.clientInfo = `nodb_restore_b_${boundary}`;
+      await connB.execute(
+        "ALTER SESSION SET NLS_DATE_FORMAT = 'DD/MM/YYYY'");
+      await releaseAtBoundary(connB, boundary);
+
+      await clearCallbacks(connection);
+      const states = [];
+      for (const conn of [connA, connB, connA, connB]) {
+        await prepareForStateRead(conn, boundary);
+        states.push(await getState(conn));
+      }
+
+      assert.strictEqual(new Set(states.map((state) => state[0])).size, 1);
+      assert.deepStrictEqual(states[0].slice(2),
+        [`nodb_restore_a_${boundary}`, 'YYYY-MM-DD']);
+      assert.deepStrictEqual(states[1].slice(2),
+        [`nodb_restore_b_${boundary}`, 'DD/MM/YYYY']);
+      assert.deepStrictEqual(states[2], states[0]);
+      assert.deepStrictEqual(states[3], states[1]);
+      await assertAlternatingCallbacks(boundary);
+
+      await resetAndClose(connA, originalNlsA);
+      await resetAndClose(connB, originalNlsB);
+    };
+
+    const testRestoreOff = async (boundary) => {
+      const connA = await openRestoreConnection(boundary, 'OFF');
+      await getState(connA);
+      await releaseAtBoundary(connA, boundary);
+      const connB = await openRestoreConnection(boundary, 'OFF');
+      await clearCallbacks(connection);
+      const states = [];
+      for (const conn of [connA, connB, connA, connB]) {
+        await prepareForStateRead(conn, boundary);
+        states.push(await getState(conn));
+      }
+      assert.strictEqual(new Set(states.map((state) => state[0])).size, 1);
+      for (const state of states) assert.strictEqual(state.length, 4);
+      await assertAlternatingCallbacks(boundary);
+
+      await connA.close();
+      await connB.close();
+    };
+
+    it('3.1 restores state across STATEMENT/ON session reuse', async function() {
+      await testRestoreOn('STATEMENT');
+    });
+
+    it('3.2 supports alternating STATEMENT/OFF connections', async function() {
+      await testRestoreOff('STATEMENT');
+    });
+
+    it('3.3 restores state across TRANSACTION/ON session reuse', async function() {
+      await testRestoreOn('TRANSACTION');
+    });
+
+    it('3.4 supports alternating TRANSACTION/OFF connections', async function() {
+      await testRestoreOff('TRANSACTION');
+    });
+
+    it('3.5 restores CURRENT_SCHEMA with STATEMENT/ON', async function() {
+      await connection.execute(testsUtil.sqlDropSource(
+        'PACKAGE', 'ora_cpool_state'));
+      const conn = await oracledb.getConnection({
+        user: dbConfig.user, password: dbConfig.password,
+        connectString: restoreConnectString('STATEMENT', 'ON'), stmtCacheSize: 0
+      });
+      conn.currentSchema = 'SYS';
+      await conn.ping();
+      assert.strictEqual((await getState(conn))[1], 'SYS');
+      conn.currentSchema = dbConfig.user;
+      await conn.close();
+      await createCallbacksPackage(connection);
+    });
+
+    it('3.6 package state prevents statement-boundary release', async function() {
+      await connection.execute(`CREATE OR REPLACE PACKAGE nodb_restore_state AS
+        value NUMBER := 0; PROCEDURE set_value; FUNCTION get_value RETURN NUMBER; END;`);
+      await connection.execute(`CREATE OR REPLACE PACKAGE BODY nodb_restore_state AS
+        PROCEDURE set_value IS BEGIN value := 42; END;
+        FUNCTION get_value RETURN NUMBER IS BEGIN RETURN value; END; END;`);
+      const conn = await oracledb.getConnection({
+        user: dbConfig.user, password: dbConfig.password,
+        connectString: restoreConnectString('STATEMENT', 'ON'), stmtCacheSize: 0
+      });
+      await clearCallbacks(connection);
+      await conn.execute('BEGIN nodb_restore_state.set_value; END;');
+      await conn.ping();
+      const result = await conn.execute('BEGIN :v := nodb_restore_state.get_value; END;',
+        { v: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } });
+      assert.strictEqual(result.outBinds.v, 42);
+      assert.deepStrictEqual(await getCallbacks(connection), [['G']]);
+      await conn.close();
+      await connection.execute(testsUtil.sqlDropSource(
+        'PACKAGE', 'nodb_restore_state'));
+    });
   });
 });

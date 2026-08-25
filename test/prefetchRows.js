@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -538,6 +538,35 @@ describe("147. prefetchRows.js", function() {
       rt = await testsUtil.getRoundTripCount(sid) - rt;
 
       assert.strictEqual(rt, 2);
+    });
+  });
+
+  describe('147.4 prefetchRows with nested Resultsets', function() {
+    const defaultPrefetchRows = oracledb.prefetchRows;
+    let connection;
+
+    before(async function() {
+      connection = await oracledb.getConnection(dbConfig);
+    });
+
+    after(async function() {
+      oracledb.prefetchRows = defaultPrefetchRows;
+      await connection.close();
+    });
+
+    it('147.4.1 returns no more than the requested rows when REF CURSOR rows are prefetched', async function() {
+      oracledb.prefetchRows = 100;
+      const result = await connection.execute(
+        `begin open :cursor for
+           select level from dual connect by level <= 5;
+         end;`,
+        {cursor: {dir: oracledb.BIND_OUT, type: oracledb.CURSOR}}
+      );
+      const cursor = result.outBinds.cursor;
+      assert.deepStrictEqual(await cursor.getRows(2), [[1], [2]]);
+      assert.deepStrictEqual(await cursor.getRows(2), [[3], [4]]);
+      assert.deepStrictEqual(await cursor.getRows(2), [[5]]);
+      await cursor.close();
     });
   });
 });

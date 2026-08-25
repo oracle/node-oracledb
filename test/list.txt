@@ -3896,6 +3896,8 @@ Overview of node-oracledb functional tests
       147.3.6 Query round-trips with prefetch larger than row count
       147.3.7 Query round-trips with prefetch < row count and fetchArraySize < row count
       147.3.8 Query round-trips with prefetch < row count and fetchArraySize > row count
+    147.4 prefetchRows with nested Resultsets
+      147.4.1 returns no more than the requested rows when REF CURSOR rows are prefetched
 
   148. fetchArraySize1.js
     148.1 oracledb.fetchArraySize
