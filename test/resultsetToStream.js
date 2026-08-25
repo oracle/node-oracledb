@@ -108,6 +108,51 @@ describe('15. resultsetToStream.js', function() {
       assert.strictEqual(counter, rowsAmount);
     }); // 15.1.1
 
+    it('15.1.2 should emit the requested number of rows per data event', async function() {
+      const result = await connection.execute(
+        'begin \n' +
+        '  open :cursor for select employees_name from nodb_rs2stream order by employees_id; \n' +
+        'end;',
+        {cursor: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}}
+      );
+      const stream = result.outBinds.cursor.toQueryStream({rowsPerDataEvent: 3});
+      const chunks = [];
+      await new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('data', rows => chunks.push(rows));
+        stream.on('end', stream.destroy);
+        stream.on('close', resolve);
+      });
+      const expectedChunkLengths = new Array(Math.floor(rowsAmount / 3)).fill(3);
+      if (rowsAmount % 3)
+        expectedChunkLengths.push(rowsAmount % 3);
+      assert.deepStrictEqual(chunks.map(rows => rows.length), expectedChunkLengths);
+      assert.deepStrictEqual(chunks.flat().map(row => row[0]),
+        Array.from({length: rowsAmount}, (_, index) => `staff ${index + 1}`));
+    }); // 15.1.2
+
+    it('15.1.3 should group normal ResultSet rows into data events', async function() {
+      const result = await connection.execute(
+        'select employees_name from nodb_rs2stream order by employees_id',
+        [],
+        {resultSet: true}
+      );
+      const stream = result.resultSet.toQueryStream({rowsPerDataEvent: 3});
+      const chunks = [];
+      await new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('data', rows => chunks.push(rows));
+        stream.on('end', stream.destroy);
+        stream.on('close', resolve);
+      });
+      const expectedChunkLengths = new Array(Math.floor(rowsAmount / 3)).fill(3);
+      if (rowsAmount % 3)
+        expectedChunkLengths.push(rowsAmount % 3);
+      assert.deepStrictEqual(chunks.map(rows => rows.length), expectedChunkLengths);
+      assert.deepStrictEqual(chunks.flat().map(row => row[0]),
+        Array.from({length: rowsAmount}, (_, index) => `staff ${index + 1}`));
+    }); // 15.1.3
+
   }); // 15.1
 
   describe('15.2 Testing ResultSet/QueryStream conversion errors', function() {
@@ -242,6 +287,24 @@ describe('15. resultsetToStream.js', function() {
       );
       stream.destroy();
     }); // 15.2.7
+
+    it('15.2.8 should reject invalid rowsPerDataEvent values', async function() {
+      const sql = `
+        begin
+          open :cursor for select employees_name from nodb_rs2stream;
+        end;`;
+      for (const rowsPerDataEvent of [0, -1, 1.5, '2', null]) {
+        const result = await connection.execute(sql, {
+          cursor: {type: oracledb.CURSOR, dir: oracledb.BIND_OUT}
+        });
+        const cursor = result.outBinds.cursor;
+        assert.throws(
+          () => cursor.toQueryStream({rowsPerDataEvent}),
+          /NJS-007:/
+        );
+        await cursor.close();
+      }
+    }); // 15.2.8
 
   }); // 15.2
 });

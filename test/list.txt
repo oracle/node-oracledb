@@ -454,9 +454,11 @@ Overview of node-oracledb functional tests
       13.2.4 should work if querystream is destroyed before resultset is opened
       13.2.5 should work if querystream is destroyed after end event
       13.2.6 should emit the error passed in
-    13.3 Testing QueryStream's fetchArraySize option
+    13.3 Testing QueryStream fetch and event sizes
       13.3.1 should use oracledb.fetchArraySize for fetching
       13.3.2 should use execute option fetchArraySize for fetching
+      13.3.3 emits the requested number of rows per data event
+      13.3.4 preserves single-row data events by default
     13.4 Testing QueryStream other race conditions
       13.4.1 queryStream from toQueryStream should get open event
       13.4.2 queryStream from toQueryStream should get metadata event
@@ -489,6 +491,7 @@ Overview of node-oracledb functional tests
       15.2.5 should prevent invoking getRows after conversion to stream
       15.2.6 should prevent invoking close after conversion to stream
       15.2.7 should prevent calling toQueryStream more than once
+      15.2.8 should reject invalid rowsPerDataEvent values
 
   18. constants.js
     18.1 Query outFormat Constants

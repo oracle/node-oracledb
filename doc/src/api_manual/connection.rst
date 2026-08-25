@@ -2292,16 +2292,51 @@ Connection Methods
 
     This function provides query streaming support. The parameters are the
     same as :meth:`connection.execute()` except a callback is not used.
-    Instead this function returns a stream used to fetch data.
+    Instead, this function returns a stream used to fetch data.
 
-    Each row is returned as a ``data`` event. Query metadata is available
-    via a ``metadata`` event. The ``end`` event indicates the end of the
-    query results. After the ``end`` event has been received, the Stream
-    `destroy() <https://nodejs.org/api/stream.html#stream_readable_destroy_error>`__
+    **queryStream(): options Parameter Properties**
+
+    In addition to the
+    :ref:`options parameter properties <executeoptionsparams>` of
+    :meth:`connection.execute()`, the following property can be set in the
+    ``options`` parameter of :meth:`connection.queryStream()`.
+
+    .. list-table-with-summary:: queryStream(): ``options`` Parameter Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the property. The second column
+         displays the data type of the property. The third column displays
+         the description of the property.
+
+        * - Property
+          - Data Type
+          - Description
+        * - ``rowsPerDataEvent``
+          - Number
+          - .. _propquerystreamrowsperdataevent:
+
+            The maximum number of rows returned in each ``data`` event.
+
+            The default value is *1*.
+
+            .. versionadded:: 7.1
+
+    By default, each ``data`` event contains the row itself, not an array
+    containing one row. This is also true when ``rowsPerDataEvent`` is set to
+    *1*. If ``rowsPerDataEvent`` is set to a value greater than *1*, then each
+    event contains an array of up to that many rows. See
+    :ref:`Query Streaming <streamingresults>` for more information about
+    ``data`` events. Query metadata is available via a ``metadata`` event. The
+    ``end`` event indicates the end of the query results. After the ``end``
+    event has been received, the Stream `destroy()
+    <https://nodejs.org/api/stream.html#stream_readable_destroy_error>`__
     function should be called to clean up resources properly. Any further
-    end-of-fetch logic, in particular the connection release, should be in
-    the ``close`` event. Alternatively the Stream
-    `destroy() <https://nodejs.org/api/stream.html#stream_readable_destroy_error>`__
+    end-of-fetch logic, in particular the connection release, should be in the
+    ``close`` event. Alternatively, the Stream `destroy()
+    <https://nodejs.org/api/stream.html#stream_readable_destroy_error>`__
     method can be used to terminate a stream early.
 
     For tuning, adjust the values of the options
@@ -2315,6 +2350,10 @@ Connection Methods
     node-oracledb 2.1.
 
     See :meth:`~connection.execute()`.
+
+    .. versionchanged:: 7.1
+
+        The ``rowsPerDataEvent`` option property was added.
 
 .. method:: connection.resumeSessionlessTransaction()
 

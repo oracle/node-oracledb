@@ -19,6 +19,11 @@ node-oracledb `v7.1.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1...
 Common Changes
 +++++++++++++++
 
+#)  Added ``rowsPerDataEvent`` option to the :meth:`connection.queryStream()`
+    and :meth:`resultset.toQueryStream()` methods to allow processing of more
+    rows per data event of the ``queryStream`` object.
+    See `Issue #633 <https://github.com/oracle/node-oracledb/issues/633>`__.
+
 #)  Fixed bug that allowed invalid ``dataRoles`` entries in
     :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`.
 

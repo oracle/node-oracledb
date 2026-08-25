@@ -294,14 +294,22 @@ from a top level query and listen for events. You can also call
 returned :ref:`ResultSet <resultsetclass>`, from an OUT bind REF CURSOR
 ResultSet, or from :ref:`Implicit Results <implicitresults>` ResultSets.
 
-With streaming, each row is returned as a ``data`` event. Query metadata
-is available via a ``metadata`` event. The ``end`` event indicates the
-end of the query results. After the ``end`` event has been received, the
-Stream
-`destroy() <https://nodejs.org/api/stream.html#stream_readable_destroy_error>`__
-function should be called to clean up resources properly. Any further
-end-of-fetch logic, in particular the connection release, should be in
-the ``close`` event.
+With streaming, each row is returned as a ``data`` event by default. To return
+multiple rows in each event, set the ``rowsPerDataEvent`` option of
+:meth:`connection.queryStream()` or :meth:`resultset.toQueryStream()`. Query
+metadata is available by using a ``metadata`` event. The ``end`` event
+indicates the end of the query results. After the ``end`` event has been
+received, the Stream `destroy() <https://nodejs.org/api/stream.html#
+stream_readable_destroy_error>`__ function should be called to clean up
+resources properly. Any further end-of-fetch logic, in particular the
+connection release, should be in the ``close`` event.
+
+Set ``rowsPerDataEvent`` to a moderate value when using backpressure, such as
+when a stream is paused with ``pause()`` or when a downstream consumer is
+slow, particularly for wide rows, LOBs, or applications that process rows
+asynchronously. In these cases, Node.js may queue multiple ``data`` events in
+the client process. When each event contains a large array of rows, client
+memory can grow quickly.
 
 Query results should be fetched to completion to avoid resource leaks,
 or the Stream
@@ -324,14 +332,20 @@ An example of streaming query results is:
 
 .. code-block:: javascript
 
-    const stream = connection.queryStream(`SELECT employees_name FROM employees`);
+    const stream = connection.queryStream(
+        `SELECT employees_name FROM employees`,
+        [],
+        { rowsPerDataEvent: 10 }
+    );
+
+    stream.on('data', function (rows) {
+        for (const row of rows) {
+            // handle row...
+        }
+    });
 
     stream.on('error', function (error) {
         // handle any error...
-    });
-
-    stream.on('data', function (data) {
-        // handle data row...
     });
 
     stream.on('end', function () {

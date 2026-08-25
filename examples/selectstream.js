@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -75,7 +75,8 @@ async function run() {
        ORDER BY id`,
       [],  // no binds
       {
-        fetchArraySize: 150  // internal buffer allocation size for tuning
+        fetchArraySize: 150,  // internal buffer allocation size for tuning
+        rowsPerDataEvent: 25      // rows emitted together in each data event
       }
     );
 
@@ -94,8 +95,10 @@ async function run() {
 
       stream.on('data', function(data) {
         // console.log("stream 'data' event");
-        console.log(data);
-        rowcount++;
+        for (const row of data) {
+          console.log(row);
+        }
+        rowcount += data.length;
       });
 
       stream.on('end', function() {

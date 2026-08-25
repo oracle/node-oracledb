@@ -417,7 +417,7 @@ describe('13. stream1.js', function() {
     });
   });
 
-  describe('13.3 Testing QueryStream\'s fetchArraySize option', function() {
+  describe('13.3 Testing QueryStream fetch and event sizes', function() {
 
     it('13.3.1 should use oracledb.fetchArraySize for fetching', async function() {
       const defaultFetchArraySize = oracledb.fetchArraySize;
@@ -457,6 +457,52 @@ describe('13. stream1.js', function() {
           stream.destroy();
         });
       });
+    });
+
+    it('13.3.3 emits the requested number of rows per data event', async function() {
+      const rowsPerDataEvent = 50;
+      const stream = connection.queryStream(
+        'SELECT employee_name FROM nodb_stream1 ORDER BY employee_id',
+        [],
+        { fetchArraySize: 8, rowsPerDataEvent },
+      );
+      const chunks = [];
+      await new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('data', rows => chunks.push(rows));
+        stream.on('end', stream.destroy);
+        stream.on('close', resolve);
+      });
+
+      assert.deepStrictEqual(chunks.map(rows => rows.length), [50, 50, 50, 50, 17]);
+      assert.deepStrictEqual(
+        chunks.flat().map(row => row[0]),
+        Array.from({ length: rowsAmount }, (_, index) => `staff ${index + 1}`),
+      );
+    });
+
+    it('13.3.4 preserves single-row data events by default', async function() {
+      const stream = connection.queryStream(
+        'SELECT employee_name FROM nodb_stream1 WHERE employee_id <= 2 ORDER BY employee_id',
+      );
+      const rows = [];
+      await new Promise((resolve, reject) => {
+        stream.on('error', reject);
+        stream.on('data', row => rows.push(row));
+        stream.on('end', stream.destroy);
+        stream.on('close', resolve);
+      });
+
+      assert.deepStrictEqual(rows, [['staff 1'], ['staff 2']]);
+    });
+
+    it('13.3.5 rejects invalid rowsPerDataEvent values', function() {
+      for (const rowsPerDataEvent of [0, -1, 1.5, '2', null]) {
+        assert.throws(
+          () => connection.queryStream('SELECT employee_name FROM nodb_stream1', [], { rowsPerDataEvent }),
+          /NJS-007:/,
+        );
+      }
     });
 
   });

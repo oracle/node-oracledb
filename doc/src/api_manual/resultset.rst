@@ -140,7 +140,7 @@ ResultSet Methods
 
     .. code-block:: javascript
 
-        toQueryStream();
+        toQueryStream([Object options]);
 
     This synchronous method converts a ResultSet into a `Readable Stream
     <https://nodejs.org/api/stream.html>`__.
@@ -149,6 +149,58 @@ ResultSet Methods
     CURSOR bind variables streamable. To make top-level queries streamable,
     the alternative :meth:`connection.queryStream()` method
     may be easier to use.
+
+    The parameters of the :meth:`resultset.toQueryStream()` method are:
+
+    .. list-table-with-summary::  resultset.toQueryStream() Parameters
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the property. The second column
+         displays the data type of the property. The third column displays
+         the description of the property.
+
+        * - Parameter
+          - Data Type
+          - Description
+        * - ``options``
+          - Object
+          - .. _proptoquerystreamrowsperdataevent:
+
+            An optional parameter that can be used to control the behavior of ``toQueryStream()``. See :ref:`toQueryStream() options Parameter properties <toquerystreamoptions>` for information about its properties.
+
+            .. versionadded:: 7.1
+
+    .. _toquerystreamoptions:
+
+    **toQueryStream(): options Parameter Properties**
+
+    The properties of the ``options`` parameter are:
+
+    .. list-table-with-summary:: toQueryStream(): ``options`` Parameter Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 10 30
+        :width: 100%
+        :summary: The first column displays the property. The second column
+         displays the data type of the property. The third column displays
+         the description of the property.
+
+        * - Property
+          - Data Type
+          - Description
+        * - ``rowsPerDataEvent``
+          - Number
+          - .. _proptoquerystreamrowsperdataevent:
+
+            The maximum number of rows returned in each ``data`` event.
+
+            The default value is *1*.
+
+            .. versionadded:: 7.1
 
     To change the behavior of ``toQueryStream()``, such as setting the
     :ref:`query output Format <queryoutputformats>` or the internal buffer
@@ -161,3 +213,8 @@ ResultSet Methods
 
     Support for Node.js 8’s Stream ``destroy()`` method was added in
     node-oracledb 2.1.
+
+    .. versionchanged:: 7.1
+
+        The ``options`` parameter and the ``rowsPerDataEvent`` option property
+        were added.
