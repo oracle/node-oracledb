@@ -75,6 +75,12 @@ Thick Mode Changes
     :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>` if the
     value is not enqueued or available.
 
+#)  ODPI-C now requires the standard Oracle Client library file names
+    `libclntsh.so` on Linux and `libclntsh.dylib` on macOS when using
+    :meth:`oracledb.init_oracle_client()` to load Oracle Client libraries.
+    Version-specific library names such as `libclntsh.so.19.1` are no longer
+    loaded directly.
+
 node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...v7.0.1>`__ (15 Jul 2026)
 -----------------------------------------------------------------------------------------------------------
 
