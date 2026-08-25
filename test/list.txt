@@ -5953,6 +5953,7 @@ Overview of node-oracledb functional tests
       290.5.1 verify associative array outbinds
     290.6 db Object tests with XML Value type
       290.6.1 Verify XML value and metaData inside object
+      290.6.2 Verify null XMLTypeInstance
     290.7 Check cursor close behaviour
       290.7.1 create and delete DB object instance in a loop should not cause cursor leak
 

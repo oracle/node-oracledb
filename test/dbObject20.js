@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1392,6 +1392,24 @@ describe('290. dbObject20.js', () => {
       const charVal = 'JOHN';
       const expectedData = { "ID": numVal, "XMLDATA": testXMLData, "NAME": charVal };
       const sql = `select ${TYPE1}(${expectedData.ID}, sys.xmltype('${expectedData.XMLDATA}'),
+      '${expectedData.NAME}') from dual`;
+
+      const result = await conn.execute(sql);
+      assert.strictEqual(JSON.stringify(result.rows[0][0]), JSON.stringify(expectedData));
+
+      // Validate metadata.
+      const xmlObjClass = result.metaData[0];
+      const pInObj = new xmlObjClass.dbTypeClass();
+      assert.strictEqual(pInObj.attributes.XMLDATA.type, oracledb.DB_TYPE_XMLTYPE);
+      assert.strictEqual(pInObj.attributes.ID.type, oracledb.DB_TYPE_NUMBER);
+      assert.strictEqual(pInObj.attributes.NAME.type, oracledb.DB_TYPE_VARCHAR);
+    });
+
+    it('290.6.2 Verify null XMLTypeInstance', async () => {
+      const numVal = 234;
+      const charVal = 'JOHN';
+      const expectedData = { "ID": numVal, "XMLDATA": null, "NAME": charVal };
+      const sql = `select ${TYPE1}(${expectedData.ID}, null,
       '${expectedData.NAME}') from dual`;
 
       const result = await conn.execute(sql);
