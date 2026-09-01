@@ -38,6 +38,8 @@ async function getToken(params) {
       return await simpleAuthentication(params);
     case 'instanceprincipal':
       return await instancePrincipalAuthentication(params);
+    case 'resourceprincipal':
+      return await resourcePrincipalAuthentication(params);
     default:
       throwErr(`Invalid authentication type ${params.authType} in extensionOci plugins.`);
   }
@@ -190,6 +192,18 @@ async function simpleAuthentication(accessTokenConfig) {
 //---------------------------------------------------------------------------
 async function instancePrincipalAuthentication(accessTokenConfig) {
   const provider = await new common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
+
+  return await generateAccessToken(provider, accessTokenConfig.scope);
+}
+
+//---------------------------------------------------------------------------
+// resourcePrincipalAuthentication()
+//
+// Authentication in an OCI resource-principal-enabled service. Credentials
+// are supplied by the OCI runtime, so no API key material is needed.
+//---------------------------------------------------------------------------
+async function resourcePrincipalAuthentication(accessTokenConfig) {
+  const provider = common.ResourcePrincipalAuthenticationDetailsProvider.builder();
 
   return await generateAccessToken(provider, accessTokenConfig.scope);
 }

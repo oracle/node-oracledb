@@ -134,7 +134,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database Dedicated Servers, Shared Servers, and Database Resident Connection Pooling (DRCP) (see :ref:`drcp`)
       - Yes
       - Yes
-    * - Oracle Database 26ai Implicit connection pooling for DRCP and PRCP (see :ref:`implicitpool`)
+    * - Oracle AI Database 26ai Implicit connection pooling for DRCP and PRCP (see :ref:`implicitpool`)
       - Yes
       - Yes
     * - Multitenant Databases
@@ -146,7 +146,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Bequeath connections
       - No
       - Yes
-    * - Oracle Database 26ai Deep Data Security (see :ref:`deepdatasecurity`)
+    * - Oracle AI Database 26ai Deep Data Security (see :ref:`deepdatasecurity`)
       - Yes
       - No
     * - Lightweight Directory Access Protocol (LDAP) connections
@@ -254,7 +254,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Feature tracking
       - No
       - Yes
-    * - Oracle Database 26ai Sessionless Transactions (see :ref:`sessionlesstxns`)
+    * - Oracle AI Database 26ai Sessionless Transactions (see :ref:`sessionlesstxns`)
       - Yes
       - Yes
     * - Two-phase Commit (TPC) (see :ref:`twopc`)

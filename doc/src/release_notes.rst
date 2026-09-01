@@ -37,7 +37,8 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 #)  Added support for OCI Resource Principal authentication with the
-    :ref:`OCI Object Storage centralized configuration provider <ociobjstorage>`.
+    :ref:`OCI Object Storage centralized configuration provider <ociobjstorage>`
+    and :ref:`native IAM token-based authentication <cloudnativeauthoci>`.
 
 #)  Added support for reading and setting database
     :ref:`OpenTelemetry <opentelemetry>` trace propagation with the

@@ -292,7 +292,7 @@ Upgrading from node-oracledb 6.5 to 6.6
   and connect to Oracle Database.
 
 - You can use the new :ref:`oracledb.DB_TYPE_BFILE <oracledbconstantsdbtype>`
-  constant to represent Oracle Database 26ai data type
+  constant to represent Oracle AI Database 26ai data type
   :ref:`BFILE <insertbfile>`.
 
 - In node-oracledb Thin mode, you can directly specify the security
@@ -313,14 +313,14 @@ Upgrading from node-oracledb 6.4 to 6.5
 - Review the :ref:`releasenotes` and take advantage of new features.
 
 - The new :ref:`oracledb.JsonId <jsonid>` class represents JSON ID values
-  returned by SODA in Oracle Database 26ai and later in the ``_id`` attribute
-  of documents stored in native collections.
+  returned by SODA in Oracle AI Database 26ai and later in the ``_id``
+  attribute of documents stored in native collections.
 
 - You can now pass BigInt values as binds to :meth:`connection.execute()` and
   :meth:`connection.executeMany()`.
 
 - With the new :ref:`oracledb.DB_TYPE_VECTOR <oracledbconstantsdbtype>`
-  constant, you can now represent Oracle Database 26ai data type
+  constant, you can now represent Oracle AI Database 26ai data type
   :ref:`VECTOR <vectors>` with the ``vectorDimensions`` and ``vectorFormat``
   :ref:`metadata <execmetadata>` information attributes.
 
@@ -328,7 +328,7 @@ Upgrading from node-oracledb 6.4 to 6.5
   changed without restarting the pool or application using the
   :meth:`pool.reconfigure()` method.
 
-- In node-oracledb Thin mode, you can now use Oracle Database 26ai's
+- In node-oracledb Thin mode, you can now use Oracle AI Database 26ai's
   :ref:`Implicit Connection Pooling <implicitpool>` feature with Database
   Resident Connection Pooling (DRCP) and Proxy Resident Connection Pooling
   (PRCP).
