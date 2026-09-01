@@ -820,7 +820,6 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
                 baton->queryVars, baton->numQueryVars, &resultSet))
             return false;
 
-        baton->dpiStmtHandle = NULL;
         baton->queryVars = NULL;
         baton->numQueryVars = 0;
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "resultSet",
@@ -1409,7 +1408,6 @@ static bool njsConnection_getImplicitResults(njsBaton *baton,
                 implicitResult->queryVars, implicitResult->numQueryVars,
                 &resultSet))
             return false;
-        implicitResult->stmt = NULL;
         implicitResult->queryVars = NULL;
         implicitResult->numQueryVars = 0;
         NJS_CHECK_NAPI(env, napi_set_element(env, *implicitResultsObj, i,
@@ -1812,7 +1810,6 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
                 baton->queryVars, baton->numQueryVars, &temp))
             return false;
 
-        baton->dpiStmtHandle = NULL;
         baton->queryVars = NULL;
         baton->numQueryVars = 0;
         NJS_CHECK_NAPI(env, napi_get_named_property(env, temp, "metaData",

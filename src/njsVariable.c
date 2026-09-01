@@ -463,15 +463,6 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
             return njsLob_new(baton->globals, &buffer->lobs[pos], env,
                     baton->jsCallingObj, value);
         case DPI_NATIVE_TYPE_STMT:
-            if (dpiStmt_addRef(data->value.asStmt) < 0)
-                return njsBaton_setErrorDPI(baton);
-
-            // put the statement handle on the baton, then remove it from the
-            // baton after it has been moved to the resultset. If there are
-            // any errors in between, the baton will take care of the ref
-            // count.
-            baton->dpiStmtHandle = data->value.asStmt;
-
             // queryVars are transferred to the first nested ResultSet created
             // A later nested cursor in the same fetched parent batch must
             // create its own queryVars before its ResultSet can be created.
@@ -481,10 +472,9 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
                 if (!njsVariable_processBuffer(var, buffer, baton))
                     return false;
             }
-            if (!njsResultSet_new(baton, env, conn, baton->dpiStmtHandle,
+            if (!njsResultSet_new(baton, env, conn, data->value.asStmt,
                     buffer->queryVars, buffer->numQueryVars, value))
                 return false;
-            baton->dpiStmtHandle = NULL;
             buffer->queryVars = NULL;
             buffer->numQueryVars = 0;
             break;

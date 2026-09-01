@@ -272,6 +272,8 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     NJS_CHECK_NAPI(env, napi_call_function(env, *rsObj, fn, 2, args, &temp))
 
     // perform some initializations
+    if (dpiStmt_addRef(handle) < 0)
+        return njsBaton_setErrorDPI(baton);
     rs->handle = handle;
     rs->conn = conn;
     rs->numQueryVars = numVars;
