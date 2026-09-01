@@ -102,6 +102,8 @@ Thick Mode Changes
 #)  Added support for CQN registration IDs created by :meth:`connection.subscribe()`
     to handle JavaScript Number values which require more than 32 bits.
 
+#) Internal code improvements for optimized memory management with resultsets.
+
 node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...v7.0.1>`__ (15 Jul 2026)
 -----------------------------------------------------------------------------------------------------------
 

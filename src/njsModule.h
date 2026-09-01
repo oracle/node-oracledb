@@ -637,7 +637,6 @@ struct njsResultSet {
     uint32_t numQueryVars;
     njsVariable *queryVars;
     uint32_t fetchArraySize;
-    bool isNested;
     bool varsDefined;
 };
 

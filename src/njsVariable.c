@@ -465,18 +465,28 @@ bool njsVariable_getScalarValue(njsVariable *var, njsConnection *conn,
         case DPI_NATIVE_TYPE_STMT:
             if (dpiStmt_addRef(data->value.asStmt) < 0)
                 return njsBaton_setErrorDPI(baton);
-            if (!njsResultSet_new(baton, env, conn, data->value.asStmt,
-                    buffer->queryVars, buffer->numQueryVars, value)) {
-                dpiStmt_release(data->value.asStmt);
+
+            // put the statement handle on the baton, then remove it from the
+            // baton after it has been moved to the resultset. If there are
+            // any errors in between, the baton will take care of the ref
+            // count.
+            baton->dpiStmtHandle = data->value.asStmt;
+
+            // queryVars are transferred to the first nested ResultSet created
+            // A later nested cursor in the same fetched parent batch must
+            // create its own queryVars before its ResultSet can be created.
+            // The regular JS processing pass has already completed, so
+            // initialize the newly-created query vars for JS here.
+            if (!buffer->queryVars) {
+                if (!njsVariable_processBuffer(var, buffer, baton))
+                    return false;
+            }
+            if (!njsResultSet_new(baton, env, conn, baton->dpiStmtHandle,
+                    buffer->queryVars, buffer->numQueryVars, value))
                 return false;
-            }
-            // only nested cursors need to have their variables retained; for
-            // regular cursors, the variables must be tranferred to the result
-            // set and deleted there once the result set is closed
-            if (baton->callingInstance == (void*) conn) {
-                buffer->queryVars = NULL;
-                buffer->numQueryVars = 0;
-            }
+            baton->dpiStmtHandle = NULL;
+            buffer->queryVars = NULL;
+            buffer->numQueryVars = 0;
             break;
         case DPI_NATIVE_TYPE_ROWID:
             if (dpiRowid_getStringValue(data->value.asRowid, &rowidValue,

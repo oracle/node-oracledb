@@ -97,12 +97,10 @@ static bool njsResultSet_closeAsync(njsBaton *baton)
         return false;
     }
 
-    if (!rs->isNested) {
-        baton->queryVars = rs->queryVars;
-        baton->numQueryVars = rs->numQueryVars;
-        rs->queryVars = NULL;
-        rs->numQueryVars = 0;
-    }
+    baton->queryVars = rs->queryVars;
+    baton->numQueryVars = rs->numQueryVars;
+    rs->queryVars = NULL;
+    rs->numQueryVars = 0;
 
     return true;
 }
@@ -123,11 +121,9 @@ static void njsResultSet_finalize(napi_env env, void *finalizeData,
     }
     // free the queryVars and nested buffers when an explicit close is not
     // called and the JS garbage collector does the clean-up
-    if (!rs->isNested) {
-        njsUtils_freeQueryVars(rs->queryVars, rs->numQueryVars);
-        rs->queryVars = NULL;
-        rs->numQueryVars = 0;
-    }
+    njsUtils_freeQueryVars(rs->queryVars, rs->numQueryVars);
+    rs->queryVars = NULL;
+    rs->numQueryVars = 0;
     free(rs);
 }
 
@@ -167,11 +163,9 @@ static bool njsResultSet_getRowsAsync(njsBaton *baton)
         if (var->dpiVarHandle && var->maxArraySize >= baton->fetchArraySize)
             continue;
         rs->varsDefined = false;
-        if (var->dpiVarHandle) {
-            if (dpiVar_release(var->dpiVarHandle) < 0)
-                return njsBaton_setErrorDPI(baton);
-            var->dpiVarHandle = NULL;
-        }
+
+        // free the old runtime state of the existing variable
+        njsVariable_free(var);
         var->maxArraySize = baton->fetchArraySize;
         if (!njsVariable_createBuffer(var, rs->conn, baton))
             return false;
@@ -241,7 +235,7 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
     }
 
     // clear variables if result set was closed
-    if (!rs->handle && !rs->isNested) {
+    if (!rs->handle) {
         njsUtils_freeQueryVars(rs->queryVars, rs->numQueryVars);
         rs->queryVars = NULL;
         rs->numQueryVars = 0;
@@ -283,7 +277,6 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
     rs->numQueryVars = numVars;
     rs->queryVars = vars;
     rs->fetchArraySize = baton->fetchArraySize;
-    rs->isNested = (baton->callingInstance != (void*) conn);
 
     // set fetch types
     if (!njsResultSet_setFetchTypes(env, rs, args[1]))
