@@ -87,7 +87,7 @@ class OCIProvider extends base {
       if (auth == 'OCI_INSTANCE_PRINCIPAL') {
         provider = await oci.common.InstancePrincipalsAuthenticationDetailsProviderBuilder().build();
       } else if (auth == 'OCI_RESOURCE_PRINCIPAL') {
-        provider = await new oci.common.ResourcePrincipalAuthenticationDetailsProvider.builder();
+        provider = oci.common.ResourcePrincipalAuthenticationDetailsProvider.builder();
       } else {
         const errmsg = util.format('OCI authentication failed: The authentication parameter value %s may be incorrect', auth);
         throw new Error(errmsg);
