@@ -89,7 +89,7 @@ Thick Mode Changes
 
 #)  ODPI-C now requires the standard Oracle Client library file names
     `libclntsh.so` on Linux and `libclntsh.dylib` on macOS when using
-    :meth:`oracledb.init_oracle_client()` to load Oracle Client libraries.
+    :meth:`oracledb.initOracleClient()` to load Oracle Client libraries.
     Version-specific library names such as `libclntsh.so.19.1` are no longer
     loaded directly.
 

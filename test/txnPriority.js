@@ -57,6 +57,13 @@ describe('329. txnPriority.js', function() {
   let tableCreated;
   let waitTargetsSet;
 
+  // Transaction priority requires client and database version 23.26.2 or later.
+  before(async function() {
+    if (!await testsUtil.checkPrerequisites(2326020000, 2326020000)) {
+      this.skip();
+    }
+  });
+
   beforeEach(() => {
     conn = undefined;
     conn2 = undefined;
@@ -165,7 +172,11 @@ describe('329. txnPriority.js', function() {
     assert.strictEqual(conn.txnPriority, lowPriority);
   }); // 329.2
 
-  it('329.3 createPool() reflects pool create-time value', async () => {
+  it('329.3 createPool() reflects pool create-time value', async function() {
+    // Pool create-time priority is not supported in Thick mode yet.
+    if (!oracledb.thin) {
+      this.skip();
+    }
     // The pool's auth handle supplies the priority for sessions created by the
     // pool.
     pool = await createNewSessionPool(lowPriority);
@@ -173,7 +184,11 @@ describe('329. txnPriority.js', function() {
     assert.strictEqual(conn.txnPriority, lowPriority);
   }); // 329.3
 
-  it('329.4 pooled acquire does not override pool create value', async () => {
+  it('329.4 pooled acquire does not override pool create value', async function() {
+    // Pool create-time priority is not supported in Thick mode yet.
+    if (!oracledb.thin) {
+      this.skip();
+    }
     // Acquiring a connection does not change the priority configured when the
     // pool was created, including when an acquire option is supplied.
     pool = await createReusablePool(lowPriority);
@@ -189,7 +204,11 @@ describe('329. txnPriority.js', function() {
     assert.strictEqual(conn.txnPriority, lowPriority);
   }); // 329.4
 
-  it('329.5 reused pooled session keeps changed value until reset', async () => {
+  it('329.5 reused pooled session keeps changed value until reset', async function() {
+    // Pool create-time priority is not supported in Thick mode yet.
+    if (!oracledb.thin) {
+      this.skip();
+    }
     // Verify that a priority changed on a pooled session is retained when the
     // same session is released and acquired again.
     pool = await createReusablePool(lowPriority);

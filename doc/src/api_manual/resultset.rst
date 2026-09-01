@@ -167,7 +167,7 @@ ResultSet Methods
           - Description
         * - ``options``
           - Object
-          - .. _proptoquerystreamrowsperdataevent:
+          - .. _resultsetquerystreamrowsperdataevent:
 
             An optional parameter that can be used to control the behavior of ``toQueryStream()``. See :ref:`toQueryStream() options Parameter properties <toquerystreamoptions>` for information about its properties.
 
