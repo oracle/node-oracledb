@@ -2930,7 +2930,7 @@ Connection Methods
 
             It contains the ``table`` key which is an array of objects identical to the objects created for Database Change Notification (see the ``tables`` property below).
         * - ``regId``
-          - A JavaScript BigInt value which specifies a unique identifier that is returned during registration. This is the same value returned by the :ref:`result object's <consubscribecallback>` ``regId`` property.
+          - A JavaScript BigInt value which specifies a unique identifier that is returned during registration. The same value is returned by the :ref:`result object's <consubscribecallback>` ``regId`` property, as long as it remains within the bounds of the JavaScript Number type.
 
             .. versionadded:: 6.7
         * - ``registered``
@@ -2993,7 +2993,7 @@ Connection Methods
         * - Error ``error``
           - If ``subscribe()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Object ``result``
-          - For :ref:`CQN <cqn>` ``oracledb.SUBSCR_NAMESPACE_DBCHANGE`` subscriptions this contains a single property ``regId`` corresponding the value of ``REGID`` in the database view ``USER_CHANGE_NOTIFICATION_REGS`` or the value of ``REG_ID`` in ``USER_SUBSCR_REGISTRATIONS``. For :ref:`AQ <aq>` ``oracledb.SUBSCR_NAMESPACE_AQ`` subscriptions, ``regId`` is undefined. Due to Node.js type limitations, the largest ``regId`` shown will be 2 ^ 32 - 1. Larger values will wrap.
+          - For :ref:`CQN <cqn>` ``oracledb.SUBSCR_NAMESPACE_DBCHANGE`` subscriptions this contains a single property ``regId`` corresponding the value of ``REGID`` in the database view ``USER_CHANGE_NOTIFICATION_REGS`` or the value of ``REG_ID`` in ``USER_SUBSCR_REGISTRATIONS``. It is a JavaScript number. For :ref:`AQ <aq>` ``oracledb.SUBSCR_NAMESPACE_AQ`` subscriptions, ``regId`` is undefined.
 
             .. versionadded:: 4.0
 

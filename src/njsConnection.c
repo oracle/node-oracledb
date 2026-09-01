@@ -2798,8 +2798,8 @@ static bool njsConnection_subscribePostAsync(njsBaton *baton, napi_env env,
     if (baton->subscription->subscrNamespace ==
             DPI_SUBSCR_NAMESPACE_DBCHANGE) {
         NJS_CHECK_NAPI(env, napi_create_object(env, result))
-        NJS_CHECK_NAPI(env, napi_create_uint32(env,
-                (uint32_t) baton->subscription->regId, &regId))
+        NJS_CHECK_NAPI(env, napi_create_bigint_uint64(env,
+                baton->subscription->regId, &regId))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *result, "regId",
                 regId))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, *result,

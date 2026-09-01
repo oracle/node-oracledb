@@ -99,6 +99,9 @@ Thick Mode Changes
     Version-specific library names such as `libclntsh.so.19.1` are no longer
     loaded directly.
 
+#)  Added support for CQN registration IDs created by :meth:`connection.subscribe()`
+    to handle JavaScript Number values which require more than 32 bits.
+
 node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...v7.0.1>`__ (15 Jul 2026)
 -----------------------------------------------------------------------------------------------------------
 
