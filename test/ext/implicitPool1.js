@@ -117,6 +117,8 @@ describe('1. implicitPool1.js', function() {
     if (!isRunnable) this.skip();
 
     connection = await oracledb.getConnection(dbConfig);
+    await connection.execute(testsUtil.sqlDropSource('PACKAGE BODY', 'ora_cpool_state'));
+    await connection.execute(testsUtil.sqlDropSource('PACKAGE', 'ora_cpool_state'));
 
     // Create TestImplicitPoolCallbacks table
     await connection.execute(testsUtil.sqlCreateTable(
@@ -168,8 +170,8 @@ describe('1. implicitPool1.js', function() {
 
   after(async function() {
     if (!isRunnable) return;
-    await connection.execute(`DROP PACKAGE BODY ora_cpool_state`);
-    await connection.execute(`DROP PACKAGE ora_cpool_state`);
+    await connection.execute(testsUtil.sqlDropSource('PACKAGE BODY', 'ora_cpool_state'));
+    await connection.execute(testsUtil.sqlDropSource('PACKAGE', 'ora_cpool_state'));
     await connection.execute(testsUtil.sqlDropTable(
       `${dbConfig.user}.TestImplicitPoolCallbacks`));
     await connection.execute(testsUtil.sqlDropTable('TestTempTable'));
@@ -625,6 +627,171 @@ describe('1. implicitPool1.js', function() {
       // release without requiring an explicit connection close.
       assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
     }); // 1.20
+
+    it('1.21 partial ResultSet fetch retains the session until its boundary while caching enabled', async function() {
+      await clearCallbacks(connection);
+      const result = await conn.execute(
+        `SELECT IntCol FROM TestNumbers ORDER BY IntCol`,
+        [],
+        { resultSet: true, keepInStmtCache: true }
+      );
+
+      const rows = await result.resultSet.getRows(1);
+      assert.deepStrictEqual(rows, [[1]]);
+      // An open cursor makes the implicit session stateful, so it cannot be
+      // released at the end of the fetch call.
+      assert.deepStrictEqual(await getCallbacks(connection), [['G']]);
+
+      await result.resultSet.close();
+      assert.deepStrictEqual(await getCallbacks(connection), [['G']]);
+      if (transactionBoundary) await conn.commit();
+      else await conn.ping();
+      assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
+    }); // 1.21
+
+    it('1.22 sends both cursor cancel and close piggybacks on the same execute', async function() {
+      await clearCallbacks(connection);
+
+      // Create both statements before closing either one, so that no RPC
+      // occurs after a cursor has been added to a pending list.
+      const cachedResult = await conn.execute(
+        `SELECT IntCol FROM TestNumbers ORDER BY IntCol`,
+        [],
+        { resultSet: true, keepInStmtCache: true }
+      );
+
+      const uncachedResult = await conn.execute(
+        `SELECT IntCol FROM TestNumbers WHERE IntCol = :1`,
+        [2],
+        { resultSet: true, keepInStmtCache: false }
+      );
+
+      // Partially fetch the cached statement, then abandon it.
+      assert.deepStrictEqual(
+        await cachedResult.resultSet.getRows(1),
+        [[1]]
+      );
+      await cachedResult.resultSet.close();
+
+      // Abandon the non-cached statement so its cursor is pending close.
+      assert.deepStrictEqual(
+        await uncachedResult.resultSet.getRows(1),
+        [[2]]
+      );
+      await uncachedResult.resultSet.close();
+
+      // Both cursor operations must now be pending before the next RPC.
+      assert.strictEqual(
+        conn._impl.statementCache._cursorsToCancel.size,
+        1
+      );
+      assert.strictEqual(
+        conn._impl.statementCache._cursorsToClose.size,
+        1
+      );
+
+      // This is the single RPC that should carry both piggybacks.
+      await conn.execute(
+        `SELECT IntCol FROM TestNumbers WHERE IntCol = :1`,
+        [3],
+        { resultSet: false, keepInStmtCache: false }
+      );
+
+      // Both piggyback lists should have been consumed.
+      assert.strictEqual(
+        conn._impl.statementCache._cursorsToCancel.size,
+        0
+      );
+      assert.strictEqual(
+        conn._impl.statementCache._cursorsToClose.size,
+        0
+      );
+    }); // 1.22
+
+    it('1.23 invalidates partially fetched cached cursor after DRCP session change', async function() {
+      await clearCallbacks(connection);
+
+      const result = await conn.execute(
+        `SELECT IntCol FROM TestNumbers ORDER BY IntCol`,
+        [],
+        { resultSet: true, keepInStmtCache: true }
+      );
+
+      assert.deepStrictEqual(
+        await result.resultSet.getRows(1),
+        [[1]]
+      );
+
+      const statement = result.resultSet._impl.statement;
+      assert.notStrictEqual(statement.cursorId, 0);
+
+      await result.resultSet.close();
+
+      // The cached statement must remain in _openCursors so that clearCursors()
+      // can invalidate its cursorId if the DRCP session changes.
+      assert.strictEqual(
+        conn._impl.statementCache._openCursors.has(statement),
+        true
+      );
+
+      if (transactionBoundary) {
+        await conn.commit();
+      } else {
+        await conn.ping();
+      }
+
+      // The old cursor ID must be invalidated after the DRCP session change.
+      assert.strictEqual(statement.cursorId, 0);
+
+      // The same statement should remain reusable from the statement cache.
+      const result2 = await conn.execute(
+        `SELECT IntCol FROM TestNumbers ORDER BY IntCol`,
+        [],
+        { resultSet: true, keepInStmtCache: true }
+      );
+
+      assert.strictEqual(result2.resultSet._impl.statement, statement);
+      assert.notStrictEqual(result2.resultSet._impl.statement.cursorId, 0);
+
+      await result2.resultSet.close();
+    }); // 1.23
+
+    it('1.24 evicted cached statement moves pending cursor cancellation to close', async function() {
+      await clearCallbacks(connection);
+
+      const statementCache = conn._impl.statementCache;
+      const originalMaxSize = statementCache._maxSize;
+
+      try {
+        const result = await conn.execute(
+          `SELECT IntCol FROM TestNumbers ORDER BY IntCol`,
+          [],
+          { resultSet: true, keepInStmtCache: true }
+        );
+
+        assert.deepStrictEqual(await result.resultSet.getRows(1), [[1]]);
+
+        const statement = result.resultSet._impl.statement;
+        const cursorId = statement.cursorId;
+
+        assert.notStrictEqual(cursorId, 0);
+
+        await result.resultSet.close();
+
+        assert.strictEqual(statementCache._cursorsToCancel.has(cursorId), true);
+        assert.strictEqual(statementCache._cursorsToClose.has(cursorId), false);
+
+        // Force this cached statement to be evicted without another RPC.
+        statementCache._maxSize = 0;
+        statementCache._adjustCache();
+
+        // Eviction should supersede the pending cancellation.
+        assert.strictEqual(statementCache._cursorsToCancel.has(cursorId), false);
+        assert.strictEqual(statementCache._cursorsToClose.has(cursorId), true);
+      } finally {
+        statementCache._maxSize = originalMaxSize;
+      }
+    });
   });
 
   describe('2. Pool Tests', function() {

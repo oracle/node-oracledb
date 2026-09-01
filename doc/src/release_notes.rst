@@ -72,6 +72,10 @@ Thin Mode Changes
     attribute handling to reject unsupported non-JSON JavaScript values such as
     ``BigInt``, ``Symbol``, and ``function`` with NJS errors.
 
+#)  Fixed bug to cancel partially fetched cursors while retaining the statements
+    in the statement cache, allowing implicit DRCP sessions to be released at
+    STATEMENT pool boundary.
+
 #)  Fixed bug when a :ref:`DbObject <dbobjectclass>` instance contains an attribute
     of type ``SYS.XMLTYPE`` with a ``null`` value.
 
