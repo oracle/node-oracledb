@@ -6446,6 +6446,8 @@ Overview of node-oracledb functional tests
   314. dbObject21.js
     314.1 check attribute metadata
       314.1.1 check metadata of DbObject attributes
+      314.1.2 check scalar timestamp collection element metadata
+        314.1.2.1 checks scalar collection element metadata
 
   315. poolMaxLifeTimeSession.js
     315.1 Testing maxLifetimeSession on conn release

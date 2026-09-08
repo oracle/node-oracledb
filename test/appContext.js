@@ -496,15 +496,16 @@ FROM dual`),
         // The first SQL carries the configured values to the database session.
         let result = await firstConnection.execute(
           `SELECT SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx'), action
-             FROM v$session
-            WHERE sid = SYS_CONTEXT('USERENV', 'SID')`,
+            FROM v$session WHERE sid = SYS_CONTEXT('USERENV', 'SID')`
         );
-        assert.deepStrictEqual(result.rows[0], [traceParentValue, traceParentValue]);
+        assert.deepStrictEqual(result.rows[0],
+          [traceParentValue, traceParentValue]);
 
         // The values remain visible through later SQL on the same connection.
         await firstConnection.execute("SELECT 1 FROM dual");
         const sameConnectionSysContextResult = await firstConnection.execute(
-          "SELECT SYS_CONTEXT('USERENV', 'ACTION'), SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx') FROM dual",
+          `SELECT SYS_CONTEXT('USERENV', 'ACTION'),
+            SYS_CONTEXT('CLIENTCONTEXT', 'ora$opentelem$tracectx') FROM dual`,
         );
         assert.deepStrictEqual(sameConnectionSysContextResult.rows[0], [
           traceParentValue,

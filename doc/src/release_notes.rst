@@ -19,6 +19,11 @@ node-oracledb `v7.1.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1...
 Common Changes
 +++++++++++++++
 
+#)  Added :attr:`connection.txnPriority` to support Oracle AI Database 26ai's
+    transaction priority feature with standalone connections and pools.
+    Note that, setting ``txnPriority`` when creating a connection pool is not
+    supported in Thick mode yet.
+
 #)  Added ``rowsPerDataEvent`` option to the :meth:`connection.queryStream()`
     and :meth:`resultset.toQueryStream()` methods to allow processing of more
     rows per data event of the ``queryStream`` object.
@@ -124,11 +129,6 @@ Common Changes
 #)  Fixed bug to throw proper validation errors in AQ with ``consumerName``,
     ``correlation``, ``recipients``, ``transformation``, and
     ``exceptionQueue`` properties.
-
-#)  Added :attr:`connection.txnPriority` and support for specifying
-    ``txnPriority`` when creating standalone connections and pools. In Thick
-    mode, setting ``txnPriority`` when creating a pool is currently not
-    supported.
 
 Thin Mode Changes
 +++++++++++++++++

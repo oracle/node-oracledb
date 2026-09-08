@@ -1,4 +1,4 @@
-/* Copyright 2025, Oracle and/or its affiliates. */
+/* Copyright 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -152,6 +152,71 @@ describe('314. dbObject21.js', function() {
       assert.deepStrictEqual(types.OBJECTVALUE.typeClass.prototype.attributes,
         expectedTypes.OBJECTVALUE.typeClass.prototype.attributes);
     }); // 314.1.1
-  }); // 314.1
 
+    describe('314.1.2 check scalar timestamp collection element metadata', function() {
+      const collectionTypes = [
+        {
+          name: 'NODB_TS0_VARRAY',
+          sql: 'CREATE OR REPLACE TYPE NODB_TS0_VARRAY AS VARRAY(10) OF TIMESTAMP(0)',
+          expected: {
+            type: oracledb.DB_TYPE_TIMESTAMP,
+            typeName: 'TIMESTAMP'
+          }
+        },
+        {
+          name: 'NODB_TS6_TABLE',
+          sql: 'CREATE OR REPLACE TYPE NODB_TS6_TABLE AS TABLE OF TIMESTAMP(6)',
+          expected: {
+            type: oracledb.DB_TYPE_TIMESTAMP,
+            typeName: 'TIMESTAMP'
+          }
+        },
+        {
+          name: 'NODB_TS9TZ_VARRAY',
+          sql: `CREATE OR REPLACE TYPE NODB_TS9TZ_VARRAY AS
+            VARRAY(10) OF TIMESTAMP(9) WITH TIME ZONE`,
+          expected: {
+            type: oracledb.DB_TYPE_TIMESTAMP_TZ,
+            typeName: 'TIMESTAMP WITH TIME ZONE'
+          }
+        },
+        {
+          name: 'NODB_TSLTZ_TABLE',
+          sql: `CREATE OR REPLACE TYPE NODB_TSLTZ_TABLE AS
+            TABLE OF TIMESTAMP WITH LOCAL TIME ZONE`,
+          expected: {
+            type: oracledb.DB_TYPE_TIMESTAMP_LTZ,
+            typeName: 'TIMESTAMP WITH LOCAL TIME ZONE',
+          }
+        }
+      ];
+
+      before(async function() {
+        for (const collectionType of collectionTypes) {
+          await testsUtil.createType(
+            connection, collectionType.name, collectionType.sql);
+        }
+      });
+
+      after(async function() {
+        for (const collectionType of collectionTypes) {
+          await testsUtil.dropType(connection, collectionType.name);
+        }
+      });
+
+      it('314.1.2.1 checks scalar collection element metadata', async function() {
+        for (const collectionType of collectionTypes) {
+          const dbObjectClass = await connection.getDbObjectClass(
+            collectionType.name);
+          assert.deepStrictEqual(
+            dbObjectClass.prototype.elementType,
+            collectionType.expected.type);
+          assert.deepStrictEqual(
+            dbObjectClass.prototype.elementTypeName,
+            collectionType.expected.typeName);
+        }
+      }); // 314.1.2.1
+    }); // 314.1.2
+
+  }); // 314.1
 });

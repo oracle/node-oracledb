@@ -1527,14 +1527,17 @@ describe('324. pipeline.js', function() {
       const clobVal = "CLOB Data 324.3.28";
       const pipeline = new oracledb.Pipeline();
       pipeline.addExecute(`truncate table ${TEST_TAB_CLOBS}`);
-      pipeline.addExecute(`INSERT INTO ${TEST_TAB_CLOBS} (id, clob_1) VALUES (1, :1)`, [clobVal]);
+      pipeline.addExecute(`INSERT INTO ${TEST_TAB_CLOBS} (id, clob_1)
+        VALUES (1, :1)`, [clobVal]);
       pipeline.addCommit();
-      pipeline.addFetchOne(`select id, clob_1 from ${TEST_TAB_CLOBS} order by id`, [], {}, false); // fetchLobs = false
-      pipeline.addFetchOne(`select id, clob_1 from ${TEST_TAB_CLOBS} order by id`); // fetchLobs = true (default)
+      pipeline.addFetchOne(`select id, clob_1 from ${TEST_TAB_CLOBS}
+        order by id`, [], {}, false); // fetchLobs = false
+      pipeline.addFetchOne(`select id, clob_1 from ${TEST_TAB_CLOBS}
+        order by id`); // fetchLobs = true (default)
       const results = await conn.runPipeline(pipeline);
       assert(results[1].rowsAffected === 1);
       assert.deepStrictEqual(results[3].rows[0], [1, clobVal]);
-      const data = await results[4].rows[0][1].getData(); // get lob data from lob object
+      const data = await results[4].rows[0][1].getData(); // get lob data
       assert.deepStrictEqual(data, clobVal);
     }); // 324.3.28
 
@@ -1563,18 +1566,22 @@ describe('324. pipeline.js', function() {
       const clobVal = "CLOB Data 324.3.30";
       pipeline.addExecute(`truncate table ${TEST_TAB_CLOBS}`);
       for (let i = 0; i < 4; i++) {
-        pipeline.addExecute(`INSERT INTO ${TEST_TAB_CLOBS} (id, clob_1) VALUES (${i + 1}, :1)`, [`${clobVal}-${i + 1}`]);
+        pipeline.addExecute(`INSERT INTO ${TEST_TAB_CLOBS} (id, clob_1)
+          VALUES (${i + 1}, :1)`, [`${clobVal}-${i + 1}`]);
       }
       pipeline.addCommit();
-      pipeline.addFetchMany(`select id, clob_1 from ${TEST_TAB_CLOBS} order by id`, [], {}, numRows, false); // fetchLobs = false
-      pipeline.addFetchMany(`select id, clob_1 from ${TEST_TAB_CLOBS} order by id`, [], {}, numRows); // fetchLobs = true (default)
+      pipeline.addFetchMany(`select id, clob_1 from ${TEST_TAB_CLOBS}
+        order by id`, [], {}, numRows, false); // fetchLobs = false
+      pipeline.addFetchMany(`select id, clob_1 from ${TEST_TAB_CLOBS}
+        order by id`, [], {}, numRows); // fetchLobs = true (default)
       const results = await conn.runPipeline(pipeline);
       for (let i = 0; i < numRows; i++) {
         assert.deepStrictEqual(results[6].rows[i], [i + 1, `${clobVal}-${i + 1}`]);
       }
       for (let i = 0; i < numRows; i++) {
         const data = await results[7].rows[i][1].getData();
-        assert.deepStrictEqual([results[7].rows[i][0], data], [i + 1, `${clobVal}-${i + 1}`]);
+        assert.deepStrictEqual([results[7].rows[i][0], data],
+          [i + 1, `${clobVal}-${i + 1}`]);
       }
     }); // 324.3.30
 
