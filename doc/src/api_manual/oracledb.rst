@@ -2861,13 +2861,15 @@ Oracledb Methods
           - Description
           - Required or Optional
         * - ``authType``
-          - The authentication type. The value should be the string *configFileBasedAuthentication*, *simpleAuthentication*, or *instancePrincipal*.
+          - The authentication type. The value should be the string *configFileBasedAuthentication*, *simpleAuthentication*, *instancePrincipal*, or *resourcePrincipal*.
 
             With Configuration File Based Authentication, the location of the configuration file containing the necessary information must be provided.
 
             With Simple Authentication, the configuration parameters can be provided at runtime.
 
             With Instance Principal Authentication, OCI compute instances can be authorized to access services on Oracle Cloud such as Oracle Autonomous Database. Node-oracledb applications running on such a compute instance are automatically authenticated, eliminating the need to provide database user credentials. This authentication method will only work on compute instances where internal network endpoints are reachable. See :ref:`instanceprincipalauth` for more information.
+
+            With Resource Principal Authentication, an OCI resource such as a Data Science notebook session can use its resource principal credentials to obtain an OCI IAM database token. Node-oracledb can then use this token for native :ref:`OCI IAM token-based authentication <cloudnativeauthoci>` when connecting to Oracle Autonomous AI Database. Access is authorized by OCI IAM policies granted to the resource's dynamic group, and the database must map the IAM identity or dynamic group to a global database user.
 
             See `OCI SDK Authentication Methods <https://docs.oracle.com/en-us/iaas/Content/API/Concepts/sdk_authentication_methods.htm>`__ for more information.
           - Required
@@ -3827,11 +3829,15 @@ Oracledb Methods
           - Description
           - Required or Optional
         * - ``authType``
-          - The authentication type. The value should be the string *configFileBasedAuthentication* or *simpleAuthentication*.
+          - The authentication type. The value should be the string *configFileBasedAuthentication*, *simpleAuthentication*, *instancePrincipal*, or *resourcePrincipal*.
 
             In Configuration File Based Authentication, the location of the configuration file containing the necessary information must be provided.
 
             In Simple Authentication, the configuration parameters can be provided at runtime.
+
+            In Instance Principal Authentication, OCI compute instances can be authorized to access services on Oracle Cloud such as Oracle Autonomous Database. Node-oracledb applications running on such a compute instance are automatically authenticated, eliminating the need to provide database user credentials. This authentication method will only work on compute instances where internal network endpoints are reachable. See :ref:`instanceprincipalauth` for more information.
+
+            In Resource Principal Authentication, an OCI resource such as a Data Science notebook session can use its resource principal credentials to obtain an OCI IAM database token. Node-oracledb can then use this token for native :ref:`OCI IAM token-based authentication <cloudnativeauthoci>` when connecting to Oracle Autonomous AI Database. Access is authorized by OCI IAM policies granted to the resource's dynamic group, and the database must map the IAM identity or dynamic group to a global database user.
           - Required
         * - ``profile``
           - The configuration profile name. The default value is *DEFAULT*.
