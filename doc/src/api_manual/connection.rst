@@ -1372,7 +1372,7 @@ Connection Methods
           - Named type or collection
           - A string with the name of the Oracle Database object or collection, or a :ref:`DbObject <dbobjectclass>`.
           - This combination is supported from node-oracledb 4.0.
-        * - For dense vectors, Uint8Array, Int8Array, Float32Array, and Float16Array.
+        * - For dense vectors, Uint8Array, Int8Array, Float32Array, and Float64Array.
 
             For sparse vectors, :ref:`oracledb.SparseVector <oracledbsparsevector>`.
           - VECTOR
