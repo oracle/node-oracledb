@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -189,7 +189,7 @@ describe('19. fetchTimestampAsString.js', function() {
         `alter session set nls_timestamp_tz_format = 'DD-MON-YYYY HH24:MI:SS:FF'`);
       await test5(tableName, ref);
       // restore TSTZ format
-      connection.execute(
+      await connection.execute(
         `alter session set nls_timestamp_tz_format = 'YYYY-MM-DD HH24:MI:SS.FF'`);
     });
 
@@ -300,7 +300,7 @@ describe('19. fetchTimestampAsString.js', function() {
       if (row) {
         assert.deepStrictEqual(row, want[count]);
         count++;
-        return fetchRowFromRS(rs);
+        return await fetchRowFromRS(rs);
       } else {
         await rs.close();
       }
@@ -326,7 +326,7 @@ describe('19. fetchTimestampAsString.js', function() {
       if (row) {
         assert.deepStrictEqual(row, want[count]);
         count++;
-        return fetchRowFromRS(rs);
+        return await fetchRowFromRS(rs);
       } else {
         await rs.close();
       }
@@ -364,7 +364,7 @@ describe('19. fetchTimestampAsString.js', function() {
       if (row) {
         assert.deepStrictEqual(row, want[count]);
         count++;
-        return fetchRowFromRS(rs);
+        return await fetchRowFromRS(rs);
       } else {
         await rs.close();
       }
@@ -389,7 +389,7 @@ describe('19. fetchTimestampAsString.js', function() {
       if (row) {
         assert.deepStrictEqual(row, want[count]);
         count++;
-        return fetchRowFromRS(rs);
+        return await fetchRowFromRS(rs);
       } else {
         await rs.close();
       }

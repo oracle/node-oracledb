@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -235,7 +235,7 @@ describe("154. fetchArraySize7.js", function() {
         // console.log(rows[i][0]);
         assert.strictEqual(row[0], rowCount);
         assert.strictEqual(row[1], rowCount.toString());
-        return fetchRowFromRS(rs, rowCount);
+        return await fetchRowFromRS(rs, rowCount);
       } else {
         assert.strictEqual(rowCount, tableSize);
         await rs.close();
@@ -297,7 +297,7 @@ describe("154. fetchArraySize7.js", function() {
         }
       );
       const rowCount = 0;
-      fetchRowFromRS(result.resultSet, rowCount);
+      await fetchRowFromRS(result.resultSet, rowCount);
     };
 
     async function fetchRowFromRS(rs, rowCount) {

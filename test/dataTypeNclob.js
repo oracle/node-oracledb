@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -293,7 +293,7 @@ describe('123. dataTypeNclob.js', function() {
         resultSet: true
       });
     assert.strictEqual((result.resultSet.metaData[0]).name, 'CONTENT');
-    fetchRowFromRS(result.resultSet, originalStr);
+    await fetchRowFromRS(result.resultSet, originalStr);
   };
 
   const fetchLob_fetchas = async function(tableName, originalStr) {
@@ -313,7 +313,7 @@ describe('123. dataTypeNclob.js', function() {
         resultSet: true
       });
     assert.strictEqual((result.resultSet.metaData[0]).name, 'CONTENT');
-    fetchRowFromRS(result.resultSet, originalStr);
+    await fetchRowFromRS(result.resultSet, originalStr);
   };
 
   const fetchRowFromRS = async function(rs, originalStr) {
@@ -347,7 +347,7 @@ describe('123. dataTypeNclob.js', function() {
         { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       ],
       { fetchInfo: { CONTENT: { type: oracledb.STRING } } });
-    fetchRowFromRS(result.outBinds[0], originalStr);
+    await fetchRowFromRS(result.outBinds[0], originalStr);
     await connection.execute("DROP PROCEDURE testproc");
   };
 
@@ -367,7 +367,7 @@ describe('123. dataTypeNclob.js', function() {
       [
         { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       ]);
-    fetchRowFromRS(result.outBinds[0], originalStr);
+    await fetchRowFromRS(result.outBinds[0], originalStr);
     await connection.execute("DROP PROCEDURE testproc");
   };
 });

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -735,7 +735,7 @@ describe('4. binding.js', function() {
 
       vdate = new Date("2016-08-05T00:00:00.000Z");
       assert.deepStrictEqual(result.outBinds.io, vdate);
-      connection.execute("DROP PROCEDURE nodb_binddate3");
+      await connection.execute("DROP PROCEDURE nodb_binddate3");
     }); // 4.8.3
 
   }); // 4.8

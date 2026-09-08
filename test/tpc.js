@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -97,7 +97,7 @@ describe('259. tpc.js', function() {
 
     after(async function() {
       if (conn) {
-        conn.execute(`DROP TABLE TBL_259_2 PURGE`);
+        await conn.execute(`DROP TABLE TBL_259_2 PURGE`);
         await conn.close();
       }
       if (dbaConn) {
@@ -327,7 +327,7 @@ describe('259. tpc.js', function() {
 
     after(async function() {
       if (conn) {
-        conn.execute(`DROP TABLE TBL_259_2 PURGE`);
+        await conn.execute(`DROP TABLE TBL_259_2 PURGE`);
         await conn.close();
       }
     });
@@ -531,7 +531,7 @@ describe('259. tpc.js', function() {
 
     after(async function() {
       if (conn) {
-        conn.execute(`DROP TABLE TBL_259_4 PURGE`);
+        await conn.execute(`DROP TABLE TBL_259_4 PURGE`);
         await conn.close();
       }
     });

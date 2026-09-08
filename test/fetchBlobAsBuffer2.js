@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1478,7 +1478,7 @@ describe('88. fetchBlobAsBuffer2.js', function() {
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
 
-      insertIntoBlobTable1(id, content);
+      await insertIntoBlobTable1(id, content);
       const result = await connection.execute(
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },

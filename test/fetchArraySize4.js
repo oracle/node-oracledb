@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -107,7 +107,7 @@ describe("151. fetchArraySize4.js", function() {
         { resultSet: true }
       );
       const rowCount = 0;
-      fetchRowsFromRS(result.resultSet, numRowsVal, rowCount);
+      await fetchRowsFromRS(result.resultSet, numRowsVal, rowCount);
     };
 
     async function fetchRowsFromRS(rs, numRowsVal, rowCount) {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2023, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2023, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -23,7 +23,7 @@
  * limitations under the License.
  *
  * NAME
- *   272. jsonDualityView1.js
+ *   272. jsonDualityViews1.js
  *
  * DESCRIPTION
  *   Testing JSON Relational Duality View using GraphQL
@@ -844,7 +844,7 @@ describe('272. jsonDualityView1.js', function() {
         await connection.execute(grantPriv1);
         await connection.execute(createUser2);
         await connection.execute(grantPriv2);
-        connection.commit();
+        await connection.commit();
       });
 
       after(async function() {

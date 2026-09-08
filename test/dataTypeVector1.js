@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -185,7 +185,7 @@ describe('294. dataTypeVector1.js', function() {
 
     await connection.execute(`INSERT INTO ${tableName} (IntCol, VectorFixedCol)
         VALUES(1, :1)`, binds);
-    connection.execute(`SELECT VectorFixedCol FROM ${tableName}`);
+    await connection.execute(`SELECT VectorFixedCol FROM ${tableName}`);
     let result = await connection.execute(`SELECT VectorFixedCol FROM ${tableName}`);
     assert.deepStrictEqual(result.rows[0][0], [1, 2]);
 
@@ -210,7 +210,7 @@ describe('294. dataTypeVector1.js', function() {
 
     await connection.execute(`INSERT INTO ${tableName} (IntCol, VectorBinaryCol)
         VALUES(1, :1)`, binds);
-    connection.execute(`SELECT VectorBinaryCol FROM ${tableName}`);
+    await connection.execute(`SELECT VectorBinaryCol FROM ${tableName}`);
     const result = await connection.execute(`SELECT VectorBinaryCol FROM ${tableName}`);
     assert.deepStrictEqual(result.rows[0][0], [3, 4]);
 
@@ -237,7 +237,7 @@ describe('294. dataTypeVector1.js', function() {
 
     await connection.execute(`INSERT INTO ${tableName} (IntCol, VectorBinaryCol)
         VALUES(1, :1)`, binds);
-    connection.execute(`SELECT VectorBinaryCol FROM ${tableName}`);
+    await connection.execute(`SELECT VectorBinaryCol FROM ${tableName}`);
     let result = await connection.execute(`SELECT VectorBinaryCol FROM ${tableName}`);
     assert.deepStrictEqual(result.rows[0][0], [3, 4]);
 
@@ -286,7 +286,7 @@ describe('294. dataTypeVector1.js', function() {
 
     await connection.execute(`INSERT INTO ${tableName} (IntCol, VectorFixedCol)
         VALUES(1, :1)`, binds);
-    connection.execute(`SELECT VectorFixedCol FROM ${tableName}`);
+    await connection.execute(`SELECT VectorFixedCol FROM ${tableName}`);
     let result = await connection.execute(`SELECT VectorFixedCol FROM ${tableName}`);
     assert.deepStrictEqual(result.rows[0][0], [1, 2]);
 

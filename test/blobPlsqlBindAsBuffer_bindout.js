@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -895,7 +895,7 @@ describe('78. blobPlsqlBindAsBuffer_bindout.js', function() {
         b1: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size_1 },
         b2: { type: oracledb.BUFFER, dir: oracledb.BIND_OUT, maxSize: size_2 }
       };
-      insertTwoBlobWithbuffer(sequence, bufferStr_1, bufferStr_2);
+      await insertTwoBlobWithbuffer(sequence, bufferStr_1, bufferStr_2);
       let sql = "select blob_1 from nodb_tab_blob_in where id = " + sequence;
       await verifyBlobValueWithBuffer(sql, bufferStr_1, specialStr_1);
 
