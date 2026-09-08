@@ -1,4 +1,4 @@
-/* Copyright (c) 2020, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2020, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -36,6 +36,15 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 
 describe('233. nestedCursor02.js', () => {
+
+  let conn;
+  before(async function() {
+    conn = await oracledb.getConnection(dbConfig);
+  });
+
+  after(async function() {
+    await conn.close();
+  });
 
   it('233.1 example-nested-cursor.js', async () => {
     const simpleSql = `
@@ -89,8 +98,6 @@ describe('233. nestedCursor02.js', () => {
       }
       return fetchedRows;
     } // traverse_results()
-
-    const conn = await oracledb.getConnection(dbConfig);
 
     const rowsSimple = [
       [ 1, 'Nested Row 1' ], [ 2, 'Nested Row 2' ], [ 3, 'Nested Row 3' ]
@@ -153,6 +160,109 @@ describe('233. nestedCursor02.js', () => {
     assert.strictEqual(result4.metaData[0].name, "'LEVEL1STRING'");
     assert.strictEqual(result4.metaData[1].name, 'NC1');
 
-    await conn.close();
+  });
+
+  it('233.2 initializes DB object types for later nested cursors', async () => {
+    const typeName = 'NODB_NESTED_CURSOR_OBJ';
+
+    try {
+      await conn.execute(`CREATE OR REPLACE TYPE ${typeName} AS OBJECT (
+        id NUMBER
+      )`);
+
+      const result = await conn.execute(`
+        SELECT id, CURSOR(
+          SELECT ${typeName}(id) AS obj FROM dual
+        ) AS nc
+        FROM (
+          SELECT 1 AS id FROM dual
+          UNION ALL
+          SELECT 2 AS id FROM dual
+        )
+        ORDER BY id`, [], { resultSet: true, fetchArraySize: 2 });
+      const parentRows = await result.resultSet.getRows(2);
+      const firstChildRows = await parentRows[0][1].getRows();
+      const secondChildRows = await parentRows[1][1].getRows();
+
+      assert.strictEqual(parentRows.length, 2);
+      assert.strictEqual(firstChildRows.length, 1);
+      assert.strictEqual(firstChildRows[0][0].ID, 1);
+      assert.strictEqual(secondChildRows.length, 1);
+      assert.strictEqual(secondChildRows[0][0].ID, 2);
+
+      await parentRows[0][1].close();
+      await parentRows[1][1].close();
+      await result.resultSet.close();
+    } finally {
+      await conn.execute(`DROP TYPE ${typeName} FORCE`);
+    }
+  });
+
+  it('233.3 keeps nested cursor DbObjects after parent buffer replacement', async () => {
+    const typeName = 'NODB_NESTED_CURSOR_RESIZE_OBJ';
+
+    try {
+      await conn.execute(`CREATE OR REPLACE TYPE ${typeName} AS OBJECT (
+        id NUMBER
+      )`);
+
+      const result = await conn.execute(`
+        SELECT id, CURSOR(
+          SELECT ${typeName}(id) AS obj FROM dual
+          ) AS nc
+          FROM (
+            SELECT LEVEL AS id FROM dual CONNECT BY LEVEL <= 5
+          )
+          ORDER BY id`, [], {
+        resultSet: true,
+        fetchArraySize: 1,
+        outFormat: oracledb.OUT_FORMAT_OBJECT
+      });
+      const firstRows = await result.resultSet.getRows(1);
+      const remainingRows = await result.resultSet.getRows(4);
+      const parentRows = firstRows.concat(remainingRows);
+
+      await result.resultSet.close();
+
+      // Consume retained children after parent buffer replacement and close.
+      for (const index of [4, 1, 3, 0, 2]) {
+        const childRows = await parentRows[index].NC.getRows();
+        assert.strictEqual(childRows.length, 1);
+        assert.strictEqual(childRows[0].OBJ.ID, index + 1);
+        await parentRows[index].NC.close();
+      }
+    } finally {
+      await conn.execute(`DROP TYPE ${typeName} FORCE`);
+    }
+  });
+
+  it('233.4 initializes DbObjects in multi-level nested cursors', async () => {
+    const typeName = 'NODB_MULTI_LEVEL_NESTED_OBJ';
+
+    try {
+      await conn.execute(`CREATE OR REPLACE TYPE ${typeName} AS OBJECT (
+        id NUMBER
+      )`);
+      const result = await conn.execute(`
+        SELECT CURSOR(
+          SELECT CURSOR(
+            SELECT ${typeName}(1) AS obj FROM dual
+          ) AS nc2
+          FROM dual
+        ) AS nc1
+        FROM dual`, [], { resultSet: true });
+      const parentRows = await result.resultSet.getRows();
+      const middleRows = await parentRows[0][0].getRows();
+      const childRows = await middleRows[0][0].getRows();
+
+      assert.strictEqual(childRows.length, 1);
+      assert.strictEqual(childRows[0][0].ID, 1);
+
+      await middleRows[0][0].close();
+      await parentRows[0][0].close();
+      await result.resultSet.close();
+    } finally {
+      await conn.execute(`DROP TYPE ${typeName} FORCE`);
+    }
   });
 });

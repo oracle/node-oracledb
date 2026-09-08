@@ -4780,13 +4780,15 @@ Overview of node-oracledb functional tests
     207.1 examples/selectobject.js
 
   208. dbObject9.js
-    208.1 REF cursors that fetch object
-    208.2 Implicit results that fetch objects
-    208.3 Implicit results that fetch objects with Result Set
-    208.4 DML RETURNING INTO, explicit bind type
-    208.5 DML RETURNING INTO, implicit bind type
-    208.6 DML RETURNING INTO, bind by named values
-    208.7 DML RETURNING INTO and executeMany()
+    208.1 top-level ResultSet that fetches an object
+    208.2 REF cursors that fetch object
+    208.3 two REF cursors that fetch objects
+    208.4 Implicit results that fetch objects
+    208.5 Implicit results that fetch objects with Result Set
+    208.6 DML RETURNING INTO, explicit bind type
+    208.7 DML RETURNING INTO, implicit bind type
+    208.8 DML RETURNING INTO, bind by named values
+    208.9 DML RETURNING INTO and executeMany()
 
   209. dbObject10.js
     209.1 DB Objects which contain PL/SQL methods
@@ -4990,6 +4992,9 @@ Overview of node-oracledb functional tests
 
   233. nestedCursor02.js
     233.1 example-nested-cursor.js
+    233.2 initializes DB object types for later nested cursors
+    233.3 keeps nested cursor DbObjects after parent buffer replacement
+    233.4 initializes DbObjects in multi-level nested cursors
 
   234. nestedCursor03.js
     234.1 fetch zero row without resultSet option

@@ -19,10 +19,14 @@ node-oracledb `v7.1.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1...
 Common Changes
 +++++++++++++++
 
-#)  Added :attr:`connection.txnPriority` to support Oracle AI Database 26ai's
-    transaction priority feature with standalone connections and pools.
-    Note that, setting ``txnPriority`` when creating a connection pool is not
-    supported in Thick mode yet.
+#)  Added :attr:`connection.txnPriority` property to support Oracle AI
+    Database 26ai's :ref:`transaction priority <txnpriority>` feature with
+    standalone connections in Thin and Thick modes, and with pools in Thin
+    mode.
+
+#)  Added support for OCI Resource Principal authentication with the
+    :ref:`OCI Object Storage centralized configuration provider <ociobjstorage>`
+    and :ref:`native IAM token-based authentication <cloudnativeauthoci>`.
 
 #)  Added ``rowsPerDataEvent`` option to the :meth:`connection.queryStream()`
     and :meth:`resultset.toQueryStream()` methods to allow processing of more
@@ -34,32 +38,24 @@ Common Changes
 
 #)  Fixed bug where the OSON encoder did not set the correct flags.
 
-#)  Fixed bug causing infinite loop in thin mode due to a race condition during
-    a pooled connection release.
-    See `Issue #1784 <https://github.com/oracle/node-oracledb/issues/1784>`__.
-    (Willian Marques).
-
 Thin Mode Changes
 +++++++++++++++++
-#)  Added support for OCI Resource Principal authentication with the
-    :ref:`OCI Object Storage centralized configuration provider <ociobjstorage>`
-    and :ref:`native IAM token-based authentication <cloudnativeauthoci>`.
 
 #)  Added support for reading and setting database
     :ref:`OpenTelemetry <opentelemetry>` trace propagation with the
     :attr:`connection.databaseOpenTelemetryTracing` property.
 
 #)  Added support for updating the :attr:`connection.ecid` end-to-end tracing
-    attribute in Thin mode.
+    attribute.
 
 #)  Fixed a bug where end-to-end tracing attributes set by PL/SQL were not
     synchronized with the Thin mode connection.
 
 #)  Added support for tls_* TLS certificate DN-validation parameters alongside
-    the existing ssl_* parameters in Thin mode.
+    the existing ssl_* parameters.
 
-#)  Added support for using the ``ssl_allow_weak_dn_match`` property with Easy
-    Connect strings.
+#)  Added support for using the ``ssl_allow_weak_dn_match`` property with
+    :ref:`Easy Connect strings <easyconnect>`.
 
 #)  Fixed bug to return proper metadata if ``fetchTypeHandler`` updates
     column names.
@@ -73,23 +69,29 @@ Thin Mode Changes
     ``enqTime`` property in
     :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>`.
 
-#)  Fixed bug to make JSON serialization to include only enumerable JavaScript object
-    properties.
+#)  Fixed bug to make JSON serialization to include only enumerable JavaScript
+    object properties.
 
 #)  Fixed :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`
-    attribute handling to reject unsupported non-JSON JavaScript values such as
-    ``BigInt``, ``Symbol``, and ``function`` with NJS errors.
+    attribute handling to reject unsupported non-JSON JavaScript values such
+    as ``BigInt``, ``Symbol``, and ``function`` with NJS errors.
 
-#)  Fixed bug to cancel partially fetched cursors while retaining the statements
-    in the statement cache, allowing implicit DRCP sessions to be released at
-    STATEMENT pool boundary.
+#)  Fixed bug to cancel partially fetched cursors while retaining the
+    statements in the statement cache, allowing
+    :ref:`implicit <implicitpool>` DRCP sessions to be released at STATEMENT
+    pool boundary.
 
-#)  Fixed bug when a :ref:`DbObject <dbobjectclass>` instance contains an attribute
-    of type ``SYS.XMLTYPE`` with a ``null`` value.
+#)  Fixed bug when a :ref:`DbObject <dbobjectclass>` instance contains an
+    attribute of type ``SYS.XMLTYPE`` with a `null` value.
 
 #)  Fixed bug where repeated Thin mode executions of the same SQL statement
     with different LOB fetch type settings could reuse stale statement cache
     define information.
+
+#)  Fixed bug causing infinite loop in Thin mode due to a race condition during
+    a pooled connection release.
+    See `Issue #1784 <https://github.com/oracle/node-oracledb/issues/1784>`__.
+    (Willian Marques).
 
 Thick Mode Changes
 ++++++++++++++++++
@@ -105,10 +107,15 @@ Thick Mode Changes
     Version-specific library names such as `libclntsh.so.19.1` are no longer
     loaded directly.
 
-#)  Added support for CQN registration IDs created by :meth:`connection.subscribe()`
-    to handle JavaScript Number values which require more than 32 bits.
+#)  Added support for CQN registration IDs created by
+    :meth:`connection.subscribe()` to handle JavaScript Number values which
+    require more than 32 bits.
 
-#) Internal code improvements for optimized memory management with resultsets.
+#)  Fixed bug causing segfault when using nested cursors with
+    :ref:`database objects <objects>`.
+
+#)  Internal code improvements for optimized memory management with
+    :ref:`resultsets <resultset>`.
 
 node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...v7.0.1>`__ (15 Jul 2026)
 -----------------------------------------------------------------------------------------------------------

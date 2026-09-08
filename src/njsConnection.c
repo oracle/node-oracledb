@@ -809,11 +809,6 @@ static bool njsConnection_executePostAsync(njsBaton *baton, napi_env env,
     // handle queries
     if (baton->queryVars) {
 
-        // perform any initialization required within JavaScript
-        if (!njsVariable_initForQueryJS(baton->queryVars, baton->numQueryVars,
-                env, baton))
-            return false;
-
         // return result set
         if (!njsResultSet_new(baton, env,
                 (njsConnection*) baton->callingInstance, baton->dpiStmtHandle,
@@ -1400,9 +1395,6 @@ static bool njsConnection_getImplicitResults(njsBaton *baton,
             implicitResultsObj))
     implicitResult = baton->implicitResults;
     for (i = 0; i < numImplicitResults; i++) {
-        if (!njsVariable_initForQueryJS(implicitResult->queryVars,
-                implicitResult->numQueryVars, env, baton))
-            return false;
         if (!njsResultSet_new(baton, env,
                 (njsConnection*) baton->callingInstance, implicitResult->stmt,
                 implicitResult->queryVars, implicitResult->numQueryVars,
@@ -1791,10 +1783,6 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
 
     // add metadata (queries only)
     if (baton->queryVars) {
-        if (!njsVariable_initForQueryJS(baton->queryVars, baton->numQueryVars,
-                env, baton))
-            return false;
-
         // Setup the options parameter for "_setup" call in JavaScript
         NJS_CHECK_NAPI(env, napi_create_object(env, &options))
         NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,

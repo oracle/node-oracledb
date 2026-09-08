@@ -248,8 +248,8 @@ static bool njsResultSet_getRowsPostAsync(njsBaton *baton, napi_env env,
 //-----------------------------------------------------------------------------
 // njsResultSet_new()
 //   Creates a new ResultSet object given the handle and variables that have
-// been built previously. It is assumed that the calling instance is a
-// connection.
+// been built previously. The calling instance is a connection or a parent
+// Resultset; conn identifies the owning connection in both cases.
 //-----------------------------------------------------------------------------
 bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
         dpiStmt *handle, njsVariable *vars, uint32_t numVars,
@@ -257,6 +257,10 @@ bool njsResultSet_new(njsBaton *baton, napi_env env, njsConnection *conn,
 {
     napi_value fn, temp, args[2];
     njsResultSet *rs;
+
+    // perform any initialization required within JavaScript
+    if (!njsVariable_initForQueryJS(vars, numVars, env, baton))
+        return false;
 
     // create new instance
     if (!njsUtils_genericNew(env, &njsClassDefResultSet,

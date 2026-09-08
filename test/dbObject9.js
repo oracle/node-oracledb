@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -109,7 +109,21 @@ describe('208. dbObject9.js', function() {
 
   }); // after()
 
-  it('208.1 REF cursors that fetch object', async () => {
+  it('208.1 top-level ResultSet that fetches an object', async () => {
+    const result = await conn.execute(
+      `SELECT person FROM ${TABLE} ORDER BY empnum`,
+      [],
+      { resultSet: true }
+    );
+    const rows = await result.resultSet.getRows(PEOPLE.length);
+
+    for (let i = 0; i < PEOPLE.length; i++) {
+      assert.deepStrictEqual(rows[i][0]._toPojo(), PEOPLE[i]);
+    }
+    await result.resultSet.close();
+  }); // 208.1
+
+  it('208.2 REF cursors that fetch object', async () => {
     const PROC = 'nodb_proc_getemp';
     let plsql = `
       CREATE OR REPLACE PROCEDURE ${PROC} (p_out OUT SYS_REFCURSOR)
@@ -136,7 +150,35 @@ describe('208. dbObject9.js', function() {
 
     const sql = `DROP PROCEDURE ${PROC}`;
     await conn.execute(sql);
-  }); // 208.1
+  }); // 208.2
+
+  it('208.3 two REF cursors that fetch objects', async () => {
+    const proc = 'nodb_proc_get_two_emp_cursors';
+    try {
+      await conn.execute(`
+        CREATE OR REPLACE PROCEDURE ${proc} (
+        p_one OUT SYS_REFCURSOR,
+        p_two OUT SYS_REFCURSOR
+        ) AS
+        BEGIN
+          OPEN p_one FOR SELECT person FROM ${TABLE} WHERE empnum = 1;
+          OPEN p_two FOR SELECT person FROM ${TABLE} WHERE empnum = 2;
+        END;`);
+      const result = await conn.execute(`BEGIN ${proc}(:one, :two); END;`, {
+        one: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_CURSOR },
+        two: { dir: oracledb.BIND_OUT, type: oracledb.DB_TYPE_CURSOR }
+      });
+      const firstRows = await result.outBinds.one.getRows();
+      const secondRows = await result.outBinds.two.getRows();
+
+      assert.deepStrictEqual(firstRows[0][0]._toPojo(), PEOPLE[0]);
+      assert.deepStrictEqual(secondRows[0][0]._toPojo(), PEOPLE[1]);
+      await result.outBinds.one.close();
+      await result.outBinds.two.close();
+    } finally {
+      await conn.execute(`DROP PROCEDURE ${proc}`);
+    }
+  }); // 208.3
 
   const queryImpres = `
     DECLARE
@@ -149,7 +191,7 @@ describe('208. dbObject9.js', function() {
     END;
   `;
 
-  it('208.2 Implicit results that fetch objects', async function() {
+  it('208.4 Implicit results that fetch objects', async function() {
     if (dbConfig.test.isCmanTdm) this.skip();
     const result = await conn.execute(queryImpres);
     const rows = result.implicitResults[0];
@@ -157,9 +199,9 @@ describe('208. dbObject9.js', function() {
       assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
       assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
     }
-  }); // 208.2
+  }); // 208.4
 
-  it('208.3 Implicit results that fetch objects with Result Set', async function() {
+  it('208.5 Implicit results that fetch objects with Result Set', async function() {
     if (dbConfig.test.isCmanTdm) this.skip();
     const result = await conn.execute(queryImpres, [], { resultSet: true});
     const rows = await result.implicitResults[0].getRows(PEOPLE.length);
@@ -167,9 +209,9 @@ describe('208. dbObject9.js', function() {
       assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
       assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
     }
-  }); // 208.3
+  }); // 208.5
 
-  it('208.4 DML RETURNING INTO, explicit bind type', async () => {
+  it('208.6 DML RETURNING INTO, explicit bind type', async () => {
     const PersonType = await conn.getDbObjectClass(TYPE);
 
     const staff = { ID: 1123, NAME: 'Changjie', GENDER: 'Male' };
@@ -190,9 +232,9 @@ describe('208. dbObject9.js', function() {
       result.outBinds[1][0]._toPojo(),
       staff
     );
-  }); // 208.4
+  }); // 208.6
 
-  it('208.5 DML RETURNING INTO, implicit bind type', async () => {
+  it('208.7 DML RETURNING INTO, implicit bind type', async () => {
     const PersonType = await conn.getDbObjectClass(TYPE);
 
     const staff = { ID: 23456, NAME: 'Chris', GENDER: 'Male' };
@@ -213,9 +255,9 @@ describe('208. dbObject9.js', function() {
       result.outBinds[1][0]._toPojo(),
       staff
     );
-  }); // 208.5
+  }); // 208.7
 
-  it('208.6 DML RETURNING INTO, bind by named values', async () => {
+  it('208.8 DML RETURNING INTO, bind by named values', async () => {
     const PersonType = await conn.getDbObjectClass(TYPE);
 
     const staff = { ID: 789, NAME: 'Shelly', GENDER: 'Female' };
@@ -236,9 +278,9 @@ describe('208. dbObject9.js', function() {
       result.outBinds.o2[0]._toPojo(),
       staff
     );
-  }); // 208.6
+  }); // 208.8
 
-  it.skip('208.7 DML RETURNING INTO and executeMany()', async () => {
+  it.skip('208.9 DML RETURNING INTO and executeMany()', async () => {
     const PersonType = await conn.getDbObjectClass(TYPE);
 
     const staffs = [
@@ -277,6 +319,6 @@ describe('208. dbObject9.js', function() {
     console.log("==== Result in table ========");
     const res = await conn.execute(`SELECT * FROM ${TABLE} WHERE empnum > 200 AND empnum < 205`);
     console.log(res);
-  }); // 208.7
+  }); // 208.9
 
 });
