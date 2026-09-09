@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -83,7 +83,7 @@ describe('5.clobPLSQLBindAsStringMaxSize.js', function() {
 
   before(async function() {
     connection = await oracledb.getConnection(dbConfig);
-    setupAllTable();
+    await setupAllTable();
   }); // before
 
   after(async function() {
@@ -436,7 +436,7 @@ describe('5.clobPLSQLBindAsStringMaxSize.js', function() {
   });
 
   const bindIn = async function(sqlRun, bindVar, orgStr, specialStr) {
-    connection.execute(sqlRun, bindVar, { autoCommit: true });
+    await connection.execute(sqlRun, bindVar, { autoCommit: true });
     const sql = `select clob from nodb_tab_clob_in where id = ` + insertID;
     await verifyClobValueWithString(sql, orgStr, specialStr);
   };
@@ -447,7 +447,7 @@ describe('5.clobPLSQLBindAsStringMaxSize.js', function() {
     const sql = `select clob from nodb_tab_clob_in where id = ` + insertID;
 
     await verifyClobValueWithFileData(sql, inFileName);
-    const result = connection.execute(sqlRun, bindVar);
+    const result = await connection.execute(sqlRun, bindVar);
     console.log("Result : " + JSON.stringify(result));
     fs.unlinkSync(inFileName);
   };
@@ -497,9 +497,8 @@ describe('5.clobPLSQLBindAsStringMaxSize.js', function() {
       inStream.on("error", reject);
       lob.on("error", reject);
 
-      lob.on('close', async function() {
-        await connection.commit();
-        resolve();
+      lob.on('close', function() {
+        connection.commit().then(resolve, reject);
       });
 
       inStream.pipe(lob); // copies the text to the CLOB

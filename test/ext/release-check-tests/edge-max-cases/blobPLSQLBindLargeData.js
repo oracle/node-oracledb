@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -259,7 +259,7 @@ describe('3.blobPLSQLBindLargeData.js', function() {
         // ORA-01691: unable to extend lob segment SHENZHEN.SYS_LOB0000185953C00002$$ by 699912 in tablespace SYSTE
         assert.equal(err.message.substring(0, 10), `ORA-01691:`);
       }
-      lob.close();
+      await lob.close();
     }
     await verifyBindinBlob(insertID, insertID, lenExpected);
     fs.unlinkSync(inFileName);
@@ -363,7 +363,6 @@ describe('3.blobPLSQLBindLargeData.js', function() {
     await new Promise((resolve, reject) => {
       inStream.on("error", reject);
       lob.on("error", reject);
-
       lob.on('close', async function() {
         await connection.commit();
         resolve();
@@ -420,11 +419,8 @@ describe('3.blobPLSQLBindLargeData.js', function() {
       c: { val: blob, type: oracledb.BLOB, dir: oracledb.BIND_IN }
     };
 
-    await connection.execute(
-      insetSql,
-      bindVar,
-      { autoCommit: true });
-    blob.close();
+    await connection.execute(insetSql, bindVar, { autoCommit: true });
+    await blob.close();
     await executeSQL(proc_compare_blob);
     bindVar = {
       r: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },

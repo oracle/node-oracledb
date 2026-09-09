@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -83,25 +83,19 @@ describe('62. lobProperties1.js', function() {
     let blob = result.outBinds.blob[0];
     const clobStream = fs.createReadStream(clobFileName);
     const blobStream = fs.createReadStream(blobFileName);
+    const clobFinished = new Promise((resolve, reject) => {
+      clobStream.on('error', reject);
+      clob.on('error', reject);
+      clob.on('finish', resolve);
+    });
+    const blobFinished = new Promise((resolve, reject) => {
+      blobStream.on('error', reject);
+      blob.on('error', reject);
+      blob.on('finish', resolve);
+    });
     clobStream.pipe(clob);
     blobStream.pipe(blob);
-    await new Promise((resolve, reject) => {
-      clobStream.on('error', reject);
-      blobStream.on('error', reject);
-      clob.on('error', reject);
-      blob.on('error', reject);
-      const waitForClob = async function() {
-        await new Promise((resolve) => {
-          clob.on('finish', resolve);
-        });
-      };
-      const waitForBlob = async function() {
-        await new Promise((resolve) => {
-          blob.on('finish', resolve);
-        });
-      };
-      Promise.all([waitForClob(), waitForBlob()]).then(resolve);
-    });
+    await Promise.all([clobFinished, blobFinished]);
     result = await connection.execute(sqlSelect, { i: 1 });
     clob = result.rows[0][1];
     blob = result.rows[0][2];

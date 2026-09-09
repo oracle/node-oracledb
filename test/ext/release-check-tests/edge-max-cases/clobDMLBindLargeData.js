@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -185,7 +185,6 @@ describe('4.clobDMLBindLargeData.js', function() {
     await new Promise((resolve, reject) => {
       inStream.on("error", reject);
       lob.on("error", reject);
-
       lob.on('close', async function() {
         await connection.commit();
         resolve();
@@ -226,10 +225,10 @@ describe('4.clobDMLBindLargeData.js', function() {
         { autoCommit: true });
     } catch (err) {
       if (err) {
-        // ORA-01691: unable to extend lob segment SHENZHEN.SYS_LOB0000185953C00002$$ by 699912 in tablespace SYSTE
+        // ORA-01691: unable to extend lob segment
         assert.equal(err.message.substring(0, 10), `ORA-01691:`);
       }
-      lob.close();
+      await lob.close();
     }
 
     await executeSQL(proc_compare_clob);

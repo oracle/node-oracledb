@@ -107,7 +107,7 @@ describe("154. fetchArraySize7.js", function() {
         }
       );
       const rowCount = 0;
-      fetchRowsFromRS(result.resultSet, numRowsVal, rowCount);
+      await fetchRowsFromRS(result.resultSet, numRowsVal, rowCount);
     };
 
     async function fetchRowsFromRS(rs, numRowsVal, rowCount) {

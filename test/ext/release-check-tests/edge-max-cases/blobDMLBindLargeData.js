@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -229,7 +229,7 @@ describe('1.blobDMLBindLargeData.js', function() {
       );
     } catch (err) {
       assert.ifError(err);
-      lob.close();
+      await lob.close();
     }
 
     await executeSQL(proc_compare_blob);

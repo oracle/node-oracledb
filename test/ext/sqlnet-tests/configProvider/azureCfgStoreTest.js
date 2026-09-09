@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -207,7 +207,7 @@ describe('1. Azure Configuration Store', function() {
       // Labels allow you to create variants of a key tailored
       // for specific use-cases like supporting multiple environments.
       config.connectString = process.env.NODE_ORACLEDB_CONNECTIONSTRING_CERT_VAULT + '&label=test1';
-      oracledb.getConnection(config);
+      await oracledb.getConnection(config);
       await assert.rejects(
         async () => await oracledb.getConnection(config),
         ''
