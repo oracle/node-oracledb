@@ -38,6 +38,9 @@ Common Changes
 
 #)  Fixed bug where the OSON encoder did not set the correct flags.
 
+#)  Fixed bug causing precision and scale to be incorrect for timestamps found
+    within a :ref:`database object <dbobjectclass>`.
+
 Thin Mode Changes
 +++++++++++++++++
 

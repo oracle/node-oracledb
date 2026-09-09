@@ -375,6 +375,7 @@ Overview of node-oracledb functional tests
       9.7.3 columns with very long names
     9.8 Metadata Type Precision and Scale
       9.8.1 should provide precision and scale for numeric columns
+      9.8.2 should provide precision for timestamp columns
 
   10. nullColumnValues.js
     10.1 a simple query for null value

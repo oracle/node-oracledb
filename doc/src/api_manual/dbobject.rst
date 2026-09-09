@@ -44,11 +44,15 @@ The properties of a DbObject object are listed below.
     - ``typeClass``: Set if the value of ``type`` is a DbObject. It is the
       DbObject class for the attribute.
     - ``precision``: The precision of the attribute when the attribute's type
-      is ``oracledb.DB_TYPE_NUMBER``. For all other types, the value returned
-      is *undefined*.
+      is ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``,
+      ``oracledb.DB_TYPE_TIMESTAMP_TZ``, or
+      ``oracledb.DB_TYPE_TIMESTAMP_LTZ``. For all other types, the value
+      returned is *undefined*.
     - ``scale``: The scale of the attribute when the attribute's type is
-      ``oracledb.DB_TYPE_NUMBER``. For all other types, the value returned is
-      *undefined*.
+      ``oracledb.DB_TYPE_NUMBER``, ``oracledb.DB_TYPE_TIMESTAMP``,
+      ``oracledb.DB_TYPE_TIMESTAMP_TZ``, or
+      ``oracledb.DB_TYPE_TIMESTAMP_LTZ``. For all other types, the value
+      returned is *undefined*.
     - ``maxSize``: The maximum size (in bytes) of the attribute when the
       attribute's type is one of ``oracledb.DB_TYPE_CHAR``,
       ``oracledb.DB_TYPE_NCHAR``, ``oracledb.DB_TYPE_NVARCHAR``,

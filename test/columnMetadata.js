@@ -539,5 +539,36 @@ describe('9. columnMetadata.js', function() {
 
       await connection.execute(testsUtil.sqlDropTable(tableName));
     });
+
+    it('9.8.2 should provide precision for timestamp columns', async function() {
+      const result = await connection.execute(`
+        SELECT
+          CAST(NULL AS TIMESTAMP) AS timestamp_default,
+          CAST(NULL AS TIMESTAMP(0)) AS timestamp_0,
+          CAST(NULL AS TIMESTAMP(6)) AS timestamp_6,
+          CAST(NULL AS TIMESTAMP(9)) AS timestamp_9,
+          CAST(NULL AS TIMESTAMP WITH TIME ZONE) AS timestamp_tz,
+          CAST(NULL AS TIMESTAMP WITH LOCAL TIME ZONE) AS timestamp_ltz
+        FROM DUAL`);
+      const expected = [
+        ['TIMESTAMP_DEFAULT', oracledb.DB_TYPE_TIMESTAMP, 'TIMESTAMP', 6],
+        ['TIMESTAMP_0', oracledb.DB_TYPE_TIMESTAMP, 'TIMESTAMP', 0],
+        ['TIMESTAMP_6', oracledb.DB_TYPE_TIMESTAMP, 'TIMESTAMP', 6],
+        ['TIMESTAMP_9', oracledb.DB_TYPE_TIMESTAMP, 'TIMESTAMP', 9],
+        ['TIMESTAMP_TZ', oracledb.DB_TYPE_TIMESTAMP_TZ,
+          'TIMESTAMP WITH TIME ZONE', 6],
+        ['TIMESTAMP_LTZ', oracledb.DB_TYPE_TIMESTAMP_LTZ,
+          'TIMESTAMP WITH LOCAL TIME ZONE', 6]
+      ];
+
+      for (let i = 0; i < expected.length; i++) {
+        const [name, dbType, dbTypeName, precision] = expected[i];
+        assert.strictEqual(result.metaData[i].name, name);
+        assert.strictEqual(result.metaData[i].dbType, dbType);
+        assert.strictEqual(result.metaData[i].dbTypeName, dbTypeName);
+        assert.strictEqual(result.metaData[i].precision, precision);
+        assert.strictEqual(result.metaData[i].scale, undefined);
+      }
+    });
   });
 });

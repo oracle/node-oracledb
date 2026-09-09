@@ -69,10 +69,10 @@ bool njsUtils_addTypeProperties(napi_env env, napi_value obj,
 
 //-----------------------------------------------------------------------------
 // njsUtils_addMetaDataProperties()
-//   Add Metadata properties to the specified object given the ODPI-C type info
+//   Add Metadata properties to the specified object given the DB type info
 //-----------------------------------------------------------------------------
 bool njsUtils_addMetaDataProperties(napi_env env, napi_value obj,
-        dpiDataTypeInfo *info)
+        njsDataTypeInfo *info)
 {
     napi_value temp;
 
@@ -83,7 +83,10 @@ bool njsUtils_addMetaDataProperties(napi_env env, napi_value obj,
             temp))
     }
 
-    if (info->precision != 0 || info->scale != 0) {
+    if (info->precision != 0 || info->scale != 0 ||
+            info->oracleTypeNum == DPI_ORACLE_TYPE_TIMESTAMP ||
+            info->oracleTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_TZ ||
+            info->oracleTypeNum == DPI_ORACLE_TYPE_TIMESTAMP_LTZ) {
         // set the precision
         NJS_CHECK_NAPI(env, napi_create_int32(env, info->precision, &temp))
         NJS_CHECK_NAPI(env, napi_set_named_property(env, obj, "precision",

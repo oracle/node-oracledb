@@ -66,6 +66,9 @@ describe('314. dbObject21.js', function() {
       BINARYDOUBLEVALUE BINARY_DOUBLE,
       DATEVALUE DATE,
       TIMESTAMPVALUE TIMESTAMP,
+      TIMESTAMP0VALUE TIMESTAMP(0),
+      TIMESTAMP6VALUE TIMESTAMP(6),
+      TIMESTAMP9VALUE TIMESTAMP(9),
       TIMESTAMPTZVALUE TIMESTAMP WITH TIME ZONE,
       TIMESTAMPLTZVALUE TIMESTAMP WITH LOCAL TIME ZONE,
       CLOBVALUE CLOB,
@@ -103,15 +106,39 @@ describe('314. dbObject21.js', function() {
       DATEVALUE: { type: oracledb.DB_TYPE_DATE, typeName: 'DATE' },
       TIMESTAMPVALUE: {
         type: oracledb.DB_TYPE_TIMESTAMP,
-        typeName: 'TIMESTAMP'
+        typeName: 'TIMESTAMP',
+        precision: 0,
+        scale: 6
+      },
+      TIMESTAMP0VALUE: {
+        type: oracledb.DB_TYPE_TIMESTAMP,
+        typeName: 'TIMESTAMP',
+        precision: 0,
+        scale: 0
+      },
+      TIMESTAMP6VALUE: {
+        type: oracledb.DB_TYPE_TIMESTAMP,
+        typeName: 'TIMESTAMP',
+        precision: 0,
+        scale: 6
+      },
+      TIMESTAMP9VALUE: {
+        type: oracledb.DB_TYPE_TIMESTAMP,
+        typeName: 'TIMESTAMP',
+        precision: 0,
+        scale: 9
       },
       TIMESTAMPTZVALUE: {
         type: oracledb.DB_TYPE_TIMESTAMP_TZ,
-        typeName: 'TIMESTAMP WITH TIME ZONE'
+        typeName: 'TIMESTAMP WITH TIME ZONE',
+        precision: 0,
+        scale: 6
       },
       TIMESTAMPLTZVALUE: {
         type: oracledb.DB_TYPE_TIMESTAMP_LTZ,
-        typeName: 'TIMESTAMP WITH LOCAL TIME ZONE'
+        typeName: 'TIMESTAMP WITH LOCAL TIME ZONE',
+        precision: 0,
+        scale: 6
       },
       CLOBVALUE: { type: oracledb.DB_TYPE_CLOB, typeName: 'CLOB' },
       NCLOBVALUE: { type: oracledb.DB_TYPE_NCLOB, typeName: 'NCLOB' },

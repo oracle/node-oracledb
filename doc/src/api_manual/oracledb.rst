@@ -865,8 +865,12 @@ Each of the configuration properties is described below.
       <oracledbconstantsdbtype>`.
     - ``maxSize``: The maximum number of bytes allocated.
     - ``typeName``: The name of the object.
-    - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER`` type.
-    - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER`` type.
+    - ``precision``: Set only for ``oracledb.DB_TYPE_NUMBER``,
+      ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ``, and
+      ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` types.
+    - ``scale``: Set only for ``oracledb.DB_TYPE_NUMBER``,
+      ``oracledb.DB_TYPE_TIMESTAMP``, ``oracledb.DB_TYPE_TIMESTAMP_TZ``, and
+      ``oracledb.DB_TYPE_TIMESTAMP_LTZ`` types.
 
     The function is expected to return an object containing a
     ``converter`` attribute which works similar to the existing fetch type

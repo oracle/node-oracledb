@@ -977,7 +977,7 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
             return false;
         NJS_CHECK_NAPI(env, napi_create_object(env, &elementTypeInfo))
         if (!njsUtils_addMetaDataProperties(env, elementTypeInfo,
-                &info->elementTypeInfo))
+                &objType->elementTypeInfo))
             return false;
         NJS_CHECK_NAPI(env, napi_set_named_property(env, jsObjectType,
                 "elementTypeInfo", elementTypeInfo))
@@ -1006,7 +1006,7 @@ static bool njsDbObjectType_populate(njsDbObjectType *objType,
                     attr->typeInfo.objectType))
                 return false;
             if (!njsUtils_addMetaDataProperties(env, element,
-                    &attrInfo.typeInfo))
+                    &attr->typeInfo))
                 return false;
             NJS_CHECK_NAPI(env, napi_wrap(env, element, attr, NULL, NULL,
                     NULL))
@@ -1063,7 +1063,7 @@ static bool njsDbObjectType_populateTypeInfo(njsDataTypeInfo *info,
         info->nativeTypeNum = sourceInfo->defaultNativeTypeNum;
     }
     info->precision = sourceInfo->precision;
-    info->scale = sourceInfo->scale;
+    info->scale = sourceInfo->scale + sourceInfo->fsPrecision;
     info->dbSizeInBytes = sourceInfo->dbSizeInBytes;
     if (sourceInfo->objectType) {
         return njsDbObject_getSubClass(baton, sourceInfo->objectType, env,
