@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -230,7 +230,7 @@ describe('144. urowidProcedureBindAsString4.js', function() {
     testsUtil.checkUrowidLength(urowidLen_1, contentLen_1);
     const id_2 = insertID + 1;
     sql_insert = "insert into " + tableName_indexed + " values (" + id_2 + ", '" + str_2 + "')";
-    result = await connection.execute(sql_insert);
+    await connection.execute(sql_insert);
     result = await connection.execute("select ROWID from " + tableName_indexed + " where c1 = " + id_2);
     const urowid_2 = result.rows[0][0];
     const urowidLen_2 = urowid_2.length;

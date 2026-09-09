@@ -947,8 +947,7 @@ describe('324. pipeline.js', function() {
       pipeline.addFetchOne(`select sysdate from dual`);
       pipeline.addFetchOne(`select user from dual`);
       pipeline.addExecute(`INSERT INTO ${TEST_TAB} VALUES (24, 'BES')`);
-      let results = [];
-      results = await conn.runPipeline(pipeline, true);
+      const results = await conn.runPipeline(pipeline, true);
 
       assert(results[0].rowsAffected === 1);
       assert(results[1].rows[0][0] instanceof oracledb.Lob);
@@ -1077,7 +1076,6 @@ describe('324. pipeline.js', function() {
       );
 
       // re-run same stmts which should be in cache and should run faster.
-      results = undefined;
       pipeline.addFetchOne(`select user from dual`);
       pipeline.addExecuteMany(plsql, binds, options);
       pipeline.addExecute(`INSERT INTO ${TEST_TAB} VALUES (24, 'plsql')`); // single request/response at end of pipeline

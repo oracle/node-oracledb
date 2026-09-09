@@ -4317,6 +4317,7 @@ Overview of node-oracledb functional tests
     162.42 Numeric aliases converted to strings
     162.43 Special character aliases
     162.44 Metadata consistency between output formats - duplicate aliases
+    162.45 DbObject metadata
 
   163. executeMany1.js
     163.1 inserts many rows with bind by name

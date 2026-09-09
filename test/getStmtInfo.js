@@ -596,4 +596,24 @@ describe('162. getStmtInfo.js', function() {
     assert.strictEqual(infoArray.metaData[1].name, 'A_1');
     assert.strictEqual(infoArray.metaData[1].dbColumnName, 'A');
   });
+
+  it('162.45 DbObject metadata', async function() {
+    const typeName = 'NODB_GET_STMT_INFO_OBJ';
+
+    try {
+      await conn.execute(`CREATE OR REPLACE TYPE ${typeName} AS OBJECT (
+        id NUMBER
+      )`);
+      const info = await conn.getStatementInfo(
+        `SELECT ${typeName}(1) AS obj FROM dual`
+      );
+
+      assert.strictEqual(info.metaData.length, 1);
+      assert.strictEqual(info.metaData[0].name, 'OBJ');
+      assert.strictEqual(info.metaData[0].dbType, oracledb.DB_TYPE_OBJECT);
+      assert(info.metaData[0].dbTypeName.endsWith(`.${typeName}`));
+    } finally {
+      await conn.execute(`DROP TYPE ${typeName} FORCE`);
+    }
+  });
 });

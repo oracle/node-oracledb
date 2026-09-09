@@ -1,4 +1,4 @@
-// Copyright (c) 2015, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2015, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -513,11 +513,16 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsLob_setDirFileName, 1, NULL)
             &dirName, &dirNameLength))
         return false;
     if (!njsUtils_getNamedPropertyString(env, args[0], "fileName",
-            &fileName, &fileNameLength))
+            &fileName, &fileNameLength)) {
+        NJS_FREE_AND_CLEAR(dirName);
         return false;
+    }
     if (dpiLob_setDirectoryAndFileName(lob->handle, dirName, dirNameLength,
-            fileName, fileNameLength) < 0)
+            fileName, fileNameLength) < 0) {
+        NJS_FREE_AND_CLEAR(dirName);
+        NJS_FREE_AND_CLEAR(fileName);
         return njsUtils_throwErrorDPI(env, globals);
+    }
 
     return true;
 }

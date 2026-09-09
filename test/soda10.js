@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -44,8 +44,7 @@ describe('178. soda10.js', function() {
 
   before(async function() {
 
-    const runnable = await testsUtil.isSodaRunnable();
-
+    runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
     } else {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -114,8 +114,7 @@ describe('53. resultSetClose.js', function() {
 
   it('53.6 can call getRow() again in the callback of getRow()', async function() {
 
-    let rs2   = null;
-    const tab   = "nodb_float";
+    const tab = "nodb_float";
 
     await assist.setUp(connection, tab, numbers);
 
@@ -124,7 +123,7 @@ describe('53. resultSetClose.js', function() {
       [],
       { resultSet: true, outFormat: oracledb.OUT_FORMAT_OBJECT });
 
-    rs2 = result.resultSet;
+    const rs2 = result.resultSet;
 
     const row = await rs2.getRow();
     assert(row);

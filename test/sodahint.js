@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -52,7 +52,7 @@ describe('257. sodahint.js', () => {
         this.skip();
       }
     }
-    const runnable = await testsUtil.isSodaRunnable();
+    runnable = await testsUtil.isSodaRunnable();
     if (!runnable) {
       this.skip();
     } else {

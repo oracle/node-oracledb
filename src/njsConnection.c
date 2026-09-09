@@ -1691,11 +1691,14 @@ NJS_NAPI_METHOD_IMPL_SYNC(njsConnection_getStmtCacheSize, 0, NULL)
 // PARAMETERS
 //   - SQL statement
 //-----------------------------------------------------------------------------
-NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getStatementInfo, 1, NULL)
+NJS_NAPI_METHOD_IMPL_ASYNC(njsConnection_getStatementInfo, 2, NULL)
 {
     if (!njsUtils_copyStringFromJS(env, args[0], &baton->sql,
             &baton->sqlLength))
         return false;
+    NJS_CHECK_NAPI(env, napi_create_reference(env, args[1], 1,
+            &baton->jsExecuteOptionsRef))
+
     return njsBaton_queueWork(baton, env, "GetStatementInfo",
             njsConnection_getStatementInfoAsync,
             njsConnection_getStatementInfoPostAsync, returnValue);
@@ -1775,7 +1778,7 @@ static bool njsConnection_getStatementInfoAsync(njsBaton *baton)
 static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
         napi_env env, napi_value *result)
 {
-    napi_value bindNames, metadata, temp, options, callingObj;
+    napi_value bindNames, metadata, temp;
     uint32_t i;
 
     // create object for the result
@@ -1783,15 +1786,6 @@ static bool njsConnection_getStatementInfoPostAsync(njsBaton *baton,
 
     // add metadata (queries only)
     if (baton->queryVars) {
-        // Setup the options parameter for "_setup" call in JavaScript
-        NJS_CHECK_NAPI(env, napi_create_object(env, &options))
-        NJS_CHECK_NAPI(env, napi_get_reference_value(env, baton->jsCallingObjRef,
-                &callingObj))
-        NJS_CHECK_NAPI(env, napi_set_named_property(env, options, "connection",
-                callingObj))
-        NJS_CHECK_NAPI(env, napi_create_reference(env, options, 1,
-                &baton->jsExecuteOptionsRef))
-
         // return result set
         if (!njsResultSet_new(baton, env,
                 (njsConnection*) baton->callingInstance, baton->dpiStmtHandle,

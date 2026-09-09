@@ -41,6 +41,9 @@ Common Changes
 #)  Fixed bug causing precision and scale to be incorrect for timestamps found
     within a :ref:`database object <dbobjectclass>`.
 
+#)  Fixed bug throwing error when :meth:`connection.getStatementInfo()`
+    contains SQL involving database objects.
+
 Thin Mode Changes
 +++++++++++++++++
 
@@ -50,9 +53,6 @@ Thin Mode Changes
 
 #)  Added support for updating the :attr:`connection.ecid` end-to-end tracing
     attribute.
-
-#)  Fixed a bug where end-to-end tracing attributes set by PL/SQL were not
-    synchronized with the Thin mode connection.
 
 #)  Added support for tls_* TLS certificate DN-validation parameters alongside
     the existing ssl_* parameters.
@@ -68,9 +68,13 @@ Thin Mode Changes
     are truncated or an error is thrown.
     See `Issue #1782 <https://github.com/oracle/node-oracledb/issues/1782>`__.
 
-#)  Returned `undefined` instead of `null` as the default value for the
-    ``enqTime`` property in
-    :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>`.
+#)  Fixed bug causing infinite loop in Thin mode due to a race condition during
+    a pooled connection release.
+    See `Issue #1784 <https://github.com/oracle/node-oracledb/issues/1784>`__.
+    (Willian Marques).
+
+#)  Fixed bug where end-to-end tracing attributes set by PL/SQL were not
+    synchronized with the Thin mode connection.
 
 #)  Fixed bug to make JSON serialization to include only enumerable JavaScript
     object properties.
@@ -91,13 +95,16 @@ Thin Mode Changes
     with different LOB fetch type settings could reuse stale statement cache
     define information.
 
-#)  Fixed bug causing infinite loop in Thin mode due to a race condition during
-    a pooled connection release.
-    See `Issue #1784 <https://github.com/oracle/node-oracledb/issues/1784>`__.
-    (Willian Marques).
+#)  Returned `undefined` instead of `null` as the default value for the
+    ``enqTime`` property in
+    :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>`.
 
 Thick Mode Changes
 ++++++++++++++++++
+
+#)  Added support for CQN registration IDs created by
+    :meth:`connection.subscribe()` to handle JavaScript Number values which
+    require more than 32 bits.
 
 #)  Fixed bug resulting in a random date value when getting the ``enqTime``
     property for
@@ -110,15 +117,11 @@ Thick Mode Changes
     Version-specific library names such as `libclntsh.so.19.1` are no longer
     loaded directly.
 
-#)  Added support for CQN registration IDs created by
-    :meth:`connection.subscribe()` to handle JavaScript Number values which
-    require more than 32 bits.
-
 #)  Fixed bug causing segfault when using nested cursors with
     :ref:`database objects <objects>`.
 
 #)  Internal code improvements for optimized memory management with
-    :ref:`resultsets <resultset>`.
+    :ref:`resultsets <resultsetclass>`.
 
 node-oracledb `v7.0.1 <https://github.com/oracle/node-oracledb/compare/v7.0.0...v7.0.1>`__ (15 Jul 2026)
 -----------------------------------------------------------------------------------------------------------
