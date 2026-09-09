@@ -176,5 +176,24 @@ describe('328. endUserSecurityContext.js', function() {
         );
       }
     }); // 328.1.3
+
+    it('328.1.4 rejects circular attribute values', function() {
+      const circular = {
+        region: 'US',
+      };
+      circular.self = circular;
+
+      assert.throws(
+        () =>
+          new oracledb.EndUserSecurityContext({
+            databaseAccessToken: 'db-token-circular-attrs',
+            endUserToken: 'user-token-circular-attrs',
+            attributes: {
+              'EUC.HCM': circular,
+            },
+          }),
+        /NJS-005:/,
+      );
+    }); // 328.1.4
   }); // 328.1
 });

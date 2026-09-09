@@ -81,7 +81,7 @@ Thin Mode Changes
 
 #)  Fixed :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`
     attribute handling to reject unsupported non-JSON JavaScript values such
-    as ``BigInt``, ``Symbol``, and ``function`` with NJS errors.
+    as ``BigInt``, ``Symbol``, ``function`` and circular attribute values with NJS errors.
 
 #)  Fixed bug to cancel partially fetched cursors while retaining the
     statements in the statement cache, allowing

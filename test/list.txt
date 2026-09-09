@@ -6806,6 +6806,7 @@ Overview of node-oracledb functional tests
       328.1.1 ignores non-enumerable nested attribute properties
       328.1.2 rejects unsupported nested JSON values
       328.1.3 rejects unsupported nested field names
+      328.1.4 rejects circular attribute values
 
   329. txnPriority.js
     329.1 initial value comes from connect piggyback
