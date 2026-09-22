@@ -2027,6 +2027,19 @@ following AWS modules:
 See :ref:`awssecretsmanager` for information on using this configuration
 provider with node-oracledb.
 
+.. _googlecloudstoragemodules:
+
+Install Modules for Google Cloud Storage
+----------------------------------------
+
+For node-oracledb to work with Google Cloud Storage, you must install the
+`Google Cloud Storage for Node.js Client <https://www.npmjs.com/package/
+@google-cloud/storage>`__ module using:
+
+.. code-block:: shell
+
+    npm install @google-cloud/storage
+
 .. _cloudnativemodules:
 
 Installing Cloud Native Authentication Modules for node-oracledb

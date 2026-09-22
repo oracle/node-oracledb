@@ -241,3 +241,27 @@ To load the ``awssecretsmanager`` plugin in your application, use:
     require('oracledb/plugins/configProviders/awssecretsmanager');
 
 See :ref:`awssecretsmanager` for more information.
+
+.. _googlecloudstorageplugin:
+
+Google Cloud Storage Centralized Configuration Provider Plugin
+--------------------------------------------------------------
+
+.. versionadded:: 7.1
+
+``gcpstorage`` is a plugin that can be loaded in your application to provide
+access to configuration information stored in
+:ref:`Google Cloud Storage <googlecloudstorage>`.
+
+This plugin is implemented as a :ref:`centralized configuration provider hook
+function <configproviderhookfn>` to handle connection strings which have the
+prefix ``config-gcpstorage``, see :ref:`Google Cloud Storage connection
+strings <connstringgcs>`.
+
+To load the ``gcpstorage`` plugin in your application, use:
+
+.. code-block:: javascript
+
+    require('oracledb/plugins/configProviders/gcpstorage');
+
+See :ref:`googlecloudstorage` for more information.

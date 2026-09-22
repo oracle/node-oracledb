@@ -332,8 +332,9 @@ centrally in :ref:`OCI Object Storage <ociobjstorage>`,
 :ref:`OCI Vault <ocivault>`, :ref:`local file <fileconfigprovider>`,
 :ref:`Azure App Configuration <azureappconfig>`,
 :ref:`Azure Key Vault <azurekeyvault>`,
-:ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`, or
-:ref:`AWS Secrets Manager <awssecretsmanager>`. Using a provider URL,
+:ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`,
+:ref:`AWS Secrets Manager <awssecretsmanager>`, or
+:ref:`Google Cloud Storage <googlecloudstorage>`. Using a provider URL,
 node-oracledb will access the information stored in the configuration provider
 and use it to connect to Oracle Database.
 
@@ -346,8 +347,8 @@ other sections.
 The Centralized Configuration Provider URL must begin with
 "config-<configuration-provider>://" where the configuration-provider value
 can be set to *ociobject*, *ocivault*, *file*, *azure*, *azurevault*, *awss3*,
-or *awssecretsmanager* depending on the location of your configuration
-information.
+*awssecretsmanager*, or *gcpstorage* depending on the location of your
+configuration information.
 
 For example, consider the following connection configuration stored in
 :ref:`OCI Object Storage <ociobjstorage>`:
@@ -632,6 +633,7 @@ The following configuration providers are supported by node-oracledb:
 - :ref:`Microsoft Azure Key Vault <azurekeyvault>`
 - :ref:`Amazon Web Service (AWS) Simple Storage Service (S3) <awss3>`
 - :ref:`AWS Secrets Manager <awssecretsmanager>`
+- :ref:`Google Cloud Storage <googlecloudstorage>`
 
 To use Centralized Configuration Provider functionality in node-oracledb Thick
 mode, you should set :attr:`oracledb.thickModeDSNPassthrough` to *false*.
@@ -670,7 +672,7 @@ below.
 
         The password of the database user.
 
-        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`File <fileconfigprovider>`, :ref:`AWS S3 <awss3>` configuration providers, and :ref:`AWS Secrets Manager <awssecretsmanager>`, the value is an object which contains the following parameters:
+        For :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`File <fileconfigprovider>`, :ref:`AWS S3 <awss3>`, :ref:`AWS Secrets Manager <awssecretsmanager>`, and :ref:`Google Cloud Storage <googlecloudstorage>` configuration providers, the value is an object which contains the following parameters:
 
         - ``type``: The possible values of this required parameter are *ocivault*, *azurevault*, *base64*, and *text*.
 
@@ -690,7 +692,7 @@ below.
     * - ``wallet_location``
       - The reference to the wallet.
 
-        For :ref:`File <fileconfigprovider>`, :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`AWS S3 <awss3>`, and :ref:`AWS Secrets Manager <awssecretsmanager>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
+        For :ref:`File <fileconfigprovider>`, :ref:`OCI Object Storage <ociobjstorage>`, :ref:`OCI Vault <ocivault>`, :ref:`Azure Key Vault <azurekeyvault>`, :ref:`AWS S3 <awss3>`, :ref:`AWS Secrets Manager <awssecretsmanager>`, and :ref:`Google Cloud Storage <googlecloudstorage>` configuration providers, the value is an object itself and contains the same parameters that are listed in the :ref:`password <passwordparams>` parameter. This can only be used in node-oracledb Thin mode.
 
         For :ref:`Azure App Configuration <azureappconfig>`, this parameter is the reference to the Azure Key Vault and Secret that contains the wallet as the value.
       - Optional
@@ -1569,6 +1571,122 @@ Note that *AWS_REGION*, *HTTPS_PROXY*, and *AWS_PROFILE* environment variables
 can also be set instead of the corresponding connection string parameters. If
 you set these, then you need to set the authentication environment variables.
 See :ref:`awsauthmethods`.
+
+.. _googlecloudstorage:
+
+Using a Google Cloud Storage Centralized Configuration Provider
+---------------------------------------------------------------
+
+`Google Cloud Storage <https://docs.cloud.google.com/storage/docs>`__ stores
+and manages Oracle Database connection information as JSON. This configuration
+provider support was introduced in node-oracledb 7.1.
+
+To use a Google Cloud Storage Centralized Configuration Provider, you must:
+
+1. Upload a JSON file that contains the connection information into `Google
+   Cloud Storage Bucket <https://docs.cloud.google.com/storage/docs/
+   buckets>`__. See `Upload an object into the bucket <https://docs.cloud.
+   google.com/storage/docs/discover-object-storage-console#upload_an_object_
+   into_the_bucket>`__ for the steps. See :ref:`Google Cloud Storage Centralized
+   Configuration Provider Parameters <gcsconfigparams>` for the configuration
+   information that can be added.
+
+2. Install the required Google Cloud Storage modules. See
+   :ref:`googlecloudstoragemodules`.
+
+4. Load the :ref:`gcpstorage <googlecloudstorageplugin>` plugin in your
+   application using
+   ``require('oracledb/plugins/configProviders/gcpstorage')``.
+
+5. :ref:`Use an Google Cloud Storage connection string URL <connstringgcs>`
+   in the ``connectString`` property of connection and pool creation methods.
+
+Note that node-oracledb caches configurations by default, see
+:ref:`conncaching`.
+
+.. _gcsconfigparams:
+
+**Connection Information for Google Cloud Storage Configuration Provider**
+
+The connection information stored in a JSON file must contain a
+``connect_descriptor`` key. Optionally, you can specify the database user
+name, password, wallet location, and node-oracledb properties. For details
+on the information that can be stored in this configuration provider, see
+:ref:`_configuration_information`.
+
+.. _examplegooglecloudstorage:
+
+An example of a JSON file that can be used with Google Cloud Storage
+Centralized Configuration Provider is:
+
+.. code-block:: json
+
+    {
+        "connect_descriptor": "(description=(retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)
+                (host=adb.region.oraclecloud.com))(connect_data=(service_name=dbsvcname))
+                (security=(ssl_server_dn_match=yes)))",
+
+        "user": "scott",
+        "password": {
+            "type": "ocivault",
+            "value": "ocid1.vaultsecret.my-secret-id"
+        },
+        "wallet_location": {
+            "type": "ocivault",
+            "value": "ocid1.vaultwallet.my-wallet-id"
+        },
+        "njs": {
+            "stmtCacheSize": 30,
+            "prefetchRows": 2,
+            "poolMin": 2,
+            "poolMax": 10
+        }
+    }
+
+.. _connstringgcs:
+
+**Google Cloud Storage Centralized Configuration Provider connectString Syntax**
+
+The ``connectString`` parameter for :meth:`oracledb.getConnection()` and
+:meth:`oracledb.createPool()` calls should use a connection string URL in the
+format::
+
+    config-gcpstorage://[project=<projectName>;]bucket=<bucketName>;object=<objectName>
+
+For example, a connection string to access Google Cloud Storage and connect to
+Oracle Database is:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        connectString: "config-gcpstorage://project=my-gcp-project;bucket=my-config-bucket;object=database/config.json"
+    });
+
+The parameters of the connection string URL format are detailed in the table
+below.
+
+.. list-table-with-summary:: Connection String Parameters for Google Cloud Storage
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 15 25 15
+    :name: _connection_string_for_google_cloud_storage
+    :summary: The first row displays the name of the connection string parameter. The second row displays the description of the connection string parameter. The third row displays whether the connection string parameter is required or optional.
+
+    * - Parameter
+      - Description
+      - Required or Optional
+    * - config-gcpstorage
+      - Indicates that the configuration provider is Google Cloud Storage.
+      - Required
+    * - project=<projectName>
+      - The unique identifier of your Google Cloud project. This can be omitted for object download operations that do not require a project.
+      - Optional
+    * - bucket=<bucketName>
+      - The Google Cloud Storage bucket name where the JSON file is stored.
+      - Required
+    * - object=<objectName>
+      - The object name containing the JSON file.
+      - Required
 
 .. _conncaching:
 

@@ -24,6 +24,9 @@ Common Changes
     standalone connections in Thin and Thick modes, and with pools in Thin
     mode.
 
+#)  Added support for :ref:`Google Cloud Storage <googlecloudstorage>`
+    Centralized Configuration Provider.
+
 #)  Added support for OCI Resource Principal authentication with the
     :ref:`OCI Object Storage centralized configuration provider <ociobjstorage>`
     and :ref:`native IAM token-based authentication <cloudnativeauthoci>`.
