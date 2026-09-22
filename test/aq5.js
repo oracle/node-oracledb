@@ -106,7 +106,10 @@ describe('281. aq5.js', function() {
     });
 
     it('281.1.1 subscribe dequeue messages', async function() {
-      // Skipping in Thin mode due to no support for subscription/aq notifs
+      // This test uses classic AQ notifications. Thin supports classic queue
+      // enqueue/dequeue, but notification delivery requires a server-initiated
+      // callback. Thin notification coverage uses client-initiated TxEventQ
+      // (sharded queue) notifications in aq12.js.
       if (oracledb.thin)
         return this.skip();
 

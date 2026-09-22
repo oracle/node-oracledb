@@ -47,6 +47,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added support for client initiated
+    :ref:`Continuous Query Notification (CQN) <cqn>` subscriptions and
+    :ref:`Advanced Queuing (AQ) notifications <aqnotifications>` with
+    Transactional Event Queues, including AQ notification extension metadata.
+
 #)  Added support for reading and setting database
     :ref:`OpenTelemetry <opentelemetry>` trace propagation with the
     :attr:`connection.databaseOpenTelemetryTracing` property.

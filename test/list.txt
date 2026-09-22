@@ -6832,3 +6832,20 @@ Overview of node-oracledb functional tests
     329.21 setter piggybacks on execute roundtrip
     329.22 valid pending setter syncs back even when SQL execution fails
     329.23 setter accepts case-insensitive txnPriority values
+  
+  330. cqn.js
+    330.1 receives a basic CQN notification
+    330.2 returns the registration id for query subscriptions
+    330.3 rejects invalid CQN query registration SQL
+    330.4 rejects invalid and repeated unsubscribe
+    330.5 rejects query registration during an active transaction
+    330.6 SUBSCR_QOS_DEREG_NFY marks notification deregistered
+    330.7 reuses a CQN subscription name to register additional queries
+    330.8 requires client-initiated CQN in Thin mode
+
+  331. aq12.js
+    331.1 subscribes to AQ notifications on a sharded queue
+    331.2 receives two AQ notifications after one subscribe
+    331.3 reuses an AQ subscription name without duplicate delivery
+    331.4 keeps an AQ subscription active after pool release
+    331.5 receives AQ and CQN notifications after pool release

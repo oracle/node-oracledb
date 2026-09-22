@@ -70,8 +70,6 @@ Only node-oracledb :ref:`Thick mode <enablingthick>` supports the use of:
 - The ``transformation`` attribute of :attr:`aqQueue.enqOptions` and
   :attr:`aqQueue.deqOptions` properties
 
-- :ref:`Advanced Queuing Notifications <aqnotifications>`
-
 - Visibility constant
   :ref:`oracledb.AQ_VISIBILITY_IMMEDIATE <oracledbconstantsaq>` in
   :meth:`aqQueue.enqMany()` and :meth:`aqQueue.deqMany()` methods
@@ -735,8 +733,23 @@ there are messages to dequeue.
 
 .. note::
 
-    In this release, Advanced Queuing Notifications is only supported in
-    node-oracledb :ref:`Thick mode <enablingthick>`.
+    In node-oracledb Thin mode, Advanced Queuing Notifications are supported
+    with Transactional Event Queues. Thick mode supports AQ notifications with
+    both classic queues and Transactional Event Queues.
+
+AQ notification messages include the message identifier ``msgId``, and may
+also include AQ extension metadata such as ``originalMsgId``,
+``senderAgentName``, ``senderAgentAddress``, and ``senderAgentProtocol``, when
+these values are provided by the database. See
+:ref:`message parameter properties <messageparam>` for more information on
+these properties.
+
+To use Advanced Queuing Notifications with Transactional Event Queues, you
+must set the :ref:`clientInitiated <consubscribeoptclientinitiated>` option of
+:meth:`connection.subscribe()` to *true*. This property requires Oracle
+Database 19.4 or later. When ``clientInitiated`` is *true*, notifications use
+a client-initiated connection to the database and do not require the database
+to connect back to the application.
 
 To subscribe to a queue, pass its name to ``subscribe()`` and set the
 :ref:`namespace <consubscribeoptnamespace>` option to
@@ -748,6 +761,7 @@ To subscribe to a queue, pass its name to ``subscribe()`` and set the
 
     const subscrOptions = {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
+        clientInitiated: true,    // must specify in Thin mode
         callback: ProcessAqMessage
     };
 
@@ -765,13 +779,19 @@ To subscribe to a queue, pass its name to ``subscribe()`` and set the
     await connection.subscribe(queueName, subscrOptions);
     await connection.close();
 
-    await connection.unsubscribe(queueName); // unsubscribes from a queue
+The connection used to create a subscription can be released to a pool. The
+subscription remains active until it is explicitly unregistered. To unregister
+it, acquire a connection to the same database with the same credentials and
+call ``unsubscribe()``. For example:
+
+.. code-block:: javascript
+
+    const unsubscribeConnection = await oracledb.getConnection();
+    await unsubscribeConnection.unsubscribe(queueName);
+    await unsubscribeConnection.close();
 
 See :ref:`Continuous Query Notification (CQN) <cqn>` for more information
 about subscriptions and notifications.
-
-AQ notifications require the same configuration as CQN. Specifically the
-database must be able to connect back to node-oracledb.
 
 .. _aqrecipientlists:
 

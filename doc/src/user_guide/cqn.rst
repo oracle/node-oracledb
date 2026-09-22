@@ -13,11 +13,6 @@ interested in knowing if a table used for lookup data has changed so
 that the application can update a local cache of that table. CQN can
 invoke a JavaScript method, which can perform the action.
 
-.. note::
-
-    In this release, CQN is only supported in node-oracledb Thick mode. See
-    :ref:`enablingthick`.
-
 CQN is suitable for infrequently modified tables. It is recommended to
 avoid frequent subscription and unsubscription.
 
@@ -31,17 +26,20 @@ options can include an :ref:`ipAddress <consubscribeoptipaddress>` and
 :ref:`port <consubscribeoptport>` on which to listen for notifications,
 otherwise the database chooses values.
 
-Alternatively, when using Oracle Database and Oracle client libraries
-19.4, or later, subscriptions can set the optional
-:ref:`clientInitiated <consubscribeoptclientinitiated>` property to
-*true*. This makes CQN internally use the same approach as normal
-connections to the database, and does not require the database to be
-able to connect back to the application. Since client initiated CQN
-notifications do not need additional network configuration, they have
-ease-of-use and security advantages.
+In node-oracledb Thin mode, CQN requires the
+:ref:`clientInitiated <consubscribeoptclientinitiated>` option of
+:meth:`connection.subscribe()` to be set to *true*. This property requires
+Oracle Database 19.4 or later. For node-oracledb Thick mode, Oracle Client
+19.4 or later is additionally required. Using this property makes CQN
+internally use the same approach as normal connections to the database, and
+does not require the database to be able to connect back to the application.
+Since client initiated CQN notifications do not need additional network
+configuration, they have ease-of-use and security advantages.
 
-To register interest in database changes, the connection must be created
-with :attr:`oracledb.events` mode *true*. Then the
+To register interest in database changes, Thick mode connections must be
+created by setting :attr:`oracledb.events` mode to *true*. The Thin mode
+client-initiated CQN does not use this property because it creates a separate
+EMON (Event Monitor) connection to receive notifications. Then the
 :meth:`connection.subscribe()` method is passed an
 arbitrary name and an :ref:`options <consubscribeoptions>` object that
 controls notification. In particular ``options`` contains a valid SQL
@@ -53,7 +51,7 @@ query and a JavaScript callback:
         user          : "hr",
         password      : mypw,  // mypw contains the hr schema password
         connectString : "localhost/FREEPDB1",
-        events        : true
+        events        : !oracledb.thin // required in Thick mode only
     });
 
     function myCallback(message) {
@@ -61,9 +59,9 @@ query and a JavaScript callback:
     }
 
     const options = {
-        sql      : `SELECT * FROM mytable`,  // query of interest
-        callback : myCallback                // method called by notifications
-        clientInitiated : true               // For Oracle DB & Client 19.4 or later
+        sql             : `SELECT * FROM mytable`,  // query of interest
+        callback        : myCallback,  // method called by notifications
+        clientInitiated : true         // Database 19.4+, and Client 19.4+ in Thick mode
     };
 
     await connection.subscribe('mysub', options);
@@ -97,6 +95,11 @@ from the ``connection.subscribe()`` callback parameter. In the database view
 
 When notifications are no longer required, the subscription name can be
 passed to :meth:`connection.unsubscribe()`.
+
+The connection used to create a subscription can be released to a pool. The
+subscription remains active until it is explicitly unregistered. To unregister
+it, acquire a connection to the same database with the same credentials and
+call :meth:`connection.unsubscribe()`.
 
 By default, object-level (previously known as Database Change
 Notification) occurs and the JavaScript notification method is invoked

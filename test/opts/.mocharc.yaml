@@ -311,3 +311,5 @@ spec:
   - test/dbObject22.js
   - test/endUserSecurityContext.js
   - test/txnPriority.js
+  - test/cqn.js
+  - test/aq12.js

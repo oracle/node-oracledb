@@ -2760,13 +2760,19 @@ Connection Methods
     in the database by any committed transaction, or when there are Advanced
     Queuing messages to be dequeued.
 
-    For notification to work, the connection must be created with
-    :attr:`oracledb.events` mode *true*.
+    In node-oracledb Thick mode, connections must be created with the
+    :attr:`oracledb.events` mode set to *true*. Server-initiated notifications
+    are only supported in Thick mode. For these notifications, the database
+    must be able to connect to the node-oracledb machine. Typically this means
+    that the machine running node-oracledb needs a fixed IP address. If there
+    is any problem sending a notification, then the callback method will not
+    be invoked.
 
-    The database must be able to connect to the node-oracledb machine for
-    notifications to be received. Typically this means that the machine
-    running node-oracledb needs a fixed IP address. If there is any problem
-    sending a notification, then the callback method will not be invoked.
+    In Thin mode, the :ref:`clientInitiated <consubscribeoptclientinitiated>`
+    option of ``connection.subscribe()`` must be set to *true*. It creates a
+    separate client-initiated EMON (Event Monitor) connection for
+    notifications and does not use :attr:`oracledb.events` or require the
+    database to connect back to the application.
 
     The ``connection.subscribe()`` method may be called multiple times with
     the same ``name``, as long as the same connection is used. In this case,
@@ -2843,13 +2849,13 @@ Connection Methods
           - Boolean
           - .. _consubscribeoptclientinitiated:
 
-            This property enables CQN “client initiated” connections which internally use the same approach as normal connections to the database, and do not require the database to be able to connect back to the application. Since client initiated connections do not need additional network configuration, they have ease-of-use and security advantages.
+            This property enables “client initiated” CQN and AQ notification connections which internally use the same approach as normal connections to the database, and do not require the database to be able to connect back to the application. Since client initiated connections do not need additional network configuration, they have ease-of-use and security advantages. This property must be specified in node-oracledb Thin mode.
 
             The default is *false*.
 
             .. versionadded:: 4.2
 
-            It is available when Oracle Database and the Oracle Client libraries are version 19.4 or higher.
+            This property is available with Oracle Database 19.4, and later. For Thick mode, you must additionally use Oracle Client 19.4 or later.
         * - ``groupingClass``
           - Number
           - .. _consubscribeoptgroupingclass:
@@ -2921,6 +2927,18 @@ Connection Methods
           - Description
         * - ``dbName``
           - The name of the database which sent a notification. This property is only defined for CQN. It is not defined when ``type`` is :ref:`oracledb.SUBSCR_EVENT_TYPE_DEREG <oracledbconstantssubscription>`.
+        * - ``consumerName``
+          - The consumer name for Advanced Queuing notifications. Undefined for CQN.
+
+            .. versionadded:: 7.1
+        * - ``msgId``
+          - A Buffer containing the Advanced Queuing message identifier. Undefined for CQN.
+
+            .. versionadded:: 7.1
+        * - ``originalMsgId``
+          - A Buffer containing the original Advanced Queuing message identifier, if provided by the database. Undefined for CQN.
+
+            .. versionadded:: 7.1
         * - ``queueName``
           - The name of the Advanced Queue. Undefined for CQN.
 
@@ -2935,6 +2953,24 @@ Connection Methods
             .. versionadded:: 6.7
         * - ``registered``
           - A boolean indicating whether the subscription is registered with the database. Will be *false* if ``type`` is :ref:`oracledb.SUBSCR_EVENT_TYPE_DEREG <oracledbconstantssubscription>` or if the subscription was created with the :ref:`qos <consubscribeoptqos>` property set to :ref:`oracledb.SUBSCR_QOS_DEREG_NFY <oracledbconstantssubscription>`.
+        * - ``senderAgentAddress``
+          - The Advanced Queuing sender agent address, if provided by the database. Undefined for CQN.
+
+            This property is only supported in node-oracledb Thin mode.
+
+            .. versionadded:: 7.1
+        * - ``senderAgentName``
+          - The Advanced Queuing sender agent name, if provided by the database. Undefined for CQN.
+
+            This property is only supported in node-oracledb Thin mode.
+
+            .. versionadded:: 7.1
+        * - ``senderAgentProtocol``
+          - The Advanced Queuing sender agent protocol, if provided by the database. Undefined for CQN.
+
+            This property is only supported in node-oracledb Thin mode.
+
+            .. versionadded:: 7.1
         * - ``tables``
           - An array of objects specifying the tables which were affected by the notification. This is only defined if ``type`` is :ref:`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE <oracledbconstantssubscription>`.
             It contains the following properties:
