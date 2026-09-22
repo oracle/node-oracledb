@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -493,20 +493,20 @@ describe('80. lobBindAsStringBuffer.js', function() {
       const bigStr = random.getRandomString(size, specialStr);
       const clob = await connection.createLob(oracledb.CLOB);
       const inStream = Readable.from([bigStr]);
-      inStream.pipe(clob);
       await new Promise((resolve, reject) => {
         inStream.on("error", reject);
         clob.on("error", reject);
         clob.on("finish", resolve);
+        inStream.pipe(clob);
       });
       const bufferStr = Buffer.from(bigStr, "utf-8");
       const blob = await connection.createLob(oracledb.CLOB);
       const inStream2 = Readable.from([bufferStr]);
-      inStream2.pipe(blob);
       await new Promise((resolve, reject) => {
-        inStream.on("error", reject);
+        inStream2.on("error", reject);
         blob.on("error", reject);
         blob.on("finish", resolve);
+        inStream2.pipe(blob);
       });
 
       const bindVar = {

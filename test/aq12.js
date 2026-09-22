@@ -113,15 +113,7 @@ describe('331. aq12.js', function() {
         );
       END;
     `;
-    try {
-      await conn.execute(plsql);
-    } catch (err) {
-      // Some databases have a lower compatible setting that prevents creating
-      // sharded queues.
-      if (err.message.includes('ORA-24081:'))
-        this.skip();
-      throw err;
-    }
+    await conn.execute(plsql);
     await conn.commit();
   });
 
@@ -155,43 +147,32 @@ describe('331. aq12.js', function() {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
         clientInitiated: true,
         callback(message) {
-          try {
-            verifyAqNotification(message);
-            clearTimeout(timeout);
-            resolveNotification(message);
-          } catch (err) {
-            clearTimeout(timeout);
-            rejectNotification(err);
-          }
+          verifyAqNotification(message);
+          clearTimeout(timeout);
+          resolveNotification(message);
         },
         timeout: 10
       };
 
-      try {
-        // Start empty so an earlier message cannot satisfy this notification.
-        const queue = await workConn.getQueue(queueName);
-        queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
-        while (await queue.deqOne()) {
-          // dequeue until empty
-        }
-        await workConn.commit();
-
-        await conn.subscribe(queueName, options);
-        isSubscribed = true;
-        const enqMessage = await queue.enqOne('This is my message');
-        await workConn.commit();
-
-        const message = await notification;
-        assert.deepStrictEqual(message.msgId, enqMessage.msgId);
-      } finally {
-        clearTimeout(timeout);
-        try {
-          if (isSubscribed)
-            await conn.unsubscribe(queueName);
-        } finally {
-          await workConn.close();
-        }
+      // Start empty so an earlier message cannot satisfy this notification.
+      const queue = await workConn.getQueue(queueName);
+      queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+      while (await queue.deqOne()) {
+        // dequeue until empty
       }
+      await workConn.commit();
+
+      await conn.subscribe(queueName, options);
+      isSubscribed = true;
+      const enqMessage = await queue.enqOne('This is my message');
+      await workConn.commit();
+
+      const message = await notification;
+      assert.deepStrictEqual(message.msgId, enqMessage.msgId);
+      clearTimeout(timeout);
+      if (isSubscribed)
+        await conn.unsubscribe(queueName);
+      await workConn.close();
     }); // 331.1
 
   it('331.2 receives two AQ notifications after one subscribe',
@@ -222,53 +203,41 @@ describe('331. aq12.js', function() {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
         clientInitiated: true,
         callback(message) {
-          try {
-            verifyAqNotification(message);
-            messages.push(message);
-            if (messages.length === 1) {
-              resolveFirst(message);
-            } else if (messages.length === 2) {
-              clearTimeout(timeout);
-              resolveAll(messages);
-            }
-          } catch (err) {
+          verifyAqNotification(message);
+          messages.push(message);
+          if (messages.length === 1) {
+            resolveFirst(message);
+          } else if (messages.length === 2) {
             clearTimeout(timeout);
-            rejectFirst(err);
-            rejectAll(err);
+            resolveAll(messages);
           }
         },
         timeout: 10
       };
 
-      try {
-        const drainQueue = await workConn.getQueue(queueName);
-        drainQueue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
-        while (await drainQueue.deqOne()) {
-          // dequeue until empty
-        }
-        await workConn.commit();
-
-        const queue = await workConn.getQueue(queueName);
-        await conn.subscribe(queueName, options);
-        isSubscribed = true;
-        await queue.enqOne('AQ notification lifecycle message 1');
-        await workConn.commit();
-        await firstNotification;
-
-        // The same subscription must receive the next enqueue without a
-        // second subscribe() call; dequeue behavior is tested separately.
-        await queue.enqOne('AQ notification lifecycle message 2');
-        await workConn.commit();
-        await allNotifications;
-      } finally {
-        clearTimeout(timeout);
-        try {
-          if (isSubscribed)
-            await conn.unsubscribe(queueName);
-        } finally {
-          await workConn.close();
-        }
+      const drainQueue = await workConn.getQueue(queueName);
+      drainQueue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
+      while (await drainQueue.deqOne()) {
+        // dequeue until empty
       }
+      await workConn.commit();
+
+      const queue = await workConn.getQueue(queueName);
+      await conn.subscribe(queueName, options);
+      isSubscribed = true;
+      await queue.enqOne('AQ notification lifecycle message 1');
+      await workConn.commit();
+      await firstNotification;
+
+      // The same subscription must receive the next enqueue without a
+      // second subscribe() call; dequeue behavior is tested separately.
+      await queue.enqOne('AQ notification lifecycle message 2');
+      await workConn.commit();
+      await allNotifications;
+      clearTimeout(timeout);
+      if (isSubscribed)
+        await conn.unsubscribe(queueName);
+      await workConn.close();
     }); // 331.2
 
   it('331.3 reuses an AQ subscription name without duplicate delivery',
@@ -286,35 +255,28 @@ describe('331. aq12.js', function() {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
         clientInitiated: true,
         callback(message) {
-          try {
-            verifyAqNotification(message);
-            notificationCount++;
-            resolveNotification(message);
-          } catch (err) {
-            rejectNotification(err);
-          }
+          verifyAqNotification(message);
+          notificationCount++;
+          resolveNotification(message);
         },
         timeout: 300
       };
 
       await conn.subscribe(queueName2, options);
-      try {
-        await conn.subscribe(queueName2, {
-          ...options,
-          callback() {
-            assert.fail('the original callback must be reused');
-          }
-        });
-        const queue = await conn.getQueue(queueName2);
-        await queue.enqOne('One notification only');
-        await conn.commit();
-        await notification;
-        await testsUtil.sleep(500);
-        assert.strictEqual(notificationCount, 1);
-      } finally {
-        clearTimeout(timeout);
-        await conn.unsubscribe(queueName2);
-      }
+      await conn.subscribe(queueName2, {
+        ...options,
+        callback() {
+          assert.fail('the original callback must be reused');
+        }
+      });
+      const queue = await conn.getQueue(queueName2);
+      await queue.enqOne('One notification only');
+      await conn.commit();
+      await notification;
+      await testsUtil.sleep(500);
+      assert.strictEqual(notificationCount, 1);
+      clearTimeout(timeout);
+      await conn.unsubscribe(queueName2);
     }); // 331.3
 
   it('331.4 keeps an AQ subscription active after pool release',
@@ -327,7 +289,7 @@ describe('331. aq12.js', function() {
         poolMax: 2,
         events: !oracledb.thin
       });
-      let subscribeConn, workConn, isSubscribed = false;
+      let subscribeConn, isSubscribed = false;
       let resolveNotification, rejectNotification;
       const notification = new Promise((resolve, reject) => {
         resolveNotification = resolve;
@@ -340,46 +302,38 @@ describe('331. aq12.js', function() {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
         clientInitiated: true,
         callback(message) {
-          try {
-            verifyAqNotification(message);
-            clearTimeout(timeout);
-            resolveNotification(message);
-          } catch (err) {
-            clearTimeout(timeout);
-            rejectNotification(err);
-          }
+          verifyAqNotification(message);
+          clearTimeout(timeout);
+          resolveNotification(message);
         },
         timeout: 300
       };
 
-      try {
-        subscribeConn = await pool.getConnection();
-        await subscribeConn.subscribe(queueName, options);
-        isSubscribed = true;
-        await subscribeConn.close();
-        subscribeConn = null;
-        await testsUtil.sleep(500);
+      subscribeConn = await pool.getConnection();
+      await subscribeConn.subscribe(queueName, options);
+      isSubscribed = true;
+      await subscribeConn.close();
+      subscribeConn = null;
+      await testsUtil.sleep(500);
 
-        workConn = await pool.getConnection();
-        const queue = await workConn.getQueue(queueName);
-        await queue.enqOne('AQ subscription after pool release');
-        await workConn.commit();
-        await notification;
-        await workConn.unsubscribe(queueName);
-        isSubscribed = false;
-      } finally {
-        clearTimeout(timeout);
-        if (subscribeConn) {
-          await subscribeConn.close();
-        }
-        if (workConn) {
-          if (isSubscribed) {
-            await workConn.unsubscribe(queueName);
-          }
-          await workConn.close();
-        }
-        await pool.close();
+      const workConn = await pool.getConnection();
+      const queue = await workConn.getQueue(queueName);
+      await queue.enqOne('AQ subscription after pool release');
+      await workConn.commit();
+      await notification;
+      await workConn.unsubscribe(queueName);
+      isSubscribed = false;
+      clearTimeout(timeout);
+      if (subscribeConn) {
+        await subscribeConn.close();
       }
+      if (workConn) {
+        if (isSubscribed) {
+          await workConn.unsubscribe(queueName);
+        }
+        await workConn.close();
+      }
+      await pool.close();
     }); // 331.4
 
   it('331.5 receives AQ and CQN notifications after pool release',
@@ -395,7 +349,7 @@ describe('331. aq12.js', function() {
         connectString: dbConfig.connectString,
         privilege: oracledb.SYSDBA
       };
-      let subscribeConn, workConn, pool;
+      let subscribeConn;
       let cqnTableCreated = false;
       let aqSubscribed = false;
       let cqnSubscribed = false;
@@ -414,98 +368,87 @@ describe('331. aq12.js', function() {
         rejectCqn(err);
       }, 10000);
 
-      try {
-        const dbaConn = await oracledb.getConnection(dbaCredential);
-        await dbaConn.execute(`GRANT CHANGE NOTIFICATION TO ${AQ_USER}`);
-        await dbaConn.close();
-        await conn.execute(`CREATE TABLE ${cqnTableName} (id NUMBER)`);
-        cqnTableCreated = true;
-        await conn.commit();
+      const dbaConn = await oracledb.getConnection(dbaCredential);
+      await dbaConn.execute(`GRANT CHANGE NOTIFICATION TO ${AQ_USER}`);
+      await dbaConn.close();
+      await conn.execute(`CREATE TABLE ${cqnTableName} (id NUMBER)`);
+      cqnTableCreated = true;
+      await conn.commit();
 
-        pool = await oracledb.createPool({
-          user: AQ_USER,
-          password: AQ_USER_PWD,
-          connectString: dbConfig.connectString,
-          poolMin: 0,
-          poolMax: 2,
-          events: !oracledb.thin
-        });
-        subscribeConn = await pool.getConnection();
+      const pool = await oracledb.createPool({
+        user: AQ_USER,
+        password: AQ_USER_PWD,
+        connectString: dbConfig.connectString,
+        poolMin: 0,
+        poolMax: 2,
+        events: !oracledb.thin
+      });
+      subscribeConn = await pool.getConnection();
 
-        // Create the AQ subscription on the original pooled connection.
-        await subscribeConn.subscribe(queueName3, {
-          namespace: oracledb.SUBSCR_NAMESPACE_AQ,
-          clientInitiated: true,
-          callback(message) {
-            try {
-              verifyAqNotification(message);
-              resolveAq(message);
-            } catch (err) {
-              rejectAq(err);
-            }
-          },
-          timeout: 300
-        });
-        aqSubscribed = true;
+      // Create the AQ subscription on the original pooled connection.
+      await subscribeConn.subscribe(queueName3, {
+        namespace: oracledb.SUBSCR_NAMESPACE_AQ,
+        clientInitiated: true,
+        callback(message) {
+          verifyAqNotification(message);
+          resolveAq(message);
+        },
+        timeout: 300
+      });
+      aqSubscribed = true;
 
-        // Create the CQN subscription on that same pooled connection.
-        await subscribeConn.subscribe(cqnSubName, {
-          callback(message) {
-            try {
-              assert.strictEqual(message.type,
-                oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
-              assert.strictEqual(message.registered, true);
-              resolveCqn(message);
-            } catch (err) {
-              rejectCqn(err);
-            }
-          },
-          clientInitiated: true,
-          qos: oracledb.SUBSCR_QOS_QUERY,
-          sql: `SELECT * FROM ${cqnTableName}`,
-          timeout: 300
-        });
-        cqnSubscribed = true;
+      // Create the CQN subscription on that same pooled connection.
+      await subscribeConn.subscribe(cqnSubName, {
+        callback(message) {
+          assert.strictEqual(message.type,
+            oracledb.SUBSCR_EVENT_TYPE_QUERY_CHANGE);
+          assert.strictEqual(message.registered, true);
+          resolveCqn(message);
+        },
+        clientInitiated: true,
+        qos: oracledb.SUBSCR_QOS_QUERY,
+        sql: `SELECT * FROM ${cqnTableName}`,
+        timeout: 300
+      });
+      cqnSubscribed = true;
 
-        // Release the original pooled connection. Both subscriptions must
-        // remain active after the connection is returned to the pool.
+      // Release the original pooled connection. Both subscriptions must
+      // remain active after the connection is returned to the pool.
+      await subscribeConn.close();
+      subscribeConn = null;
+      await testsUtil.sleep(1000);
+
+      // Trigger AQ and CQN notifications using a different pool checkout.
+      const workConn = await pool.getConnection();
+      const queue = await workConn.getQueue(queueName3);
+      await queue.enqOne('AQ and CQN after pool release');
+      await workConn.execute(`INSERT INTO ${cqnTableName} VALUES (1)`);
+      await workConn.commit();
+      await Promise.all([aqNotification, cqnNotification]);
+
+      // Explicitly remove both subscriptions before closing the pool.
+      await workConn.unsubscribe(queueName3);
+      aqSubscribed = false;
+      await workConn.unsubscribe(cqnSubName);
+      cqnSubscribed = false;
+      clearTimeout(timeout);
+      if (subscribeConn) {
         await subscribeConn.close();
-        subscribeConn = null;
-        await testsUtil.sleep(1000);
-
-        // Trigger AQ and CQN notifications using a different pool checkout.
-        workConn = await pool.getConnection();
-        const queue = await workConn.getQueue(queueName3);
-        await queue.enqOne('AQ and CQN after pool release');
-        await workConn.execute(`INSERT INTO ${cqnTableName} VALUES (1)`);
-        await workConn.commit();
-        await Promise.all([aqNotification, cqnNotification]);
-
-        // Explicitly remove both subscriptions before closing the pool.
-        await workConn.unsubscribe(queueName3);
-        aqSubscribed = false;
-        await workConn.unsubscribe(cqnSubName);
-        cqnSubscribed = false;
-      } finally {
-        clearTimeout(timeout);
-        if (subscribeConn) {
-          await subscribeConn.close();
+      }
+      if (workConn) {
+        if (aqSubscribed) {
+          await workConn.unsubscribe(queueName3);
         }
-        if (workConn) {
-          if (aqSubscribed) {
-            await workConn.unsubscribe(queueName3);
-          }
-          if (cqnSubscribed) {
-            await workConn.unsubscribe(cqnSubName);
-          }
-          await workConn.close();
+        if (cqnSubscribed) {
+          await workConn.unsubscribe(cqnSubName);
         }
-        if (pool) {
-          await pool.close();
-        }
-        if (cqnTableCreated) {
-          await conn.execute(`DROP TABLE ${cqnTableName} PURGE`);
-        }
+        await workConn.close();
+      }
+      if (pool) {
+        await pool.close();
+      }
+      if (cqnTableCreated) {
+        await conn.execute(`DROP TABLE ${cqnTableName} PURGE`);
       }
     }); // 331.5
 

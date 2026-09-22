@@ -193,7 +193,7 @@ describe('309. dataTypeVector7.js', function() {
             VALUES(${id}, :1)`, [sparsevec]);
       let result = await connection.execute(`SELECT SparseVector64Col FROM ${tableName}`);
       let dense = result.rows[0][0].dense();
-      assert.deepStrictEqual(result.rows[0][0].dense(), new Float64Array([0, 1, 0, 3.4]));
+      assert.deepStrictEqual(dense, new Float64Array([0, 1, 0, 3.4]));
       assert.deepStrictEqual(result.metaData[0], metaDataFloat64);
 
       sparsevec = new oracledb.SparseVector({values: regFloatArray, indices: [1, 3], numDimensions: 4});
@@ -205,7 +205,7 @@ describe('309. dataTypeVector7.js', function() {
             VALUES(${id}, :1)`, [sparsevec]);
       result = await connection.execute(`SELECT SparseVector64Col FROM ${tableName} where IntCol = ${id}`);
       dense = result.rows[0][0].dense();
-      assert.deepStrictEqual(result.rows[0][0].dense(), new Float64Array([0, 1, 0, 3.4]));
+      assert.deepStrictEqual(dense, new Float64Array([0, 1, 0, 3.4]));
       assert.deepStrictEqual(result.metaData[0], metaDataFloat64);
 
       // Allow indices and values property as typedArray should work.
@@ -220,7 +220,7 @@ describe('309. dataTypeVector7.js', function() {
             VALUES(${id}, :1)`, [sparsevec]);
       result = await connection.execute(`SELECT SparseVector64Col FROM ${tableName} where IntCol = ${id}`);
       dense = result.rows[0][0].dense();
-      assert.deepStrictEqual(result.rows[0][0].dense(), new Float64Array([0, 1, 0, 3.4]));
+      assert.deepStrictEqual(dense, new Float64Array([0, 1, 0, 3.4]));
       assert.deepStrictEqual(result.metaData[0], metaDataFloat64);
 
       // Allow indices property as typedArray and values as regular Array should work.
@@ -235,7 +235,7 @@ describe('309. dataTypeVector7.js', function() {
             VALUES(${id}, :1)`, [sparsevec]);
       result = await connection.execute(`SELECT SparseVector64Col FROM ${tableName} where IntCol = ${id}`);
       dense = result.rows[0][0].dense();
-      assert.deepStrictEqual(result.rows[0][0].dense(), new Float64Array([0, 1, 0, 3.4]));
+      assert.deepStrictEqual(dense, new Float64Array([0, 1, 0, 3.4]));
       assert.deepStrictEqual(result.metaData[0], metaDataFloat64);
     }); // 309.1.2
 
@@ -1435,7 +1435,7 @@ describe('309. dataTypeVector7.js', function() {
           VALUES(${id}, :1)`, [sparsevec]);
       let result = await connection.execute(`SELECT SparseVector8Col FROM ${tableName}`);
       let dense = result.rows[0][0].dense();
-      assert.deepStrictEqual(result.rows[0][0].dense(), new Int8Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34]));
+      assert.deepStrictEqual(dense, new Int8Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34]));
       assert.deepStrictEqual(result.metaData[0], metaDataInt8);
 
       sparsevec = new oracledb.SparseVector({
@@ -1453,7 +1453,7 @@ describe('309. dataTypeVector7.js', function() {
           VALUES(${id}, :1)`, [sparsevec]);
       result = await connection.execute(`SELECT SparseVector8Col FROM ${tableName} where IntCol = ${id}`);
       dense = result.rows[0][0].dense();
-      assert.deepStrictEqual(result.rows[0][0].dense(), new Int8Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34]));
+      assert.deepStrictEqual(dense, new Int8Array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34]));
       assert.deepStrictEqual(result.metaData[0], metaDataInt8);
     }); // 309.3.8
 

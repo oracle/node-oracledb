@@ -311,10 +311,9 @@ describe('67. poolCache.js', function() {
 
     it('67.3.8 works if poolAttrs.poolAlias is undefined', async function() {
       const config = {...dbConfig, poolAlias: undefined};
-      let pool = await oracledb.createPool(config);
+      const pool = await oracledb.createPool(config);
       assert.strictEqual(pool.poolAlias, "default");
       await pool.close(0);
-      pool = null;
     });
   }); // 67.3
 

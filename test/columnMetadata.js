@@ -338,7 +338,7 @@ describe('9. columnMetadata.js', function() {
       values.fill(clobStr, 0, column_size);
       binds.fill(values, 0, numRows);
       const sql = `INSERT INTO nodb_large_columns VALUES (${bindNames})`;
-      result = await connection.executeMany(sql, binds);
+      await connection.executeMany(sql, binds);
 
       // Issue second select with rows in table.
       result = await connection.execute(sqlSelect);

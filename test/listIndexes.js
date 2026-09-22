@@ -67,7 +67,7 @@ describe('286. listIndexes.js', function() {
     const collection = await soda.createCollection("soda_test_285_1");
     const fetchedIndexArr = await collection.listIndexes();
     assert.strictEqual(fetchedIndexArr.length, 0);
-    collection.drop();
+    await collection.drop();
   });
 
 
@@ -89,7 +89,7 @@ describe('286. listIndexes.js', function() {
     const fetchedIndexArr = await collection.listIndexes();
     assert.strictEqual(fetchedIndexArr.length, 1);
     assert.strictEqual(fetchedIndexArr[0].name, indexSpec.name);
-    collection.drop();
+    await collection.drop();
   });
 
   it('286.3 listIndexes after 2-createIndex', async () => {
@@ -131,7 +131,7 @@ describe('286. listIndexes.js', function() {
     assert.strictEqual(fetchedIndexArr[0].name, indexArr[0].name);
     assert.strictEqual(fetchedIndexArr[1].name, indexArr[1].name);
 
-    collection.drop();
+    await collection.drop();
   });
 
   it('286.4 listIndexes after 2-createIndex 1 drop index', async () => {
@@ -167,7 +167,7 @@ describe('286. listIndexes.js', function() {
     const fetchedIndexArr = await collection.listIndexes();
     assert.strictEqual(fetchedIndexArr.length, 1);
     assert.strictEqual(fetchedIndexArr[0].name, indexSpec1.name);
-    collection.drop();
+    await collection.drop();
   });
 
 
@@ -201,7 +201,7 @@ describe('286. listIndexes.js', function() {
 
     const fetchedIndexArr = await collection.listIndexes();
     assert.strictEqual(fetchedIndexArr.length, 0);
-    collection.drop();
+    await collection.drop();
   });
 
 
@@ -256,7 +256,7 @@ describe('286. listIndexes.js', function() {
     assert.strictEqual(fetchedIndexArr[1].name, indexArr[1].name);
     assert.strictEqual(fetchedIndexArr[2].name, indexArr[2].name);
 
-    collection.drop();
+    await collection.drop();
   });
 
 });

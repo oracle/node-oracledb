@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -86,17 +86,15 @@ describe('10. nullColumnValues.js', function() {
 
   it('10.1 a simple query for null value', async function() {
     assert(connection);
-    let result = null;
 
-    result = await connection.execute("SELECT null FROM DUAL");
-
+    const result = await connection.execute("SELECT null FROM DUAL");
     assert.deepStrictEqual(result.rows[0], [null]);
   });
 
   it('10.2 in-bind for null column value', async function() {
     assert(connection);
-    let result = null;
-    result = await connection.execute(
+
+    let result = await connection.execute(
       "INSERT INTO nodb_nullcol_dept VALUES(:did, :dname, :mid, :mname)",
       {
         did: 101,
@@ -119,14 +117,14 @@ describe('10. nullColumnValues.js', function() {
 
   it('10.3 out-bind for null column value', async function() {
     assert(connection);
-    let result = null;
+
     const proc = "CREATE OR REPLACE PROCEDURE nodb_testproc (p_out OUT VARCHAR2) \
                 AS \
                 BEGIN \
                   p_out := ''; \
                 END;";
     await connection.execute(proc);
-    result = await connection.execute(
+    const result = await connection.execute(
       "BEGIN nodb_testproc(:o); END;",
       {
         o: { type: oracledb.STRING, dir: oracledb.BIND_OUT }
@@ -137,9 +135,8 @@ describe('10. nullColumnValues.js', function() {
 
   it('10.4 DML Returning for null column value', async function() {
     assert(connection);
-    let result = null;
 
-    result = await connection.execute(
+    const result = await connection.execute(
       "UPDATE nodb_nullcol_dept SET department_name = :dname, \
         manager_id = :mid WHERE department_id = :did \
         RETURNING department_id, department_name, manager_id INTO \
@@ -162,7 +159,6 @@ describe('10. nullColumnValues.js', function() {
 
   it('10.5 resultSet for null value', async function() {
     assert(connection);
-    let result = null;
 
     await connection.execute(
       "UPDATE nodb_nullcol_dept SET department_name = :dname, \
@@ -173,7 +169,7 @@ describe('10. nullColumnValues.js', function() {
         did: 50
       },
       { autoCommit: true });
-    result = await connection.execute(
+    const result = await connection.execute(
       "SELECT * FROM nodb_nullcol_dept WHERE department_id = :1",
       [50],
       { resultSet: true });

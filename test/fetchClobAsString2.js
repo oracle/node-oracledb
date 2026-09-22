@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1574,9 +1574,7 @@ describe('85. fetchClobAsString2.js', function() {
       const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
 
-      let resultVal = row[0][1];
-      compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1][1];
+      compareStrings(row[0][1], specialStr_1, content_1, contentLength_1);
       oracledb.maxRows = maxRowsBak;
       await result.resultSet.close();
     }); // 85.5.12
@@ -1609,9 +1607,7 @@ describe('85. fetchClobAsString2.js', function() {
       const row = await result.resultSet.getRows(rowNumFetched);
       assert.strictEqual(row.length, 2);
 
-      let resultVal = row[0][1];
-      compareStrings(resultVal, specialStr_1, content_1, contentLength_1);
-      resultVal = row[1][1];
+      compareStrings(row[0][1], specialStr_1, content_1, contentLength_1);
       oracledb.maxRows = maxRowsBak;
       await result.resultSet.close();
     }); // 85.5.13

@@ -77,18 +77,12 @@ describe('330. cqn.js', function() {
         if (settled) {
           return;
         }
-        try {
-          verifyMessage(message, messages.length);
-          messages.push(message);
-          if (messages.length === expectedCount) {
-            settled = true;
-            clearTimeout(timeout);
-            resolveWait(messages);
-          }
-        } catch (err) {
+        verifyMessage(message, messages.length);
+        messages.push(message);
+        if (messages.length === expectedCount) {
           settled = true;
           clearTimeout(timeout);
-          rejectWait(err);
+          resolveWait(messages);
         }
       },
       wait() {
@@ -172,25 +166,22 @@ describe('330. cqn.js', function() {
       assert(table.operation & oracledb.CQN_OPCODE_INSERT);
     });
 
-    try {
-      await subscribeWithDefaults(subName, {
-        callback: notifications.callback,
-        sql: `SELECT * FROM ${tableName}`,
-        timeout: 20,
-        qos: oracledb.SUBSCR_QOS_QUERY
-      });
-      isSubscribed = true;
-      await testsUtil.sleep(500);
+    await subscribeWithDefaults(subName, {
+      callback: notifications.callback,
+      sql: `SELECT * FROM ${tableName}`,
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY
+    });
+    isSubscribed = true;
+    await testsUtil.sleep(500);
 
-      await conn.execute(`INSERT INTO ${tableName} VALUES (1)`);
-      await conn.commit();
-      await notifications.wait();
-    } finally {
-      if (isSubscribed) {
-        await conn.unsubscribe(subName);
-      }
-      await testsUtil.dropTable(conn, tableName);
+    await conn.execute(`INSERT INTO ${tableName} VALUES (1)`);
+    await conn.commit();
+    await notifications.wait();
+    if (isSubscribed) {
+      await conn.unsubscribe(subName);
     }
+    await testsUtil.dropTable(conn, tableName);
   }); // 330.1
 
   it('330.2 returns the registration id for query subscriptions',
@@ -201,34 +192,31 @@ describe('330. cqn.js', function() {
 
       await conn.execute(testsUtil.sqlCreateTable(tableName,
         `CREATE TABLE ${tableName} (k NUMBER)`));
-      try {
-        const result = await subscribeWithDefaults(subName, {
-          callback: function(message) {
-            assert.strictEqual(message.registered, true);
-          },
-          sql: `SELECT * FROM ${tableName} WHERE k > :bv`,
-          binds: { bv: 100 },
-          timeout: 20,
-          qos: oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
-        });
-        isSubscribed = true;
-        // subscribe() exposes a CQN registration ID as a JavaScript number.
-        assert.strictEqual(typeof result.regId, 'number');
+      const result = await subscribeWithDefaults(subName, {
+        callback: function(message) {
+          assert.strictEqual(message.registered, true);
+        },
+        sql: `SELECT * FROM ${tableName} WHERE k > :bv`,
+        binds: { bv: 100 },
+        timeout: 20,
+        qos: oracledb.SUBSCR_QOS_QUERY | oracledb.SUBSCR_QOS_ROWIDS
+      });
+      isSubscribed = true;
+      // subscribe() exposes a CQN registration ID as a JavaScript number.
+      assert.strictEqual(typeof result.regId, 'number');
 
-        const fullTableName = `${dbConfig.user}.${tableName}`.toUpperCase();
-        const query = `
-          SELECT regid
-          FROM user_change_notification_regs
-          WHERE table_name = :tableName
-        `;
-        const dbResult = await conn.execute(query, { tableName: fullTableName });
-        assert.strictEqual(result.regId, dbResult.rows[0][0]);
-      } finally {
-        if (isSubscribed) {
-          await conn.unsubscribe(subName);
-        }
-        await testsUtil.dropTable(conn, tableName);
+      const fullTableName = `${dbConfig.user}.${tableName}`.toUpperCase();
+      const query = `
+        SELECT regid
+        FROM user_change_notification_regs
+        WHERE table_name = :tableName
+      `;
+      const dbResult = await conn.execute(query, { tableName: fullTableName });
+      assert.strictEqual(result.regId, dbResult.rows[0][0]);
+      if (isSubscribed) {
+        await conn.unsubscribe(subName);
       }
+      await testsUtil.dropTable(conn, tableName);
     }); // 330.2
 
   it('330.3 rejects invalid CQN query registration SQL', async function() {
@@ -271,24 +259,21 @@ describe('330. cqn.js', function() {
 
     await conn.execute(testsUtil.sqlCreateTable(tableName,
       `CREATE TABLE ${tableName} (k NUMBER)`));
-    try {
-      await subscribeWithDefaults(subName, {
-        callback: function(message) {
-          assert(message);
-        },
-        sql: `SELECT * FROM ${tableName}`,
-        timeout: 20,
-        qos: oracledb.SUBSCR_QOS_QUERY
-      });
+    await subscribeWithDefaults(subName, {
+      callback: function(message) {
+        assert(message);
+      },
+      sql: `SELECT * FROM ${tableName}`,
+      timeout: 20,
+      qos: oracledb.SUBSCR_QOS_QUERY
+    });
 
-      await conn.unsubscribe(subName);
-      await assert.rejects(
-        async () => await conn.unsubscribe(subName),
-        /(NJS-061:|DPI-1002:)/
-      );
-    } finally {
-      await testsUtil.dropTable(conn, tableName);
-    }
+    await conn.unsubscribe(subName);
+    await assert.rejects(
+      async () => await conn.unsubscribe(subName),
+      /(NJS-061:|DPI-1002:)/
+    );
+    await testsUtil.dropTable(conn, tableName);
   }); // 330.4
 
   it('330.5 rejects query registration during an active transaction',
@@ -298,23 +283,20 @@ describe('330. cqn.js', function() {
 
       await conn.execute(testsUtil.sqlCreateTable(tableName,
         `CREATE TABLE ${tableName} (k NUMBER, v VARCHAR2(50))`));
-      try {
-        await conn.execute(`INSERT INTO ${tableName} VALUES (1, 'test')`);
-        await assert.rejects(
-          async () => await subscribeWithDefaults(subName, {
-            callback: function(message) {
-              assert(message);
-            },
-            sql: `SELECT * FROM ${tableName}`,
-            timeout: 20,
-            qos: oracledb.SUBSCR_QOS_QUERY
-          }),
-          /ORA-29975:/
-        );
-      } finally {
-        await conn.rollback();
-        await testsUtil.dropTable(conn, tableName);
-      }
+      await conn.execute(`INSERT INTO ${tableName} VALUES (1, 'test')`);
+      await assert.rejects(
+        async () => await subscribeWithDefaults(subName, {
+          callback: function(message) {
+            assert(message);
+          },
+          sql: `SELECT * FROM ${tableName}`,
+          timeout: 20,
+          qos: oracledb.SUBSCR_QOS_QUERY
+        }),
+        /ORA-29975:/
+      );
+      await conn.rollback();
+      await testsUtil.dropTable(conn, tableName);
     }); // 330.5
 
   it('330.6 SUBSCR_QOS_DEREG_NFY marks notification deregistered',
@@ -329,54 +311,49 @@ describe('330. cqn.js', function() {
         assert.strictEqual(message.registered, false);
       });
 
-      try {
+      await subscribeWithDefaults(subName, {
+        callback: notifications.callback,
+        sql: `SELECT * FROM ${tableName}`,
+        timeout: 20,
+        qos: oracledb.SUBSCR_QOS_DEREG_NFY
+      });
+      isSubscribed = true;
+      await testsUtil.sleep(500);
+
+      await conn.execute(`INSERT INTO ${tableName} VALUES (1)`);
+      await conn.commit();
+      await notifications.wait();
+      if (oracledb.thin) {
+        await assert.rejects(
+          async () => await conn.unsubscribe(subName),
+          /NJS-061:/
+        );
+
+        // Server-side deregistration must also remove the driver's public
+        // subscription entry so that the name can be registered again.
         await subscribeWithDefaults(subName, {
-          callback: notifications.callback,
+          callback: function(message) {
+            assert(message);
+          },
           sql: `SELECT * FROM ${tableName}`,
           timeout: 20,
-          qos: oracledb.SUBSCR_QOS_DEREG_NFY
+          qos: oracledb.SUBSCR_QOS_QUERY
         });
         isSubscribed = true;
-        await testsUtil.sleep(500);
-
-        await conn.execute(`INSERT INTO ${tableName} VALUES (1)`);
-        await conn.commit();
-        await notifications.wait();
-        if (oracledb.thin) {
-          await assert.rejects(
-            async () => await conn.unsubscribe(subName),
-            /NJS-061:/
-          );
-
-          // Server-side deregistration must also remove the driver's public
-          // subscription entry so that the name can be registered again.
-          await subscribeWithDefaults(subName, {
-            callback: function(message) {
-              assert(message);
-            },
-            sql: `SELECT * FROM ${tableName}`,
-            timeout: 20,
-            qos: oracledb.SUBSCR_QOS_QUERY
-          });
-          isSubscribed = true;
-        } else {
-          // Allow OCI to finish terminal-callback cleanup before releasing
-          // the native subscription handle used by the next test.
-          await testsUtil.sleep(100);
-          try {
-            await conn.unsubscribe(subName);
-          } catch (err) {
-            // OCI may have already removed the registration.
-            assert.match(err.message, /DPI-1002:/);
-          }
-          isSubscribed = false;
-        }
-      } finally {
-        if (isSubscribed) {
-          await conn.unsubscribe(subName);
-        }
-        await testsUtil.dropTable(conn, tableName);
+      } else {
+        // Allow OCI to finish terminal-callback cleanup before releasing
+        // the native subscription handle used by the next test.
+        await testsUtil.sleep(100);
+        await conn.unsubscribe(subName).catch(err => {
+          // OCI may have already removed the registration.
+          assert.match(err.message, /DPI-1002:/);
+        });
+        isSubscribed = false;
       }
+      if (isSubscribed) {
+        await conn.unsubscribe(subName);
+      }
+      await testsUtil.dropTable(conn, tableName);
     }); // 330.6
 
   it('330.7 reuses a CQN subscription name to register additional queries',
@@ -396,41 +373,38 @@ describe('330. cqn.js', function() {
         `CREATE TABLE ${tableOne} (k NUMBER)`));
       await conn.execute(testsUtil.sqlCreateTable(tableTwo,
         `CREATE TABLE ${tableTwo} (k NUMBER)`));
-      try {
-        const firstResult = await subscribeWithDefaults(subName, {
-          callback: notifications.callback,
-          sql: `SELECT * FROM ${tableOne}`,
-          timeout: 20,
-          qos: oracledb.SUBSCR_QOS_QUERY
-        });
-        isSubscribed = true;
-        const secondResult = await subscribeWithDefaults(subName, {
-          callback: function() {
-            assert.fail('the original callback must be reused');
-          },
-          sql: `SELECT * FROM ${tableTwo}`,
-          timeout: 1,
-          qos: oracledb.SUBSCR_QOS_ROWIDS
-        });
-        assert.strictEqual(secondResult.regId, firstResult.regId);
-        await testsUtil.sleep(500);
+      const firstResult = await subscribeWithDefaults(subName, {
+        callback: notifications.callback,
+        sql: `SELECT * FROM ${tableOne}`,
+        timeout: 20,
+        qos: oracledb.SUBSCR_QOS_QUERY
+      });
+      isSubscribed = true;
+      const secondResult = await subscribeWithDefaults(subName, {
+        callback: function() {
+          assert.fail('the original callback must be reused');
+        },
+        sql: `SELECT * FROM ${tableTwo}`,
+        timeout: 1,
+        qos: oracledb.SUBSCR_QOS_ROWIDS
+      });
+      assert.strictEqual(secondResult.regId, firstResult.regId);
+      await testsUtil.sleep(500);
 
-        await conn.execute(`INSERT INTO ${tableOne} VALUES (1)`);
-        await conn.commit();
-        await conn.execute(`INSERT INTO ${tableTwo} VALUES (1)`);
-        await conn.commit();
-        await notifications.wait();
-        assert.deepStrictEqual(tableNames, new Set([
-          `${dbConfig.user}.${tableOne}`.toUpperCase(),
-          `${dbConfig.user}.${tableTwo}`.toUpperCase()
-        ]));
-      } finally {
-        if (isSubscribed) {
-          await conn.unsubscribe(subName);
-        }
-        await testsUtil.dropTable(conn, tableOne);
-        await testsUtil.dropTable(conn, tableTwo);
+      await conn.execute(`INSERT INTO ${tableOne} VALUES (1)`);
+      await conn.commit();
+      await conn.execute(`INSERT INTO ${tableTwo} VALUES (1)`);
+      await conn.commit();
+      await notifications.wait();
+      assert.deepStrictEqual(tableNames, new Set([
+        `${dbConfig.user}.${tableOne}`.toUpperCase(),
+        `${dbConfig.user}.${tableTwo}`.toUpperCase()
+      ]));
+      if (isSubscribed) {
+        await conn.unsubscribe(subName);
       }
+      await testsUtil.dropTable(conn, tableOne);
+      await testsUtil.dropTable(conn, tableTwo);
     }); // 330.7
 
   it('330.8 requires client-initiated CQN in Thin mode', async function() {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -221,13 +221,12 @@ describe('213.2 Object Collection with BLOB fields', () => {
     // insert data into table
     let sql = `BEGIN ${TEST_PROC}(:buff_collection); END;`;
     const binds = { buff_collection: bufTypeCollection };
-    let result = await conn.execute(sql, binds);
+    await conn.execute(sql, binds);
 
     // read from the table and verify
-    let lob;
-    let lobData;
+    let lob, lobData;
     sql = `select * from ${TABLE}`;
-    result = await conn.execute(sql);
+    const result = await conn.execute(sql);
     for (let i = 0; i < bufArray.length; i++) {
       lob = result.rows[0][0][i].ID;
       if (!lob) {

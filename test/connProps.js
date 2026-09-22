@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -307,7 +307,7 @@ describe('193. connProps.js', function() {
 
     // change to root container
     query = "ALTER SESSION SET CONTAINER = CDB$ROOT";
-    result = await dbaConnection.execute(query);
+    await dbaConnection.execute(query);
     if (oracledb.thin) {
       query = "SELECT SYS_CONTEXT('USERENV', 'CON_NAME') FROM dual";
       result = await dbaConnection.execute(query);

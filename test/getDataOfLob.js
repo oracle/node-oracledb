@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -101,12 +101,12 @@ describe('196. getDataOfLob.js', () => {
     const result = await conn.execute(sql, binds, opt);
 
     const clob = result.outBinds.lobbv[0];
-    inStream.pipe(clob);
 
     const insertionComplete = new Promise((resolve, reject) => {
       inStream.on('error', reject);
       clob.on('error', reject);
       clob.on('finish', () => resolve(conn.commit()));
+      inStream.pipe(clob);
     });
 
     await insertionComplete;
@@ -151,12 +151,12 @@ describe('196. getDataOfLob.js', () => {
     const result = await conn.execute(sql, binds, opt);
 
     const blob = result.outBinds.lobbv[0];
-    inStream.pipe(blob);
 
     const insertionComplete = new Promise((resolve, reject) => {
       inStream.on('error', reject);
       blob.on('error', reject);
       blob.on('finish', () => resolve(conn.commit()));
+      inStream.pipe(blob);
     });
 
     await insertionComplete;
@@ -186,13 +186,11 @@ describe('196. getDataOfLob.js', () => {
     const inFileName = 'test/clobexample.txt';
     const tempLob = await conn.createLob(oracledb.CLOB);
     const inStream = fs.createReadStream(inFileName);
-
-    inStream.pipe(tempLob);
-
     const insertionComplete = new Promise((resolve, reject) => {
       inStream.on('error', reject);
       tempLob.on('error', reject);
       tempLob.on('finish', resolve);
+      inStream.pipe(tempLob);
     });
 
     await insertionComplete;

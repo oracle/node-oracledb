@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -72,13 +72,13 @@ describe('54. lobClose.js', function() {
     await lob.close();
     const inFileName = './test/clobexample.txt';
     const inStream = fs.createReadStream(inFileName);
-    inStream.pipe(lob);
     await assert.rejects(
       async () => {
         await new Promise((resolve, reject) => {
           inStream.on("error", reject);
           lob.on("error", reject);
           lob.on('finish', resolve);
+          inStream.pipe(lob);
         });
       },
       /NJS-022:/
@@ -93,13 +93,13 @@ describe('54. lobClose.js', function() {
     // Verify that lob2 gets closed automatically
     const inFileName = './test/clobexample.txt';
     const inStream = fs.createReadStream(inFileName);
-    inStream.pipe(lob2);
     await assert.rejects(
       async () => {
         await new Promise((resolve, reject) => {
           inStream.on("error", reject);
           lob2.on("error", reject);
           lob2.on('finish', resolve);
+          inStream.pipe(lob2);
         });
       },
       /NJS-003:/

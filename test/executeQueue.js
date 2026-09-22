@@ -145,7 +145,7 @@ describe("256. executeQueue.js", function() {
       for (let i = 0 ; i < loopCount; i++) {
         assert.strictEqual(values[i].status, 'fulfilled');
         assert.strictEqual(values[i].value.name, collName + i);
-        (values[i].value).drop();
+        await (values[i].value).drop();
       }
     });
 

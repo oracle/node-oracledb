@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -39,14 +39,17 @@
 const fs = require('fs');
 const execSync = require('child_process').execSync;
 const nodbUtil = require('../lib/util.js');
-const packageJSON = require("../package.json");
+const path = require('path');
+const packageJSON = require('../package.json');
 
-const jsStagingInfoFile = nodbUtil.RELEASE_DIR + '/oracledb-' + nodbUtil.PACKAGE_JSON_VERSION + '-js-buildinfo.txt';
+const jsStagingInfoFile = nodbUtil.RELEASE_DIR + '/oracledb-' +
+  nodbUtil.PACKAGE_JSON_VERSION + '-js-buildinfo.txt';
 let areBinariesAvailable = true;
 
 let njsGitSha;
 try {
-  njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD').toString().replace(/[\n\r]/, '');
+  njsGitSha = execSync('git --git-dir=./.git rev-parse --verify HEAD')
+    .toString().replace(/[\n\r]/, '');
 } catch {
   njsGitSha = 'unknown NJS SHA';
 }
@@ -60,12 +63,14 @@ if (fs.existsSync('.npmignore')) {
 
 // Create the npm package
 function packageUp() {
-  console.log('Creating the npm package for node-oracledb ' + packageJSON.version);
-  try {
+  console.log('Creating the npm package for node-oracledb ' +
+    packageJSON.version);
 
+  try {
     if (!fs.existsSync(nodbUtil.STAGING_DIR)) {
       areBinariesAvailable = false;
-      console.warn("Directory '" + nodbUtil.STAGING_DIR + "' not found. Binaries for the thick mode will not be packaged.");
+      console.warn("Directory '" + nodbUtil.STAGING_DIR + "' not found. " +
+        "Binaries for the thick mode will not be packaged.");
     }
 
     // Update package.json by setting an install script target to call
@@ -75,7 +80,8 @@ function packageUp() {
     packageJSON.scripts = {};
     packageJSON.scripts.install = 'node package/install.js';
     packageJSON.scripts.prune = 'node package/prunebinaries.js';
-    fs.writeFileSync('package.json', JSON.stringify(packageJSON, null, 2) + '\n');
+    fs.writeFileSync('package.json', JSON.stringify(packageJSON, null, 2) +
+      '\n');
 
     // Remove the directory & its contents
     try {
@@ -99,12 +105,16 @@ function packageUp() {
     // by default otherwise compiling from a GitHub tag or branch
     // won't work.
     // Some of the entries already exist in the GitHub clone .npmignore file,
-    // but they make building from a source bundle cleaner, because the source bundles
-    // in GitHub releases don't contain .npmignore.
-    fs.appendFileSync('.npmignore', '\n/odpi\n/src\nbinding.gyp\n/package/buildbinary.js\n/package/buildpackage.js\n/package/Staging\n/build/Makefile\n/build/oracledb.target.mk\n/build/Release/obj.target\n/build/binding.Makefile\n.gitattributes\n*.tgz\n');
+    // but they make building from a source bundle cleaner, because the
+    // source bundles in GitHub releases don't contain .npmignore.
+    fs.appendFileSync('.npmignore',
+      '\n/odpi\n/src\nbinding.gyp\n/package/buildbinary.js\n' +
+      '/package/buildpackage.js\n/package/Staging\n/build/Makefile\n' +
+      '/build/oracledb.target.mk\n/build/Release/obj.target\n' +
+      '/build/binding.Makefile\n.gitattributes\n*.tgz\n');
+
     // Build the package
     execSync('npm pack');
-
   } catch (err) {
     console.error(err);
   } finally {
@@ -120,15 +130,18 @@ function packageUp() {
 
 // Copy a directory
 function copyDir(srcDir, destDir) {
-  try {
-    const f = fs.readdirSync(srcDir);
-    for (let i = 0; i < f.length; i++) {
-      fs.copyFileSync(srcDir + '/' + f[i], destDir + '/' + f[i]);
-      const mode = f[i].match(/\.txt$/) ? 0o644 : 0o755;
-      fs.chmodSync(destDir + '/' + f[i], mode);
+  for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
+    const source = path.join(srcDir, entry.name);
+    const destination = path.join(destDir, entry.name);
+
+    // copy files (recursively if required)
+    if (entry.isDirectory()) {
+      copyDir(source, destination);
+    } else {
+      fs.copyFileSync(source, destination);
     }
-  } catch (err) {
-    console.error(err.message);
+    const mode = entry.name.endsWith('.txt') ? 0o644 : 0o755;
+    fs.chmodSync(destination, mode);
   }
 }
 

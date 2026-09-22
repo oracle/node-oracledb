@@ -397,9 +397,7 @@ following properties in this object:
 
 - The non-zero values of the dimensions with a JavaScript array or TypedArray.
 
-If the array of indices is not a JavaScript array or a Uint32Array TypedArray,
-then the ``NJS-158: SPARSE VECTOR indices is not Uint32Array or an Array`` is
-raised. See :ref:`sparsevectorproperties` for more information.
+See :ref:`sparsevectorproperties` for more information.
 
 The SparseVector object can be defined in the following ways:
 
@@ -434,6 +432,14 @@ The example below inserts a sparse vector as an object using the
         `INSERT INTO vecSparseTable (SPARSECOL64) VALUES (:vec64)`,
          { vec64: sparseVec }
     );
+
+Creating a SparseVector object performs basic client-side validation only. For
+example, the indices argument is checked to ensure that it is a JavaScript
+array or a Uint32Array TypedArray, and an ``NJS-158`` error is raised if it is
+not. The individual sparse vector values and indices are not fully validated
+when the object is created. Oracle Database validates them when the vector is
+used in a database operation and returns the corresponding ``ORA`` error if
+the data is invalid.
 
 .. _fetchsparsevector:
 

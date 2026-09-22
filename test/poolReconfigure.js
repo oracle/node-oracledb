@@ -2029,13 +2029,12 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      let pool3 = await oracledb.createPool(poolConfig3);
+      const pool3 = await oracledb.createPool(poolConfig3);
       const poolStatistics3 = pool3.getStatistics();
       assert.strictEqual(pool3._enableStats, false);
       assert.strictEqual(pool3.enableStatistics, false);
       assert.strictEqual(poolStatistics3, null);
       await pool3.close(0);
-      pool3 = null;
     });
 
     it('255.6.6 set multiple _enableStats', async function() {
@@ -2087,13 +2086,12 @@ describe('255. poolReconfigure.js', function() {
         enableStatistics : false //eslint-disable-line
       };
 
-      let pool3 = await oracledb.createPool(poolConfig3);
+      const pool3 = await oracledb.createPool(poolConfig3);
       const poolStatistics3 = pool3.getStatistics();
       assert.strictEqual(pool3._enableStats, false);
       assert.strictEqual(pool3.enableStatistics, false);
       assert.strictEqual(poolStatistics3, null);
       await pool3.close(0);
-      pool3 = null;
     });
 
     it('255.6.7 get pool statistics by setting enableStatistics', async function() {

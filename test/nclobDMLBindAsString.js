@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -121,8 +121,7 @@ describe('124. nclobDMLBindAsString.js', function() {
 
   const bindOut = async function(tableName, insertStr) {
     insertID++;
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       "INSERT INTO " + tableName + " (num, content) VALUES (:i, TO_NCLOB(:c)) RETURNING content INTO :lobbv",
       {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN},
@@ -148,8 +147,7 @@ describe('124. nclobDMLBindAsString.js', function() {
     const bindVar = {
       c: { val: insertStr, type: oracledb.STRING, dir: oracledb.BIND_IN}
     };
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       sql,
       bindVar,
       {
@@ -160,8 +158,7 @@ describe('124. nclobDMLBindAsString.js', function() {
   };
 
   const streamLob = async function(tableName, originalStr) {
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       "SELECT TO_CLOB(content) FROM " + tableName + " where num = " + insertID);
     await new Promise((resolve, reject) => {
       let clob = '';
