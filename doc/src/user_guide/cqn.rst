@@ -33,8 +33,24 @@ Oracle Database 19.4 or later. For node-oracledb Thick mode, Oracle Client
 19.4 or later is additionally required. Using this property makes CQN
 internally use the same approach as normal connections to the database, and
 does not require the database to be able to connect back to the application.
-Since client initiated CQN notifications do not need additional network
-configuration, they have ease-of-use and security advantages.
+Since client initiated CQN notifications do not need application-side
+reverse connection configuration, they have ease-of-use and security
+advantages.
+
+For client-initiated subscriptions, the database service must be
+registered with the listener used by the connection string. This is
+normally automatic. If dynamic registration is missing or points to the
+wrong listener, for example with a non-default listener configuration,
+an EMON connection can fail with ``ORA-12523``. This may require a
+database-side configuration update with:
+
+.. code-block:: sql
+
+    ALTER SYSTEM SET LOCAL_LISTENER =
+      '(ADDRESS=(PROTOCOL=TCP)(HOST=<host>)(PORT=<port>))'
+      SCOPE=BOTH;
+
+    ALTER SYSTEM REGISTER;
 
 To register interest in database changes, Thick mode connections must be
 created by setting :attr:`oracledb.events` mode to *true*. The Thin mode

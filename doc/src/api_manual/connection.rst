@@ -2849,7 +2849,7 @@ Connection Methods
           - Boolean
           - .. _consubscribeoptclientinitiated:
 
-            This property enables “client initiated” CQN and AQ notification connections which internally use the same approach as normal connections to the database, and do not require the database to be able to connect back to the application. Since client initiated connections do not need additional network configuration, they have ease-of-use and security advantages. This property must be specified in node-oracledb Thin mode.
+            This property enables “client initiated” CQN and AQ notification connections which internally use the same approach as normal connections to the database, and do not require the database to be able to connect back to the application. Since client initiated connections do not need application-side reverse connection configuration, they have ease-of-use and security advantages. This property must be specified in node-oracledb Thin mode. See :ref:`CQN <cqn>` for database listener requirements.
 
             The default is *false*.
 

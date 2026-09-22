@@ -793,6 +793,11 @@ call ``unsubscribe()``. For example:
 See :ref:`Continuous Query Notification (CQN) <cqn>` for more information
 about subscriptions and notifications.
 
+AQ notifications use the same configuration as CQN. By default, the
+database must be able to connect back to node-oracledb. For
+client-initiated AQ notifications, see the :ref:`CQN listener
+requirements <cqn>`.
+
 .. _aqrecipientlists:
 
 Recipient Lists
