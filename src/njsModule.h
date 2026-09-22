@@ -637,7 +637,7 @@ struct njsResultSet {
     uint32_t numQueryVars;
     njsVariable *queryVars;
     uint32_t fetchArraySize;
-    bool varsDefined;
+    bool varsDefined; // prevents unnecessary query variable redefines
 };
 
 // data for class SodaCollection exposed to JS.

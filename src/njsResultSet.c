@@ -156,30 +156,29 @@ static bool njsResultSet_getRowsAsync(njsBaton *baton)
     njsVariable *var;
     int moreRows;
     uint32_t i;
+    bool defineAllVars = !rs->varsDefined; // varsDefined's entry state
 
     // create ODPI-C variables, if necessary
     for (i = 0; i < rs->numQueryVars; i++) {
         var = &rs->queryVars[i];
-        if (var->dpiVarHandle && var->maxArraySize >= baton->fetchArraySize)
-            continue;
-        rs->varsDefined = false;
-
-        // free the old runtime state of the existing variable
-        njsVariable_free(var);
-        var->maxArraySize = baton->fetchArraySize;
-        if (!njsVariable_createBuffer(var, rs->conn, baton))
-            return false;
-    }
-
-    // perform define, if necessary
-    if (!rs->varsDefined) {
-        for (i = 0; i < rs->numQueryVars; i++) {
-            var = &rs->queryVars[i];
-            if (dpiStmt_define(rs->handle, i + 1, var->dpiVarHandle) < 0)
-                return njsBaton_setErrorDPI(baton);
+        if (var->dpiVarHandle && var->maxArraySize >= baton->fetchArraySize) {
+            // Reuse already-defined variables when buffers are sufficient
+            if (!defineAllVars)
+                continue;
+        } else {
+            rs->varsDefined = false;
+            njsVariable_free(var);
+            var->maxArraySize = baton->fetchArraySize;
+            if (!njsVariable_createBuffer(var, rs->conn, baton))
+                return false;
         }
-        rs->varsDefined = true;
+
+        // perform define only when required
+        if (dpiStmt_define(rs->handle, i + 1, var->dpiVarHandle) < 0)
+            return njsBaton_setErrorDPI(baton);
     }
+
+    rs->varsDefined = true;
 
     // set fetch array size as requested
     if (dpiStmt_setFetchArraySize(rs->handle, baton->fetchArraySize) < 0)
