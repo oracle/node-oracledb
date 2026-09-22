@@ -792,6 +792,22 @@ describe('1. implicitPool1.js', function() {
         statementCache._maxSize = originalMaxSize;
       }
     });
+
+    it('1.25 returns PL/SQL INOUT bind and invokes implicit release callback', async function() {
+      await clearCallbacks(connection);
+      await conn.execute(
+        'BEGIN :value := :value + 5; END;',
+        {
+          value: {
+            dir: oracledb.BIND_INOUT,
+            type: oracledb.NUMBER,
+            val: 5
+          }
+        }
+      );
+
+      assert.deepStrictEqual(await getCallbacks(connection), [['G'], ['R']]);
+    });
   });
 
   describe('2. Pool Tests', function() {

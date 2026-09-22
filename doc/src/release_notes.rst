@@ -117,6 +117,9 @@ Thin Mode Changes
     consuming a fully prefetched result set could return previously consumed
     rows instead of just the remaining rows.
 
+#) Fixed Thin mode implicit pooling to invoke the release callback for
+   single-iteration PL/SQL execute() calls with INOUT binds.
+
 Thick Mode Changes
 ++++++++++++++++++
 
