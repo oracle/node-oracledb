@@ -81,7 +81,7 @@ See :ref:`cloudnativeauthoauth` for more information.
 End-User Security Provider Plugin
 ---------------------------------
 
-.. versionadded:: 7.1
+.. versionadded:: 26.0.0
 
 Node-oracledb's ``endUserSecurityProvider`` plugin can be used with Oracle
 Deep Data Security to create and apply end-user security contexts for database

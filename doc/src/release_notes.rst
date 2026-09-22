@@ -19,9 +19,10 @@ node-oracledb `v26.0.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1..
 Common Changes
 +++++++++++++++
 
-#)  Added end-user security provider plugin for scoped OCI IAM and
-    Microsoft Entra ID application-token and on-behalf-of authentication with
-    :ref:`Oracle Deep Data Security <deepdatasecurity>`.
+#)  Added end-user security provider
+    :ref:`plugin <endusersecuritycontextcreationplugin>` for scoped OCI IAM
+    and Microsoft Entra ID application-token and on-behalf-of authentication
+    with :ref:`Oracle Deep Data Security <deepdatasecurity>`.
 
 #)  Added :attr:`connection.txnPriority` property to support Oracle AI
     Database 26ai's :ref:`transaction priority <txnpriority>` feature with

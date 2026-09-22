@@ -2415,7 +2415,7 @@ operations performed in the corresponding application scope. The generated
 context is cleared after the operation completes, so SQL executed outside the
 callback continues to use the standard database login.
 
-The ``endUserSecurityProvider`` plugin was introduced in node-oracledb 7.1.
+The ``endUserSecurityProvider`` plugin was introduced in node-oracledb 26.0.0.
 
 The :ref:`endUserSecurityProvider <endusersecurityproviderplugin>` can be used
 by your application by adding the following line to your code before creating

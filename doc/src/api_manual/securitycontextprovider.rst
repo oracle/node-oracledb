@@ -9,7 +9,7 @@ request-specific metadata with asynchronous application work. It is used with
 the :ref:`endUserSecurityProvider <endusersecurityproviderplugin>` plugin to
 scope end-user security metadata to database operations.
 
-.. versionadded:: 7.1
+.. versionadded:: 26.0.0
 
 A SecurityContextProvider object is obtained by calling
 :meth:`oracledb.getSecurityContextProvider()`:
@@ -27,7 +27,7 @@ SecurityContextProvider Methods
 
 .. method:: securityContextProvider.runWithContext()
 
-    .. versionadded:: 7.1
+    .. versionadded:: 26.0.0
 
     **Promise**::
 
@@ -101,7 +101,7 @@ SecurityContextProvider Methods
 
 .. method:: securityContextProvider.getCurrentContext()
 
-    .. versionadded:: 7.1
+    .. versionadded:: 26.0.0
 
     ::
 

@@ -2232,7 +2232,7 @@ Oracledb Methods
 
             This property is used with Oracle Deep Data Security. The plugin uses it to configure an end-user security context provider for the pool. Request-specific metadata can be supplied later with :meth:`securityContextProvider.runWithContext()`.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``events``
           - Boolean
           - Thick
@@ -3422,7 +3422,7 @@ Oracledb Methods
 
             This property is used with Oracle Deep Data Security. The plugin uses it to configure an end-user security context provider for the connection. Request-specific metadata can be supplied later with :meth:`securityContextProvider.runWithContext()`.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``events``
           - Boolean
           - Thick
@@ -4115,7 +4115,7 @@ Oracledb Methods
 
 .. method:: oracledb.getSecurityContextProvider()
 
-    .. versionadded:: 7.1
+    .. versionadded:: 26.0.0
 
     ::
 
