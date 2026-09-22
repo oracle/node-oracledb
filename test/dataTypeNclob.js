@@ -248,8 +248,8 @@ describe('123. dataTypeNclob.js', function() {
   };
 
   const getLobData = async function(tableName, originalStr) {
-    let result = null;
-    result = await connection.execute("SELECT TO_CLOB(content) FROM " + tableName + " where num = " + insertID);
+    const result = await connection.execute("SELECT TO_CLOB(content) FROM " +
+      tableName + " where num = " + insertID);
     const lob = result.rows[0][0];
 
     assert(lob);
@@ -270,8 +270,7 @@ describe('123. dataTypeNclob.js', function() {
   };
 
   const fetchLob_fetchInfo = async function(tableName, originalStr) {
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       "SELECT content AS C FROM " + tableName + " where num = " + insertID,
       {},
       {
@@ -284,8 +283,7 @@ describe('123. dataTypeNclob.js', function() {
   };
 
   const fetchLob_fetchInfo_rs = async function(tableName, originalStr) {
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       "SELECT content FROM " + tableName + " where num = " + insertID,
       {},
       {
@@ -297,16 +295,14 @@ describe('123. dataTypeNclob.js', function() {
   };
 
   const fetchLob_fetchas = async function(tableName, originalStr) {
-    let result = null;
-    result = await connection.execute("SELECT content AS C FROM " + tableName + " where num = " + insertID);
+    const result = await connection.execute("SELECT content AS C FROM " + tableName + " where num = " + insertID);
     const resultStr = result.rows[0][0];
     assert.strictEqual(resultStr.length, originalStr.length);
     assert.strictEqual(resultStr, originalStr);
   };
 
   const fetchLob_fetchas_rs = async function(tableName, originalStr) {
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       "SELECT content FROM " + tableName + " where num = " + insertID,
       {},
       {
@@ -339,9 +335,8 @@ describe('123. dataTypeNclob.js', function() {
           "    OPEN p_out FOR " +
           "        SELECT content FROM " + tableName  + " where num = " + insertID + "; " +
           "END; ";
-    let result = null;
     await connection.execute(createProc);
-    result =  await connection.execute(
+    const result =  await connection.execute(
       "BEGIN testproc(:o); END;",
       [
         { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
@@ -359,10 +354,9 @@ describe('123. dataTypeNclob.js', function() {
           "    OPEN p_out FOR " +
           "        SELECT content FROM " + tableName  + " where num = " + insertID + "; " +
           "END; ";
-    let result = null;
     await connection.execute(createProc);
 
-    result = await connection.execute(
+    const result = await connection.execute(
       "BEGIN testproc(:o); END;",
       [
         { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }

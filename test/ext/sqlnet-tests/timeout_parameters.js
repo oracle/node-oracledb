@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -67,9 +67,8 @@ describe('1. Transport Connect Timeout Parameters', function() {
   });
 
   it('1.3 Connect string with TRANSPORT_CONNECT_TIMEOUT parameter with Numeric value too long', async function() {
-    let connection = null;
     dbConfig.connectString = `(DESCRIPTION=(TRANSPORT_CONNECT_TIMEOUT=123456789012345678901234567890)(ADDRESS=(PROTOCOL=${protocol})(HOST=${host})(PORT=${port}))(CONNECT_DATA=(SERVICE_NAME=${svcName})))`;
-    connection = await oracledb.getConnection(dbConfig);
+    const connection = await oracledb.getConnection(dbConfig);
     const result = await connection.execute("select 1+1 from dual");
     assert(result.rows[0][0], 2);
     await connection.close();

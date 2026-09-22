@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -241,11 +241,11 @@ describe('71. lobBind1.js', function() {
 
       const sql1 = "SELECT content FROM nodb_tab_clob1 WHERE id = :id";
       const sql2 = "begin nodb_clobinproc1(:1, :2); end;";
-      let result = await connection.execute(sql1, { id: seq });
+      const result = await connection.execute(sql1, { id: seq });
       assert.notStrictEqual(result.rows.length, 0);
 
       const lob = result.rows[0][0];
-      result = await connection.execute(
+      await connection.execute(
         sql2,
         [
           { val: seq, type: oracledb.NUMBER, dir: oracledb.BIND_IN },

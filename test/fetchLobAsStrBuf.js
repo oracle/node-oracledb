@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -73,7 +73,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
   };
 
   const insertIntoTable = async function(id, contentClob, contentBlob) {
-    let result = null;
+    let result;
     if (contentClob == "EMPTY_CLOB" && contentBlob == "EMPTY_BLOB") {
       result = await connection.execute("insert INTO fetchLobAsStrBuf_table values(:id, EMPTY_CLOB(), EMPTY_BLOB())",
         [ id ]);
@@ -100,9 +100,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
   };
 
   const verifyClobValueWithString = async function(selectSql, originalString, specialStr) {
-    let result = null;
-    result = await connection.execute(selectSql);
-
+    const result = await connection.execute(selectSql);
     const lob = result.rows[0][0];
     if (originalString == '' || originalString == undefined || originalString == null) {
       assert.ifError(lob);
@@ -139,8 +137,7 @@ describe('245. fetchLobAsStrBuf.js', function() {
   };
 
   const verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
-    let result = null;
-    result = await connection.execute(selectSql);
+    const result = await connection.execute(selectSql);
     const lob = result.rows[0][0];
     if (originalBuffer == '' || originalBuffer == undefined) {
       assert.ifError(lob);

@@ -460,7 +460,6 @@ describe('161. changePassword.js', function() {
     }); // after
 
     it('161.12.1 basic case with password length 1024 Bytes', async function() {
-      let result = null;
       let sql = "BEGIN \n" +
                       "    DECLARE \n" +
                       "        e_user_missing EXCEPTION; \n" +
@@ -490,7 +489,7 @@ describe('161. changePassword.js', function() {
       const conn = await oracledb.getConnection(credential);
       assert(conn);
 
-      result = await conn.execute("select sysdate as ts_date from dual");
+      const result = await conn.execute("select sysdate as ts_date from dual");
       assert((result.rows[0][0]) instanceof Date);
       await conn.close();
     }); // 161.12.1

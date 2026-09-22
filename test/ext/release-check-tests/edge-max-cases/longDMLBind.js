@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -174,24 +174,22 @@ describe('7. longDMLBind.js', function() {
 
   const insert = async function(content) {
     const sql = `insert into ` + tableName + ` (id, content) values (:i, :c)`;
-    let result = null;
     const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
-    result = await connection.execute(sql, bindVar);
+    const result = await connection.execute(sql, bindVar);
     assert.strictEqual(result.rowsAffected, 1);
   };
 
   const update = async function(content) {
     const sql = `update ` + tableName + ` set content = :c where id = :i`;
-    let result = null;
     const bindVar = {
       i: { val: insertID, dir: oracledb.BIND_IN, type: oracledb.NUMBER },
       c: { val: content, dir: oracledb.BIND_IN, type: oracledb.STRING }
     };
     try {
-      result = await connection.execute(sql, bindVar);
+      const result = await connection.execute(sql, bindVar);
       assert.strictEqual(result.rowsAffected, 1);
     } catch (err) {
       if (err) {
@@ -204,8 +202,7 @@ describe('7. longDMLBind.js', function() {
 
   const fetch = async function(expected) {
     const sql = `select content from ` + tableName + ` where id = ` + insertID;
-    let result = null;
-    result = await connection.execute(sql);
+    const result = await connection.execute(sql);
     assert.strictEqual(result.rows[0][0], expected);
   };
 

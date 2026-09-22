@@ -134,7 +134,7 @@ describe('400. bfileTestType.js', function() {
 
   async function removeDir() {
     const removeDir = `
-      -- Step 1: Use a PL/SQL Block to Remove the Directory and its Contents
+      -- Step 1: Use a PL/SQL Block to Remove the Directory and its contents
       BEGIN
         DBMS_SCHEDULER.create_job (
           job_name        => 'DELETE_TEMP_DIR_JOB',
@@ -167,7 +167,8 @@ describe('400. bfileTestType.js', function() {
 
   before(async function() {
     if (!bFileDir) {
-      console.log("BFILEDIR environment variable for the database server is not set. They can be set as follows:\n" +
+      console.log("BFILEDIR environment variable for the database server is" +
+                  " not set. They can be set as follows:\n" +
                   "- Windows: C:\\Windows\\Temp\\bfiletest\n" +
                   "- Linux: /tmp/bfiletest\n");
       this.skip();
@@ -359,7 +360,8 @@ describe('400. bfileTestType.js', function() {
     const lob = result.rows[0][0];
     await assert.rejects(
       async () => await lob.fileExists(),
-      /ORA-22285:/ //ORA-22285: non-existent directory or file for FILEEXISTS operation
+      /ORA-22285:/
+      //ORA-22285: non-existent directory or file for FILEEXISTS operation
     );
   }); // 400.12
 
@@ -396,10 +398,9 @@ describe('400. bfileTestType.js', function() {
           WHERE ID = :ID`, [dirName, fileName, 101]
     );
 
-    result = await conn.execute(`SELECT * FROM TBL_BFILE`);
     result = await conn.execute(`
       SELECT BFILECOL FROM TBL_BFILE WHERE ID = :ID`, [101]);
-    lob = result.rows[0][0];dirFile = lob.getDirFileName();
+    lob = result.rows[0][0];
     dirFile = lob.getDirFileName();
     assert.strictEqual(dirFile.dirName, "OTHER_DIR");
     assert.strictEqual(dirFile.fileName, "OTHER_FILE.JPG");

@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -83,14 +83,13 @@ describe('1. clobDMLReturningSingleRowAsString.js', function() {
 
   before(async function() {
     const sqlCheckMaxStrVal = "SELECT name, value FROM v$parameter WHERE name = 'max_string_size'";
-    let result = null;
 
     connection = await oracledb.getConnection(credential_DBA);
 
     serverVersion = connection.oracleServerVersion;
     console.log("serverVersion " + serverVersion);
 
-    result = await connection.execute(sqlCheckMaxStrVal);
+    const result = await connection.execute(sqlCheckMaxStrVal);
 
     if (result.rows.length == 0) maxStringSize = "UNDEFINED";
     else maxStringSize = result.rows[0][1];

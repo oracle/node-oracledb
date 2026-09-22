@@ -17,7 +17,7 @@ node-oracledb `v26.0.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1..
 -----------------------------------------------------------------------------------------------------------
 
 Common Changes
-+++++++++++++++
+++++++++++++++
 
 #)  Added end-user security provider
     :ref:`plugin <endusersecuritycontextcreationplugin>` for scoped OCI IAM
@@ -94,7 +94,8 @@ Thin Mode Changes
 
 #)  Fixed :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`
     attribute handling to reject unsupported non-JSON JavaScript values such
-    as ``BigInt``, ``Symbol``, ``function`` and circular attribute values with NJS errors.
+    as ``BigInt``, ``Symbol``, ``function`` and circular attribute values with
+    NJS errors.
 
 #)  Fixed bug to cancel partially fetched cursors while retaining the
     statements in the statement cache, allowing

@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -73,7 +73,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   };
 
   const insertIntoBlobTable1 = async function(id, content) {
-    let result = null;
+    let result;
     if (content === "EMPTY_BLOB") {
       result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, EMPTY_BLOB())",
@@ -91,7 +91,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
   };
 
   const updateBlobTable1 = async function(id, content) {
-    let result = null;
+    let result;
     if (content === "EMPTY_BLOB") {
       result = await connection.execute(
         "UPDATE nodb_dml_blob_1 set blob = EMPTY_BLOB() where id = :ID",
@@ -159,8 +159,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const id = insertID++;
       const bigStr = '';
       const content = Buffer.from(bigStr, "utf-8");
-      let result = null;
-      result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
           ID: { val: id },
@@ -174,8 +173,7 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const id = insertID++;
       const bigStr = '';
       const content = Buffer.from(bigStr, "utf-8");
-      let result = null;
-      result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
           ID: { val: id },
@@ -191,7 +189,6 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const content = undefined;
 
       await insertIntoBlobTable1(id, content);
-
       await checkInsertResult(id, content, null);
     }); // 82.1.5
 
@@ -200,15 +197,14 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const content = null;
 
       await insertIntoBlobTable1(id, content);
-
       await checkInsertResult(id, content, null);
     }); // 82.1.6
 
     it('82.1.7 works with null and bind in maxSize set to 32767', async function() {
       const id = insertID++;
       const content = null;
-      let result = null;
-      result = await connection.execute(
+
+      const result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
           ID: { val: id },
@@ -221,9 +217,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
     it('82.1.8 works with null and bind in maxSize set to 50000', async function() {
       const id = insertID++;
       const content = null;
-      let result = null;
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
           ID: { val: id },
@@ -273,8 +268,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const specialStr = "82.1.11";
       const bigStr = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(bigStr, "utf-8");
-      await insertIntoBlobTable1(id, content);
 
+      await insertIntoBlobTable1(id, content);
       await checkInsertResult(id, content);
     }); // 82.1.11
 
@@ -334,9 +329,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const specialStr = "82.1.16";
       const bigStr = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(bigStr, "utf-8");
-      let result = null;
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:1, :2)",
         [
           id, { val: content, dir: oracledb.BIND_IN, type: oracledb.BUFFER }
@@ -367,9 +361,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const bigStr = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(bigStr, "utf-8");
       const sql = "INSERT INTO nodb_dml_blob_1 (id, blob) VALUES (:i, :c) RETURNING blob INTO :lobbv";
-      let result = null;
 
-      result = await connection.execute(sql,
+      const result = await connection.execute(sql,
         {
           i: id,
           c: { val: content, type: oracledb.BUFFER, dir: oracledb.BIND_IN },
@@ -386,9 +379,8 @@ describe('82.blobDMLBindAsBuffer.js', function() {
       const specialStr = "82.1.20";
       const bigStr = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(bigStr, "utf-8");
-      let result = null;
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "INSERT INTO nodb_dml_blob_1 VALUES (:ID, :C)",
         {
           ID: { val: id },

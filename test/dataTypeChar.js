@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -137,7 +137,6 @@ describe('22. dataTypeChar.js', function() {
     }); // 22.3.2
 
     it('22.3.3 bind scalar values OUT', async function() {
-      let result = null;
       const proc = "CREATE OR REPLACE\n" +
                      "PROCEDURE nodb_testproc(stringValue OUT NOCOPY CHAR)\n" +
                      "IS\n" +
@@ -146,7 +145,7 @@ describe('22. dataTypeChar.js', function() {
                      "END nodb_testproc;\n";
       await connection.execute(proc);
       const bindvars = { stringValue: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 200} };
-      result = await connection.execute(
+      const result = await connection.execute(
         "BEGIN nodb_testproc(:stringValue); END;",
         bindvars);
       // There are trailing spaces with the outBind value as CHAR is a kind of
@@ -160,7 +159,6 @@ describe('22. dataTypeChar.js', function() {
   describe('22.4 PL/SQL binding indexed tables', function() {
 
     it.skip('22.4.1 bind indexed table IN', async function() {
-      let result = null;
       let proc = "CREATE OR REPLACE PACKAGE\n" +
                   "nodb_testpack\n" +
                   "IS\n" +
@@ -188,7 +186,7 @@ describe('22. dataTypeChar.js', function() {
         result: {type: oracledb.STRING, dir: oracledb.BIND_OUT, maxSize: 2000},
         strings: {type: oracledb.STRING, dir: oracledb.BIND_IN, val: ['John', 'Doe']}
       };
-      result = await connection.execute(
+      const result = await connection.execute(
         "BEGIN :result := nodb_testpack.nodb_testfunc(:strings); END;",
         bindvars);
       console.log(result);

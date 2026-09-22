@@ -668,11 +668,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const specialStrLength = specialStr.length;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
         { id: id },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -700,10 +699,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength_2 = 100;
       const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       const content_2 = Buffer.from(strBuf_2, "utf-8");
-      let result = null;
       await insertIntoBlobTable1(id_1, content_1);
       await insertIntoBlobTable1(id_2, content_2);
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -717,11 +715,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 200;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -740,13 +737,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength_2 = 208;
       const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       const content_2 = Buffer.from(strBuf_2, "utf-8");
-      let result = null;
 
       await insertAndFetch(id, specialStr_1, content_1);
 
       await updateBlobTable1(id, content_2);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id,
         { },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -786,11 +782,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 200;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
       oracledb.fetchAsBuffer = [];
-      result = await connection.execute("SELECT B from nodb_blob1 WHERE ID = " + id);
+      const result = await connection.execute("SELECT B from nodb_blob1 WHERE ID = " + id);
 
       const lob = result.rows[0][0];
       let blobData = Buffer.alloc(0);
@@ -818,13 +813,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const content_2 = Buffer.from(strBuf_2, "utf-8");
       const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 1;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
-
       await insertIntoBlobTable1(id_2, content_2);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -847,11 +840,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const content_2 = Buffer.from(strBuf_2, "utf-8");
       const maxRowsBak = oracledb.maxRows;
       oracledb.maxRows = 10;
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
       await insertIntoBlobTable1(id_2, content_2);
-      result = await connection.execute(
+
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE id = " + id_1 + " or id = " + id_2,
         { },
         { outFormat: oracledb.OUT_FORMAT_OBJECT });
@@ -1019,14 +1012,12 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength_2 = 100;
       const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       const content_2 = Buffer.from(strBuf_2, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id_1, content_1);
-
       await insertIntoBlobTable1(id_2, content_2);
 
       const rowNumFetched = 2;
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         {
@@ -1048,10 +1039,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
 
-      let result = null;
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         {
@@ -1219,11 +1209,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 20;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id: id },
         {
@@ -1260,10 +1249,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // afterEach
 
     const insertAndFetch = async function(id, specialStr, insertContent) {
-      let result = null;
       await insertIntoBlobTable1(id, insertContent);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id: id },
         { outFormat: oracledb.OUT_FORMAT_ARRAY });
@@ -1337,10 +1325,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const specialStrLength = specialStr.length;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) from nodb_blob1 WHERE ID = :id",
         { id: id },
         { outFormat: oracledb.OUT_FORMAT_ARRAY });
@@ -1368,12 +1355,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const strBuf_2 = random.getRandomString(contentLength_2, specialStr_2);
       const content_2 = Buffer.from(strBuf_2, "utf-8");
 
-      let result = null;
       await insertIntoBlobTable1(id_1, content_1);
-
       await insertIntoBlobTable1(id_2, content_2);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = " + id_1 + " or id = " + id_2,
         { },
         { outFormat: oracledb.OUT_FORMAT_ARRAY });
@@ -1388,10 +1373,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 200;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
+
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B AS B1, B AS B2 from nodb_blob1 WHERE ID = " + id,
         { },
         { outFormat: oracledb.OUT_FORMAT_ARRAY });
@@ -1458,11 +1443,11 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 200;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
+
       await insertIntoBlobTable1(id, content);
 
       oracledb.fetchAsBuffer = [];
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT B from nodb_blob1 WHERE ID = " + id);
 
       const lob = result.rows[0][0];
@@ -1493,7 +1478,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       oracledb.maxRows = 1;
 
       await insertIntoBlobTable1(id_1, content_1);
-
       await insertIntoBlobTable1(id_2, content_2);
 
       const result = await connection.execute(
@@ -1541,11 +1525,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const contentLength = 20;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id: id },
         {
@@ -1581,10 +1564,9 @@ describe('87. fetchBlobAsBuffer1.js', function() {
     }); // afterEach
 
     const insertAndFetch = async function(id, specialStr, insertContent) {
-      let result = null;
       await insertIntoBlobTable1(id, insertContent);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "SELECT ID, B from nodb_blob1 WHERE ID = :id",
         { id: id },
         {
@@ -1663,10 +1645,10 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const specialStrLength = specialStr.length;
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
-      let result = null;
 
       await insertIntoBlobTable1(id, content);
-      result = await connection.execute(
+
+      const result = await connection.execute(
         "SELECT dbms_lob.substr(B, " + specialStrLength + ", 1) AS B1 from nodb_blob1 WHERE ID = :id",
         { id: id },
         {
@@ -1776,7 +1758,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const strBuf = random.getRandomString(contentLength, specialStr);
       const content = Buffer.from(strBuf, "utf-8");
 
-      let result = null;
       await insertIntoBlobTable1(id, content);
 
       const ref_proc = "CREATE OR REPLACE PROCEDURE nodb_ref(blob_cursor OUT SYS_REFCURSOR)\n" +
@@ -1790,9 +1771,7 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       const bindVar = {
         b: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
       };
-      result = await connection.execute(
-        sql,
-        bindVar);
+      const result = await connection.execute(sql, bindVar);
       const rows = await result.outBinds.b.getRows(3);
       assert.deepStrictEqual(rows[0][0], content);
       await result.outBinds.b.close();
@@ -1869,7 +1848,6 @@ describe('87. fetchBlobAsBuffer1.js', function() {
       oracledb.maxRows = 10;
 
       await insertIntoBlobTable1(id_1, content_1);
-
       await insertIntoBlobTable1(id_2, content_2);
 
       const result = await connection.execute(

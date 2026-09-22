@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -188,15 +188,11 @@ describe('10.jsonPLSQLBindLargeData.js', function() {
         readStream.on('error', reject);
       });
       let bindVar = { i: { val: id, type: oracledb.NUMBER, dir: oracledb.BIND_IN }, json: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN } };
-      let result = await conn.execute(
-        proc_in_run,
-        bindVar);
+      await conn.execute(proc_in_run, bindVar);
 
       bindVar = { i: { val: id, type: oracledb.NUMBER, dir: oracledb.BIND_IN }, json: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT } };
-      result = await conn.execute(
-        proc_out_run,
-        bindVar);
-      assert.deepEqual(result.outBinds.json, jsonVal);
+      const result = await conn.execute(proc_out_run, bindVar);
+      assert.deepStrictEqual(result.outBinds.json, jsonVal);
       fs.unlinkSync(inFileName);
     };
 
@@ -219,13 +215,9 @@ describe('10.jsonPLSQLBindLargeData.js', function() {
         readStream.on('error', reject);
       });
       let bindVar = { i: { val: id, type: oracledb.NUMBER, dir: oracledb.BIND_IN }, json: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_IN } };
-      let result = await conn.execute(
-        proc_in_run,
-        bindVar);
+      await conn.execute(proc_in_run, bindVar);
       bindVar = { i: { val: id, type: oracledb.NUMBER, dir: oracledb.BIND_IN }, json: { val: jsonVal, type: oracledb.DB_TYPE_JSON, dir: oracledb.BIND_OUT } };
-      result = await conn.execute(
-        proc_out_run,
-        bindVar);
+      const result = await conn.execute(proc_out_run, bindVar);
       assert.deepEqual(result.outBinds.json, jsonVal);
 
       fs.unlinkSync(inFileName);

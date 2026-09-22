@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -92,9 +92,9 @@ describe('8. autoCommitForSelect.js', function() {
   });
 
   it('8.1 should return previous value when autoCommit is false', async function() {
-    assert.ok(connection);
+    assert(connection);
     oracledb.autoCommit = false;
-    let result = null;
+    let result;
 
     await connection.execute(
       "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')");
@@ -120,9 +120,9 @@ describe('8. autoCommitForSelect.js', function() {
   });
 
   it('8.2 can use explicit commit() to keep data consistent', async function() {
-    assert.ok(connection);
+    assert(connection);
     oracledb.autoCommit = false;
-    let result = null;
+    let result;
     await connection.execute(
       "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')");
 
@@ -149,9 +149,9 @@ describe('8. autoCommitForSelect.js', function() {
   });
 
   it('8.3 can also use the autoCommit for SELECTs feature', async function() {
-    assert.ok(connection);
+    assert(connection);
     oracledb.autoCommit = false;
-    let result = null;
+    let result;
 
     await connection.execute(
       "INSERT INTO nodb_commit4_dept VALUES (180, 'Construction')");

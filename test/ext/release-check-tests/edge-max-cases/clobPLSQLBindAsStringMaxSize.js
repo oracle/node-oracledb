@@ -479,11 +479,8 @@ describe('5.clobPLSQLBindAsStringMaxSize.js', function() {
   const insetTableWithClob = async function(id, inFileName) {
     const sql = `INSERT INTO nodb_tab_clob_in (id, clob) VALUES (:i, EMPTY_CLOB()) RETURNING clob INTO :lobbv`;
     const bindVar = { i: id, lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } };
-    let result = null;
 
-    result = await connection.execute(
-      sql,
-      bindVar,
+    const result = await connection.execute(sql, bindVar,
       { autoCommit: false }, // a transaction needs to span the INSERT and pipe()
     );
 
@@ -506,9 +503,7 @@ describe('5.clobPLSQLBindAsStringMaxSize.js', function() {
   };
 
   const verifyClobValueWithString = async function(selectSql, originalString, specialStr) {
-    let result = null;
-
-    result = await connection.execute(selectSql);
+    const result = await connection.execute(selectSql);
 
     const lob = result.rows[0][0];
     if (originalString == null | originalString == '' || originalString == undefined) {
@@ -537,9 +532,7 @@ describe('5.clobPLSQLBindAsStringMaxSize.js', function() {
   };
 
   const verifyClobValueWithFileData = async function(selectSql, inFileName) {
-    let result = null;
-
-    result = await connection.execute(selectSql);
+    const result = await connection.execute(selectSql);
 
     const lob = result.rows[0][0];
     assert(lob);

@@ -255,15 +255,14 @@ describe('41. dataTypeBlob.js', function() {
       const byteBuf = Buffer.from(JSON.stringify((expectedObj1)));
 
       // Insert Buffer into OSON format column and verify with decode.
-      let result = await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
-      values (1, :1, :2) `,
-      [byteBuf, byteBuf]);
-      result = await connection.execute(`select OSONCOL from ${TABLE}`);
+      await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
+        values (1, :1, :2) `, [byteBuf, byteBuf]);
+      let result = await connection.execute(`select OSONCOL from ${TABLE}`);
       assert.deepStrictEqual(expectedObj1, result.rows[0][0]);
 
       // Generate OSON bytes and insert these bytes and verify with decode.
       const osonBytes = connection.encodeOSON(expectedObj2);
-      result = await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
+      await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
       values (2, :1, :2) `,
       [osonBytes, byteBuf]);
       result = await connection.execute(`select OSONCOL from ${TABLE} where IntCol = 2`);
@@ -271,9 +270,10 @@ describe('41. dataTypeBlob.js', function() {
 
       // Verify vector inside OSON image for 23.4 server onwards.
       if (connection.oracleServerVersion >= 2304000000) {
-        result = await connection.execute(`insert into ${TABLE}(IntCol, OsonCol, blobCol)
-      values (3, :1, :2) `,
-        [connection.encodeOSON(expectedObj3), byteBuf]);
+        await connection.execute(
+          `insert into ${TABLE}(IntCol, OsonCol, blobCol)
+            values (3, :1, :2) `,
+          [connection.encodeOSON(expectedObj3), byteBuf]);
         result = await connection.execute(`select OSONCOL from ${TABLE} where IntCol = 3`);
         assert.deepStrictEqual(expectedObj3, result.rows[0][0]);
 

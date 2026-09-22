@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -707,13 +707,12 @@ assist.createCharString = function(size) {
   const buffer = new StringBuffer();
   const scSize = assist.data.specialChars.length;
   let scIndex = 0;
-  let cIndex = 0;
   for (let i = 0; i < size; i++) {
     if (i % 10 == 0) {
-      buffer.append(assist.data.specialChars[scIndex].substr(0, 1));
+      buffer.append(assist.data.specialChars[scIndex].substring(0, 1));
       scIndex = (scIndex + 1) % scSize;
     } else {
-      cIndex = Math.floor(Math.random() * 52); // generate a random integer among 0-51
+      const cIndex = Math.floor(Math.random() * 52); // generate a random integer among 0-51
       buffer.append(assist.data.alphabet[cIndex]);
     }
   }
@@ -732,19 +731,16 @@ assist.createBuffer = function(size) {
 assist.createSchemaString = function(size) {
   const buffer = new StringBuffer();
   const schema_prefix = "\"";
-  let scIndex = 0;
-  let cIndex = 0;
-  let nIndex = 0;
 
   for (let i = 0; i < size - 2; i++) {
     if (i % 3 == 0) {
-      scIndex = Math.floor(Math.random() * 30);
+      const scIndex = Math.floor(Math.random() * 30);
       buffer.append(assist.schema.specialChars[scIndex]);
     } else if (i % 3 == 1) {
-      cIndex = Math.floor(Math.random() * 52);
+      const cIndex = Math.floor(Math.random() * 52);
       buffer.append(assist.schema.alphabet[cIndex]);
     } else {
-      nIndex = Math.floor(Math.random() * 10);
+      const nIndex = Math.floor(Math.random() * 10);
       buffer.append(assist.schema.numbers[nIndex]);
     }
   }

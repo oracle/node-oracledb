@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -84,16 +84,14 @@ describe('7. autoCommit.js', function() {
   });
 
   it('7.1 autoCommit takes effect when setting oracledb.autoCommit before connecting', async function() {
-    let conn1 = null;
-    let conn2 = null;
-    let result = null;
+    let result;
 
     oracledb.autoCommit = true;
-    conn1 = await pool.getConnection();
+    const conn1 = await pool.getConnection();
     await conn1.execute("INSERT INTO nodb_commit_dept VALUES (82, 'Security')");
 
     // get another connection
-    conn2 = await pool.getConnection();
+    const conn2 = await pool.getConnection();
 
     result = await conn2.execute(
       "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
@@ -118,16 +116,14 @@ describe('7. autoCommit.js', function() {
   });
 
   it('7.2 autoCommit takes effect when setting oracledb.autoCommit after connecting', async function() {
-    let conn1 = null;
-    let conn2 = null;
-    let result = null;
+    let result;
 
-    conn1 = await pool.getConnection();
+    const conn1 = await pool.getConnection();
 
     oracledb.autoCommit = true;   // change autoCommit after connection
     await conn1.execute("INSERT INTO nodb_commit_dept VALUES (82, 'Security')");
 
-    conn2 = await pool.getConnection();
+    const conn2 = await pool.getConnection();
 
     result = await conn2.execute(
       "SELECT department_id FROM nodb_commit_dept WHERE department_name = 'Security'",
@@ -152,15 +148,13 @@ describe('7. autoCommit.js', function() {
   });
 
   it('7.3 autoCommit setting does not affect previous SQL result', async function() {
-    let conn1 = null;
-    let conn2 = null;
-    let result = null;
+    let result;
 
-    conn1 = await pool.getConnection();
+    const conn1 = await pool.getConnection();
 
     await conn1.execute("INSERT INTO nodb_commit_dept VALUES (82, 'Security')");
 
-    conn2 = await pool.getConnection();
+    const conn2 = await pool.getConnection();
 
     oracledb.autoCommit = true;   // change autoCommit after connection
     result = await conn2.execute(
@@ -246,9 +240,7 @@ describe('7. autoCommit.js', function() {
     });
 
     it("7.5.5 works as 'false' when setting to 'undefined'", async function() {
-      let result = null;
-
-      result = await connection.execute(
+      const result = await connection.execute(
         "select user from dual",
         [],
         { autoCommit: undefined });

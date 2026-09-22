@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -168,7 +168,6 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
     it.skip('2.1.4 works with Buffer size 1GB', async function() {
       const strLength = 1 * 1024 * 1024 * 1024;
       const bigStr = get1GBBuffer();
-      let result = null;
       const bufferStr = Buffer.from(bigStr, 'utf8');
       const bindVar = {
         i: { val: insertID, type: oracledb.NUMBER, dir: oracledb.BIND_IN },
@@ -178,7 +177,7 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
       await connection.execute(sqlRun, bindVar, { autoCommit: true });
 
       const selectSql = `select blob from nodb_tab_blob_in where id = ` + insertID;
-      result = await connection.execute(selectSql);
+      const result = await connection.execute(selectSql);
       const lob = result.rows[0][0];
       assert(lob);
     }); // 2.1.4
@@ -403,10 +402,8 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
     await insetTableWithBlob(insertID, inFileName);
     const sql = `select blob from nodb_tab_blob_in where id = ` + insertID;
     await verifyBlobValueWithFileData(sql, inFileName);
-    let result = null;
 
-    result = await connection.execute(sqlRun, bindVar);
-
+    const result = await connection.execute(sqlRun, bindVar);
     const resultLength = result.outBinds.b.length;
     const specStrLength = specialStr.length;
     assert.strictEqual(result.outBinds.b.length, fileSize);
@@ -422,7 +419,6 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
   };
 
   const dropAllTable = async function() {
-
     await connection.execute(`DROP TABLE nodb_tab_blob_in PURGE`);
 
     await connection.execute(`DROP TABLE nodb_tab_lobs_pre PURGE`);
@@ -435,11 +431,8 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
   const insetTableWithBlob = async function(id, inFileName) {
     const sql = `INSERT INTO nodb_tab_blob_in (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv`;
     const bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
-    let result = null;
 
-    result = await connection.execute(
-      sql,
-      bindVar,
+    const result = await connection.execute(sql, bindVar,
       { autoCommit: false }); // a transaction needs to span the INSERT and pipe()
 
     assert.strictEqual(result.rowsAffected, 1);
@@ -460,11 +453,10 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
     });
   };
 
-  const verifyBlobValueWithBuffer = async function(selectSql, oraginalBuffer, specialStr) {
-    let result = null;
-    result = await connection.execute(selectSql);
+  const verifyBlobValueWithBuffer = async function(selectSql, originalBuffer, specialStr) {
+    const result = await connection.execute(selectSql);
     const lob = result.rows[0][0];
-    if (oraginalBuffer == null | oraginalBuffer == '' || oraginalBuffer == undefined) {
+    if (originalBuffer == null | originalBuffer == '' || originalBuffer == undefined) {
       assert.ifError(lob);
     } else {
       assert(lob);
@@ -479,7 +471,7 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
         lob.on("error", reject);
 
         lob.on('end', function() {
-          assert.strictEqual(totalLength, oraginalBuffer.length);
+          assert.strictEqual(totalLength, originalBuffer.length);
           const specStrLength = specialStr.length;
           assert.strictEqual(blobData.toString('utf8', 0, specStrLength), specialStr);
           assert.strictEqual(blobData.toString('utf8', (totalLength - specStrLength), totalLength), specialStr);
@@ -490,9 +482,7 @@ describe('2.blobPLSQLBindAsBufferMaxSize.js', function() {
   };
 
   const verifyBlobValueWithFileData = async function(selectSql, inFileName) {
-    let result = null;
-
-    result = await connection.execute(selectSql);
+    const result = await connection.execute(selectSql);
 
     const lob = result.rows[0][0];
     assert(lob);

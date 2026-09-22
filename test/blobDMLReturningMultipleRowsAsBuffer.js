@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -87,7 +87,6 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
   });
 
   const insertData = async function(tableSize) {
-    let result = null;
     const insert_data = "DECLARE \n" +
                       "    tmpchar VARCHAR2(2000); \n" +
                       "    tmplob BLOB; \n" +
@@ -101,14 +100,13 @@ describe('137. blobDMLReturningMultipleRowsAsBuffer.js', function() {
                       "END; ";
 
     await connection.execute(insert_data);
-    result = await connection.execute("select num from " + tableName);
+    const result = await connection.execute("select num from " + tableName);
     assert.strictEqual(result.rows.length, tableSize);
   };
 
   const updateReturning_buffer = async function(tabsize) {
     const sql_update = "UPDATE " + tableName + " set num = num+10 RETURNING num, blob into :num, :lobou";
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       sql_update,
       {
         num: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },

@@ -23,19 +23,21 @@
  * limitations under the License.
  *
  * NAME
- *   331. aq12.js
+ *   331. aqTxEventQNotifications.js
  *
  * DESCRIPTION
- *   Test AQ notifications with client-initiated subscriptions on sharded
- *   queues / TxEventQ. Thin mode supports AQ notifications only for these
- *   queues; classic AQ notification coverage remains in aq5.js for Thick mode.
+ *   Test extended AQ notification lifecycles with client-initiated
+ *   subscriptions on sharded queues / TxEventQ.
+ *
+ *   Since notification delivery is asynchronous and environment-dependent,
+ *   setup issues can appear as intermittent waits, hangs, or timeout failures.
  *
  *****************************************************************************/
 'use strict';
 
 const oracledb  = require('oracledb');
-const dbConfig  = require('./dbconfig.js');
-const testsUtil = require('./testsUtil.js');
+const dbConfig  = require('../../dbconfig.js');
+const testsUtil = require('../../testsUtil.js');
 const assert    = require('assert');
 
 function verifyAqNotification(message) {
@@ -55,7 +57,7 @@ function verifyAqNotification(message) {
     assert.strictEqual(typeof message.senderAgentProtocol, 'number');
 }
 
-describe('331. aq12.js', function() {
+describe('331. aqTxEventQNotifications.js', function() {
 
   let conn;
   let userCreated = false;
@@ -147,32 +149,31 @@ describe('331. aq12.js', function() {
         namespace: oracledb.SUBSCR_NAMESPACE_AQ,
         clientInitiated: true,
         callback(message) {
-          verifyAqNotification(message);
-          clearTimeout(timeout);
-          resolveNotification(message);
+          try {
+            verifyAqNotification(message);
+            clearTimeout(timeout);
+            resolveNotification(message);
+          } catch (err) {
+            clearTimeout(timeout);
+            rejectNotification(err);
+          }
         },
         timeout: 10
       };
-
-      // Start empty so an earlier message cannot satisfy this notification.
-      const queue = await workConn.getQueue(queueName);
-      queue.deqOptions.wait = oracledb.AQ_DEQ_NO_WAIT;
-      while (await queue.deqOne()) {
-        // dequeue until empty
+      try {
+        await conn.subscribe(queueName, options);
+        isSubscribed = true;
+        const queue = await workConn.getQueue(queueName);
+        const enqMessage = await queue.enqOne('AQ notification message');
+        await workConn.commit();
+        const message = await notification;
+        assert.deepStrictEqual(message.msgId, enqMessage.msgId);
+      } finally {
+        clearTimeout(timeout);
+        if (isSubscribed)
+          await conn.unsubscribe(queueName);
+        await workConn.close();
       }
-      await workConn.commit();
-
-      await conn.subscribe(queueName, options);
-      isSubscribed = true;
-      const enqMessage = await queue.enqOne('This is my message');
-      await workConn.commit();
-
-      const message = await notification;
-      assert.deepStrictEqual(message.msgId, enqMessage.msgId);
-      clearTimeout(timeout);
-      if (isSubscribed)
-        await conn.unsubscribe(queueName);
-      await workConn.close();
     }); // 331.1
 
   it('331.2 receives two AQ notifications after one subscribe',

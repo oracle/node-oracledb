@@ -170,10 +170,7 @@ describe('4.clobDMLBindLargeData.js', function() {
       i: id,
       lobbv: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
     };
-    let result = null;
-    result = await connection.execute(
-      sql,
-      bindVar,
+    const result = await connection.execute(sql, bindVar,
       { autoCommit: false });
     // a transaction needs to span the INSERT and pipe()
     assert.strictEqual(result.rowsAffected, 1);
@@ -194,10 +191,8 @@ describe('4.clobDMLBindLargeData.js', function() {
   };
 
   const verifyClob = async function(selectID, insertID, lenExpected) {
-    let lob = {};
     const selectSql = `select clob from nodb_tab_lobs_pre where id = ` + selectID;
     const insetSql = `INSERT INTO nodb_tab_lobs_pre (id, clob) VALUES (:i, :c)`;
-    let result = null;
     const proc_compare_clob = `CREATE OR REPLACE PROCEDURE nodb_clob_compare(result OUT NUMBER, len OUT NUMBER) \n
                              IS \n
                                  clob1 CLOB; \n
@@ -211,8 +206,8 @@ describe('4.clobDMLBindLargeData.js', function() {
     const sqlRunComparePorc = `begin nodb_clob_compare(:r, :l); end;`;
     const sqlDropComparePorc = `DROP PROCEDURE nodb_clob_compare`;
 
-    result = await connection.execute(selectSql);
-    lob = result.rows[0][0];
+    let result = await connection.execute(selectSql);
+    const lob = result.rows[0][0];
 
     let bindVar = {
       i: insertID,

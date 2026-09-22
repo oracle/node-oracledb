@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -245,7 +245,6 @@ describe('6.clobPLSQLBindLargeData.js', function() {
 
   const bindInLargeFile = async function(fileSizeInGB, numMinus, lenExpected, insertTable) {
     const sqlRun = "BEGIN nodb_clobs_in_741 (:i, :c); END;";
-    let lob = {};
 
     inFileName = fileRoot + '/' + fileSizeInGB + 'largeString.txt';
     largeFile.createFileInGB(inFileName, fileSizeInGB, numMinus);
@@ -254,7 +253,7 @@ describe('6.clobPLSQLBindLargeData.js', function() {
 
     const sql = "select clob from " + insertTable + " where id = " + insertID;
     const result = await connection.execute(sql);
-    lob = result.rows[0][0];
+    const lob = result.rows[0][0];
     assert(lob);
 
     const bindconst = { i: insertID, c: { val: lob, type: oracledb.CLOB, dir: oracledb.BIND_IN } };
@@ -268,7 +267,6 @@ describe('6.clobPLSQLBindLargeData.js', function() {
 
   const bindInSmallFile = async function(fileSize, insertTable, specialStr) {
     const sqlRun = "BEGIN nodb_clobs_in_741 (:i, :c); END;";
-    let lob = {};
 
     inFileName = fileRoot + '/' + 'smallString.txt';
     largeFile.createFileInKB(inFileName, fileSize, specialStr);
@@ -277,7 +275,7 @@ describe('6.clobPLSQLBindLargeData.js', function() {
 
     const sql = "select clob from " + insertTable + " where id = " + insertID;
     const result = await connection.execute(sql);
-    lob = result.rows[0][0];
+    const lob = result.rows[0][0];
     assert(lob);
 
     const bindconst = { i: insertID, c: { val: lob, type: oracledb.CLOB, dir: oracledb.BIND_IN } };
@@ -291,7 +289,6 @@ describe('6.clobPLSQLBindLargeData.js', function() {
 
   const bindOutLargeFile = async function(fileSizeInGB, numMinus, lenExpected, insertTable) {
     const sqlRun = "BEGIN nodb_clobs_out_742 (:i, :c); END;";
-    let resultClob = {};
     inFileName = fileRoot + '/' + fileSizeInGB + 'largeString.txt';
     largeFile.createFileInGB(inFileName, fileSizeInGB, numMinus);
 
@@ -302,7 +299,7 @@ describe('6.clobPLSQLBindLargeData.js', function() {
       c: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
     };
     const result = await connection.execute(sqlRun, bindconst);
-    resultClob = result.outBinds.c;
+    const resultClob = result.outBinds.c;
     assert(resultClob);
 
     await verifyBindoutClob(resultClob, insertID, insertID, lenExpected);
@@ -313,7 +310,6 @@ describe('6.clobPLSQLBindLargeData.js', function() {
 
   const bindOutSmallFile = async function(fileSize, insertTable, specialStr) {
     const sqlRun = "BEGIN nodb_clobs_out_742 (:i, :c); END;";
-    let resultClob = {};
 
     inFileName = fileRoot + '/' + 'smallString.txt';
     largeFile.createFileInKB(inFileName, fileSize, specialStr);
@@ -325,7 +321,7 @@ describe('6.clobPLSQLBindLargeData.js', function() {
       c: { type: oracledb.CLOB, dir: oracledb.BIND_OUT }
     };
     const result = await connection.execute(sqlRun, bindconst);
-    resultClob = result.outBinds.c;
+    const resultClob = result.outBinds.c;
     assert(resultClob);
 
     await verifyBindoutClob(resultClob, insertID, insertID, fileSize);

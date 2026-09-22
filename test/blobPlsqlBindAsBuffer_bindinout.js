@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -112,11 +112,8 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
   const prepareTableWithBlob = async function(sql, id) {
     const bindVar = { i: id, lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } };
-    let result = null;
 
-    result = await connection.execute(
-      sql,
-      bindVar,
+    const result = await connection.execute(sql, bindVar,
       { autoCommit: false }); // a transaction needs to span the INSERT and pipe()
 
     assert.strictEqual(result.rowsAffected, 1);
@@ -147,12 +144,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
   // execute plsql bind in out procedure, and verify the plsql bind out buffer
   const plsqlBindInOut = async function(sqlRun, bindVar, originalBuf, specialStr) {
-    let result = null;
-
-    result = await connection.execute(
-      sqlRun,
-      bindVar);
-
+    const result = await connection.execute(sqlRun, bindVar);
     const resultVal = result.outBinds.io;
     if (originalBuf == 'EMPTY_BLOB' || originalBuf == null || originalBuf == undefined || originalBuf == "") {
       assert.strictEqual(resultVal, null);
@@ -423,9 +415,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
       await assert.rejects(
         async () => {
-          await connection.execute(
-            sqlRun,
-            bindVar);
+          await connection.execute(sqlRun, bindVar);
         },
         // NJS-011: encountered bind value and type mismatch in parameter 2
         /NJS-011:/
@@ -439,10 +429,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       const bigStr = random.getRandomString(size, specialStr);
       const bufferStr = Buffer.from(bigStr, "utf-8");
       const bindVar = [ sequence, { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT, maxSize: size } ];
-      let result = null;
-      result = await connection.execute(
-        sqlRun,
-        bindVar);
+      const result = await connection.execute(sqlRun, bindVar);
       const resultVal = result.outBinds[0];
       compareResultBufAndOriginal(resultVal, bufferStr, specialStr);
     }); // 79.1.20
@@ -905,9 +892,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
       await assert.rejects(
         async () => {
-          await connection.execute(
-            sqlRun,
-            bindVar);
+          await connection.execute(sqlRun, bindVar);
         },
         /NJS-058:/
       );
@@ -1001,9 +986,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
         io: { val: bufferStr, type: oracledb.BUFFER, dir: oracledb.BIND_INOUT }
       };
 
-      await connection.execute(
-        sqlRun,
-        bindVar);
+      await connection.execute(sqlRun, bindVar);
     }); // 79.2.21
 
   }); // 79.2
@@ -1028,9 +1011,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
 
     // execute plsql bind in out procedure, and verify the plsql bind out buffer
     const plsqlBindInOut = async function(sqlRun, bindVar, originalBuf1, specialStr1, originalBuf2, specialStr2) {
-      let result = null;
-
-      result = await connection.execute(sqlRun, bindVar);
+      const result = await connection.execute(sqlRun, bindVar);
       let resultVal = result.outBinds.lob_1;
       compareResultBufAndOriginal(resultVal, originalBuf1, specialStr1);
       resultVal = result.outBinds.lob_2;
@@ -1044,7 +1025,7 @@ describe('79. blobPlsqlBindAsBuffer_bindinout.js', function() {
       const specialStr = "79.3.1";
       const bigStr_1 = random.getRandomString(size_1, specialStr);
       const bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
-      let result = null;
+      let result;
 
       const sql = "INSERT INTO nodb_tab_lobs_in (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       await prepareTableWithBlob(sql, preparedCLOBID);

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -997,12 +997,11 @@ describe('77. blobPlsqlBindAsBuffer_bindin.js', function() {
       const size_1 = 32768;
       const bigStr_1 = random.getRandomString(size_1, specialStr);
       const bufferStr_1 = Buffer.from(bigStr_1, "utf-8");
-      let result = null;
 
       const sql = "INSERT INTO nodb_tab_lobs_in (id, blob) VALUES (:i, EMPTY_BLOB()) RETURNING blob INTO :lobbv";
       await prepareTableWithBlob(sql, preparedCLOBID);
 
-      result = await connection.execute(
+      const result = await connection.execute(
         "select blob from nodb_tab_lobs_in where id = :id",
         { id: preparedCLOBID });
 

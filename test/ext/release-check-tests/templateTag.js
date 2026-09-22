@@ -84,7 +84,7 @@ async function run() {
 
   // update test
   query = sql`update nodb_tab_template set name = 'JOHN' where id = ${id}`;
-  result = await connection.execute(query);
+  await connection.execute(query);
 
   // After update
   query = sql`SELECT * FROM nodb_tab_template WHERE id = 20`;

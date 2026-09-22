@@ -498,8 +498,7 @@ describe('1. vectorDatabaseLink.js', function() {
       };
       await connection.execute(sql, bindVar);
 
-      let result = null;
-      result = await connection.execute(
+      let result = await connection.execute(
         `SELECT TO_CLOB(nclobCol) FROM ${tableName}`);
       let lob = result.rows[0][0];
       assert(lob);

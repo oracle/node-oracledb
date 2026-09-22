@@ -224,11 +224,11 @@ describe('290. dbObject20.js', () => {
           NAME: 'ABC'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'LMN'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'XYZ'
         }
       ];
@@ -267,11 +267,11 @@ describe('290. dbObject20.js', () => {
           NAME: 'ABC'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'LMN'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'XYZ'
         }
       ];
@@ -493,11 +493,11 @@ describe('290. dbObject20.js', () => {
           NAME: 'ABC'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'LMN'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'XYZ'
         }
       ];
@@ -536,11 +536,11 @@ describe('290. dbObject20.js', () => {
           NAME: 'ABC'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'LMN'
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: 'XYZ'
         }
       ];
@@ -745,11 +745,11 @@ describe('290. dbObject20.js', () => {
           NAME: Buffer.from('ABC')
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: Buffer.from('LMN')
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: Buffer.from('XYZ')
         }
       ];
@@ -788,11 +788,11 @@ describe('290. dbObject20.js', () => {
           NAME: Buffer.from('ABC')
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: Buffer.from('LMN')
         },
         {
-          ID: initialID++,
+          ID: ++initialID,
           NAME: Buffer.from('XYZ')
         }
       ];
@@ -995,13 +995,13 @@ describe('290. dbObject20.js', () => {
       // create Procedure.
       const PROC = 'nodb_proc_test2029041';
       const createProc = `
-      CREATE OR REPLACE PROCEDURE ${PROC}
-        (a IN ${TYPE3}, b IN OUT ${TYPE3}) AS
-      BEGIN
-         b := a;
-      END;
-    `;
-      let result = await conn.execute(createProc);
+        CREATE OR REPLACE PROCEDURE ${PROC}
+          (a IN ${TYPE3}, b IN OUT ${TYPE3}) AS
+        BEGIN
+          b := a;
+        END;
+      `;
+      await conn.execute(createProc);
 
       // Call procedure.
       const plsql = `BEGIN ${PROC} (:pIn, :pOut); END;`;
@@ -1009,7 +1009,7 @@ describe('290. dbObject20.js', () => {
         pIn: { val: pInObj, dir: oracledb.BIND_IN },
         pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
       };
-      result = await conn.execute(plsql, bindVar);
+      const result = await conn.execute(plsql, bindVar);
 
       // Verify the result.
       assert.strictEqual(JSON.stringify(data), JSON.stringify(result.outBinds.pOut));
@@ -1113,13 +1113,13 @@ describe('290. dbObject20.js', () => {
       // create Procedure.
       let PROC = 'nodb_proc_test2029044';
       let createProc = `
-      CREATE OR REPLACE PROCEDURE ${PROC}
-        (a IN ${TYPE5}, b IN OUT ${TYPE5}) AS
-      BEGIN
-         b := a;
-      END;
-    `;
-      let result = await conn.execute(createProc);
+        CREATE OR REPLACE PROCEDURE ${PROC}
+          (a IN ${TYPE5}, b IN OUT ${TYPE5}) AS
+        BEGIN
+          b := a;
+        END;
+      `;
+      await conn.execute(createProc);
 
       // Call procedure.
       let plsql = `BEGIN ${PROC} (:pIn, :pOut); END;`;
@@ -1127,7 +1127,7 @@ describe('290. dbObject20.js', () => {
         pIn: { val: pInObj, dir: oracledb.BIND_IN },
         pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
       };
-      result = await conn.execute(plsql, bindVar);
+      let result = await conn.execute(plsql, bindVar);
 
       // Verify the result.
       assert.strictEqual(JSON.stringify(dataChar), JSON.stringify(result.outBinds.pOut));
@@ -1171,7 +1171,7 @@ describe('290. dbObject20.js', () => {
          b := a;
       END;
     `;
-      result = await conn.execute(createProc);
+      await conn.execute(createProc);
       pInClass = await conn.getDbObjectClass(TYPE6);
       pOutClass = await conn.getDbObjectClass(TYPE6);
       pInObj = new pInClass(dataBytes);
@@ -1572,13 +1572,13 @@ describe('290. dbObject20.js', () => {
       // create Procedure.
       const PROC = 'nodb_proc_test2029041';
       const createProc = `
-      CREATE OR REPLACE PROCEDURE ${PROC}
-        (a IN ${TYPE1}, b IN OUT ${TYPE1}) AS
-      BEGIN
-         b := a;
-      END;
-    `;
-      let result = await conn.execute(createProc);
+        CREATE OR REPLACE PROCEDURE ${PROC}
+          (a IN ${TYPE1}, b IN OUT ${TYPE1}) AS
+        BEGIN
+          b := a;
+        END;
+      `;
+      await conn.execute(createProc);
 
       // Call procedure.
       let plsql = `BEGIN ${PROC} (:pIn, :pOut); END;`;
@@ -1586,7 +1586,7 @@ describe('290. dbObject20.js', () => {
         pIn: { val: pInObj, dir: oracledb.BIND_IN },
         pOut: { val: pOutObj, dir: oracledb.BIND_INOUT },
       };
-      result = await conn.execute(plsql, bindVar);
+      let result = await conn.execute(plsql, bindVar);
       // convert number and float expected data as string.
       expectedData.LINE_ID = String(expectedData.LINE_ID);
       expectedData.LINE_ID2 = String(expectedData.LINE_ID2);
@@ -1615,7 +1615,7 @@ describe('290. dbObject20.js', () => {
            b := a;
         END;
       `;
-      result = await conn.execute(createProc2);
+      await conn.execute(createProc2);
 
       // Call procedure.
       plsql = `BEGIN ${PROC2} (:pIn, :pOut); END;`;

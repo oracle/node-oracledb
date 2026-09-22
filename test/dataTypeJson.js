@@ -1003,14 +1003,14 @@ describe('244.dataTypeJson.js', function() {
     it('244.12.1 Verify Json Id on select', async function() {
       const inpDoc = {"name": "Jenny"};
       let sql = ` insert into ${TABLE} values (:1)`;
-      let result = await connection.execute(sql, [{
+      await connection.execute(sql, [{
         type: oracledb.DB_TYPE_JSON,
         val: inpDoc
       }]);
 
       // Verify _id is generated.
       sql = `select * from ${TABLE}`;
-      result = await connection.execute(sql);
+      let result = await connection.execute(sql);
       let genDoc = result.rows[0][0];
       assert(("_id" in genDoc));
       const autogenID = genDoc._id;
@@ -1018,7 +1018,7 @@ describe('244.dataTypeJson.js', function() {
       // Verify update with new values without passing _id.
       inpDoc.name = "Scott";
       sql = ` update ${TABLE} set DATA = :1`;
-      result = await connection.execute(sql, [{
+      await connection.execute(sql, [{
         type: oracledb.DB_TYPE_JSON,
         val: inpDoc
       }]);
@@ -1032,7 +1032,7 @@ describe('244.dataTypeJson.js', function() {
       // Verify update with new values with passing _id from the generated Doc.
       genDoc.name = "John";
       sql = ` update ${TABLE} set DATA = :1`;
-      result = await connection.execute(sql, [{
+      await connection.execute(sql, [{
         type: oracledb.DB_TYPE_JSON,
         val: genDoc
       }]);
@@ -1049,7 +1049,7 @@ describe('244.dataTypeJson.js', function() {
       const jsonId = new oracledb.JsonId(genDoc._id);
       const inpDocWithJsonIdKey = {"_id": jsonId, "name": "Bob"};
       sql = ` insert into ${TABLE} values (:1)`;
-      result = await connection.execute(sql, [{
+      await connection.execute(sql, [{
         type: oracledb.DB_TYPE_JSON,
         val: inpDocWithJsonIdKey
       }]);
@@ -1074,7 +1074,7 @@ describe('244.dataTypeJson.js', function() {
       // User provided keys should still work.
       const inpDocWithUserKey = {"_id": 1, "name": "Jenny"};
       sql = ` insert into ${TABLE} values (:1)`;
-      result = await connection.execute(sql, [{
+      await connection.execute(sql, [{
         type: oracledb.DB_TYPE_JSON,
         val: inpDocWithUserKey
       }]);

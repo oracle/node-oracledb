@@ -75,7 +75,7 @@ describe('229. dbType03.js', () => {
     result = await conn.execute(sql);
     assert.strictEqual(binds[0], result.rows[0][0]);
 
-    let nearlyEqual = false;
+    let nearlyEqual;
     nearlyEqual = ApproxEql(binds[1].val, result.rows[0][1]);
     assert.strictEqual(nearlyEqual, true);
 
@@ -99,7 +99,7 @@ describe('229. dbType03.js', () => {
     const result = await conn.execute(sql, binds);
     assert.strictEqual(1, result.rowsAffected);
 
-    let nearlyEqual = false;
+    let nearlyEqual;
     nearlyEqual = ApproxEql(num1, result.outBinds[0][0]);
     assert.strictEqual(nearlyEqual, true);
 

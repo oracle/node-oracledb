@@ -238,15 +238,14 @@ describe('3.blobPLSQLBindLargeData.js', function() {
 
   const bindInLargeFile = async function(fileSizeInGB, numMinus, lenExpected, insertTable) {
     const sqlRun = `BEGIN nodb_blobs_in_741 (:i, :b); END;`;
-    let lob = {};
-    let result = null;
+
     inFileName = fileRoot + '/' + fileSizeInGB + 'largeString.txt';
     await largeFile.createFileInGB(inFileName, fileSizeInGB, numMinus);
     await insertTableWithBlob(insertID, inFileName, insertTable);
     const sql = `select blob from ` + insertTable + ` where id = ` + insertID;
-    result = await connection.execute(sql);
+    const result = await connection.execute(sql);
 
-    lob = result.rows[0][0];
+    const lob = result.rows[0][0];
     assert(lob);
     const bindVar = {
       i: insertID,
@@ -267,14 +266,12 @@ describe('3.blobPLSQLBindLargeData.js', function() {
 
   const bindInSmallFile = async function(fileSize, insertTable, specialStr) {
     const sqlRun = `BEGIN nodb_blobs_in_741 (:i, :b); END;`;
-    let lob = {};
-    let result = null;
     inFileName = fileRoot + '/' + 'smallString.txt';
     await largeFile.createFileInKB(inFileName, fileSize, specialStr);
     await insertTableWithBlob(insertID, inFileName, insertTable);
     const sql = `select blob from ` + insertTable + ` where id = ` + insertID;
-    result = await connection.execute(sql);
-    lob = result.rows[0][0];
+    const result = await connection.execute(sql);
+    const lob = result.rows[0][0];
     assert(lob);
     const bindVar = {
       i: insertID,
@@ -291,8 +288,6 @@ describe('3.blobPLSQLBindLargeData.js', function() {
 
   const bindOutLargeData = async function(fileSizeInGB, numMinus, lenExpected, insertTable) {
     const sqlRun = `BEGIN nodb_blobs_out_742 (:i, :b); END;`;
-    let resultBlob = {};
-    let result = null;
     inFileName = fileRoot + '/' + fileSizeInGB + 'largeData.txt';
     largeFile.createFileInGB(inFileName, fileSizeInGB, numMinus);
     await insertTableWithBlob(insertID, inFileName, insertTable);
@@ -301,8 +296,8 @@ describe('3.blobPLSQLBindLargeData.js', function() {
       b: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
     };
 
-    result = await connection.execute(sqlRun, bindVar);
-    resultBlob = result.outBinds.b;
+    const result = await connection.execute(sqlRun, bindVar);
+    const resultBlob = result.outBinds.b;
     assert(resultBlob);
 
     await verifyBindoutBlob(resultBlob, insertID, insertID, lenExpected);
@@ -311,8 +306,6 @@ describe('3.blobPLSQLBindLargeData.js', function() {
 
   const bindOutSmallData = async function(fileSize, insertTable, specialStr) {
     const sqlRun = `BEGIN nodb_blobs_out_742 (:i, :b); END;`;
-    let resultBlob = {};
-    let result = null;
     inFileName = fileRoot + '/' + 'smallData.txt';
     largeFile.createFileInKB(inFileName, fileSize, specialStr);
     await insertTableWithBlob(insertID, inFileName, insertTable);
@@ -321,8 +314,8 @@ describe('3.blobPLSQLBindLargeData.js', function() {
       b: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
     };
 
-    result = await connection.execute(sqlRun, bindVar);
-    resultBlob = result.outBinds.b;
+    const result = await connection.execute(sqlRun, bindVar);
+    const resultBlob = result.outBinds.b;
     assert(resultBlob);
     await verifyBindoutBlob(resultBlob, insertID, insertID, fileSize);
     fs.unlinkSync(inFileName);
@@ -348,11 +341,8 @@ describe('3.blobPLSQLBindLargeData.js', function() {
       i: id,
       lobbv: { type: oracledb.BLOB, dir: oracledb.BIND_OUT }
     };
-    let result = null;
 
-    result = await connection.execute(
-      sql,
-      bindVar,
+    const result = await connection.execute(sql, bindVar,
       { autoCommit: false }); // a transaction needs to span the INSERT and pipe()
 
     assert.strictEqual(result.rowsAffected, 1);
@@ -384,13 +374,12 @@ describe('3.blobPLSQLBindLargeData.js', function() {
                              END nodb_blob_compare;`;
     const sqlRunComparePorc = `begin nodb_blob_compare(:r, :l); end;`;
     const sqlDropComparePorc = `DROP PROCEDURE nodb_blob_compare`;
-    let result = null;
     await executeSQL(proc_compare_blob);
     const bindVar = {
       r: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
       l: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
     };
-    result = await connection.execute(sqlRunComparePorc, bindVar);
+    const result = await connection.execute(sqlRunComparePorc, bindVar);
 
     assert.strictEqual(result.outBinds.r, 0);
     assert.strictEqual(result.outBinds.l, lenExpected);
@@ -399,7 +388,6 @@ describe('3.blobPLSQLBindLargeData.js', function() {
   };
 
   const verifyBindoutBlob = async function(blob, insertID, preID, lenExpected) {
-    let result = null;
     const insetSql = `INSERT INTO nodb_tab_lobs_pre (id, blob) VALUES (:i, :c)`;
     const proc_compare_blob = `CREATE OR REPLACE PROCEDURE nodb_blob_compare(result OUT NUMBER, len OUT NUMBER) \n
                                IS \n
@@ -426,7 +414,7 @@ describe('3.blobPLSQLBindLargeData.js', function() {
       r: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT },
       l: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
     };
-    result = await connection.execute(sqlRunComparePorc, bindVar);
+    const result = await connection.execute(sqlRunComparePorc, bindVar);
 
     assert.strictEqual(result.outBinds.r, 0);
     assert.strictEqual(result.outBinds.l, lenExpected);

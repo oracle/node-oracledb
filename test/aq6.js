@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -181,6 +181,7 @@ describe('282. aq6.js', function() {
       msg = await queue.enqOne ({
         payload: { "employees": [ "Employee1", "Employee2", "Employee3" ] },
       });
+      assert(msg);
 
       await conn.commit();
 
@@ -204,6 +205,7 @@ describe('282. aq6.js', function() {
         {payload: { "employees": [ "Employee1", "Employee2", "Employee3" ] } },
         {payload: { "ids": [ 101, 102, 103 ] } },
       ]);
+      assert(msgs);
 
       await conn.commit();
 

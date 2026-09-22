@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -73,7 +73,7 @@ describe('81. clobDMLBindAsString.js', function() {
   };
 
   const insertIntoClobTable1 = async function(id, content) {
-    let result = null;
+    let result;
     if (content == "EMPTY_CLOB") {
       result = await connection.execute(
         "INSERT INTO nodb_dml_clob_1 VALUES (:ID, EMPTY_CLOB())",
@@ -91,7 +91,7 @@ describe('81. clobDMLBindAsString.js', function() {
   };
 
   const updateClobTable1 = async function(id, content) {
-    let result = null;
+    let result;
     if (content == "EMPTY_CLOB") {
       result = await connection.execute(
         "UPDATE nodb_dml_clob_1 set clob = EMPTY_CLOB() where id = :ID",
@@ -107,8 +107,7 @@ describe('81. clobDMLBindAsString.js', function() {
 
   // compare the inserted clob with orginal content
   const verifyClobValueWithString = async function(selectSql, originalString, specialStr) {
-    let result = null;
-    result = await connection.execute(selectSql);
+    const result = await connection.execute(selectSql);
     const lob = result.rows[0][0];
 
     if (originalString == '' || originalString == undefined || originalString == null) {

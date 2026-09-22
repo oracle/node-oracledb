@@ -62,14 +62,16 @@ describe("326. appContext.js", () => {
       ]);
 
       let result =
-        await connection.execute(`SELECT SYS_CONTEXT('${nameSpaceName}', 'traceCtx') AS ctx_val
-FROM dual`);
+        await connection.execute(
+          `SELECT SYS_CONTEXT('${nameSpaceName}', 'traceCtx') AS ctx_val
+            FROM dual`);
       assert.deepStrictEqual(result.rows[0], ["12"]);
 
       // The context is available until its cleared.
       result =
-        await connection.execute(`SELECT SYS_CONTEXT('${nameSpaceName}', 'version') AS ctx_val
-FROM dual`);
+        await connection.execute(
+          `SELECT SYS_CONTEXT('${nameSpaceName}', 'version') AS ctx_val
+            FROM dual`);
       assert.deepStrictEqual(result.rows[0], ["1"]);
 
       // Verify update context for 'CLIENTCONTEXT'
@@ -78,24 +80,28 @@ FROM dual`);
         { version: "2" },
       ]);
       result =
-        await connection.execute(`SELECT SYS_CONTEXT('${nameSpaceName}', 'traceCtx') AS ctx_val
-FROM dual`);
+        await connection.execute(
+          `SELECT SYS_CONTEXT('${nameSpaceName}', 'traceCtx') AS ctx_val
+            FROM dual`);
       assert.deepStrictEqual(result.rows[0], ["13"]);
       result =
-        await connection.execute(`SELECT SYS_CONTEXT('${nameSpaceName}', 'version') AS ctx_val
-FROM dual`);
+        await connection.execute(
+          `SELECT SYS_CONTEXT('${nameSpaceName}', 'version') AS ctx_val
+            FROM dual`);
       assert.deepStrictEqual(result.rows[0], ["2"]);
 
       //Verify context is cleared after issuing clearAppContext.
       connection.clearAppContext("CLIENTCONTEXT");
       result =
-        await connection.execute(`SELECT SYS_CONTEXT('${nameSpaceName}', 'traceCtx') AS ctx_val
-FROM dual`);
+        await connection.execute(
+          `SELECT SYS_CONTEXT('${nameSpaceName}', 'traceCtx') AS ctx_val
+            FROM dual`);
       assert.deepStrictEqual(result.rows[0], [null]);
 
       result =
-        await connection.execute(`SELECT SYS_CONTEXT('${nameSpaceName}', 'version') AS ctx_val
-FROM dual`);
+        await connection.execute(
+          `SELECT SYS_CONTEXT('${nameSpaceName}', 'version') AS ctx_val
+            FROM dual`);
       assert.deepStrictEqual(result.rows[0], [null]);
 
       // Verify context name other than default CLIENTCONTEXT throws an error
@@ -109,8 +115,9 @@ FROM dual`);
 
         await assert.rejects(
           async () =>
-            await connection.execute(`SELECT SYS_CONTEXT('${multiByteContextName}', 'traceCtx') AS ctx_val
-FROM dual`),
+            await connection.execute(
+              `SELECT SYS_CONTEXT('${multiByteContextName}', 'traceCtx') AS ctx_val
+                FROM dual`),
           /ORA-28267:/ /* An invalid value was provided for the context namespace. */,
         );
       } else {
@@ -180,7 +187,7 @@ FROM dual`),
           { traceCtx: 1 },
           { version: "updated" },
         ]);
-      }, /NJS-185/); // ERR_APP_CONTEXT_INVALID_KEY_VALUE
+      }, /NJS-185:/); // ERR_APP_CONTEXT_INVALID_KEY_VALUE
 
       // Non-object entries should surface ERR_APP_CONTEXT_INVALID_KEY_VALUE with entry type.
       assert.throws(() => {
@@ -240,14 +247,14 @@ FROM dual`),
         connection.appContext("CLIENTCONTEXT", [
           { [tooLongKey]: "12" },
         ]);
-      }, /NJS-186/); // ERR_APP_CONTEXT_KEY_TOO_LONG
+      }, /NJS-186:/); // ERR_APP_CONTEXT_KEY_TOO_LONG
       connection.clearAppContext("CLIENTCONTEXT");
 
       assert.throws(() => {
         connection.appContext("CLIENTCONTEXT", [
           { version: tooLongValue },
         ]);
-      }, /NJS-187/); // ERR_APP_CONTEXT_VALUE_TOO_LONG
+      }, /NJS-187:/); // ERR_APP_CONTEXT_VALUE_TOO_LONG
       connection.clearAppContext("CLIENTCONTEXT");
     });
 
@@ -454,14 +461,10 @@ FROM dual`),
         );
         assert.deepStrictEqual(result.rows[0], ["1"]);
       } finally {
-        if (secondConnection) {
+        if (secondConnection)
           await secondConnection.close();
-          secondConnection = null;
-        }
-        if (poolConnection) {
+        if (poolConnection)
           await poolConnection.close();
-          poolConnection = null;
-        }
       }
     }); // 326.3.1
 

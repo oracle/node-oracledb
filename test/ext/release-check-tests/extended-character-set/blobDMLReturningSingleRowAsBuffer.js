@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, Oracle and/or its affiliates. All rights reserved. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. All rights reserved. */
 
 /******************************************************************************
  *
@@ -52,7 +52,11 @@ const random        = require('../../../random.js');
 
 describe('2. blobDMLReturningSingleRowAsBuffer.js', function() {
 
-  const credential_DBA = {user: process.env.NODE_ORACLEDB_DBA_USER, password: process.env.NODE_ORACLEDB_DBA_PASSWORD, connectString: dbConfig.connectString, privilege: oracledb.SYSDBA};
+  const credential_DBA = {
+    user: process.env.NODE_ORACLEDB_DBA_USER,
+    password: process.env.NODE_ORACLEDB_DBA_PASSWORD,
+    connectString: dbConfig.connectString,
+    privilege: oracledb.SYSDBA};
 
   let connection = null;
   const tableName = "nodb_dml_blob_140";
@@ -79,12 +83,11 @@ describe('2. blobDMLReturningSingleRowAsBuffer.js', function() {
 
   before(async function() {
     const sqlCheckMaxStrVal = "SELECT name, value FROM v$parameter WHERE name = 'max_string_size'";
-    let result = null;
     connection = await oracledb.getConnection(credential_DBA);
 
     serverVersion = await connection.oracleServerVersion;
 
-    result = await connection.execute(sqlCheckMaxStrVal);
+    const result = await connection.execute(sqlCheckMaxStrVal);
     if (result.rows.length == 0) maxStringSize = "UNDEFINED";
     else maxStringSize = result.rows[0][1];
   });
@@ -247,14 +250,12 @@ describe('2. blobDMLReturningSingleRowAsBuffer.js', function() {
   const insertData = async function(i) {
     const str = random.getRandomLengthString(i + 10);
     const blob = Buffer.from(str, "utf-8");
-    let result = null;
-    result = await connection.execute(
+    const result = await connection.execute(
       "insert into " + tableName + " values (:id, :b)",
       {
         id: {val: i, dir: oracledb.BIND_IN, type: oracledb.NUMBER},
         b: {val: blob, dir: oracledb.BIND_IN, type: oracledb.BUFFER}
       });
     assert.strictEqual(result.rowsAffected, 1);
-
   };
 });
