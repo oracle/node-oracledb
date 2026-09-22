@@ -104,6 +104,10 @@ Thin Mode Changes
     ``enqTime`` property in
     :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>`.
 
+#)  Fixed bug where calling :meth:`resultset.getRows()` after partially
+    consuming a fully prefetched result set could return previously consumed
+    rows instead of just the remaining rows.
+
 Thick Mode Changes
 ++++++++++++++++++
 

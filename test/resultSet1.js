@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -457,6 +457,56 @@ describe('12. resultSet1.js', function() {
       );
     });
 
+    it('12.3.13 gets remaining prefetched rows after a partial read',
+      async function() {
+        const result = await conn.execute(
+          `SELECT employees_id FROM nodb_rs1_emp
+           WHERE employees_id <= 3 ORDER BY employees_id`,
+          [],
+          { resultSet: true, fetchArraySize: 5, prefetchRows: 3 }
+        );
+        const rs = result.resultSet;
+        assert.deepStrictEqual(await rs.getRows(1), [ [1] ]);
+        assert.deepStrictEqual(await rs.getRows(3), [ [2], [3] ]);
+        await rs.close();
+      });
+
+    it('12.3.14 fetches cleanly after exhausting prefetched rows and maintains independent fetch state',
+      async function() {
+        const sql = `
+          SELECT employees_id
+          FROM nodb_rs1_emp
+          WHERE employees_id <= 4
+          ORDER BY employees_id`;
+
+        const options = {
+          resultSet: true,
+          fetchArraySize: 5,
+          prefetchRows: 3
+        };
+
+        // Execute the same statement twice while both result sets are active.
+        const firstResult = await conn.execute(sql, [], options);
+        const secondResult = await conn.execute(sql, [], options);
+        const firstResultSet = firstResult.resultSet;
+        const secondResultSet = secondResult.resultSet;
+
+        // Consume one prefetched row from each result set independently.
+        assert.deepStrictEqual(await firstResultSet.getRows(1), [[1]]);
+        assert.deepStrictEqual(await secondResultSet.getRows(1), [[1]]);
+
+        // Exhaust the remaining prefetched rows, then fetch the next row.
+        assert.deepStrictEqual(await firstResultSet.getRows(2), [[2], [3]]);
+        assert.deepStrictEqual(await firstResultSet.getRows(1), [[4]]);
+
+        // Verify that consuming the first result set did not affect the second
+        // result set, which should continue from its own buffer position.
+        assert.deepStrictEqual(await secondResultSet.getRows(2), [[2], [3]]);
+        assert.deepStrictEqual(await secondResultSet.getRows(1), [[4]]);
+
+        await firstResultSet.close();
+        await secondResultSet.close();
+      });
   }); // 12.3
 
   describe('12.4 Testing function getRow()', function() {

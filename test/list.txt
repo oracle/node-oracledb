@@ -414,6 +414,8 @@ Overview of node-oracledb functional tests
       12.3.10 getRows(0) returns remaining all rows
       12.3.11 Negative - set the 1st parameter of getRows() to be -5
       12.3.12 Negative - set the 1st parameter of getRows() to be null
+      12.3.13 gets remaining prefetched rows after a partial read
+      12.3.14 fetches cleanly after exhausting prefetched rows and maintains independent fetch state
     12.4 Testing function getRow()
       12.4.1 works well with all correct setting
       12.4.2 data in resultSet is array when setting outFormat ARRAY
@@ -6832,7 +6834,7 @@ Overview of node-oracledb functional tests
     329.21 setter piggybacks on execute roundtrip
     329.22 valid pending setter syncs back even when SQL execution fails
     329.23 setter accepts case-insensitive txnPriority values
-  
+
   330. cqn.js
     330.1 receives a basic CQN notification
     330.2 returns the registration id for query subscriptions
