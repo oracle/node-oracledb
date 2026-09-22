@@ -247,7 +247,7 @@ See :ref:`awssecretsmanager` for more information.
 Google Cloud Storage Centralized Configuration Provider Plugin
 --------------------------------------------------------------
 
-.. versionadded:: 7.1
+.. versionadded:: 26.0.0
 
 ``gcpstorage`` is a plugin that can be loaded in your application to provide
 access to configuration information stored in

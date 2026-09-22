@@ -454,7 +454,7 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
 
         The SSL_ALLOW_WEAK_DN_MATCH is considered a temporary solution to enable the behavior of SSL_SERVER_DN_MATCH prior to Oracle AI Database 26ai. See `Strict DN Matching with Both Listener and Server Certificates <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-87017-2>`__ for more information.
 
-        .. versionchanged:: 7.1
+        .. versionchanged:: 26.0.0
 
           The TLS alias support was added in node-oracledb Thin mode.
     * - SSL_SERVER_CERT_DN or TLS_SERVER_CERT_DN
@@ -463,7 +463,7 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
 
         **Note**: If specified, this value is used for any verification. Otherwise, the hostname will be used.
 
-        .. versionchanged:: 7.1
+        .. versionchanged:: 26.0.0
 
           The TLS alias support was added in node-oracledb Thin mode.
     * - SSL_SERVER_DN_MATCH or TLS_SERVER_DN_MATCH
@@ -472,7 +472,7 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
 
         **Note**: In Thin mode, parsing the parameter supports case insensitive on/yes/true values similar to the Thick mode. Any other value is treated as disabling it.
 
-        .. versionchanged:: 7.1
+        .. versionchanged:: 26.0.0
 
           The TLS alias support was added in node-oracledb Thin mode.
     * - WALLET_LOCATION

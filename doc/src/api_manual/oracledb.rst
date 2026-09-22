@@ -708,7 +708,7 @@ Constants for the :ref:`vectorFormat <execmetadata>` attribute.
 Transaction Priority Constants
 ------------------------------
 
-.. versionadded:: 7.1
+.. versionadded:: 26.0.0
 
 Constants for the :attr:`connection.txnPriority` property, and the
 ``txnPriority`` property of :meth:`oracledb.getConnection()` and
@@ -2719,7 +2719,7 @@ Oracledb Methods
 
             See :ref:`txnpriority` for more information.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``transportConnectTimeout``
           - Number
           - Thin
@@ -3711,7 +3711,7 @@ Oracledb Methods
 
             See :ref:`txnpriority` for more information.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``user``, ``username``
           - String
           - Both

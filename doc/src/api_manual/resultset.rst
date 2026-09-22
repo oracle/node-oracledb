@@ -171,7 +171,7 @@ ResultSet Methods
 
             An optional parameter that can be used to control the behavior of ``toQueryStream()``. See :ref:`toQueryStream() options Parameter properties <toquerystreamoptions>` for information about its properties.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
 
     .. _toquerystreamoptions:
 
@@ -200,7 +200,7 @@ ResultSet Methods
 
             The default value is *1*.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
 
     To change the behavior of ``toQueryStream()``, such as setting the
     :ref:`query output Format <queryoutputformats>` or the internal buffer
@@ -214,7 +214,7 @@ ResultSet Methods
     Support for Node.js 8’s Stream ``destroy()`` method was added in
     node-oracledb 2.1.
 
-    .. versionchanged:: 7.1
+    .. versionchanged:: 26.0.0
 
         The ``options`` parameter and the ``rowsPerDataEvent`` option property
         were added.

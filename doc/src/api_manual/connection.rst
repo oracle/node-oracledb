@@ -129,7 +129,7 @@ The properties of a *Connection* object are listed below.
 
 .. attribute:: connection.databaseOpenTelemetryTracing
 
-    .. versionadded:: 7.1
+    .. versionadded:: 26.0.0
 
     This read/write property is a boolean that enables or disables database
     server-side OpenTelemetry traces.
@@ -201,7 +201,7 @@ The properties of a *Connection* object are listed below.
     The value is available in the ``ECID`` column of the ``V$SESSION`` view.
     It is also shown in audit logs.
 
-    .. versionchanged:: 7.1
+    .. versionchanged:: 26.0.0
 
         Support for this property was added in node-oracledb Thin mode.
 
@@ -455,7 +455,7 @@ The properties of a *Connection* object are listed below.
 
 .. attribute:: connection.txnPriority
 
-    .. versionadded:: 7.1
+    .. versionadded:: 26.0.0
 
     This read/write property is a string that specifies the transaction
     priority associated with the connection.
@@ -2341,7 +2341,7 @@ Connection Methods
 
             The default value is *1*.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
 
     By default, each ``data`` event contains the row itself, not an array
     containing one row. This is also true when ``rowsPerDataEvent`` is set to
@@ -2370,7 +2370,7 @@ Connection Methods
 
     See :meth:`~connection.execute()`.
 
-    .. versionchanged:: 7.1
+    .. versionchanged:: 26.0.0
 
         The ``rowsPerDataEvent`` option property was added.
 
@@ -2930,15 +2930,15 @@ Connection Methods
         * - ``consumerName``
           - The consumer name for Advanced Queuing notifications. Undefined for CQN.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``msgId``
           - A Buffer containing the Advanced Queuing message identifier. Undefined for CQN.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``originalMsgId``
           - A Buffer containing the original Advanced Queuing message identifier, if provided by the database. Undefined for CQN.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``queueName``
           - The name of the Advanced Queue. Undefined for CQN.
 
@@ -2958,19 +2958,19 @@ Connection Methods
 
             This property is only supported in node-oracledb Thin mode.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``senderAgentName``
           - The Advanced Queuing sender agent name, if provided by the database. Undefined for CQN.
 
             This property is only supported in node-oracledb Thin mode.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``senderAgentProtocol``
           - The Advanced Queuing sender agent protocol, if provided by the database. Undefined for CQN.
 
             This property is only supported in node-oracledb Thin mode.
 
-            .. versionadded:: 7.1
+            .. versionadded:: 26.0.0
         * - ``tables``
           - An array of objects specifying the tables which were affected by the notification. This is only defined if ``type`` is :ref:`oracledb.SUBSCR_EVENT_TYPE_OBJ_CHANGE <oracledbconstantssubscription>`.
             It contains the following properties:

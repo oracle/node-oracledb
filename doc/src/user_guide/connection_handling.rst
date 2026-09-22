@@ -1579,7 +1579,7 @@ Using a Google Cloud Storage Centralized Configuration Provider
 
 `Google Cloud Storage <https://docs.cloud.google.com/storage/docs>`__ stores
 and manages Oracle Database connection information as JSON. This configuration
-provider support was introduced in node-oracledb 7.1.
+provider support was introduced in node-oracledb 26.0.0.
 
 To use a Google Cloud Storage Centralized Configuration Provider, you must:
 

@@ -100,7 +100,7 @@ more information on transaction priority, see `Priority Transactions
 <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-8B71D725-24E9-
 4AE1-B9FA-BAC291923EAC>`__.
 
-From node-oracledb version 7.1 onwards, the transaction priority can be set
+From node-oracledb version 26.0.0 onwards, the transaction priority can be set
 on connections. The transaction priority must be set when the connection has
 no active transactions. Applications that use low or medium priority
 transactions must be prepared for the database to roll back a transaction that
