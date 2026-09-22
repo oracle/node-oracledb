@@ -282,6 +282,9 @@ Thin Mode Changes
     :ref:`Oracle Deep Data Security <deepdatasecurity>` feature introduced in
     Oracle AI Database 26ai.
 
+#)  Added the :ref:`Vector SDK plugin <vectorsdkplugin>` for Oracle AI Vector
+    Search workflows.
+
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
     See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
 

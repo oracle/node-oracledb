@@ -168,6 +168,18 @@ if (process.env.NODE_ORACLEDB_PDB2) {
   config.test.NODE_ORACLEDB_PDB2 = process.env.NODE_ORACLEDB_PDB2;
 }
 
+if (process.env.MODEL_DIR) {
+  config.test.modelDir = process.env.MODEL_DIR;
+}
+
+if (process.env.MODEL_FILE) {
+  config.test.modelFile = process.env.MODEL_FILE;
+}
+
+if (process.env.MODEL_DIMS) {
+  config.test.modelDims = process.env.MODEL_DIMS;
+}
+
 config.createUser = () => {
   ++counter;
   return "NJS_" + counter.toString() + config.user;
