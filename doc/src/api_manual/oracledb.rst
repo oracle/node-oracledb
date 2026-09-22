@@ -3028,19 +3028,19 @@ Oracledb Methods
           - Authentication flow used by the provider. Values are "onBehalfOf" and "app". The default value is "onBehalfOf".
         * - ``endUserToken``
           - String
-          - Default end-user token. Request metadata supplied to :meth:`securityContextProvider.runWithContext()` overrides this value. In ``app`` mode, it is included with the application database token and cannot be combined with ``endUserName`` or ``contextId``.
+          - Default end-user token. Request metadata supplied to :meth:`securityContextProvider.runWithContext()` overrides this value. In ``app`` mode, it is included with the application database token and cannot be combined with ``endUserName`` or ``key``.
         * - ``endUserName``
           - String
           - Default end-user name.
+        * - ``key``
+          - String
+          - Default end-user security context key. It can be used only with ``endUserName``.
         * - ``dataRoles``
           - Array
           - Default data roles to include in the end-user security context.
         * - ``attributes``
           - Object
           - Default JSON-serializable attributes to include in the end-user security context.
-        * - ``authMode``
-          - String
-          - Default request authentication mode. Values are "obo" and "app".
         * - ``cacheOptions``
           - Object
           - Options for the Azure OBO token cache. Set ``enabled`` to *false* to disable caching.

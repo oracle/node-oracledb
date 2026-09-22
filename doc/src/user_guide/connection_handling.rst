@@ -2487,7 +2487,6 @@ metadata must include an end-user token. For example:
     const connection = await pool.getConnection();
     try {
       const result = await securityContextProvider.runWithContext({
-        authMode: "obo",
         endUserToken: accessToken,
         dataRoles: ["employee_reader"],
         attributes: { department: "finance" },
@@ -2546,25 +2545,49 @@ Instead, limit the security context scope to the database operation:
       await connection.close();
     }
 
-Direct Application Logon
-++++++++++++++++++++++++
+Application Token Flow
+++++++++++++++++++++++
 
-For scheduled jobs, service workloads, or AI agents that are authorized as the
-registered application itself, set ``authFlow`` to *"app"* and omit both
-``endUserToken`` and ``endUserName``. The provider obtains a client-credential
-database-access token and uses it for direct application logon. The database
-maps the token's client identity to the registered application identity. No
-``endUserToken``, ``endUserName``, or context key is sent. For example:
+The ``app`` flow supports direct application logon and application-mediated
+end-user identities. For scheduled jobs, service workloads, or AI agents that
+are authorized as the registered application itself, select the direct form by
+omitting both ``endUserToken`` and ``endUserName``. The provider obtains a
+client-credential database-access token and uses it for direct application
+logon. The database maps the token's client identity to the registered
+application identity. No ``endUserToken``, ``endUserName``, or context key is
+sent. For example:
+
+.. code-block:: javascript
+
+    const result = await securityContextProvider.runWithContext({}, () =>
+      connection.execute("select * from hr.employees"));
+
+An application-token request with ``endUserName`` is an application-mediated
+end-user context. An application-token request with ``endUserToken`` carries
+that token directly in the security context; it must not also specify
+``endUserName`` or a context key. Use ``authFlow: "obo"`` when the driver must
+exchange the end-user token for a database token.
+
+With a pool or standalone connection configured with ``authFlow: "app"``, a
+named application-mediated end user can be supplied in request metadata:
 
 .. code-block:: javascript
 
     const result = await securityContextProvider.runWithContext({
-      authMode: "app",
+      endUserName: "employee-service",
+      key: "request-42",
+      dataRoles: ["employee_reader"],
     }, () => connection.execute("select * from hr.employees"));
 
-An application-token request with ``endUserName`` is an application-mediated
-end-user context. Do not supply ``endUserToken`` with ``authFlow: "app"``;
-use ``authFlow: "obo"`` for an end-user-token context.
+Alternatively, pass an end-user token directly with the application database
+token. Do not supply ``endUserName`` or ``key`` in this form:
+
+.. code-block:: javascript
+
+    const result = await securityContextProvider.runWithContext({
+      endUserToken: accessToken,
+      dataRoles: ["employee_reader"],
+    }, () => connection.execute("select * from hr.employees"));
 
 Token Caching
 +++++++++++++

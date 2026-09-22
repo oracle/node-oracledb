@@ -63,8 +63,7 @@ SecurityContextProvider Methods
           - A non-null object containing request-specific metadata. With the
             ``endUserSecurityProvider`` plugin, this metadata can include
             properties such as ``endUserToken``, ``endUserName``,
-            ``dataRoles``, ``attributes``, ``contextId``, and
-            ``authMode``.
+            ``dataRoles``, ``attributes``, and ``key``.
         * - ``fn``
           - Function
           - The callback function to run in the asynchronous scope associated
@@ -75,7 +74,8 @@ SecurityContextProvider Methods
 
     Values supplied in ``context`` override any default metadata specified in
     the ``endUserSecParams`` property used when creating the connection or
-    pool.
+    pool. The configured ``authFlow`` determines whether the provider uses OBO
+    or application-token authentication; request metadata cannot change it.
 
     The context does not accept an HTTP ``Authorization`` header. Applications
     and framework adapters should validate and extract the bearer token from
@@ -93,7 +93,6 @@ SecurityContextProvider Methods
         const securityContextProvider = oracledb.getSecurityContextProvider();
 
         const result = await securityContextProvider.runWithContext({
-          authMode: "obo",
           endUserToken: accessToken,
           dataRoles: ["employee_reader"],
           attributes: { department: "finance" }

@@ -37,12 +37,11 @@ const hasOwn = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
 // forwarded to an Azure or OCI token extension as token configuration.
 const PROVIDER_CONTROL_FIELDS = new Set([
   'spiType', 'authFlow', 'endUserToken', 'endUserName',
-  'dataRoles', 'attributes', 'contextId', 'authMode',
+  'dataRoles', 'attributes', 'key',
   'cacheOptions', 'contextResolution'
 ]);
 const DEFAULT_METADATA_FIELDS = [
-  'endUserToken', 'endUserName', 'dataRoles', 'attributes', 'contextId',
-  'authMode'
+  'endUserToken', 'endUserName', 'dataRoles', 'attributes', 'key',
 ];
 const PROVIDER_MODULE_PATHS = {
   azure: '../extensionAzure/index.js',
@@ -116,7 +115,7 @@ function normalizeProvider(params) {
 /**
  * Creates a provider from the `endUserSecParams` shape. Configuration fields
  * that describe the identity provider are static. `endUserToken`,
- * `endUserName`, `dataRoles`, and `attributes` are defaults only: request
+ * `endUserName`, `key`, `dataRoles`, and `attributes` are defaults only: request
  * metadata supplied by runWithContext() wins.
  */
 function configureUnifiedContextProvider(params) {
@@ -149,9 +148,10 @@ function createProviderFn(config, provider) {
     }
     const metadata = mergeMetadata(config.defaultMetadata, current);
     const endUserToken = getEndUserToken(metadata);
-    const authMode = metadata.authMode ?? config.authFlow;
-
-    if (authMode === "obo") {
+    // authFlow is fixed when the pool or standalone connection is created.
+    // Per-request metadata supplies identity only; it cannot select a token
+    // exchange for which the configured provider may lack credentials.
+    if (config.authFlow === "obo") {
       if (config.provider.vendor !== 'azure') {
         throwErr('On-behalf-of security contexts are supported only with spiType "azure".');
       }
@@ -178,8 +178,8 @@ function createProviderFn(config, provider) {
     // carries a supplied end-user token directly in the EUSC. This is not an
     // OBO exchange; Azure and OCI both support this explicit identity form.
     if (endUserToken) {
-      if (metadata.endUserName || metadata.contextId) {
-        throwErr('App mode cannot combine endUserToken with endUserName or contextId.');
+      if (metadata.endUserName || metadata.key) {
+        throwErr('App mode cannot combine endUserToken with endUserName or key.');
       }
       return getOrCreateScopedSecurityContext(unifiedProvider, config,
         tokenResult, () => createSecurityContext(finalizeAppTokenMode(metadata,
@@ -236,7 +236,7 @@ function finalizeAppMode(metadata, databaseAccessToken) {
     databaseAccessToken,
     endUserName: metadata.endUserName,
     dataRoles: metadata.dataRoles,
-    key: metadata.contextId,
+    key: metadata.key,
     attributes: metadata.attributes
   });
   return context;

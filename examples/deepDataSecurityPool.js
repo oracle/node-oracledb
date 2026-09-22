@@ -389,8 +389,8 @@ function resolveOboSecurityMetadata(req, res) {
 function resolveAppSecurityMetadata(req, _res, requestUrl) {
   const metadata = buildRequestMetadata(req, { authMode: AUTH_MODES.APP });
 
-  if (!metadata.contextId) {
-    metadata.contextId = `app-${randomUUID()}`;
+  if (!metadata.key) {
+    metadata.key = `app-${randomUUID()}`;
   }
 
   if (!metadata.dataRoles) {
@@ -546,9 +546,9 @@ function buildRequestMetadata(req, baseMetadata = {}) {
       .filter(Boolean);
   }
 
-  const contextId = headerValue(req, "x-context-id");
-  if (contextId) {
-    metadata.contextId = contextId;
+  const key = headerValue(req, "x-end-user-key");
+  if (key) {
+    metadata.key = key;
   }
 
   const attributesHeader = headerValue(req, "x-security-attributes");
@@ -683,7 +683,7 @@ async function resolveSecurityContext(metadata) {
       databaseAccessToken: await getApplicationToken(azureApp),
       endUserName: metadata.endUserName || "system-app",
       ...(metadata.dataRoles && { dataRoles: metadata.dataRoles }),
-      ...(metadata.contextId && { key: metadata.contextId }),
+      ...(metadata.key && { key: metadata.key }),
       ...(metadata.attributes && { attributes: metadata.attributes }),
     });
   }
