@@ -196,4 +196,17 @@ describe('328. endUserSecurityContext.js', function() {
       );
     }); // 328.1.4
   }); // 328.1
+
+  describe('328.2 EndUserSecurityContext application direct logon', function() {
+    it('328.2.1 encodes a database-token-only application context', function() {
+      const securityContext = new oracledb.EndUserSecurityContext({
+        databaseAccessToken: 'application-direct-db-token',
+      });
+
+      assert.deepStrictEqual(decodeContextPayload(securityContext), {
+        ver: '1.0',
+        database_access_token: 'application-direct-db-token',
+      });
+    }); // 328.2.1
+  }); // 328.2
 });

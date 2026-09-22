@@ -76,6 +76,33 @@ that generates OAuth 2.0 tokens. This function is internally invoked when the
 
 See :ref:`cloudnativeauthoauth` for more information.
 
+.. _endusersecurityproviderplugin:
+
+End-User Security Provider Plugin
+---------------------------------
+
+.. versionadded:: 7.1
+
+Node-oracledb's ``endUserSecurityProvider`` plugin can be used with Oracle
+Deep Data Security to create and apply end-user security contexts for database
+operations.
+
+The ``endUserSecurityProvider`` plugin implementation is available in the
+`plugins/token/endUserSecurityProvider <https://github.com/oracle/
+node-oracledb/tree/main/plugins/token/endUserSecurityProvider/index.js>`__
+directory of the node-oracledb package.
+
+Adding this plugin to your code defines and registers a built-in process
+configuration hook that creates an end-user security context provider. This
+provider is configured when the ``endUserSecParams`` property is specified in
+:meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()`.
+Request-specific metadata is supplied with
+:meth:`securityContextProvider.runWithContext()`, and the generated end-user
+security context is applied only to database operations executed within that
+callback.
+
+See :ref:`endusersecuritycontextcreationplugin` for more information.
+
 .. _configproviderplugins:
 
 Centralized Configuration Provider Plugins

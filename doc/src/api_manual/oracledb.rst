@@ -2223,6 +2223,16 @@ Oracledb Methods
             .. versionadded:: 5.2
 
             The obsolete property ``_enableStats`` can still be used, but it will be removed in a future version of node-oracledb.
+        * - ``endUserSecParams``
+          - Object
+          - Thin
+          - .. _createpoolpoolattrsendusersecparams:
+
+            A JavaScript object containing the static identity-provider configuration and optional default end-user metadata used by the :ref:`endUserSecurityProvider <endusersecurityproviderplugin>` plugin. The properties of the ``endUserSecParams`` object are described in :ref:`endusersecparamsproperties`.
+
+            This property is used with Oracle Deep Data Security. The plugin uses it to configure an end-user security context provider for the pool. Request-specific metadata can be supplied later with :meth:`securityContextProvider.runWithContext()`.
+
+            .. versionadded:: 7.1
         * - ``events``
           - Boolean
           - Thick
@@ -2987,6 +2997,61 @@ Oracledb Methods
             All scopes included must be for a single resource. Specifying scopes for multiple resources will result in an error.
           - Required
 
+    **createPool(): endUserSecParams Object Properties**
+
+    The properties of the ``endUserSecParams`` object are:
+
+    .. _endusersecparamsproperties:
+
+    .. list-table-with-summary::  ``endUserSecParams`` Object Properties
+        :header-rows: 1
+        :class: wy-table-responsive
+        :align: center
+        :widths: 10 30 10
+        :width: 100%
+        :name: _create_pool_endusersecparams_properties
+        :summary: The first column displays the property. The second column
+         displays the description of the property. The third column displays
+         whether the property is required or optional.
+
+        * - Property
+          - Data Type
+          - Description
+        * - ``authType``
+          - String
+          - The authentication type. The authentication type for OAuth 2.0 is "azureServicePrincipal". This type makes the plugin acquire Azure service principal access tokens through a client credential flow.
+        * - ``spiType``
+          - String
+          - Identity provider type. The default value is "oci". Use "azure" for Microsoft Entra ID.
+        * - ``authFlow``
+          - String
+          - Authentication flow used by the provider. Values are "onBehalfOf" and "app". The default value is "onBehalfOf".
+        * - ``endUserToken``
+          - String
+          - Default end-user token. Request metadata supplied to :meth:`securityContextProvider.runWithContext()` overrides this value. In ``app`` mode, it is included with the application database token and cannot be combined with ``endUserName`` or ``contextId``.
+        * - ``endUserName``
+          - String
+          - Default end-user name.
+        * - ``dataRoles``
+          - Array
+          - Default data roles to include in the end-user security context.
+        * - ``attributes``
+          - Object
+          - Default JSON-serializable attributes to include in the end-user security context.
+        * - ``authMode``
+          - String
+          - Default request authentication mode. Values are "obo" and "app".
+        * - ``cacheOptions``
+          - Object
+          - Options for the Azure OBO token cache. Set ``enabled`` to *false* to disable caching.
+
+    The remaining properties in ``endUserSecParams`` are passed to the
+    selected token provider. For Microsoft Entra ID, commonly used properties
+    include ``clientId``, ``clientSecret``, ``authority``, and ``scopes``. For
+    OCI, the required properties depend on the selected OCI ``authType``. For
+    example, ``clientcredentials`` uses ``authority``, ``clientId``,
+    ``clientSecret``, and optionally ``scopes``.
+
     **Callback**:
 
     If you are using the callback programming style::
@@ -3348,6 +3413,16 @@ Oracledb Methods
                 Support for this property was added in node-oracledb Thin mode.
 
             .. versionadded:: 2.2
+        * - ``endUserSecParams``
+          - Object
+          - Thin
+          - .. _getconnectiondbattrsendusersecparams:
+
+            A JavaScript object containing the static identity-provider configuration and optional default end-user metadata used by the :ref:`endUserSecurityProvider <endusersecurityproviderplugin>` plugin. The properties of the ``endUserSecParams`` object are described in :ref:`endusersecparamsproperties`.
+
+            This property is used with Oracle Deep Data Security. The plugin uses it to configure an end-user security context provider for the connection. Request-specific metadata can be supplied later with :meth:`securityContextProvider.runWithContext()`.
+
+            .. versionadded:: 7.1
         * - ``events``
           - Boolean
           - Thick
@@ -4037,6 +4112,18 @@ Oracledb Methods
         * - ``alias``
           - String
           - The pool alias of the pool to retrieve from the connection pool cache. The default value is ‘default’ which will retrieve the default pool from the cache.
+
+.. method:: oracledb.getSecurityContextProvider()
+
+    .. versionadded:: 7.1
+
+    ::
+
+        provider = oracledb.getSecurityContextProvider()
+
+    Returns the security context provider helper. This helper can be used with
+    the :ref:`endUserSecurityProvider <endusersecurityproviderplugin>` plugin to
+    scope request-specific metadata to database operations.
 
 .. method:: oracledb.initOracleClient()
 

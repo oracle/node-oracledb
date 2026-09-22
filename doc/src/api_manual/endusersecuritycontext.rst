@@ -4,8 +4,17 @@
 API: EndUserSecurityContext Class
 *********************************
 
-The EndUserSecurityContext class is used to define the end user security
-context information for an end user.
+The EndUserSecurityContext class represents Deep Data Security context
+information that node-oracledb can set on a connection. It can identify an
+end user by using an end-user token from an external Identity and Access
+Management (IAM) system, or by using the name of a local database user. For
+direct application logon, it can also represent the application identity
+encoded by the database-access token, without specifying a separate end-user
+identity.
+
+The security context information can include the database-access token,
+end-user identity details, data roles, and application-provided attributes
+used by Oracle Database to authorize access to protected data.
 
 .. versionadded:: 7.0
 
@@ -22,7 +31,7 @@ The EndUserSecurityContext object is created by using:
 
     const security_context = new oracledb.EndUserSecurityContext(options);
 
-The parameters of the ``EndUserSecurityContext`` method are:
+The parameters of the ``EndUserSecurityContext`` object are:
 
 .. _endusersecuritycontextattrs:
 
@@ -31,53 +40,53 @@ The parameters of the ``EndUserSecurityContext`` method are:
     :class: wy-table-responsive
     :align: center
     :widths: 10 10 30
-    :summary: The first column displays the parameter. The second column displays the data type of the parameter. The third column displays the description of the attribute.
+    :summary: The first column displays the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
 
     * - Parameter
       - Data Type
       - Description
     * - ``options``
       - Object
-      - The ``options`` parameter contains the attributes necessary to define an end user security context for a connection. See :ref:`EndUserSecurityContext options Parameters Attributes <endusersecuritycontextopts>` for information.
+      - The ``options`` parameter contains the properties necessary to define an end-user security context for a connection. See :ref:`EndUserSecurityContext options Parameters Attributes <endusersecuritycontextopts>` for information.
 
 The properties of the ``options`` parameter are:
 
 .. _endusersecuritycontextopts:
 
-.. list-table-with-summary::  EndUserSecurityContext ``options`` Parameter Attributes
+.. list-table-with-summary::  EndUserSecurityContext ``options`` Parameter Properties
     :header-rows: 1
     :class: wy-table-responsive
     :align: center
     :widths: 10 10 30
     :name: _end_user_security_context_parameters
-    :summary: The first column displays the attribute. The second column displays the description of the attribute. The third column displays whether the attribute is required or optional.
+    :summary: The first column displays the property. The second column displays the data type of the property. The third column displays the description of the property.
 
-    * - Attribute
+    * - Property
       - Data Type
       - Description
     * - ``databaseAccessToken``
       - String
-      - A security token issued by an external Identity and Access Management (IAM) system such as Oracle Cloud Infrastructure (OCI) IAM or Microsoft Entra ID that authorizes an application to access Oracle Database. This can either be an On-Behalf-Of (OBO) token or a Client Credentials token.
+      - A security token issued by an external Identity and Access Management (IAM) system such as Oracle Cloud Infrastructure (OCI) IAM or Microsoft Entra ID that authorizes an application to access Oracle Database. This property is required and can either be an On-Behalf-Of (OBO) token or a Client Credentials token.
 
         An OBO token is obtained from an IAM using the end-user token as an assertion. This access token can only be used when ``endUserToken`` is specified.
 
-        A Client Credentials token is obtained from an IAM using the application's token. This access token can be used when either ``endUserToken`` or ``endUserName`` is specified.
+        A Client Credentials token is obtained from an IAM using the application's token. This access token can be used when either ``endUserToken`` or ``endUserName`` is specified. It can also be used without ``endUserToken`` or ``endUserName`` for direct application logon, where the database maps the token to the application identity.
     * - ``endUserToken``
       - String
-      - The unique identification of an end-user managed by an external IAM system. This contains the end-user token issued by IAM systems after user authentication.
+      - A token that identifies an end-user managed by an external IAM system. This token is issued by the IAM system after user authentication.
 
-        This attribute should not be set when ``endUserName`` or ``key`` is specified.
+        This property should not be set when ``endUserName`` or ``key`` is specified.
     * - ``endUserName``
       - String
-      - The unique identification of an end-user managed by Oracle Database. This contains the name of a local database user created in Oracle Database that has the ``CREATE END USER SECURITY CONTEXT`` database privilege set.
+      - The name of a local database user created in Oracle Database that has the ``CREATE END USER SECURITY CONTEXT`` database privilege set.
 
-        This attribute should not be set when ``endUserToken`` is specified.
+        This property should not be set when ``endUserToken`` is specified.
     * - ``key``
       - String
-      - An optional lookup identifier that the database maps to stored context attributes. This attribute may be specified with ``endUserName`` and should not be set when ``endUserToken`` is specified.
+      - An optional lookup identifier that the database maps to stored context attributes. This property may be specified with ``endUserName`` and should not be set when ``endUserToken`` is specified.
     * - ``dataRoles``
       - Array
-      - The names of data roles granted to the application. These data roles are created with a ``CREATE DATA ROLE`` statement in the database and granted to application identity created with ``CREATE APPLICATION IDENTITY`` statement in the database.
+      - The names of data roles granted to the application. These data roles are created with a ``CREATE DATA ROLE`` statement in the database and granted to an application identity created with ``CREATE APPLICATION IDENTITY`` statement in the database.
 
         For external IAM systems, these data roles are mapped to roles managed in your IAM system.
 

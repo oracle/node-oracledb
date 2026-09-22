@@ -376,7 +376,6 @@ function resolveOboSecurityMetadata(req, res) {
 
   const metadata = buildRequestMetadata(req, {
     authMode,
-    authorization,
     endUserToken: userAccessToken || undefined,
   });
 
@@ -534,11 +533,6 @@ function buildRequestMetadata(req, baseMetadata = {}) {
     metadata.endUserToken = headerEndUserToken;
   }
 
-  const authorization = req.headers.authorization;
-  if (authorization) {
-    metadata.authorization = authorization;
-  }
-
   const endUserName = headerValue(req, "x-end-user-name");
   if (endUserName) {
     metadata.endUserName = endUserName;
@@ -679,9 +673,7 @@ function withResolvedSecurityContext(metadataFactory, handler) {
 
 // Acquires an app or OBO database token and constructs its direct connection context.
 async function resolveSecurityContext(metadata) {
-  const endUserToken =
-    metadata.endUserToken ||
-    metadata.authorization?.replace(/^[Bb]earer\s+/u, "");
+  const endUserToken = metadata.endUserToken;
   const authMode =
     metadata.authMode || (endUserToken ? AUTH_MODES.OBO : AUTH_MODES.APP);
 

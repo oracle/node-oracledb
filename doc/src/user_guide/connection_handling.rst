@@ -2132,8 +2132,21 @@ authorize and grant access to the data. See `Oracle Deep Data Security
 4FF0-98DD-2E374F79C63C>`__ in the Oracle Deep Data Security Configuration
 Guide for more information.
 
+An end-user security context payload can be created with
+:ref:`node-oracledb methods <endusersecuritycontextcreation>` or by using the
+pre-supplied node-oracledb
+:ref:`end-user security provider <endusersecuritycontextcreationplugin>` plugin.
+
+.. _endusersecuritycontextcreation:
+
+End-User Security Context Payload Creation Using node-oracledb Methods
+----------------------------------------------------------------------
+
+To create and set the end-user security context payload directly in your code,
+use the node-oracledb methods detailed below.
+
 Creating an End-User Security Context Payload
----------------------------------------------
++++++++++++++++++++++++++++++++++++++++++++++
 
 An End-User Security Context Payload can be created for a user managed by an
 external Identity and Access Management (IAM) system such as Oracle Cloud
@@ -2206,7 +2219,7 @@ For detailed information on these attributes, see this
     ``endUserName`` or ``key`` raises an error.
 
 Setting an End-User Security Context Payload
---------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++++
 
 To set an end-user security context payload on a connection, use
 :meth:`connection.setEndUserSecurityContext()`. This method must be called
@@ -2310,7 +2323,7 @@ context as shown in the example below.
     await Promise.all([firstOperation, secondOperation]);
 
 Clearing an End-User Security Context Payload
----------------------------------------------
++++++++++++++++++++++++++++++++++++++++++++++
 
 To clear an end-user security context payload set by a previous call to
 :meth:`connection.setEndUserSecurityContext()`, use
@@ -2345,7 +2358,7 @@ use ``await`` to allow each operation to complete before changing the end-user
 security context on the same connection.
 
 Example of Using End-User Security Context
-------------------------------------------
+++++++++++++++++++++++++++++++++++++++++++
 
 An example of using an end-user security context is:
 
@@ -2386,6 +2399,190 @@ An example of using an end-user security context is:
 
     // Close the connection
     await connection.close();
+
+.. _endusersecuritycontextcreationplugin:
+
+End-User Security Context Payload Creation Using endUserSecurityProvider Plugin
+-------------------------------------------------------------------------------
+
+Applications that obtain database tokens from OCI IAM or Microsoft Entra ID
+can use the
+:ref:`end-user security provider plugin <endusersecurityproviderplugin>`. With
+Oracle Deep Data Security, the plugin creates and applies an end-user security
+context from the configured identity-provider settings and request-specific
+end-user metadata. The security context is used only for the database
+operations performed in the corresponding application scope. The generated
+context is cleared after the operation completes, so SQL executed outside the
+callback continues to use the standard database login.
+
+The ``endUserSecurityProvider`` plugin was introduced in node-oracledb 7.1.
+
+The :ref:`endUserSecurityProvider <endusersecurityproviderplugin>` can be used
+by your application by adding the following line to your code before creating
+a standalone connection or connection pool:
+
+.. code-block:: javascript
+
+    const oracledb = require("oracledb");
+    require("oracledb/plugins/token/endUserSecurityProvider");
+
+For connection and pool creation with Oracle Deep Data Security, specify the
+``endUserSecParams`` property. This object contains the static
+identity-provider configuration and, optionally, default end-user identity
+metadata.
+
+The parameters of the ``endUserSecParams`` property are detailed in
+:ref:`endusersecparamsproperties`. When using the ``endUserSecurityProvider``
+plugin, you can also specify the ``contextResolution`` property in
+``endUserSecParams``. The possible values are *connection* and *operation*.
+The default value is *connection*.
+
+With *connection*, the provider resolves and sets the security context on the
+first database operation of a borrowed connection. The security context then
+applies to that connection until it is closed or released to the pool. With
+*operation*, the provider resolves the current ``runWithContext()`` metadata
+before each database operation, and node-oracledb clears the generated
+security context after the operation completes. This allows one borrowed
+connection to be used sequentially with different security contexts, but adds
+token-provider and security-context creation work for each operation.
+
+An example of using the ``endUserSecParams`` property is shown below:
+
+.. code-block:: javascript
+
+    const pool = await oracledb.createPool({
+      user: "hr",
+      password: mypw, // contains the hr schema password
+      connectString: "mydbmachine.example.com/orclpdb1",
+      endUserSecParams: {
+        spiType: "azure",
+        authFlow: "onBehalfOf",
+        clientId: <client_id>,
+        clientSecret: <client_secret>,
+        authority: <authority>,
+        scopes: <scopes>
+      },
+    });
+
+You can call ``oracledb.getSecurityContextProvider()`` to get the security
+context provider helper. Use the
+:meth:`securityContextProvider.runWithContext()` method to associate dynamic
+metadata with the asynchronous work in the callback. Values supplied to
+``runWithContext()`` override any default metadata specified in
+``endUserSecParams``.
+
+Do not modify the metadata object passed to ``runWithContext()`` until the
+callback has completed, and all database operations started by the callback
+have finished. This includes changing its properties, the ``dataRoles`` array,
+or any values in nested ``attributes`` objects.
+
+Only database operations that require the end-user security context should be
+run inside the ``runWithContext()`` callback. Unrelated asynchronous work
+should be performed outside the callback. For an on-behalf-of flow, the request
+metadata must include an end-user token. For example:
+
+.. code-block:: javascript
+
+    const securityContextProvider = oracledb.getSecurityContextProvider();
+    const connection = await pool.getConnection();
+    try {
+      const result = await securityContextProvider.runWithContext({
+        authMode: "obo",
+        endUserToken: accessToken,
+        dataRoles: ["employee_reader"],
+        attributes: { department: "finance" },
+      }, () => connection.execute("select * from hr.employees"));
+    } finally {
+      await connection.close();
+    }
+
+When ``authFlow`` is set to *"app"*, the provider creates an
+application-direct context when neither ``endUserToken`` nor ``endUserName``
+is supplied. Provide ``endUserName`` to create an application-mediated
+end-user context.
+
+The provider resolves and sets the security context when the first database
+operation is executed on a borrowed connection. The security context then
+applies to that connection until it is closed or released to the pool, when
+node-oracledb clears it. So, acquire a connection, execute its first database
+operation inside ``runWithContext()``, and release the connection after
+completing the work for that security context. Do not use the same borrowed
+connection for different security contexts, either concurrently or
+sequentially. If the first database operation on the connection is executed
+outside ``runWithContext()``, the connection continues to use the normal
+database login until it is released.
+
+The following example runs HTTP and Kafka operations inside the
+``runWithContext()`` callback even though they do not use the database security
+context. Only the database operation needs to run in that callback:
+
+.. code-block:: javascript
+
+    const securityContextProvider = oracledb.getSecurityContextProvider();
+    const connection = await pool.getConnection();
+
+    try {
+      await securityContextProvider.runWithContext(context, async () => {
+        await sendHttpRequest();
+        await writeToKafka();
+        await connection.execute("select ...");
+      });
+    } finally {
+      await connection.close();
+    }
+
+Instead, limit the security context scope to the database operation:
+
+.. code-block:: javascript
+
+    await sendHttpRequest();
+    await writeToKafka();
+
+    try {
+      await securityContextProvider.runWithContext(context, () =>
+        connection.execute("select ...")
+      );
+    } finally {
+      await connection.close();
+    }
+
+Direct Application Logon
+++++++++++++++++++++++++
+
+For scheduled jobs, service workloads, or AI agents that are authorized as the
+registered application itself, set ``authFlow`` to *"app"* and omit both
+``endUserToken`` and ``endUserName``. The provider obtains a client-credential
+database-access token and uses it for direct application logon. The database
+maps the token's client identity to the registered application identity. No
+``endUserToken``, ``endUserName``, or context key is sent. For example:
+
+.. code-block:: javascript
+
+    const result = await securityContextProvider.runWithContext({
+      authMode: "app",
+    }, () => connection.execute("select * from hr.employees"));
+
+An application-token request with ``endUserName`` is an application-mediated
+end-user context. Do not supply ``endUserToken`` with ``authFlow: "app"``;
+use ``authFlow: "obo"`` for an end-user-token context.
+
+Token Caching
++++++++++++++
+
+The Azure OBO token cache is process-wide and bounded to 100 entries. It
+caches protected token values, avoids making concurrent token exchanges for
+the same request, and does not expose raw end-user tokens as cache keys.
+Cached tokens expire based on the expiration time returned by Azure. To
+disable this cache, set ``enabled`` to *false* in the ``cacheOptions``
+property of ``endUserSecParams``.
+
+Azure service-principal tokens and OCI ``clientcredentials`` tokens also use
+process-wide, bounded, expiry-aware token caches. All Azure and OCI token
+caches have a fixed maximum of 100 entries. Other OCI authentication modes
+are not cached.
+
+OCI OBO is not supported. OCI token configurations use application-token
+flows. Use an Azure configuration for an ``authFlow`` set to *obo*.
 
 .. _pooled-connections:
 .. _connpooling:

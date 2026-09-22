@@ -29,20 +29,59 @@ const identitydataplane = require("oci-identitydataplane");
 const common = require("oci-common");
 const { generateKeyPair } = require('crypto');
 const fs = require('fs');
+const https = require('https');
+const { URL } = require('url');
+const { TokenCache, hashValue } = require('../cache.js');
+const TOKEN_REQUEST_TIMEOUT_MS = 30000;
+const APP_TOKEN_CACHE_CLOCK_SKEW_MS = 60 * 1000;
+const APP_TOKEN_CACHE_MAX_ENTRIES = 100;
+// Process-wide, bounded LRU cache for OCI client-credentials tokens. Its key
+// includes the authentication inputs that can change a token. Other OCI
+// authentication modes retain their pre-cache behavior.
+const appTokenCache = new TokenCache(APP_TOKEN_CACHE_MAX_ENTRIES);
 
-async function getToken(params) {
+// Internal Deep Security API. The driver's ordinary token-authentication hook
+// below formats this result as a string or token/private-key pair.
+async function getTokenResult(params) {
+  if (typeof params?.authType !== 'string') {
+    throwErr('OCI authentication type is required.');
+  }
+  const authType = params.authType.toLowerCase();
+  let result;
+  if (authType === 'clientcredentials') {
+    const cacheKey = computeAppCacheKey(params);
+    result = await appTokenCache.get(cacheKey, () => acquireToken(params));
+  } else {
+    result = { value: (await acquireToken(params)).value, isCacheHit: false };
+  }
+  if (typeof result.value === 'string') {
+    return { accessToken: result.value, isNewToken: !result.isCacheHit };
+  }
+  return { ...result.value, isNewToken: !result.isCacheHit };
+}
+
+async function acquireToken(params) {
+  let result;
   switch (params.authType.toLowerCase()) {
     case 'configfilebasedauthentication':
-      return await configFileBasedAuthentication(params);
+      result = await configFileBasedAuthentication(params);
+      break;
     case 'simpleauthentication':
-      return await simpleAuthentication(params);
+      result = await simpleAuthentication(params);
+      break;
     case 'instanceprincipal':
-      return await instancePrincipalAuthentication(params);
+      result = await instancePrincipalAuthentication(params);
+      break;
+    case 'clientcredentials':
+      result = await clientCredentialsAuthentication(params);
+      break;
     case 'resourceprincipal':
-      return await resourcePrincipalAuthentication(params);
+      result = await resourcePrincipalAuthentication(params);
+      break;
     default:
       throwErr(`Invalid authentication type ${params.authType} in extensionOci plugins.`);
   }
+  return { value: result.value, validUntil: calculateValidUntil(result) };
 }
 
 //---------------------------------------------------------------------------
@@ -83,9 +122,16 @@ async function generateAccessToken(provider, scope) {
   const generateScopedAccessTokenResponse =
     await client.generateScopedAccessToken(generateScopedAccessTokenRequest);
 
+  const securityToken = generateScopedAccessTokenResponse.securityToken;
+  if (typeof securityToken?.token !== 'string' || !securityToken.token.trim()) {
+    throwErr('OCI scoped access token response is missing a token.');
+  }
   return {
-    token: generateScopedAccessTokenResponse.securityToken.token,
-    privateKey: keyPair.privateKey
+    value: {
+      token: securityToken.token,
+      privateKey: keyPair.privateKey
+    },
+    expiresOn: securityToken.expirationTime
   };
 }
 
@@ -155,21 +201,19 @@ async function simpleAuthentication(accessTokenConfig) {
     throwErr("Token based authentication config parameter user is missing for simpleauthentication in extensionOci plugins.");
   const fingerprint = accessTokenConfig.fingerprint ??
     throwErr("Token based authentication config parameter fingerprint is missing for simpleauthentication in extensionOci plugins.");
-  const passphrase = accessTokenConfig.passphrase |= null; // optional
+  const passphrase = accessTokenConfig.passphrase ?? null; // optional
   const privateKeyLocation = accessTokenConfig.privateKeyLocation ??
     throwErr("Token based authentication config parameter privateKeyLocation is missing for simpleauthentication in extensionOci plugins.");
   const privateKey = fs.readFileSync(privateKeyLocation, 'utf-8'); // ~/.oci/oci_api_key.pem
   const regionId = accessTokenConfig.regionId ??      // ex : us-ashburn-1
     throwErr("Token based authentication config parameter regionId is missing for simpleauthentication in extensionOci plugins.");
 
-  let region;
-  const regionsList = common.Region.values();
-  regionsList.forEach(regions => {
-    if (regions.regionId === regionId) {
-      region = regions;
-      return;
-    }
-  });
+  const region = common.Region.values().find(
+    (item) => item.regionId === regionId
+  );
+  if (!region) {
+    throwErr(`Invalid OCI regionId ${regionId}.`);
+  }
   const provider = new common.SimpleAuthenticationDetailsProvider(
     tenancy,
     user,
@@ -197,6 +241,145 @@ async function instancePrincipalAuthentication(accessTokenConfig) {
 }
 
 //---------------------------------------------------------------------------
+// clientCredentialsAuthentication()
+//
+// Requests an access token from an OCI Identity Domain using the OAuth 2.0
+// client-credentials grant.
+//---------------------------------------------------------------------------
+async function clientCredentialsAuthentication(config) {
+  const authority = config.authority ??
+    throwErr("Token based authentication config parameter authority is missing for clientcredentials in extensionOci plugins.");
+  const clientId = config.clientId ??
+    throwErr("Token based authentication config parameter clientId is missing for clientcredentials in extensionOci plugins.");
+  const clientSecret = config.clientSecret ??
+    throwErr("Token based authentication config parameter clientSecret is missing for clientcredentials in extensionOci plugins.");
+  if (config.scopes !== undefined && typeof config.scopes !== 'string') {
+    throwErr('OCI OAuth scopes must be a string.');
+  }
+
+  const params = new URLSearchParams();
+
+  params.set("grant_type", "client_credentials");
+  if (config.scopes) {
+    // OAuth defines a singular form parameter; the driver configuration uses
+    // the same plural `scopes` spelling as the Azure token configuration.
+    params.set("scope", config.scopes);
+  }
+
+  const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const requestBody = params.toString();
+  const response = await postForm(authority, {
+    'Authorization': `Basic ${basicAuth}`
+  }, requestBody, config.tokenRequestTimeoutMs);
+
+  let payload = null;
+  if (response && response.body) {
+    try {
+      payload = JSON.parse(response.body);
+    } catch {
+      payload = null;
+    }
+  }
+
+  const statusCode = Number(response?.statusCode ?? 0);
+  if (statusCode < 200 || statusCode >= 300) {
+    const statusText = response?.statusMessage || `HTTP ${statusCode}`;
+    const errorMessage =
+      payload?.error_description ||
+      payload?.error ||
+      statusText;
+    throwErr(`OCI client credentials token request failed: ${errorMessage}`);
+  }
+
+  const accessToken = payload?.access_token;
+  if (!accessToken) {
+    throwErr("OCI client credentials token response is missing access_token.");
+  }
+
+  return { value: accessToken, expiresIn: payload?.expires_in };
+}
+
+function calculateValidUntil(result) {
+  let expiresAt;
+  if (result.expiresOn instanceof Date) {
+    expiresAt = result.expiresOn.getTime();
+  } else if (typeof result.expiresOn === 'number') {
+    expiresAt = result.expiresOn;
+  } else if (typeof result.expiresOn === 'string') {
+    expiresAt = Date.parse(result.expiresOn);
+  } else if (Number.isFinite(Number(result.expiresIn)) &&
+      Number(result.expiresIn) > 0) {
+    expiresAt = Date.now() + (Number(result.expiresIn) * 1000);
+  }
+  return Number.isFinite(expiresAt) ?
+    expiresAt - APP_TOKEN_CACHE_CLOCK_SKEW_MS : undefined;
+}
+
+function computeAppCacheKey(config) {
+  // This function is called only for clientcredentials. Array positions are
+  // fixed, and JSON serialization makes the result unambiguous.
+  return JSON.stringify([
+    config.authType.toLowerCase(), config.authority, config.clientId,
+    hashValue(config.clientSecret), config.scopes,
+  ]);
+}
+
+//---------------------------------------------------------------------------
+// postForm()
+//
+// Minimal HTTPS helper for posting x-www-form-urlencoded payloads.
+//---------------------------------------------------------------------------
+function postForm(endpoint, extraHeaders, body, timeoutMs = TOKEN_REQUEST_TIMEOUT_MS) {
+  return new Promise((resolve, reject) => {
+    try {
+      const url = new URL(endpoint);
+      if (url.protocol !== 'https:') {
+        throwErr('OCI token endpoint must use HTTPS.');
+      }
+      if (!Number.isInteger(timeoutMs) || timeoutMs < 1) {
+        throwErr('OCI token request timeout must be a positive integer.');
+      }
+      const headers = Object.assign({
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(body)
+      }, extraHeaders);
+
+      const requestOptions = {
+        method: 'POST',
+        protocol: url.protocol,
+        hostname: url.hostname,
+        port: url.port || (url.protocol === 'https:' ? 443 : undefined),
+        path: `${url.pathname}${url.search}`,
+        headers
+      };
+
+      const req = https.request(requestOptions, (res) => {
+        let responseBody = '';
+        res.setEncoding('utf8');
+        res.on('data', chunk => {
+          responseBody += chunk;
+        });
+        res.on('end', () => {
+          resolve({
+            statusCode: res.statusCode,
+            statusMessage: res.statusMessage,
+            body: responseBody
+          });
+        });
+      });
+
+      req.on('error', reject);
+      req.setTimeout(timeoutMs, () => {
+        req.destroy(new Error('OCI token request timed out.'));
+      });
+      req.write(body);
+      req.end();
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
+
 // resourcePrincipalAuthentication()
 //
 // Authentication in an OCI resource-principal-enabled service. Credentials
@@ -215,9 +398,17 @@ async function resourcePrincipalAuthentication(accessTokenConfig) {
 function hookFn(options) {
   if (options.tokenAuthConfigOci) {
     options.accessToken = async function callbackFn(refresh, config) {
-      return await getToken(config);
+      const result = await getTokenResult(config);
+      if (result.privateKey !== undefined) {
+        return { token: result.token, privateKey: result.privateKey };
+      }
+      return result.accessToken;
     };
     options.accessTokenConfig = options.tokenAuthConfigOci;
   }
 }
 oracledb.registerProcessConfigurationHook(hookFn);
+
+module.exports = {
+  getTokenResult
+};
