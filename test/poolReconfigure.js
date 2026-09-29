@@ -69,6 +69,14 @@ describe('255. poolReconfigure.js', function() {
     assert.strictEqual(pool.enableStatistics, enableStatisticsOriginalVal);
   }
 
+  // Let the Docker database listener update dedicated-handler capacity after
+  // each nested cleanup. Without this cooldown, it can return ORA-12516.
+  afterEach(async function() {
+    if (testsUtil.isDockerDatabase) {
+      await testsUtil.sleep();
+    }
+  });
+
   describe('255.1 poolReconfigure - poolMin/poolMax/poolIncrement properties', function() {
     let pool;
 
@@ -1684,6 +1692,11 @@ describe('255. poolReconfigure.js', function() {
     });
   });
 
+  // These tests rapidly create dedicated sessions. A resource-constrained
+  // database, especially one running in Docker, can block the listener handler
+  // and return ORA-12516. The listener log contains:
+  // "DEDICATED handler blocked by listener:"
+  // A one-second sleep after each test lets the listener recover.
   describe('255.6 Pool statistics', function() {
     let pool, pool1, pool2;
 

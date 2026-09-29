@@ -38,9 +38,12 @@ const testsUtil = require('./testsUtil.js');
 
 describe('227. dbType02.js', () => {
   let conn;
+  let dbTimeZoneIsRegionInThinMode = false;
 
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
+    dbTimeZoneIsRegionInThinMode = oracledb.thin &&
+      await testsUtil.isDbTimeZoneRegion(conn);
   });
 
   after(async () => {
@@ -93,28 +96,30 @@ describe('227. dbType02.js', () => {
   async function VerifyDate(TABLE, TYPE, NODB_TYPE) {
     await CreateTable(TABLE, TYPE);
 
-    let sql = `INSERT INTO ${TABLE} VALUES (:i, :c)`;
-    const dateInVal = new Date();
-    const bindArray = [
-      { i: 1, c: dateInVal },
-      { i: 2, c: null }
-    ];
-    const opts = {
-      autoCommit: true,
-      bindDefs: {
-        i: { type: oracledb.DB_TYPE_NUMBER },
-        c: { type: NODB_TYPE, maxSize: 200 }
-      }
-    };
+    try {
+      let sql = `INSERT INTO ${TABLE} VALUES (:i, :c)`;
+      const dateInVal = new Date();
+      const bindArray = [
+        { i: 1, c: dateInVal },
+        { i: 2, c: null }
+      ];
+      const opts = {
+        autoCommit: true,
+        bindDefs: {
+          i: { type: oracledb.DB_TYPE_NUMBER },
+          c: { type: NODB_TYPE, maxSize: 200 }
+        }
+      };
 
-    await conn.executeMany(sql, bindArray, opts);
+      await conn.executeMany(sql, bindArray, opts);
 
-    sql = `SELECT * FROM ${TABLE} ORDER BY ID`;
-    const result = await conn.execute(sql);
-    assert.strictEqual(testsUtil.isDate(result.rows[0][1]), true);
-    assert.strictEqual(result.rows[1][1], null);
-
-    await DropTable(TABLE);
+      sql = `SELECT * FROM ${TABLE} ORDER BY ID`;
+      const result = await conn.execute(sql);
+      assert.strictEqual(testsUtil.isDate(result.rows[0][1]), true);
+      assert.strictEqual(result.rows[1][1], null);
+    } finally {
+      await DropTable(TABLE);
+    }
   }
 
   it('227.1 DB_TYPE_VARCHAR', async () => {
@@ -157,6 +162,10 @@ describe('227. dbType02.js', () => {
     const tableName = 'nodb_type_date';
     const type = 'TIMESTAMP WITH LOCAL TIME ZONE';
     const dbType = oracledb.DB_TYPE_TIMESTAMP_LTZ;
+    if (dbTimeZoneIsRegionInThinMode) {
+      await assert.rejects(VerifyDate(tableName, type, dbType), /NJS-201:/);
+      return;
+    }
     await VerifyDate(tableName, type, dbType);
 
   }); // 227.6

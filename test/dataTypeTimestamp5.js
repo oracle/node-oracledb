@@ -35,14 +35,18 @@ const oracledb = require('oracledb');
 const assert   = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('37. dataTypeTimestamp5.js', function() {
 
   let connection = null;
+  let dbTimeZoneIsRegionInThinMode = false;
   const tableName = "nodb_timestamp5";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
+    dbTimeZoneIsRegionInThinMode = oracledb.thin &&
+      await testsUtil.isDbTimeZoneRegion(connection);
   });
 
   after('release connection', async function() {
@@ -51,14 +55,21 @@ describe('37. dataTypeTimestamp5.js', function() {
 
   describe('37.1 Testing JavaScript Date with database TIMESTAMP WITH LOCAL TIME ZONE', function() {
     const dates = assist.data.dates;
+    let tableCreated = false;
 
     before('create table, insert data', async function() {
+      if (dbTimeZoneIsRegionInThinMode) {
+        this.skip();
+      }
       await assist.setUp(connection, tableName, dates);
+      tableCreated = true;
     });
 
     after(async function() {
       oracledb.fetchAsString = [];
-      await connection.execute(`DROP table ` + tableName + ` PURGE`);
+      if (tableCreated) {
+        await connection.execute(`DROP table ` + tableName + ` PURGE`);
+      }
     });
 
     it('37.1.1 works well with SELECT query', async function() {
@@ -91,13 +102,20 @@ describe('37. dataTypeTimestamp5.js', function() {
 
     describe('37.3 testing TIMESTAMP WITH LOCAL TIME ZONE', function() {
       const timestamps = assist.TIMESTAMP_TZ_STRINGS_2;
+      let tableCreated = false;
 
       before(async function() {
+        if (dbTimeZoneIsRegionInThinMode) {
+          this.skip();
+        }
         await assist.setUp4sql(connection, tableName, timestamps);
+        tableCreated = true;
       });
 
       after(async function() {
-        await connection.execute(`DROP table ` + tableName + ` PURGE`);
+        if (tableCreated) {
+          await connection.execute(`DROP table ` + tableName + ` PURGE`);
+        }
       }); // after
 
       it('37.3.1 SELECT query - original data', async function() {
@@ -122,4 +140,74 @@ describe('37. dataTypeTimestamp5.js', function() {
     }); // end of 37.3 suite
 
   });
+
+  describe('37.4 DBTIMEZONE conversion', function() {
+    it('37.4.1 returns the correct LTZ instant', async function() {
+      if (dbTimeZoneIsRegionInThinMode) {
+        this.skip();
+      }
+
+      const result = await connection.execute(`
+        SELECT CAST(
+          TIMESTAMP '2026-07-20 15:00:00 America/New_York'
+          AS TIMESTAMP WITH LOCAL TIME ZONE
+        ) FROM dual`);
+
+      assert.strictEqual(result.rows[0][0].toISOString(),
+        '2026-07-20T19:00:00.000Z');
+    });
+
+    it('37.4.2 restores the session time zone after verifying an LTZ instant',
+      async function() {
+        if (dbTimeZoneIsRegionInThinMode) {
+          this.skip();
+        }
+
+        const result = await connection.execute(
+          'SELECT SESSIONTIMEZONE FROM dual');
+        const originalSessionTimeZone = result.rows[0][0];
+        try {
+          await connection.execute("ALTER SESSION SET TIME_ZONE = '+03:00'");
+          const ltzResult = await connection.execute(`
+            SELECT CAST(
+              TIMESTAMP '2026-07-20 15:00:00 America/New_York'
+              AS TIMESTAMP WITH LOCAL TIME ZONE
+            ) FROM dual`);
+
+          assert.strictEqual(ltzResult.rows[0][0].toISOString(),
+            '2026-07-20T19:00:00.000Z');
+        } finally {
+          await connection.execute(
+            `ALTER SESSION SET TIME_ZONE = '${originalSessionTimeZone}'`);
+        }
+      });
+
+    it('37.4.3 rejects LTZ fetches with a region DBTIMEZONE',
+      async function() {
+        if (!dbTimeZoneIsRegionInThinMode) {
+          this.skip();
+        }
+
+        await assert.rejects(connection.execute(`
+          SELECT CAST(
+            TIMESTAMP '2026-07-20 15:00:00 America/New_York'
+            AS TIMESTAMP WITH LOCAL TIME ZONE
+          ) FROM dual`), /NJS-201:/);
+      });
+
+    it('37.4.4 rejects LTZ binds with a region DBTIMEZONE',
+      async function() {
+        if (!dbTimeZoneIsRegionInThinMode) {
+          this.skip();
+        }
+
+        await assert.rejects(connection.execute(`
+          SELECT CAST(:1 AS TIMESTAMP WITH LOCAL TIME ZONE) FROM dual`, {
+          1: {
+            val: new Date('2026-07-20T19:00:00.000Z'),
+            type: oracledb.DB_TYPE_TIMESTAMP_LTZ
+          }
+        }), /NJS-201:/);
+      });
+  }); // end of 37.4 suite
 });

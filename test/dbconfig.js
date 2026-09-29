@@ -59,6 +59,7 @@ const config = {
     mode: 'thin',
     instantClientPath: '',
     isCloudService: false,
+    isDockerDatabase: false,
     isCmanTdm: false,
     drcp: false,
     implicitPool: false
@@ -94,6 +95,11 @@ if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
 
 if (process.env.NODE_ORACLEDB_DRCP) {
   config.test.drcp = (process.env.NODE_ORACLEDB_DRCP.toLowerCase() === 'true');
+}
+
+if (process.env.NODE_ORACLEDB_TEST_DOCKER) {
+  config.test.isDockerDatabase =
+    process.env.NODE_ORACLEDB_TEST_DOCKER.toLowerCase() === 'true';
 }
 
 if (process.env.NODE_ORACLEDB_IMPLICIT_POOL) {

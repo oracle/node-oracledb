@@ -40,13 +40,23 @@ const testsUtil = require('./testsUtil.js');
 describe('216. dbObject17.js', () => {
 
   let conn;
+  let dbTimeZoneIsRegionInThinMode = false;
 
   const TABLE = 'NODB_TAB_SPORTS';
   const PLAYER_T = 'NODB_TYP_PLAYER_17';
   const TEAM_T   = 'NODB_TYP_TEAM_17';
 
+  function formatLocalTimestamp(date) {
+    const pad = (value, length = 2) => String(value).padStart(length, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${
+      pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${
+      pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
+  }
+
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
+    dbTimeZoneIsRegionInThinMode = oracledb.thin &&
+      await testsUtil.isDbTimeZoneRegion(conn);
 
     let sql = `
       CREATE TYPE ${PLAYER_T} AS OBJECT (
@@ -104,8 +114,34 @@ describe('216. dbObject17.js', () => {
 
     let sql = `INSERT INTO ${TABLE} VALUES (:sn, :t)`;
     const binds = { sn: "Frisbee", t: FrisbeeTeam };
+    if (dbTimeZoneIsRegionInThinMode) {
+      await assert.rejects(conn.execute(sql, binds), /NJS-201:/);
+      return;
+    }
+
     const result1 = await conn.execute(sql, binds);
     assert.strictEqual(result1.rowsAffected, 1);
+
+    // Verify the values Oracle stored independently of the driver's fetch
+    // paths. A bind/fetch-only check can hide matching errors in both paths.
+    sql = `
+      SELECT TO_CHAR(p.ts, 'YYYY-MM-DD"T"HH24:MI:SS.FF3'),
+        TO_CHAR(SYS_EXTRACT_UTC(p.tsz), 'YYYY-MM-DD"T"HH24:MI:SS.FF3'),
+        TO_CHAR(SYS_EXTRACT_UTC(p.ltz), 'YYYY-MM-DD"T"HH24:MI:SS.FF3')
+      FROM ${TABLE} t, TABLE(t.team) p
+      WHERE t.sportname = :sportName
+      ORDER BY p.shirtnumber
+    `;
+    const storedValues = await conn.execute(sql, { sportName: 'Frisbee' });
+    for (let i = 0; i < FrisbeePlayers.length; i++) {
+      const player = FrisbeePlayers[i];
+      assert.strictEqual(storedValues.rows[i][0],
+        formatLocalTimestamp(player.TS));
+      assert.strictEqual(storedValues.rows[i][1],
+        player.TSZ.toISOString().slice(0, -1));
+      assert.strictEqual(storedValues.rows[i][2],
+        player.LTZ.toISOString().slice(0, -1));
+    }
 
     sql = `SELECT * FROM ${TABLE}`;
     const result = await conn.execute(sql, [], { outFormat: oracledb.OUT_FORMAT_OBJECT });

@@ -1054,6 +1054,31 @@ fractional part when fetched.
     :ref:`converter <converterfunc>` as shown in the
     :ref:`example <timestampconvexample>` below.
 
+TIMESTAMP WITH LOCAL TIME ZONE values are normalized by Oracle Database using
+the database time zone. The time zone is not stored with each value, so
+node-oracledb must know the database time zone when converting values to and
+from JavaScript Date objects. This differs from TIMESTAMP WITH TIME ZONE,
+which stores the time zone information with each value. DATE and TIMESTAMP
+values do not have time zone semantics and do not use the database time zone
+for conversion.
+
+In Thin mode, node-oracledb automatically uses the database time zone when
+needed for the TIMESTAMP WITH LOCAL TIME ZONE conversions. For a fixed-offset
+database time zone, such as *-08:00*, this can avoid an additional SQL
+round-trip. If the database time zone is an Oracle time zone region, such as
+Europe/London, Thin mode identifies the region with an additional SQL
+round-trip. Fetching or binding TIMESTAMP WITH LOCAL TIME ZONE values is not
+supported with a regional database time zone in Thin mode.
+
+.. note::
+
+    Thin mode does not use Node.js ICU timezone data to convert TIMESTAMP WITH
+    LOCAL TIME ZONE values with a regional database time zone. Oracle Database
+    and Node.js can use different timezone-data versions, so using the Node.js
+    rules could produce different historical or recently changed DST results.
+    Configure a fixed-offset database time zone when Thin mode needs to fetch
+    or bind TIMESTAMP WITH LOCAL TIME ZONE values.
+
 .. _timestampconvexample:
 
 An example of using a fetch type handler with a converter to return TIMESTAMP

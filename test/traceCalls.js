@@ -34,11 +34,13 @@
 const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('307. traceCalls.js', function() {
 
   let conn;
   let roundTripSpans = 4; // pre-23ai
+  let dbTimeZoneInitializationRoundTrips = 0;
 
   after(async () => {
     // restore to default tracing.
@@ -54,6 +56,17 @@ describe('307. traceCalls.js', function() {
       roundTripSpans = 0; // onBeginRoundTrip, onBeginRoundTrip are not called.
     } else if (conn.oracleServerVersion >= 2304002405) {
       roundTripSpans = 2;
+    }
+
+    if (oracledb.thin) {
+      // A regional DBTIMEZONE requires Thin to query DBTIMEZONE during a
+      // successful connection. The trace handler is disabled for this setup
+      // connection, so its execute and cursor-close round trips are not
+      // logged. Keep this test on the public DBTIMEZONE behavior rather than
+      // inspecting Thin's internal runtime-capability bitmap.
+      if (await testsUtil.isDbTimeZoneRegion(conn)) {
+        dbTimeZoneInitializationRoundTrips = 2;
+      }
     }
   });
 
@@ -115,7 +128,8 @@ describe('307. traceCalls.js', function() {
       // getConnection causes onEnterFn, onExitFn to be called for
       // public API getConnection. onBeginRoundTrip, onEndRoundTrip callbacks are called
       // for each roundtrip to DB.
-      assert((logs.length === (roundTripSpans * 2 + 2)));
+      assert.strictEqual(logs.length,
+        (roundTripSpans + dbTimeZoneInitializationRoundTrips) * 2 + 2);
     }); // 307.1.4
 
     it('307.1.3 getConnection behaviour with a custom instance disabling trace', async function() {

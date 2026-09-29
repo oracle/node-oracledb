@@ -34,14 +34,18 @@
 const oracledb  = require('oracledb');
 const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('237. indexedTables01.js', () => {
 
   let conn;
+  let dbTimeZoneIsRegionInThinMode = false;
   const pkgName = 'nodb_pkg_indexed_tables';
 
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
+    dbTimeZoneIsRegionInThinMode = oracledb.thin &&
+      await testsUtil.isDbTimeZoneRegion(conn);
 
     let plsql = `
       create or replace package ${pkgName} as
@@ -334,6 +338,10 @@ describe('237. indexedTables01.js', () => {
     };
 
     const sql = `begin :retval := ${pkgName}.${func}(:inval); end;`;
+    if (dbTimeZoneIsRegionInThinMode) {
+      await assert.rejects(conn.execute(sql, binds), /NJS-201:/);
+      return;
+    }
     const result = await conn.execute(sql, binds);
     assert.strictEqual(result.outBinds.retval, arr.length);
   }); // 237.9

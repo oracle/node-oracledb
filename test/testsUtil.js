@@ -40,6 +40,8 @@ const os       = require('os');
 const testsUtil = exports;
 module.exports = testsUtil;
 
+testsUtil.isDockerDatabase = dbConfig.test.isDockerDatabase;
+
 testsUtil.removeID = function(content) {
   if (typeof content == "string") {
     const data = JSON.parse(content);
@@ -48,6 +50,19 @@ testsUtil.removeID = function(content) {
   }
   delete content._id;
   return content;
+};
+
+//---------------------------------------------------------------------------
+// isDbTimeZoneRegion()
+//
+// Returns true when DBTIMEZONE is a named timezone unsupported for Thin LTZ
+// operations. Oracle's named UTC aliases are handled as +00:00.
+//---------------------------------------------------------------------------
+testsUtil.isDbTimeZoneRegion = async function(connection) {
+  const result = await connection.execute('SELECT DBTIMEZONE FROM dual');
+  const value = result.rows[0][0];
+  const utcNames = new Set(['UTC', 'GMT', 'UNIVERSAL', 'ZULU']);
+  return !/^[+-]\d{2}:\d{2}$/.test(value) && !utcNames.has(value.toUpperCase());
 };
 
 testsUtil.sqlCreateTable = function(tableName, sql) {

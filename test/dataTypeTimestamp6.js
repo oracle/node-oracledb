@@ -38,14 +38,18 @@ const oracledb = require('oracledb');
 const asssert  = require('assert');
 const assist   = require('./dataTypeAssist.js');
 const dbConfig = require('./dbconfig.js');
+const testsUtil = require('./testsUtil.js');
 
 describe('38. dataTypeTimestamp6.js', function() {
 
   let connection = null;
+  let dbTimeZoneIsRegionInThinMode = false;
   const tableName = "nodb_timestamp6";
 
   before('get one connection', async function() {
     connection = await oracledb.getConnection(dbConfig);
+    dbTimeZoneIsRegionInThinMode = oracledb.thin &&
+      await testsUtil.isDbTimeZoneRegion(connection);
   });
 
   after('release connection', async function() {
@@ -54,14 +58,21 @@ describe('38. dataTypeTimestamp6.js', function() {
 
   describe('38.1 Testing JavaScript Date with database TIMESTAMP(9) WITH LOCAL TIME ZONE', function() {
     const dates = assist.data.dates;
+    let tableCreated = false;
 
     before('create table, insert data', async function() {
+      if (dbTimeZoneIsRegionInThinMode) {
+        this.skip();
+      }
       await assist.setUp(connection, tableName, dates);
+      tableCreated = true;
     });
 
     after(async function() {
       oracledb.fetchAsString = [];
-      await connection.execute(`DROP table ` + tableName + ` PURGE`);
+      if (tableCreated) {
+        await connection.execute(`DROP table ` + tableName + ` PURGE`);
+      }
     });
 
     it('38.1.1 works well with SELECT query', async function() {
@@ -94,13 +105,20 @@ describe('38. dataTypeTimestamp6.js', function() {
 
   describe('38.3 testing TIMESTAMP WITH LOCAL TIME ZONE', function() {
     const timestamps = assist.TIMESTAMP_TZ_STRINGS_2;
+    let tableCreated = false;
 
     before(async function() {
+      if (dbTimeZoneIsRegionInThinMode) {
+        this.skip();
+      }
       await assist.setUp4sql(connection, tableName, timestamps);
+      tableCreated = true;
     });
 
     after(async function() {
-      await connection.execute(`DROP table ` + tableName + ` PURGE`);
+      if (tableCreated) {
+        await connection.execute(`DROP table ` + tableName + ` PURGE`);
+      }
     }); // after
 
     it('38.3.1 SELECT query - original data', async function() {

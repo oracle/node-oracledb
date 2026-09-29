@@ -89,6 +89,12 @@ Thin Mode Changes
 #)  Fixed bug where end-to-end tracing attributes set by PL/SQL were not
     synchronized with the Thin mode connection.
 
+#)  Fixed TIMESTAMP WITH LOCAL TIME ZONE conversion when the database time
+    zone is not UTC. Thin mode now obtains the database time zone during TTC
+    data type negotiation when supported by the server, including database
+    time zones that observe daylight saving time.
+    See `Issue #1785 <https://github.com/oracle/node-oracledb/issues/1785>`__.
+
 #)  Fixed bug to make JSON serialization to include only enumerable JavaScript
     object properties.
 

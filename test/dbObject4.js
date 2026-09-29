@@ -38,6 +38,7 @@ const testsUtil = require('./testsUtil.js');
 
 describe('203. dbObject4.js', () => {
   let conn, testCount = 0;
+  let dbTimeZoneIsRegionInThinMode = false;
   const TYPE = 'NODB_TYP_OBJ_4';
   const TABLE  = 'NODB_TAB_OBJ4';
 
@@ -72,6 +73,8 @@ describe('203. dbObject4.js', () => {
 
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
+    dbTimeZoneIsRegionInThinMode = oracledb.thin &&
+      await testsUtil.isDbTimeZoneRegion(conn);
 
     let sql =
       `CREATE OR REPLACE TYPE ${TYPE} AS OBJECT (
@@ -125,9 +128,25 @@ describe('203. dbObject4.js', () => {
     const objClass = await conn.getDbObjectClass(TYPE);
     const testObj = new objClass(objData);
 
+    if (dbTimeZoneIsRegionInThinMode) {
+      await assert.rejects(conn.execute(sql, [seq, testObj]), /NJS-201:/);
+      return;
+    }
+
     let result = await conn.execute(sql, [seq, testObj]);
     assert.strictEqual(result.rowsAffected, 1);
     await conn.commit();
+
+    // Verify Oracle's stored UTC instants independently of the object's LTZ
+    // fetch path. A matching bind/fetch error could otherwise go unnoticed.
+    result = await conn.execute(`
+      SELECT TO_CHAR(SYS_EXTRACT_UTC(t.person.entry),
+          'YYYY-MM-DD"T"HH24:MI:SS.FF3'),
+        TO_CHAR(SYS_EXTRACT_UTC(t.person."EXIT"),
+          'YYYY-MM-DD"T"HH24:MI:SS.FF3')
+      FROM ${TABLE} t WHERE t.num = :seq`, { seq });
+    assert.strictEqual(result.rows[0][0], date1.toISOString().slice(0, -1));
+    assert.strictEqual(result.rows[0][1], date2.toISOString().slice(0, -1));
 
     sql = `SELECT * FROM ${TABLE} WHERE num = ${seq}`;
     result = await conn.execute(sql);

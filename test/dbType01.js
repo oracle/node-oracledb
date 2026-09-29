@@ -39,11 +39,14 @@ const testsUtil = require('./testsUtil.js');
 describe('226. dbType01.js', function() {
 
   let conn;
+  let dbTimeZoneIsRegionInThinMode = false;
   const default_stmtCacheSize = oracledb.stmtCacheSize;
 
   before(async () => {
     oracledb.stmtCacheSize = 0;
     conn = await oracledb.getConnection(dbConfig);
+    dbTimeZoneIsRegionInThinMode = oracledb.thin &&
+      await testsUtil.isDbTimeZoneRegion(conn);
   });
 
   after(async () => {
@@ -98,6 +101,10 @@ describe('226. dbType01.js', function() {
 
   it('226.6 DB_TYPE_TIMESTAMP_LTZ', async () => {
     const bindVal = { BIND1: {val: dateInVal, type: oracledb.DB_TYPE_TIMESTAMP_LTZ}};
+    if (dbTimeZoneIsRegionInThinMode) {
+      await assert.rejects(conn.execute(SQL, bindVal), /NJS-201:/);
+      return;
+    }
     const result = await conn.execute(SQL, bindVal);
     assert.match(result.rows[0][1], /Typ=231 Len=11/);
   }); // 226.6
