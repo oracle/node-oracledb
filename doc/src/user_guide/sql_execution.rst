@@ -1065,15 +1065,15 @@ for conversion.
 In Thin mode, node-oracledb automatically uses the database time zone when
 needed for the TIMESTAMP WITH LOCAL TIME ZONE conversions. For a fixed-offset
 database time zone, such as *-08:00*, this can avoid an additional SQL
-round-trip. If the database time zone is an Oracle time zone region, such as
-Europe/London, Thin mode identifies the region with an additional SQL
+round-trip. If the database time zone is an Oracle named time zone, such as
+Europe/London, Thin mode identifies the name with an additional SQL
 round-trip. Fetching or binding TIMESTAMP WITH LOCAL TIME ZONE values is not
-supported with a regional database time zone in Thin mode.
+supported with a named database time zone in Thin mode.
 
 .. note::
 
     Thin mode does not use Node.js ICU timezone data to convert TIMESTAMP WITH
-    LOCAL TIME ZONE values with a regional database time zone. Oracle Database
+    LOCAL TIME ZONE values with a named database time zone. Oracle Database
     and Node.js can use different timezone-data versions, so using the Node.js
     rules could produce different historical or recently changed DST results.
     Configure a fixed-offset database time zone when Thin mode needs to fetch
