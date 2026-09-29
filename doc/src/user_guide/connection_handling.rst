@@ -2555,11 +2555,15 @@ omitting both ``endUserToken`` and ``endUserName``. The provider obtains a
 client-credential database-access token and uses it for direct application
 logon. The database maps the token's client identity to the registered
 application identity. No ``endUserToken``, ``endUserName``, or context key is
-sent. For example:
+sent. ``dataRoles`` and ``attributes`` can still be included in the direct
+application security context. For example:
 
 .. code-block:: javascript
 
-    const result = await securityContextProvider.runWithContext({}, () =>
+    const result = await securityContextProvider.runWithContext({
+      dataRoles: ["scheduled_job"],
+      attributes: { application: "payroll-service" },
+    }, () =>
       connection.execute("select * from hr.employees"));
 
 An application-token request with ``endUserName`` is an application-mediated

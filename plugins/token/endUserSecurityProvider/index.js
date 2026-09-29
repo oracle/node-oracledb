@@ -170,9 +170,19 @@ function createProviderFn(config, provider) {
     // No end-user identity means the database resolves the application
     // identity directly from the client-credential database access token.
     if (!endUserToken && !metadata.endUserName) {
+      // A key identifies a named database-managed end user. It is not valid
+      // for direct application logon, but roles and attributes are valid
+      // authorization metadata for either identity form.
+      if (metadata.key) {
+        throwErr("authFlow 'app' requires endUserName when key is supplied.");
+      }
       return getOrCreateScopedSecurityContext(unifiedProvider, config,
         tokenResult, () => createSecurityContext(
-          buildContext({ databaseAccessToken })));
+          buildContext({
+            databaseAccessToken,
+            dataRoles: metadata.dataRoles,
+            attributes: metadata.attributes
+          })));
     }
     // App mode uses the application token to authorize database access and
     // carries a supplied end-user token directly in the EUSC. This is not an
