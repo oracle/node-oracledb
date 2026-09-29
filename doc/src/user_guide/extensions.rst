@@ -300,61 +300,33 @@ Vector SDK Plugin
 
 .. versionadded:: 26.0.0
 
-Node-oracledb provides a pre-supplied Vector SDK plugin that provides a
-high-level interface for `Oracle AI Vector Search <https://www.oracle.com/pls/
-topic/lookup?ctx=dblatest&id=VECSE-GUID-746EAA47-9ADA-4A77-82BB-
-64E8EF5309BE>`__ workflows in Node.js applications. This plugin provides APIs
-for creating vector stores, storing documents and embeddings, searching by
-vector or text, creating vector indexes, and managing embedding models in
-Oracle Database.
+Node-oracledb provides a pre-supplied Vector SDK plugin with a high-level
+interface for `Oracle AI Vector Search <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=VECSE-GUID-746EAA47-9ADA-4A77-82BB-64E8EF5309BE>`__
+workflows in Node.js applications. This plugin provides APIs for creating
+vector stores, storing documents and embeddings, searching by vector or text,
+creating vector indexes, and managing embedding models in Oracle Database.
 
 The ``vectorsdk`` plugin implementation is available in the `plugins/vectorsdk
 <https://github.com/oracle/node-oracledb/tree/main/plugins/vectorsdk>`__
-directory of the node-oracledb package. The Vector SDK requires Oracle Database
-23.4 or later.
+directory of the node-oracledb package. The Vector SDK requires Oracle
+Database 23.4 or later.
 
-To load the ``vectorsdk`` plugin, use:
+The ``vectorsdk`` plugin provides the ``OracleVecDB`` class for creating and
+using a database-backed vector store. An ``OracleVecDB`` instance stores the
+configuration the Vector SDK uses for vector table, document, embedding, and
+search operations, such as the database source, table name, vector definition,
+and distance metric.
+
+To load the ``vectorsdk`` plugin and access the ``OracleVecDB`` class, use:
 
 .. code-block:: javascript
 
    const { OracleVecDB } = require('oracledb/plugins/vectorsdk');
 
-Loading this ``vectorsdk`` plugin returns the ``OracleVecDB`` class which is
-used for creating and using a database-backed vector store. This class
-supports creating vector tables, adding supplied vectors, generating
-embeddings from text, searching by vector or text, creating vector indexes,
-deleting documents, and dropping vector tables. Also, the plugin returns the
-following functions:
-
-.. list-table-with-summary:: Vector SDK Helper Functions
-    :header-rows: 1
-    :class: wy-table-responsive
-    :widths: 10 40
-    :name:  _vector_sdk_helper_functions
-    :summary: The first column displays the function name. The second column displays the description of the function.
-
-    * - Function
-      - Description
-    * - ``loadModel()``
-      - A function that loads an embedding model into Oracle Database.
-    * - ``dropModel()``
-      - A function that drops an embedding model from Oracle Database.
-    * - ``describeModel()``
-      - A function that returns metadata for a loaded embedding model. This function requires Oracle Database 26.2 or later.
-    * - ``listModels()``
-      - A function that lists models in the current schema. This function requires Oracle Database 26.2 or later.
-    * - ``getIndexBuildStatus()``
-      - A function that returns vector index build status information for a table. This function requires Oracle Database 26.2 or later.
-
-For information on using the Vector SDK, see the subsequent sections.
-
-.. _vectorsdk:
-
-Using the Vector SDK Plugin
----------------------------
-
-To use the ``vectorsdk`` plugin in your application, load the required APIs in
-your code:
+The plugin also provides functions for managing embedding models stored in
+Oracle Database and checking vector index build status. To load
+``OracleVecDB`` with these additional functions, use:
 
 .. code-block:: javascript
 
@@ -367,10 +339,8 @@ your code:
       getIndexBuildStatus
     } = require('oracledb/plugins/vectorsdk');
 
-Most Vector SDK operations use ``OracleVecDB``, which represents a vector store
-backed by an Oracle Database table. The other provided functions manage embedding
-models or report vector index build status. See
-:ref:`_vector_sdk_helper_functions` for more information.
+For more information on these functions, see this
+:ref:`table <_vector_sdk_helper_functions>`.
 
 After loading the ``vectorsdk`` plugin, you can:
 
@@ -399,7 +369,7 @@ node-oracledb, see :ref:`vectors`.
 .. _createvectorstore:
 
 Creating a Vector Store
-+++++++++++++++++++++++
+-----------------------
 
 A vector store is an ``OracleVecDB`` instance that contains the configuration
 used by the Vector SDK for vector table, document, embedding, and search
@@ -570,7 +540,7 @@ the properties described above:
 .. _dbsourceconfiguration:
 
 Database Source Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++++
 
 Set the ``dbSource`` property to specify how the Vector SDK gets a database
 connection for each operation. The value can be a node-oracledb
@@ -658,7 +628,7 @@ pools.
 .. _vectorconfiguration:
 
 Vector Configuration
-^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++
 
 Set the :ref:`vector <vecdbvector>` property in an ``OracleVecDB`` instance to
 define the Oracle Database ``VECTOR`` column used by the vector store. This
@@ -744,7 +714,7 @@ name, specify ``annotation`` without ``name`` as shown in the example below:
 .. _columnconfiguration:
 
 Column Configuration
-^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++
 
 Set the :ref:`columns <vecdbcolumns>` property in an ``OracleVecDB`` instance
 to customize the table columns used by the vector store.
@@ -819,7 +789,7 @@ name, specify ``annotation`` without ``name`` as shown in the example below:
 .. _descriptionconfiguration:
 
 Table Comment Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++++
 
 Use the :ref:`description <vecdbdescription>` property in an OracleVecDB
 instance to add a comment to a table created by the Vector SDK.
@@ -837,7 +807,7 @@ An example of specifying table and column comments is shown below:
 .. _distancemetricsconfiguration:
 
 Distance Metrics Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++
 
 Set the :ref:`vectorDistanceType <vecdbvectordistancetype>` property to specify the
 distance metric used by vector searches and vector indexes. The distance metric
@@ -867,7 +837,7 @@ For more information on distance metrics, see `Vector Distance Metrics
 .. _modelparamsconfiguration:
 
 Model Parameters Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++
 
 Set the :ref:`modelParams <vecdbmodelparams>` property when the vector store
 needs to generate embeddings in Oracle Database. The Vector SDK passes
@@ -922,7 +892,7 @@ Database, see :ref:`vecsdkmanagemodels`.
 .. _identifierquotingconfiguration:
 
 Identifier Quoting Configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+++++++++++++++++++++++++++++++++
 
 By default, configured identifiers are unquoted Oracle Database identifiers.
 The Vector SDK removes leading and trailing whitespace, validates each value
@@ -962,7 +932,7 @@ This configuration uses the schema-qualified table name
 .. _oraclevecdbmethods:
 
 OracleVecDB Methods
-^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++
 
 After creating an ``OracleVecDB`` instance, you can use the following methods:
 
@@ -992,6 +962,34 @@ After creating an ``OracleVecDB`` instance, you can use the following methods:
       - Inserts rows from a source table into the vector table, generating embeddings from source text values.
     * - ``search()``
       - Searches for documents by supplied vector or by text.
+
+Vector SDK Helper Functions
++++++++++++++++++++++++++++
+
+The ``vectorsdk`` plugin also provides the following helper functions for
+managing embedding models stored in Oracle Database and for checking vector
+index build status. These functions are called directly from the plugin
+export.
+
+.. list-table-with-summary:: Vector SDK Helper Functions
+    :header-rows: 1
+    :class: wy-table-responsive
+    :widths: 10 40
+    :name:  _vector_sdk_helper_functions
+    :summary: The first column displays the function name. The second column displays the description of the function.
+
+    * - Function
+      - Description
+    * - ``loadModel()``
+      - A function that loads an embedding model into Oracle Database.
+    * - ``dropModel()``
+      - A function that drops an embedding model from Oracle Database.
+    * - ``describeModel()``
+      - A function that returns metadata for a loaded embedding model. This function requires Oracle Database 26.2 or later.
+    * - ``listModels()``
+      - A function that lists models in the current schema. This function requires Oracle Database 26.2 or later.
+    * - ``getIndexBuildStatus()``
+      - A function that returns vector index build status information for a table. This function requires Oracle Database 26.2 or later.
 
 .. _vecsdkcreatevectortable:
 

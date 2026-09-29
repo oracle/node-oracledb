@@ -18,7 +18,7 @@ in Oracle Database. A sparse vector is a vector which has mostly zero as its
 dimension values and only the non-zero values are physically stored.
 
 For high-level document embedding and vector search workflows, see
-:ref:`vectorsdk`, which details the node-oracledb ``vectorsdk`` plugin.
+:ref:`vectorsdkplugin`, which details the node-oracledb ``vectorsdk`` plugin.
 
 With the VECTOR data type, you can define the number of dimensions for the
 data and the storage format for each dimension value in the vector. The

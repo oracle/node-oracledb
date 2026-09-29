@@ -177,7 +177,7 @@ if (process.env.MODEL_FILE) {
 }
 
 if (process.env.MODEL_DIMS) {
-  config.test.modelDims = process.env.MODEL_DIMS;
+  config.test.modelDims = Number(process.env.MODEL_DIMS);
 }
 
 config.createUser = () => {
