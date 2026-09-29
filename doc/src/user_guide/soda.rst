@@ -913,8 +913,8 @@ With Oracle Database 21, default metadata might be like::
         "readOnly": false
     }
 
-See `Overview of SODA Document Collections <https://www.oracle.com/pls/topic
-/lookup?ctx=dblatest&id=GUID-C107707F-E135-493F-9112-98691C80D3E9>`__
+See `Overview of SODA Document Collections <https://docs.oracle.com/en/
+database/oracle/simple-oracle-document-access/adsdi/overview-soda-collections.html>`__
 for more information on collections and their metadata.
 
 The following example shows how to create a collection that supports

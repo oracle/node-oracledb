@@ -48,40 +48,36 @@ describe('216. dbObject17.js', () => {
   before(async () => {
     conn = await oracledb.getConnection(dbConfig);
 
-    let plsql = `
-      CREATE OR REPLACE TYPE ${PLAYER_T} AS OBJECT (
+    let sql = `
+      CREATE TYPE ${PLAYER_T} AS OBJECT (
         shirtnumber NUMBER,
         name        VARCHAR2(20),
         ts          TIMESTAMP,
         tsz         TIMESTAMP WITH TIME ZONE,
         ltz         TIMESTAMP WITH LOCAL TIME ZONE
-      );
+      )
     `;
-    await conn.execute(plsql);
+    await conn.execute(testsUtil.sqlCreateType(PLAYER_T, sql));
 
-    plsql = `
-      CREATE OR REPLACE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T};
+    sql = `
+      CREATE TYPE ${TEAM_T} AS VARRAY(10) OF ${PLAYER_T}
     `;
-    await conn.execute(plsql);
+    await conn.execute(testsUtil.sqlCreateType(TEAM_T, sql));
 
-    const sql = `
+    sql = `
       CREATE TABLE ${TABLE} (sportname VARCHAR2(20), team ${TEAM_T})
     `;
-    plsql = testsUtil.sqlCreateTable(TABLE, sql);
-    await conn.execute(plsql);
+    await conn.execute(testsUtil.sqlCreateTable(TABLE, sql));
   }); // before()
 
   after(async () => {
-    let sql = `DROP TABLE ${TABLE} PURGE`;
-    await conn.execute(sql);
-
-    sql = `DROP TYPE ${TEAM_T} FORCE`;
-    await conn.execute(sql);
-
-    sql = `DROP TYPE ${PLAYER_T} FORCE`;
-    await conn.execute(sql);
-
-    await conn.close();
+    try {
+      await conn.execute(testsUtil.sqlDropTable(TABLE));
+      await conn.execute(testsUtil.sqlDropType(TEAM_T));
+      await conn.execute(testsUtil.sqlDropType(PLAYER_T));
+    } finally {
+      await conn.close();
+    }
   }); // after()
 
   it('216.1 VARRAY Collection. Object columns contain TS, TSZ and LTZ', async () => {
