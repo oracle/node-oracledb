@@ -169,3 +169,32 @@ For more information, see the blog `Oracle Database and n8n: Add Oracle
 Database to your AI-powered workflows <https://medium.com/oracledevs/oracle-
 database-and-n8n-add-oracle-database-to-your-ai-powered-workflows-
 ed042d7ba8b7>`__.
+
+.. _libredbstudio:
+
+LibreDB Studio
+==============
+
+`LibreDB Studio <https://github.com/libredb/libredb-studio>`__ is an
+open-source web-based SQL IDE for working with Oracle Database and other
+database systems.
+
+It is self-hosted and can be deployed with Docker, Helm, or npx. See the
+`LibreDB Studio installation documentation <https://github.com/libredb/libredb
+-studio#install>`__ for deployment commands and configuration options.
+
+LibreDB Studio's Oracle Database integration is built on node-oracledb. It uses
+node-oracledb Thin mode by default, so Oracle Instant Client libraries are not
+required. Thick mode is also supported as an optional configuration when an
+Oracle Instant Client installation is provided. See `LibreDB Studio Thick mode
+opt-in <https://github.com/libredb/libredb-studio/blob/main/docs/providers/
+oracle.md#44-thick-mode-opt-in-oracle_client_lib_dir>`__ for the steps to
+configure using Thick mode.
+
+The Oracle Database integration provides a schema browser, SQL editor with
+query cancellation, transaction support, database monitoring based on V$
+views, statistics gathering, index rebuilding, and support for TCPS
+connections.
+
+See the `LibreDB Studio Oracle documentation <https://github.com/libredb/
+libredb-studio/blob/main/docs/providers/oracle.md>`__ for more information.
