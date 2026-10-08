@@ -118,7 +118,8 @@ describe('208. dbObject9.js', function() {
     const rows = await result.resultSet.getRows(PEOPLE.length);
 
     for (let i = 0; i < PEOPLE.length; i++) {
-      assert.deepStrictEqual(rows[i][0]._toPojo(), PEOPLE[i]);
+      assert.deepStrictEqual(JSON.parse(JSON.stringify(rows[i][0])),
+        PEOPLE[i]);
     }
     await result.resultSet.close();
   }); // 208.1
@@ -143,8 +144,8 @@ describe('208. dbObject9.js', function() {
     const RS = result.outBinds.out;
     const rows = await RS.getRows(PEOPLE.length);
     for (let i = 0; i < PEOPLE.length; i++) {
-      assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
-      assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
+      assert.deepStrictEqual(JSON.parse(JSON.stringify(rows[i][1])),
+        PEOPLE[i]);
     }
     await RS.close();
 
@@ -171,8 +172,10 @@ describe('208. dbObject9.js', function() {
       const firstRows = await result.outBinds.one.getRows();
       const secondRows = await result.outBinds.two.getRows();
 
-      assert.deepStrictEqual(firstRows[0][0]._toPojo(), PEOPLE[0]);
-      assert.deepStrictEqual(secondRows[0][0]._toPojo(), PEOPLE[1]);
+      assert.deepStrictEqual(JSON.parse(JSON.stringify(firstRows[0][0])),
+        PEOPLE[0]);
+      assert.deepStrictEqual(JSON.parse(JSON.stringify(secondRows[0][0])),
+        PEOPLE[1]);
       await result.outBinds.one.close();
       await result.outBinds.two.close();
     } finally {
@@ -195,20 +198,18 @@ describe('208. dbObject9.js', function() {
     if (dbConfig.test.isCmanTdm) this.skip();
     const result = await conn.execute(queryImpres);
     const rows = result.implicitResults[0];
-    for (let i = 0; i < PEOPLE.length; i++) {
-      assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
-      assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
-    }
+    for (let i = 0; i < PEOPLE.length; i++)
+      assert.deepStrictEqual(JSON.parse(JSON.stringify(rows[i][1])),
+        PEOPLE[i]);
   }); // 208.4
 
   it('208.5 Implicit results that fetch objects with Result Set', async function() {
     if (dbConfig.test.isCmanTdm) this.skip();
     const result = await conn.execute(queryImpres, [], { resultSet: true});
     const rows = await result.implicitResults[0].getRows(PEOPLE.length);
-    for (let i = 0; i < PEOPLE.length; i++) {
-      assert.deepStrictEqual(rows[i][1]._toPojo(), PEOPLE[i]);
-      assert.strictEqual(JSON.stringify(rows[i][1]), JSON.stringify(PEOPLE[i]));
-    }
+    for (let i = 0; i < PEOPLE.length; i++)
+      assert.deepStrictEqual(JSON.parse(JSON.stringify(rows[i][1])),
+        PEOPLE[i]);
   }); // 208.5
 
   it('208.6 DML RETURNING INTO, explicit bind type', async () => {
@@ -229,7 +230,7 @@ describe('208. dbObject9.js', function() {
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds[0][0], staffNo);
     assert.deepStrictEqual(
-      result.outBinds[1][0]._toPojo(),
+      JSON.parse(JSON.stringify(result.outBinds[1][0])),
       staff
     );
   }); // 208.6
@@ -252,7 +253,7 @@ describe('208. dbObject9.js', function() {
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds[0][0], staffNo);
     assert.deepStrictEqual(
-      result.outBinds[1][0]._toPojo(),
+      JSON.parse(JSON.stringify(result.outBinds[1][0])),
       staff
     );
   }); // 208.7
@@ -275,7 +276,7 @@ describe('208. dbObject9.js', function() {
     assert.strictEqual(result.rowsAffected, 1);
     assert.strictEqual(result.outBinds.o1[0], staffNo);
     assert.deepStrictEqual(
-      result.outBinds.o2[0]._toPojo(),
+      JSON.parse(JSON.stringify(result.outBinds.o2[0])),
       staff
     );
   }); // 208.8

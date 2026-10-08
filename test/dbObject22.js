@@ -105,8 +105,8 @@ describe('327. dbObject22.js', function() {
   }
 
   it('327.1.3 rejects a DbObject with a different DbObject type', async function() {
-    // This test requires Oracle Database 19c or later in Thin Mode
-    if (oracledb.thin && connection.oracleServerVersion <= 1900000000)
+    // This test requires Oracle Database 21c or later in Thin Mode
+    if (oracledb.thin && connection.oracleServerVersion < 2100000000)
       this.skip();
 
     const smallType = objectTypes[0];

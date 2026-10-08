@@ -913,9 +913,9 @@ With Oracle Database 21, default metadata might be like::
         "readOnly": false
     }
 
-See `Overview of SODA Document Collections <https://docs.oracle.com/en/
-database/oracle/simple-oracle-document-access/adsdi/overview-soda-collections.html>`__
-for more information on collections and their metadata.
+See `Overview of SODA Document Collections <https://www.oracle.com/pls/topic/
+lookup?ctx=dblatest&id=GUID-C231A496-B94E-4D0C-AEF7-B1DD0B826289>`__ for more
+information on collections and their metadata.
 
 The following example shows how to create a collection that supports
 keys supplied by the application, instead of being system generated.

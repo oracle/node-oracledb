@@ -131,8 +131,19 @@ The properties of a *Connection* object are listed below.
 
     .. versionadded:: 26.0.0
 
-    This read/write property is a boolean that enables or disables database
-    server-side OpenTelemetry traces.
+    This read/write property is a boolean that controls whether node-oracledb
+    requests Oracle Database server-side OpenTelemetry tracing for operations
+    on the connection.
+
+    Note that setting this property alone does not collect or display database
+    traces. Oracle Database OpenTelemetry must also be configured and enabled
+    in the database environment. For more information, see
+    :ref:`Configuring Oracle Database Server-side OpenTelemetry with
+    node-oracledb <otdbconfig>`.
+
+    This property can be set to *true* or *false* during the lifetime of a
+    connection. The updated value is sent to Oracle Database on a subsequent
+    round-trip.
 
     .. note::
 
@@ -526,17 +537,9 @@ Connection Methods
 
     .. _appcontextparams:
 
-    .. list-table-with-summary:: connection.appContext() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: connection.appContext() Parameters
+        :name: _appcontext_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``namespaceName``
           - String
           - The namespace of the application context to be set.
@@ -564,18 +567,9 @@ Connection Methods
 
     .. _beginsessionlesstxn:
 
-    .. list-table-with-summary:: connection.beginSessionlessTransaction() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: connection.beginSessionlessTransaction() Parameters
+        :name: _beginsessionlesstxn_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``options``
           - Object
           - This is an optional parameter to ``beginSessionlessTransaction()``
@@ -717,18 +711,9 @@ Connection Methods
 
     .. _changepassword:
 
-    .. list-table-with-summary:: connection.changePassword() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: connection.changePassword() Parameters
+        :name: _changepassword_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``User``
           - String
           - The name of the user whose password is to be changed.
@@ -782,17 +767,9 @@ Connection Methods
 
     .. _clearappcontext:
 
-    .. list-table-with-summary:: connection.clearAppContext() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: connection.clearAppContext() Parameters
+        :name: _clearappcontext_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``namespaceName``
           - String
           - The namespace of the application context to be cleared.
@@ -851,18 +828,9 @@ Connection Methods
 
     .. _connectionclose:
 
-    .. list-table-with-summary:: connection.close() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: connection.close() Parameters
+        :name: _close_params:
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``options``
           - Object
           - This parameter only affects pooled connections. The only valid option attribute is `drop`.
@@ -955,18 +923,9 @@ Connection Methods
 
     .. _connectioncreatelob:
 
-    .. list-table-with-summary:: connection.createLob() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: connection.createLob() Parameters
+        :name: _createlob_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``type``
           - Number
           - One of the constants :ref:`oracledb.CLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.BLOB <oracledbconstantsnodbtype>`, :ref:`oracledb.NCLOB <oracledbconstantsnodbtype>` (or the equivalent ``DB_TYPE_*`` constants), or :ref:`oracledb.DB_TYPE_BFILE <oracledbconstantsdbtype>`.
@@ -1008,17 +967,9 @@ Connection Methods
 
     The parameters of the ``connection.decodeOSON()`` are:
 
-    .. list-table-with-summary:: connection.decodeOSON() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: connection.decodeOSON() Parameters
+        :name: _decodeoson_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``buf``
           - Buffer
           - The OSON buffer that is to be decoded.
@@ -1039,16 +990,9 @@ Connection Methods
 
     .. _connectiondirectpathload:
 
-    .. list-table-with-summary:: connection.directPathLoad() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 20
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: connection.directPathLoad() Parameters
+        :name: _directpathload_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``schema``
           - String
           - The name of the database schema.
@@ -1107,16 +1051,9 @@ Connection Methods
 
     The parameters of the ``connection.encodeOSON()`` are:
 
-    .. list-table-with-summary:: connection.encodeOSON() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 20
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: connection.encodeOSON() Parameters
+        :name: _encodeoson_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``value``
           - Any
           - The JavaScript value that is to be encoded into OSON bytes. The JavaScript value can be any value supported by `JSON <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-FBC22D72-AA64-4B0A-92A2-837B32902E2C>`__.
@@ -1143,18 +1080,9 @@ Connection Methods
 
     .. _connectionexecute:
 
-    .. list-table-with-summary:: connection.execute() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: connection.execute() Parameters
+        :name: _execute_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``sql``
           - String or Object
           - .. _executesqlparam:
@@ -1696,18 +1624,9 @@ Connection Methods
 
     .. _executemanyparam:
 
-    .. list-table-with-summary:: connection.executeMany() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: connection.executeMany() Parameters
+        :name: _executemany_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``sql``
           - String
           - .. _executemanysqlparam:
@@ -1961,19 +1880,9 @@ Connection Methods
 
     .. _getdbobjectparams:
 
-    .. list-table-with-summary:: connection.getDbObjectClass() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.getDbObjectClass() Parameters
+        :name: _getdbobjectclass_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``className``
           - String
           - The name of the Oracle object or collection.
@@ -2024,18 +1933,9 @@ Connection Methods
 
     .. _getqueueparams:
 
-    .. list-table-with-summary:: connection.getQueue() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.getQueue() Parameters
+        :name: _getqueue_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``name``
           - String
           - The name of the Advanced Queue to use. This queue should have been created previously, for example with the ``DBMS_AQADM.CREATE_QUEUE()`` function.
@@ -2163,19 +2063,9 @@ Connection Methods
 
     .. _getstmtinfo:
 
-    .. list-table-with-summary:: connection.getStatementInfo() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.getStatementInfo() Parameters
+        :name: _getstmtinfo_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``sql``
           - String
           - The SQL statement to parse.
@@ -2392,18 +2282,9 @@ Connection Methods
 
     .. _resumesessionlesstxn:
 
-    .. list-table-with-summary:: connection.resumeSessionlessTransaction() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: connection.resumeSessionlessTransaction() Parameters
+        :name: _resumesessionlesstxn_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``transactionId``
           - Buffer
           - The unique identifier of an existing sessionless transaction that is to be resumed.
@@ -2534,18 +2415,9 @@ Connection Methods
 
     .. _runpipeline:
 
-    .. list-table-with-summary:: connection.runPipeline() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: connection.runPipeline() Parameters
+        :name: _runpipeline_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pipeline``
           - Object
           - .. _pipelinerunpipeline:
@@ -2655,17 +2527,9 @@ Connection Methods
 
     The parameters of the ``connection.setEndUserSecurityContext()`` are:
 
-    .. list-table-with-summary:: connection.setEndUserSecurityContext() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: connection.setEndUserSecurityContext() Parameters
+        :name: _setendusersecuritycontext_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``context``
           - Object
           - The end user security context to be set on the connection.
@@ -2705,18 +2569,9 @@ Connection Methods
 
     .. _conshutdownmode:
 
-    .. list-table-with-summary:: connection.shutdown() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.shutdown() Parameters
+        :name: _connshutdown_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``shutdownMode``
           - Number
           - One of the constants :ref:`oracledb.SHUTDOWN_MODE_ABORT <oracledbconstantsshutdown>`, :ref:`oracledb.SHUTDOWN_MODE_DEFAULT <oracledbconstantsshutdown>`, :ref:`oracledb.SHUTDOWN_MODE_FINAL <oracledbconstantsshutdown>`, :ref:`oracledb.SHUTDOWN_MODE_IMMEDIATE <oracledbconstantsshutdown>`, :ref:`oracledb.SHUTDOWN_MODE_TRANSACTIONAL <oracledbconstantsshutdown>`, or :ref:`oracledb.SHUTDOWN_MODE_TRANSACTIONAL_LOCAL <oracledbconstantsshutdown>`.
@@ -2792,18 +2647,9 @@ Connection Methods
 
     .. _subscribeparams:
 
-    .. list-table-with-summary:: connection.subscribe() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.subscribe() Parameters
+        :name: _subscribe_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``name``
           - String
           - .. _consubscribename:
@@ -3109,19 +2955,9 @@ Connection Methods
 
     .. _constartupparams:
 
-    .. list-table-with-summary:: connection.startup() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.startup() Parameters
+        :name: _connstartup_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``options``
           - Object
           - See :ref:`startupoptions` for information on the properties.
@@ -3195,18 +3031,9 @@ Connection Methods
 
     .. _tpcbegin:
 
-    .. list-table-with-summary:: connection.tpcBegin() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: connection.tpcBegin() Parameters
+        :name: _tpcbegin_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``xid``
           - Object
           - The transaction identifier (XID). It should be an object with the following three attributes:
@@ -3277,18 +3104,9 @@ Connection Methods
 
     .. _tpccommit:
 
-    .. list-table-with-summary:: connection.tpcCommit() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.tpcCommit() Parameters
+        :name: _tpccommit_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``xid``
           - Object
           - The transaction identifier previously passed to :meth:`~connection.tpcBegin()` when starting the transaction branch.
@@ -3339,18 +3157,9 @@ Connection Methods
 
     .. _tpcend:
 
-    .. list-table-with-summary:: connection.changePassword() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: connection.tpcEnd() Parameters
+        :name: _tpcend_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``xid``
           - Object
           - The transaction identifier previously passed to :meth:`~connection.tpcBegin()` when starting the transaction branch.
@@ -3405,18 +3214,9 @@ Connection Methods
 
     .. _tpcforget:
 
-    .. list-table-with-summary:: connection.tpcForget() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: connection.tpcForget() Parameters
+        :name: _tpcforget_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``xid``
           - Object
           - The transaction identifier previously passed to :meth:`~connection.tpcBegin()` when starting the transaction branch.
@@ -3474,18 +3274,9 @@ Connection Methods
 
     .. _tpcprepare:
 
-    .. list-table-with-summary:: connection.tpcPrepare() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: connection.tpcPrepare() Parameters
+        :name: _tpcprepare_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``xid``
           - Object
           - The transaction identifier previously passed to :meth:`~connection.tpcBegin()` when starting the transaction branch.
@@ -3535,18 +3326,9 @@ Connection Methods
 
     .. _tpcrecover:
 
-    .. list-table-with-summary:: connection.tpcRecover() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: connection.tpcRecover() Parameters
+        :name: _tpcrecover_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``asString``
           - Boolean
           - If ``asString`` is *true*, then the ``globalTransactionId`` and ``branchQualifier`` attributes will be converted to Strings. Otherwise the values are returned as Buffers.
@@ -3598,18 +3380,9 @@ Connection Methods
 
     .. _tpcrollback:
 
-    .. list-table-with-summary:: connection.tpcRollback() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: connection.tpcRollback() Parameters
+        :name: _tpcrollback_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``xid``
           - Object
           - The transaction identifier previously passed to :meth:`~connection.tpcBegin()` when starting the transaction branch.
@@ -3667,19 +3440,9 @@ Connection Methods
 
     .. _unsubscribe:
 
-    .. list-table-with-summary:: connection.unsubscribe() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: connection.unsubscribe() Parameters
+        :name: _unsubscribe_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``name``
           - String
           - The name of the subscription used in :meth:`connection.subscribe()`.

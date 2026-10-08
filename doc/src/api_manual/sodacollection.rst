@@ -67,18 +67,9 @@ SodaCollection Methods
 
     .. _sodacollcreateindexparams:
 
-    .. list-table-with-summary:: sodaCollection.createIndex() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: sodaCollection.createIndex() Parameters
+        :name: _sodacreateindex_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``indexSpec``
           - Object
           - An object with fields as shown in the `SODA Index Specifications (Reference) <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-00C06941-6FFD-4CEB-81B6-9A7FBD577A2C>`__ manual.
@@ -194,18 +185,9 @@ SodaCollection Methods
 
     .. _sodacolldropindexparams:
 
-    .. list-table-with-summary:: sodaCollection.dropIndex() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: sodaCollection.dropIndex() Parameters
+        :name: _sodadropindex_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``indexName``
           - String
           - Name of the index to be dropped.
@@ -425,18 +407,9 @@ SodaCollection Methods
 
     .. _sodacollinsertoneparams:
 
-    .. list-table-with-summary:: sodaCollection.insertOne() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: sodaCollection.insertOne() Parameters
+        :name: _sodainsertone_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
           - The document to insert.
@@ -511,18 +484,9 @@ SodaCollection Methods
 
     .. _insertoneandget:
 
-    .. list-table-with-summary:: sodaCollection.insertOneAndGet() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: sodaCollection.insertOneAndGet() Parameters
+        :name: _sodainsertoneandget_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
           - The document to insert. For related documentation, see :meth:`sodaCollection.insertOne()`.

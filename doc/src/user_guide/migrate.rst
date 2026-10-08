@@ -4,6 +4,76 @@
 Upgrading to the Latest node-oracledb Releases
 **********************************************
 
+.. _upgradev70v260:
+
+Upgrading from node-oracledb 7.0 to 26.0.0
+==========================================
+
+- Review the :ref:`releasenotes` and take advantage of new features.
+
+- The new end-user security provider
+  :ref:`plugin <endusersecuritycontextcreationplugin>` can be used for scoped
+  OCI IAM and Microsoft Entra ID application-token and on-behalf-of
+  authentication with :ref:`Oracle Deep Data Security <deepdatasecurity>`.
+
+- With the new :attr:`connection.txnPriority` property, you can use Oracle AI
+  Database 26ai's :ref:`transaction priority <txnpriority>` feature with
+  standalone connections in Thin and Thick modes, and with pools in Thin mode.
+
+- You can now use the configuration information stored in the
+  :ref:`Google Cloud Storage <googlecloudstorage>` Centralized Configuration
+  Provider, and connect to Oracle Database.
+
+- You can now use OCI Resource Principal authentication with the
+  :ref:`OCI Object Storage centralized configuration provider <ociobjstorage>`
+  and :ref:`native IAM token-based authentication <cloudnativeauthoci>`.
+
+- The new ``rowsPerDataEvent`` option in the :meth:`connection.queryStream()`
+  and :meth:`resultset.toQueryStream()` methods allows processing of more rows
+  per data event of the ``queryStream`` object.
+
+- The timestamp attributes in :ref:`database objects <dbobjectclass>` now
+  return ``precision`` and ``scale`` metadata values. These values apply when
+  the ``type`` attribute is oracledb.DB_TYPE_TIMESTAMP,
+  oracledb.DB_TYPE_TIMESTAMP_TZ, or oracledb.DB_TYPE_TIMESTAMP_LTZ.
+
+- In node-oracledb Thin mode, you can now use client initiated
+  :ref:`Continuous Query Notification (CQN) <cqn>` subscriptions and
+  :ref:`Advanced Queuing (AQ) notifications <aqnotifications>` with
+  Transactional Event Queues, including AQ notification extension metadata.
+
+- The new property :attr:`connection.databaseOpenTelemetryTracing` in
+  node-oracledb Thin mode can be used to read and set database
+  :ref:`OpenTelemetry <opentelemetry>` trace propagation.
+
+- In node-oracledb Thin mode, you can now update the :attr:`connection.ecid`
+  end-to-end tracing property.
+
+- In node-oracledb Thin mode, you can now set tls_* TLS certificate
+  DN-validation parameters alongside the existing ssl_* parameters.
+
+- You can now use the ``ssl_allow_weak_dn_match`` property with
+  :ref:`Easy Connect strings <easyconnect>` in node-oracledb Thin mode.
+
+- In node-oracledb Thin mode, the default value of the ``enqTime`` property
+  for :ref:`Advanced Queuing (AQ) messages <_aqmessage_class_attributes>` is
+  now *undefined* instead of *null* when no enqueue time is available. In
+  Thick mode, unavailable ``enqTime`` values no longer return a random date.
+
+- In node-oracledb Thin mode, TIMESTAMP WITH LOCAL TIME ZONE conversions now
+  use the database time zone when converting values to and from JavaScript
+  Date objects. See :ref:`datehandling` for more information.
+
+- In node-oracledb Thick mode, CQN registration IDs created by
+  :meth:`connection.subscribe()` can now handle JavaScript Number values
+  which require more than 32 bits.
+
+- In node-oracledb Thick mode, ODPI-C now requires the standard Oracle Client
+  library file names ``libclntsh.so`` on Linux and ``libclntsh.dylib`` on
+  macOS when using :meth:`oracledb.initOracleClient()` to load Oracle Client
+  libraries. Version-specific library names such as ``libclntsh.so.19.1`` are
+  no longer loaded directly.
+
 .. _upgradev610v70:
 
 Upgrading from node-oracledb 6.10 to 7.0

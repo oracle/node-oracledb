@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -110,7 +110,7 @@ describe('209. dbObject10.js', () => {
     assert.strictEqual(dbObj.toString(), expect);
 
     expect = '[object Object]';
-    assert.strictEqual(dbObj._toPojo().toString(), expect);
+    assert.strictEqual(dbObj.toJSON().toString(), expect);
   }); // 209.2
 
   it('209.3 The Object literal and JSON.stringify()', async () => {

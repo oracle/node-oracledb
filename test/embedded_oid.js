@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -41,14 +41,13 @@ const testsUtil = require('./testsUtil.js');
 
 describe('288. embedded_oid.js', function() {
   let conn;
-  let isRunnable = true;
 
   before(async function() {
-    const sodaRunnable = await testsUtil.isSodaRunnable();
-    const preRequisites = await testsUtil.checkPrerequisites(2300000000, 2300000000);
-    if (!sodaRunnable || !preRequisites || !dbConfig.test.DBA_PRIVILEGE || oracledb.thin) {
+    let isRunnable = true;
+    const preRequisites = await testsUtil.isSodaRunnable() ||
+      await testsUtil.checkPrerequisites(2300000000, 2300000000);
+    if (!preRequisites || !dbConfig.test.DBA_PRIVILEGE || oracledb.thin)
       isRunnable = false;
-    }
 
     if (!isRunnable) this.skip();
     await sodaUtil.cleanup();
@@ -95,7 +94,7 @@ describe('288. embedded_oid.js', function() {
       let contentId;
       if (oracledb.oracleClientVersion > 2304000000) {
         assert.strictEqual(content._id instanceof oracledb.JsonId, true);
-        contentId = content._id.toJSON();
+        contentId = JSON.parse(JSON.stringify(content._id));
       } else {
         contentId = content._id;
       }

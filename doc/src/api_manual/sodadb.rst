@@ -72,18 +72,9 @@ SodaDatabase Methods
 
     .. _createcoll:
 
-    .. list-table-with-summary:: sodaDatabase.createCollection() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: sodaDatabase.createCollection() Parameters
+        :name: _sodadbcreatecollection_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``collectionName``
           - String
           - The name of the collection to be created.
@@ -180,18 +171,9 @@ SodaDatabase Methods
 
     .. _createdocument:
 
-    .. list-table-with-summary:: sodaDatabase.createDocument() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: sodaDatabase.createDocument() Parameters
+        :name: _sodadbcreatedocument_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``content``
           - String, Buffer, or Object
           - The document content.
@@ -243,18 +225,9 @@ SodaDatabase Methods
 
     .. _getcollectionnames:
 
-    .. list-table-with-summary:: sodaDatabase.getCollectionNames() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: sodaDatabase.getCollectionNames() Parameters
+        :name: _sodadbgetcollectionnames_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``options``
           - Object
           - If ``options`` is undefined, then all collection names will be returned. Otherwise, it can have the attributes listed in :ref:`getcollectionnamesoptions`.
@@ -332,19 +305,9 @@ SodaDatabase Methods
 
     .. _opencoll:
 
-    .. list-table-with-summary:: sodaDatabase.openCollection() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 40
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: sodaDatabase.openCollection() Parameters
+        :name: _sodadbopencollection_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``collectionName``
           - String
           - The name of the collection to open.

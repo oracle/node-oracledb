@@ -1495,8 +1495,9 @@ In SQL*Plus execute:
          mydata VARCHAR2(20)
         )
 
-Refer to the `CREATE TABLE identity column documentation
-<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-F9CE0CC3-13AE-4744-A43C-EAC7A71AAAB6__GUID-3F840F33-7A29-4910-9E43-2F1DAE4FFE76>`__.
+Refer to the `CREATE TABLE identity column documentation <https://www.oracle.
+com/pls/topic/lookup?ctx=dblatest&id=GUID-F9CE0CC3-13AE-4744-A43C-
+EAC7A71AAAB6>`__.
 
 If you already have a sequence ``myseq`` you can use values from it to
 auto-increment a column value like this:

@@ -95,7 +95,7 @@ File Name                                                 | Description
 [`em_rowcounts.js`](em_rowcounts.js)                      | `executeMany()` example showing how to find the number of rows affected by each input row
 [`endtoend.js`](endtoend.js)                              | Example showing setting tracing attributes
 [`example.js`](example.js)                                | Basic example of creating a table, inserting multiple rows, and querying rows
-[`gcpConfigProvider.js`](gcpConfigProvider.js)            | Shows how to connect to Oracle Database using GCP Storage Configuration Provider
+[`gcpConfigProvider.js`](gcpConfigProvider.js)            | Shows how to connect to Oracle Database using Google Cloud Provider (GCP) Storage Configuration Provider
 [`impres.js`](impres.js)                                  | Shows PL/SQL 'Implicit Results' returning multiple query results from PL/SQL code.
 [`insert1.js`](insert1.js)                                | Basic example creating a table and inserting data with DDL and DML respectively
 [`insert2.js`](insert2.js)                                | Basic example showing auto commit behavior

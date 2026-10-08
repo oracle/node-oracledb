@@ -45,19 +45,9 @@ SecurityContextProvider Methods
 
     The parameters of ``runWithContext()`` are:
 
-    .. list-table-with-summary:: securityContextProvider.runWithContext() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 15 40
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: securityContextProvider.runWithContext() Parameters
+        :name: _runwithcontext_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``context``
           - Object
           - A non-null object containing request-specific metadata. With the

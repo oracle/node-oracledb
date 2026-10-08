@@ -685,19 +685,6 @@ In the above sample code, the ``enhancedDatabaseReporting`` property is set to
     Use the ``enhancedDatabaseReporting`` property carefully since bind values
     may contain sensitive information.
 
-In node-oracledb Thin mode, when connected to Oracle AI Database
-26ai (version 23.26.2) or later, the
-:attr:`connection.databaseOpenTelemetryTracing` property enables or disables
-database server-side OpenTelemetry traces. For example:
-
-.. code-block:: javascript
-
-    connection.databaseOpenTelemetryTracing = true;
-
-The types of OpenTelemetry data and metrics for Oracle Database are listed
-`here <https://github.com/open-telemetry/semantic-conventions/blob/main/docs/
-db/oracledb.md>`__.
-
 The tracing parameters and methods that can be used by the OpenTelemetry
 JavaScript project to generate telemetry data were introduced in node-oracledb
 6.7. See :ref:`tracehandlerinterface`.
@@ -706,6 +693,55 @@ For more information, see the blog `Integrate OpenTelemetry to build
 high-performance Oracle Database Applications with Node.js <https://medium.com
 /oracledevs/integrate-opentelemetry-to-build-high-performance-oracle-database-
 applications-with-node-js-118e3a6c8793#f0c3>`__.
+
+.. _otdbconfig:
+
+**Configuring Oracle Database Server-side OpenTelemetry with node-oracledb**
+
+Oracle Database OpenTelemetry was introduced in Oracle AI Database 26ai
+(version 23.26.2). It must be configured and enabled in the database server to
+collect database server-side spans. For information on
+configuring Oracle Database OpenTelemetry, see `Observability with
+OpenTelemetry <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-
+8896FEDD-D6C3-46FE-ADA2-DB73DEC7CE51>`__ and `DBMS_OBSERVABILITY
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-889590D2-D6F9-
+4D6C-82D3-EE7205D1F395>`__.
+
+In node-oracledb Thin mode, when connected to Oracle AI Database version
+23.26.2 or later, set :attr:`connection.databaseOpenTelemetryTracing` to
+*true* to request Oracle Database server-side OpenTelemetry tracing for
+operations on the connection. For example:
+
+.. code-block:: javascript
+
+    connection.databaseOpenTelemetryTracing = true;
+
+Ensure that Oracle Database OpenTelemetry is configured and enabled on the
+database server as indicated above before setting this property. Database
+server-side spans are exported by Oracle Database to the database's configured
+OpenTelemetry endpoint or collector; they are not returned to node-oracledb.
+
+If the Node.js application has enabled OpenTelemetry tracing by using
+``@opentelemetry/instrumentation-oracledb``, you can view the node-oracledb
+operation and the related Oracle Database work together in your observability
+tool. To view node-oracledb spans and Oracle Database server-side spans
+together, configure both the Node.js application and Oracle Database to export
+spans to the same OpenTelemetry Protocol (OTLP)-compatible collector or
+observability backend.
+
+Database server-side OpenTelemetry spans can help provide details about the
+work inside Oracle Database for a traced operation, such as SQL execution,
+timing, waits, errors, and other database-side execution information. The
+exact span attributes and events depend on the Oracle Database release and
+database OpenTelemetry configuration.
+
+The :attr:`connection.databaseOpenTelemetryTracing` property can be set to
+*true* or *false* during the lifetime of a connection. The updated value is
+sent to Oracle Database on a subsequent round-trip.
+
+The types of OpenTelemetry data and metrics for Oracle Database are listed
+`here <https://github.com/open-telemetry/semantic-conventions/blob/main/docs/
+db/oracledb.md>`__.
 
 Low Level node-oracledb Driver Tracing
 ======================================

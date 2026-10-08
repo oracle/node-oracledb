@@ -47,16 +47,9 @@ Pipeline Methods
 
     .. _addexecute:
 
-    .. list-table-with-summary:: pipeline.addExecute() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: pipeline.addExecute() Parameters
+        :name: _addexecute_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``statement``
           - String
           - The SQL statement to be executed.
@@ -91,16 +84,9 @@ Pipeline Methods
 
     .. _addexecutemany:
 
-    .. list-table-with-summary:: pipeline.addExecuteMany() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: pipeline.addExecuteMany() Parameters
+        :name: _addexecutemany_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``statement``
           - String
           - The SQL or PL/SQL statement to be executed.
@@ -132,16 +118,9 @@ Pipeline Methods
 
     .. _addfetchall:
 
-    .. list-table-with-summary:: pipeline.addFetchAll() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: pipeline.addFetchAll() Parameters
+        :name: _addfetchall_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``statement``
           - String
           - The SQL or PL/SQL statement to be executed.
@@ -182,16 +161,9 @@ Pipeline Methods
 
     .. _addfetchmany:
 
-    .. list-table-with-summary:: pipeline.addFetchMany() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: pipeline.addFetchMany() Parameters
+        :name: _addfetchmany_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``statement``
           - String
           - The SQL or PL/SQL statement to be executed.
@@ -234,16 +206,9 @@ Pipeline Methods
 
     .. _addfetchone:
 
-    .. list-table-with-summary:: pipeline.addFetchOne() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: pipeline.addFetchOne() Parameters
+        :name: _addfetchone_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``statement``
           - String
           - The SQL or PL/SQL statement to be executed.

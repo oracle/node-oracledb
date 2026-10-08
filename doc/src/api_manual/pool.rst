@@ -373,18 +373,9 @@ Pool Methods
 
     .. _poolcloseparams:
 
-    .. list-table-with-summary:: pool.close() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: pool.close() Parameters
+        :name: _poolclose_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``drainTime``
           - Number
           - The number of seconds before the pool and connections are force closed.
@@ -472,18 +463,9 @@ Pool Methods
 
     .. _poolgetconnectionparams:
 
-    .. list-table-with-summary:: pool.getConnection() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: pool.getConnection() Parameters
+        :name: _poolgetconnection_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``poolAttrs``
           - Object
           - This parameter can contain a ``tag`` property when :ref:`connection tagging <connpooltagging>` is in use. It can also contain :ref:`shardingKey <getconnectiondbattrsshardingkey>` and :ref:`superShardingKey <getconnectiondbattrssupershardingkey>` properties, when using :ref:`Oracle Globally Distributed Database <sharding>`.
@@ -607,18 +589,9 @@ Pool Methods
 
     .. _poolreconfigureparams:
 
-    .. list-table-with-summary:: pool.reconfigure() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: pool.reconfigure() Parameters
+        :name: _poolreconfigure_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``poolAttrs``
           - Object
           - The following ``oracledb.createPool()`` properties can be changed with ``pool.reconfigure()`` in both Thin and Thick modes unless otherwise specified:
@@ -684,18 +657,9 @@ Pool Methods
 
     .. _setaccesstokenparams:
 
-    .. list-table-with-summary:: pool.setAccessToken() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: pool.setAccessToken() Parameters
+        :name: _poolsetaccesstoken_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``tokenAttrs``
           - Object
           - The ``tokenAttrs`` parameter object provides IAM token-based authentication properties.

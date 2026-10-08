@@ -195,18 +195,9 @@ AqQueue Methods
 
     .. _deqmany:
 
-    .. list-table-with-summary:: aqQueue.deqMany() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: aqQueue.deqMany() Parameters
+        :name: _deqmany_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``maxMessages``
           - Number
           - Dequeue at most this many messages. Depending on the dequeue options, the number of messages returned will be between zero and ``maxMessages``.
@@ -358,18 +349,9 @@ AqQueue Methods
 
     .. _enqmany:
 
-    .. list-table-with-summary:: aqQueue.enqMany() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: aqQueue.enqMany() Parameters
+        :name: _enqmany_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``messages``
           - Array
           - Each element of the array must be a String, a Buffer, a :ref:`DbObject <dbobjectclass>`, or a JavaScript Object as used by :meth:`enqOne() <aqQueue.enqOne()>`.
@@ -422,18 +404,9 @@ AqQueue Methods
 
     .. _enqOne:
 
-    .. list-table-with-summary:: aqQueue.enqOne() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: aqQueue.enqOne() Parameters
+        :name: _enqone_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``message``
           - String, Buffer, DbObject, or Object
           -  - String: If the message is a String, it will be converted to a buffer using the UTF-8 encoding.

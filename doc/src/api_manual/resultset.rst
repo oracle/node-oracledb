@@ -152,19 +152,9 @@ ResultSet Methods
 
     The parameters of the :meth:`resultset.toQueryStream()` method are:
 
-    .. list-table-with-summary::  resultset.toQueryStream() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the property. The second column
-         displays the data type of the property. The third column displays
-         the description of the property.
+    .. parameters-table::  resultset.toQueryStream() Parameters
+        :name: _toquerystream_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``options``
           - Object
           - .. _resultsetquerystreamrowsperdataevent:

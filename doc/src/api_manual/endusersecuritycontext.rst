@@ -35,16 +35,9 @@ The parameters of the ``EndUserSecurityContext`` object are:
 
 .. _endusersecuritycontextattrs:
 
-.. list-table-with-summary::  EndUserSecurityContext Parameters
-    :header-rows: 1
-    :class: wy-table-responsive
-    :align: center
-    :widths: 10 10 30
-    :summary: The first column displays the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+.. parameters-table::  EndUserSecurityContext Parameters
+    :name: _endusersecuritycontext_params
 
-    * - Parameter
-      - Data Type
-      - Description
     * - ``options``
       - Object
       - The ``options`` parameter contains the properties necessary to define an end-user security context for a connection. See :ref:`EndUserSecurityContext options Parameters Attributes <endusersecuritycontextopts>` for information.

@@ -21,8 +21,13 @@ sys.path.append(os.path.abspath("_ext"))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ["table_with_summary", "oracle_desupported", "constants_table",
-              'sphinx_rtd_theme']
+extensions = [
+    "table_with_summary",
+    "oracle_desupported",
+    "constants_table",
+    "parameters_table",
+    "sphinx_rtd_theme"
+]
 
 # turn on nitpicky mode
 nitpicky = True

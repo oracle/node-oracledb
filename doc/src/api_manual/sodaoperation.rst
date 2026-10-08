@@ -497,18 +497,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. _replaceone:
 
-    .. list-table-with-summary:: sodaOperation.replaceOne() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: sodaOperation.replaceOne() Parameters
+        :name: _sodareplaceone_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
           - The new document. See :meth:`sodaCollection.insertOne()`, which has the same semantics for the document.
@@ -569,18 +560,9 @@ method chain. Only one terminal method can be used in each chain.
 
     .. _replaceoneandget:
 
-    .. list-table-with-summary:: sodaOperation.replaceOneAndGet() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-          displays the data type of the parameter. The third column displays
-          the description of the parameter.
+    .. parameters-table:: sodaOperation.replaceOneAndGet() Parameters
+        :name: _sodareplaceoneandget_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``newDocumentContent`` or ``newSodaDocument``
           - Object or SodaDocument
           - The new document. See :meth:`sodaCollection.insertOne()`, which has the same semantics for the document.

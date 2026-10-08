@@ -233,16 +233,9 @@ Lob Methods
 
     The parameters of ``lob.getData()`` are:
 
-    .. list-table-with-summary:: lob.getData() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: lob.getData() Parameters
+        :name: _lobgetdata_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``offset``
           - Number
           - For LOBs of type CLOB and NCLOB, the offset is the position from which the data is to be fetched, in `UCS-2 code points <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-42BCD57A-A380-4ED9-897F-0500A94803D1>`__. UCS-2 code points are equivalent to characters for all but supplemental characters. If supplemental characters are in the LOB, the offset and amount will have to be chosen carefully to avoid splitting a character.
@@ -336,16 +329,9 @@ Lob Methods
 
     The parameters of the ``lob.setDirFileName()`` method are:
 
-    .. list-table-with-summary:: lob.setDirFileName() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: lob.setDirFileName() Parameters
+        :name: _lobsetdirfilename_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``dirFileName``
           - Object
           - This parameter contains the directory alias and file name of the BFILE type LOB.
@@ -366,16 +352,9 @@ Lob Methods
 
     The parameters of ``lob.trim()`` are:
 
-    .. list-table-with-summary:: lob.trim() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The second column displays the data type of the parameter. The third column displays the description of the parameter.
+    .. parameters-table:: lob.trim() Parameters
+        :name: _lobtrim_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``newSize``
           - Number
           - The size to which the LOB is to be trimmed.

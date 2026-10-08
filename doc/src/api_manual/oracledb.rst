@@ -2052,18 +2052,9 @@ Oracledb Methods
 
     .. _createpoolparams:
 
-    .. list-table-with-summary:: oracledb.createPool() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the name of the parameter. The
-         second column displays the data type of the parameter. The third
-         column displays the description of the parameter.
+    .. parameters-table:: oracledb.createPool() Parameters
+        :name: _createpool_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``poolAttrs``
           - Object
           - The ``poolAttrs`` parameter object provides connection credentials and pool-specific configuration properties, such as the maximum or minimum number of connections for the pool, or the statement cache size for the connections.
@@ -3096,19 +3087,9 @@ Oracledb Methods
 
     .. _enquoteliteral:
 
-    .. list-table-with-summary:: oracledb.enquoteLiteral() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: oracledb.enquoteLiteral() Parameters
+        :name: _enquoteliteral_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``value``
           - String
           - The value to be converted to a SQL string literal.
@@ -3136,19 +3117,9 @@ Oracledb Methods
 
     .. _enquotename:
 
-    .. list-table-with-summary:: oracledb.enquoteName() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: oracledb.enquoteName() Parameters
+        :name: _enquotename_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``name``
           - String
           - The string to be quoted for identifier use.
@@ -3235,18 +3206,9 @@ Oracledb Methods
 
     .. _getconnectiondbattrs:
 
-    .. list-table-with-summary:: oracledb.getConnection() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the property. The second column
-         displays the data type of the property. The third column displays
-         the description of the property.
+    .. parameters-table:: oracledb.getConnection() Parameters
+        :name: _getconnection_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``poolAlias``
           - String
           - .. _getconnectionpoolalias:
@@ -4064,18 +4026,9 @@ Oracledb Methods
 
     .. _getnetworkservicenameattrs:
 
-    .. list-table-with-summary:: oracledb.getNetworkServiceNames() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.getNetworkServiceNames() Parameters
+        :name: _getnetworkservicenames_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``configDir``
           - String
           - The directory in which the :ref:`tnsnames.ora <tnsadmin>` file resides.
@@ -4097,18 +4050,9 @@ Oracledb Methods
 
     .. _getpoolattrs:
 
-    .. list-table-with-summary:: oracledb.getPool() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.getPool() Parameters
+        :name: _getpool_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``alias``
           - String
           - The pool alias of the pool to retrieve from the connection pool cache. The default value is ‘default’ which will retrieve the default pool from the cache.
@@ -4163,18 +4107,9 @@ Oracledb Methods
 
     .. _odbinitoracleclientattrs:
 
-    .. list-table-with-summary:: oracledb.initOracleClient() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.initOracleClient() Parameters
+        :name: _initoracleclient_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``options``
           - Object
           - The options parameter and option attributes are optional. If an attribute is set, it should be a string value. See :ref:`odbinitoracleclientattrsopts` for information on the ``options`` attributes.
@@ -4252,19 +4187,9 @@ Oracledb Methods
 
     .. _isqualifiedsqlname:
 
-    .. list-table-with-summary:: oracledb.isQualifiedSqlName() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: oracledb.isQualifiedSqlName() Parameters
+        :name: _isqualifiedsqlname_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``name``
           - String
           - The string to be validated.
@@ -4290,19 +4215,9 @@ Oracledb Methods
 
     .. _issimplesqlname:
 
-    .. list-table-with-summary:: oracledb.isSimpleSqlName() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays the
-         description of the parameter.
+    .. parameters-table:: oracledb.isSimpleSqlName() Parameters
+        :name: _issimplesqlname_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``name``
           - String
           - The string to be validated.
@@ -4332,19 +4247,9 @@ Oracledb Methods
 
     .. _registerconfigurationproviderhookattrs:
 
-    .. list-table-with-summary:: oracledb.registerConfigurationProviderHook() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.registerConfigurationProviderHook() Parameters
+        :name: _registerconfigurationproviderhook_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``configProvider``
           - String
           - The centralized configuration provider extension that needs to be
@@ -4377,19 +4282,9 @@ Oracledb Methods
 
     .. _registerprocessconfigurationhookattrs:
 
-    .. list-table-with-summary:: oracledb.registerProcessConfigurationHook() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :width: 100%
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.registerProcessConfigurationHook() Parameters
+        :name: _registerprocessconfigurationhook_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``fn``
           - Function
           - The user hook function that needs to be registered. This hook
@@ -4423,18 +4318,9 @@ Oracledb Methods
 
     .. _odbshutdownattrs:
 
-    .. list-table-with-summary:: oracledb.shutdown() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.shutdown() Parameters
+        :name: _shutdown_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``connAttr``
           - Object
           - .. _odbshutdownattrsconn:
@@ -4498,18 +4384,9 @@ Oracledb Methods
 
     .. _odbstartupattrs:
 
-    .. list-table-with-summary:: oracledb.startup() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.startup() Parameters
+        :name: _startup_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``connAttr``
           - Object
           - .. _odbstartupattrsconn:
@@ -4763,18 +4640,9 @@ TraceHandlerBase Methods
 
     .. _onenterfn:
 
-    .. list-table-with-summary:: onEnterFn() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onEnterFn() Parameters
+        :name: _onenterfn_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``traceContext``
           - Object
           - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
@@ -4790,18 +4658,9 @@ TraceHandlerBase Methods
 
     .. _onexitfn:
 
-    .. list-table-with-summary:: onExitFn() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onExitFn() Parameters
+        :name: _onexitfn_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``traceContext``
           - Object
           - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
@@ -4817,18 +4676,9 @@ TraceHandlerBase Methods
 
     .. _onbeginroundtrip:
 
-    .. list-table-with-summary:: onBeginRoundTrip() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onBeginRoundTrip() Parameters
+        :name: _onbeginroundtrip_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``traceContext``
           - Object
           - The trace context details. This includes connection configuration details, call level details, and additional attribute details.
@@ -4845,14 +4695,8 @@ TraceHandlerBase Methods
 
     .. _onendroundtrip:
 
-    .. list-table-with-summary:: onEndRoundTrip() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onEndRoundTrip() Parameters
+        :name: _onendroundtrip_params
 
         * - Parameter
           - Data Type
@@ -4878,18 +4722,9 @@ TraceHandlerBase Methods
 
     .. _onpoolacquire:
 
-    .. list-table-with-summary:: onPoolAcquire() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolAcquire() Parameters
+        :name: _onpoolacquire_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -4909,18 +4744,9 @@ TraceHandlerBase Methods
 
     .. _onpoolclose:
 
-    .. list-table-with-summary:: onPoolClose() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolClose() Parameters
+        :name: _onpoolclose_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -4941,18 +4767,9 @@ TraceHandlerBase Methods
 
     .. _onpoolconnectionhit:
 
-    .. list-table-with-summary:: onPoolConnectionHit() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolConnectionHit() Parameters
+        :name: _onpoolconnectionhit_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -4973,18 +4790,9 @@ TraceHandlerBase Methods
 
     .. _onpoolconnectionmiss:
 
-    .. list-table-with-summary:: onPoolConnectionMiss() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolConnectionMiss() Parameters
+        :name: _onpoolconnectionmiss_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -5005,18 +4813,9 @@ TraceHandlerBase Methods
 
     .. _onpoolexpand:
 
-    .. list-table-with-summary:: onPoolExpand() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolExpand() Parameters
+        :name: _onpoolexpand_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -5037,18 +4836,9 @@ TraceHandlerBase Methods
 
     .. _onpoolrelease:
 
-    .. list-table-with-summary:: onPoolRelease() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolRelease() Parameters
+        :name: _onpoolrelease_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -5069,18 +4859,9 @@ TraceHandlerBase Methods
 
     .. _onpoolrequesttimeout:
 
-    .. list-table-with-summary:: onPoolRequestTimeout() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolRequestTimeout() Parameters
+        :name: _onpoolrequesttimeout_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -5101,18 +4882,9 @@ TraceHandlerBase Methods
 
     .. _onpoolshrink:
 
-    .. list-table-with-summary:: onPoolShrink() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolShrink() Parameters
+        :name: _onpoolshrink_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -5133,18 +4905,9 @@ TraceHandlerBase Methods
 
     .. _onpoolwait:
 
-    .. list-table-with-summary:: onPoolWait() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: onPoolWait() Parameters
+        :name: _onpoolwait_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``pool``
           - Object
           - The :ref:`connection pool <poolclass>` object that is used to retrieve connection pool statistics.
@@ -5187,18 +4950,9 @@ TraceHandler Methods
 
     .. _settraceinstance:
 
-    .. list-table-with-summary:: oracledb.traceHandler.setTraceInstance() Parameters
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 10 10 30
-        :summary: The first column displays the parameter. The second column
-         displays the data type of the parameter. The third column displays
-         the description of the parameter.
+    .. parameters-table:: oracledb.traceHandler.setTraceInstance() Parameters
+        :name: _settraceinstance_params
 
-        * - Parameter
-          - Data Type
-          - Description
         * - ``obj``
           - Object
           - The singleton object pointing to the traceHandler instance.

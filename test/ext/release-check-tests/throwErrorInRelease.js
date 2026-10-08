@@ -24,7 +24,8 @@
  *
  * GitHub issue
  * https://github.com/oracle/node-oracledb/issues/562
- * Uncaught exceptions within the release callback can cause connection pool malfunction in node-oracledb.
+ * Uncaught exceptions within the release callback can cause connection pool
+ * malfunction in node-oracledb.
  * This can lead to queued connection requests failing due to timeouts.
  *
  *****************************************************************************/
@@ -32,10 +33,10 @@
 
 const oracledb = require('oracledb');
 const assert = require('assert');
-const dbConfig = require('../../../dbconfig.js');
+const dbConfig = require('../../dbconfig.js');
 
 describe('throwErrorInRelease.js', function() {
-  it('Github issue 562', async function() {
+  it('GitHub issue 562', async function() {
     // Set the number of requests to simulate
     const requests = 20;
 
@@ -75,7 +76,7 @@ describe('throwErrorInRelease.js', function() {
     }
 
     // Log pool statistics and verify results
-    await pool.logStatistics();
+    pool.logStatistics();
 
     // Assert that the obtained and released counters are equal
     assert.strictEqual(counters.obtained, counters.released);
