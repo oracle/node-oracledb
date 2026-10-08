@@ -36,6 +36,16 @@ const assert    = require('assert');
 const dbConfig  = require('./dbconfig.js');
 const testUtil  = require('./testsUtil.js');
 
+const runSuffix = `${process.pid}_${Date.now().toString(36)}`;
+const tableName2592 = `TBL_259_2_${runSuffix}`;
+const tableName2594 = `TBL_259_4_${runSuffix}`;
+
+// TPC identifiers and test tables are database-wide. Use per-run names so
+// release matrix jobs can execute against the same schema concurrently.
+function uniqueTransactionId(name, suite) {
+  return `${name}_${suite}_${runSuffix}`;
+}
+
 
 describe('259. tpc.js', function() {
   describe('259.1 TPC constants', function() {
@@ -73,10 +83,10 @@ describe('259. tpc.js', function() {
             e_table_missing EXCEPTION;
             PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
             BEGIN
-                EXECUTE IMMEDIATE('DROP TABLE TBL_259_2 PURGE');
+                EXECUTE IMMEDIATE('DROP TABLE ${tableName2592} PURGE');
                 EXCEPTION  WHEN e_table_missing THEN NULL;  END;
                 EXECUTE IMMEDIATE (
-                    'CREATE TABLE TBL_259_2
+                    'CREATE TABLE ${tableName2592}
                      (INTCOL NUMBER, STRINGCOL VARCHAR2(256))');
             END;`;
 
@@ -97,7 +107,7 @@ describe('259. tpc.js', function() {
 
     after(async function() {
       if (conn) {
-        await conn.execute(`DROP TABLE TBL_259_2 PURGE`);
+        await conn.execute(`DROP TABLE ${tableName2592} PURGE`);
         await conn.close();
       }
       if (dbaConn) {
@@ -108,7 +118,7 @@ describe('259. tpc.js', function() {
     it('259.2.1 test tpcBegin, tpcPrepare, tpcRollback', async function() {
       const xid = {
         formatId: 3900,
-        globalTransactionId: "txn3900",
+        globalTransactionId: uniqueTransactionId("txn3900", "259_2"),
         branchQualifier: "branchId"
       };
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
@@ -116,55 +126,56 @@ describe('259. tpc.js', function() {
       assert.strictEqual(commitNeeded, false);
 
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      await conn.execute(`INSERT INTO TBL_259_2 VALUES (101, 'test#1')`);
+      await conn.execute(`INSERT INTO ${tableName2592} VALUES (101, 'test#1')`);
 
       commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcRollback(xid);
-      const result = await conn.execute(`SELECT * FROM TBL_259_2`);
+      const result = await conn.execute(`SELECT * FROM ${tableName2592}`);
       assert.strictEqual(result.rows.length, 0);
     });
 
     it('259.2.2 test tpcBegin, tpcPrepare, tpcCommit', async function() {
       const xid = {
         formatId: 3901,
-        globalTransactionId: "txn3901",
+        globalTransactionId: uniqueTransactionId("txn3901", "259_2"),
         branchQualifier: "branchId"
       };
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
       await conn.execute(
-        `INSERT INTO TBL_259_2 (IntCol, StringCol) values (1, 'testName')`);
+        `INSERT INTO ${tableName2592} (IntCol, StringCol) values (1, 'testName')`);
       const commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcCommit(xid, false);
 
       const conn1 = await oracledb.getConnection(dbConfig);
-      const result = await conn1.execute(`SELECT INTCOL FROM TBL_259_2`);
+      const result = await conn1.execute(`SELECT INTCOL FROM ${tableName2592}`);
       assert.strictEqual(result.rows[0][0], 1);
       await conn1.close();
     });
 
     it('259.2.3 test multiple global transactions on same connection', async function() {
+      const globalTransactionId = uniqueTransactionId("txn3902", "259_2");
       const xid1 = {
         formatId: 3902,
-        globalTransactionId: "txn3902",
+        globalTransactionId,
         branchQualifier: "branch1"
       };
 
       const xid2 = {
         formatId: 3902,
-        globalTransactionId: "txn3902",
+        globalTransactionId,
         branchQualifier: "branch2"
       };
 
       await conn.tpcBegin(xid1, oracledb.TPC_BEGIN_NEW, 60);
       await conn.execute(
-        `INSERT INTO TBL_259_2 (IntCol, StringCol) VALUES (1, 'testName')`);
+        `INSERT INTO ${tableName2592} (IntCol, StringCol) VALUES (1, 'testName')`);
       await conn.tpcEnd(xid1);
 
       await conn.tpcBegin(xid2, oracledb.TPC_BEGIN_NEW, 60);
       await conn.execute(
-        `INSERT INTO TBL_259_2 (IntCol, StringCol) VALUES (2, 'testName')`);
+        `INSERT INTO ${tableName2592} (IntCol, StringCol) VALUES (2, 'testName')`);
       await conn.tpcEnd(xid2);
 
       const commitNeeded1 = await conn.tpcPrepare(xid1);
@@ -174,17 +185,17 @@ describe('259. tpc.js', function() {
       if (commitNeeded2)
         await conn.tpcCommit(xid2);
       const result1 = await conn.execute(
-        `SELECT INTCOL, STRINGCOL FROM TBL_259_2 WHERE INTCOL = :1`, [1]);
+        `SELECT INTCOL, STRINGCOL FROM ${tableName2592} WHERE INTCOL = :1`, [1]);
       assert.strictEqual (result1.rows[0][0], 1);
       const result2 = await conn.execute(
-        `SELECT INTCOL, STRINGCOL FROM TBL_259_2 WHERE INTCOL = :1`, [2]);
+        `SELECT INTCOL, STRINGCOL FROM ${tableName2592} WHERE INTCOL = :1`, [2]);
       assert.strictEqual(result2.rows[0][0], 2);
     });
 
     it('259.2.4 test tpcPrepare with no xid', async function() {
       const xid = {
         formatId: 3904,
-        globalTransactionId: "txn3904",
+        globalTransactionId: uniqueTransactionId("txn3904", "259_2"),
         branchQualifier: "branchId"
       };
 
@@ -193,7 +204,7 @@ describe('259. tpc.js', function() {
       assert.strictEqual(commitNeeded, false);
 
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      await conn.execute(`INSERT INTO TBL_259_2 VALUES (101, 'test#1')`);
+      await conn.execute(`INSERT INTO ${tableName2592} VALUES (101, 'test#1')`);
 
       commitNeeded = await conn.tpcPrepare();
       assert.strictEqual(commitNeeded, true);
@@ -202,7 +213,7 @@ describe('259. tpc.js', function() {
 
     it('259.2.5 negative - missing formatId in XID', async function() {
       const xid = {
-        globalTransactionId: "txn3900",
+        globalTransactionId: uniqueTransactionId("txn3900", "259_2"),
         branchQualifier: "branchId"
       };
       await assert.rejects(
@@ -225,7 +236,7 @@ describe('259. tpc.js', function() {
     it('259.2.7 negative missing branchQualifier in XID', async function() {
       const xid = {
         formatId: 3900,
-        globalTransactionId: "txn3900",
+        globalTransactionId: uniqueTransactionId("txn3900", "259_2"),
       };
       await assert.rejects(
         async () => await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60),
@@ -239,7 +250,7 @@ describe('259. tpc.js', function() {
       }
       const xid = {
         formatId: 3998,
-        globalTransactionId: "txn3998",
+        globalTransactionId: uniqueTransactionId("txn3998", "259_2"),
         branchQualifier: "branchId"
       };
 
@@ -247,7 +258,7 @@ describe('259. tpc.js', function() {
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
 
       // Perform some database operations within the transaction
-      await conn.execute(`INSERT INTO TBL_259_2 VALUES (102, 'test#2')`);
+      await conn.execute(`INSERT INTO ${tableName2592} VALUES (102, 'test#2')`);
 
       // Prepare the transaction
       await conn.tpcPrepare(xid);
@@ -266,7 +277,7 @@ describe('259. tpc.js', function() {
       }
       const xid = {
         formatId: 3999,
-        globalTransactionId: "txn3999",
+        globalTransactionId: uniqueTransactionId("txn3999", "259_2"),
         branchQualifier: "branchId"
       };
 
@@ -274,7 +285,7 @@ describe('259. tpc.js', function() {
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
 
       // Perform some database operations within the transaction
-      await conn.execute(`INSERT INTO TBL_259_2 VALUES (102, 'test#2')`);
+      await conn.execute(`INSERT INTO ${tableName2592} VALUES (102, 'test#2')`);
 
       // Call tpcForget to forget the transaction
       await assert.rejects(
@@ -290,17 +301,17 @@ describe('259. tpc.js', function() {
 
       const xid = {
         formatId: 5000,
-        globalTransactionId: "txn5000",
+        globalTransactionId: uniqueTransactionId("txn5000", "259_2"),
         branchQualifier: "branchId"
       };
 
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      await conn.execute(`INSERT INTO TBL_259_2 VALUES (101, 'test#1')`);
+      await conn.execute(`INSERT INTO ${tableName2592} VALUES (101, 'test#1')`);
       await conn.tpcPrepare(xid);
       const promise =  dbaConn.tpcRecover();
       const res = await Promise.resolve(promise);
       assert.strictEqual(res[0].formatId, 5000);
-      assert.strictEqual(res[0].globalTransactionId, "txn5000");
+      assert.strictEqual(res[0].globalTransactionId, xid.globalTransactionId);
       assert.strictEqual(res[0].branchQualifier, "branchId");
       await conn.tpcCommit(res[0]);
     });
@@ -313,10 +324,10 @@ describe('259. tpc.js', function() {
             e_table_missing EXCEPTION;
             PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
             BEGIN
-                EXECUTE IMMEDIATE('DROP TABLE TBL_259_2 PURGE');
+                EXECUTE IMMEDIATE('DROP TABLE ${tableName2592} PURGE');
                 EXCEPTION  WHEN e_table_missing THEN NULL;  END;
                 EXECUTE IMMEDIATE (
-                    'CREATE TABLE TBL_259_2
+                    'CREATE TABLE ${tableName2592}
                      (INTCOL NUMBER, STRINGCOL VARCHAR2(256))');
             END;`;
 
@@ -327,7 +338,7 @@ describe('259. tpc.js', function() {
 
     after(async function() {
       if (conn) {
-        await conn.execute(`DROP TABLE TBL_259_2 PURGE`);
+        await conn.execute(`DROP TABLE ${tableName2592} PURGE`);
         await conn.close();
       }
     });
@@ -335,7 +346,7 @@ describe('259. tpc.js', function() {
     it('259.3.1 test tpcBegin, tpcPrepare, tpcRollback', async function() {
       const xid = {
         formatId: 3900,
-        globalTransactionId: "txn3900",
+        globalTransactionId: uniqueTransactionId("txn3900", "259_3"),
         branchQualifier: "branchId"
       };
       await conn.tpcBegin(xid);
@@ -343,55 +354,56 @@ describe('259. tpc.js', function() {
       assert.strictEqual(commitNeeded, false);
 
       await conn.tpcBegin(xid);
-      await conn.execute(`INSERT INTO TBL_259_2 VALUES (101, 'test#1')`);
+      await conn.execute(`INSERT INTO ${tableName2592} VALUES (101, 'test#1')`);
 
       commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcRollback(xid);
-      const result = await conn.execute(`SELECT * FROM TBL_259_2`);
+      const result = await conn.execute(`SELECT * FROM ${tableName2592}`);
       assert.strictEqual(result.rows.length, 0);
     });
 
     it('259.3.2 test tpcBegin, tpcPrepare, tpcCommit', async function() {
       const xid = {
         formatId: 3901,
-        globalTransactionId: "txn3901",
+        globalTransactionId: uniqueTransactionId("txn3901", "259_3"),
         branchQualifier: "branchId"
       };
       await conn.tpcBegin(xid);
       await conn.execute(
-        `INSERT INTO TBL_259_2 (IntCol, StringCol) values (1, 'testName')`);
+        `INSERT INTO ${tableName2592} (IntCol, StringCol) values (1, 'testName')`);
       const commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcCommit(xid, false);
 
       const conn1 = await oracledb.getConnection(dbConfig);
-      const result = await conn1.execute(`SELECT INTCOL FROM TBL_259_2`);
+      const result = await conn1.execute(`SELECT INTCOL FROM ${tableName2592}`);
       assert.strictEqual(result.rows[0][0], 1);
       await conn1.close();
     });
 
     it('259.3.3 test multiple global transactions on same connection', async function() {
+      const globalTransactionId = uniqueTransactionId("txn3902", "259_3");
       const xid1 = {
         formatId: 3902,
-        globalTransactionId: "txn3902",
+        globalTransactionId,
         branchQualifier: "branch1"
       };
 
       const xid2 = {
         formatId: 3902,
-        globalTransactionId: "txn3902",
+        globalTransactionId,
         branchQualifier: "branch2"
       };
 
       await conn.tpcBegin(xid1);
       await conn.execute(
-        `INSERT INTO TBL_259_2 (IntCol, StringCol) VALUES (1, 'testName')`);
+        `INSERT INTO ${tableName2592} (IntCol, StringCol) VALUES (1, 'testName')`);
       await conn.tpcEnd(xid1);
 
       await conn.tpcBegin(xid2);
       await conn.execute(
-        `INSERT INTO TBL_259_2 (IntCol, StringCol) VALUES (2, 'testName')`);
+        `INSERT INTO ${tableName2592} (IntCol, StringCol) VALUES (2, 'testName')`);
       await conn.tpcEnd(xid2);
 
       const commitNeeded1 = await conn.tpcPrepare(xid1);
@@ -401,17 +413,17 @@ describe('259. tpc.js', function() {
       if (commitNeeded2)
         await conn.tpcCommit(xid2);
       const result1 = await conn.execute(
-        `SELECT INTCOL, STRINGCOL FROM TBL_259_2 WHERE INTCOL = :1`, [1]);
+        `SELECT INTCOL, STRINGCOL FROM ${tableName2592} WHERE INTCOL = :1`, [1]);
       assert.strictEqual (result1.rows[0][0], 1);
       const result2 = await conn.execute(
-        `SELECT INTCOL, STRINGCOL FROM TBL_259_2 WHERE INTCOL = :1`, [2]);
+        `SELECT INTCOL, STRINGCOL FROM ${tableName2592} WHERE INTCOL = :1`, [2]);
       assert.strictEqual(result2.rows[0][0], 2);
     });
 
     it('259.3.4 test tpcPrepare with no xid', async function() {
       const xid = {
         formatId: 3904,
-        globalTransactionId: "txn3904",
+        globalTransactionId: uniqueTransactionId("txn3904", "259_3"),
         branchQualifier: "branchId"
       };
 
@@ -420,7 +432,7 @@ describe('259. tpc.js', function() {
       assert.strictEqual(commitNeeded, false);
 
       await conn.tpcBegin(xid);
-      await conn.execute(`INSERT INTO TBL_259_2 VALUES (101, 'test#1')`);
+      await conn.execute(`INSERT INTO ${tableName2592} VALUES (101, 'test#1')`);
 
       commitNeeded = await conn.tpcPrepare();
       assert.strictEqual(commitNeeded, true);
@@ -429,7 +441,7 @@ describe('259. tpc.js', function() {
 
     it('259.3.5 negative - missing formatId in XID', async function() {
       const xid = {
-        globalTransactionId: "txn3900",
+        globalTransactionId: uniqueTransactionId("txn3900", "259_3"),
         branchQualifier: "branchId"
       };
       await assert.rejects(
@@ -453,7 +465,7 @@ describe('259. tpc.js', function() {
     it('259.3.7 negative missing branchQualifier in XID', async function() {
       const xid = {
         formatId: 3900,
-        globalTransactionId: "txn3900",
+        globalTransactionId: uniqueTransactionId("txn3900", "259_3"),
       };
       await assert.rejects(
         async () => await conn.tpcBegin(xid),
@@ -517,10 +529,10 @@ describe('259. tpc.js', function() {
             e_table_missing EXCEPTION;
             PRAGMA EXCEPTION_INIT(e_table_missing, -00942);
             BEGIN
-                EXECUTE IMMEDIATE('DROP TABLE TBL_259_4 PURGE');
+                EXECUTE IMMEDIATE('DROP TABLE ${tableName2594} PURGE');
                 EXCEPTION  WHEN e_table_missing THEN NULL;  END;
                 EXECUTE IMMEDIATE (
-                    'CREATE TABLE TBL_259_4
+                    'CREATE TABLE ${tableName2594}
                      (INTCOL NUMBER, STRINGCOL VARCHAR2(256))');
             END;`;
 
@@ -531,13 +543,13 @@ describe('259. tpc.js', function() {
 
     after(async function() {
       if (conn) {
-        await conn.execute(`DROP TABLE TBL_259_4 PURGE`);
+        await conn.execute(`DROP TABLE ${tableName2594} PURGE`);
         await conn.close();
       }
     });
 
     it('259.5.1 test tpcBegin, tpcPrepare, tpcRollback using Buffer type', async function() {
-      const buf = Buffer.from(['t', 'x', 'n', '3', '9', '0', '4'], "utf-8");
+      const buf = Buffer.from(uniqueTransactionId("txn3904", "259_5"), "utf-8");
       const xid = {
         formatId: 3904,
         globalTransactionId: buf,
@@ -549,12 +561,12 @@ describe('259. tpc.js', function() {
       assert.strictEqual(commitNeeded, false);
 
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      await conn.execute(`INSERT INTO TBL_259_4 VALUES (101, 'test#1')`);
+      await conn.execute(`INSERT INTO ${tableName2594} VALUES (101, 'test#1')`);
 
       commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcRollback(xid);
-      const result = await conn.execute(`SELECT * FROM TBL_259_4`);
+      const result = await conn.execute(`SELECT * FROM ${tableName2594}`);
       assert.strictEqual(result.rows.length, 0);
     });
 
@@ -562,7 +574,7 @@ describe('259. tpc.js', function() {
       const buf = Buffer.from(['b', 'r', 'a', 'n', 'c', 'h', 'I', 'd'], "utf-8");
       const xid = {
         formatId: 3904,
-        globalTransactionId: "txn3904",
+        globalTransactionId: uniqueTransactionId("txn3904", "259_5"),
         branchQualifier: buf
       };
 
@@ -571,12 +583,12 @@ describe('259. tpc.js', function() {
       assert.strictEqual(commitNeeded, false);
 
       await conn.tpcBegin(xid, oracledb.TPC_BEGIN_NEW, 60);
-      await conn.execute(`INSERT INTO TBL_259_4 VALUES (101, 'test#1')`);
+      await conn.execute(`INSERT INTO ${tableName2594} VALUES (101, 'test#1')`);
 
       commitNeeded = await conn.tpcPrepare(xid);
       assert.strictEqual(commitNeeded, true);
       await conn.tpcRollback(xid);
-      const result = await conn.execute(`SELECT * FROM TBL_259_4`);
+      const result = await conn.execute(`SELECT * FROM ${tableName2594}`);
       assert.strictEqual(result.rows.length, 0);
     });
   });

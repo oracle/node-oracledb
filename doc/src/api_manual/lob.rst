@@ -125,16 +125,8 @@ Lob Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``close()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -203,16 +195,8 @@ Lob Methods
     The parameters of the callback function
     ``function(Error error, Boolean val)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``fileExists()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Boolean ``val``
@@ -286,16 +270,8 @@ Lob Methods
     The parameters of the callback function
     ``function(Error error, String data)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``getData()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - String ``data`` or Buffer ``data``
@@ -375,15 +351,7 @@ Lob Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``trim()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.

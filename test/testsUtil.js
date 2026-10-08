@@ -505,6 +505,25 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
       privilege: oracledb.SYSDBA
     };
 
+    const connAsDBA = await oracledb.getConnection(dbaCredential);
+    // JSON AQ queue tables use SecureFile LOBs and require ASSM tablespaces.
+    const tablespaceResult = await connAsDBA.execute(`
+      SELECT tablespace_name
+      FROM (
+        SELECT tablespace_name
+        FROM dba_tablespaces
+        WHERE contents = 'PERMANENT'
+          AND segment_space_management = 'AUTO'
+          AND tablespace_name NOT IN ('SYSTEM', 'SYSAUX')
+        ORDER BY CASE WHEN tablespace_name = 'USERS' THEN 0 ELSE 1 END,
+                 tablespace_name
+      )
+      WHERE ROWNUM = 1
+    `);
+    const defaultTablespace = tablespaceResult.rows[0]?.[0];
+    const tablespaceClause = defaultTablespace ?
+      `DEFAULT TABLESPACE ${defaultTablespace}` : '';
+
     const plsql = `
       BEGIN
         DECLARE
@@ -518,6 +537,7 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
         END;
         EXECUTE IMMEDIATE ('
           CREATE USER ${AQ_USER} IDENTIFIED BY ${AQ_USER_PWD}
+            ${tablespaceClause}
         ');
         EXECUTE IMMEDIATE ('
           GRANT CONNECT, RESOURCE, UNLIMITED TABLESPACE TO ${AQ_USER}
@@ -531,7 +551,6 @@ testsUtil.createAQtestUser = async function(AQ_USER, AQ_USER_PWD) {
     END;
     `;
 
-    const connAsDBA = await oracledb.getConnection(dbaCredential);
     await connAsDBA.execute(plsql);
     await connAsDBA.close();
 
@@ -672,12 +691,13 @@ testsUtil.checkUrowidLength = function(urowidLen, expectedLength) {
 // in a given time interval
 testsUtil.checkAndWait = async function(intervalWait, numIntervals, func) {
   for (let i = 0; i < numIntervals; i++) {
-    await new Promise((resolve) => setTimeout(resolve, intervalWait));
     if (func())
       return true;
+    if (i < numIntervals - 1)
+      await new Promise((resolve) => setTimeout(resolve, intervalWait));
   }
   const err = new Error("Ran out of time!");
-  err.totalTimeWaited = (intervalWait * numIntervals) / 1000;
+  err.totalTimeWaited = (intervalWait * Math.max(0, numIntervals - 1)) / 1000;
   throw err;
 };
 

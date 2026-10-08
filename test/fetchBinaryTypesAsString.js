@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2019, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -42,7 +42,15 @@ describe('190. fetchBinaryTypesAsString.js', function() {
   const floatPreciseThreshold = 1e-7;
 
   async function insertContent(contentValue) {
-    await conn.execute(`INSERT INTO ${tableName} (CONTENT) VALUES (${contentValue})`);
+    await conn.execute(`INSERT INTO ${tableName} (CONTENT) VALUES (:1)`, [contentValue]);
+    await conn.commit();
+  }
+
+  async function insertContents(contents) {
+    await conn.executeMany(
+      `INSERT INTO ${tableName} (CONTENT) VALUES (:1)`,
+      contents.map((content) => [content])
+    );
     await conn.commit();
   }
 
@@ -162,11 +170,8 @@ describe('190. fetchBinaryTypesAsString.js', function() {
 
     it('190.1.5 Fetch binary double in multiple rows', async function() {
       oracledb.fetchAsString = [oracledb.NUMBER];
-      const contents = [];
-      for (let i = 0; i < 5; i++) {
-        contents.push(Math.random());
-        await insertContent(contents[i]);
-      }
+      const contents = Array.from({ length: 5 }, () => Math.random());
+      await insertContents(contents);
       const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 5);
@@ -272,11 +277,8 @@ describe('190. fetchBinaryTypesAsString.js', function() {
 
     it('190.2.5 Fetch binary float in multiple rows', async function() {
       oracledb.fetchAsString = [oracledb.NUMBER];
-      const contents = [];
-      for (let i = 0; i < 5; i++) {
-        contents.push(Math.random());
-        await insertContent(contents[i]);
-      }
+      const contents = Array.from({ length: 5 }, () => Math.random());
+      await insertContents(contents);
       const res = await conn.execute(`select content from ${tableName}`);
       assert(res.rows);
       assert.strictEqual(res.rows.length, 5);

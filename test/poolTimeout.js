@@ -106,8 +106,8 @@ describe('269. Pool Timeout', function() {
         await conn1.close();
       if (conn2)
         await conn2.close();
-      await sleep(5000);
       conn3 = await pool.getConnection();
+      await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 1);
       assert.deepStrictEqual(pool.connectionsOpen, 1);
       assert.deepStrictEqual(pool.connectionsInUse, 1);
       if (conn3)
@@ -147,8 +147,8 @@ describe('269. Pool Timeout', function() {
         await conn1.close();
       if (conn2)
         await conn2.close();
-      await sleep(5000);
       conn3 = await pool.getConnection();
+      await testUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 1);
       assert.deepStrictEqual(pool.connectionsOpen, 1);
       assert.deepStrictEqual(pool.connectionsInUse, 1);
       if (conn3)

@@ -48,6 +48,8 @@ describe('308. Inband Notification', function() {
   } : null;
 
   let dbaConn;
+  let executeGrant = false;
+  let sessionViewGrant = false;
   const pkg = 'dbms_tg_dbg';
 
   before(async function() {
@@ -64,13 +66,19 @@ describe('308. Inband Notification', function() {
 
     dbaConn = await oracledb.getConnection(DBA_config);
     await dbaConn.execute(`GRANT EXECUTE ON ${pkg} TO ${dbConfig.user}`);
+    executeGrant = true;
     await dbaConn.execute(`GRANT SELECT ON v_$session TO ${dbConfig.user}`);
+    sessionViewGrant = true;
   });
 
   after(async function() {
-    if (dbConfig.test.DBA_PRIVILEGE && isRunnable) {
-      await dbaConn.execute(`REVOKE EXECUTE ON ${pkg} FROM ${dbConfig.user}`);
-      await dbaConn.execute(`REVOKE SELECT ON v_$session FROM ${dbConfig.user}`);
+    if (dbConfig.test.DBA_PRIVILEGE && isRunnable && dbaConn) {
+      if (executeGrant) {
+        await dbaConn.execute(`REVOKE EXECUTE ON ${pkg} FROM ${dbConfig.user}`);
+      }
+      if (sessionViewGrant) {
+        await dbaConn.execute(`REVOKE SELECT ON v_$session FROM ${dbConfig.user}`);
+      }
       await dbaConn.close();
     }
   });

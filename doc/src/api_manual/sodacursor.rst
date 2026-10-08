@@ -42,16 +42,8 @@ SodaDocumentCursor Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``close()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
 
@@ -79,16 +71,8 @@ SodaDocumentCursor Methods
     The parameters of the callback function
     ``function(Error error, SodaDocument document)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``getNext()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``

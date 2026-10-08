@@ -123,16 +123,8 @@ SodaDatabase Methods
     The parameters of the callback function
     ``function(Error error, SodaCollection collection)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``createCollection()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaCollection ``collection``
@@ -266,16 +258,8 @@ SodaDatabase Methods
     The parameters of the callback function
     ``function(Error error, Array collectionNames)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``getCollectionNames()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - Array ``collectionNames``
@@ -323,16 +307,8 @@ SodaDatabase Methods
     The parameters of the callback function
     ``function(Error error, SodaCollection collection)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``openCollection()`` succeeds, ``error`` is NULL. It is not an error if the requested collection does not exist. If an error occurs, then ``error`` contains the error message.
         * - SodaCollection ``collection``

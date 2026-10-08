@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -45,7 +45,7 @@ describe('6. dmlReturning.js', function() {
   describe('6.1 NUMBER & STRING driver data type', function() {
 
     let connection;
-    beforeEach('get connection and prepare table', async function() {
+    before('get connection and create table', async function() {
       const makeTable =
       "BEGIN \
             DECLARE \
@@ -63,27 +63,20 @@ describe('6. dmlReturning.js', function() {
                     name VARCHAR2(4000) \
                 ) \
             '); \
-            EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_dmlreturn  \
-                   VALUES \
-                   (1001,''Chris Jones'') \
-            '); \
-            EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_dmlreturn  \
-                   VALUES \
-                   (1002,''Tom Kyte'') \
-            '); \
-            EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_dmlreturn  \
-                   VALUES \
-                   (2001, ''Karen Morton'') \
-            '); \
         END; ";
       connection = await oracledb.getConnection(dbConfig);
       await connection.execute(makeTable);
     });
 
-    afterEach('drop table and release connection', async function() {
+    beforeEach('reset table data', async function() {
+      await connection.execute('TRUNCATE TABLE nodb_dmlreturn');
+      await connection.executeMany(
+        'INSERT INTO nodb_dmlreturn VALUES (:1, :2)',
+        [[1001, 'Chris Jones'], [1002, 'Tom Kyte'], [2001, 'Karen Morton']]
+      );
+    });
+
+    after('drop table and release connection', async function() {
       await connection.execute("DROP TABLE nodb_dmlreturn PURGE");
       await connection.close();
     });
@@ -369,12 +362,17 @@ describe('6. dmlReturning.js', function() {
     const tableName = "nodb_date";
     const dates = assist.DATE_STRINGS;
 
-    beforeEach('get connection, prepare table', async function() {
+    before('get connection and create table', async function() {
       connection = await oracledb.getConnection(dbConfig);
-      await assist.setUp4sql(connection, tableName, dates);
+      await assist.createTable(connection, tableName);
     }); // before
 
-    afterEach('drop table, release connection', async function() {
+    beforeEach('reset table data', async function() {
+      await connection.execute('TRUNCATE TABLE ' + tableName);
+      await assist.insertData4sql(connection, tableName, dates);
+    }); // before
+
+    after('drop table, release connection', async function() {
       await connection.execute("DROP table " + tableName + " PURGE");
       await connection.close();
     });

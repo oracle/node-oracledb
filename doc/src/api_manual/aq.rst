@@ -116,6 +116,8 @@ AqQueue Properties
     <aqenqoptionsclass>`. AqEnqOptions objects cannot be created
     independently.
 
+    The properties of the AqEnqOptions object are:
+
     .. _aqenqoptionsclass:
 
     .. list-table-with-summary::  AqEnqOptions Class Properties
@@ -213,16 +215,8 @@ AqQueue Methods
     The parameters of the callback function
     ``function(Array messages, Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Array ``messages``
           - An array of :ref:`AqMessage objects <aqmessageclass>`.
         * - Error ``error``
@@ -247,16 +241,8 @@ AqQueue Methods
     The parameters of the callback function
     ``function(Error error, AqMessage message)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``deqOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - AqMessage ``message``
@@ -339,12 +325,6 @@ AqQueue Methods
       Instead, use :ref:`standalone connections <connectionhandling>` or make
       multiple calls to ``enqOne()``. The ``deqMany()`` method is not affected.
 
-    **Callback**:
-
-    If you are using the callback programming style::
-
-        enqMany(Array messages, function(Error error));
-
     The parameters of the ``aqQueue.enqMany()`` method are:
 
     .. _enqmany:
@@ -356,23 +336,21 @@ AqQueue Methods
           - Array
           - Each element of the array must be a String, a Buffer, a :ref:`DbObject <dbobjectclass>`, or a JavaScript Object as used by :meth:`enqOne() <aqQueue.enqOne()>`.
 
-    The parameters of the callback function ``function(Error error)`` are:
-
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
-
-        * - Callback Function Parameter
-          - Description
-        * - Error ``error``
-          - If ``enqMany()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
-
     The ``aqQueue.enqMany()`` method returns an array of
     :ref:`AqMessage objects <aqmessageclass>`.
+
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        enqMany(Array messages, function(Error error));
+
+    The parameters of the callback function ``function(Error error)`` are:
+
+    .. callbackfunc-table::
+
+        * - Error ``error``
+          - If ``enqMany()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
     .. versionchanged:: 6.1
 
@@ -391,15 +369,6 @@ AqQueue Methods
     containing the actual message and some attributes controlling the
     behavior of the queued message.
 
-    **Callback**:
-
-    If you are using the callback programming style::
-
-        enqOne(String message, function(Error error));
-        enqOne(Buffer message, function(Error error));
-        enqOne(DbObject message, function(Error error));
-        enqOne(Object message, function(Error error));
-
     The parameters of the ``aqQueue.enqOne()`` method are:
 
     .. _enqOne:
@@ -413,6 +382,12 @@ AqQueue Methods
              - Buffer: If the message is a Buffer, it will be transferred as it is.
              - DbObject: An object of the :ref:`DbObject Class <dbobjectclass>`.
              - Object message: A JavaScript object can be used to alter the message properties. It must contain a ``payload`` property with the actual message content. It may contain other attributes as noted in the :ref:`objmsgattr` table.
+
+    Enqueued messages are returned as :ref:`AqMessage objects <aqmessageclass>`.
+
+    **Object Message Attributes**
+
+    The attributes of the Object Message are:
 
     .. _objmsgattr:
 
@@ -464,22 +439,21 @@ AqQueue Methods
     topic/lookup?ctx=dblatest&id=ADQUE>`__ for more information about
     attributes.
 
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        enqOne(String message, function(Error error));
+        enqOne(Buffer message, function(Error error));
+        enqOne(DbObject message, function(Error error));
+        enqOne(Object message, function(Error error));
+
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``enqOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
-
-    Enqueued messages are returned as :ref:`AqMessage objects <aqmessageclass>`.
 
     .. versionchanged:: 6.1
 

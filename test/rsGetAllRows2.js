@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -88,9 +88,11 @@ describe('250. rsGetAllRows2.js', function() {
     await conn.execute(deptInsert, [301, "Marketing"]);
 
     await conn.execute(create_table_emp_sql);
+    const employees = [];
     for (let i = 0; i < 127; i++) {
-      await conn.execute(empInsert, [301, 1100 + i, "Marketing " + i ]);
+      employees.push([301, 1100 + i, "Marketing " + i]);
     }
+    await conn.executeMany(empInsert, employees);
     await conn.execute(empInsert, [101, 1001, "R&D 1"]);
     await conn.commit();
   });

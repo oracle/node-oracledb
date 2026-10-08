@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -75,7 +75,7 @@ describe('279. Pool Shrinkage', function() {
     assert.strictEqual(pool.connectionsInUse, 1);
     assert.strictEqual(pool.connectionsOpen, 1);
     await conn1.close();
-    await testsUtil.sleep(1100);
+    await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 0);
     assert.strictEqual(pool.connectionsOpen, 0);
     assert.strictEqual(pool.connectionsInUse, 0);
     await pool.close(0);
@@ -99,7 +99,7 @@ describe('279. Pool Shrinkage', function() {
     await conn.close();
     assert.strictEqual(pool.connectionsOpen, 2);
     assert.strictEqual(pool.connectionsInUse, 0);
-    await testsUtil.sleep(2000);
+    await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 0);
     assert.strictEqual(pool.connectionsOpen, 0);
     assert.strictEqual(pool.connectionsInUse, 0);
     await pool.close(0);
@@ -125,7 +125,7 @@ describe('279. Pool Shrinkage', function() {
     await conn1.close();
     assert.strictEqual(pool.connectionsOpen, 3);
     assert.strictEqual(pool.connectionsInUse, 1);
-    await testsUtil.sleep(2000);
+    await testsUtil.checkAndWait(100, 50, () => pool.connectionsOpen === 1);
     await conn2.close();
     assert.strictEqual(pool.connectionsOpen, 1);
     assert.strictEqual(pool.connectionsInUse, 0);

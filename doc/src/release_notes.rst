@@ -13,7 +13,7 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
-node-oracledb `v26.0.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1...v26.0.0>`__ (TBD)
+node-oracledb `v26.0.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1...v26.0.0>`__ (8 Oct 2026)
 -----------------------------------------------------------------------------------------------------------
 
 Common Changes

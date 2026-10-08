@@ -626,16 +626,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``beginSessionlessTransaction()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -678,16 +670,8 @@ Connection Methods
 
     The parameter of the callback function is:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``break()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -737,16 +721,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``changePassword()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -851,16 +827,8 @@ Connection Methods
 
     The parameter of the callback function ``function(Error error)`` is:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``close()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -880,16 +848,8 @@ Connection Methods
 
     The parameter of the callback function ``function(Error error)`` is:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``commit()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -940,16 +900,8 @@ Connection Methods
 
     The parameter of the callback function ``function(Error error)`` is:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``createLob()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -1023,16 +975,8 @@ Connection Methods
 
     The parameter of the callback function ``function(Error error)`` is:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``directPathLoad()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -1446,16 +1390,8 @@ Connection Methods
     The parameters of the callback function
     ``function(Error error, Object result)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``execute()`` succeeds, error is NULL. If an ``error`` occurs, then error contains the :ref:`error message <errorobj>`.
         * - Object ``result``
@@ -1780,16 +1716,8 @@ Connection Methods
     The parameters of the callback function
     ``function(Error error, Object result)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``executeMany()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
@@ -1898,16 +1826,8 @@ Connection Methods
     The parameters of the callback function
     ``function(Error error, DbObject obj)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``getDbObjectClass()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - DbObject ``obj``
@@ -1994,16 +1914,8 @@ Connection Methods
     The parameters of the callback function
     ``function(Error error, AqQueue queue)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``queue()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -2081,16 +1993,8 @@ Connection Methods
     The parameters of the callback function
     ``function(Error error, Object information)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``getStatementInfo()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Object ``information``
@@ -2175,16 +2079,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``ping()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -2343,16 +2239,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``resumeSessionlessTransaction()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -2373,16 +2261,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``rollback()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -2444,16 +2324,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error, Array results)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter. The
-         second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``runPipeline()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Array ``results``
@@ -2590,16 +2462,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter. The
-         second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``shutdown()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -2862,16 +2726,8 @@ Connection Methods
 
     .. _consubscribecallback:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``subscribe()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Object ``result``
@@ -2905,16 +2761,8 @@ Connection Methods
 
     The parameter of the callback function is:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``suspendSessionlessTransaction()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3000,16 +2848,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``startup()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3069,16 +2909,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``tpcBegin()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3124,16 +2956,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``tpcCommit()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3181,16 +3005,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``tpcEnd()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3231,16 +3047,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``tpcForget()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3292,16 +3100,8 @@ Connection Methods
     The parameters of the callback function
     ``function(Error error, Boolean commitNeeded)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``tpcPrepare()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
         * - Boolean ``commitNeeded``
@@ -3345,16 +3145,8 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``tpcRecover()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3391,22 +3183,14 @@ Connection Methods
 
     If you are using the callback programming style::
 
-        tpcRollback([Object xid,] function(Error error);
+        tpcRollback([Object xid,] function(Error error));
 
     See :ref:`tpcrollback` for information on the ``xid`` parameter.
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``tpcRollback()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
 
@@ -3457,15 +3241,7 @@ Connection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-         The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``unsubscribe()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.

@@ -84,16 +84,8 @@ SodaCollection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``createIndex()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
 
@@ -147,16 +139,8 @@ SodaCollection Methods
     The parameters of the callback function
     ``function(Error error, Object result)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``drop()`` succeeds, ``error`` is NULL. It is not an error if the collection does not exist. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
@@ -211,16 +195,8 @@ SodaCollection Methods
     The parameters of the callback function
     ``function(Error error, Object result)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``dropIndex()`` succeeds, ``error`` is NULL. It is not an error if the index does not exist. If an error occurs, then ``error`` contains the error message.
         * - Object ``result``
@@ -292,16 +268,8 @@ SodaCollection Methods
     The parameters of the callback function
     ``function(Error error, SodaDocument document)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``getDataGuide()`` succeeds, ``error`` is NULL. It is not an error if no document is replaced. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``
@@ -430,16 +398,8 @@ SodaCollection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``insertOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
 
@@ -504,16 +464,8 @@ SodaCollection Methods
     The parameters of the callback function
     ``function(Error error, SodaDocument document)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``insertOne()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.
         * - SodaDocument ``document``
@@ -651,15 +603,7 @@ SodaCollection Methods
 
     The parameters of the callback function ``function(Error error)`` are:
 
-    .. list-table-with-summary::
-        :header-rows: 1
-        :class: wy-table-responsive
-        :align: center
-        :widths: 15 30
-        :summary: The first column displays the callback function parameter.
-          The second column displays the description of the parameter.
+    .. callbackfunc-table::
 
-        * - Callback Function Parameter
-          - Description
         * - Error ``error``
           - If ``truncate()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the error message.

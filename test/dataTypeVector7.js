@@ -276,17 +276,27 @@ describe('309. dataTypeVector7.js', function() {
 
       if (oracledb.thin) {
         sparseVec = new oracledb.SparseVector(null);
-        await connection.execute(
-          `INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col)
-            VALUES(1, :1)`, [sparseVec]);
-        result = await connection.execute(
-          `SELECT SparseVectorFlex64Col FROM ${tableName}`);
-        const vector = result.rows[0][0];
-        assert.deepStrictEqual(Array.from(vector.values), []);
-        assert.deepStrictEqual(Array.from(vector.indices), []);
-        assert.strictEqual(vector.numDimensions, 0);
-        assert.strictEqual(vector.dense(), null);
-        assert.deepStrictEqual(result.metaData[0], metaDataFloat64Flex);
+        if (connection.oracleServerVersion >= 2601000000) {
+          // Database 26.1 rejects zero-dimension sparse vectors.
+          await assert.rejects(
+            async () => await connection.execute(
+              `INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col)
+                VALUES(1, :1)`, [sparseVec]),
+            /ORA-51835:/
+          );
+        } else {
+          await connection.execute(
+            `INSERT INTO ${tableName} (IntCol, SparseVectorFlex64Col)
+              VALUES(1, :1)`, [sparseVec]);
+          result = await connection.execute(
+            `SELECT SparseVectorFlex64Col FROM ${tableName}`);
+          const vector = result.rows[0][0];
+          assert.deepStrictEqual(Array.from(vector.values), []);
+          assert.deepStrictEqual(Array.from(vector.indices), []);
+          assert.strictEqual(vector.numDimensions, 0);
+          assert.strictEqual(vector.dense(), null);
+          assert.deepStrictEqual(result.metaData[0], metaDataFloat64Flex);
+        }
       }
 
       sparseVec = null;
@@ -885,17 +895,27 @@ describe('309. dataTypeVector7.js', function() {
 
       if (oracledb.thin) {
         sparseVec = new oracledb.SparseVector(null, 'float32');
-        await connection.execute(
-          `INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col)
-            VALUES(1, :1)`, [sparseVec]);
-        result = await connection.execute(
-          `SELECT SparseVectorFlex32Col FROM ${tableName}`);
-        const vector = result.rows[0][0];
-        assert.deepStrictEqual(Array.from(vector.values), []);
-        assert.deepStrictEqual(Array.from(vector.indices), []);
-        assert.strictEqual(vector.numDimensions, 0);
-        assert.strictEqual(vector.dense(), null);
-        assert.deepStrictEqual(result.metaData[0], metaDataFloat32Flex);
+        if (connection.oracleServerVersion >= 2601000000) {
+          // Database 26.1 rejects zero-dimension sparse vectors.
+          await assert.rejects(
+            async () => await connection.execute(
+              `INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col)
+                VALUES(1, :1)`, [sparseVec]),
+            /ORA-51835:/
+          );
+        } else {
+          await connection.execute(
+            `INSERT INTO ${tableName} (IntCol, SparseVectorFlex32Col)
+              VALUES(1, :1)`, [sparseVec]);
+          result = await connection.execute(
+            `SELECT SparseVectorFlex32Col FROM ${tableName}`);
+          const vector = result.rows[0][0];
+          assert.deepStrictEqual(Array.from(vector.values), []);
+          assert.deepStrictEqual(Array.from(vector.indices), []);
+          assert.strictEqual(vector.numDimensions, 0);
+          assert.strictEqual(vector.dense(), null);
+          assert.deepStrictEqual(result.metaData[0], metaDataFloat32Flex);
+        }
       }
 
       sparseVec = null;

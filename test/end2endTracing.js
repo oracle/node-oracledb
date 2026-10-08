@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -105,10 +105,7 @@ describe('159. end2endTracing.js', function() {
         `select sys_context('userenv', 'action'),
                 sys_context('userenv', 'client_identifier'),
                 sys_context('userenv', 'client_info'),
-                sys_context('userenv', 'module'),
-                (select ecid
-                   from v$session
-                  where sid = sys_context('userenv', 'sid'))
+                sys_context('userenv', 'module')
            from dual`,
       );
 
@@ -117,8 +114,14 @@ describe('159. end2endTracing.js', function() {
         expected.clientId,
         expected.clientInfo,
         expected.module,
-        expected.ecid,
       ]);
+
+      const sessionResult = await conn.execute(
+        `select ecid
+           from v$session
+          where sid = sys_context('userenv', 'sid')`,
+      );
+      assert.strictEqual(sessionResult.rows[0][0], expected.ecid);
     };
 
     await conn.execute(

@@ -24,8 +24,10 @@ sys.path.append(os.path.abspath("_ext"))
 extensions = [
     "table_with_summary",
     "oracle_desupported",
+    "oracle_version_directives",
     "constants_table",
     "parameters_table",
+    "callbackfunc_table",
     "sphinx_rtd_theme"
 ]
 
@@ -55,8 +57,8 @@ author = 'Oracle'
 # from the other)
 #
 # The short X.Y version.
-version = '7.0'
-release = '7.0.1'
+version = '26.0'
+release = '26.0.0'
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:

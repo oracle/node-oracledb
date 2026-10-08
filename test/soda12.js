@@ -1,4 +1,4 @@
-/* Copyright (c) 2021, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2021, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -44,11 +44,14 @@ describe('230. soda12.js', () => {
     if (oracledb.thin) this.skip();
     const clientVersion = testsUtil.getClientVersion();
     const isClientOK = clientVersion < 1909000000 ? false : true;
+    const isServerOK = await testsUtil.checkPrerequisites(0, 1800000000);
+
+    if (!isClientOK || !isServerOK) {
+      this.skip();
+    }
 
     const sodaRole = await sodaUtil.isSodaRoleGranted();
-
-    const isRunnable = isClientOK && sodaRole;
-    if (!isRunnable) {
+    if (!sodaRole) {
       this.skip();
     }
 

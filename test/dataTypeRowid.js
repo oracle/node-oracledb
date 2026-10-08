@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -169,17 +169,13 @@ describe('39. dataTypeRowid.js', function() {
   });
 
   const insertData = async function(connection, tableName) {
-    await Promise.all(array.map(async function(element) {
-      const sql = `INSERT INTO ` + tableName + `(num) VALUES(` + element + `)`;
-      await connection.execute(sql);
-    }));
+    const sql = `INSERT INTO ${tableName}(num) VALUES(:1)`;
+    await connection.executeMany(sql, array.map((element) => [element]));
   };
 
   const updateDate = async function(connection, tableName) {
-    await Promise.all(array.map(async function(element) {
-      const sql = `UPDATE ` + tableName + ` T SET content = T.ROWID where num = ` + element;
-      await connection.execute(sql);
-    }));
+    const sql = `UPDATE ${tableName} T SET content = T.ROWID where num = :1`;
+    await connection.executeMany(sql, array.map((element) => [element]));
   };
 
   const verifyRefCursor = async function(connection, tableName) {

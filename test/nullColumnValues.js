@@ -26,7 +26,8 @@
  *   10. nullColumnValues.js
  *
  * DESCRIPTION
- *    Tests to check that a NULL data value in a column is returned as a JavaScript null.
+ *    Tests to check that a NULL data value in a column is returned as a
+ *    JavaScript null.
  *
  *****************************************************************************/
 'use strict';
@@ -37,8 +38,9 @@ const dbConfig = require('./dbconfig.js');
 
 describe('10. nullColumnValues.js', function() {
 
-  let connection = null;
-  beforeEach('get connection & create table', async function() {
+  let connection;
+
+  before('get connection & create table', async function() {
     const makeTable =
       "BEGIN \
             DECLARE \
@@ -58,28 +60,26 @@ describe('10. nullColumnValues.js', function() {
                     location_id NUMBER \
                 ) \
             '); \
-            EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_nullcol_dept  \
-                   VALUES \
-                   (40,''Human Resources'', 203, 2400) \
-            '); \
-            EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_nullcol_dept  \
-                   VALUES \
-                   (50,''Shipping'', 121, 1500) \
-            '); \
-            EXECUTE IMMEDIATE (' \
-              INSERT INTO nodb_nullcol_dept  \
-                   VALUES \
-                   (90, ''Executive'', 100, 1700) \
-            '); \
         END; ";
 
     connection = await oracledb.getConnection(dbConfig);
     await connection.execute(makeTable);
   });
 
-  afterEach('drop table and release connection', async function() {
+  beforeEach('reset table data', async function() {
+    const seedRows = [
+      [40, 'Human Resources', 203, 2400],
+      [50, 'Shipping', 121, 1500],
+      [90, 'Executive', 100, 1700]
+    ];
+    await connection.execute('TRUNCATE TABLE nodb_nullcol_dept');
+    await connection.executeMany(
+      'INSERT INTO nodb_nullcol_dept VALUES (:1, :2, :3, :4)',
+      seedRows
+    );
+  });
+
+  after('drop table and release connection', async function() {
     await connection.execute("DROP TABLE nodb_nullcol_dept PURGE");
     await connection.close();
   });

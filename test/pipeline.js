@@ -1710,9 +1710,10 @@ describe('324. pipeline.js', function() {
 
       const numRows = 4;
       const numRowsFetchMany = 3;
-      for (let i = 0; i < numRows; i++) {
-        await conn.execute(`insert into ${TEST_TAB} (id, address) values (${i + 1}, 'test pipeline')`);
-      }
+      await conn.executeMany(
+        `insert into ${TEST_TAB} (id, address) values (:1, :2)`,
+        Array.from({ length: numRows }, (_, i) => [i + 1, 'test pipeline'])
+      );
       await conn.commit();
 
       // each opertion will run in non-pipeline mode.
@@ -2086,9 +2087,10 @@ describe('324. pipeline.js', function() {
       const pipelines = [];
       const numRows = 4;
       const numRowsFetchMany = 3;
-      for (let i = 0; i < numRows; i++) {
-        await conn.execute(`insert into ${TEST_TAB} (id, address) values (${i + 1}, 'test pipeline')`);
-      }
+      await conn.executeMany(
+        `insert into ${TEST_TAB} (id, address) values (:1, :2)`,
+        Array.from({ length: numRows }, (_, i) => [i + 1, 'test pipeline'])
+      );
       await conn.commit();
 
       for (let p = 0; p < 300; p++) {
@@ -2118,9 +2120,10 @@ describe('324. pipeline.js', function() {
       const pipelines = [];
       const numRows = 4;
       const numRowsFetchMany = 3;
-      for (let i = 0; i < numRows; i++) {
-        await conn.execute(`insert into ${TEST_TAB} (id, address) values (${i + 1}, 'test pipeline')`);
-      }
+      await conn.executeMany(
+        `insert into ${TEST_TAB} (id, address) values (:1, :2)`,
+        Array.from({ length: numRows }, (_, i) => [i + 1, 'test pipeline'])
+      );
       await conn.commit();
 
       for (let p = 0; p < 30; p++) {

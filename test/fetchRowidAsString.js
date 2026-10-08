@@ -1,4 +1,4 @@
-/* Copyright (c) 2017, 2022, Oracle and/or its affiliates. */
+/* Copyright (c) 2017, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -72,24 +72,18 @@ describe('106. fetchRowidAsString.js', function() {
   });
 
   const insertData = async function(connection, tableName) {
-    for (let i = 0; i < array.length; i++) {
-      const element = array[i];
-      const sql = "INSERT INTO " + tableName + "(num) VALUES(" + element + ")";
-      await connection.execute(sql);
-    }
+    const sql = 'INSERT INTO ' + tableName + '(num) VALUES(:1)';
+    await connection.executeMany(sql, array.map((element) => [element]));
   };
 
   const updateDate = async function(connection, tableName) {
-    for (let i = 0; i < array.length; i++) {
-      const element = array[i];
-      const sql = "UPDATE " + tableName + " T SET content = T.ROWID where num = " + element;
-      await connection.execute(sql);
-    }
+    const sql = 'UPDATE ' + tableName + ' T SET content = T.ROWID where num = :1';
+    await connection.executeMany(sql, array.map((element) => [element]));
   };
 
   describe('106.1 works with fetchInfo option', function() {
     const maxRowBak = oracledb.maxRows;
-    const option = { fetchInfo: { "CONTENT": { type: oracledb.STRING } } };
+    const option = { fetchInfo: { 'CONTENT': { type: oracledb.STRING } } };
 
     before(async function() {
       await connection.execute(proc_create_table);
@@ -449,15 +443,14 @@ describe('106. fetchRowidAsString.js', function() {
   });
 
   async function test1(option, object) {
-    for (let i = 0; i < array.length; i++) {
-      const element = array[i];
-      const sql = "select content,rowid from " + tableName + " where num = " + element;
-      const result = await connection.execute(sql, [], option);
-      let resultVal_1 = result.rows[0][0];
-      let resultVal_2 = result.rows[0][1];
+    const sql = "select content,rowid from " + tableName + " order by num";
+    const result = await connection.execute(sql, [], option);
+    for (const row of result.rows) {
+      let resultVal_1 = row[0];
+      let resultVal_2 = row[1];
       if (object === true) {
-        resultVal_1 = result.rows[0].CONTENT;
-        resultVal_2 = result.rows[0].ROWID;
+        resultVal_1 = row.CONTENT;
+        resultVal_2 = row.ROWID;
       }
       assert.strictEqual(typeof resultVal_1, "string");
       assert.strictEqual(resultVal_1, resultVal_2);
