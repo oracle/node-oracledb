@@ -1494,6 +1494,138 @@ when creating a standalone connection or a connection pool. For example:
 For information on the OCI specific parameters, see
 :ref:`_get_connection_oci_properties`.
 
+.. _resourceprincipalauth:
+
+Resource Principal Authentication
+=================================
+
+With Resource Principal Authentication, an OCI resource such as a Data Science
+notebook session can use its resource principal credentials to obtain an OCI
+IAM database token. Node-oracledb can then use this token for native
+:ref:`OCI IAM token-based authentication <cloudnativeauthoci>` when connecting
+to Oracle Autonomous AI Database. Access is authorized by OCI IAM policies
+granted to the resource's dynamic group, and the database must map the IAM
+identity or dynamic group to a global database user.
+
+Resource Principal Authentication was introduced in node-oracledb 26.0.0.
+
+The example below demonstrates how to connect to Oracle Autonomous AI Database
+from an OCI Data Science Notebook using Resource Principal authentication. To
+enable this, use node-oracledb's pre-supplied
+:ref:`extensionOci <extensionociplugin>` plugin.
+
+**Step 1: Create a Dynamic Group**
+
+A Dynamic Group is used to define rules to group the resources that require
+access.
+
+To create a dynamic group using the Oracle Cloud console, see the steps in the
+`Creating a Dynamic Group <https://docs.oracle.com/en-us/iaas/Content/
+Identity/Tasks/managingdynamicgroups.htm#>`__ section of the Oracle Cloud
+Infrastructure documentation.
+
+**Step 2: Create an IAM Policy**
+
+An IAM Policy is used to grant the Notebook session permission to access the
+required Oracle Autonomous AI Database compartment. For example, the following
+policy permits the dynamic group to use only the specified Autonomous AI
+Database:
+
+.. code-block:: text
+
+    Allow dynamic-group <identity-domain>/<dynamic-group-name> to use autonomous-database-family in compartment <compartment-name> where target.database.id = '<autonomous-database-ocid>'
+
+Replace the placeholders with the identity domain, dynamic-group name,
+compartment name, and Autonomous AI Database OCID.
+
+For more information, see the `Create an IAM Policy <https://docs.oracle.com/
+en-us/iaas/application-integration/doc/creating-iam-policy.html>`__ section of
+the Oracle Cloud Infrastructure documentation.
+
+Note that policy changes may take longer than ordinary IAM policy propagation
+to become effective for Resource Principal authentication. The Resource
+Principal token is cached for two hours. Therefore, changes to the IAM policy
+or dynamic group may take up to two hours to take effect. For more
+information, see `Use Resource Principal to Access Oracle Cloud Infrastructure
+Resources <https://docs.oracle.com/en-us/iaas/autonomous-database-serverless/
+doc/resource-principal.html#GUID-3CF59CED-F7DF-46AF-B3CF-E703ED0BB3EE>`__.
+
+**Step 3: Map the Resource Principal to a Database User**
+
+Create a global database user mapped to the dynamic group. Include the IAM
+identity-domain name when specifying the dynamic group. For more
+information, see `Accessing the Database Using a Resource Principal
+<https://docs.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1B648FB0-BE86-
+4BCE-91D0-239D287C638B>`__.
+
+Also, ensure that external authentication is enabled on Oracle Autonomous AI
+Database and the Oracle Database parameter ``IDENTITY_PROVIDER_TYPE`` is set
+to *OCI_IAM*. For the steps, see `Enable IAM Authentication on Autonomous AI
+Database <https://docs.oracle.com/en/cloud/paas/autonomous-database/serverless
+/adbsb/enable-iam-authentication.html>`__.
+
+**Step 4: Prepare the Notebook Environment**
+
+Install node-oracledb and the OCI SDK packages required by the OCI token
+extension:
+
+.. code-block:: bash
+
+    npm install oracledb oci-common oci-identitydataplane
+
+**Step 5: Configure the Oracle Autonomous AI Database Wallet**
+
+If Oracle Autonomous AI Database requires
+:ref:`mutual TLS (mTLS) <connectionadbmtls>`, download the wallet and make it
+available in the Notebook Session. See :ref:`getwallet` for the steps. Extract
+the wallet and use the service alias from ``tnsnames.ora`` as the connection
+string.
+
+The wallet directory should contain files such as ``tnsnames.ora``,
+``sqlnet.ora``, ``cwallet.sso``, ``ewallet.pem``, and ``ewallet.p12``.
+
+**Step 6: Connect Using Resource Principal Authentication**
+
+To use Resource Principal authentication, set the ``authType`` property of the
+``tokenAuthConfigOci`` parameter to *resourcePrincipal* when creating a
+standalone connection or a connection pool. You must also set the
+``connectString`` and ``externalAuth`` properties. Also, define the
+Autonomous AI Database IAM token scope. For example:
+
+.. code-block:: javascript
+
+    const oracledb = require('oracledb');
+    require('oracledb/plugins/token/extensionOci');
+
+    const walletDir = '/path/to/adb_wallet';
+
+    const scope =
+      'urn:oracle:db::id::<compartment-ocid>::<autonomous-database-ocid>';
+
+    const connection = await oracledb.getConnection({
+      connectString: '<adb-service-alias>',
+      externalAuth: true,
+      tokenAuthConfigOci: {
+        authType: 'resourcePrincipal',
+        scope
+      },
+      configDir: walletDir,
+      walletLocation: walletDir,
+      walletPassword: '<wallet-password>'
+    });
+
+    const result = await connection.execute(`
+      SELECT user,
+             sys_context('USERENV', 'AUTHENTICATED_IDENTITY')
+      FROM dual
+    `);
+
+    console.log(result.rows);
+    await connection.close();
+
+For information on the OCI specific parameters, see
+:ref:`_get_connection_oci_properties`.
+
 .. _configproviderauthmethods:
 
 Authentication Methods for Centralized Configuration Providers
