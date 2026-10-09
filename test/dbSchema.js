@@ -90,6 +90,8 @@ describe('291. dbSchema.js', function() {
       assert.strictEqual(result.metaData[0].domainSchema, undefined);
       assert.strictEqual(result.metaData[0].domainName, undefined);
       assert.strictEqual(result.metaData[0].annotations, undefined);
+      assert.strictEqual(result.metaData[0].tableName, undefined);
+      assert.strictEqual(result.metaData[0].tableSchema, undefined);
       assert.strictEqual(result.metaData[1].domainSchema,
         await testsUtil.getUser(connection));
       assert.strictEqual(result.metaData[1].domainName,
