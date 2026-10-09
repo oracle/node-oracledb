@@ -32,7 +32,9 @@ Common Changes
 #)  Added support for :ref:`Google Cloud Storage <googlecloudstorage>`
     Centralized Configuration Provider.
 
-#)  Added support for OCI Resource Principal authentication with the
+#)  Added support for
+    :ref:`OCI Resource Principal authentication <resourceprincipalauth>` with
+    the
     :ref:`OCI Object Storage centralized configuration provider <ociobjstorage>`
     and :ref:`native IAM token-based authentication <cloudnativeauthoci>`.
 
@@ -123,8 +125,8 @@ Thin Mode Changes
     consuming a fully prefetched result set could return previously consumed
     rows instead of just the remaining rows.
 
-#) Fixed Thin mode implicit pooling to invoke the release callback for
-   single-iteration PL/SQL execute() calls with INOUT binds.
+#)  Fixed Thin mode implicit pooling to invoke the release callback for
+    single-iteration PL/SQL execute() calls with INOUT binds.
 
 Thick Mode Changes
 ++++++++++++++++++
