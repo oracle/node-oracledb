@@ -101,6 +101,9 @@ Thin Mode Changes
     :ref:`Advanced Queuing (AQ) notifications <aqnotifications>` with
     Transactional Event Queues, including AQ notification extension metadata.
 
+#)  Added the :ref:`Vector SDK plugin <vectorsdkplugin>` for Oracle AI Vector
+    Search workflows.
+
 #)  Added support for reading and setting database
     :ref:`OpenTelemetry <opentelemetry>` trace propagation with the
     :attr:`connection.databaseOpenTelemetryTracing` property.
@@ -213,9 +216,6 @@ Common Changes
 
 Thin Mode Changes
 +++++++++++++++++
-
-#)  Added the :ref:`Vector SDK plugin <vectorsdkplugin>` for Oracle AI Vector
-    Search workflows.
 
 #)  Fixed bug with sharing
     :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`
