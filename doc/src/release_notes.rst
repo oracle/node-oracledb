@@ -214,6 +214,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added the :ref:`Vector SDK plugin <vectorsdkplugin>` for Oracle AI Vector
+    Search workflows.
+
 #)  Fixed bug with sharing
     :ref:`oracledb.EndUserSecurityContext <endusersecuritycontextclass>`
     across connections.
@@ -332,9 +335,6 @@ Thin Mode Changes
     :ref:`Connection <connectionclass>` to work with
     :ref:`Oracle Deep Data Security <deepdatasecurity>` feature introduced in
     Oracle AI Database 26ai.
-
-#)  Added the :ref:`Vector SDK plugin <vectorsdkplugin>` for Oracle AI Vector
-    Search workflows.
 
 #)  Fixed bug to close the socket when ``NJS-138`` error is thrown.
     See `Issue #1764 <https://github.com/oracle/node-oracledb/issues/1764>`__.
