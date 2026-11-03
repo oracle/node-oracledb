@@ -274,4 +274,341 @@ describe('192. implicitResults.js', function() {
     }
   }); // 192.5
 
+  it('192.6 fetches all JSON rows from implicit results in Thin mode', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    try {
+      if (!oracledb.thin || conn.oracleServerVersion < 2100000000) {
+        this.skip();
+      }
+
+      const jsonRows = (numRows) => Array.from({ length: numRows }, (_, i) =>
+        [{ n: i + 1 }]);
+      const jsonBlock = (numRows) => `
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL RETURNING JSON) AS j
+            FROM dual CONNECT BY LEVEL <= ${numRows};
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`;
+      const expected = [jsonRows(3)];
+
+      let result = await conn.execute(jsonBlock(3));
+      assert.deepStrictEqual(result.implicitResults, expected);
+
+      result = await conn.execute(jsonBlock(3), [], { prefetchRows: 0 });
+      assert.deepStrictEqual(result.implicitResults, expected);
+
+      result = await conn.execute(jsonBlock(1), [], { prefetchRows: 2 });
+      assert.deepStrictEqual(result.implicitResults, [jsonRows(1)]);
+
+      result = await conn.execute(jsonBlock(2), [], { prefetchRows: 2 });
+      assert.deepStrictEqual(result.implicitResults, [jsonRows(2)]);
+
+      result = await conn.execute(jsonBlock(20), [], { prefetchRows: 2 });
+      assert.deepStrictEqual(result.implicitResults, [jsonRows(20)]);
+
+      result = await conn.execute(jsonBlock(3), [], { prefetchRows: 10 });
+      assert.deepStrictEqual(result.implicitResults, expected);
+
+      result = await conn.execute(jsonBlock(25), [], { prefetchRows: 10 });
+      assert.deepStrictEqual(result.implicitResults, [jsonRows(25)]);
+
+      result = await conn.execute(jsonBlock(3), [], {
+        resultSet: true,
+        prefetchRows: 0,
+        fetchArraySize: 1
+      });
+      const resultSet = result.implicitResults[0];
+      try {
+        const rows = [];
+        rows.push(...await resultSet.getRows(1));
+        rows.push(...await resultSet.getRows(1));
+        rows.push(...await resultSet.getRows(1));
+        assert.deepStrictEqual(rows, expected[0]);
+        assert.deepStrictEqual(await resultSet.getRows(1), []);
+      } finally {
+        await resultSet.close();
+      }
+
+      result = await conn.execute(`
+        DECLARE
+          c_json SYS_REFCURSOR;
+          c_text SYS_REFCURSOR;
+        BEGIN
+          OPEN c_json FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL RETURNING JSON) AS j
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c_json);
+          OPEN c_text FOR
+            SELECT 'text ' || LEVEL AS t
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c_text);
+        END;`);
+      assert.deepStrictEqual(result.implicitResults, [
+        jsonRows(3),
+        [['text 1'], ['text 2'], ['text 3']]
+      ]);
+
+      result = await conn.execute(`
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL RETURNING JSON) AS j,
+                   'text ' || LEVEL AS t
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`);
+      assert.deepStrictEqual(result.implicitResults, [[
+        [{ n: 1 }, 'text 1'],
+        [{ n: 2 }, 'text 2'],
+        [{ n: 3 }, 'text 3']
+      ]]);
+
+      result = await conn.execute(`
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE 1 RETURNING JSON) AS j
+            FROM dual WHERE 1 = 0;
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`);
+      assert.deepStrictEqual(result.implicitResults, [[]]);
+
+      result = await conn.execute(`
+        BEGIN
+          OPEN :cursor FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL RETURNING JSON) AS j
+            FROM dual CONNECT BY LEVEL <= 3;
+        END;`, {
+        cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR }
+      });
+      const cursor = result.outBinds.cursor;
+      try {
+        assert.deepStrictEqual(await cursor.getRows(), jsonRows(3));
+      } finally {
+        await cursor.close();
+      }
+    } finally {
+      await conn.close();
+    }
+  }); // 192.6
+
+  it('192.6.1 fetches all JSON rows as strings from implicit results in Thin mode', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    try {
+      if (!oracledb.thin || conn.oracleServerVersion < 2100000000) {
+        this.skip();
+      }
+
+      const plsql = `
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL RETURNING JSON) AS j
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`;
+      const options = {
+        fetchTypeHandler(metadata) {
+          if (metadata.dbType === oracledb.DB_TYPE_JSON) {
+            return { type: oracledb.STRING };
+          }
+        }
+      };
+      const expected = [[['{"n":1}'], ['{"n":2}'], ['{"n":3}']]];
+
+      let result = await conn.execute(plsql, [], options);
+      assert.deepStrictEqual(result.implicitResults, expected);
+
+      result = await conn.execute(plsql, [], { ...options, prefetchRows: 0 });
+      assert.deepStrictEqual(result.implicitResults, expected);
+    } finally {
+      await conn.close();
+    }
+  }); // 192.6.1
+
+  it('192.6.2 fetches all VARCHAR2 rows from implicit results in Thin mode', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    try {
+      if (!oracledb.thin || conn.oracleServerVersion < 2100000000) {
+        this.skip();
+      }
+
+      const plsql = `
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL) AS j
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`;
+      const expected = [[['{"n":1}'], ['{"n":2}'], ['{"n":3}']]];
+
+      let result = await conn.execute(plsql);
+      assert.deepStrictEqual(result.implicitResults, expected);
+
+      result = await conn.execute(plsql, [], { prefetchRows: 0 });
+      assert.deepStrictEqual(result.implicitResults, expected);
+    } finally {
+      await conn.close();
+    }
+  }); // 192.6.2
+
+  it('192.6.3 fetches VARCHAR2 rows from an implicit result set without defines in Thin mode', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    try {
+      if (!oracledb.thin || conn.oracleServerVersion < 2100000000) {
+        this.skip();
+      }
+
+      const plsql = `
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL) AS j
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`;
+      const result = await conn.execute(plsql, [], {
+        resultSet: true,
+        prefetchRows: 0,
+        fetchArraySize: 1
+      });
+      const resultSet = result.implicitResults[0];
+      try {
+        assert.deepStrictEqual(await resultSet.getRows(1), [['{"n":1}']]);
+        assert.deepStrictEqual(await resultSet.getRows(1), [['{"n":2}']]);
+        assert.deepStrictEqual(await resultSet.getRows(1), [['{"n":3}']]);
+        assert.deepStrictEqual(await resultSet.getRows(1), []);
+      } finally {
+        await resultSet.close();
+      }
+    } finally {
+      await conn.close();
+    }
+  }); // 192.6.3
+
+  it('192.6.4 fetches all CLOB rows from implicit results in Thin mode', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    try {
+      if (!oracledb.thin || conn.oracleServerVersion < 2100000000) {
+        this.skip();
+      }
+
+      const plsql = `
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL RETURNING CLOB) AS j
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`;
+      const options = {
+        resultSet: true,
+        fetchArraySize: 1,
+        fetchTypeHandler(metadata) {
+          if (metadata.dbType === oracledb.DB_TYPE_CLOB) {
+            return { type: oracledb.CLOB };
+          }
+        }
+      };
+
+      for (const prefetchRows of [0, 10]) {
+        const result = await conn.execute(plsql, [], { ...options, prefetchRows });
+        const resultSet = result.implicitResults[0];
+        try {
+          const rows = await resultSet.getRows();
+          assert.strictEqual(rows.length, 3);
+          for (let i = 1; i <= 3; i++) {
+            const lob = rows[i - 1][0];
+            try {
+              assert.strictEqual(lob.type, oracledb.DB_TYPE_CLOB);
+              assert.strictEqual(await lob.getData(), `{"n":${i}}`);
+            } finally {
+              await lob.close();
+            }
+          }
+        } finally {
+          await resultSet.close();
+        }
+      }
+    } finally {
+      await conn.close();
+    }
+  }); // 192.6.4
+
+  it('192.6.5 fetches all CLOB rows as strings from implicit results in Thin mode', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    try {
+      if (!oracledb.thin || conn.oracleServerVersion < 2100000000) {
+        this.skip();
+      }
+
+      const plsql = `
+        DECLARE
+          c SYS_REFCURSOR;
+        BEGIN
+          OPEN c FOR
+            SELECT JSON_OBJECT('n' VALUE LEVEL RETURNING CLOB) AS j
+            FROM dual CONNECT BY LEVEL <= 3;
+          DBMS_SQL.RETURN_RESULT(c);
+        END;`;
+      const options = {
+        fetchTypeHandler(metadata) {
+          if (metadata.dbType === oracledb.DB_TYPE_CLOB) {
+            return { type: oracledb.STRING };
+          }
+        }
+      };
+      const expected = [[['{"n":1}'], ['{"n":2}'], ['{"n":3}']]];
+
+      let result = await conn.execute(plsql, [], options);
+      assert.deepStrictEqual(result.implicitResults, expected);
+
+      result = await conn.execute(plsql, [], { ...options, prefetchRows: 0 });
+      assert.deepStrictEqual(result.implicitResults, expected);
+    } finally {
+      await conn.close();
+    }
+  }); // 192.6.5
+
+  it('192.6.6 fetches all VECTOR rows from an OUT REF CURSOR', async function() {
+    const conn = await oracledb.getConnection(dbConfig);
+    try {
+      if (!await testsUtil.checkPrerequisites(2304000000, 2304000000)) {
+        this.skip();
+      }
+
+      const result = await conn.execute(`
+        BEGIN
+          OPEN :cursor FOR
+            SELECT TO_VECTOR('[1, 2, 3]', 3, FLOAT32) AS v
+            FROM dual CONNECT BY LEVEL <= 3;
+        END;`, {
+        cursor: { dir: oracledb.BIND_OUT, type: oracledb.CURSOR }
+      }, { prefetchRows: 2 });
+      const cursor = result.outBinds.cursor;
+      try {
+        // Two rows can arrive with the define request; the third needs OFETCH.
+        const rows = await cursor.getRows(3);
+        assert.strictEqual(rows.length, 3);
+        for (const row of rows) {
+          assert.deepStrictEqual(row[0], new Float32Array([1, 2, 3]));
+        }
+      } finally {
+        await cursor.close();
+      }
+    } finally {
+      await conn.close();
+    }
+  }); // 192.6.6
+
 });

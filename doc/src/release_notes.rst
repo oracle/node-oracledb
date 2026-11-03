@@ -28,6 +28,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed a bug where an :ref:`implicit result set <implicitresults>` with
+    JSON, LOB, or VECTOR columns returned only the rows sent in the initial
+    prefetch.
+    See `Issue #1795 <https://github.com/oracle/node-oracledb/issues/1795>`__.
+
 #)  Fixed operation-level Deep Data Security context reuse after another
     request refreshes the shared database-token cache. The next operation now
     rebuilds its context when the cached token changes, preserving the current

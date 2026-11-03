@@ -284,6 +284,57 @@ describe('84. fetchClobAsString1.js', function() {
       await connection.execute(ref_proc_drop);
     }); // 84.1.12
 
+    it('84.1.12.1 fetches more CLOB rows from an OUT REF CURSOR', async function() {
+      const values = [];
+      for (let i = 0; i < 3; i++) {
+        const id = insertID++;
+        const specialStr = `84.1.12.1_${i + 1}`;
+        const contentLength = 26;
+        const content = random.getRandomString(contentLength, specialStr);
+        values.push({id, specialStr, content, contentLength});
+        await insertIntoClobTable1(id, content);
+      }
+
+      const refProcName = 'nodb_ref_fetch_more';
+      const refProc = `CREATE OR REPLACE PROCEDURE ${refProcName} ` +
+        '(clob_cursor OUT SYS_REFCURSOR)\n' +
+        'AS \n' +
+        'BEGIN \n' +
+        '    OPEN clob_cursor FOR \n' +
+        `        SELECT C from nodb_clob1 WHERE ID BETWEEN ${values[0].id} ` +
+        `AND ${values[2].id} ORDER BY ID; \n` +
+        'END;';
+      let resultSet;
+      let procedureCreated = false;
+      try {
+        await connection.execute(refProc);
+        procedureCreated = true;
+        const result = await connection.execute(`BEGIN ${refProcName}(:c); END;`, {
+          c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT }
+        }, { prefetchRows: 2 });
+        resultSet = result.outBinds.c;
+
+        // Two rows can arrive with the define request; the third needs OFETCH.
+        const rows = await resultSet.getRows(3);
+        assert.strictEqual(rows.length, values.length);
+        for (let i = 0; i < values.length; i++) {
+          assert.strictEqual(typeof rows[i][0], 'string');
+          compareStrings(rows[i][0], values[i].specialStr, values[i].content,
+            values[i].contentLength);
+        }
+      } finally {
+        try {
+          if (resultSet) {
+            await resultSet.close();
+          }
+        } finally {
+          if (procedureCreated) {
+            await connection.execute(`DROP PROCEDURE ${refProcName}`);
+          }
+        }
+      }
+    }); // 84.1.12.1
+
     it('84.1.13 fetch CLOB with stream', async function() {
       const id = insertID++;
       const specialStr = '84.1.13';

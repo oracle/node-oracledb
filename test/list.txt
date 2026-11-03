@@ -1851,6 +1851,7 @@ Overview of node-oracledb functional tests
       84.1.10 fetch the same CLOB column multiple times
       84.1.11 works with update statement
       84.1.12 works with REF CURSOR
+      84.1.12.1 fetches more CLOB rows from an OUT REF CURSOR
       84.1.13 fetch CLOB with stream
       84.1.14 works with setting oracledb.maxRows < actual number of rows in the table
       84.1.15 works with setting oracledb.maxRows > actual number of rows in the table
@@ -4675,6 +4676,13 @@ Overview of node-oracledb functional tests
     192.3 multiple options, outFormat is OBJECT
     192.4 releases multiple implicit result set entries
     192.5 re-executes PL/SQL returning REFCURSORs with DBMS_SQL.RETURN_RESULT after normal query
+    192.6 fetches all JSON rows from implicit results in Thin mode
+    192.6.1 fetches all JSON rows as strings from implicit results in Thin mode
+    192.6.2 fetches all VARCHAR2 rows from implicit results in Thin mode
+    192.6.3 fetches VARCHAR2 rows from an implicit result set without defines in Thin mode
+    192.6.4 fetches all CLOB rows from implicit results in Thin mode
+    192.6.5 fetches all CLOB rows as strings from implicit results in Thin mode
+    192.6.6 fetches all VECTOR rows from an OUT REF CURSOR in Thin mode
 
   193. connProps.js
     193.1 the default values of clientInfo and dbOp are null
