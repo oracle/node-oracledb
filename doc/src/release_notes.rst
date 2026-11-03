@@ -28,6 +28,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed operation-level Deep Data Security context reuse after another
+    request refreshes the shared database-token cache. The next operation now
+    rebuilds its context when the cached token changes, preserving the current
+    request's roles and attributes.
+
 #)  Fixed bug where a TxEventQ Advanced Queue with JSON payload was throwing
     an ``NJS-061`` error during a :meth:`connection.unsubscribe()` call.
 

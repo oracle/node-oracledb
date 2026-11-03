@@ -30,6 +30,7 @@
  * connection owns its provider; there is no process-global provider setting.
  */
 const oracledb = require('oracledb');
+const { createHash } = require('crypto');
 const securityContextProvider = oracledb.getSecurityContextProvider();
 
 const hasOwn = (obj, prop) => Object.prototype.hasOwnProperty.call(obj, prop);
@@ -221,12 +222,19 @@ function getOrCreateScopedSecurityContext(provider, config, tokenResult,
   if (config.contextResolution !== 'operation') {
     return createContext();
   }
+
+  // A shared token cache may have been refreshed by another scope. A cache
+  // hit alone does not guarantee that this scope's EUSC contains that token.
+  const tokenHash = createHash('sha256').update(tokenResult.accessToken)
+    .digest('hex');
   const cached = securityContextProvider._getScopedValue(provider);
-  if (cached && tokenResult.isNewToken === false) {
-    return cached;
+  if (cached && tokenResult.isNewToken === false &&
+      cached.tokenHash === tokenHash) {
+    return cached.securityContext;
   }
   const securityContext = createContext();
-  securityContextProvider._setScopedValue(provider, securityContext);
+  securityContextProvider._setScopedValue(provider,
+    { securityContext, tokenHash });
   return securityContext;
 }
 

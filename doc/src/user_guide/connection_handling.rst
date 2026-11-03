@@ -2446,6 +2446,10 @@ security context after the operation completes. This allows one borrowed
 connection to be used sequentially with different security contexts, but adds
 token-provider and security-context creation work for each operation.
 
+In operation resolution, a scope reuses its encoded security context while the
+token provider returns the same cached database token. A changed token rebuilds
+the context, including when another request refreshed the shared token cache.
+
 An example of using the ``endUserSecParams`` property is shown below:
 
 .. code-block:: javascript
