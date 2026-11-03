@@ -38,6 +38,9 @@ Thin Mode Changes
 
 #)  Internal code optimization for improved connection and BFILE handling.
 
+#)  Fixed issue where JSON binds (`DB_TYPE_JSON`) on invalid Date values
+    returned corrupted dates instead of rejecting them.
+
 Thick Mode Changes
 ++++++++++++++++++
 

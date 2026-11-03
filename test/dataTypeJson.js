@@ -132,6 +132,26 @@ describe('244.dataTypeJson.js', function() {
       );
     }); // 244.1.5
 
+    it('244.1.6 rejects invalid JavaScript dates', async function() {
+      const sql = "insert into " + tableName + " (id, content) values (:i, :c)";
+      const invalidDates = [
+        new Date(NaN),
+        new Date('not-a-date'),
+        { date: new Date(NaN) },
+        [new Date('not-a-date')]
+      ];
+
+      for (const value of invalidDates) {
+        await assert.rejects(
+          async () => await connection.execute(sql, [
+            { val: 1, type: oracledb.NUMBER },
+            { val: value, type: oracledb.DB_TYPE_JSON }
+          ]),
+          oracledb.thin ? /NJS-203:/ : /ORA-01841:/
+        );
+      }
+    }); // 244.1.6
+
   }); // 244.1
 
   describe('244.2 stores null value correctly', function() {
