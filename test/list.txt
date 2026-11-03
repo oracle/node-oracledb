@@ -6574,6 +6574,7 @@ Overview of node-oracledb functional tests
     319.7 Enqueue/Dequeue RAW Sharded Queue
     319.8 Enqueue/Dequeue JSON Sharded Queue
     319.9 Enqueue/Dequeue ADT Sharded Queue
+    319.10 Subscribe/Unsubscribe JSON Sharded Queue with timeout omitted
 
   320. lobMethods1.js
     320.1 LOB content streamed from file

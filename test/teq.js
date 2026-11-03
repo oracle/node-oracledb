@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -47,7 +47,8 @@ describe('319. teq.js', function() {
   const credential = {
     user: TEQ_USER,
     password: TEQ_USER_PWD,
-    connectString: dbConfig.connectString
+    connectString: dbConfig.connectString,
+    events: true
   };
 
   before(async function() {
@@ -287,4 +288,15 @@ describe('319. teq.js', function() {
     const msg = await queue.deqOne();
     assert.strictEqual(msg.payload.MAKE, 'BMW');
   }); // 319.9
+
+  it('319.10 Subscribe/Unsubscribe JSON Sharded Queue with timeout omitted', async function() {
+    const subscriptionName = `${TEQ_USER}.JSON_SHQ:py_sub`;
+    // JSON payload metadata must not overwrite the subscription registration ID.
+    await conn.subscribe(subscriptionName, {
+      namespace: oracledb.SUBSCR_NAMESPACE_AQ,
+      clientInitiated: true,
+      callback: () => {}
+    });
+    await conn.unsubscribe(subscriptionName);
+  }); // 319.10
 });
