@@ -1,4 +1,4 @@
-// Copyright (c) 2018, 2025, Oracle and/or its affiliates.
+// Copyright (c) 2018, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -336,8 +336,10 @@ static void njsSubscription_onStopNotifications(uv_handle_t *handle)
     njsSubscription *subscr = (njsSubscription*) handle->data;
     napi_handle_scope scope;
 
-    if (napi_open_handle_scope(subscr->env, &scope) != napi_ok)
+    if (napi_open_handle_scope(subscr->env, &scope) != napi_ok) {
+        njsSubscription_onStopNotificationsHelper(subscr->env, subscr);
         return;
+    }
     njsSubscription_onStopNotificationsHelper(subscr->env, subscr);
     napi_close_handle_scope(subscr->env, scope);
 }
@@ -373,8 +375,14 @@ static void njsSubscription_processNotification(uv_async_t *handle)
     njsSubscription *subscr = (njsSubscription*) handle->data;
     napi_handle_scope scope;
 
-    if (napi_open_handle_scope(subscr->env, &scope) != napi_ok)
+    if (napi_open_handle_scope(subscr->env, &scope) != napi_ok) {
+        uv_mutex_lock(&subscr->mutex);
+        if (!subscr->message->registered)
+            njsSubscription_stopNotifications(subscr);
+        njsSubscription_waitOnBarrier(subscr);
+        uv_mutex_unlock(&subscr->mutex);
         return;
+    }
     uv_mutex_lock(&subscr->mutex);
     njsSubscription_processNotificationHelper(subscr->env, subscr);
     njsSubscription_waitOnBarrier(subscr);

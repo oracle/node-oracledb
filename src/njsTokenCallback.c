@@ -167,8 +167,10 @@ static void njsTokenCallback_processNotification(uv_async_t *handle)
     napi_handle_scope scope;
     bool result;
 
-    if (napi_open_handle_scope(callback->env, &scope) != napi_ok)
+    if (napi_open_handle_scope(callback->env, &scope) != napi_ok) {
+        njsTokenCallback_waitOnBarrier(callback);
         return;
+    }
     result = njsTokenCallback_processNotificationHelper(callback);
     if (!result)
         njsTokenCallback_waitOnBarrier(callback);
@@ -309,12 +311,16 @@ static void njsTokenCallback_waitOnBarrier(njsTokenCallback *callback)
 static void njsTokenCallback_onStopNotifications(uv_handle_t *handle)
 {
     njsTokenCallback *callback = (njsTokenCallback*) handle->data;
+    napi_env env = callback->env;
     napi_handle_scope scope;
-    if (napi_open_handle_scope(callback->env, &scope) != napi_ok)
+    if (napi_open_handle_scope(env, &scope) != napi_ok) {
+        njsTokenCallback_free(env, callback);
         return;
+    }
 
-    njsTokenCallback_onStopNotificationsHelper(callback->env, callback);
-    napi_close_handle_scope(callback->env, scope);
+    // The helper frees callback, so retain env for closing the scope.
+    njsTokenCallback_onStopNotificationsHelper(env, callback);
+    napi_close_handle_scope(env, scope);
 }
 
 

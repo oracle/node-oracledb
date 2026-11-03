@@ -4422,6 +4422,12 @@ Overview of node-oracledb functional tests
     170.13 drainTime = NaN
     170.14 draining a pool will not block the other pool
     170.15 draining a pool will not block another aliased pool
+    170.16 immediate close rejects all queued requests (queueTimeout=0)
+    170.17 immediate close rejects all queued requests (queueTimeout=5000)
+    170.18 drain expiry rejects all queued requests (queueTimeout=0)
+    170.19 drain expiry rejects all queued requests (queueTimeout=5000)
+    170.20 connections returned during draining rejects all queued requests (queueTimeout=0)
+    170.21 connections returned during draining rejects all queued requests (queueTimeout=5000)
 
   171. jsObjectGetter2.js
     171.1 oracledb.fetchAsBuffer

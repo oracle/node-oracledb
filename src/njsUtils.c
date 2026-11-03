@@ -176,8 +176,13 @@ bool njsUtils_copyStringFromJS(napi_env env, napi_value value, char **result,
         return njsUtils_throwInsufficientMemory(env);
 
     // get the string value contents
-    NJS_CHECK_NAPI(env, napi_get_value_string_utf8(env, value, *result,
-            *resultLength + 1, resultLength))
+    if (napi_get_value_string_utf8(env, value, *result,
+            *resultLength + 1, resultLength) != napi_ok) {
+        free(*result);
+        *result = NULL;
+        *resultLength = 0;
+        return njsUtils_genericThrowError(env, __FILE__, __LINE__);
+    }
     return true;
 }
 

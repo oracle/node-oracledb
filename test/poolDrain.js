@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2023, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -251,5 +251,90 @@ describe('170. poolDrain.js', () => {
     await pool_2.close(1);
     await p;
   });
+
+  const closeScenarios = [
+    {name: 'immediate close', drainTime: 0},
+    {name: 'drain expiry', drainTime: 1},
+    {name: 'connections returned during draining', drainTime: 10,
+      releaseDuringDrain: true}
+  ];
+
+  for (const [index, scenario] of closeScenarios.entries()) {
+    let innerLoopIdx = 0;
+    for (const queueTimeout of [0, 5000]) {
+      it(`170.${16 + index * 2 + innerLoopIdx} ${scenario.name}` +
+        ` rejects all queued requests ` +
+        `(queueTimeout=${queueTimeout})`, async function() {
+        this.timeout(15000);
+        const pool = await oracledb.createPool({
+          ...dbConfig,
+          poolMin: 2,
+          poolMax: 2,
+          poolIncrement: 1,
+          queueMax: 3,
+          queueTimeout,
+          enableStatistics: true
+        });
+        const connections = [];
+        let closing;
+        let timeout;
+        try {
+          connections.push(await pool.getConnection());
+          connections.push(await pool.getConnection());
+          assert.strictEqual(pool.connectionsInUse, 2);
+
+          // Observe every rejection before closing the pool.
+          const pending = Promise.allSettled([
+            pool.getConnection(), pool.getConnection(), pool.getConnection()
+          ]);
+          assert.strictEqual(pool.getStatistics().currentQueueLength, 3);
+
+          closing = pool.close(scenario.drainTime);
+          if (scenario.releaseDuringDrain) {
+            // Keep one connection checked out so releasing the other wakes
+            // queued requests while the pool is still DRAINING.
+            assert.strictEqual(pool.status, oracledb.POOL_STATUS_DRAINING);
+            await connections.pop().close();
+          } else {
+            await closing;
+          }
+
+          // In particular, queueTimeout=0 must not hang on a regression.
+          const results = await Promise.race([
+            pending,
+            new Promise((resolve, reject) => {
+              timeout = setTimeout(() => reject(new Error(
+                'Queued requests did not settle after pool shutdown'
+              )), 3000);
+            })
+          ]);
+          for (const result of results) {
+            assert.strictEqual(result.status, 'rejected');
+            assert.strictEqual(result.reason.code, 'NJS-065');
+          }
+
+          if (scenario.releaseDuringDrain) {
+            assert.strictEqual(pool.status, oracledb.POOL_STATUS_DRAINING);
+            const result = await connections[0].execute('select 1 from dual');
+            assert.deepStrictEqual(result.rows, [[1]]);
+            await connections.pop().close();
+          }
+          await closing;
+          assert.strictEqual(pool.status, oracledb.POOL_STATUS_CLOSED);
+        } finally {
+          clearTimeout(timeout);
+          if (pool.status === oracledb.POOL_STATUS_DRAINING) {
+            await Promise.allSettled(connections.map(conn => conn.close()));
+          }
+          if (closing) {
+            await closing;
+          } else if (pool.status === oracledb.POOL_STATUS_OPEN) {
+            await pool.close(0);
+          }
+        }
+      });
+      innerLoopIdx++;
+    }
+  }
 
 });

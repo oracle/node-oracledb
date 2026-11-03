@@ -13,14 +13,28 @@ that impact both Thin and Thick modes ('Common'), the changes that
 affect Thin mode (the default runtime behavior of node-oracledb from 6.0.0),
 and the changes that affect the optional :ref:`Thick Mode <enablingthick>`.
 
-node-oracledb `v26.1.0 <https://github.com/oracle/node-oracledb/compare/v26.0.0...v26.1.0>`__ (TBD)
+node-oracledb `v26.1.0 <https://github.com/oracle/node-oracledb/compare/v26.0.0...v26.1.0>`__ (TBD 2026)
 -----------------------------------------------------------------------------------------------------------
+
+Common Changes
+++++++++++++++
+
+#)  Fixed bug where pool thread runs indefinitely even after the pool is
+    closed.
 
 Thin Mode Changes
 +++++++++++++++++
 
 #)  Fixed bug where a TxEventQ Advanced Queue with JSON payload was throwing
     an ``NJS-061`` error during a :meth:`connection.unsubscribe()` call.
+
+#)  Internal code optimization for improved connection and BFILE handling.
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Optimized memory management, data management and error handling for tokens
+    and subscriptions.
 
 node-oracledb `v26.0.0 <https://github.com/oracle/node-oracledb/compare/v7.0.1...v26.0.0>`__ (8 Oct 2026)
 -----------------------------------------------------------------------------------------------------------
