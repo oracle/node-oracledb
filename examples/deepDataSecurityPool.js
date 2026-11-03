@@ -32,6 +32,16 @@
  *   to service each request. All outbound HTTP calls honor the configured HTTPS
  *   proxy so the sample works from restricted networks.
  *
+ *   NOTE: The /login endpoint uses Resource Owner Password
+ *   Credentials (ROPC), which is insecure and included for demonstration only.
+ *   Do not use this login flow in production.
+ *   Recommended: use application-managed OAuth 2.0 Authorization Code with
+ *   PKCE through MSAL. The application handles interactive sign-in, redirects,
+ *   and state validation. Obtain a user access token for this middle-tier API
+ *   and send it as Authorization: Bearer <token> to /employees/obo over HTTPS.
+ *   The server uses OBO to obtain a database-audience token. Browser sign-in
+ *   belongs in the application, outside the database plugin and SQL execution.
+ *
  *   Database environment variables:
  *     NODE_ORACLEDB_USER
  *       Database user for the connection pool.
@@ -443,6 +453,9 @@ function resolveAuthMode(req, hasUserToken) {
 }
 
 // Uses Azure ROPC to obtain the caller's initial access token.
+// ROPC is insecure and used only for this demo; do not use it in production.
+// Instead, acquire a middle-tier access token with MSAL Authorization Code
+// with PKCE in the application, then call /employees/obo for the OBO exchange.
 async function getAzureToken(username, password) {
   requireEnv("AZURE_TENANT_ID", AZURE_TENANT_ID);
   requireEnv("AZURE_CLIENT_ID", AZURE_CLIENT_ID);

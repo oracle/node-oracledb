@@ -14,6 +14,16 @@
  *   driver resolves and applies the database context. Its lifetime is selected
  *   with DEEPSEC_CONTEXT_RESOLUTION.
  *
+ *   NOTE: The /login endpoint uses Resource Owner Password
+ *   Credentials (ROPC), which is insecure and included for demonstration only.
+ *   Do not use this login flow in production.
+ *   Recommended: use application-managed OAuth 2.0 Authorization Code with
+ *   PKCE through MSAL. The application handles interactive sign-in, redirects,
+ *   and state validation. Obtain a user access token for this middle-tier API
+ *   and send it as Authorization: Bearer <token> to /employees/obo over HTTPS.
+ *   The server uses OBO to obtain a database-audience token. Browser sign-in
+ *   belongs in the application, outside the database plugin and SQL execution.
+ *
  * ENVIRONMENT VARIABLES
  *   NODE_ORACLEDB_USER, NODE_ORACLEDB_PASSWORD,
  *   NODE_ORACLEDB_CONNECTIONSTRING, NODE_ORACLEDB_WALLET_LOCATION,
@@ -226,6 +236,9 @@ async function listEmployees(req, res, options = {}) {
   }
 }
 
+// ROPC is insecure and used only for this demo; do not use it in production.
+// Instead, acquire a middle-tier access token with MSAL Authorization Code
+// with PKCE in the application, then call /employees/obo for the OBO exchange.
 async function getAzureToken(username, password) {
   if (!TOKEN_URL) {
     throw new Error("Unable to determine Azure token URL.");

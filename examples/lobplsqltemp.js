@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, 2024, Oracle and/or its affiliates. */
+/* Copyright (c) 2016, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -40,6 +40,7 @@ Error.stackTraceLimit = 50;
 
 const fs = require('fs');
 const oracledb = require('oracledb');
+const path = require('path');
 const dbConfig = require('./dbconfig.js');
 const demoSetup = require('./demosetup.js');
 
@@ -98,7 +99,7 @@ async function run() {
       });
 
       console.log('Reading from ' + inFileName);
-      const inStream = fs.createReadStream(inFileName);
+      const inStream = fs.createReadStream(path.join(__dirname, inFileName));
       inStream.on('error', (err) => {
         // console.log("inStream.on 'error' event");
         tempLob.destroy(err);
