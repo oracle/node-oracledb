@@ -96,14 +96,12 @@ describe('330. cqn.js', function() {
       (oracledb.thin || process.platform !== 'darwin');
 
     hasRequiredVersions = await testsUtil.checkPrerequisites(
-      1904000000, 1904000000);
-    if (oracledb.thin && !hasRequiredVersions) {
+      1904000000, 1903000000);
+    if (!hasRequiredVersions)
       isRunnable = false;
-    }
 
-    if (!isRunnable) {
+    if (!isRunnable)
       this.skip();
-    }
 
     const dbaCredential = {
       user: dbConfig.test.DBA_user,
@@ -114,10 +112,9 @@ describe('330. cqn.js', function() {
     connAsDBA = await oracledb.getConnection(dbaCredential);
     await connAsDBA.execute(`GRANT CHANGE NOTIFICATION TO ${dbConfig.user}`);
 
-    const connectOptions = {...dbConfig};
-    if (!oracledb.thin) {
+    const connectOptions = { ...dbConfig };
+    if (!oracledb.thin)
       connectOptions.events = true;
-    }
     conn = await oracledb.getConnection(connectOptions);
 
     subscribeWithDefaults = async function(name, options) {

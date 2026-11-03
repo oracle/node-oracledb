@@ -1,4 +1,4 @@
-/* Copyright (c) 2024, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2024, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -52,7 +52,7 @@ describe('1. transactionguardTest.js', function() {
     // Transaction Guard requires Oracle Client 12.1 or later and
     // Oracle Database 12.1 or later.
     // It also does not work with CMAN-TDM or DRCP.
-    isRunnable = await testsUtil.checkPrerequisites(1200000000, 1200000000);
+    isRunnable = await testsUtil.checkPrerequisites(1201000000, 1201000000);
     if (!isRunnable || !dbConfig.test.DBA_PRIVILEGE ||
       dbConfig.test.drcp || dbConfig.test.isCmanTdm) this.skip();
 
