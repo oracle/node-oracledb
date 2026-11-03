@@ -5188,7 +5188,8 @@ Overview of node-oracledb functional tests
       244.11.2 fetch JSON with relative offsets and shared fields and values
       244.11.3 fetch JSON with relative offsets and shared fields, not values
     244.12 Verify auto-generated SODA document key
-      244.12.1 Verify Json Id on select
+      244.12.1 JsonId serializes only its visible bytes
+      244.12.2 Verify Json Id on select
     244.13 Read JSON data on meta data change
       244.13.1 table recreate - with oracledb.fetchAsString
       244.13.2 table recreate - with fetchInfo oracledb.STRING

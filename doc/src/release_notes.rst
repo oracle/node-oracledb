@@ -22,6 +22,9 @@ Common Changes
 #)  Fixed bug where pool thread runs indefinitely even after the pool is
     closed.
 
+#)  Fixed issue where :ref:`oracledb.JsonId <jsonid>` class does not serialize
+    the json id correctly.
+
 Thin Mode Changes
 +++++++++++++++++
 

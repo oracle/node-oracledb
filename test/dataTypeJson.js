@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2015, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -1000,7 +1000,20 @@ describe('244.dataTypeJson.js', function() {
       await connection.execute(sql);
     }); // after()
 
-    it('244.12.1 Verify Json Id on select', async function() {
+    it('244.12.1 JsonId serializes only its visible bytes', function() {
+      const backing = Uint8Array.from([0xaa, 0x01, 0x02, 0x03, 0xbb]);
+      const jsonId = new oracledb.JsonId(backing.buffer, 1, 3);
+
+      assert.strictEqual(jsonId.toJSON(), '010203');
+      assert.strictEqual(JSON.stringify({ _id: jsonId }),
+        '{"_id":"010203"}');
+
+      const encoded = connection.encodeOSON({ _id: jsonId });
+      const decoded = connection.decodeOSON(encoded);
+      assert.strictEqual(Buffer.from(decoded._id).toString('hex'), '010203');
+    });
+
+    it('244.12.2 Verify Json Id on select', async function() {
       const inpDoc = {"name": "Jenny"};
       let sql = ` insert into ${TABLE} values (:1)`;
       await connection.execute(sql, [{
@@ -1082,7 +1095,7 @@ describe('244.dataTypeJson.js', function() {
       result = await connection.execute(sql);
       genDoc = result.rows[2][0];
       assert.deepStrictEqual(genDoc, inpDocWithUserKey);
-    }); // 244.12.1
+    }); // 244.12.2
 
   });  // 244.12
 
