@@ -2153,10 +2153,14 @@ external Identity and Access Management (IAM) system such as Oracle Cloud
 Infrastructure (OCI) IAM or Microsoft Entra ID, or a user locally created in
 Oracle Database.
 
+Applications can create a security context payload containing either only the
+database-access token (single-token payload) or both the database-access token
+and an end-user identity (two-token payload).
+
 To create an end-user security context payload for a user, you must create an
 EndUserSecurityContext object using the
 :ref:`Oracledb EndUserSecurityContext class <endusersecuritycontextclass>`.
-For example:
+For example, a two-token security context payload can be created as follows:
 
 .. code-block:: javascript
 
@@ -2169,17 +2173,43 @@ For example:
         },
     });
 
-The following attributes can be defined in an EndUserSecurityContext object:
+You must set the ``databaseAccessToken`` property. The ``endUserToken``,
+``endUserName``, ``key``, ``dataRoles``, and ``attributes`` are optional.
 
-- ``databaseAccessToken``: A token that authenticates your application with
-  the database. This token is issued by your Identity and Access Management
-  (IAM) system and can either be an On-Behalf-Of (OBO) token or a Client
-  Credentials token. This attribute is required.
+You can create a security context payload containing only the mandatory
+database-access token, when connected to Oracle AI Database 26ai version
+23.26.4 or later. This was introduced in node-oracledb 26.1.0. An example of
+creating a single-token security context payload is shown below:
+
+.. code-block:: javascript
+
+    const user_context = new oracledb.EndUserSecurityContext({
+        databaseAccessToken: "<db_token_issued_by_an_IAM>"
+    });
+
+For a security context payload containing only the database-access token,
+Oracle AI Database determines the identity used for authorization from that
+token. A TCPS connection is required to set a security context containing only
+the database-access token.
+
+For versions earlier than Oracle AI Database 23.26.4, both the database-access
+token and end-user identity must be specified in the security context. Setting
+only the database-access token will raise the ``NJS-203`` error.
+
+The following properties can be defined in an EndUserSecurityContext object:
+
+- ``databaseAccessToken``: A required token issued by your Identity and Access
+  Management (IAM) system, with an audience accepted by the database. It can
+  represent an end user from an Authorization Code flow, a delegated end user
+  from On-Behalf-Of, or an application from Client Credentials. Oracle AI
+  Database 26ai version 23.26.4 or later is required when setting a security
+  context containing only this database-access token on a connection.
 
 - ``endUserToken``: A token that identifies the end user. This token is issued
-  by your IAM system after user authentication. This attribute must be
-  specified for users managed by external IAM systems. Do not set this
-  attribute if the ``endUserName`` or the ``key`` attribute is defined.
+  by your IAM system after user authentication. When specified with
+  ``databaseAccessToken``, it creates a security context containing two
+  tokens, database-access token and end-user token. Do not set this attribute
+  if the ``endUserName`` or the ``key`` attribute is defined.
 
 - ``endUserName``: The name of a local database user created in Oracle
   Database that has the ``CREATE END USER SECURITY CONTEXT`` database
@@ -2213,10 +2243,13 @@ For detailed information on these attributes, see this
 
 .. note::
 
-    Note that you must set either the ``endUserToken`` or ``endUserName``
-    attribute in the EndUserSecurityContext object. The ``key`` attribute is
-    optional with ``endUserName``. Setting ``endUserToken`` together with
-    ``endUserName`` or ``key`` raises an error.
+    - Do not specify both ``endUserToken`` and ``endUserName`` to create a
+      single-token security context payload.
+
+    - The ``key`` attribute is optional with ``endUserName`` but requires it.
+
+    - Setting ``endUserToken`` together with ``endUserName`` or ``key`` raises
+      an error.
 
 Setting an End-User Security Context Payload
 ++++++++++++++++++++++++++++++++++++++++++++
@@ -2251,6 +2284,10 @@ connection is shown below:
     });
 
     connection.setEndUserSecurityContext(user_context);
+
+The credentials used to authenticate the database connection are independent
+of the tokens in the security context. Creating a security context does not
+change how the connection is authenticated.
 
 An example of setting an end-user security context payload on a connection
 pool is:
@@ -2400,6 +2437,25 @@ An example of using an end-user security context is:
     // Close the connection
     await connection.close();
 
+An example of using a database-access token obtained through an
+application-managed OAuth Authorization Code flow is:
+
+.. code-block:: javascript
+
+    // userDatabaseToken was obtained by the application's OAuth flow.
+    const context = new oracledb.EndUserSecurityContext({
+      databaseAccessToken: userDatabaseToken,
+    });
+    const connection = await pool.getConnection();
+    try {
+      connection.setEndUserSecurityContext(context);
+      const result = await connection.execute("select * from hr.employees");
+      console.log(result.rows);
+    } finally {
+      connection.clearEndUserSecurityContext();
+      await connection.close();
+    }
+
 .. _endusersecuritycontextcreationplugin:
 
 End-User Security Context Payload Creation Using endUserSecurityProvider Plugin
@@ -2409,11 +2465,8 @@ Applications that obtain database tokens from OCI IAM or Microsoft Entra ID
 can use the
 :ref:`end-user security provider plugin <endusersecurityproviderplugin>`. With
 Oracle Deep Data Security, the plugin creates and applies an end-user security
-context from the configured identity-provider settings and request-specific
-end-user metadata. The security context is used only for the database
-operations performed in the corresponding application scope. The generated
-context is cleared after the operation completes, so SQL executed outside the
-callback continues to use the standard database login.
+context using the configured identity-provider settings and request-specific
+end-user metadata.
 
 The ``endUserSecurityProvider`` plugin was introduced in node-oracledb 26.0.0.
 
@@ -2427,24 +2480,9 @@ a standalone connection or connection pool:
     require("oracledb/plugins/token/endUserSecurityProvider");
 
 For connection and pool creation with Oracle Deep Data Security, specify the
-``endUserSecParams`` property. This object contains the static
-identity-provider configuration and, optionally, default end-user identity
-metadata.
-
-The parameters of the ``endUserSecParams`` property are detailed in
-:ref:`endusersecparamsproperties`. When using the ``endUserSecurityProvider``
-plugin, you can also specify the ``contextResolution`` property in
-``endUserSecParams``. The possible values are *connection* and *operation*.
-The default value is *connection*.
-
-With *connection*, the provider resolves and sets the security context on the
-first database operation of a borrowed connection. The security context then
-applies to that connection until it is closed or released to the pool. With
-*operation*, the provider resolves the current ``runWithContext()`` metadata
-before each database operation, and node-oracledb clears the generated
-security context after the operation completes. This allows one borrowed
-connection to be used sequentially with different security contexts, but adds
-token-provider and security-context creation work for each operation.
+``endUserSecParams`` property. This object contains the identity-provider and
+security context information. See :ref:`endusersecparamsproperties` for the
+details on this information.
 
 In operation resolution, a scope reuses its encoded security context while the
 token provider returns the same cached database token. A changed token rebuilds
@@ -2457,7 +2495,7 @@ An example of using the ``endUserSecParams`` property is shown below:
     const pool = await oracledb.createPool({
       user: "hr",
       password: mypw, // contains the hr schema password
-      connectString: "mydbmachine.example.com/orclpdb1",
+      connectString: "tcps://mydbmachine.example.com/orclpdb1",
       endUserSecParams: {
         spiType: "azure",
         authFlow: "onBehalfOf",
@@ -2467,6 +2505,58 @@ An example of using the ``endUserSecParams`` property is shown below:
         scopes: <scopes>
       },
     });
+
+**Using Different Authentication Flows and Oracle AI Database Versions**
+
+The behavior of the ``endUserSecurityProvider`` plugin depends on the
+configured authentication flow and the Oracle AI Database version.
+
+For Microsoft Azure On-Behalf-Of (OBO), the plugin uses ``endUserToken`` as
+the assertion to obtain a database-access token. When using Oracle AI 26ai
+Database version 23.26.4 or later with the Azure OBO authentication flow, the
+security context is created only with the database-access token. This was
+introduced in node-oracledb 26.1.0. Applications that require both the
+database-access token and the end-user token for Azure OBO can acquire the
+tokens themselves and use the
+:ref:`node-oracledb APIs <endusersecuritycontextcreation>` instead of using
+the plugin. After upgrading to Oracle Database version 23.26.4 or later,
+verify application access because automatic Azure OBO sends only the
+database-access token.
+
+For Azure OBO authentication flow and Oracle AI Database versions earlier than
+23.26.4, the plugin creates a security context with both the database-access
+token and the end-user token.
+
+For Azure and OCI "app" flows, the specified ``endUserToken`` is included
+with the application database-access token in the security context when using
+Oracle AI Database 26ai version 23.26.2 or later. Specifying ``endUserName``
+creates a local database-user context. The ``key`` property can be set with
+``endUserName``. If neither ``endUserToken`` nor ``endUserName`` is specified,
+the plugin creates a security context containing only the database-access
+token and requires Oracle AI Database 26ai version 23.26.4 or later. See
+:ref:`apptokenflow` for more information.
+
+Request metadata cannot override the configured ``authFlow``.
+
+**Setting Context Resolution**
+
+When using the ``endUserSecurityProvider`` plugin, you can also specify the
+``contextResolution`` property which controls whether the security context
+created by the plugin lasts until the connection is released or is cleared
+after each operation.
+
+When set to *"connection"*, the plugin resolves and sets the security context
+on the first database operation of a borrowed connection. The security context
+is then applicable on that connection until it is closed or released to the pool.
+
+When set to *"operation"*, the plugin creates and applies a security context
+for each database operation, then clears it when the operation finishes. This
+allows the same borrowed connection to be used sequentially with different
+security contexts. The plugin may reuse the security context when the
+database-access token is cached. It creates a new security context when a new
+database-access token is obtained.
+
+**Using the Security Context Provider Helper**
 
 You can call ``oracledb.getSecurityContextProvider()`` to get the security
 context provider helper. Use the
@@ -2499,10 +2589,11 @@ metadata must include an end-user token. For example:
       await connection.close();
     }
 
-When ``authFlow`` is set to *"app"*, the provider creates an
-application-direct context when neither ``endUserToken`` nor ``endUserName``
-is supplied. Provide ``endUserName`` to create an application-mediated
-end-user context.
+When ``authFlow`` is set to *"app"*, the provider preserves the supplied
+end-user identity; the OBO-only token omission does not apply. The existing
+application identity context is used when neither ``endUserToken`` nor
+``endUserName`` is supplied. Provide ``endUserName`` for a named-user context
+or ``endUserToken`` for a two token security context.
 
 The provider resolves and sets the security context when the first database
 operation is executed on a borrowed connection. The security context then
@@ -2549,18 +2640,32 @@ Instead, limit the security context scope to the database operation:
       await connection.close();
     }
 
+.. _apptokenflow:
+
 Application Token Flow
 ++++++++++++++++++++++
 
-The ``app`` flow supports direct application logon and application-mediated
-end-user identities. For scheduled jobs, service workloads, or AI agents that
-are authorized as the registered application itself, select the direct form by
-omitting both ``endUserToken`` and ``endUserName``. The provider obtains a
-client-credential database-access token and uses it for direct application
-logon. The database maps the token's client identity to the registered
-application identity. No ``endUserToken``, ``endUserName``, or context key is
-sent. ``dataRoles`` and ``attributes`` can still be included in the direct
-application security context. For example:
+The "app" authentication flow supports application identities and
+application-mediated end-user identities. Unlike Azure On-Behalf-Of, it always
+includes a supplied ``endUserToken`` in the security context, regardless of
+the version of Oracle AI Database 26ai used.
+
+For scheduled jobs, service workloads, or AI agents authorized as the
+registered application, do not specify ``endUserToken`` or ``endUserName``.
+The plugin then creates a security context containing only the
+database-access token. Oracle AI Database version 23.26.4 or later is required
+to set that context on a connection.
+
+A Client Credentials token identifies the application. To include an end-user
+identity, also specify ``endUserToken`` or ``endUserName``. Application-managed
+``dataRoles`` and ``attributes`` should be derived from trusted authorization
+logic, and the relevant data roles should be granted to the registered
+application identity.
+
+The plugin obtains an application database-access token and applies it in the
+security context on the already-authenticated database connection. Oracle
+Database determines the application identity from the token. The security
+context can also include ``dataRoles`` and ``attributes``. For example:
 
 .. code-block:: javascript
 
@@ -2570,11 +2675,30 @@ application security context. For example:
     }, () =>
       connection.execute("select * from hr.employees"));
 
-An application-token request with ``endUserName`` is an application-mediated
-end-user context. An application-token request with ``endUserToken`` carries
-that token directly in the security context; it must not also specify
-``endUserName`` or a context key. Use ``authFlow: "obo"`` when the driver must
-exchange the end-user token for a database token.
+For OCI Client Credentials, the provider configuration can be:
+
+.. code-block:: javascript
+
+    endUserSecParams: {
+      spiType: "oci",
+      authFlow: "app",
+      authType: "clientcredentials",
+      authority: process.env.OCI_TOKEN_ENDPOINT,
+      clientId: process.env.OCI_CLIENT_ID,
+      clientSecret: process.env.OCI_CLIENT_SECRET,
+      scopes: process.env.OCI_DB_SCOPE,
+    }
+
+``authority`` is the OCI OAuth token endpoint. Azure application credentials
+use the Azure configuration shown above with ``authFlow`` set to "app".
+
+An application-token request with ``endUserName`` creates an
+application-mediated local database-user context. An application-token
+request with ``endUserToken`` includes that token directly in the security
+context, regardless of the database version. Do not specify
+``endUserName`` or ``key`` with ``endUserToken``. Set ``authFlow`` to "obo"
+when node-oracledb must exchange the end-user token for a delegated
+database-access token.
 
 With a pool or standalone connection configured with ``authFlow: "app"``, a
 named application-mediated end user can be supplied in request metadata:
@@ -2587,8 +2711,8 @@ named application-mediated end user can be supplied in request metadata:
       dataRoles: ["employee_reader"],
     }, () => connection.execute("select * from hr.employees"));
 
-Alternatively, pass an end-user token directly with the application database
-token. Do not supply ``endUserName`` or ``key`` in this form:
+Alternatively, pass an end-user token with the application database token.
+Do not supply ``endUserName`` or ``key`` in this form:
 
 .. code-block:: javascript
 

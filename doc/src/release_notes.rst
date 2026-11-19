@@ -32,6 +32,9 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Added automatic single-token Deep Data Security contexts for Azure OBO
+    on Oracle AI Database version 23.26.4 or later.
+
 #)  Fixed a bug where an :ref:`implicit result set <implicitresults>` with
     JSON, LOB, or VECTOR columns returned only the rows sent in the initial
     prefetch.

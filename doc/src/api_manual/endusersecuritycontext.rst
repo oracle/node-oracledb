@@ -5,16 +5,22 @@ API: EndUserSecurityContext Class
 *********************************
 
 The EndUserSecurityContext class represents Deep Data Security context
-information that node-oracledb can set on a connection. It can identify an
-end user by using an end-user token from an external Identity and Access
-Management (IAM) system, or by using the name of a local database user. For
-direct application logon, it can also represent the application identity
-encoded by the database-access token, without specifying a separate end-user
-identity.
+information that node-oracledb can set on a connection. It allows applications
+to create an end-user security context containing either only the
+database-access token (single-token), or both the database-access token and an
+end-user identity (two-token).
 
-The security context information can include the database-access token,
-end-user identity details, data roles, and application-provided attributes
-used by Oracle Database to authorize access to protected data.
+With Oracle AI Database 26ai version 23.26.4 or later, you can set an end-user
+security context containing only the database-access token on a connection.
+For Oracle AI Database versions earlier than 23.26.4, a security context
+containing both the database-access token and an end-user identity can be set
+on a connection.
+
+The end-user identity in the security context can be an end-user token from an
+external Identity and Access Management (IAM) system or the name of a local
+database user. The security context information can also include data roles
+and application-provided attributes used by Oracle Database to authorize
+access to protected data.
 
 .. versionadded:: 7.0
 
@@ -59,14 +65,14 @@ The properties of the ``options`` parameter are:
       - Description
     * - ``databaseAccessToken``
       - String
-      - A security token issued by an external Identity and Access Management (IAM) system such as Oracle Cloud Infrastructure (OCI) IAM or Microsoft Entra ID that authorizes an application to access Oracle Database. This property is required and can either be an On-Behalf-Of (OBO) token or a Client Credentials token.
+      - A required, non-empty token issued by an external Identity and Access Management (IAM) system such as Oracle Cloud Infrastructure (OCI) IAM or Microsoft Entra ID, with an audience accepted by Oracle Database.
 
-        An OBO token is obtained from an IAM using the end-user token as an assertion. This access token can only be used when ``endUserToken`` is specified.
+        Applications are responsible for acquiring the database-access token. It may be obtained through an OAuth Authorization Code, On-Behalf-Of (OBO), or Client Credentials flow, provided that the token has an audience accepted by Oracle Database.
 
-        A Client Credentials token is obtained from an IAM using the application's token. This access token can be used when either ``endUserToken`` or ``endUserName`` is specified. It can also be used without ``endUserToken`` or ``endUserName`` for direct application logon, where the database maps the token to the application identity.
+        This database-access token can be specified alone or with an end-user identity. Oracle AI Database 26ai version 23.26.4 or later is required when setting a security context containing only this token on a connection. Setting only a database-access token on an earlier database version raises the ``NJS-203`` error.
     * - ``endUserToken``
       - String
-      - A token that identifies an end-user managed by an external IAM system. This token is issued by the IAM system after user authentication.
+      - An optional token that identifies an end-user managed by an external IAM system. When this property is specified with ``databaseAccessToken``, it creates a two-token security context containing both the database-access token and the end-user token, which node-oracledb sends to Oracle Database.
 
         This property should not be set when ``endUserName`` or ``key`` is specified.
     * - ``endUserName``

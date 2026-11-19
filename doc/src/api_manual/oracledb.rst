@@ -3028,10 +3028,32 @@ Oracledb Methods
           - Identity provider type. The default value is "oci". Use "azure" for Microsoft Entra ID.
         * - ``authFlow``
           - String
-          - Authentication flow used by the provider. Values are "onBehalfOf" and "app". The default value is "onBehalfOf".
+          - Authentication flow used to acquire the database-access token. Values are "onBehalfOf" (aliases "obo", "on_behalf_of", and "on-behalf-of") and "app". The default is "onBehalfOf".
+
+            For Microsoft Azure "OnBehalfOf" authentication flow, the ``endUserSecurityProvider`` plugin uses ``endUserToken`` to obtain a database-access token. When connected to Oracle AI Database 26ai version 23.26.4 or later, the plugin creates a security context containing only a single-token, that is, the database-access token. For earlier database versions, the plugin creates a security context containing two-tokens, that is, the database-access token and the end-user token.
+
+            For the "app" flow, the specified ``endUserToken`` is included in the security context regardless of the database version to which the application is connected.
+        * - ``contextResolution``
+          - String
+          - Controls when the security-context provider resolves the security context. The value can be *"connection"* or *"operation"*.
+
+            When set to *"connection"*, the provider resolves the context on the first eligible database operation and retains the provider-applied context until the connection is closed or released to its pool. Subsequent operations on that connection reuse the same context.
+
+            When set to *"operation"*, the provider resolves the context before each database operation and clears the provider-applied context afterward. This allows sequential operations with different security contexts on the same connection. See :ref:`endusersecuritycontextcreationplugin`.
+
+            The default value is *"connection"*.
+
+            .. versionadded:: 26.1.0
         * - ``endUserToken``
           - String
-          - Default end-user token. Request metadata supplied to :meth:`securityContextProvider.runWithContext()` overrides this value. In ``app`` mode, it is included with the application database token and cannot be combined with ``endUserName`` or ``key``.
+          - Default end-user token. Request metadata supplied to
+            :meth:`securityContextProvider.runWithContext()` overrides this
+            value.
+
+            For Microsoft Azure OnBehalfOf, this token is required as the assertion to obtain a database-access token. When connected to Oracle AI Database 26ai version 23.26.4 or later, the ``endUserSecurityProvider`` plugin sends only the database-access token in the security context. For earlier Oracle Database 26ai versions, the plugin includes both the database-access token and the end-user token.
+
+            For the "app" flow, a specified end-user token is always included with the application database-access token in the security context. This is regardless of the database version to which the application is connected to. It cannot be combined
+            with ``endUserName`` or ``key``. See :ref:`endusersecuritycontextcreationplugin` and :ref:`endusersecuritycontextcreation`.
         * - ``endUserName``
           - String
           - Default end-user name.

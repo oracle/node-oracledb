@@ -97,9 +97,40 @@ configuration hook that creates an end-user security context provider. This
 provider is configured when the ``endUserSecParams`` property is specified in
 :meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()`.
 Request-specific metadata is supplied with
-:meth:`securityContextProvider.runWithContext()`, and the generated end-user
-security context is applied only to database operations executed within that
-callback.
+:meth:`securityContextProvider.runWithContext()`.
+
+The plugin resolves and applies the security context according to the
+``contextResolution``. When ``contextResolution`` is set to its default value,
+*"connection"*, the plugin resolves the context before the first database
+operation and retains the provider-applied context until the connection is
+released. When ``contextResolution`` is set to *"operation"*, the plugin
+resolves the context before each database operation and clears the
+provider-applied context afterward. This allows sequential operations with
+different security contexts on the same connection.
+
+The plugin generates the security context according to the configured
+authentication flow and the Oracle AI Database version.
+
+For the Microsoft Azure On-Behalf-Of (OBO) authentication flow, the plugin
+uses the specified ``endUserToken`` as the assertion to obtain a
+database-access token. The Oracle AI Database 26ai version determines whether
+the end-user token is included in the security context. When connected to
+Oracle Database 26ai version 23.26.4 or later, the security context contains
+only the database-access token. For earlier Oracle Database 26ai versions, the
+security context contains both the database-access token and the end-user
+token.
+
+For Azure and OCI application-token flow, a supplied ``endUserToken`` is
+included in the security context regardless of the database version to which
+the application is connected. Supplying ``endUserName`` creates a local
+database-user context. If neither ``endUserToken`` nor ``endUserName`` is
+supplied, the context contains only the database-access token and requires
+Oracle AI Database version 23.26.4 or later.
+
+OCI OBO and interactive OAuth Authorization Code token acquisition are not
+implemented by this plugin. Applications must acquire and supply tokens for
+those scenarios. See :ref:`endusersecuritycontextcreation` for manual security
+context creation.
 
 See :ref:`endusersecuritycontextcreationplugin` for more information.
 

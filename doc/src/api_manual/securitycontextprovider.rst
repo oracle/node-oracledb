@@ -64,8 +64,31 @@ SecurityContextProvider Methods
 
     Values supplied in ``context`` override any default metadata specified in
     the ``endUserSecParams`` property used when creating the connection or
-    pool. The configured ``authFlow`` determines whether the provider uses OBO
-    or application-token authentication; request metadata cannot change it.
+    pool. The configured ``authFlow`` determines whether the provider uses
+    On-Behalf-Of (OBO) or application-token authentication.
+
+    For Microsoft Azure OBO, the
+    :ref:`endUserSecurityProvider <endusersecurityproviderplugin>` plugin
+    requires ``endUserToken`` as the assertion to obtain a database-access
+    token. If you are using Oracle AI Database 26ai version 23.26.4 or later,
+    the plugin creates the security context with only the database-access
+    token. With Oracle Database versions earlier than 23.26.4, the plugin
+    creates the security context with both the database-access token and the
+    end-user token.
+
+    For Azure and OCI application-token flows, a specified ``endUserToken`` is
+    included in the security context regardless of the Oracle Database
+    versions. Specifying ``endUserName`` creates a local database-user
+    security context. If neither ``endUserToken`` nor ``endUserName`` is
+    specified, the plugin creates a security context containing only the
+    database-access token, which requires Oracle AI Database 26ai version
+    23.26.4 or later.
+
+    A Client Credentials token identifies the application. To include an
+    end-user identity with an application token, supply ``endUserToken`` or
+    ``endUserName`` according to the selected context form.
+
+    Request metadata cannot override the configured authentication flow.
 
     The context does not accept an HTTP ``Authorization`` header. Applications
     and framework adapters should validate and extract the bearer token from

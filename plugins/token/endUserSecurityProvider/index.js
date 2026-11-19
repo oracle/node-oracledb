@@ -48,6 +48,7 @@ const PROVIDER_MODULE_PATHS = {
   azure: '../extensionAzure/index.js',
   oci: '../extensionOci/index.js',
 };
+const SINGLE_TOKEN_OBO_MIN_DB_VERSION = 2326040000;
 
 function throwErr(message, code) {
   const err = new Error(message);
@@ -138,7 +139,7 @@ function getEndUserToken(metadata) {
 }
 
 function createProviderFn(config, provider) {
-  const unifiedProvider = async function unifiedProvider() {
+  const unifiedProvider = async function unifiedProvider(connection) {
     const current = securityContextProvider.getCurrentContext();
     if (!current || typeof current !== "object") {
       // Do not acquire an application token for normal work outside a scope.
@@ -149,6 +150,20 @@ function createProviderFn(config, provider) {
     }
     const metadata = mergeMetadata(config.defaultMetadata, current);
     const endUserToken = getEndUserToken(metadata);
+    const hasEndUserToken = endUserToken != null;
+    const hasEndUserName = metadata.endUserName != null;
+    const hasKey = metadata.key != null;
+
+    // Check the merged defaults too: excluding a token from the wire must not
+    // silently discard a conflicting named identity or context key.
+    if (hasEndUserToken && (hasEndUserName || hasKey)) {
+      throwErr('Security context cannot combine endUserToken with endUserName or key.');
+    }
+    if (hasKey && !hasEndUserName) {
+      throwErr('Security context requires endUserName when key is supplied.');
+    }
+    const namedAppContext = config.authFlow === 'app' && hasEndUserName;
+
     // authFlow is fixed when the pool or standalone connection is created.
     // Per-request metadata supplies identity only; it cannot select a token
     // exchange for which the configured provider may lack credentials.
@@ -156,52 +171,27 @@ function createProviderFn(config, provider) {
       if (config.provider.vendor !== 'azure') {
         throwErr('On-behalf-of security contexts are supported only with spiType "azure".');
       }
-      if (!endUserToken) {
-        throwErr("authFlow=obo requires an end-user token.");
+      if (typeof endUserToken !== 'string' || !endUserToken.trim()) {
+        throwErr("authFlow=obo requires a non-empty end-user token.");
       }
 
+      const omitEndUserToken = connection.getOracleServerVersion() >=
+        SINGLE_TOKEN_OBO_MIN_DB_VERSION;
       const tokenResult = await acquireOboToken(config, provider, endUserToken);
       return getOrCreateScopedSecurityContext(unifiedProvider, config,
-        tokenResult, () => createSecurityContext(finalizeOboMode(metadata,
-          tokenResult.accessToken)));
+        tokenResult, () => createSecurityContext(
+          finalizeTokenMode(metadata, tokenResult.accessToken,
+            omitEndUserToken)));
     }
 
     const tokenResult = await acquireAppToken(config, provider);
     const databaseAccessToken = tokenResult.accessToken;
-    // No end-user identity means the database resolves the application
-    // identity directly from the client-credential database access token.
-    if (!endUserToken && !metadata.endUserName) {
-      // A key identifies a named database-managed end user. It is not valid
-      // for direct application logon, but roles and attributes are valid
-      // authorization metadata for either identity form.
-      if (metadata.key) {
-        throwErr("authFlow 'app' requires endUserName when key is supplied.");
-      }
-      return getOrCreateScopedSecurityContext(unifiedProvider, config,
-        tokenResult, () => createSecurityContext(
-          buildContext({
-            databaseAccessToken,
-            dataRoles: metadata.dataRoles,
-            attributes: metadata.attributes
-          })));
-    }
-    // App mode uses the application token to authorize database access and
-    // carries a supplied end-user token directly in the EUSC. This is not an
-    // OBO exchange; Azure and OCI both support this explicit identity form.
-    if (endUserToken) {
-      if (metadata.endUserName || metadata.key) {
-        throwErr('App mode cannot combine endUserToken with endUserName or key.');
-      }
-      return getOrCreateScopedSecurityContext(unifiedProvider, config,
-        tokenResult, () => createSecurityContext(finalizeAppTokenMode(metadata,
-          databaseAccessToken)));
-    }
-    if (!metadata.endUserName) {
-      throwErr("authFlow 'app' requires endUserName when endUserToken is supplied.");
-    }
+    // App flows retain the supplied identity, including an end-user token.
+    // Only OBO on supported database versions omits that token automatically.
     return getOrCreateScopedSecurityContext(unifiedProvider, config,
-      tokenResult, () => createSecurityContext(
-        finalizeAppMode(metadata, databaseAccessToken)));
+      tokenResult, () => createSecurityContext(namedAppContext
+        ? finalizeAppMode(metadata, databaseAccessToken)
+        : finalizeTokenMode(metadata, databaseAccessToken, false)));
   };
   // The driver reads this private property to choose the provider lifecycle.
   unifiedProvider._contextResolution = config.contextResolution;
@@ -214,9 +204,9 @@ function createSecurityContext(context) {
 
 // Operation resolution calls the provider for every database operation so the
 // token extension remains authoritative for expiry and refresh. When it
-// confirms the same database token came from its cache, reuse the already
-// encoded EUSC for this runWithContext() scope. The scope cache holds no
-// plaintext token and is released when the async scope completes.
+// reports a cached database token, reuse the encoded EUSC for this scope. The
+// scope cache holds no plaintext token and is released when the async scope
+// completes.
 function getOrCreateScopedSecurityContext(provider, config, tokenResult,
   createContext) {
   if (config.contextResolution !== 'operation') {
@@ -238,14 +228,15 @@ function getOrCreateScopedSecurityContext(provider, config, tokenResult,
   return securityContext;
 }
 
-function finalizeOboMode(metadata, databaseAccessToken) {
-  const attributeResolution = resolveAttributesForRequest(metadata);
+function finalizeTokenMode(metadata, databaseAccessToken, omitEndUserToken) {
   const context = {
     databaseAccessToken,
     dataRoles: metadata.dataRoles,
-    attributes: attributeResolution.payload
+    attributes: metadata.attributes
   };
-  context.endUserToken = getEndUserToken(metadata);
+  if (!omitEndUserToken) {
+    context.endUserToken = getEndUserToken(metadata);
+  }
   return buildContext(context);
 }
 
@@ -258,15 +249,6 @@ function finalizeAppMode(metadata, databaseAccessToken) {
     attributes: metadata.attributes
   });
   return context;
-}
-
-function finalizeAppTokenMode(metadata, databaseAccessToken) {
-  return buildContext({
-    databaseAccessToken,
-    endUserToken: metadata.endUserToken,
-    dataRoles: metadata.dataRoles,
-    attributes: metadata.attributes
-  });
 }
 
 async function acquireAppToken(config, provider) {
@@ -353,20 +335,6 @@ function snapshotDefaultMetadata(metadata) {
     snapshot.attributes = JSON.parse(JSON.stringify(metadata.attributes));
   }
   return snapshot;
-}
-
-function resolveAttributesForRequest(metadata) {
-  if (!hasOwn(metadata, 'attributes')) {
-    return { payload: undefined };
-  }
-  try {
-    JSON.stringify(metadata.attributes);
-  } catch (err) {
-    const error = new Error('security context attributes must be JSON-serializable.');
-    error.cause = err;
-    throw error;
-  }
-  return { payload: metadata.attributes };
 }
 
 /**
