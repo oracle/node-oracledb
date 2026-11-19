@@ -6813,6 +6813,7 @@ Overview of node-oracledb functional tests
       324.6.2 does not return implicit results rows with addFetch*() in pipeline
     324.7 recovery outside a pipeline
       324.7.1 recovers from an invalid cursor before and after a pipeline
+      324.7.2 reuses the connection after pipeline preparation fails
 
   325. sqlAssert.js
     325.1 enquotes literals

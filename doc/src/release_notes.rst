@@ -67,6 +67,9 @@ Thin Mode Changes
 #)  Fixed issue where JSON binds (`DB_TYPE_JSON`) on invalid Date values
     returned corrupted dates instead of rejecting them.
 
+#)  Fixed issue where a pipeline preparation error could cause subsequent
+    operations on the connection to fail.
+
 Thick Mode Changes
 ++++++++++++++++++
 

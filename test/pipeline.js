@@ -2286,5 +2286,29 @@ describe('324. pipeline.js', function() {
         await conn.close();
       }
     });
+
+    it('324.7.2 reuses the connection after pipeline preparation fails', async function() {
+      if (!supportsPipelining) this.skip();
+      const conn = await oracledb.getConnection(dbConfig);
+      try {
+        const pipeline = new oracledb.Pipeline();
+        pipeline.addFetchOne('SELECT 1 FROM dual');
+        pipeline.addExecute(null);
+        await assert.rejects(() => conn.runPipeline(pipeline), /NJS-005:/);
+        const bindResult = await conn.execute('BEGIN :x := :x; END;', {
+          x: {dir: oracledb.BIND_INOUT, type: 'SYS.ODCINUMBERLIST', val: null}
+        });
+        assert.strictEqual(bindResult.outBinds.x, null);
+        const queryResult = await conn.execute('SELECT 42 FROM dual');
+        assert.deepStrictEqual(queryResult.rows, [[42]]);
+        const nextPipeline = new oracledb.Pipeline();
+        nextPipeline.addFetchOne('SELECT 11 FROM dual');
+        nextPipeline.addFetchOne('SELECT 22 FROM dual');
+        const results = await conn.runPipeline(nextPipeline);
+        assert.deepStrictEqual(results.map(result => result.rows), [[[11]], [[22]]]);
+      } finally {
+        await conn.close();
+      }
+    });
   }); // 324.7
 });
