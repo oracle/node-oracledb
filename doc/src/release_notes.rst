@@ -43,8 +43,8 @@ Thin Mode Changes
 +++++++++++++++++
 
 #)  Enabled support for hash-based end user security context piggybacks for
-    database servers with Oracle Deep Data Security to improve
-    connection performance.
+    database servers with Oracle Deep Data Security to improve connection
+    performance.
 
 #)  Added automatic single-token Deep Data Security contexts for Azure OBO
     on Oracle AI Database version 23.26.4 or later.
@@ -1646,7 +1646,7 @@ node-oracledb `v5.5.0 <https://github.com/oracle/node-oracledb/compare/v5.4.0...
     - The ``accessToken`` attribute for connection and connection pool
       creation can now be a string, a callback function, or an object.
 
-    - Fixed a bug that prevented async functions from being used in token
+    - Fixed bug that prevented async functions from being used in token
       callbacks.
 
     - Deprecated the connection pool creation attribute
@@ -1679,12 +1679,12 @@ node-oracledb `v5.4.0 <https://github.com/oracle/node-oracledb/compare/v5.3.0...
 #)  Added code to keep the method name in internally bound functions.
     PR #1466 (Slawomir Osoba).
 
-#)  Added a :meth:`connection.isHealthy()` function to perform a local
+#)  Added :meth:`connection.isHealthy()` function to perform a local
     connection health check.
 
 #)  Added missing support for binding as ``oracledb.DB_TYPE_BINARY_INTEGER``.
 
-#)  Fixed a crash using multiple :ref:`DbObject <dbobjectclass>` OUT binds
+#)  Fixed crash using multiple :ref:`DbObject <dbobjectclass>` OUT binds
     `Issue #1464 <https://github.com/oracle/node-oracledb/issues/1464>`__.
 
 #)  Fixed calling ``initOracleClient()`` with TypeScript 4.4 `Issue
@@ -1698,11 +1698,11 @@ node-oracledb `v5.4.0 <https://github.com/oracle/node-oracledb/compare/v5.3.0...
     as ``oracledb.DB_TYPE_BLOB``, ``oracledb.DB_TYPE_CLOB`` or
     ``oracledb.DB_TYPE_NCLOB``.
 
-#)  Fixed a crash when certain errors occur during binding. (`ODPI-C change
+#)  Fixed crash when certain errors occur during binding. (`ODPI-C change
     <https://github.com/oracle/odpi/commit/13899afcbdf51998863d48752debc3
     f239f3d655>`__).
 
-#)  Fixed a bug causing ORA-25263 when dequeuing a message with a specific
+#)  Fixed bug causing ORA-25263 when dequeuing a message with a specific
     message ID. (`ODPI-C change <https://github.com/oracle/odpi/commit/
     68c438dd3b779e8f5eb146a0762d6cd149cdf9f1>`__).
 
@@ -1806,7 +1806,7 @@ node-oracledb `v5.2.0 <https://github.com/oracle/node-oracledb/compare/v5.1.0...
       21.3 (or later).  It is also available in Oracle Client 19 from
       19.11 onwards.
 
-    - Added a SODA :meth:`~sodaOperation.hint()` SodaOperation method and
+    - Added SODA :meth:`~sodaOperation.hint()` SodaOperation method and
       equivalent hint option to ``sodaCollection.insertManyAndGet()``,
       ``sodaCollection.insertOneAndGet()``, and
       ``sodaCollection.saveAndGet()`` to allow monitoring and passing hints.
@@ -1815,7 +1815,7 @@ node-oracledb `v5.2.0 <https://github.com/oracle/node-oracledb/compare/v5.1.0...
     <https://github.com/oracle/odpi/commit/09da0065409702cc28ba622951c
     a999a6b77d0e9>`__).
 
-#)  Fixed a failure when using JavaScript functions on OUT bind variables
+#)  Fixed failure when using JavaScript functions on OUT bind variables
     from ``executeMany()`` that require the connection, for example accessing
     database objects or streaming LOBs.
 
@@ -1844,7 +1844,7 @@ node-oracledb `v5.1.0 <https://github.com/oracle/node-oracledb/compare/v5.0.0...
 #)  The value of ``prefetchRows`` set when getting a REF CURSOR as a BIND_OUT
     parameter is now used in the subsequent data retrieval from that cursor.
 
-#)  Fixed a compatibility regression affecting SODA "get" operations using older
+#)  Fixed compatibility regression affecting SODA "get" operations using older
     Oracle Client releases.
 
 #)  Fixed a memory leak getting attributes of objects or elements of collections
@@ -1906,9 +1906,9 @@ node-oracledb `v5.0.0 <https://github.com/oracle/node-oracledb/compare/v4.2.0...
     :meth:`oracledb.startup()`, :meth:`oracledb.shutdown()`,
     :meth:`connection.startup()`, and :meth:`connection.shutdown()`.
 
-#)  Added a new constant :ref:`oracledb.SYSPRELIM
-    <oracledbconstantsprivilege>` to allow preliminary database connections,
-    such as required when starting a database.
+#)  Added new constant :ref:`oracledb.SYSPRELIM <oracledbconstantsprivilege>`
+    to allow preliminary database connections, such as required when startin
+    a database.
 
 #)  Added support for ResultSet IN binds to PL/SQL REF CURSOR parameters.
 
@@ -2030,8 +2030,8 @@ node-oracledb `v4.1.0 <https://github.com/oracle/node-oracledb/compare/v4.0.1...
 
 #)  Added support for :ref:`Oracle Sharding <sharding>`.
 
-#)  Fixed a `regression <https://github.com/oracle/node-oracledb/issues/
-    1152>`__ when binding dates with alternative JavaScript frameworks.
+#)  Fixed `regression <https://github.com/oracle/node-oracledb/issues/1152>`__
+    when binding dates with alternative JavaScript frameworks.
 
 #)  Fixed "NJS-024: memory allocation failed" errors seen on AIX.
 
@@ -2075,11 +2075,11 @@ node-oracledb `v4.0.1 <https://github.com/oracle/node-oracledb/compare/v4.0.0...
     <https://github.com/oracle/odpi/commit/f945355f3e58e7337dd798cba0404ab
     5755f0692>`__).
 
-#)  Fixed a regression when enumerable properties were added to
+#)  Fixed regression when enumerable properties were added to
     ``Object.prototype``.
     (`#1129 <https://github.com/oracle/node-oracledb/issues/1129>`__).
 
-#)  Fixed a regression with missing ``metaData`` from
+#)  Fixed regression with missing ``metaData`` from
     ``connection.getStatementInfo()``.
 
 #)  Fixed crashes with spurious subscription (e.g. CQN) notifications, and
@@ -2143,7 +2143,7 @@ node-oracledb `v4.0.0 <https://github.com/oracle/node-oracledb/compare/v3.1.2...
 #)  Added asynchronous method :meth:`lob.getData()` to return all data from
     a Lob readable stream.
 
-#)  Added a new ``dbTypeName`` attribute to :ref:`extendedMetaData output
+#)  Added new ``dbTypeName`` attribute to :ref:`extendedMetaData output
     <execmetadata>`. It contains the name of the type the column has in the
     database, such as "VARCHAR2".
 
@@ -2159,7 +2159,7 @@ node-oracledb `v4.0.0 <https://github.com/oracle/node-oracledb/compare/v3.1.2...
     - Added support and message type constants for database startup
       and shutdown events.
 
-    - Fixed a crash that occurred when unsubscribing from CQN while
+    - Fixed crash that occurred when unsubscribing from CQN while
       notifications were ongoing (`ODPI-C change <https://github.com/oracle
       /odpi/commit/b96b11b7fe58f32f011c7f7419555e40268d5bf4>`__).
 
@@ -2251,7 +2251,7 @@ node-oracledb `v4.0.0 <https://github.com/oracle/node-oracledb/compare/v3.1.2...
 node-oracledb `v3.1.2 <https://github.com/oracle/node-oracledb/compare/v3.1.1...v3.1.2>`__ (22 Feb 2019)
 --------------------------------------------------------------------------------------------------------
 
-#)  Fixed a bug causing CQN crashes when multiple queries are registered
+#)  Fixed bug causing CQN crashes when multiple queries are registered
     (`ODPI-C change <https://github.com/oracle/odpi/issues/96>`__).
 
 #)  Fixed a CQN race condition to prevent a crash when a multiple
@@ -2350,9 +2350,9 @@ node-oracledb `v3.1.0 <https://github.com/oracle/node-oracledb/compare/v3.0.1...
 #)  Fixed ``poolPingInterval`` with Oracle client libraries 12.2 or later
     (ODPI-C change).
 
-#)  Fixed an issue with ``poolPingInterval`` that could cause usable
-    pooled connections to be unnecessarily dropped by
-    :meth:`connection.close()`.  (ODPI-C change).
+#)  Fixed issue with ``poolPingInterval`` that could cause usable pooled
+    connections to be unnecessarily dropped by :meth:`connection.close()`.
+    (ODPI-C change).
 
 #)  Fixed a memory leak under certain cirumstances when pooled
     connections are released back to the pool. (ODPI-C change)
@@ -2405,9 +2405,9 @@ node-oracledb `v3.0.0 <https://github.com/oracle/node-oracledb/compare/v2.3.0...
     session resource limits (for example, ORA-02396), or are explicitly
     closed by DBAs (for example, ORA-00028).  (ODPI-C change).
 
-#)  Removed the connection pool :attr:`~oracledb.queueRequests` property.
-    Now ``pool.getConnection()`` calls are always queued if the pool is
-    fully in use.
+#)  Removed connection pool :attr:`~oracledb.queueRequests` property.
+    Now ``pool.getConnection()`` calls are always queued if the pool is fully
+    in use.
 
 #)  Altered the internal ``pool.getConnection()`` logic to work better
     with Oracle Client 18 library pool changes and retain backward
@@ -2426,7 +2426,7 @@ node-oracledb `v3.0.0 <https://github.com/oracle/node-oracledb/compare/v2.3.0...
 #)  Change the binary package filename format from '...-node-vXX...' to
     to '...-node-abiXX...' to reduce Node version and ABI confusion.
 
-#)  Eliminated a memory leak when fetching LOBs and more than one
+#)  Eliminated memory leak found when fetching LOBs and more than one
     internal fetch occurs.
 
 #)  Test updates.
@@ -2456,17 +2456,17 @@ node-oracledb `v2.3.0 <https://github.com/oracle/node-oracledb/compare/v2.2.0...
 #)  Added Windows support for building binary packages for self-hosting
     on internal networks. PR #891 (Danilo Silva).
 
-#)  Eliminated a memory leak when binding LOBs as ``oracledb.BIND_INOUT``.
+#)  Eliminated memory leak found when binding LOBs as ``oracledb.BIND_INOUT``.
 
-#)  Added an error message indicating that ``batchErrors`` and
+#)  Added error message indicating that ``batchErrors`` and
     ``dmlRowCounts`` can only be used with INSERT, UPDATE, DELETE and
     MERGE statements.
 
-#)  Fixed a bug that caused ``queryStream()`` to emit multiple close
+#)  Fixed bug that caused ``queryStream()`` to emit multiple close
     events in Node.js 10.
 
-#)  Fixed a crash when getting the list of names for an undefined object
-    with Node.js 6.
+#)  Fixed crash when getting the list of names for an undefined object with
+    Node.js 6.
 
 #)  Remove deprecated ``Buffer()`` function in tests in order to eliminate
     a deprecation warning with Node.js 10.
@@ -2609,7 +2609,7 @@ node-oracledb `v2.1.0 <https://github.com/oracle/node-oracledb/compare/v2.0.15..
     - The `Oracle mirror <https://oss.oracle.com/git/oracle/>`__ of `github.com/oracle
       <https://github.com/oracle>`__.
 
-#)  Correct the error message text when attempting to set
+#)  Corrected error message text when attempting to set
     ``oracledb.oracleClientVersion``.
 
 node-oracledb `v2.0.15 <https://github.com/oracle/node-oracledb/compare/v1.13.1...v2.0.15>`__ (15 Dec 2017) changes since node-oracledb version 1
@@ -3089,8 +3089,8 @@ node-oracledb `v1.11.0 <https://github.com/oracle/node-oracledb/compare/v1.10.1.
 #)  Added a connection pool cache feature allowing pools to have aliases and
     be more easily used.
 
-#)  Improved the bootstrap error message when the node-oracledb binary cannot
-    be loaded.
+#)  Improved bootstrap error message when the node-oracledb binary cannot be
+    loaded.
 
 #)  Fixed memory leaks with `DATE` and `TIMESTAMP` bind values.
 
@@ -3098,7 +3098,7 @@ node-oracledb `v1.11.0 <https://github.com/oracle/node-oracledb/compare/v1.10.1.
 
 #)  Fixed metadata `scale` and `precision` values on AIX.
 
-#)  Made an internal change to replace `std::string.data()` with
+#)  Made internal change to replace `std::string.data()` with
     `std::string.c_str()`.
 
 #)  Made an internal change to remove an unused parameter from the
@@ -3107,21 +3107,21 @@ node-oracledb `v1.11.0 <https://github.com/oracle/node-oracledb/compare/v1.10.1.
 node-oracledb `v1.10.1 <https://github.com/oracle/node-oracledb/compare/v1.10.0...v1.10.1>`__ (21 Jul 2016)
 -----------------------------------------------------------------------------------------------------------
 
-#)  Fixed a bug that prevented a null value being passed from JavaScript into
-    an IN OUT bind.
+#)  Fixed bug that prevented a null value being passed from JavaScript into an
+    IN OUT bind.
 
-#)  Fixed a memory leak introduced in 1.10 with REF CURSORs.
+#)  Fixed memory leak introduced in 1.10 with REF CURSORs.
 
-#)  Fixed a memory leak in error handling paths when using REF CURSORs.
+#)  Fixed memory leak in error handling paths when using REF CURSORs.
 
-#)  Made an internal change for queries selecting unsupported column types
+#)  Made internal change for queries selecting unsupported column types
     allowing them to report an error earlier.
 
-#)  Made an internal change to use `std::string&` for string lengths.
+#)  Made internal change to use `std::string&` for string lengths.
 
-#)  Fixed a compilation warning on Windows.
+#)  Fixed compilation warning on Windows.
 
-#)  Added a mocha configuration file for the test suite.
+#)  Added mocha configuration file for the test suite.
 
 node-oracledb `v1.10.0 <https://github.com/oracle/node-oracledb/compare/v1.9.3...v1.10.0>`__ (8 Jul 2016)
 ---------------------------------------------------------------------------------------------------------
@@ -3130,16 +3130,16 @@ node-oracledb `v1.10.0 <https://github.com/oracle/node-oracledb/compare/v1.9.3..
     ``oracledb.extendedMetaData`` or ``execute()`` option
     ``extendedMetaData`` property is `true`. (Leonardo Olmi).
 
-#)  Fixed an issue preventing the garbage collector cleaning up when a
-    query with LOBs is executed but LOB data isn't actually streamed.
+#)  Fixed issue preventing the garbage collector cleaning up when a query with
+    LOBs is executed but LOB data isn't actually streamed.
 
-#)  Fixed a bug where an error event could have been emitted on a
+#)  Fixed bug where an error event could have been emitted on a
     QueryStream instance prior to the underlying ResultSet having been
     closed.  This would cause problems if the user tried to close the
     connection in the error event handler as the ResultSet could have
     prevented it.
 
-#)  Fixed a bug where the public ``close()`` method was invoked on the
+#)  Fixed bug where the public ``close()`` method was invoked on the
     ResultSet instance that underlies the QueryStream instance if an
     error occurred during a call to ``getRows()``. The public method would
     have thrown an error had the QueryStream instance been created from
@@ -3149,7 +3149,7 @@ node-oracledb `v1.10.0 <https://github.com/oracle/node-oracledb/compare/v1.9.3..
 #)  Updated ``Pool._logStats()`` to throw an error instead of printing to
     the console if the pool is not valid.
 
-#)  Report an error earlier when a named bind object is used in a
+#)  Report error earlier when a named bind object is used in a
     bind-by-position context.  A new error NJS-044 is returned.
     Previously errors like ORA-06502 were given.
 
@@ -3271,10 +3271,10 @@ node-oracledb `v1.7.1 <https://github.com/oracle/node-oracledb/compare/v1.7.0...
 node-oracledb `v1.7.0 <https://github.com/oracle/node-oracledb/compare/v1.6.0...v1.7.0>`__ (29 Feb 2016)
 --------------------------------------------------------------------------------------------------------
 
-#)  Added a JavaScript wrapper around the C++ API to allow for easier
+#)  Added JavaScript wrapper around the C++ API to allow for easier
     extension.
 
-#)  Added a connection pool queue configured with ``queueRequests`` and
+#)  Added connection pool queue configured with ``queueRequests`` and
     ``queueTimeout`` attributes.  The queue is enabled by default.
 
 #)  Added connection pool option attribute ``_enableStats`` and method
@@ -3342,11 +3342,11 @@ node-oracledb `v1.4.0 <https://github.com/oracle/node-oracledb/compare/v1.3.0...
     with Node 0.10, 0.12, 4 and 5 (Richard Natal).  Note: a compiler supporting
     C++11 is required to build with Node 4 and 5.
 
-#)  Fixed a cursor leak when statement execution fails.
+#)  Fixed cursor leak when statement execution fails.
 
-#)  Fixed a crash when accessing Pool properties on Windows.
+#)  Fixed crash when accessing Pool properties on Windows.
 
-#)  Added a run-script 'testWindows' target for Windows testing. See
+#)  Added run-script 'testWindows' target for Windows testing. See
     `test/README.md <https://github.com/oracle/node-oracledb/blob/v5.5.x/test/README.md>`__.
 
 #)  Fixed compilation warnings with recent compilers.
@@ -3354,7 +3354,7 @@ node-oracledb `v1.4.0 <https://github.com/oracle/node-oracledb/compare/v1.3.0...
 node-oracledb `v1.3.0 <https://github.com/oracle/node-oracledb/compare/v1.2.0...v1.3.0>`__ (15 Oct 2015)
 --------------------------------------------------------------------------------------------------------
 
-#)  Added a ``oracledb.oracleClientVersion`` property giving the version of
+#)  Added ``oracledb.oracleClientVersion`` property giving the version of
     the Oracle Client library, and a ``connection.oracleServerVersion``
     property giving the Oracle Database version.
 
@@ -3386,10 +3386,9 @@ node-oracledb `v1.2.0 <https://github.com/oracle/node-oracledb/compare/v1.1.0...
 #)  Optimized CLOB memory allocation to account for different
     database-to-client character set expansions.
 
-#)  Fixed a crash while reading a LOB from a closed connection.
+#)  Fixed crash while reading a LOB from a closed connection.
 
-#)  Fixed a crash when selecting multiple rows with LOB values
-    (Bruno Jouhier).
+#)  Fixed crash when selecting multiple rows with LOB values (Bruno Jouhier).
 
 #)  Corrected the order of Stream 'end' and 'close' events when reading
     a LOB (Bruno Jouhier).
@@ -3429,11 +3428,11 @@ node-oracledb `v1.1.0 <https://github.com/oracle/node-oracledb/compare/v1.0.0...
 
 #)  Fixed AIX-specific failures with queries and RETURNING INTO clauses.
 
-#)  Fixed a crash with NULL or uninitialized REF CURSOR OUT bind variables.
+#)  Fixed crash with NULL or uninitialized REF CURSOR OUT bind variables.
 
 #)  Fixed potential memory leak when connecting throws an error.
 
-#)  Added a check to throw an error sooner when a CURSOR type is used for IN
+#)  Added check to throw an error sooner when a CURSOR type is used for IN
     or IN OUT binds. (Support is pending).
 
 #)  Temporarily disabling setting lobPrefetchSize.
@@ -3458,11 +3457,11 @@ node-oracledb `v1.0.0 <https://github.com/oracle/node-oracledb/compare/v0.7.0...
 #)  Fixed issues with database-to-client character set conversion by
     allocating extra memory to allow for character expansion.
 
-#)  Fixed a crash with ``ResultSet`` and unsupported column data types.
+#)  Fixed crash with ``ResultSet`` and unsupported column data types.
 
-#)  Fixed a crash allocating memory for large ``maxRows`` values.
+#)  Fixed crash allocating memory for large ``maxRows`` values.
 
-#)  Fixed a bug preventing closing of a ``ResultSet`` when ``getRow()`` or
+#)  Fixed bug preventing closing of a ``ResultSet`` when ``getRow()`` or
     ``getRows()`` returned an error.
 
 #)  Fixed date precision issues affecting insert and query.
@@ -3544,7 +3543,7 @@ node-oracledb `v0.4.1 <https://github.com/oracle/node-oracledb/compare/v0.3.1...
 
 #)  Improved errors messages when setting out of range property values.
 
-#)  Fixed a bug: When ``terminate()`` of a connection pool fails because
+#)  Fixed bug: When ``terminate()`` of a connection pool fails because
     connections have not yet been closed, subsequent use of ``release()``
     to close those connections no longer gives an error
     ``ORA-24550: Signal Received``.

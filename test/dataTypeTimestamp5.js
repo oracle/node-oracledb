@@ -182,7 +182,58 @@ describe('37. dataTypeTimestamp5.js', function() {
         }
       });
 
-    it('37.4.3 rejects LTZ fetches with a region DBTIMEZONE',
+    it('37.4.3 preserves a stored LTZ instant after a session time zone change',
+      async function() {
+        if (dbTimeZoneIsRegionInThinMode) {
+          this.skip();
+        }
+
+        const table = 'nodb_ltz_session_time_zone';
+        let tableCreated = false;
+        const result = await connection.execute(
+          'SELECT DBTIMEZONE, SESSIONTIMEZONE FROM dual');
+        const originalSessionTimeZone = result.rows[0][1];
+        try {
+          await connection.execute(`
+            CREATE TABLE ${table} (value TIMESTAMP WITH LOCAL TIME ZONE)`);
+          tableCreated = true;
+          await connection.execute(`
+            INSERT INTO ${table} VALUES (CAST(
+              TIMESTAMP '2026-07-20 15:00:00 America/New_York'
+              AS TIMESTAMP WITH LOCAL TIME ZONE
+            ))`);
+          await connection.commit();
+
+          // Use a fixed UTC offset so this test does not depend on the Oracle
+          // Client timezone file recognizing the named UTC region in Thick mode.
+          await connection.execute("ALTER SESSION SET TIME_ZONE = '+00:00'");
+          const before = await connection.execute(`
+            SELECT TO_CHAR(value, 'YYYY-MM-DD HH24:MI:SS'), value
+            FROM ${table}`);
+          assert.strictEqual(before.rows[0][0], '2026-07-20 19:00:00');
+          assert.strictEqual(before.rows[0][1].toISOString(),
+            '2026-07-20T19:00:00.000Z');
+
+          await connection.execute("ALTER SESSION SET TIME_ZONE = '+03:00'");
+          const after = await connection.execute(`
+            SELECT TO_CHAR(value, 'YYYY-MM-DD HH24:MI:SS'), value
+            FROM ${table}`);
+          assert.strictEqual(after.rows[0][0], '2026-07-20 22:00:00');
+          assert.strictEqual(after.rows[0][1].toISOString(),
+            '2026-07-20T19:00:00.000Z');
+        } finally {
+          try {
+            await connection.execute(
+              `ALTER SESSION SET TIME_ZONE = '${originalSessionTimeZone}'`);
+          } finally {
+            if (tableCreated) {
+              await connection.execute(`DROP TABLE ${table} PURGE`);
+            }
+          }
+        }
+      });
+
+    it('37.4.4 rejects LTZ fetches with a region DBTIMEZONE',
       async function() {
         if (!dbTimeZoneIsRegionInThinMode) {
           this.skip();
@@ -195,7 +246,7 @@ describe('37. dataTypeTimestamp5.js', function() {
           ) FROM dual`), /NJS-201:/);
       });
 
-    it('37.4.4 rejects LTZ binds with a region DBTIMEZONE',
+    it('37.4.5 rejects LTZ binds with a region DBTIMEZONE',
       async function() {
         if (!dbTimeZoneIsRegionInThinMode) {
           this.skip();
