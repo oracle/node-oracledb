@@ -1,4 +1,4 @@
-/* Copyright (c) 2018, 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2018, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -221,10 +221,8 @@ describe('163. executeMany1.js', function() {
 
   it('163.6 shows dmlRowCounts', async function() {
 
-    if ((testsUtil.getClientVersion() < 1201000200)
-      || (conn.oracleServerVersion < 1201000200)) {
+    if (conn.oracleServerVersion < 120100020)
       return this.skip();
-    }
 
     const childTable = "nodb_tab_child_one";
     const parentTable = "nodb_tab_parent_one";
@@ -241,10 +239,8 @@ describe('163. executeMany1.js', function() {
 
   it('163.7 shows batchErrors behavior', async function() {
 
-    if ((testsUtil.getClientVersion() < 1201000200)
-      || (conn.oracleServerVersion < 1201000200)) {
+    if (conn.oracleServerVersion < 1201000200)
       return this.skip();
-    }
 
     const childTable = "nodb_tab_child_two";
     const parentTable = "nodb_tab_parent_two";
@@ -282,11 +278,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.7
 
   it('163.8 Negative - batchErrors with non-DML statement', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     await doCreateProc();
 
     const plsql = "BEGIN nodb_proc_em(:1, :2, :3); END;";
@@ -308,11 +299,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.8
 
   it('163.9 if batchErrors is disabled', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const childTable = "nodb_tab_child_three";
     const parentTable = "nodb_tab_parent_three";
 
@@ -346,10 +332,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.9
 
   it('163.10 Negative -  dmlRowCounts with non-DML statement', async function() {
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     await doCreateProc();
     const plsql = "BEGIN nodb_proc_em(:1, :2, :3); END;";
     const binds = [ [1], [2], [3], [4], [6] ];
@@ -525,11 +507,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.17
 
   it('163.18 Negative - executeMany with SELECT query, positional bind', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const sql = "SELECT :1 FROM DUAL";
     const binds = [ [3] ];
 
@@ -543,11 +520,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.18
 
   it('163.19 Negative - executeMany with SELECT query, named bind', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const sql = "SELECT :num FROM DUAL";
     const binds = [{ num: 3 }];
 
@@ -561,11 +533,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.19
 
   it('163.20 Negative - executeMany with WITH SQL clause, positional bind', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const sql =  "WITH data as (SELECT 1 as Num1, 2 as Num2 from dual) SELECT :1 from data";
     const binds = [ [1] ];
 
@@ -579,11 +546,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.20
 
   it('163.21 Negative - executeMany with WITH SQL clause, named bind', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const sql = "WITH data as (SELECT 1 as Num1, 2 as Num2 from dual) SELECT :Num1 from data";
     const binds = [ { Num1: 3 } ];
 
@@ -597,11 +559,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.21
 
   it('163.22 Negative - executeMany with SELECT query, multiple positional binds', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const sql = "SELECT :1, :2 FROM DUAL";
     const binds = [ [1, 2] ];
 
@@ -615,11 +572,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.22
 
   it('163.23 Negative - executeMany with WITH SQL clause and multiple positional binds', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const sql = "WITH data as (SELECT 1 as Num1, 2 as Num2 from dual) SELECT :1, :2 FROM data";
     const binds = [ [1, 2] ];
 
@@ -633,11 +585,6 @@ describe('163. executeMany1.js', function() {
   }); // 163.23
 
   it('163.24 Negative - executeMany with SELECT query and invalid bind variable', async function() {
-
-    if (testsUtil.getClientVersion() < 1201000200) {
-      return this.skip();
-    }
-
     const sql = "SELECT :invalidBind FROM DUAL";
     const binds = [ [3] ];
 
@@ -652,10 +599,9 @@ describe('163. executeMany1.js', function() {
 
   it('163.25 Negative - executeMany with DDL - CREATE TABLE', async function() {
 
-    // Does not throw the proper error in Thin mode yet
-    if (testsUtil.getClientVersion() < 1201000200 || oracledb.thin) {
+    // Does not throw proper error in Thin mode yet
+    if (oracledb.thin)
       return this.skip();
-    }
 
     const sql = "CREATE TABLE :tblname (:id NUMBER, :name VARCHAR2(30))";
     const binds = [ ["tbl1", "ID", "NAME"] ];

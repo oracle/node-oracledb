@@ -96,7 +96,7 @@ describe('330. cqn.js', function() {
       (oracledb.thin || process.platform !== 'darwin');
 
     hasRequiredVersions = await testsUtil.checkPrerequisites(
-      1904000000, 1903000000);
+      1904000000, 1904000000);
     if (!hasRequiredVersions)
       isRunnable = false;
 
