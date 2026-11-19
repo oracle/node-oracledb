@@ -1286,6 +1286,12 @@ and refresh OAuth 2.0 tokens when required with the support of the `Microsoft
 Authentication Library for Node (msal-node) <https://www.npmjs.com/package/
 @azure/msal-node>`__. This ability was introduced in node-oracledb 6.8.
 
+The ``extensionAzure`` plugin supports two Azure authentication methods:
+service principal authentication and, with msal-node package 2.7.0 or later,
+managed identity authentication for system-assigned and user-assigned managed
+identities. See :ref:`azureserviceprincipalauth` and
+:ref:`azuremanagedidentityauth` for more information.
+
 The :ref:`extensionAzure <extensionazureplugin>` plugin can be used by your
 application by adding the following line to your code:
 
@@ -1301,9 +1307,11 @@ generates OAuth 2.0 tokens. This function is internally invoked when the
 ``tokenAuthConfigAzure`` parameter is specified in calls to
 :meth:`oracledb.getConnection()` or :meth:`oracledb.createPool()`. The
 ``tokenAuthConfigAzure`` object contains the configuration parameters needed
-for token generation. This hook function sets the ``accessToken`` parameter of
-the connection methods to a callback function which uses the configuration
-parameters to generate OAuth 2.0 tokens.
+for token generation. For information on the supported authentication methods
+and their configuration, see :ref:`azureserviceprincipalauth` and
+:ref:`azuremanagedidentityauth`. This hook function sets the ``accessToken``
+parameter of the connection methods to a callback function which uses the
+configuration parameters to generate OAuth 2.0 tokens.
 
 The ``extensionAzure`` plugin is available as part of the `plugins/token
 <https://github.com/oracle/node-oracledb/tree/main/plugins/token/
@@ -1313,10 +1321,8 @@ For OAuth 2.0 token-based authentication with the ``extensionAzure`` plugin,
 the ``tokenAuthConfigAzure`` connection parameter must be specified. This
 parameter should be a JavaScript object containing the necessary configuration
 parameters for Oracle Database authentication. See
-:ref:`_get_connection_azure_properties` for information on the Azure specific
-parameters. All keys and values of the Azure parameters other than
-``authType`` are used by `Microsoft Authentication Library for Node (msal-node)
-<https://www.npmjs.com/package/@azure/msal-node>`__ API calls in the plugin.
+:ref:`_get_connection_azure_properties` for information on the Azure-specific
+parameters.
 
 **Standalone Connections Using OAuth 2.0 Tokens**
 
@@ -1334,11 +1340,11 @@ OAuth 2.0 tokens, you need to set the
     async function run() {
       await oracledb.getConnection({
         tokenAuthConfigAzure: {
-          authType: ...,    // Azure-specific parameters to
-          clientId: ...,    // be set when using extensionAzure
-          authority: ...,   // plugin
+          authType: ...,    // azureServicePrincipal or azureManagedIdentity
+          clientId: ...,    // SP application ID, or user-assigned identity ID
+          authority: ...,   // required for azureServicePrincipal only
           scopes: ...,
-          clientSecret: ...
+          clientSecret: ... // required for azureServicePrincipal only
         }
         externalAuth: true, // must specify external authentication
         connectString: ...  // Oracle Autonomous Database connection string
@@ -1347,6 +1353,11 @@ OAuth 2.0 tokens, you need to set the
 
 For information on the Azure specific parameters, see
 :ref:`_get_connection_azure_properties`.
+
+For information about configuring Azure service principal and managed identity
+authentication, see :ref:`Azure Service Principal Authentication
+<azureserviceprincipalauth>` and :ref:`Azure Managed Identity Authentication
+<azuremanagedidentityauth>`.
 
 **Connection Pools Using OAuth 2.0 Tokens**
 
@@ -1365,11 +1376,11 @@ in :meth:`oracledb.createPool()`. For example:
     async function run() {
       await oracledb.createPool({
         tokenAuthConfigAzure: {
-          authType: ...,    // Azure-specific parameters to
-          clientId: ...,    // be set when using extensionAzure
-          authority: ...,   // plugin
+          authType: ...,    // azureServicePrincipal or azureManagedIdentity
+          clientId: ...,    // SP application ID, or user-assigned identity ID
+          authority: ...,   // required for azureServicePrincipal only
           scopes: ...,
-          clientSecret: ...
+          clientSecret: ... // required for azureServicePrincipal only
         }
         externalAuth: true, // must specify external authentication
         homogeneous: true,  // must use a homogeneous pool
@@ -1380,10 +1391,136 @@ in :meth:`oracledb.createPool()`. For example:
 For information on the Azure specific parameters, see
 :ref:`_create_pool_azure_properties`.
 
+For information about configuring Azure service principal and managed identity
+authentication, see :ref:`Azure Service Principal Authentication
+<azureserviceprincipalauth>` and :ref:`Azure Managed Identity Authentication
+<azuremanagedidentityauth>`.
+
 See `azurecloudnativetoken.js <https://github.com/oracle/node-
 oracledb/tree/main/examples/azurecloudnativetoken.js>`__ for a
 runnable example using the :ref:`extensionAzure <extensionazureplugin>`
 plugin.
+
+.. _azureserviceprincipalauth:
+
+Azure Service Principal Authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Service principal authentication uses an application identity registered with
+Microsoft Entra ID. The application obtains access tokens using its client ID
+and client secret, without requiring user interaction. For more information,
+see `Microsoft Entra service principals <https://learn.microsoft.com/en-us/
+entra/identity-platform/app-objects-and-service-principals>`__.
+
+The node-oracledb :ref:`extensionAzure plugin <extensionazureplugin>` uses
+these credentials with the `Microsoft Authentication Library for Node
+(msal-node) <https://www.npmjs.com/package/@azure/msal-node>`__ to acquire an
+access token. The token is then used to authenticate the connection to Oracle
+Database.
+
+Microsoft Azure Service principal token-based authentication was introduced in
+node-oracledb 6.8.
+
+Before using service principal authentication, ensure that the application is
+registered in Microsoft Entra ID, that the client ID and client secret are
+available, and that the service principal has permission to access the target
+resource.
+
+To use the service principal authentication, set the ``authType`` property to
+"azureServicePrincipal" in the ``tokenAuthConfigAzure`` object. You must also
+set ``authority``, ``clientId``, ``clientSecret`` and ``scopes`` properties.
+For example:
+
+.. code-block:: javascript
+
+    tokenAuthConfigAzure: {
+      authType: 'azureServicePrincipal',   // azureServicePrincipal
+      clientId: ...,                       // service principal application ID
+      authority: ...,                      // required for azureServicePrincipal
+      scopes: ...,
+      clientSecret: ...                    // required for azureServicePrincipal
+    }
+
+See :ref:`_get_connection_azure_properties` for information on the
+Azure-specific parameters.
+
+.. _azuremanagedidentityauth:
+
+Azure Managed Identity Authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Managed identities are identities assigned to Microsoft Azure resources. They
+allow an application running on Azure to obtain Microsoft Entra access tokens
+without storing a client secret or certificate in the application. For more
+information, see `Using Managed Identity <https://learn.microsoft.com/en-us/
+entra/msal/javascript/node/managed-identity>`__.
+
+Azure Managed Identities require `Microsoft Authentication Library for Node
+(msal-node) <https://www.npmjs.com/package/@azure/msal-node>`__ package 2.7.0
+or later. The plugin uses the "ManagedIdentityApplication" class from this
+package to acquire an access token from Azure.
+
+Microsoft Azure Managed Identity was introduced in node-oracledb 26.1.0.
+
+Azure supports two types of managed identities - system-assigned and
+user-assigned. See `Managed Identity Types <https://learn.microsoft.com/en-us/
+entra/identity/managed-identities-azure-resources/overview#managed-identity-
+types>`__ for more information on these types of managed identities.
+
+Before using managed identity authentication, ensure that the application runs
+on an Azure resource that supports managed identities and that the identity
+has permission to access the target resource.
+
+To use managed identity authentication, set the ``authType`` property to
+"azureManagedIdentity" in the ``tokenAuthConfigAzure`` object. The plugin
+uses MSAL managed identity APIs to obtain an access token for Oracle Database.
+
+**System-assigned Managed Identity**
+
+A system-assigned managed identity is automatically created and managed by
+Azure for an Azure resource. The identity is created as part of an Azure
+resource and is deleted when that resource is deleted.
+
+For a system-assigned managed identity, set the ``authType`` parameter to
+"azureManagedIdentity" in ``tokenAuthConfigAzure``. Also, set the ``scopes``
+parameter. For example:
+
+.. code-block:: javascript
+
+    tokenAuthConfigAzure: {
+      authType: 'azureManagedIdentity',
+      scopes: 'https://{Oracle resource URI}/.default'
+    }
+
+Do not specify the ``authority``, ``clientId``, and ``clientSecret``
+properties in the ``tokenAuthConfigAzure`` object.
+
+See :ref:`_get_connection_azure_properties` for information on the
+Azure-specific parameters.
+
+**User-assigned Managed Identity**
+
+A user-assigned managed identity (UAMI) in Azure is a standalone identity
+created as a separate resource in Microsoft Entra ID that you can assign to one
+or more Azure compute services.
+
+For a user-assigned managed identity, set the ``authType`` property to
+"azureManagedIdentity", and the ``clientId`` property to the identity's client
+ID. Also, set the ``scopes`` parameter.
+
+.. code-block:: javascript
+
+    tokenAuthConfigAzure: {
+      authType: 'azureManagedIdentity',
+      clientId: process.env.AZURE_CLIENT_ID,
+      scopes: 'https://{Oracle resource URI}/.default'
+    }
+
+Do not specify the ``authority`` and ``clientSecret`` properties in the
+``tokenAuthConfigAzure`` object.
+
+See :ref:`_get_connection_azure_properties` for information on the
+Azure-specific parameters.
 
 .. _instanceprincipalauth:
 

@@ -2077,5 +2077,7 @@ must install the `Microsoft Authentication Library for Node (msal-node)
 
     npm install @azure/msal-node
 
+Managed identity authentication requires msal-node 2.7.0 or later.
+
 See :ref:`cloudnativeauthoauth` for more information on using the
 ``extensionAzure`` plugin in node-oracledb.

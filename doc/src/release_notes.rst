@@ -25,6 +25,10 @@ Common Changes
 #)  Fixed issue where :ref:`oracledb.JsonId <jsonid>` class does not serialize
     the json id correctly.
 
+#)  Added support for
+    :ref:`Azure Managed Identity authentication <azuremanagedidentityauth>`
+    for system-assigned and user-assigned identities.
+
 Thin Mode Changes
 +++++++++++++++++
 

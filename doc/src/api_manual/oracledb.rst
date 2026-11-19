@@ -2688,7 +2688,9 @@ Oracledb Methods
           - Both
           - .. _createpoolpoolattrstokenauthconfigazure:
 
-            A JavaScript object containing the Azure-specific parameters that need to be set when using the node-oracledb :ref:`extensionAzure plugin <extensionazureplugin>` with the support of `Azure SDK <https://www.npmjs.com/package/@azure/msal-node>`__ for token generation. The properties of the ``tokenAuthConfigAzure`` object are detailed in :ref:`tokenauthconfigazureproperties`. See `Azure SDK Parameters <https://learn.microsoft.com/en-us/entra/identity-platform/msal-client-application-configuration>`__ for more information on these properties.
+            A JavaScript object containing the Azure-specific parameters that need to be set when using the node-oracledb :ref:`extensionAzure plugin <extensionazureplugin>` to generate tokens for a service principal or a system-assigned or user-assigned managed identity with the support of `Azure SDK <https://www.npmjs.com/package/@azure/msal-node>`__.
+
+            The properties of the ``tokenAuthConfigAzure`` object are detailed in :ref:`tokenauthconfigazureproperties`. See `Azure SDK Parameters <https://learn.microsoft.com/en-us/entra/identity-platform/msal-client-application-configuration>`__ for more information on these properties.
 
             When using OAuth 2.0 token-based authentication with node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used.
 
@@ -2955,28 +2957,38 @@ Oracledb Methods
           - Description
           - Required or Optional
         * - ``authType``
-          - The authentication type. The authentication type for OAuth 2.0 is "azureServicePrincipal". This type makes the plugin acquire Azure service principal access tokens through a client credential flow.
+          - The authentication type to use for Microsoft Azure OAuth 2.0 token-based authentication.
+
+            Use "azureServicePrincipal" for service principal client credentials, or "azureManagedIdentity" for a system-assigned or user-assigned managed identity.
+
+            .. versionchanged:: 26.1.0
+
+                Azure Managed Identity authentication for system-assigned and user-assigned identities was added.
           - Required
         * - ``authority``
-          - This parameter must be set as a string in URI format with the tenant ID, for example, ``https://{identity provider instance}/{tenantId}``.
+          - The service principal authority URI with the tenant ID, for example, ``https://login.microsoftonline.com/<tenant>/``. It is not used for managed identity.
 
-            The tenantId is the directory tenant the application plans to operate against in GUID or domain-name format.
-
-            Some of the common authority URLs are::
+            Common MSAL authority URLs include::
 
               https://login.microsoftonline.com/<tenant>/
               https://login.microsoftonline.com/common/
               https://login.microsoftonline.com/organizations/
               https://login.microsoftonline.com/consumers/
-          - Required
-        * - ``clientId``
-          - The application ID that is assigned to your application.
 
-            This information can be found in the portal where the application was registered.
-          - Required
+            This property is not used when ``authType`` is "azureManagedIdentity".
+          - Required for "azureServicePrincipal"
+        * - ``clientId``
+          - The service principal application ID when using "azureServicePrincipal", or the client ID of a user-assigned managed identity when using "azureManagedIdentity".
+
+            Do not set this property for a system-assigned managed identity.
+          - Required for "azureServicePrincipal"
+
+            Optional for "azureManagedIdentity"
         * - ``clientSecret``
           - The client secret that was generated for your application in the application registration portal.
-          - Required when using azureServicePrincipal
+
+            This property is not used when ``authType`` is "azureManagedIdentity".
+          - Required for "azureServicePrincipal"
         * - ``proxy``
           - This property is to be set while using token generation behind a firewall.
           - Optional
@@ -3692,7 +3704,9 @@ Oracledb Methods
           - Both
           - .. _getconnectiondbattrstokenauthconfigazure:
 
-            A JavaScript object containing the Azure-specific parameters that need to be set when using the node-oracledb :ref:`extensionAzure plugin <extensionazureplugin>` with the support of `Azure SDK <https://www.npmjs.com/package/@azure/msal-node>`__ for token generation. The properties of the ``tokenAuthConfigAzure`` object are detailed in :ref:`getconnectiontokenauthconfigazureproperties`. See `Azure SDK Parameters <https://learn.microsoft.com/en-us/entra/identity-platform/msal-client-application-configuration>`__ for more information on these properties.
+            A JavaScript object containing the Azure-specific parameters that need to be set when using the node-oracledb :ref:`extensionAzure plugin <extensionazureplugin>` to generate tokens for a service principal or a system-assigned or user-assigned managed identity with the support of `Azure SDK <https://www.npmjs.com/package/@azure/msal-node>`__.
+
+            The properties of the ``tokenAuthConfigAzure`` object are detailed in :ref:`getconnectiontokenauthconfigazureproperties`. See `Azure SDK Parameters <https://learn.microsoft.com/en-us/entra/identity-platform/msal-client-application-configuration>`__ for more information on these properties.
 
             When using OAuth 2.0 token-based authentication with node-oracledb Thick mode, Oracle Client libraries 19.15 (or later), or 21.7 (or later) must be used.
 
@@ -3940,28 +3954,37 @@ Oracledb Methods
           - Description
           - Required or Optional
         * - ``authType``
-          - The authentication type. The authentication type for OAuth 2.0 is "azureServicePrincipal". This type makes the plugin acquire Azure service principal access tokens through a client credential flow.
+          - The authentication type to use for Microsoft Azure OAuth 2.0 token-based authentication.
+
+            Use "azureServicePrincipal" for service principal client credentials, or "azureManagedIdentity" for a system-assigned or user-assigned managed identity.
+
+            .. versionchanged:: 26.1.0
+
+                Azure Managed Identity authentication for system-assigned and user-assigned identities was added.
           - Required
         * - ``authority``
-          - This parameter must be set as a string in URI format with the tenant ID, for example, ``https://{identity provider instance}/{tenantId}``.
+          - The service principal authority URI with the tenant ID, for example, ``https://login.microsoftonline.com/<tenant>/``.
 
-            The tenantId is the directory tenant the application plans to operate against in GUID or domain-name format.
-
-            Some of the common authority URLs are::
+            Common MSAL authority URLs include::
 
               https://login.microsoftonline.com/<tenant>/
               https://login.microsoftonline.com/common/
               https://login.microsoftonline.com/organizations/
               https://login.microsoftonline.com/consumers/
-          - Required
-        * - ``clientId``
-          - The application ID that is assigned to your application.
 
-            This information can be found in the portal where the application was registered.
-          - Required
+            This property is not used when ``authType`` is "azureManagedIdentity".
+          - Required for "azureServicePrincipal"
+        * - ``clientId``
+          - The service principal application ID when using "azureServicePrincipal", or the client ID of a user-assigned managed identity when using "azureManagedIdentity".
+
+            Do not set this property for a system-assigned managed identity.
+          - Required for "azureServicePrincipal"
+
+            Optional for "azureManagedIdentity"
         * - ``clientSecret``
           - The client secret that was generated for your application in the application registration portal.
-          - Required when using azureServicePrincipal
+            This property is not used when ``authType`` is set to "azureManagedIdentity".
+          - Required for "azureServicePrincipal"
         * - ``proxy``
           - This property is to be set while using token generation behind a firewall.
           - Optional

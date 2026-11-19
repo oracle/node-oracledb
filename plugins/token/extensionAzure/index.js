@@ -1,4 +1,4 @@
-// Copyright (c) 2025, Oracle and/or its affiliates.
+// Copyright (c) 2025, 2026, Oracle and/or its affiliates.
 
 //-----------------------------------------------------------------------------
 //
@@ -29,15 +29,17 @@ const msal = require('@azure/msal-node');
 const { TokenCache, hashValue } = require('../cache.js');
 
 const OBO_DEFAULT_CLOCK_SKEW_MS = 60 * 1000;
+const AZURE_DEFAULT_CLOCK_SKEW_MS = 60 * 1000;
 const TOKEN_CACHE_MAX_ENTRIES = 100;
 // Process-wide, bounded LRU cache of completed OBO exchanges. Connections
 // safely share entries only when their cache key has the same caller-token
 // hash and every Azure credential/request input that can change the result.
 // Values are obfuscated at rest.
 const oboTokenCache = new TokenCache(TOKEN_CACHE_MAX_ENTRIES);
-// Process-wide, bounded cache of service-principal tokens. Its key includes
-// every credential and request input that can change the resulting token, so
-// pools can share only compatible entries. Values are obfuscated at rest.
+// Process-wide, bounded cache of application and managed-identity tokens. Its
+// key includes every identity and request input that can change the resulting
+// token, so pools can share only compatible entries. Values are obfuscated at
+// rest.
 const appTokenCache = new TokenCache(TOKEN_CACHE_MAX_ENTRIES);
 
 
@@ -50,6 +52,8 @@ async function getTokenResult(params) {
   switch (params.authType.toLowerCase()) {
     case 'azureserviceprincipal':
       return await servicePrincipalCredentials(params);
+    case 'azuremanagedidentity':
+      return await managedIdentityCredentials(params);
     default:
       throwErr(`Invalid authentication type ${params.authType} in extensionAzure plugins.`);
   }
@@ -93,6 +97,72 @@ async function servicePrincipalCredentials(params) {
   return { accessToken: result.value, isNewToken: !result.isCacheHit };
 }
 
+//---------------------------------------------------------------------------
+// Returns the access token for an Azure managed identity. If clientId is
+// omitted, Azure selects the system-assigned identity. Supplying clientId
+// selects a user-assigned identity.
+// ---------------------------------------------------------------------------
+async function managedIdentityCredentials(params) {
+  const clientId = params.clientId;
+
+  if (clientId !== undefined && clientId !== null &&
+      (typeof clientId !== "string" || !clientId.trim())) {
+    throwErr(
+      "Token based authentication config parameter clientId must be a non-empty string when using azureManagedIdentity in extensionAzure plugins."
+    );
+  }
+
+  const scopes = params.scopes ??
+    throwErr(
+      "Token based authentication config parameter scopes is missing for azureManagedIdentity in extensionAzure plugins."
+    );
+
+  const resource = normalizeScopes(scopes, { managedIdentity: true });
+
+  if (typeof msal.ManagedIdentityApplication !== "function") {
+    throwErr(
+      "Azure managed identity authentication requires @azure/msal-node 2.7.0 or later."
+    );
+  }
+
+  const networkClient = buildNetworkClient(params.proxy);
+  const msalConfig = {};
+
+  if (networkClient) {
+    msalConfig.system = { networkClient };
+  }
+
+  if (clientId !== undefined && clientId !== null) {
+    msalConfig.managedIdentityIdParams = {
+      userAssignedClientId: clientId.trim(),
+    };
+  }
+
+  const cacheKey = computeManagedIdentityCacheKey(clientId, resource);
+
+  const result = await appTokenCache.get(cacheKey, async () => {
+    const app = new msal.ManagedIdentityApplication(msalConfig);
+    const authResponse = await app.acquireToken({ resource });
+
+    if (!authResponse || !authResponse.accessToken) {
+      throwErr("Failed to acquire managed identity access token from Azure.");
+    }
+
+    return {
+      value: authResponse.accessToken,
+      validUntil: calculateExpiry(
+        authResponse,
+        AZURE_DEFAULT_CLOCK_SKEW_MS
+      ),
+    };
+  });
+
+  return {
+    accessToken: result.value,
+    isNewToken: !result.isCacheHit,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // hookFn()
 // hookFn is registered to driver while loading plugins.
@@ -111,7 +181,29 @@ oracledb.registerProcessConfigurationHook(hookFn);
 //---------------------------------------------------------------------------
 // normalizeScopes()
 //---------------------------------------------------------------------------
-function normalizeScopes(scopes) {
+function normalizeScopes(scopes, { managedIdentity = false } = {}) {
+  if (managedIdentity) {
+    const scope = typeof scopes === 'string'
+      ? scopes
+      : (Array.isArray(scopes) && scopes.length === 1 ? scopes[0] : null);
+    if (typeof scope !== 'string' || !scope.trim()) {
+      throwErr(
+        'Azure managed identity scopes must be a URI string or a one-element array containing a non-empty URI string.'
+      );
+    }
+
+    const resource = scope.trim();
+    const url = new URL(resource);
+    if (url.protocol !== "https:") {
+      throwErr("Azure managed identity URI must use HTTPS.");
+    }
+
+    if (resource.endsWith("/.default")) {
+      return resource.slice(0, -"/.default".length);
+    }
+    return resource;
+  }
+
   const normalized = Array.isArray(scopes)
     ? scopes
     : (typeof scopes === 'string' ? [scopes] : null);
@@ -119,7 +211,8 @@ function normalizeScopes(scopes) {
     typeof scope !== 'string' || !scope.trim())) {
     throwErr('Azure scopes must be a string or an array of non-empty strings.');
   }
-  return normalized.map((scope) => scope.trim()).sort();
+  const scopesList = normalized.map((scope) => scope.trim());
+  return scopesList.sort();
 }
 
 //---------------------------------------------------------------------------
@@ -157,6 +250,12 @@ function computeAppCacheKey(config, scopes) {
   return JSON.stringify([
     config.authType?.toLowerCase(), config.clientId,
     hashValue(config.clientSecret), config.authority, scopes,
+  ]);
+}
+
+function computeManagedIdentityCacheKey(clientId, resource) {
+  return JSON.stringify([
+    'azuremanagedidentity', clientId?.trim() ?? null, resource,
   ]);
 }
 
