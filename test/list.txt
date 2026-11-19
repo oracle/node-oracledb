@@ -6626,7 +6626,8 @@ Overview of node-oracledb functional tests
     320.6 LOB write() method additional tests
       320.6.1 Multiple writes to same LOB
       320.6.2 Write with specific offset in middle
-      320.6.3 Set Unicode data on a temporary CLOB
+      320.6.3 Set unicode data on a temporary CLOB and then stream write
+      320.6.4 Set empty data on a temporary CLOB and then stream write
     320.7 LOB trim() method additional tests
       320.7.1 Trim temporary LOB
       320.7.2 Trim to zero length

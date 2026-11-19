@@ -351,7 +351,12 @@ Starting from node-oracledb 26.1.0, you can use the :meth:`lob.setData()`
 method to replace all of the data in a LOB with the specified String or
 Buffer. The ``data`` parameter can be a String or Buffer. When setting a BLOB,
 a String is converted to a Buffer. When setting a CLOB or NCLOB, a Buffer is
-converted to a String. To replace the CLOB contents that were trimmed in the
+converted to a String. The supported character encoding for these conversions
+is UTF-8.
+
+This is a random access method and does not change the LOB stream offset.
+
+To replace the CLOB contents that were trimmed in the
 example above with the text - *Updated CLOB Data*, use:
 
 .. code-block:: javascript

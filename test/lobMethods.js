@@ -818,7 +818,7 @@ describe('320. lobMethods1.js', function() {
       await lob2.close();
     }); // 320.6.2
 
-    it('320.6.3 Set Unicode data on a temporary CLOB', async function() {
+    it('320.6.3 Set unicode data on a temporary CLOB and then stream write', async function() {
       const lob = await conn.createLob(oracledb.CLOB);
       const data = 'A😀B';
 
@@ -833,9 +833,27 @@ describe('320. lobMethods1.js', function() {
         });
       });
 
-      assert.strictEqual(await lob.getData(), 'A😀BC');
+      assert.strictEqual(await lob.getData(), 'C😀B');
       await lob.close();
     }); // 320.6.3
+
+    it('320.6.4 Set empty data on a temporary CLOB and then stream write', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+
+      await lob.setData('');
+      await new Promise((resolve, reject) => {
+        lob.write('C', err => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      assert.strictEqual(await lob.getData(), 'C');
+      await lob.close();
+    }); // 320.6.4
 
   }); // 320.6
 

@@ -23,8 +23,8 @@ Common Changes
     :ref:`Azure Managed Identity authentication <azuremanagedidentityauth>`
     for system-assigned and user-assigned identities.
 
-#)  Added asynchronous method :meth:`lob.setData()` to set string and buffer
-    data on LOB columns.
+#)  Added asynchronous random access method :meth:`lob.setData()` to set
+    string and buffer data on LOB columns.
 
 #)  Fixed bug where pool thread runs indefinitely even after the pool is
     closed.

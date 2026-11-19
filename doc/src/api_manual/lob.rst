@@ -288,10 +288,16 @@ Lob Methods
 
     Replaces all of the data in the LOB with the specified string or Buffer.
 
+    This is a random access method and does not change the current stream
+    offset of the LOB. Subsequent stream writes continue from their existing
+    stream offset. It is recommended to not mix LOB stream writes and this
+    method on the same LOB.
+
     The ``data`` parameter can be a string or Buffer. For BLOBs, strings are
     converted to Buffers. For CLOBs and NCLOBs, Buffers are converted to
     strings. If ``data`` is an empty String or Buffer, the LOB is truncated to
-    zero length and no write operation is performed.
+    zero length and no write operation is performed. The supported character
+    encoding for these conversions is UTF-8.
 
     The existing LOB data is discarded before the new data is written.
 
