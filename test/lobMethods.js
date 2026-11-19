@@ -823,6 +823,7 @@ describe('320. lobMethods1.js', function() {
       const data = 'A😀B';
 
       await lob.setData(data);
+      assert.strictEqual(lob.length, data.length);
       await new Promise((resolve, reject) => {
         lob.write('C', err => {
           if (err) {

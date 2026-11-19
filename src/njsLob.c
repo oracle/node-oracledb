@@ -593,9 +593,16 @@ static bool njsLob_writeAsync(njsBaton *baton)
             baton->bufferSize) < 0)
         return njsBaton_setErrorDPI(baton);
 
-    // set the lob length
+    // set the lob length. For character LOBs, bufferSize is the UTF-8 byte
+    // length, so get the length from ODPI-C to obtain the character length.
+    if (lob->dataType ==DPI_ORACLE_TYPE_CLOB ||
+            lob->dataType == DPI_ORACLE_TYPE_NCLOB) {
+        if (dpiLob_getSize(lob->handle, &lob->length) < 0)
+            return njsBaton_setErrorDPI(baton);
+    } else {
     lob->length = NJS_MAX_NUM(lob->length,
             baton->lobOffset - 1 + baton->bufferSize);
+    }
 
     return true;
 }

@@ -32,6 +32,9 @@ Common Changes
 #)  Fixed issue where :ref:`oracledb.JsonId <jsonid>` class does not serialize
     the json id correctly.
 
+#)  Fixed bug where LOB streaming writes do not convert Buffers to strings for
+    NCLOBs.
+
 Thin Mode Changes
 +++++++++++++++++
 
@@ -42,7 +45,7 @@ Thin Mode Changes
 #)  Added automatic single-token Deep Data Security contexts for Azure OBO
     on Oracle AI Database version 23.26.4 or later.
 
-#)  Fixed a bug where an :ref:`implicit result set <implicitresults>` with
+#)  Fixed bug where an :ref:`implicit result set <implicitresults>` with
     JSON, LOB, or VECTOR columns returned only the rows sent in the initial
     prefetch.
     See `Issue #1795 <https://github.com/oracle/node-oracledb/issues/1795>`__.

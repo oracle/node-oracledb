@@ -4,10 +4,14 @@
 API: LOB Class
 **************
 
-Lob objects can be used to access Oracle Database CLOB, BLOB and BFILE data.
+Lob objects can be used to access Oracle Database CLOB, BLOB, NCLOB, and BFILE
+data.
 
 A Lob object implements the `Node.js
-Stream <https://nodejs.org/api/stream.html>`__ interface.
+Stream <https://nodejs.org/api/stream.html>`__ interface, including its
+`read() <https://nodejs.org/api/stream.html#readablereadsize>`__ and
+`write() <https://nodejs.org/api/stream.html#writablewritechunk-encoding-
+callback>`__ methods.
 
 See :ref:`Using CLOB, NCLOB, BLOB and BFILE Data <lobhandling>` and :ref:`LOB
 Bind Parameters <lobbinds>` for more information.
