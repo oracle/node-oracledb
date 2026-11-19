@@ -2254,4 +2254,37 @@ describe('324. pipeline.js', function() {
       ]);
     }); // 324.6.2
   }); // 324.6
+
+  describe('324.7 recovery outside a pipeline', function() {
+    it('324.7.1 recovers from an invalid cursor before and after a pipeline', async function() {
+      if (!supportsPipelining) {
+        this.skip();
+      }
+      const conn = await oracledb.getConnection(dbConfig);
+      try {
+        const checkRecovery = async () => {
+          await assert.rejects(
+            () => conn.execute(`DECLARE
+              PROCEDURE p(c OUT SYS_REFCURSOR) IS BEGIN NULL; END;
+              BEGIN p(:c); END;`,
+            { c: { type: oracledb.CURSOR, dir: oracledb.BIND_OUT } }),
+            /NJS-107:/
+          );
+          const result = await conn.execute('SELECT 127 FROM dual');
+          assert.strictEqual(result.rows[0][0], 127);
+        };
+
+        await checkRecovery();
+        const pipeline = new oracledb.Pipeline();
+        pipeline.addFetchOne('SELECT 1 FROM dual');
+        pipeline.addFetchOne('SELECT 2 FROM dual');
+        const results = await conn.runPipeline(pipeline);
+        assert.strictEqual(results[0].rows[0][0], 1);
+        assert.strictEqual(results[1].rows[0][0], 2);
+        await checkRecovery();
+      } finally {
+        await conn.close();
+      }
+    });
+  }); // 324.7
 });
