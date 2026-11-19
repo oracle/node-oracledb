@@ -6638,6 +6638,21 @@ Overview of node-oracledb functional tests
     320.9 LOB edge cases
       320.9.1 empty LOB operations
       320.9.2 LOB length property updates
+    320.10 LOB writeData() method
+      320.10.1 writes CLOB data at an offset
+      320.10.2 writes BLOB data at an offset
+      320.10.3 writes data with the default offset
+      320.10.4 writes empty CLOB and BLOB data
+      320.10.5 updates data in a temporary CLOB and BLOB
+      320.10.6 updates and converts persistent LOBs
+      320.10.7 converts strings and Buffers for LOB types
+      320.10.8 preserves suffix data for shorter writes
+      320.10.9 rejects invalid arguments
+      320.10.10 rejects writes to a closed LOB
+      320.10.11 rejects concurrent writes
+      320.10.12 rejects writes to a BFILE
+      320.10.13 writeData() does not change stream offset
+      320.10.14 NCLOB Buffer writes have consistent length
 
   321. directhpathload.js (Direct Path Load Tests)
     321.1 Testing all Basic Types

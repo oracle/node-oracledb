@@ -26,6 +26,10 @@ Common Changes
 #)  Added asynchronous random access method :meth:`lob.setData()` to set
     string and buffer data on LOB columns.
 
+#)  Added asynchronous random access method :meth:`lob.writeData()` to write
+    string and buffer data on LOB columns starting at the specified offset
+    without truncating the remaining data or changing the stream offset.
+
 #)  Fixed bug where pool thread runs indefinitely even after the pool is
     closed.
 

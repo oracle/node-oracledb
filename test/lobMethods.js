@@ -1174,4 +1174,274 @@ describe('320. lobMethods1.js', function() {
       await lob2.close();
     }); // 320.9.2
   }); // 320.9
+
+  describe('320.10 LOB writeData() method', function() {
+
+    it('320.10.1 writes CLOB data at an offset', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      await lob.writeData('Hello');
+      await lob.writeData('!', 6);
+      assert.strictEqual(await lob.getData(), 'Hello!');
+      await lob.close();
+    }); // 320.10.1
+
+    it('320.10.2 writes BLOB data at an offset', async function() {
+      const lob = await conn.createLob(oracledb.BLOB);
+      const first = Buffer.from([1, 2, 3]);
+      const second = Buffer.from([4, 5]);
+      await lob.writeData(first);
+      await lob.writeData(second, 4);
+      assert.deepStrictEqual(await lob.getData(), Buffer.concat([first, second]));
+      await lob.close();
+    }); // 320.10.2
+
+    it('320.10.3 writes data with the default offset', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      await lob.writeData('Hello');
+      assert.strictEqual(await lob.getData(), 'Hello');
+      await lob.close();
+    }); // 320.10.3
+
+    it('320.10.4 writes empty CLOB and BLOB data', async function() {
+      const clob = await conn.createLob(oracledb.CLOB);
+      const blob = await conn.createLob(oracledb.BLOB);
+      const clobData = 'Existing CLOB data';
+      const blobData = Buffer.from('Existing BLOB data');
+
+      await clob.writeData(clobData);
+      await blob.writeData(blobData);
+      await clob.writeData('', 3);
+      await blob.writeData(Buffer.alloc(0), 3);
+
+      assert.strictEqual(await clob.getData(), clobData);
+      assert.deepStrictEqual(await blob.getData(), blobData);
+      await clob.close();
+      await blob.close();
+    }); // 320.10.4
+
+    it('320.10.5 updates data in a temporary CLOB and BLOB', async function() {
+      const clob = await conn.createLob(oracledb.CLOB);
+      const blob = await conn.createLob(oracledb.BLOB);
+      const clobData = 'Hello temporary CLOB';
+      const blobData = Buffer.from([1, 2, 3, 4, 5, 6]);
+
+      // start writing at the default offset (1)
+      await clob.writeData(clobData);
+      await blob.writeData(blobData);
+      assert.strictEqual(await clob.getData(), clobData);
+      assert.deepStrictEqual(await blob.getData(), blobData);
+
+      // write from a valid offset
+      await clob.writeData('TEMP', 7);
+      await blob.writeData(Buffer.from([8, 9]), 3);
+      assert.strictEqual(await clob.getData(), 'Hello TEMPorary CLOB');
+      assert.deepStrictEqual(await blob.getData(),
+        Buffer.from([1, 2, 8, 9, 5, 6]));
+
+      await clob.close();
+      await blob.close();
+    }); // 320.10.5
+
+    it('320.10.6 updates and converts persistent LOBs', async function() {
+      const tableName = 'nodb_lob_writedata';
+      const clobData = 'Hello persistent CLOB';
+      const blobData = 'Hello persistent BLOB';
+      const nclobData = 'Hello persistent NCLOB';
+      await conn.execute(testsUtil.sqlCreateTable(
+        tableName,
+        `CREATE TABLE ${tableName} (id NUMBER, c CLOB, b BLOB, n NCLOB)`
+      ));
+
+      try {
+        let result = await conn.execute(
+          `INSERT INTO ${tableName}
+           VALUES (1, EMPTY_CLOB(), EMPTY_BLOB(), TO_NCLOB(' '))
+           RETURNING c, b, n INTO :clob, :blob, :nclob`,
+          {
+            clob: { type: oracledb.CLOB, dir: oracledb.BIND_OUT },
+            blob: { type: oracledb.BLOB, dir: oracledb.BIND_OUT },
+            nclob: { type: oracledb.NCLOB, dir: oracledb.BIND_OUT }
+          }
+        );
+        let clob = result.outBinds.clob[0];
+        let blob = result.outBinds.blob[0];
+        let nclob = result.outBinds.nclob[0];
+        await clob.writeData(Buffer.from(clobData));
+        await blob.writeData(blobData);
+        await nclob.writeData(Buffer.from(nclobData));
+
+        await clob.close();
+        await blob.close();
+        await nclob.close();
+        await conn.commit();
+
+        result = await conn.execute(
+          `SELECT c, b, n FROM ${tableName} WHERE id = 1 FOR UPDATE`
+        );
+        clob = result.rows[0][0];
+        blob = result.rows[0][1];
+        nclob = result.rows[0][2];
+        await clob.writeData(Buffer.from('PERS'), 7);
+        await blob.writeData('XY', 3);
+        await nclob.writeData('PERS', 7);
+        assert.strictEqual(await clob.getData(), 'Hello PERSistent CLOB');
+        assert.deepStrictEqual(await blob.getData(),
+          Buffer.from('HeXYo persistent BLOB'));
+        assert.strictEqual(await nclob.getData(), 'Hello PERSistent NCLOB');
+        await clob.writeData(Buffer.from('X'), 7);
+        await blob.writeData('Z', 3);
+        await nclob.writeData('X', 7);
+        assert.strictEqual(await clob.getData(), 'Hello XERSistent CLOB');
+        assert.deepStrictEqual(await blob.getData(),
+          Buffer.from('HeZYo persistent BLOB'));
+        assert.strictEqual(await nclob.getData(), 'Hello XERSistent NCLOB');
+        await conn.commit();
+
+        await clob.close();
+        await blob.close();
+        await nclob.close();
+
+        result = await conn.execute(
+          `SELECT c, b, n FROM ${tableName} WHERE id = 1`
+        );
+        clob = result.rows[0][0];
+        blob = result.rows[0][1];
+        nclob = result.rows[0][2];
+        assert.strictEqual(await clob.getData(), 'Hello XERSistent CLOB');
+        assert.deepStrictEqual(await blob.getData(),
+          Buffer.from('HeZYo persistent BLOB'));
+        assert.strictEqual(await nclob.getData(), 'Hello XERSistent NCLOB');
+        await clob.close();
+        await blob.close();
+        await nclob.close();
+      } finally {
+        await conn.rollback();
+        await conn.execute(testsUtil.sqlDropTable(tableName));
+      }
+    }); // 320.10.6
+
+    it('320.10.7 converts strings and Buffers for LOB types', async function() {
+      const blob = await conn.createLob(oracledb.BLOB);
+      const clob = await conn.createLob(oracledb.CLOB);
+      const nclobFromString = await conn.createLob(oracledb.NCLOB);
+      const nclobFromBuffer = await conn.createLob(oracledb.NCLOB);
+
+      await blob.writeData('BLOB string');
+      await clob.writeData(Buffer.from('CLOB buffer'));
+      await nclobFromString.writeData('NCLOB string');
+      await nclobFromBuffer.writeData(Buffer.from('NCLOB buffer'));
+
+      assert.deepStrictEqual(await blob.getData(), Buffer.from('BLOB string'));
+      assert.strictEqual(await clob.getData(), 'CLOB buffer');
+      assert.strictEqual(await nclobFromString.getData(), 'NCLOB string');
+      assert.strictEqual(await nclobFromBuffer.getData(), 'NCLOB buffer');
+
+      await blob.close();
+      await clob.close();
+      await nclobFromString.close();
+      await nclobFromBuffer.close();
+    }); // 320.10.7
+
+    it('320.10.8 preserves suffix data for shorter writes', async function() {
+      const clob = await conn.createLob(oracledb.CLOB);
+      const nclob = await conn.createLob(oracledb.NCLOB);
+      const blob = await conn.createLob(oracledb.BLOB);
+
+      await clob.writeData('Hello temporary CLOB');
+      await nclob.writeData('Hello temporary NCLOB');
+      await blob.writeData(Buffer.from([1, 2, 3, 4, 5, 6]));
+      await clob.writeData('X', 7);
+      await nclob.writeData('X', 7);
+      await blob.writeData(Buffer.from([8]), 3);
+
+      assert.strictEqual(await clob.getData(), 'Hello Xemporary CLOB');
+      assert.strictEqual(await nclob.getData(), 'Hello Xemporary NCLOB');
+      assert.deepStrictEqual(await blob.getData(),
+        Buffer.from([1, 2, 8, 4, 5, 6]));
+      assert.strictEqual(clob.length, 'Hello Xemporary CLOB'.length);
+      assert.strictEqual(nclob.length, 'Hello Xemporary NCLOB'.length);
+      assert.strictEqual(blob.length, 6);
+
+      await clob.close();
+      await nclob.close();
+      await blob.close();
+    }); // 320.10.8
+
+    it('320.10.9 rejects invalid arguments', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      for (const value of [123, null, {}]) {
+        await assert.rejects(() => lob.writeData(value), /NJS-005:/);
+      }
+      for (const offset of [0, -1, 1.5, NaN, Infinity, null, '1', {}]) {
+        await assert.rejects(() => lob.writeData('Hello', offset), /NJS-005:/);
+      }
+      await lob.close();
+    }); // 320.10.9
+
+    it('320.10.10 rejects writes to a closed LOB', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      await lob.close();
+      await assert.rejects(() => lob.writeData('Hello'), /NJS-022:/);
+    }); // 320.10.10
+
+    it('320.10.11 rejects concurrent writes', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      const first = lob.writeData('A'.repeat(100000));
+      const second = lob.writeData('B'.repeat(100000));
+      await assert.rejects(second, /NJS-023:/);
+      await first;
+      await lob.close();
+    }); // 320.10.11
+
+    it('320.10.12 rejects writes to a BFILE', async function() {
+      const result = await conn.execute(
+        `SELECT BFILENAME('BFILEDIR', 'A.JPG') FROM DUAL`
+      );
+      const bfile = result.rows[0][0];
+
+      await assert.rejects(
+        () => bfile.writeData(Buffer.from('Hello')),
+        /NJS-155:/
+      );
+      await bfile.close();
+    }); // 320.10.12
+
+    it('320.10.13 writeData() does not change stream offset', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      await lob.writeData('Hello');
+      await lob.writeData('X', 3);
+
+      await new Promise((resolve, reject) => {
+        lob.write('Y', err => err ? reject(err) : resolve());
+      });
+
+      assert.strictEqual(await lob.getData(), 'YeXlo');
+      await lob.close();
+    }); // 320.10.13
+
+    it('320.10.14 NCLOB Buffer writes have consistent length', async function() {
+      const streamLob = await conn.createLob(oracledb.DB_TYPE_NCLOB);
+      const directLob = await conn.createLob(oracledb.DB_TYPE_NCLOB);
+      const value = '你好';
+      const input = Buffer.from(value, 'utf8');
+
+      try {
+        await new Promise((resolve, reject) => {
+          streamLob.write(input, err => err ? reject(err) : resolve());
+        });
+        await directLob.writeData(input); //default offset of 1
+
+        assert.strictEqual(await streamLob.getData(), value);
+        assert.strictEqual(await directLob.getData(), value);
+
+        // Check cached lengths before getData() if read operations could
+        // refresh the LOB length.
+        assert.strictEqual(streamLob.length, value.length);
+        assert.strictEqual(directLob.length, value.length);
+      } finally {
+        streamLob.destroy();
+        directLob.destroy();
+      }
+    }); // 320.10.14
+  }); // 320.10
 }); // 320

@@ -402,3 +402,56 @@ Lob Methods
 
         * - Error ``error``
           - If ``trim()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.
+
+.. method:: lob.writeData(data, offset)
+
+    .. versionadded:: 26.1.0
+
+    **Promise**::
+
+        promise = writeData(String data);
+        promise = writeData(Buffer data);
+        promise = writeData(String data, Number offset);
+        promise = writeData(Buffer data, Number offset);
+
+    Writes a string or Buffer to the LOB, beginning at the position specified
+    in ``offset``.
+
+    The ``data`` parameter is the string or Buffer containing the data to
+    write to the LOB.
+
+    The ``offset`` parameter identifies the first character or byte to replace
+    and is one-based, that is, starts at 1. The default value is *1*.
+
+    The specified data overwrites existing data starting at the specified
+    offset and continuing for the length of the specified data. Existing data
+    before the offset and after the specified data is preserved.
+
+    This is a random access method and does not change the current stream
+    offset of the LOB. Subsequent stream writes continue from their existing
+    stream offset. It is recommended to not mix LOB stream writes and this
+    method on the same LOB.
+
+    For BLOBs, strings are converted to Buffers. For CLOBs and NCLOBs, Buffers
+    are converted to strings. The supported character encoding for these
+    conversions is UTF-8.
+
+    This method cannot be used with BFILEs.
+
+    See :ref:`Using lob.writeData() <lobwritedata>`.
+
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        writeData(String data, function(Error error){});
+        writeData(Buffer data, function(Error error){});
+        writeData(String data, Number offset, function(Error error){});
+        writeData(Buffer data, Number offset, function(Error error){});
+
+    The parameters of the callback function ``function(Error error)`` are:
+
+    .. callbackfunc-table::
+
+        * - Error ``error``
+          - If ``writeData()`` succeeds, ``error`` is NULL. If an error occurs, then ``error`` contains the :ref:`error message <errorobj>`.

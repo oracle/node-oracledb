@@ -378,6 +378,25 @@ For temporary LOBs, a failed :meth:`lob.setData()` operation may leave the LOB
 truncated. Destroy the temporary LOB and create a new one before retrying, if
 necessary.
 
+.. _lobwritedata:
+
+The :meth:`lob.writeData()` method writes a string or Buffer at a specified
+position without replacing the entire LOB. The ``offset`` is one-based and
+defaults to 1. Existing data before and after the written data is preserved.
+When setting a BLOB, a String is converted to a Buffer. When setting a CLOB or
+NCLOB, a Buffer is converted to a String. The supported character encoding for
+these conversions is UTF-8.
+This is a random access method and does not change the LOB stream offset.
+This was introduced in node-oracledb 26.1.0.
+
+For example, if a CLOB contains "Hello world"::
+
+    await lob.setData('Hello world');
+    await lob.writeData('Oracle', 2);
+
+The CLOB now contains ``HOracleorld``. In contrast, calling
+``setData('Oracle')`` would replace the entire value with ``Oracle``.
+
 See `lobselect2.js <https://github.com/oracle/node-oracledb/tree/main/examples/
 lobselect2.js>`__ for a runnable example.
 
