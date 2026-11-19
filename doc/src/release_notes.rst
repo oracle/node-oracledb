@@ -35,6 +35,10 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Enabled support for hash-based end user security context piggybacks for
+    database servers with Oracle Deep Data Security to improve
+    connection performance.
+
 #)  Added automatic single-token Deep Data Security contexts for Azure OBO
     on Oracle AI Database version 23.26.4 or later.
 

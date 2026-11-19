@@ -50,7 +50,7 @@ describe('328. endUserSecurityContext.js', function() {
 
   function decodeContextPayload(context) {
     assert(context instanceof oracledb.EndUserSecurityContext);
-    const encoded = context.getDeobfuscatedValue();
+    const encoded = context._getDeobfuscatedFullPayload();
     try {
       return connection.decodeOSON(encoded);
     } finally {

@@ -33,8 +33,11 @@
 
 const oracledb = require("oracledb");
 const assert = require("assert");
+const crypto = require("crypto");
 const fs = require("fs");
 const dbConfig = require('../../dbconfig.js');
+const Message = require("../../../lib/thin/protocol/messages/base.js");
+const Protocol = require("../../../lib/thin/protocol/protocol.js");
 
 (oracledb.thin ? describe : describe.skip)("327. securityContext.js", () => {
   let connection;
@@ -106,7 +109,7 @@ const dbConfig = require('../../dbconfig.js');
 
   function decodeContextPayload(context) {
     assert(context instanceof oracledb.EndUserSecurityContext);
-    const encoded = context.getDeobfuscatedValue();
+    const encoded = context._getDeobfuscatedFullPayload();
     if (!encoded) {
       return null;
     }
@@ -146,6 +149,42 @@ const dbConfig = require('../../dbconfig.js');
       Object.freeze(clone.attributes);
     }
     return Object.freeze(clone);
+  }
+
+  function createSecurityContextPiggybackWriter(securityContext,
+    supportsEndUserSecurityContextHash = true, connectionImpl) {
+    const impl = connectionImpl ?? {
+      pipelineMode: 0,
+      securityContext,
+      _sendFullSecurityContext: true,
+      _protocol: {
+        caps: {
+          supportsEndUserSecurityContextHash,
+        },
+      },
+    };
+    const message = new Message(impl);
+    // The test captures only the KVAL pairs; header encoding is tested by the
+    // common message suite.
+    message.writePiggybackHeader = () => {};
+    const writePiggyback = (pairs) => {
+      const buf = {
+        writeUB4() {},
+        writeUInt8() {},
+        writeStrKeywordValuePair(key, valueBytes, flags, text) {
+          pairs.push({
+            key,
+            valueBytes: valueBytes && Buffer.from(valueBytes),
+            flags,
+            text,
+          });
+        },
+      };
+      message._writeEndUserSecurityContextPiggyback(buf);
+    };
+    writePiggyback.confirm = () => message._confirmEndUserSecurityContext();
+    writePiggyback.impl = impl;
+    return writePiggyback;
   }
 
   let driverSupportsSecurityContextCache = null;
@@ -257,7 +296,7 @@ const dbConfig = require('../../dbconfig.js');
       assert.strictEqual(captured.length, 1);
       const [capturedContext] = captured;
       assert(capturedContext instanceof oracledb.EndUserSecurityContext);
-      const encoded = capturedContext.getDeobfuscatedValue();
+      const encoded = capturedContext._getDeobfuscatedFullPayload();
       assert(Buffer.isBuffer(encoded));
       assert(encoded.length > 252);
       encoded.fill(0);
@@ -294,13 +333,14 @@ const dbConfig = require('../../dbconfig.js');
       assert.throws(() => connection.setEndUserSecurityContext(), /NJS-009:/);
     });
 
-    it("327.1.6 Invalid parameter value", () => {
-      assert.throws(
-        () => makeSecurityContext({
-          databaseAccessToken: "db-token-invalid",
-        }),
-        /NJS-005:/, // No endUserToken or endUserName given
-      );
+    it("327.1.6 Application-direct context is valid", () => {
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-direct-application",
+      });
+      assert.deepStrictEqual(payloadForWire(securityContext), {
+        ver: "1.0",
+        database_access_token: "db-token-direct-application",
+      });
 
       assert.throws(
         () => connection.setEndUserSecurityContext(null),
@@ -543,11 +583,304 @@ const dbConfig = require('../../dbconfig.js');
 
       assert.strictEqual(impl.securityContext, secondSecurityContext);
       assert.deepStrictEqual(payloadForWire(firstSecurityContext), firstPayload);
-      assert(Buffer.isBuffer(secondSecurityContext.getDeobfuscatedValue()));
+      assert(Buffer.isBuffer(
+        secondSecurityContext._getDeobfuscatedFullPayload()));
       assert.deepStrictEqual(
         payloadForWire(impl.securityContext),
         payloadForWire(secondSecurityContext),
       );
+    });
+
+    it("327.1.19 Hash piggybacks reuse token contexts and send changed attributes", () => {
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-hash",
+        endUserToken: "user-token-hash",
+        dataRoles: ["role-b", "role-a"],
+        attributes: { region: "us" },
+      });
+      const expectedHash = crypto.createHash("sha256").update(
+        "user-token-hashdb-token-hash6:role-a6:role-b",
+        "utf8",
+      ).digest("base64");
+      assert.strictEqual(securityContext._getDeobfuscatedHash(), expectedHash);
+
+      const writePiggyback = createSecurityContextPiggybackWriter(securityContext);
+      const firstPairs = [];
+      writePiggyback(firstPairs);
+      assert.deepStrictEqual(firstPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+        "ORCL_XS_AUTH_HASH",
+      ]);
+      assert.deepStrictEqual(
+        connection.decodeOSON(firstPairs[0].valueBytes),
+        payloadForWire(securityContext),
+      );
+      assert.strictEqual(firstPairs[1].valueBytes, null);
+      assert.strictEqual(firstPairs[1].text, expectedHash);
+      // A second write before a successful response must still be complete.
+      // This mirrors a protocol retry after an uncertain first write.
+      assert.strictEqual(writePiggyback.impl._sendFullSecurityContext, true);
+
+      const retryPairs = [];
+      writePiggyback(retryPairs);
+      assert.deepStrictEqual(retryPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+        "ORCL_XS_AUTH_HASH",
+      ]);
+      assert.deepStrictEqual(
+        connection.decodeOSON(retryPairs[0].valueBytes),
+        payloadForWire(securityContext),
+      );
+      writePiggyback.confirm();
+      assert.strictEqual(writePiggyback.impl._sendFullSecurityContext, false);
+
+      const secondPairs = [];
+      writePiggyback(secondPairs);
+      assert.deepStrictEqual(secondPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+        "ORCL_XS_AUTH_HASH",
+      ]);
+      assert.deepStrictEqual(connection.decodeOSON(secondPairs[0].valueBytes), {
+        attributes: [{ name: "region", values: "us" }],
+      });
+      assert.strictEqual(secondPairs[1].valueBytes, null);
+      assert.strictEqual(secondPairs[1].text, expectedHash);
+
+      firstPairs[0].valueBytes.fill(0);
+      retryPairs[0].valueBytes.fill(0);
+      secondPairs[0].valueBytes.fill(0);
+    });
+
+    it("327.1.19.1 Keeps the full payload after an execute write fails before a response", async () => {
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-write-failure",
+        endUserToken: "user-token-write-failure",
+        attributes: { region: "us" },
+      });
+      const connectionImpl = {
+        pipelineMode: 0,
+        securityContext,
+        _sendFullSecurityContext: true,
+      };
+      const protocol = Object.create(Protocol.prototype);
+      protocol.callTimeout = 0;
+      // Do not run transport recovery in this isolated test. The first
+      // failure models a message that was encoded but did not reach a server
+      // response; a later execute-message is then allowed to complete.
+      protocol.connInProgress = true;
+      protocol.caps = { supportsEndUserSecurityContextHash: true };
+      connectionImpl._protocol = protocol;
+
+      const createExecuteMessage = () => {
+        const message = new Message(connectionImpl);
+        message.writePiggybackHeader = () => {};
+        return message;
+      };
+      const encodePiggyback = (message, pairs) => {
+        message._writeEndUserSecurityContextPiggyback({
+          writeUB4() {},
+          writeUInt8() {},
+          writeStrKeywordValuePair(key, valueBytes, flags, text) {
+            pairs.push({
+              key,
+              valueBytes: valueBytes && Buffer.from(valueBytes),
+              flags,
+              text,
+            });
+          },
+        });
+      };
+
+      const firstMessage = createExecuteMessage();
+      const firstPairs = [];
+      const writeFailure = new Error("simulated transport write failure");
+      protocol._encodeMessage = (message) => {
+        encodePiggyback(message, firstPairs);
+        throw writeFailure;
+      };
+      await assert.rejects(protocol._processMessage(firstMessage),
+        (error) => error === writeFailure);
+      assert.deepStrictEqual(firstPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+        "ORCL_XS_AUTH_HASH",
+      ]);
+      assert.strictEqual(connectionImpl._sendFullSecurityContext, true);
+
+      const successfulMessage = createExecuteMessage();
+      const successfulPairs = [];
+      protocol._encodeMessage = (message) => {
+        encodePiggyback(message, successfulPairs);
+      };
+      protocol._decodeMessage = () => {};
+      protocol._processCallStatus = () => {};
+      await protocol._processMessage(successfulMessage);
+      assert.deepStrictEqual(successfulPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+        "ORCL_XS_AUTH_HASH",
+      ]);
+      // _processMessage() confirms only after _decodeMessage(), which models
+      // the successful server response to this later execute.
+      assert.strictEqual(connectionImpl._sendFullSecurityContext, false);
+
+      const laterMessage = createExecuteMessage();
+      const laterPairs = [];
+      encodePiggyback(laterMessage, laterPairs);
+      assert.deepStrictEqual(laterPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+        "ORCL_XS_AUTH_HASH",
+      ]);
+      assert.deepStrictEqual(connection.decodeOSON(laterPairs[0].valueBytes), {
+        attributes: [{ name: "region", values: "us" }],
+      });
+
+      firstPairs[0].valueBytes.fill(0);
+      successfulPairs[0].valueBytes.fill(0);
+      laterPairs[0].valueBytes.fill(0);
+    });
+
+    it("327.1.20 Named contexts always use the full payload", () => {
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-named-hash",
+        endUserName: "named-user",
+        key: "named-key",
+        attributes: { region: "us" },
+      });
+      assert.strictEqual(securityContext._getDeobfuscatedHash(), null);
+
+      const writePiggyback = createSecurityContextPiggybackWriter(securityContext);
+      const firstPairs = [];
+      writePiggyback(firstPairs);
+      const secondPairs = [];
+      writePiggyback(secondPairs);
+      assert.deepStrictEqual(firstPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+      ]);
+      assert.deepStrictEqual(secondPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+      ]);
+      assert.deepStrictEqual(
+        connection.decodeOSON(secondPairs[0].valueBytes),
+        payloadForWire(securityContext),
+      );
+
+      firstPairs[0].valueBytes.fill(0);
+      secondPairs[0].valueBytes.fill(0);
+    });
+
+    it("327.1.21 Hash piggybacks fall back to full payloads when unsupported", () => {
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-no-hash",
+        endUserToken: "user-token-no-hash",
+        attributes: { region: "us" },
+      });
+      const writePiggyback = createSecurityContextPiggybackWriter(
+        securityContext,
+        false,
+      );
+      const firstPairs = [];
+      const secondPairs = [];
+      writePiggyback(firstPairs);
+      writePiggyback(secondPairs);
+      assert.deepStrictEqual(firstPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+      ]);
+      assert.deepStrictEqual(secondPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+      ]);
+      assert.deepStrictEqual(
+        connection.decodeOSON(secondPairs[0].valueBytes),
+        payloadForWire(securityContext),
+      );
+
+      firstPairs[0].valueBytes.fill(0);
+      secondPairs[0].valueBytes.fill(0);
+    });
+
+    it("327.1.22 Hashes data roles using Unicode code-point order", () => {
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-unicode-hash",
+        dataRoles: ["😀", "\uE000"],
+      });
+      const expectedHash = crypto.createHash("sha256").update(
+        "db-token-unicode-hash1:\uE0001:😀",
+        "utf8",
+      ).digest("base64");
+      assert.strictEqual(securityContext._getDeobfuscatedHash(), expectedHash);
+    });
+
+    it("327.1.22.1 Preserves OSON role order but hashes roles as a set", () => {
+      const firstSecurityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-role-order",
+        endUserToken: "user-token-role-order",
+        dataRoles: ["role-writer", "role-reader"],
+      });
+      const secondSecurityContext = makeSecurityContext({
+        databaseAccessToken: "db-token-role-order",
+        endUserToken: "user-token-role-order",
+        dataRoles: ["role-reader", "role-writer"],
+      });
+
+      // OSON retains application order, while the hash canonicalizes roles.
+      assert.deepStrictEqual(
+        payloadForWire(firstSecurityContext).data_roles,
+        ["role-writer", "role-reader"],
+      );
+      assert.deepStrictEqual(
+        payloadForWire(secondSecurityContext).data_roles,
+        ["role-reader", "role-writer"],
+      );
+      assert.strictEqual(
+        firstSecurityContext._getDeobfuscatedHash(),
+        secondSecurityContext._getDeobfuscatedHash(),
+      );
+    });
+
+    it("327.1.23 A refreshed database token resends the full OSON payload", () => {
+      const impl = Object.create(Object.getPrototypeOf(connection._impl));
+      impl.pipelineMode = 0;
+      impl._protocol = {
+        caps: {
+          supportsEndUserSecurityContext: true,
+          supportsEndUserSecurityContextHash: true,
+        },
+      };
+      const originalContext = makeSecurityContext({
+        databaseAccessToken: "database-token-before-refresh",
+        endUserToken: "end-user-token",
+      });
+      const refreshedContext = makeSecurityContext({
+        databaseAccessToken: "database-token-after-refresh",
+        endUserToken: "end-user-token",
+      });
+
+      impl.setEndUserSecurityContext(originalContext);
+      const writePiggyback = createSecurityContextPiggybackWriter(
+        originalContext,
+        true,
+        impl,
+      );
+      const initialPairs = [];
+      writePiggyback(initialPairs);
+      writePiggyback.confirm();
+      assert.strictEqual(impl._sendFullSecurityContext, false);
+
+      // Operation resolution installs a new EUSC when its token provider
+      // refreshes the database token. The Thin setter resets this marker.
+      impl.setEndUserSecurityContext(refreshedContext);
+      assert.strictEqual(impl._sendFullSecurityContext, true);
+      const refreshedPairs = [];
+      writePiggyback(refreshedPairs);
+      assert.deepStrictEqual(refreshedPairs.map((pair) => pair.key), [
+        "ORCL_XS_AUTHZ_CONTEXT",
+        "ORCL_XS_AUTH_HASH",
+      ]);
+      assert.deepStrictEqual(
+        connection.decodeOSON(refreshedPairs[0].valueBytes),
+        payloadForWire(refreshedContext),
+      );
+
+      initialPairs[0].valueBytes.fill(0);
+      refreshedPairs[0].valueBytes.fill(0);
     });
   });
 
@@ -1112,14 +1445,15 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.13 Missing both endUserToken and endUserName", () => {
-      assert.throws(
-        () =>
-          new oracledb.EndUserSecurityContext({
-            databaseAccessToken: "db-token-missing-end-user",
-          }),
-        /NJS-005:/,
-      );
+    it("327.5.13 Missing both endUserToken and endUserName is application direct", () => {
+      const securityContext = new oracledb.EndUserSecurityContext({
+        databaseAccessToken: "db-token-direct-application",
+      });
+      assert.deepStrictEqual(decodeContextPayload(securityContext), {
+        ver: "1.0",
+        database_access_token: "db-token-direct-application",
+      });
+      assert.ok(securityContext._getDeobfuscatedHash());
     });
 
     it("327.5.14 Empty endUserToken", () => {
@@ -1153,15 +1487,15 @@ const dbConfig = require('../../dbconfig.js');
       );
     });
 
-    it("327.5.16 Null-valued endUserToken is rejected", () => {
-      assert.throws(
-        () =>
-          new oracledb.EndUserSecurityContext({
-            databaseAccessToken: "db-token-null-token",
-            endUserToken: null,
-          }),
-        /NJS-005:/,
-      );
+    it("327.5.16 Null-valued endUserToken is application direct", () => {
+      const securityContext = new oracledb.EndUserSecurityContext({
+        databaseAccessToken: "db-token-null-token",
+        endUserToken: null,
+      });
+      assert.deepStrictEqual(decodeContextPayload(securityContext), {
+        ver: "1.0",
+        database_access_token: "db-token-null-token",
+      });
     });
 
     it("327.5.17 Null-valued endUserName is rejected", () => {
