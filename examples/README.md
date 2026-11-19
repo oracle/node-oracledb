@@ -104,6 +104,7 @@ File Name                                                 | Description
 [`lobbinds.js`](lobbinds.js)                              | Demonstrates how to bind and query LOBs
 [`lobinsert1.js`](lobinsert1.js)                          | Shows inserting a file into a CLOB column
 [`lobinsert2.js`](lobinsert2.js)                          | Inserts text into a CLOB column using the RETURNING INTO method.
+[`lobinsert3.js`](lobinsert3.js)                          | Inserts text into a CLOB column using the 'RETURNING INTO' method and updates it using lob.setData()
 [`lobinserttemp.js`](lobinserttemp.js)                    | Writes data to a Temporary CLOB and then inserts it into the database
 [`lobplsqltemp.js`](lobplsqltemp.js)                      | Streams data into a Temporary CLOB and then passes it to PL/SQL
 [`lobselect.js`](lobselect.js)                            | Shows basic, non-streaming CLOB and BLOB queries

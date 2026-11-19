@@ -345,6 +345,34 @@ This prints::
 
     The trimmed CLOB length is 4
 
+.. _lobsetdata:
+
+Starting from node-oracledb 26.1.0, you can use the :meth:`lob.setData()`
+method to replace all of the data in a LOB with the specified String or
+Buffer. The ``data`` parameter can be a String or Buffer. When setting a BLOB,
+a String is converted to a Buffer. When setting a CLOB or NCLOB, a Buffer is
+converted to a String. To replace the CLOB contents that were trimmed in the
+example above with the text - *Updated CLOB Data*, use:
+
+.. code-block:: javascript
+
+    await clob.setData('Updated CLOB data');
+    console.log(await clob.getData());
+
+This prints::
+
+    Updated CLOB data
+
+When updating a persistent LOB with :meth:`lob.setData()`, query it using
+``SELECT ... FOR UPDATE`` and keep the transaction open until
+this method completes its operation. If :meth:`lob.setData()` fails, the LOB
+may be left in a partially updated state and you need to roll back the
+transaction before retrying.
+
+For temporary LOBs, a failed :meth:`lob.setData()` operation may leave the LOB
+truncated. Destroy the temporary LOB and create a new one before retrying, if
+necessary.
+
 See `lobselect2.js <https://github.com/oracle/node-oracledb/tree/main/examples/
 lobselect2.js>`__ for a runnable example.
 

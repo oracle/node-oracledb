@@ -277,6 +277,43 @@ Lob Methods
         * - String ``data`` or Buffer ``data``
           - The value of the LOB.
 
+.. method:: lob.setData(data)
+
+    .. versionadded:: 26.1.0
+
+    **Promise**::
+
+        promise = setData(String data);
+        promise = setData(Buffer data);
+
+    Replaces all of the data in the LOB with the specified string or Buffer.
+
+    The ``data`` parameter can be a string or Buffer. For BLOBs, strings are
+    converted to Buffers. For CLOBs and NCLOBs, Buffers are converted to
+    strings. If ``data`` is an empty String or Buffer, the LOB is truncated to
+    zero length and no write operation is performed.
+
+    The existing LOB data is discarded before the new data is written.
+
+    This method cannot be used with BFILEs.
+
+    See :ref:`Using lob.setData() <lobsetdata>` for more information.
+
+    **Callback**:
+
+    If you are using the callback programming style::
+
+        setData(String data, function(Error error){});
+        setData(Buffer data, function(Error error){});
+
+    The parameters of the callback function
+    ``function(Error error)`` are:
+
+    .. callbackfunc-table::
+
+        * - Error ``error``
+          - If ``setData()`` succeeds, ``error`` is NULL. If an error occurs, then roll back the transaction before retrying.
+
 .. method:: lob.getDirFileName()
 
     .. versionadded:: 6.6

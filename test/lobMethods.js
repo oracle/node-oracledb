@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -464,7 +464,7 @@ describe('320. lobMethods1.js', function() {
     }); // 320.4.2
   }); // 320.4
 
-  describe('320.5 Temporary LOBs', function() {
+  describe('320.5 Temporary and persistent LOBs', function() {
 
     it('320.5.1 Create and use temporary CLOB', async function() {
       const lob = await conn.createLob(oracledb.CLOB);
@@ -509,6 +509,219 @@ describe('320. lobMethods1.js', function() {
 
       await lob.close();
     }); // 320.5.2
+
+    it('320.5.3 Set data on a temporary CLOB', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      await lob.setData('Temporary CLOB data test');
+
+      assert.strictEqual(await lob.getData(), 'Temporary CLOB data test');
+      assert.strictEqual(lob.length, 24);
+
+      await lob.setData('Updated CLOB data');
+      assert.strictEqual(await lob.getData(), 'Updated CLOB data');
+      assert.strictEqual(lob.length, 17);
+
+      await lob.close();
+    }); // 320.5.3
+
+    it('320.5.4 Set data on a temporary BLOB', async function() {
+      const lob = await conn.createLob(oracledb.BLOB);
+      const data = Buffer.from('Temporary BLOB data');
+      await lob.setData(data);
+
+      assert.deepStrictEqual(await lob.getData(), data);
+      assert.strictEqual(lob.length, data.length);
+
+      const updatedLongData = Buffer.from('Updated BLOB loooooooong data');
+      await lob.setData(updatedLongData);
+      assert.deepStrictEqual(await lob.getData(), updatedLongData);
+      assert.strictEqual(lob.length, updatedLongData.length);
+
+      const updatedShortData = Buffer.from('Updated BLOB data');
+      await lob.setData(updatedShortData);
+      assert.deepStrictEqual(await lob.getData(), updatedShortData);
+      assert.strictEqual(lob.length, updatedShortData.length);
+
+      await lob.close();
+    }); // 320.5.4
+
+    it('320.5.5 Set data on a persistent CLOB with transaction control', async function() {
+      const tableName = 'nodb_lob_setdata_clob';
+      const originalData = 'Persistent CLOB data test';
+      const rolledBackData = 'Rolled back persistent CLOB data';
+      const updatedData = 'Updated persistent CLOB data';
+      await conn.execute(testsUtil.sqlCreateTable(
+        tableName,
+        `CREATE TABLE ${tableName} (id NUMBER, data CLOB)`
+      ));
+
+      try {
+        let result = await conn.execute(
+          `INSERT INTO ${tableName} VALUES (1, EMPTY_CLOB())
+           RETURNING data INTO :clob`,
+          { clob: { type: oracledb.CLOB, dir: oracledb.BIND_OUT } }
+        );
+        let lob = result.outBinds.clob[0];
+        await lob.setData(originalData);
+        assert.strictEqual(await lob.getData(), originalData);
+        await conn.commit();
+        await lob.close();
+
+        // FOR UPDATE returns an updatable locator and locks the row until the
+        // transaction is committed or rolled back.
+        result = await conn.execute(
+          `SELECT data FROM ${tableName} WHERE id = 1 FOR UPDATE`
+        );
+        lob = result.rows[0][0];
+        assert.strictEqual(await lob.getData(), originalData);
+
+        // setData() has changed this locator but the transaction is still
+        // open, so rollback restores the original persistent LOB value.
+        await lob.setData(rolledBackData);
+        assert.strictEqual(await lob.getData(), rolledBackData);
+        await lob.close();
+        await conn.rollback();
+
+        result = await conn.execute(
+          `SELECT data FROM ${tableName} WHERE id = 1`
+        );
+        lob = result.rows[0][0];
+        assert.strictEqual(await lob.getData(), originalData);
+        await lob.close();
+
+        // Lock the row again before updating it, then commit to persist the
+        // replacement value.
+        result = await conn.execute(
+          `SELECT data FROM ${tableName} WHERE id = 1 FOR UPDATE`
+        );
+        lob = result.rows[0][0];
+        await lob.setData(updatedData);
+        assert.strictEqual(await lob.getData(), updatedData);
+        await conn.commit();
+        await lob.close();
+
+        lob = (await conn.execute(
+          `SELECT data FROM ${tableName} WHERE id = 1`
+        )).rows[0][0];
+        assert.strictEqual(await lob.getData(), updatedData);
+        await lob.close();
+      } finally {
+        await conn.rollback();
+        await conn.execute(testsUtil.sqlDropTable(tableName));
+      }
+    }); // 320.5.5
+
+    it('320.5.6 Set data on a persistent BLOB', async function() {
+      const tableName = 'nodb_lob_setdata_blob';
+      const originalData = Buffer.from('Persistent BLOB data test');
+      const updatedData = Buffer.from('Updated persistent BLOB data');
+      await conn.execute(testsUtil.sqlCreateTable(
+        tableName,
+        `CREATE TABLE ${tableName} (id NUMBER, data BLOB)`
+      ));
+
+      try {
+        let result = await conn.execute(
+          `INSERT INTO ${tableName} VALUES (1, EMPTY_BLOB())
+           RETURNING data INTO :blob`,
+          { blob: { type: oracledb.BLOB, dir: oracledb.BIND_OUT } }
+        );
+        let lob = result.outBinds.blob[0];
+        await lob.setData(originalData);
+        assert.deepStrictEqual(await lob.getData(), originalData);
+        await conn.commit();
+        await lob.close();
+
+        result = await conn.execute(
+          `SELECT data FROM ${tableName} WHERE id = 1 FOR UPDATE`
+        );
+        lob = result.rows[0][0];
+        await lob.setData(updatedData);
+        assert.deepStrictEqual(await lob.getData(), updatedData);
+        await conn.commit();
+        await lob.close();
+
+        result = await conn.execute(
+          `SELECT data FROM ${tableName} WHERE id = 1`
+        );
+        lob = result.rows[0][0];
+        assert.deepStrictEqual(await lob.getData(), updatedData);
+        await lob.close();
+      } finally {
+        await conn.execute(testsUtil.sqlDropTable(tableName));
+      }
+    }); // 320.5.6
+
+    it('320.5.7 Set data on a temporary NCLOB', async function() {
+      const lob = await conn.createLob(oracledb.NCLOB);
+      const data = 'Temporary NCLOB data test';
+      assert.strictEqual(lob.type, oracledb.DB_TYPE_NCLOB);
+
+      await lob.setData(data);
+      assert.strictEqual(await lob.getData(), data);
+      assert.strictEqual(lob.length, data.length);
+
+      await lob.close();
+    }); // 320.5.7
+
+    it('320.5.8 Set empty data', async function() {
+      const clob = await conn.createLob(oracledb.CLOB);
+      const blob = await conn.createLob(oracledb.BLOB);
+
+      await clob.setData('');
+      await blob.setData(Buffer.alloc(0));
+      assert.strictEqual(clob.length, 0);
+      assert.strictEqual(blob.length, 0);
+
+      await clob.close();
+      await blob.close();
+    }); // 320.5.8
+
+    it('320.5.9 BFILE setData() is not supported', async function() {
+      const result = await conn.execute(
+        `SELECT BFILENAME('BFILEDIR', 'A.JPG') FROM DUAL`
+      );
+      const bfile = result.rows[0][0];
+
+      await assert.rejects(
+        () => bfile.setData(Buffer.from('Hello')),
+        /NJS-155:/
+      );
+      await bfile.close();
+    }); // 320.5.9
+
+    it('320.5.10 Set data with invalid values', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+
+      for (const value of [123, null, {}]) {
+        await assert.rejects(
+          () => lob.setData(value),
+          /NJS-005:/
+        );
+      }
+
+      await lob.close();
+    }); // 320.5.10
+
+    it('320.5.11 Set data on a closed LOB', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      await lob.close();
+
+      await assert.rejects(
+        () => lob.setData('Hello'),
+        /NJS-022:/
+      );
+    }); // 320.5.11
+
+    it('320.5.12 Concurrent setData() calls', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      const first = lob.setData('A'.repeat(100000));
+      const second = lob.setData('B'.repeat(100000));
+
+      await assert.rejects(second, /NJS-023:/);
+      await first;
+      await lob.close();
+    }); // 320.5.12
   }); // 320.5
 
   describe('320.6 LOB write() method additional tests', function() {
@@ -604,6 +817,26 @@ describe('320. lobMethods1.js', function() {
       await lob.close();
       await lob2.close();
     }); // 320.6.2
+
+    it('320.6.3 Set Unicode data on a temporary CLOB', async function() {
+      const lob = await conn.createLob(oracledb.CLOB);
+      const data = 'A😀B';
+
+      await lob.setData(data);
+      await new Promise((resolve, reject) => {
+        lob.write('C', err => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      assert.strictEqual(await lob.getData(), 'A😀BC');
+      await lob.close();
+    }); // 320.6.3
+
   }); // 320.6
 
   describe('320.7 LOB trim() method additional tests', function() {

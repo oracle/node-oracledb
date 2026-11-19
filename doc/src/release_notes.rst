@@ -19,15 +19,18 @@ node-oracledb `v26.1.0 <https://github.com/oracle/node-oracledb/compare/v26.0.0.
 Common Changes
 ++++++++++++++
 
+#)  Added support for
+    :ref:`Azure Managed Identity authentication <azuremanagedidentityauth>`
+    for system-assigned and user-assigned identities.
+
+#)  Added asynchronous method :meth:`lob.setData()` to set string and buffer
+    data on LOB columns.
+
 #)  Fixed bug where pool thread runs indefinitely even after the pool is
     closed.
 
 #)  Fixed issue where :ref:`oracledb.JsonId <jsonid>` class does not serialize
     the json id correctly.
-
-#)  Added support for
-    :ref:`Azure Managed Identity authentication <azuremanagedidentityauth>`
-    for system-assigned and user-assigned identities.
 
 Thin Mode Changes
 +++++++++++++++++

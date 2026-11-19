@@ -6610,12 +6610,23 @@ Overview of node-oracledb functional tests
     320.4 getData() method
       320.4.1 getData() method - CLOB
       320.4.2 getData() method - BLOB
-    320.5 Temporary LOBs
+    320.5 Temporary and persistent LOBs
       320.5.1 Create and use temporary CLOB
       320.5.2 Create and use temporary BLOB
+      320.5.3 Set data on a temporary CLOB
+      320.5.4 Set data on a temporary BLOB
+      320.5.5 Set data on a persistent CLOB with transaction control
+      320.5.6 Set data on a persistent BLOB
+      320.5.7 Set data on a temporary NCLOB
+      320.5.8 Set empty data
+      320.5.9 BFILE setData() is not supported
+      320.5.10 Set data with invalid values
+      320.5.11 Set data on a closed LOB
+      320.5.12 Concurrent setData() calls
     320.6 LOB write() method additional tests
       320.6.1 Multiple writes to same LOB
       320.6.2 Write with specific offset in middle
+      320.6.3 Set Unicode data on a temporary CLOB
     320.7 LOB trim() method additional tests
       320.7.1 Trim temporary LOB
       320.7.2 Trim to zero length
