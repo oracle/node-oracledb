@@ -39,6 +39,9 @@ Common Changes
 #)  Fixed bug where LOB streaming writes do not convert Buffers to strings for
     NCLOBs.
 
+#)  Bumped the minimum Node.js version required to 18.12 to align with our plugin
+    and new API requirements, testing practices and modern security standards.
+
 #)  Fixed issue to remove incorrect nested connect string generation in some
     cases when :attr:`oracledb.thickModeDSNPassthrough` is set to `false`.
 

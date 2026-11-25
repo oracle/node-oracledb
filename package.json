@@ -42,7 +42,7 @@
     "buildpackage": "node package/buildpackage.js"
   },
   "engines": {
-    "node": ">=14.17"
+    "node": ">=18.12"
   },
   "maintainers": [
     {
