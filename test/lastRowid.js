@@ -56,7 +56,7 @@ describe('228. lastRowid.js', function() {
     await conn.close();
   });
 
-  it('228.1 examples', async () => {
+  it('228.1 INSERT, UPDATE and DELETE statements', async () => {
     const row1 = [1, "First"];
     const row2 = [2, "Second"];
 
@@ -68,27 +68,28 @@ describe('228. lastRowid.js', function() {
     const result2 = await conn.execute(sql, row2);
     assert(result2.lastRowid);
     assert.strictEqual(result2.rowsAffected, 1);
-    const rowid2 = result2.lastRowid;
 
-    // the row can be fetched with the rowid that was retained
+    // verify that ROWIDs returned by INSERT identify the correct rows
     sql = `select * from ${TABLE} where rowid = :1`;
     let result = await conn.execute(sql, [result1.lastRowid]);
     assert.deepStrictEqual(result.rows[0], row1);
     result = await conn.execute(sql, [result2.lastRowid]);
     assert.deepStrictEqual(result.rows[0], row2);
 
-    // updating multiple rows only returns the rowid of the last updated row
+    // update multiple rows only returns the rowid of the last updated row
+    // The order in which Oracle updates rows is not guaranteed.
     sql = `update ${TABLE} set value = value || ' (Modified)'`;
     result = await conn.execute(sql);
-    assert.strictEqual(result.lastRowid, rowid2);
+    assert.strictEqual(result.rowsAffected, 2);
 
-    // deleting multiple rows only returns the rowid of the last deleted row
+    // delete multiple rows only returns the rowid of the last deleted row
     sql = `delete from ${TABLE}`;
     result = await conn.execute(sql);
-    assert.strictEqual(result.lastRowid, rowid2);
+    assert.strictEqual(result.rowsAffected, 2);
 
     // deleting no rows results in an undefined value
     result = await conn.execute(sql);
+    assert.strictEqual(result.rowsAffected, 0);
     assert(result.lastRowid === undefined);
   }); // 228.1
 

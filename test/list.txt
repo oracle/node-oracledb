@@ -4985,7 +4985,7 @@ Overview of node-oracledb functional tests
     227.6 DB_TYPE_TIMESTAMP_LTZ
 
   228. lastRowid.js
-    228.1 examples
+    228.1 INSERT, UPDATE and DELETE statements
     228.2 MERGE statement
     228.3 Negative - not applicable to executeMany()
     228.4 INSERT ALL statement
