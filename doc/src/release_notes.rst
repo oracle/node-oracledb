@@ -39,6 +39,9 @@ Common Changes
 #)  Fixed bug where LOB streaming writes do not convert Buffers to strings for
     NCLOBs.
 
+#)  Fixed issue to remove incorrect nested connect string generation in some 
+    cases when ``oracledb.thickModeDSNPassthrough`` is set to False.
+
 Thin Mode Changes
 +++++++++++++++++
 
