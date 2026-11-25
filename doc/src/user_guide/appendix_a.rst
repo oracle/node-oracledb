@@ -104,6 +104,9 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
     * - Oracle Database Native Network Encryption and Checksumming (see :ref:`nne`)
       - No
       - Yes
+    * - Oracle AI Database ezTLS (see :ref:`eztls`)
+      - Yes
+      - Yes
     * - Connection pinging API (see :meth:`connection.ping()`)
       - Yes
       - Yes
@@ -527,6 +530,9 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
     * - USE_SNI
       - :ref:`useSNI <getconnectiondbattrsusesni>`
       - Indicates whether the TLS extension, Server Name Indication (SNI), is enabled.
+    * - USE_EZ_TLS
+      - :ref:`useEzTls <getconnectiondbattrsuseztls>`
+      - Determines whether encryption-only, zero-configuration TLS (ezTLS) should be used for the connection.
 
 In node-oracledb Thick mode, the above values only work when connected to
 Oracle Database 21c or later.
@@ -636,7 +642,8 @@ from node-oracledb Thick mode in the following ways:
   ``sslServerDNMatch``, ``stmtCacheSize``, ``terminal``,
   ``tokenAuthConfigAzure``, ``tokenAuthConfigOci``,
   ``transportConnectTimeout``, ``user``, ``username``, ``useSNI``,
-  ``walletContent``, ``walletLocation``, and ``walletPassword`` parameters.
+  ``useEzTls``, ``walletContent``, ``walletLocation``, and ``walletPassword``
+  parameters.
 
 - Node-oracledb Thin mode only supports homogeneous pools.
 

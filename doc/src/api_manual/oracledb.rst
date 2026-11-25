@@ -2739,6 +2739,20 @@ Oracledb Methods
               The default value was changed from *60.0* seconds to *20.0* seconds.
 
             .. versionadded:: 6.0
+        * - ``useEzTls``
+          - Boolean
+          - Both
+          - .. _createpoolpoolattrsuseztls:
+
+            Determines whether encryption-only, zero-configuration TLS (ezTLS) should be used for the connection.
+
+            When set to *true*, node-oracledb requests ezTLS from an Oracle AI Database (version 23.26.4 or later) configured to support it. This provides encrypted communication without requiring client-side certificates or a wallet.
+
+            The default is *false*.
+
+            See :ref:`eztls` for more information.
+
+            .. versionadded:: 26.1.0
         * - ``user``, ``username``
           - String
           - Both
@@ -3777,6 +3791,20 @@ Oracledb Methods
             See :ref:`txnpriority` for more information.
 
             .. versionadded:: 26.0.0
+        * - ``useEzTls``
+          - Boolean
+          - Both
+          - .. _getconnectiondbattrsuseztls:
+
+            Determines whether encryption-only, zero-configuration TLS (ezTLS) should be used for the connection.
+
+            When set to *true*, node-oracledb requests ezTLS from an Oracle AI Database (version 23.26.4 or later) configured to support it. This provides encrypted communication without requiring client-side certificates or a wallet.
+
+            The default is *false*.
+
+            See :ref:`eztls` for more information.
+
+            .. versionadded:: 26.1.0
         * - ``user``, ``username``
           - String
           - Both

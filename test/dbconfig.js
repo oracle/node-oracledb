@@ -38,7 +38,7 @@
  *      NODE_ORACLEDB_DBA_USER, NODE_ORACLEDB_DBA_PASSWORD
  *      If required:
  *      NODE_ORACLEDB_EXTERNALAUTH,
- *      NODE_ORACLEDB_PROXY_SESSION_USER, NODE_ORACLEDB_DRCP,
+ *      NODE_ORACLEDB_PROXY_SESSION_USER, NODE_ORACLEDB_DRCP, NODE_ORACLEDB_USE_EZTLS,
  *      NODE_ORACLEDB_IMPLICIT_POOL
  *      NODE_ORACLEDB_WALLET_LOCATION, NODE_ORACLEDB_WALLET_PASSWORD
  *
@@ -63,7 +63,8 @@ const config = {
     isCmanTdm: false,
     drcp: false,
     implicitPool: false
-  }
+  },
+  useEzTLS: false
 };
 
 let counter = 0;
@@ -95,6 +96,10 @@ if (process.env.NODE_ORACLEDB_EXTERNALAUTH) {
 
 if (process.env.NODE_ORACLEDB_DRCP) {
   config.test.drcp = (process.env.NODE_ORACLEDB_DRCP.toLowerCase() === 'true');
+}
+
+if (process.env.NODE_ORACLEDB_USE_EZTLS) {
+  config.useEzTLS = (process.env.NODE_ORACLEDB_USE_EZTLS.toLowerCase() === 'true');
 }
 
 if (process.env.NODE_ORACLEDB_TEST_DOCKER) {

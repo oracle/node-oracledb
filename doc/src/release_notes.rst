@@ -20,6 +20,9 @@ Common Changes
 ++++++++++++++
 
 #)  Added support for
+    :ref:`Encryption-only, zero-configuration TLS (ezTLS) <eztls>`.
+
+#)  Added support for
     :ref:`Azure Managed Identity authentication <azuremanagedidentityauth>`
     for system-assigned and user-assigned identities.
 

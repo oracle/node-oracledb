@@ -5086,6 +5086,145 @@ Refer to the `Oracle Database Security Guide <https://www.oracle.com/pls/topic
 /lookup?ctx=dblatest&id=GUID-41040F53-D7A6-48FA-A92A-0C23118BC8A0>`__ for more
 configuration information.
 
+Both Thin and Thick modes also support encryption-only, zero-configuration TLS
+(ezTLS), see :ref:`ezTLS <eztls>`. Thick mode can use Oracle Native Network
+Encryption (NNE), see :ref:`Native Network Encryption <nne>`.
+
+.. _eztls:
+
+Encryption-only, zero-configuration TLS (ezTLS)
+-----------------------------------------------
+
+Oracle AI Database encryption-only, zero-configuration TLS known as ezTLS
+provides encrypted communication between node-oracledb and Oracle Database
+without requiring client-side certificates or wallets. ezTLS requires Oracle
+AI Database 26ai version 23.26.4 or later.
+
+Traditional certificate-based TLS verifies server identity using certificates.
+ezTLS does not perform certificate-based identity verification. Instead, it
+uses a shared secret established during database authentication to verify and
+bind the encrypted connection to the authenticated database session.
+
+For more information on ezTLS, see `About ezTLS <https://www.oracle.com/pls/
+topic/lookup?ctx=dblatest&id=GUID-26FE147B-5CF0-47C9-B1B3-CDD3B8E10480>`__ in
+the Oracle AI Database Security Guide.
+
+ezTLS support was introduced in node-oracledb 26.1.0 and can be used with
+connections that use either the TCP or TCPS protocol as detailed below.
+
+.. _eztlstcp:
+
+Using ezTLS for TCP Connections
++++++++++++++++++++++++++++++++
+
+Before using ezTLS with TCP connections, enable ezTLS on the database server
+by adding the following settings to the server ``sqlnet.ora`` file:
+
+.. code-block:: text
+
+    SQLNET.ENCRYPTION_SERVER = REQUESTED
+    SQLNET.ENCRYPTION_TYPES_SERVER = (EZTLS)
+
+For more information, see `Configuring ezTLS for TCP Connections
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-D9AF19C9-BEC3-
+4A64-8BE9-97C28E07E9C7>`__.
+
+To connect using ezTLS with a TCP connection in node-oracledb, set the
+``useEzTls`` parameter to *true* in :func:`oracledb.getConnection()` or
+:func:`oracledb.createPool()`. For example:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user: "hr",
+        password: mypwd, // mypwd contains the hr schema password
+        connectString: "mydbmachine.example.com/orclpdb1",
+        useEzTLS: true
+    });
+
+Note that TCP is the default protocol.
+
+Alternatively, you can connect using ezTLS by setting the ``PROTOCOL``
+parameter to *TCP* and the ``USE_EZ_TLS`` parameter to *TRUE*  in a
+:ref:`Connect Descriptor <embedtns>` as shown below:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user: "hr",
+        password: mypwd, // mypwd contains the hr schema password
+        connectString: "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=dbhost.example.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=orcl))(SECURITY=(USE_EZ_TLS=TRUE))"
+    });
+
+.. _eztlsconnection:
+
+During connection establishment, node-oracledb and Oracle AI Database
+negotiate an encrypted TLS session. After the encrypted session is
+established, node-oracledb verifies the database server using a special ezTLS
+verification packet. If the database server does not support ezTLS, has not
+enabled it, or server verification fails, node-oracledb raises ``NJS-506``,
+indicating a TLS handshake failure.
+
+If ``useEzTLS`` is not set to *true* in :func:`~oracledb.getConnection()` or
+:func:`~oracledb.createPool()`, or if the ``USE_EZ_TLS`` parameter in the
+connect descriptor is not set to *TRUE*, node-oracledb does not request ezTLS,
+even when the database server is configured to support it. If ezTLS is
+required by the database server, the connection attempt fails.
+
+.. _eztlstcps:
+
+Using ezTLS for TCPS Connections
+++++++++++++++++++++++++++++++++
+
+Before using ezTLS for TCPS connections, configure the database server and
+listener for TCPS.
+
+Add the following setting to the database server ``sqlnet.ora`` file:
+
+.. code-block:: text
+
+    EZTLS = TRUE
+    SSL_CLIENT_AUTHENTICATION = FALSE
+
+The ``listener.ora`` configuration must include a TCPS protocol endpoint.
+
+For more information, see `Configuring ezTLS for TCPS Connections
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-1FD76F25-15FA-
+4DF7-9AAF-BEF98C1D1F07>`__.
+
+To connect using ezTLS with a TCPS connection in node-oracledb, specify the
+*tcps* protocol in the ``connectString`` property and set the ``useEzTls``
+property to *true* in :func:`oracledb.getConnection()` or
+:func:`oracledb.createPool()`. For example:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user: "hr",
+        password: mypwd,
+        connectString: "tcps://dbhost.example.com:2484/orcl",
+        useEzTLS: true
+    });
+
+If ``useEzTls`` is not set to *true*, node-oracledb does not request ezTLS,
+even when the database server and listener are configured to support it.
+
+Alternatively, you can connect using ezTLS by setting the ``PROTOCOL``
+parameter to *TCPS* and the ``USE_EZ_TLS`` parameter to *TRUE*  in a
+:ref:`Connect Descriptor <embedtns>` as shown below:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user: "hr",
+        password: mypwd, // mypwd contains the hr schema password
+        connectString: "(DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(HOST=dbhost.example.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=orcl))(SECURITY=(USE_EZ_TLS=TRUE))"
+    });
+
+For details about ezTLS negotiation, server verification, and enabling
+ezTLS for a connection, see
+:ref:`ezTLS connection behavior <eztlsconnection>`.
+
 .. _nne:
 
 Native Network Encryption
