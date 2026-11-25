@@ -454,6 +454,12 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
 
         The SSL_ALLOW_WEAK_DN_MATCH is considered a temporary solution to enable the behavior of SSL_SERVER_DN_MATCH prior to Oracle AI Database 26ai. See `Strict DN Matching with Both Listener and Server Certificates <https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-87017-2>`__ for more information.
 
+        When using Thick mode with Oracle Client version 19.30 or later, Oracle Client uses ``TLS_ALLOW_WEAK_DN_MATCH`` and ignores ``SSL_ALLOW_WEAK_DN_MATCH`` when both are specified in a connect string.
+
+        .. versionchanged:: 26.1.0
+
+          In Thin mode, node-oracledb uses the TLS value when both a TLS keyword and its SSL alias are set in a connect descriptor, regardless of their order.
+
         .. versionchanged:: 26.0.0
 
           The TLS alias support was added in node-oracledb Thin mode.
@@ -463,6 +469,12 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
 
         **Note**: If specified, this value is used for any verification. Otherwise, the hostname will be used.
 
+        When using Thick mode with Oracle Client version 19.30 or later, Oracle Client uses ``TLS_SERVER_CERT_DN`` and ignores ``SSL_SERVER_CERT_DN`` when both are specified in a connect string.
+
+        .. versionchanged:: 26.1.0
+
+          In Thin mode, node-oracledb uses the TLS value when both a TLS keyword and its SSL alias are set in a connect descriptor, regardless of their order.
+
         .. versionchanged:: 26.0.0
 
           The TLS alias support was added in node-oracledb Thin mode.
@@ -471,6 +483,12 @@ are in a ``tnsnames.ora`` file.  All unrecognized parameters are ignored.
       - Determines whether the server certificate DN should be matched in addition to the regular certificate verification that is performed.
 
         **Note**: In Thin mode, parsing the parameter supports case insensitive on/yes/true values similar to the Thick mode. Any other value is treated as disabling it.
+
+        When using Thick mode with Oracle Client version 19.30 or later, Oracle Client uses ``TLS_SERVER_DN_MATCH`` and ignores ``SSL_SERVER_DN_MATCH`` when both are specified in a connect string.
+
+        .. versionchanged:: 26.1.0
+
+          In Thin mode, node-oracledb uses the TLS value when both a TLS keyword and its SSL alias are set in a connect descriptor, regardless of their order.
 
         .. versionchanged:: 26.0.0
 

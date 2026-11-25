@@ -76,6 +76,11 @@ Thin Mode Changes
 #)  Fixed issue where a pipeline preparation error could cause subsequent
     operations on the connection to fail.
 
+#)  Fixed parameter precedence so that ``TLS_ALLOW_WEAK_DN_MATCH``,
+    ``TLS_SERVER_DN_MATCH``, and ``TLS_SERVER_CERT_DN`` take precedence over
+    their ``SSL_`` aliases when both parameters are specified in a
+    :ref:`connect descriptor <embedtns>`, regardless of their order.
+
 #)  Internal code optimization for improved connection and BFILE handling.
 
 Thick Mode Changes

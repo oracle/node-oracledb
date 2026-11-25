@@ -192,7 +192,13 @@ The TLS certificate Distinguished Name (DN) validation parameters are aliases
 for the corresponding SSL parameters. For example, ``tls_server_dn_match``,
 ``tls_server_cert_dn``, and ``tls_allow_weak_dn_match`` can be used instead of
 ``ssl_server_dn_match``, ``ssl_server_cert_dn``, and
-``ssl_allow_weak_dn_match`` respectively.
+``ssl_allow_weak_dn_match`` respectively. If you are using node-oracledb Thick
+mode with Oracle Client version 19.30 or later and if parameters prefixed
+with SSL and the corresponding TLS parameters are both specified in a
+connection string, then the SSL parameters are ignored. For more information
+on these parameters, see the `Oracle AI Database Net Services Reference
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7DF419C2-3237-
+4B79-9AA3-EA1C2D786712>`__ documentation.
 
 **Node-oracledb Settings in Easy Connect Strings**
 
@@ -235,6 +241,12 @@ exceeded, an error is raised.
 Any ``DESCRIPTION``, ``CONNECT_DATA`` and ``SECURITY`` parameters of a connect
 descriptor that are not recognized by node-oracledb are passed to the database
 unchanged.
+
+Starting from node-oracledb version 26.1.0 onwards, if you are using Thin mode
+and both a ``TLS_*`` parameter such as `TLS_SERVER_DN_MATCH
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-84A7CB98-35B8-
+472E-992A-4391B4312B2A>`__ and its corresponding ``SSL_*`` parameter are
+specified in a connect descriptor, then the TLS value is used.
 
 .. _tnsnames:
 
