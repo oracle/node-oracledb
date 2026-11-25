@@ -61,6 +61,10 @@ Thin Mode Changes
     an error.
     See `Issue #1796 <https://github.com/oracle/node-oracledb/issues/1796>`__.
 
+#)  Added support for configuring :ref:`OCI IAM <iamconnectstring>` and
+    :ref:`Azure <oauthconnectstring>` token-based authentication with the
+    ``TOKEN_AUTH`` setting in a connection string.
+
 #)  Fixed bug where an :ref:`implicit result set <implicitresults>` with
     JSON, LOB, or VECTOR columns returned only the rows sent in the initial
     prefetch.

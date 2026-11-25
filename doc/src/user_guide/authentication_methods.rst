@@ -773,19 +773,85 @@ connection or pool creation parameters described earlier. However, if
 you cannot use them, you can use IAM Token Authentication by configuring
 Oracle Net options.
 
-.. note::
+Oracle Net token authentication can be configured in both node-oracledb Thin
+mode and Thick mode in an :ref:`Easy Connect string <easyconnect>`, a
+:ref:`connect descriptor <embedtns>`, or a :ref:`tnsnames.ora <tnsnames>`
+entry. Support for configuring token authentication in a connection string in
+node-oracledb Thin mode was introduced in node-oracledb 26.1.0.
 
-    In this release, IAM connection strings are only supported in
-    node-oracledb Thick mode. See :ref:`enablingthick`.
+When you are using the connection string syntax, the ``TOKEN_AUTH`` must be
+set. Also, the ``PROTOCOL`` parameter must be set to *TCPS* and the
+``SSL_SERVER_DN_MATCH`` parameter should be set to *ON*.
 
-This requires Oracle Client libraries 19.14 (or later), or 21.5 (or later).
+In Thin mode, node-oracledb processes the Oracle Net ``TOKEN_AUTH`` settings
+and configures the selected OCI IAM authentication flow. The ``TOKEN_AUTH``
+parameter can be set to *OCI_API_KEY*, *OCI_INSTANCE_PRINCIPAL*,
+*OCI_RESOURCE_PRINCIPAL*, or *OCI_TOKEN*. For *OCI_API_KEY*,
+*OCI_INSTANCE_PRINCIPAL*, and *OCI_RESOURCE_PRINCIPAL*, load the
+:ref:`extensionOci <extensionociplugin>` plugin in your application with
+``require('oracledb/plugins/token/extensionOci')`` before creating a
+connection or pool. *OCI_TOKEN* uses file-based token authentication. For
+details on these flows and their parameters, see
+:ref:`Thin Mode OCI IAM Authentication Flows <iamauththinflows>`.
 
-Save the generated access token to a file and set the connect descriptor
-``TOKEN_LOCATION`` option to the directory containing the token file.
-The connect descriptor parameter ``TOKEN_AUTH`` must be set to
-``OCI_TOKEN``, the ``PROTOCOL`` value must be ``TCPS``, the
-``SSL_SERVER_DN_MATCH`` value should be ``ON``, and the parameter
-``SSL_SERVER_CERT_DN`` should be set. For example, if the token and
+In Thick mode, node-oracledb passes the connection information to the Oracle
+Client libraries, which parse and process the ``TOKEN_AUTH`` settings in a
+connection string. Node-oracledb Thick mode requires Oracle Client libraries
+19.14 (or later), or 21.5 (or later).
+
+You can specify the authentication parameters in an
+:ref:`Easy Connect string <easyconnect>`. For example, to use *OCI_API_KEY*
+authentication:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "tcps://dbhost:1522/service_name?TOKEN_AUTH=OCI_API_KEY&OCI_CONFIG_FILE=/home/app/.oci/config&OCI_PROFILE=DEFAULT&SSL_SERVER_DN_MATCH=TRUE"
+    });
+
+Also, you can specify these authentication parameters in a
+:ref:`Connect Descriptor <embedtns>`. This can be passed directly in the
+``connectString`` property of :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()` or as a :ref:`TNS Alias <tnsnames>` when the
+connect descriptor is stored in a :ref:`tnsnames.ora <tnsadmin>` file. For
+example, to use an OCI API key authentication in a full connect descriptor::
+
+    db_alias =
+        (DESCRIPTION=
+            (ADDRESS=(PROTOCOL=TCPS)(HOST=dbhost)(PORT=1522))
+            (SECURITY=
+                (SSL_SERVER_DN_MATCH=TRUE)
+                (TOKEN_AUTH=OCI_API_KEY)
+                (OCI_CONFIG_FILE=/home/app/.oci/config)
+                (OCI_PROFILE=DEFAULT))
+            (CONNECT_DATA=(SERVICE_NAME=service_name)))
+
+In node-oracledb Thick mode, you can additionally set ``TOKEN_AUTH`` in a
+:ref:`sqlnet.ora <tnsadmin>` file.
+
+When ``TOKEN_AUTH`` is specified in a connection string when using Thin mode,
+node-oracledb automatically configures external authentication. Do not specify
+``password``, ``accessToken``, ``accessTokenConfig``, ``tokenAuthConfigOci``,
+or ``tokenAuthConfigAzure`` during connection or pool creation. Pools using
+``TOKEN_AUTH`` must be homogeneous.
+
+When a connect descriptor contains multiple ``DESCRIPTION`` entries, each
+description must specify its own ``TOKEN_AUTH`` value and related parameters
+in its ``SECURITY`` section. When a description is selected, node-oracledb
+uses the token authentication settings from that description. This allows
+different descriptions in a ``DESCRIPTION_LIST`` to use different token
+authentication methods during standalone connection failover. In a Thin mode
+connection pool, all descriptions must use the same token authentication
+settings. Pool creation fails if the descriptions use different settings.
+
+When using OCI file-based token authentication, save the generated access
+token to a file and set the connect descriptor ``TOKEN_LOCATION`` option to
+the directory containing the token file. The connect descriptor parameter
+``TOKEN_AUTH`` must be set to ``OCI_TOKEN``, the ``PROTOCOL`` value must be
+``TCPS``, the ``SSL_SERVER_DN_MATCH`` value should be ``ON``, and the
+parameter ``SSL_SERVER_CERT_DN`` should be set. For example, if the token and
 private key are in the default location used by the `OCI CLI <https://
 docs.oracle.com/en-us/iaas/Content/API/Concepts/cliconcepts.htm>`__,
 your :ref:`tnsnames.ora <tnsnames>` file might contain:
@@ -820,13 +886,53 @@ For example in a ``tnsnames.ora`` file:
           (TOKEN_LOCATION="/opt/oracle/token")
           ))
 
-You can alternatively set ``TOKEN_AUTH`` and ``TOKEN_LOCATION`` in a
-:ref:`sqlnet.ora <tnsadmin>` file. The ``TOKEN_AUTH`` and
-``TOKEN_LOCATION`` values in a :ref:`connection string <connectionstrings>`
-take precedence over the ``sqlnet.ora`` settings.
+In node-oracledb Thick mode, you can alternatively set ``TOKEN_AUTH`` and
+``TOKEN_LOCATION`` in a :ref:`sqlnet.ora <tnsadmin>` file. The ``TOKEN_AUTH``
+and ``TOKEN_LOCATION`` values in a
+:ref:`connection string <connectionstrings>` take precedence over the
+``sqlnet.ora`` settings.
 
 See `Oracle Net Services documentation <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=NETRF>`__ for more information.
+
+.. _iamauththinflows:
+
+**OCI IAM TOKEN_AUTH values in node-oracledb Thin Mode**
+
+The following table lists the OCI IAM authentication flows supported by
+``TOKEN_AUTH`` in node-oracledb Thin mode.
+
+.. list-table-with-summary:: OCI IAM ``TOKEN_AUTH`` values supported in Thin mode
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :width: 100%
+    :name:  _oci_token_auth_values
+    :summary: The first column displays the TOKEN_AUTH value. The second column displays the authentication flow. The third column displays the optional parameters.
+
+    * - TOKEN_AUTH Value
+      - Authentication flow
+      - Optional parameters
+    * - OCI_API_KEY
+      - ConfigFileBasedAuthentication
+      - ``OCI_CONFIG_FILE``,
+        ``OCI_PROFILE``,
+        ``OCI_COMPARTMENT``,
+        ``OCI_DATABASE``
+    * - OCI_INSTANCE_PRINCIPAL
+      - InstancePrincipal
+      - ``OCI_COMPARTMENT``,
+        ``OCI_DATABASE``
+    * - OCI_RESOURCE_PRINCIPAL
+      - ResourcePrincipal
+      - ``OCI_COMPARTMENT``,
+        ``OCI_DATABASE``
+    * - OCI_TOKEN
+      - File-based OCI OCI IAM token authentication
+      - ``TOKEN_LOCATION``
+
+If ``OCI_DATABASE`` is specified without ``OCI_COMPARTMENT``, connection
+or pool creation fails with an invalid connection string parameter error.
 
 .. _cloudnativeauthoci:
 
@@ -1240,19 +1346,86 @@ connection or pool creation parameters described earlier. However, if
 you cannot use them, you can use OAuth 2.0 Token Authentication by
 configuring Oracle Net options.
 
-.. note::
+Oracle Net token authentication can be configured in both node-oracledb
+Thin mode and Thick mode in an :ref:`Easy Connect string <easyconnect>`, a
+:ref:`Full Connect Descriptor <embedtns>`, or a :ref:`tnsnames.ora <tnsnames>`
+entry. Support for configuring token authentication in a connection string in
+node-oracledb Thin mode was added in node-oracledb 26.1.0.
 
-    In this release, OAuth 2.0 connection strings are only supported in
-    node-oracledb Thick mode. See :ref:`enablingthick`.
+When you are using the connection string syntax, the ``TOKEN_AUTH`` must be
+set. Also, the ``PROTOCOL`` parameter must be ``TCPS`` and the
+``SSL_SERVER_DN_MATCH`` parameter should be ``ON``.
 
-This requires Oracle Client libraries 19.15 (or later), or 21.7 (or later).
+In Thin mode, node-oracledb processes the Oracle Net ``TOKEN_AUTH`` settings
+and configures the selected OAuth 2.0 authentication flow. The ``TOKEN_AUTH``
+parameter can be set to *AZURE_SERVICE_PRINCIPAL*, *AZURE_MANAGED_IDENTITY*,
+or *OAUTH*. For *AZURE_SERVICE_PRINCIPAL* and *AZURE_MANAGED_IDENTITY*, load
+the :ref:`extensionAzure <extensionazureplugin>` plugin in your application
+with ``require('oracledb/plugins/token/extensionAzure')`` before creating a
+connection or pool. *OAUTH* uses file-based token authentication. For details
+on these flows and their parameters, see
+:ref:`Thin Mode OAuth 2.0 Authentication Flows <oauthtokenauththinflows>`.
 
-Save the generated access token to a file and set the connect descriptor
-``TOKEN_LOCATION`` option to the directory containing the token file.
-The connect descriptor parameter ``TOKEN_AUTH`` must be set to
-``OAUTH``, the ``PROTOCOL`` value must be ``TCPS``, the
-``SSL_SERVER_DN_MATCH`` value should be ``ON``, and the parameter
-``SSL_SERVER_CERT_DN`` should be set. For example, your
+In node-oracledb Thick mode, node-oracledb passes the connection information
+to the Oracle Client libraries, which parse and process the ``TOKEN_AUTH``
+settings in a connection string. Thick mode requires Oracle Client libraries
+19.14 (or later), or 21.5 (or later).
+
+You can specify the authentication parameters in an
+:ref:`Easy Connect String <easyconnect>`. For example, to use
+*AZURE_MANAGED_IDENTITY* authentication:
+
+.. code-block:: javascript
+
+    const connection = await oracledb.getConnection({
+        user          : "hr",
+        password      : mypw,  // mypw contains the hr schema password
+        connectString : "tcps://dbhost:1522/service_name?TOKEN_AUTH=AZURE_MANAGED_IDENTITY&AZURE_DB_APP_ID_URI=https://database.windows.net"
+    });
+
+Also, you can specify these authentication parameters in a
+:ref:`Connect Descriptor <embedtns>`. This can be passed directly in the
+``connectString`` property of :meth:`oracledb.getConnection()` or
+:meth:`oracledb.createPool()` or as a :ref:`TNS Alias <tnsnames>` when the
+connect descriptor is stored in a :ref:`tnsnames.ora <tnsadmin>` file. For
+example, to use Azure Service Principal authentication in a
+:ref:`tnsnames.ora <tnsadmin>` file::
+
+    db_alias =
+        (DESCRIPTION=
+            (ADDRESS=(PROTOCOL=TCPS)(HOST=dbhost)(PORT=1522))
+            (SECURITY=
+                (TOKEN_AUTH=AZURE_SERVICE_PRINCIPAL)
+                (AZURE_DB_APP_ID_URI=https://database.windows.net)
+                (TENANT_ID=tenant-id)
+                (CLIENT_ID=client-id)
+                (CLIENT_SECRET=client-secret))
+           (CONNECT_DATA=(SERVICE_NAME=service_name)))
+
+In node-oracledb Thick mode, you can additionally set ``TOKEN_AUTH`` in a
+:ref:`sqlnet.ora <tnsadmin>` file.
+
+When ``TOKEN_AUTH`` is specified in Thin mode, node-oracledb automatically
+configures external authentication. Do not specify ``password``,
+``accessToken``, ``accessTokenConfig``, ``tokenAuthConfigOci``, or
+``tokenAuthConfigAzure`` during connection or pool creation. Pools using
+``TOKEN_AUTH`` must be homogeneous.
+
+When a connect descriptor contains multiple ``DESCRIPTION`` entries, each
+description must specify its own ``TOKEN_AUTH`` value and related parameters
+in its ``SECURITY`` section. When a description is selected, node-oracledb
+uses the token authentication settings from that description. This allows
+different descriptions in a ``DESCRIPTION_LIST`` to use different token
+authentication methods during standalone connection failover. In a Thin mode
+connection pool, all descriptions must use the same token authentication
+settings. Pool creation fails if the descriptions use different settings.
+
+When using Oracle Client's file-based OAuth authentication, save the generated
+access token to a file and set the connect descriptor ``TOKEN_LOCATION``
+option to the directory containing the token file. The connect descriptor
+parameter ``TOKEN_AUTH`` must be set to ``OAUTH``, the ``PROTOCOL`` value must
+be ``TCPS``, the ``SSL_SERVER_DN_MATCH`` value should be ``ON``, and the
+parameter ``SSL_SERVER_CERT_DN`` should be set. For example, your
 :ref:`tnsnames.ora <tnsnames>` file might contain:
 
 ::
@@ -1267,13 +1440,57 @@ The connect descriptor parameter ``TOKEN_AUTH`` must be set to
           (TOKEN_LOCATION="/opt/oracle/token")
           ))
 
-You can alternatively set ``TOKEN_AUTH`` and ``TOKEN_LOCATION`` in a
-:ref:`sqlnet.ora <tnsadmin>` file. The ``TOKEN_AUTH`` and
-``TOKEN_LOCATION`` values in a :ref:`connection string <connectionstrings>`
-take precedence over the ``sqlnet.ora`` settings.
+In node-oracledb Thick mode, you can alternatively set ``TOKEN_AUTH`` and
+``TOKEN_LOCATION`` in a :ref:`sqlnet.ora <tnsadmin>` file. The ``TOKEN_AUTH``
+and ``TOKEN_LOCATION`` values in a
+:ref:`connection string <connectionstrings>` take precedence over the
+``sqlnet.ora`` settings.
 
 See `Oracle Net Services documentation <https://www.oracle.com/pls/topic/
 lookup?ctx=dblatest&id=NETRF>`__ for more information.
+
+.. _oauthtokenauththinflows:
+
+**OAuth 2.0 TOKEN_AUTH values in node-oracledb Thin Mode**
+
+The following table lists the OAuth 2.0 authentication flows supported by
+``TOKEN_AUTH`` in node-oracledb Thin mode.
+
+.. list-table-with-summary:: OAuth 2.0 ``TOKEN_AUTH`` values supported in Thin mode
+    :header-rows: 1
+    :class: wy-table-responsive
+    :align: center
+    :width: 100%
+    :name:  _azure_token_auth_values
+    :summary: The first column displays the TOKEN_AUTH value. The second column displays the authentication flow. The third column displays the required parameters. The fourth column displays the optional parameters.
+
+    * - TOKEN_AUTH Value
+      - Authentication flow
+      - Required parameters
+      - Optional parameters
+    * - AZURE_SERVICE_PRINCIPAL
+      - AzureServicePrincipal
+      - ``AZURE_DB_APP_ID_URI``,
+        ``TENANT_ID``,
+        ``CLIENT_ID``,
+        ``CLIENT_SECRET``
+      - None
+    * - AZURE_MANAGED_IDENTITY
+      - AzureManagedIdentity
+      - ``AZURE_DB_APP_ID_URI``
+      - ``CLIENT_ID``
+    * - OAUTH
+      - File-based OAuth token authentication
+      - TOKEN_LOCATION
+      - None
+
+For *AZURE_SERVICE_PRINCIPAL*, ``TENANT_ID`` is used to construct the
+authority, and ``AZURE_DB_APP_ID_URI`` is used to construct the
+``<app-id-uri>/.default`` scope.
+
+For *AZURE_MANAGED_IDENTITY*, specifying ``CLIENT_ID`` selects the
+user-assigned identity. Not specifying ``CLIENT_ID`` selects a
+system-assigned identity.
 
 .. _cloudnativeauthoauth:
 

@@ -32,6 +32,7 @@ const fs = require('fs');
 const https = require('https');
 const { URL } = require('url');
 const { TokenCache, hashValue } = require('../cache.js');
+const { validateTokenAuthParams } = require('../../../lib/impl/tokenAuthHelpers.js');
 const TOKEN_REQUEST_TIMEOUT_MS = 30000;
 const APP_TOKEN_CACHE_CLOCK_SKEW_MS = 60 * 1000;
 const APP_TOKEN_CACHE_MAX_ENTRIES = 100;
@@ -46,18 +47,33 @@ async function getTokenResult(params) {
   if (typeof params?.authType !== 'string') {
     throwErr('OCI authentication type is required.');
   }
-  const authType = params.authType.toLowerCase();
+  const tokenParams = { ...params, scope: getDatabaseScope(params) };
+  const authType = tokenParams.authType.toLowerCase();
   let result;
   if (authType === 'clientcredentials') {
-    const cacheKey = computeAppCacheKey(params);
-    result = await appTokenCache.get(cacheKey, () => acquireToken(params));
+    const cacheKey = computeAppCacheKey(tokenParams);
+    result = await appTokenCache.get(cacheKey, () => acquireToken(tokenParams));
   } else {
-    result = { value: (await acquireToken(params)).value, isCacheHit: false };
+    result = { value: (await acquireToken(tokenParams)).value, isCacheHit: false };
   }
   if (typeof result.value === 'string') {
     return { accessToken: result.value, isNewToken: !result.isCacheHit };
   }
   return { ...result.value, isNewToken: !result.isCacheHit };
+}
+
+function getDatabaseScope(params) {
+  if (params.database !== undefined && params.compartment === undefined) {
+    throwErr('OCI_DATABASE requires OCI_COMPARTMENT');
+  }
+  if (params.compartment === undefined) {
+    return params.scope;
+  }
+  let scope = `urn:oracle:db::id::${params.compartment}`;
+  if (params.database !== undefined) {
+    scope += `::${params.database}`;
+  }
+  return scope;
 }
 
 async function acquireToken(params) {
@@ -395,6 +411,60 @@ async function resourcePrincipalAuthentication(accessTokenConfig) {
 //  hookFn()
 //  hookFn will get registerd to driver while loading plugins.
 //---------------------------------------------------------------------------
+const OCI_TOKEN_AUTH_CONFIG = {
+  oci_api_key: {
+    allowed: ['oci_config_file', 'oci_profile', 'oci_compartment', 'oci_database'],
+    required: [],
+    dependencies: { oci_database: 'oci_compartment' }
+  },
+  oci_instance_principal: {
+    allowed: ['oci_compartment', 'oci_database'],
+    required: [],
+    dependencies: { oci_database: 'oci_compartment' }
+  },
+  oci_resource_principal: {
+    allowed: ['oci_compartment', 'oci_database'],
+    required: [],
+    dependencies: { oci_database: 'oci_compartment' }
+  }
+};
+
+function mapTokenAuthParams(tokenAuth, params) {
+  const config = {};
+
+  if (tokenAuth === 'oci_api_key') {
+    config.authType = 'ConfigFileBasedAuthentication';
+    if (params.oci_config_file !== undefined) {
+      config.configFileLocation = params.oci_config_file;
+    }
+    if (params.oci_profile !== undefined) {
+      config.profile = params.oci_profile;
+    }
+  } else if (tokenAuth === 'oci_instance_principal') {
+    config.authType = 'InstancePrincipal';
+  } else if (tokenAuth === 'oci_resource_principal') {
+    config.authType = 'ResourcePrincipal';
+  }
+
+  if (params.oci_compartment !== undefined) {
+    config.compartment = params.oci_compartment;
+  }
+  if (params.oci_database !== undefined) {
+    config.database = params.oci_database;
+  }
+
+  return config;
+}
+
+function configureFromTokenAuth(params, options) {
+  const tokenAuth = String(params.token_auth).toLowerCase();
+  validateTokenAuthParams(tokenAuth, params, OCI_TOKEN_AUTH_CONFIG[tokenAuth]);
+
+  options.tokenAuthConfigOci = mapTokenAuthParams(tokenAuth, params);
+  options.externalAuth = true;
+  hookFn(options);
+}
+
 function hookFn(options) {
   if (options.tokenAuthConfigOci) {
     options.accessToken = async function callbackFn(refresh, config) {
@@ -407,8 +477,12 @@ function hookFn(options) {
     options.accessTokenConfig = options.tokenAuthConfigOci;
   }
 }
+// Advertise the connect-string TOKEN_AUTH values handled by this plugin.
+hookFn.tokenAuthTypes = Object.keys(OCI_TOKEN_AUTH_CONFIG);
+hookFn.configureFromTokenAuth = configureFromTokenAuth;
 oracledb.registerProcessConfigurationHook(hookFn);
 
 module.exports = {
-  getTokenResult
+  getTokenResult,
+  hookFn
 };

@@ -27,6 +27,7 @@
 const oracledb = require('oracledb');
 const msal = require('@azure/msal-node');
 const { TokenCache, hashValue } = require('../cache.js');
+const { validateTokenAuthParams } = require('../../../lib/impl/tokenAuthHelpers.js');
 
 const OBO_DEFAULT_CLOCK_SKEW_MS = 60 * 1000;
 const AZURE_DEFAULT_CLOCK_SKEW_MS = 60 * 1000;
@@ -168,6 +169,69 @@ async function managedIdentityCredentials(params) {
 // hookFn is registered to driver while loading plugins.
 // ---------------------------------------------------------------------------
 
+const AZURE_TOKEN_AUTH_CONFIG = {
+  azure_service_principal: {
+    allowed: [
+      'azure_db_app_id_uri',
+      'tenant_id',
+      'client_id',
+      'client_secret'
+    ],
+    required: [
+      'azure_db_app_id_uri',
+      'tenant_id',
+      'client_id',
+      'client_secret'
+    ]
+  },
+  azure_managed_identity: {
+    allowed: [
+      'azure_db_app_id_uri',
+      'client_id'
+    ],
+    required: [
+      'azure_db_app_id_uri'
+    ]
+  }
+};
+
+function mapTokenAuthParams(tokenAuth, params) {
+  const config = {};
+
+  if (tokenAuth === 'azure_service_principal') {
+    config.authType = 'AzureServicePrincipal';
+    config.authority =
+      `https://login.microsoftonline.com/${params.tenant_id}`;
+    config.clientId = params.client_id;
+    config.clientSecret = params.client_secret;
+  } else if (tokenAuth === 'azure_managed_identity') {
+    config.authType = 'AzureManagedIdentity';
+    if (params.client_id !== undefined) {
+      config.clientId = params.client_id;
+    }
+  }
+
+  config.scopes =
+    `${params.azure_db_app_id_uri.replace(/\/+$/, '')}/.default`;
+
+  return config;
+}
+
+function configureFromTokenAuth(params, options) {
+  const tokenAuth = String(params.token_auth).toLowerCase();
+  validateTokenAuthParams(tokenAuth, params, AZURE_TOKEN_AUTH_CONFIG[tokenAuth]);
+
+  const config = mapTokenAuthParams(tokenAuth, params);
+  const currentConfig = options.tokenAuthConfigAzure;
+  if (currentConfig &&
+      Object.prototype.hasOwnProperty.call(currentConfig, 'proxy')) {
+    config.proxy = currentConfig.proxy;
+  }
+  options.tokenAuthConfigAzure = config;
+  options.externalAuth = true;
+  hookFn(options);
+}
+
 function hookFn(options) {
   if (options.tokenAuthConfigAzure) {
     options.accessToken = async function callbackFn(refresh, config) {
@@ -176,6 +240,9 @@ function hookFn(options) {
     options.accessTokenConfig = options.tokenAuthConfigAzure;
   }
 }
+// Advertise the connect-string TOKEN_AUTH values handled by this plugin.
+hookFn.tokenAuthTypes = Object.keys(AZURE_TOKEN_AUTH_CONFIG);
+hookFn.configureFromTokenAuth = configureFromTokenAuth;
 oracledb.registerProcessConfigurationHook(hookFn);
 
 //---------------------------------------------------------------------------
@@ -327,5 +394,6 @@ async function getOnBehalfOfToken({ endUserToken, oboConfig, cacheOptions }) {
 
 module.exports = {
   getTokenResult,
-  getOnBehalfOfToken
+  getOnBehalfOfToken,
+  hookFn
 };
