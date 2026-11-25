@@ -1,0 +1,23 @@
+name: node-oracledb-nne
+
+services:
+  oracle:
+    image: ghcr.io/gvenzl/oracle-free:23.26.4-slim-faststart
+    entrypoint: ["/fixture-entrypoint.sh"]
+    ports:
+      - "127.0.0.1:${NNE_ORACLE_PORT:-11521}:1521"
+    environment:
+      ORACLE_PASSWORD: NneAdmin9876
+      APP_USER: nne_test
+      APP_USER_PASSWORD: NneTest9876
+      NNE_ORACLE_POLICY: ${NNE_ORACLE_POLICY:-required}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 5s
+      timeout: 10s
+      start_period: 5m
+      retries: 10
+    volumes:
+      - ./fixture-entrypoint.sh:/fixture-entrypoint.sh:ro
+      - ./session-banners.sql:/container-entrypoint-initdb.d/10-session-banners.sql:ro
+      - ./server-policy.sh:/container-entrypoint-startdb.d/10-server-policy.sh:ro

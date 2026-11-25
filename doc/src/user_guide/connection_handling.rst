@@ -4960,12 +4960,18 @@ topic/lookup?ctx=dblatest&id=GUID-7F12066A-2BA1-476C-809B-BB95A3F727CF>`__,
 the client and database server negotiate a key using Diffie-Hellman key
 exchange. There is protection against man-in-the-middle attacks.
 
-.. note::
+In this fork, Thin mode supports AES256 encryption with SHA256 checksumming
+over TCP for username and password connections. Pass
+``nativeNetworkEncryption: "required"`` in the options for
+``oracledb.getConnection()`` or ``oracledb.createPool()``. Both algorithms must
+be negotiated for the connection to open. This option cannot be combined
+with network compression or TCPS.
 
-    Oracle native network encryption is only supported in node-oracledb Thick
-    mode. See :ref:`enablingthick`.
+Use the server configuration to require strong session keys where supported.
+Oracle AI Database Free 23.26.4 has been tested with
+``SQLNET.ALLOW_WEAK_CRYPTO_CLIENTS = FALSE``.
 
-Native network encryption can be configured by editing Oracle Net’s
+In Thick mode, Oracle Client configures native network encryption through the
 optional `sqlnet.ora <https://www.oracle.com/pls/topic/lookup?ctx=dblatest
 &id=GUID-2041545B-58D4-48DC-986F-DCC9D0DEC642>`__ configuration file. The file
 on either the database server and/or on each node-oracledb ‘client’ machine

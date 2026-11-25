@@ -102,7 +102,7 @@ node-oracledb Thin and Thick modes. For more details see :ref:`modediff`.
       - Yes
       - Yes
     * - Oracle Database Native Network Encryption and Checksumming (see :ref:`nne`)
-      - No
+      - Yes, with AES256 and SHA256 over TCP
       - Yes
     * - Connection pinging API (see :meth:`connection.ping()`)
       - Yes
@@ -560,10 +560,9 @@ information.
 Native Network Encryption and Checksumming
 ++++++++++++++++++++++++++++++++++++++++++
 
-Node-oracledb Thin mode does not support connections using Oracle Database
-native network encryption or checksumming. You can enable TLS instead of using
-native network encryption. If native network encryption or checksumming are
-required, then use node-oracledb in Thick mode. See :ref:`nne`.
+In this fork, set ``nativeNetworkEncryption`` to ``"required"`` on a Thin
+connection or pool to require AES256 encryption and SHA256 checksumming
+over TCP. For the configuration and supported scope, see :ref:`nne`.
 
 .. _pwverifier:
 
