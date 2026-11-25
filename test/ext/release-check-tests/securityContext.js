@@ -341,14 +341,13 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
         ver: "1.0",
         database_access_token: "db-token-direct-application",
       });
-
-      assert.throws(
-        () => connection.setEndUserSecurityContext(null),
-        /NJS-005:/,
-      );
     });
 
-    it("327.1.7 Encoded security context exceeding the supported size", () => {
+    it("327.1.7 Explicit null security context is rejected", () => {
+      assert.throws(() => connection.setEndUserSecurityContext(null), /NJS-005:/);
+    });
+
+    it("327.1.8 Encoded security context exceeding the supported size", () => {
       assert.throws(
         () => makeSecurityContext({
           databaseAccessToken: "db-token-oversized",
@@ -361,7 +360,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.8 Non-TCPS protocol with security context", () => {
+    it("327.1.9 Non-TCPS protocol with security context", () => {
       const stub = createStubConnection({ protocol: "TCP" });
 
       assert.throws(
@@ -374,7 +373,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.9 Context with endUserName and dataRoles but without key", () => {
+    it("327.1.10 Context with endUserName and dataRoles but without key", () => {
       const context = {
         databaseAccessToken: "db-token-name-only",
         endUserName: "name-only-user",
@@ -394,7 +393,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.10 Context with only endUserToken", () => {
+    it("327.1.11 Context with only endUserToken", () => {
       const context = {
         databaseAccessToken: "db-token-token-only",
         endUserToken: "user-token-only",
@@ -426,7 +425,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.11 Context with endUserName and key but without endUserToken", () => {
+    it("327.1.12 Context with endUserName and key but without endUserToken", () => {
       const context = {
         databaseAccessToken: "db-token-name-key",
         endUserName: "named-user",
@@ -458,7 +457,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.12 Extra parameters to setEndUserSecurityContext", () => {
+    it("327.1.13 Extra parameters to setEndUserSecurityContext", () => {
       assert.throws(
         () =>
           connection.setEndUserSecurityContext(
@@ -472,7 +471,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.13 Non-object parameter values", () => {
+    it("327.1.14 Non-object parameter values", () => {
       assert.throws(
         () => connection.setEndUserSecurityContext("not-an-object"),
         /NJS-005:/,
@@ -484,7 +483,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.14 Invalid connection for setEndUserSecurityContext", () => {
+    it("327.1.15 Invalid connection for setEndUserSecurityContext", () => {
       const stub = createInvalidStubConnection();
 
       assert.throws(
@@ -497,7 +496,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.15 Extra parameters to setEndUserSecurityContext", () => {
+    it("327.1.16 Extra parameters to setEndUserSecurityContext", () => {
       assert.throws(
         () =>
           connection.setEndUserSecurityContext(
@@ -511,7 +510,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.16 Thin mode disabled on the connection", () => {
+    it("327.1.17 Thin mode disabled on the connection", () => {
       const stub = createStubConnection();
       Object.defineProperty(stub, "thin", {
         configurable: true,
@@ -534,7 +533,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.17 Passing undefined is not allowed", () => {
+    it("327.1.18 Passing undefined is not allowed", () => {
       const stub = createStubConnection();
       const callArgs = [];
       stub._impl.setEndUserSecurityContext = (...args) => {
@@ -560,7 +559,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       assert.strictEqual(callArgs[0][0], securityContext);
     });
 
-    it("327.1.18 Replacing thin security context keeps a direct reference", () => {
+    it("327.1.19 Replacing thin security context keeps a direct reference", () => {
       const impl = Object.create(Object.getPrototypeOf(connection._impl));
       impl._protocol = {
         caps: {
@@ -591,7 +590,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.19 Hash piggybacks reuse token contexts and send changed attributes", () => {
+    it("327.1.20 Hash piggybacks reuse token contexts and send changed attributes", () => {
       const securityContext = makeSecurityContext({
         databaseAccessToken: "db-token-hash",
         endUserToken: "user-token-hash",
@@ -651,7 +650,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       secondPairs[0].valueBytes.fill(0);
     });
 
-    it("327.1.19.1 Keeps the full payload after an execute write fails before a response", async () => {
+    it("327.1.20.1 Keeps the full payload after an execute write fails before a response", async () => {
       const securityContext = makeSecurityContext({
         databaseAccessToken: "db-token-write-failure",
         endUserToken: "user-token-write-failure",
@@ -738,7 +737,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       laterPairs[0].valueBytes.fill(0);
     });
 
-    it("327.1.20 Named contexts always use the full payload", () => {
+    it("327.1.21 Named contexts always use the full payload", () => {
       const securityContext = makeSecurityContext({
         databaseAccessToken: "db-token-named-hash",
         endUserName: "named-user",
@@ -767,7 +766,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       secondPairs[0].valueBytes.fill(0);
     });
 
-    it("327.1.21 Hash piggybacks fall back to full payloads when unsupported", () => {
+    it("327.1.22 Hash piggybacks fall back to full payloads when unsupported", () => {
       const securityContext = makeSecurityContext({
         databaseAccessToken: "db-token-no-hash",
         endUserToken: "user-token-no-hash",
@@ -796,7 +795,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       secondPairs[0].valueBytes.fill(0);
     });
 
-    it("327.1.22 Hashes data roles using Unicode code-point order", () => {
+    it("327.1.23 Hashes data roles using Unicode code-point order", () => {
       const securityContext = makeSecurityContext({
         databaseAccessToken: "db-token-unicode-hash",
         dataRoles: ["😀", "\uE000"],
@@ -808,7 +807,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       assert.strictEqual(securityContext._getDeobfuscatedHash(), expectedHash);
     });
 
-    it("327.1.22.1 Preserves OSON role order but hashes roles as a set", () => {
+    it("327.1.23.1 Preserves OSON role order but hashes roles as a set", () => {
       const firstSecurityContext = makeSecurityContext({
         databaseAccessToken: "db-token-role-order",
         endUserToken: "user-token-role-order",
@@ -835,7 +834,7 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       );
     });
 
-    it("327.1.23 A refreshed database token resends the full OSON payload", () => {
+    it("327.1.24 A refreshed database token resends the full OSON payload", () => {
       const impl = Object.create(Object.getPrototypeOf(connection._impl));
       impl.pipelineMode = 0;
       impl._protocol = {
@@ -2123,6 +2122,269 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
       assert.strictEqual(sessionContext.CURRENT_USER, "XS$NULL");
     });
 
+    async function getManagerEmployee(conn) {
+      const result = await conn.execute(
+        "SELECT employee_id, phone_number FROM hr.employees " +
+        "WHERE UPPER(email) = UPPER(:email)",
+        { email: process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1 }
+      );
+      assert.strictEqual(result.rows.length, 1);
+      return result.rows[0];
+    }
+
+    async function updateManagerPhone(conn, employeeId, phone, options = {}) {
+      const result = await conn.execute(
+        "UPDATE hr.employees SET phone_number = :phone " +
+        "WHERE employee_id = :employeeId",
+        { phone, employeeId },
+        options
+      );
+      assert.strictEqual(result.rowsAffected, 1);
+    }
+
+    it("327.6.13 Sessionless transaction resumes with the same DeepSec user", async function() {
+      if (
+        !process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+      !process.env.NODE_ORACLEDB_USER_TOKEN ||
+      !process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1
+      ) {
+        this.skip();
+        return;
+      }
+
+      const midtierToken = readTokenFromEnv("NODE_ORACLEDB_MIDTIER_TOKEN");
+      const userToken = readTokenFromEnv("NODE_ORACLEDB_USER_TOKEN");
+      const expectedXsUser = process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1;
+      const securityContext = makeSecurityContext({
+        databaseAccessToken: midtierToken,
+        endUserToken: userToken,
+      });
+
+      const conn1 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1);
+      conn1.setEndUserSecurityContext(securityContext);
+
+      async function assertSecuredContext(conn) {
+        const usernameResult = await conn.execute(
+          "SELECT XS_SYS_CONTEXT('XS$SESSION', 'USERNAME') FROM dual"
+        );
+        assert.strictEqual(usernameResult.rows[0][0], expectedXsUser);
+        const sessionContext = await getXsSessionContext(conn);
+        assert(
+          sessionContext.SESSION_XS_USER === expectedXsUser ||
+        sessionContext.CURRENT_XS_USER === expectedXsUser
+        );
+        assert.strictEqual(sessionContext.CURRENT_USER, "XS$NULL");
+        assert.strictEqual(sessionContext.SESSION_USER, "XS$NULL");
+      }
+
+      const employee = await getManagerEmployee(conn1);
+      const xid = await conn1.beginSessionlessTransaction();
+      await assertSecuredContext(conn1);
+      await updateManagerPhone(conn1, employee[0], employee[1]);
+      await conn1.suspendSessionlessTransaction();
+
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn2);
+      conn2.setEndUserSecurityContext(securityContext);
+      await conn2.resumeSessionlessTransaction(xid);
+      await assertSecuredContext(conn2);
+      await updateManagerPhone(conn2, employee[0], employee[1]);
+      await conn2.rollback();
+    });
+
+    function makeDeepSecSessionlessContext(tokenEnv) {
+      return makeSecurityContext({
+        databaseAccessToken: fs.readFileSync(
+          process.env.NODE_ORACLEDB_MIDTIER_TOKEN, "utf8"
+        ).trim(),
+        endUserToken: fs.readFileSync(process.env[tokenEnv], "utf8").trim(),
+      });
+    }
+
+    async function assertDeepSecXsUser(conn, envName) {
+      const result = await conn.execute(
+        "SELECT XS_SYS_CONTEXT('XS$SESSION', 'USERNAME') FROM dual"
+      );
+      assert.strictEqual(result.rows[0][0], process.env[envName]);
+    }
+
+    it("327.6.14 Sessionless transaction rejects a different DeepSec user", async function() {
+      if (
+        !process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+      !process.env.NODE_ORACLEDB_USER_TOKEN ||
+      !process.env.NODE_ORACLEDB_USER_TOKEN2 ||
+      !process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1 ||
+      !process.env.NODE_ORACLEDB_DEEPSEC_XS_USER2
+      ) {
+        this.skip();
+        return;
+      }
+      const conn1 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1);
+      conn1.setEndUserSecurityContext(
+        makeDeepSecSessionlessContext("NODE_ORACLEDB_USER_TOKEN")
+      );
+      await assertDeepSecXsUser(conn1, "NODE_ORACLEDB_DEEPSEC_XS_USER1");
+      const employee = await getManagerEmployee(conn1);
+      const xid = await conn1.beginSessionlessTransaction();
+      await updateManagerPhone(conn1, employee[0], employee[1]);
+      await conn1.suspendSessionlessTransaction();
+
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn2);
+      conn2.setEndUserSecurityContext(
+        makeDeepSecSessionlessContext("NODE_ORACLEDB_USER_TOKEN2")
+      );
+      await assertDeepSecXsUser(conn2, "NODE_ORACLEDB_DEEPSEC_XS_USER2");
+      await assert.rejects(
+        async () => {
+          await conn2.resumeSessionlessTransaction(xid);
+        },
+        /ORA-24774:/
+      );
+      await conn1.resumeSessionlessTransaction(xid);
+      await conn1.rollback();
+    });
+
+    it("327.6.15 DeepSec sessionless transaction expires after its timeout", async function() {
+      if (
+        !process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+      !process.env.NODE_ORACLEDB_USER_TOKEN ||
+      !process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1
+      ) {
+        this.skip();
+        return;
+      }
+      const securityContext = makeDeepSecSessionlessContext(
+        "NODE_ORACLEDB_USER_TOKEN"
+      );
+      const conn1 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1);
+      conn1.setEndUserSecurityContext(securityContext);
+      await assertDeepSecXsUser(conn1, "NODE_ORACLEDB_DEEPSEC_XS_USER1");
+      const employee = await getManagerEmployee(conn1);
+      const originalPhone = employee[1];
+      const marker = "NJS" + Date.now().toString(36).toUpperCase();
+      const xid = await conn1.beginSessionlessTransaction({ timeout: 1 });
+      await updateManagerPhone(conn1, employee[0], marker);
+      await conn1.suspendSessionlessTransaction();
+      await new Promise((resolve) => setTimeout(resolve, 6000));
+
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn2);
+      conn2.setEndUserSecurityContext(securityContext);
+      await assert.rejects(
+        () => conn2.resumeSessionlessTransaction(xid),
+        /ORA-26218:/
+      );
+      assert.strictEqual((await getManagerEmployee(conn2))[1], originalPhone);
+    });
+
+    it("327.6.16 DeepSec sessionless resume honors the resume wait timeout", async function() {
+      if (
+        !process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+      !process.env.NODE_ORACLEDB_USER_TOKEN ||
+      !process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1
+      ) {
+        this.skip();
+        return;
+      }
+      const securityContext = makeDeepSecSessionlessContext(
+        "NODE_ORACLEDB_USER_TOKEN"
+      );
+      const conn1 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1);
+      conn1.setEndUserSecurityContext(securityContext);
+      const xid = await conn1.beginSessionlessTransaction({ timeout: 10 });
+
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn2);
+      conn2.setEndUserSecurityContext(securityContext);
+      await assert.rejects(
+        async () => {
+          await conn2.resumeSessionlessTransaction(xid, { timeout: 1 });
+        },
+        /ORA-25351:/
+      );
+      await conn1.suspendSessionlessTransaction();
+      await conn2.resumeSessionlessTransaction(xid);
+      await assertDeepSecXsUser(conn2, "NODE_ORACLEDB_DEEPSEC_XS_USER1");
+      await conn2.rollback();
+    });
+
+    it("327.6.17 autoCommit completes a DeepSec sessionless transaction", async function() {
+      if (
+        !process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+      !process.env.NODE_ORACLEDB_USER_TOKEN ||
+      !process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1
+      ) {
+        this.skip();
+        return;
+      }
+      const securityContext = makeDeepSecSessionlessContext(
+        "NODE_ORACLEDB_USER_TOKEN"
+      );
+      const conn1 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1);
+      conn1.setEndUserSecurityContext(securityContext);
+      await assertDeepSecXsUser(conn1, "NODE_ORACLEDB_DEEPSEC_XS_USER1");
+      const employee = await getManagerEmployee(conn1);
+      const xid = await conn1.beginSessionlessTransaction();
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn2);
+      conn2.setEndUserSecurityContext(securityContext);
+      await updateManagerPhone(conn1, employee[0], employee[1], {
+        autoCommit: true,
+      });
+      assert.strictEqual((await getManagerEmployee(conn2))[1], employee[1]);
+      await assert.rejects(
+        () => conn2.resumeSessionlessTransaction(xid),
+        /ORA-26218:/
+      );
+    });
+
+    it("327.6.18 DeepSec data roles remain active after sessionless resume", async function() {
+      if (
+        !process.env.NODE_ORACLEDB_MIDTIER_TOKEN ||
+      !process.env.NODE_ORACLEDB_USER_TOKEN ||
+      !process.env.NODE_ORACLEDB_DEEPSEC_XS_USER1
+      ) {
+        this.skip();
+        return;
+      }
+      const securityContext = makeDeepSecSessionlessContext(
+        "NODE_ORACLEDB_USER_TOKEN"
+      );
+      const conn1 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1);
+      conn1.setEndUserSecurityContext(securityContext);
+      const roleResult1 = await conn1.execute(
+        "SELECT role_name FROM v$end_user_data_role ORDER BY role_name"
+      );
+      const rolesBefore = roleResult1.rows.map((row) => row[0]);
+      assert(
+        rolesBefore.includes("MANAGER_FS_ROLE") &&
+      rolesBefore.includes("EMPLOYEE_FS_ROLE"),
+        "The manager must have MANAGER_FS_ROLE and EMPLOYEE_FS_ROLE"
+      );
+
+      const xid = await conn1.beginSessionlessTransaction();
+      await conn1.suspendSessionlessTransaction();
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn2);
+      conn2.setEndUserSecurityContext(securityContext);
+      await conn2.resumeSessionlessTransaction(xid);
+      const roleResult2 = await conn2.execute(
+        "SELECT role_name FROM v$end_user_data_role ORDER BY role_name"
+      );
+      assert.deepStrictEqual(roleResult2.rows.map((row) => row[0]), rolesBefore);
+      await assertDeepSecXsUser(conn2, "NODE_ORACLEDB_DEEPSEC_XS_USER1");
+      const employee = await getManagerEmployee(conn2);
+      await updateManagerPhone(conn2, employee[0], employee[1]);
+      await conn2.rollback();
+    });
+
   });
 
   describe("327.7 OBO token-backed security contexts", () => {
@@ -2283,6 +2545,77 @@ const Protocol = require("../../../lib/thin/protocol/protocol.js");
           /ORA-00942:/,
         );
       }
+    });
+    it("327.7.4 Sessionless transaction can be resumed with the same OBO user", async function() {
+      if (process.env.NODE_ORACLEDB_MIDTIER_TOKEN === undefined ||
+        process.env.NODE_ORACLEDB_OBO_MIDTIERAPP_USER1_TOKEN === undefined) {
+        this.skip();
+        return;
+      }
+
+      const midtierToken = readTokenFromEnv("NODE_ORACLEDB_MIDTIER_TOKEN");
+      const userToken = readTokenFromEnv("NODE_ORACLEDB_OBO_MIDTIERAPP_USER1_TOKEN");
+      const conn1 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1);
+      const makeContext = () => makeSecurityContext({
+        databaseAccessToken: midtierToken,
+        endUserToken: userToken
+      });
+      conn1.setEndUserSecurityContext(makeContext());
+
+      const xid = await conn1.beginSessionlessTransaction({ timeout: 5 });
+      const beforeContext = await getXsSessionContext(conn1);
+      const beforeXsUser = getSessionXsUser(beforeContext);
+      assert(beforeXsUser);
+      assert.strictEqual(beforeContext.CURRENT_USER, "XS$NULL");
+      const beforeResume = await conn1.execute("SELECT 1 FROM dual");
+      assert.strictEqual(beforeResume.rows[0][0], 1);
+      await conn1.suspendSessionlessTransaction();
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn2);
+      conn2.setEndUserSecurityContext(makeContext());
+      await conn2.resumeSessionlessTransaction(xid);
+      const afterContext = await getXsSessionContext(conn2);
+      assert.strictEqual(getSessionXsUser(afterContext), beforeXsUser);
+      assert.strictEqual(afterContext.CURRENT_USER, "XS$NULL");
+      const afterResume = await conn2.execute("SELECT 1 FROM dual");
+      assert.strictEqual(afterResume.rows[0][0], 1);
+      await conn2.commit();
+    });
+
+    it("327.7.5 A different OBO user cannot resume a sessionless transaction", async function() {
+      if (process.env.NODE_ORACLEDB_MIDTIER_TOKEN === undefined ||
+        process.env.NODE_ORACLEDB_OBO_MIDTIERAPP_USER1_TOKEN === undefined ||
+        process.env.NODE_ORACLEDB_OBO_MIDTIERAPP_USER2_TOKEN === undefined) {
+        this.skip();
+        return;
+      }
+
+      const midtierToken = readTokenFromEnv("NODE_ORACLEDB_MIDTIER_TOKEN");
+      const user1Token = readTokenFromEnv("NODE_ORACLEDB_OBO_MIDTIERAPP_USER1_TOKEN");
+      const user2Token = readTokenFromEnv("NODE_ORACLEDB_OBO_MIDTIERAPP_USER2_TOKEN");
+      const conn1 = await oracledb.getConnection(dbConfig);
+      const conn2 = await oracledb.getConnection(dbConfig);
+      connectionsToClose.push(conn1, conn2);
+      conn1.setEndUserSecurityContext(makeSecurityContext({
+        databaseAccessToken: midtierToken,
+        endUserToken: user1Token
+      }));
+      conn2.setEndUserSecurityContext(makeSecurityContext({
+        databaseAccessToken: midtierToken,
+        endUserToken: user2Token
+      }));
+
+      const xid = await conn1.beginSessionlessTransaction({ timeout: 5 });
+      await conn1.suspendSessionlessTransaction();
+      await assert.rejects(
+        async () => {
+          await conn2.resumeSessionlessTransaction(xid);
+        },
+        /ORA-24774:/
+      );
+      await conn1.resumeSessionlessTransaction(xid);
+      await conn1.rollback();
     });
   });
 

@@ -997,82 +997,82 @@ describe('244.dataTypeJson.js', function() {
     }); // 244.11.3
 
     it('244.11.4 fetch JSON with shared fields and nested containers',
-    async function() {
-      const jsonVal = [];
-
-      for (let i = 0; i < 15; i++) {
-        jsonVal.push({
-          id: i,
-          details: {
-            name: `Employee ${i}`,
-            department: 'Engineering'
-          },
-          skills: ['JavaScript', 'SQL'],
-          active: true
-        });
-      }
-
-      await connection.execute(
-        `INSERT INTO ${table} (id, content) VALUES (:i, :c)`,
-        [
-          {val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN},
-          {val: JSON.stringify(jsonVal)}
-        ]
-      );
-
-      const result = await connection.execute(
-        `SELECT content FROM ${table} WHERE id = :id`,
-        {id: sequence}
-      );
-
-      assert.deepStrictEqual(result.rows[0][0], jsonVal);
-      sequence++;
-    }); // 244.11.4
-
-    it('244.14.5 fetches repeated objects after JSON_TRANSFORM',
       async function() {
-      const jsonVal = [];
+        const jsonVal = [];
 
-      for (let i = 0; i < 15; i++) {
-        jsonVal.push({
-          a: 6711,
-          b: 'String value'
-        });
-      }
-
-      await connection.execute(
-        `INSERT INTO ${table} (id, content) VALUES (:id, :content)`,
-        {
-          id: 7,
-          content: {
-            dir: oracledb.BIND_IN,
-            type: oracledb.DB_TYPE_JSON,
-            val: jsonVal
-          }
+        for (let i = 0; i < 15; i++) {
+          jsonVal.push({
+            id: i,
+            details: {
+              name: `Employee ${i}`,
+              department: 'Engineering'
+            },
+            skills: ['JavaScript', 'SQL'],
+            active: true
+          });
         }
-      );
 
-      await connection.execute(
-        `UPDATE ${table}
-        SET content = JSON_TRANSFORM(
-          content,
-          SET '$[7].b' = 'Updated string value'
-        )
-        WHERE id = 7`,
-        [],
-        {autoCommit: true}
-      );
+        await connection.execute(
+          `INSERT INTO ${table} (id, content) VALUES (:i, :c)`,
+          [
+            {val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN},
+            {val: JSON.stringify(jsonVal)}
+          ]
+        );
 
-      jsonVal[7].b = 'Updated string value';
+        const result = await connection.execute(
+          `SELECT content FROM ${table} WHERE id = :id`,
+          {id: sequence}
+        );
 
-      const result = await connection.execute(
-        `SELECT content FROM ${table} WHERE id = 7`
-      );
+        assert.deepStrictEqual(result.rows[0][0], jsonVal);
+        sequence++;
+      }); // 244.11.4
 
-      assert.deepStrictEqual(result.rows[0][0], jsonVal);
-    }); // 244.14.5
+    it('244.11.5 fetches repeated objects after JSON_TRANSFORM',
+      async function() {
+        const jsonVal = [];
 
-    it('244.14.6 fetches shared objects followed by sibling values',
+        for (let i = 0; i < 15; i++) {
+          jsonVal.push({
+            a: 6711,
+            b: 'String value'
+          });
+        }
+
+        await connection.execute(
+          `INSERT INTO ${table} (id, content) VALUES (:id, :content)`,
+          {
+            id: 7,
+            content: {
+              dir: oracledb.BIND_IN,
+              type: oracledb.DB_TYPE_JSON,
+              val: jsonVal
+            }
+          }
+        );
+
+        await connection.execute(
+          `UPDATE ${table}
+          SET content = JSON_TRANSFORM(
+            content,
+            SET '$[7].b' = 'Updated string value'
+          )
+          WHERE id = 7`,
+          [],
+          {autoCommit: true}
+        );
+
+        jsonVal[7].b = 'Updated string value';
+
+        const result = await connection.execute(
+          `SELECT content FROM ${table} WHERE id = 7`
+        );
+
+        assert.deepStrictEqual(result.rows[0][0], jsonVal);
+      }); // 244.11.5
+
+    it('244.11.6 fetches shared objects followed by sibling values',
       async function() {
         const jsonVal = {
           records: Array.from({length: 15}, (_, i) => ({
@@ -1113,7 +1113,7 @@ describe('244.dataTypeJson.js', function() {
         );
 
         assert.deepStrictEqual(result.rows[0][0], jsonVal);
-    }); // 244.14.6
+      }); // 244.11.6
   }); // 244.11
 
   describe('244.12 Verify auto-generated SODA document key', function() {

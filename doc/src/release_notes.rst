@@ -39,23 +39,23 @@ Common Changes
 #)  Fixed bug where LOB streaming writes do not convert Buffers to strings for
     NCLOBs.
 
-#)  Fixed issue to remove incorrect nested connect string generation in some 
-    cases when ``oracledb.thickModeDSNPassthrough`` is set to False.
+#)  Fixed issue to remove incorrect nested connect string generation in some
+    cases when :attr:`oracledb.thickModeDSNPassthrough` is set to `false`.
 
 Thin Mode Changes
 +++++++++++++++++
+
+#)  Enabled support for hash-based end user security context piggybacks for
+    database servers with :ref:`Oracle Deep Data Security <deepdatasecurity>`
+    to improve connection performance.
+
+#)  Added automatic single-token :ref:`Deep Data Security <deepdatasecurity>`
+    contexts for Azure OBO on Oracle AI Database version 23.26.4 or later.
 
 #)  Fixed OSON decoding in Thin mode for JSON documents updated in place by
     the database, including redirected update values, which previously raised
     an error.
     See `Issue #1796 <https://github.com/oracle/node-oracledb/issues/1796>`__.
-
-#)  Enabled support for hash-based end user security context piggybacks for
-    database servers with Oracle Deep Data Security to improve connection
-    performance.
-
-#)  Added automatic single-token Deep Data Security contexts for Azure OBO
-    on Oracle AI Database version 23.26.4 or later.
 
 #)  Fixed bug where an :ref:`implicit result set <implicitresults>` with
     JSON, LOB, or VECTOR columns returned only the rows sent in the initial
@@ -70,13 +70,13 @@ Thin Mode Changes
 #)  Fixed bug where a TxEventQ Advanced Queue with JSON payload was throwing
     an ``NJS-061`` error during a :meth:`connection.unsubscribe()` call.
 
-#)  Internal code optimization for improved connection and BFILE handling.
-
 #)  Fixed issue where JSON binds (`DB_TYPE_JSON`) on invalid Date values
     returned corrupted dates instead of rejecting them.
 
 #)  Fixed issue where a pipeline preparation error could cause subsequent
     operations on the connection to fail.
+
+#)  Internal code optimization for improved connection and BFILE handling.
 
 Thick Mode Changes
 ++++++++++++++++++

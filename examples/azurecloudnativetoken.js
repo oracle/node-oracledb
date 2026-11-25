@@ -1,4 +1,4 @@
-/* Copyright (c) 2025, Oracle and/or its affiliates. */
+/* Copyright (c) 2025, 2026, Oracle and/or its affiliates. */
 
 /******************************************************************************
  *
@@ -68,18 +68,23 @@ if (process.env.NODE_ORACLEDB_DRIVER_MODE === 'thick') {
 console.log(oracledb.thin ? 'Running in thin mode' : 'Running in thick mode');
 
 // In case of generating azure tokens behind proxy, use below code.
-const fetch = require('node-fetch');
+const nodeFetch = require('node-fetch');
+const fetch = nodeFetch.default || nodeFetch;
 const { HttpsProxyAgent } = require('https-proxy-agent');
 
 const proxyUrl = process.env.NODE_ORACLEDB_PROXYURL;
-const proxyAgent = new HttpsProxyAgent(proxyUrl);
+const proxyAgent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : null;
+
+function getFetchOptions(options) {
+  const fetchOptions = proxyAgent ? { agent: proxyAgent } : {};
+  return Object.assign(fetchOptions, options);
+}
 
 async function sendGetRequestAsync(url, options) {
-  const response = await fetch(url, { agent: proxyAgent, ...options });
+  const response = await fetch(url, getFetchOptions(options));
   const json = await response.json();
-  const headers = response.headers.raw();
   const obj = {
-    headers: Object.create(Object.prototype, headers),
+    headers: Object.fromEntries(response.headers.entries()),
     body: json,
     status: response.status,
   };
@@ -87,20 +92,33 @@ async function sendGetRequestAsync(url, options) {
 }
 
 async function sendPostRequestAsync(url, options) {
-  const sendingOptions = options || {};
-  sendingOptions.method = 'post';
-  const response = await fetch(url, { agent: proxyAgent, ...sendingOptions });
+  const sendingOptions = { ...options, method: 'post' };
+  const response = await fetch(url, getFetchOptions(sendingOptions));
   const json = await response.json();
-  const headers = response.headers.raw();
   const obj = {
-    headers: Object.create(Object.prototype, headers),
+    headers: Object.fromEntries(response.headers.entries()),
     body: json,
     status: response.status,
   };
   return obj;
 }
 
+// When TOKEN_AUTH and the Azure credentials come from the connect string,
+// attach only the JavaScript network client here. Oracle Net cannot carry this
+// callback object.
+if (proxyAgent) {
+  oracledb.registerProcessConfigurationHook(options => {
+    if (options.tokenAuthConfigAzure === undefined) {
+      options.tokenAuthConfigAzure = {
+        proxy: { sendGetRequestAsync, sendPostRequestAsync },
+      };
+    }
+  });
+}
+
 async function run() {
+  // If TOKEN_AUTH and the Azure credentials are in the connect string, the
+  // process configuration hook above supplies the proxy network client.
   // Configuration for token based authentication:
   //   externalAuth:        Must be set to true for token based authentication
   //   homogeneous:         Must be set to true for token based authentication
