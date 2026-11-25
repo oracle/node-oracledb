@@ -5197,12 +5197,21 @@ Overview of node-oracledb functional tests
       244.11.1 fetch JSON with relative offsets
       244.11.2 fetch JSON with relative offsets and shared fields and values
       244.11.3 fetch JSON with relative offsets and shared fields, not values
+      244.11.4 fetch JSON with shared fields and nested containers
+      244.14.5 fetches repeated objects after JSON_TRANSFORM
+      244.14.6 fetches shared objects followed by sibling values
+
     244.12 Verify auto-generated SODA document key
       244.12.1 JsonId serializes only its visible bytes
       244.12.2 Verify Json Id on select
     244.13 Read JSON data on meta data change
       244.13.1 table recreate - with oracledb.fetchAsString
       244.13.2 table recreate - with fetchInfo oracledb.STRING
+    244.14 Read JSON data updated in place
+      244.14.1 fetch JSON updated with JSON_MERGEPATCH
+      244.14.2 fetch JSON updated with JSON_TRANSFORM
+      244.14.3 fetches containers updated with JSON_TRANSFORM
+      244.14.4 fetches a JSON document after repeated updates
 
   245. fetchLobAsStrBuf.js
     245.1 CLOB,BLOB Insert

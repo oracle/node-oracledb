@@ -42,6 +42,11 @@ Common Changes
 Thin Mode Changes
 +++++++++++++++++
 
+#)  Fixed OSON decoding in Thin mode for JSON documents updated in place by
+    the database, including redirected update values, which previously raised
+    an error.
+    See `Issue #1796 <https://github.com/oracle/node-oracledb/issues/1796>`__.
+
 #)  Enabled support for hash-based end user security context piggybacks for
     database servers with Oracle Deep Data Security to improve connection
     performance.

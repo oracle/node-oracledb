@@ -996,6 +996,124 @@ describe('244.dataTypeJson.js', function() {
 
     }); // 244.11.3
 
+    it('244.11.4 fetch JSON with shared fields and nested containers',
+    async function() {
+      const jsonVal = [];
+
+      for (let i = 0; i < 15; i++) {
+        jsonVal.push({
+          id: i,
+          details: {
+            name: `Employee ${i}`,
+            department: 'Engineering'
+          },
+          skills: ['JavaScript', 'SQL'],
+          active: true
+        });
+      }
+
+      await connection.execute(
+        `INSERT INTO ${table} (id, content) VALUES (:i, :c)`,
+        [
+          {val: sequence, type: oracledb.NUMBER, dir: oracledb.BIND_IN},
+          {val: JSON.stringify(jsonVal)}
+        ]
+      );
+
+      const result = await connection.execute(
+        `SELECT content FROM ${table} WHERE id = :id`,
+        {id: sequence}
+      );
+
+      assert.deepStrictEqual(result.rows[0][0], jsonVal);
+      sequence++;
+    }); // 244.11.4
+
+    it('244.14.5 fetches repeated objects after JSON_TRANSFORM',
+      async function() {
+      const jsonVal = [];
+
+      for (let i = 0; i < 15; i++) {
+        jsonVal.push({
+          a: 6711,
+          b: 'String value'
+        });
+      }
+
+      await connection.execute(
+        `INSERT INTO ${table} (id, content) VALUES (:id, :content)`,
+        {
+          id: 7,
+          content: {
+            dir: oracledb.BIND_IN,
+            type: oracledb.DB_TYPE_JSON,
+            val: jsonVal
+          }
+        }
+      );
+
+      await connection.execute(
+        `UPDATE ${table}
+        SET content = JSON_TRANSFORM(
+          content,
+          SET '$[7].b' = 'Updated string value'
+        )
+        WHERE id = 7`,
+        [],
+        {autoCommit: true}
+      );
+
+      jsonVal[7].b = 'Updated string value';
+
+      const result = await connection.execute(
+        `SELECT content FROM ${table} WHERE id = 7`
+      );
+
+      assert.deepStrictEqual(result.rows[0][0], jsonVal);
+    }); // 244.14.5
+
+    it('244.14.6 fetches shared objects followed by sibling values',
+      async function() {
+        const jsonVal = {
+          records: Array.from({length: 15}, (_, i) => ({
+            a: 6711,
+            b: `String value ${i}`
+          })),
+          status: 'active',
+          count: 15
+        };
+
+        await connection.execute(
+          `INSERT INTO ${table} (id, content) VALUES (:id, :content)`,
+          {
+            id: 8,
+            content: {
+              dir: oracledb.BIND_IN,
+              type: oracledb.DB_TYPE_JSON,
+              val: jsonVal
+            }
+          }
+        );
+
+        await connection.execute(
+          `UPDATE ${table}
+          SET content = JSON_TRANSFORM(
+            content,
+            SET '$.records[7].b' = 'Updated value'
+          )
+          WHERE id = 8`,
+          [],
+          {autoCommit: true}
+        );
+
+        jsonVal.records[7].b = 'Updated value';
+
+        const result = await connection.execute(
+          `SELECT content FROM ${table} WHERE id = 8`
+        );
+
+        assert.deepStrictEqual(result.rows[0][0], jsonVal);
+    }); // 244.14.6
   }); // 244.11
 
   describe('244.12 Verify auto-generated SODA document key', function() {
@@ -1212,5 +1330,514 @@ describe('244.dataTypeJson.js', function() {
     }); // 244.13.2
 
   }); // 244.13
+
+  describe('244.14 Read JSON data updated in place', function() {
+
+    const table = 'nodb_json_oson_v2';
+
+    before('create table', async function() {
+      if (!isRunnable) {
+        this.skip();
+      }
+      await testsUtil.createTable(connection, table,
+        `CREATE TABLE ${table} (id NUMBER PRIMARY KEY, content JSON)`);
+    }); // before()
+
+    after(async function() {
+      if (!isRunnable) {
+        return;
+      }
+      await testsUtil.dropTable(connection, table);
+    }); // after()
+
+    it('244.14.1 fetch JSON updated with JSON_MERGEPATCH', async function() {
+      await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+        id: 1,
+        content: {
+          dir: oracledb.BIND_IN,
+          type: oracledb.DB_TYPE_JSON,
+          val: {name: 'Ada', bio: 'b0'}
+        }
+      });
+      await connection.execute(
+        `UPDATE ${table} SET content = JSON_MERGEPATCH(content,
+          JSON('{"bio":"b1"}')) WHERE id = 1`, {}, {autoCommit: true});
+      const result = await connection.execute(`SELECT content FROM ${table}`);
+      assert.deepStrictEqual(result.rows[0][0], {name: 'Ada', bio: 'b1'});
+    }); // 244.14.1
+
+    it('244.14.2 fetch JSON updated with JSON_TRANSFORM', async function() {
+      await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+        id: 2,
+        content: {
+          dir: oracledb.BIND_IN,
+          type: oracledb.DB_TYPE_JSON,
+          val: {name: 'Ada', bio: 'b0'}
+        }
+      });
+      await connection.execute(
+        `UPDATE ${table} SET content = JSON_TRANSFORM(content,
+          SET '$.bio' = 'b2') WHERE id = 2`, {}, {autoCommit: true});
+      const result = await connection.execute(`SELECT content FROM ${table}
+        WHERE id = 2`);
+      assert.deepStrictEqual(result.rows[0][0], {name: 'Ada', bio: 'b2'});
+    }); // 244.14.2
+
+    it('244.14.3 fetches containers updated with JSON_TRANSFORM', async function() {
+      const updatedProfile =
+        '{"name":"Grace","location":"Arlington","skills":["C","COBOL"]}';
+      const updatedProjects =
+        '[{"name":"Compiler","year":1952},{"name":"COBOL","year":1959}]';
+      await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+        id: 3,
+        content: {
+          dir: oracledb.BIND_IN,
+          type: oracledb.DB_TYPE_JSON,
+          val: {
+            profile: {name: 'Ada', location: 'London'},
+            projects: [{name: 'Analytical Engine'}]
+          }
+        }
+      });
+      await connection.execute(
+        `UPDATE ${table} SET content = JSON_TRANSFORM(content,
+          SET '$.profile' = JSON('${updatedProfile}'),
+          SET '$.projects' = JSON('${updatedProjects}')) WHERE id = 3`, {},
+        {autoCommit: true});
+      const result = await connection.execute(`SELECT content FROM ${table}
+        WHERE id = 3`);
+      assert.deepStrictEqual(result.rows[0][0], {
+        profile: {
+          name: 'Grace',
+          location: 'Arlington',
+          skills: ['C', 'COBOL']
+        },
+        projects: [
+          {name: 'Compiler', year: 1952},
+          {name: 'COBOL', year: 1959}
+        ]
+      });
+    }); // 244.14.3
+
+    it('244.14.4 fetches a JSON document after repeated updates', async function() {
+      await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+        id: 4,
+        content: {
+          dir: oracledb.BIND_IN,
+          type: oracledb.DB_TYPE_JSON,
+          val: {name: 'Ada', bio: 'b0', version: 0}
+        }
+      });
+      for (let i = 1; i <= 3; i++) {
+        await connection.execute(`UPDATE ${table} SET content =
+          JSON_MERGEPATCH(content, JSON('{"bio":"b${i}","version":${i}}'))
+          WHERE id = 4`, {}, {autoCommit: true});
+      }
+      const result = await connection.execute(`SELECT content FROM ${table}
+        WHERE id = 4`);
+      assert.deepStrictEqual(result.rows[0][0], {
+        name: 'Ada',
+        bio: 'b3',
+        version: 3
+      });
+    }); // 244.14.4
+
+    it('244.14.5 fetches JSON after adding, removing, and updating keys',
+      async function() {
+        await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+          id: 5,
+          content: {
+            dir: oracledb.BIND_IN,
+            type: oracledb.DB_TYPE_JSON,
+            val: {name: 'Ada', bio: 'b0', obsolete: 'remove me'}
+          }
+        });
+        await connection.execute(`UPDATE ${table} SET content =
+          JSON_TRANSFORM(content,
+            REMOVE '$.obsolete',
+            SET '$.added' = 'new',
+            SET '$.bio' = 'b1') WHERE id = 5`, {}, {autoCommit: true});
+        const result = await connection.execute(`SELECT content FROM ${table}
+          WHERE id = 5`);
+        assert.deepStrictEqual(result.rows[0][0], {
+          name: 'Ada',
+          bio: 'b1',
+          added: 'new'
+        });
+      }); // 244.14.5
+
+    it('244.14.6 fetches JSON with root-preserving JSON_TRANSFORM',
+      async function() {
+        await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+          id: 6,
+          content: {
+            dir: oracledb.BIND_IN,
+            type: oracledb.DB_TYPE_JSON,
+            val: {name: 'Ada', bio: 'b0'}
+          }
+        });
+        await connection.execute(
+          `UPDATE ${table} SET content = JSON_MERGEPATCH(content,
+            JSON('{"bio":"b1"}')) WHERE id = 6`, {}, {autoCommit: true});
+        const result = await connection.execute(`SELECT JSON_TRANSFORM(content,
+          KEEP '$') AS content FROM ${table} WHERE id = 6`);
+        assert.deepStrictEqual(result.rows[0][0], {name: 'Ada', bio: 'b1'});
+      }); // 244.14.6
+
+  }); // 244.14
+
+  describe('244.15 transforms a version 3 OSON BLOB', function() {
+
+    const table = 'nodb_json_oson_v3';
+
+    before('create table', async function() {
+      await testsUtil.createTable(connection, table,
+        `CREATE TABLE ${table} (id NUMBER PRIMARY KEY, content BLOB
+          CHECK (content IS JSON FORMAT OSON))`);
+    }); // before()
+
+    after(async function() {
+      await testsUtil.dropTable(connection, table);
+    }); // after()
+
+    it('244.15.1 JSON_TRANSFORM updates a version 3 OSON BLOB',
+      async function() {
+        const longFieldName = 'x'.repeat(256);
+        const initial = {[longFieldName]: 'before', status: 'initial'};
+        const encoded = connection.encodeOSON(initial);
+        assert.strictEqual(encoded.subarray(0, 4).toString('hex'),
+          'ff4a5a03');
+        await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+          id: 1,
+          content: {
+            dir: oracledb.BIND_IN,
+            type: oracledb.BLOB,
+            val: encoded
+          }
+        }, {autoCommit: true});
+        await connection.execute(`UPDATE ${table} SET content =
+          JSON_TRANSFORM(content, SET '$.status' = 'updated') WHERE id = 1`,
+        {}, {autoCommit: true});
+
+        const result = await connection.execute(`SELECT JSON_SERIALIZE(content
+          RETURNING VARCHAR2(32767)) FROM ${table} WHERE id = 1`);
+        assert.deepStrictEqual(JSON.parse(result.rows[0][0]), {
+          [longFieldName]: 'before',
+          status: 'updated'
+        });
+      }); // 244.15.1
+
+  }); // 244.15
+
+  describe('244.16 fetches scalar JSON roots with OSON tree-size widths',
+    function() {
+
+      const table = 'nodb_json_oson_scalar';
+
+      before('create table', async function() {
+        await testsUtil.createTable(connection, table,
+          `CREATE TABLE ${table} (id NUMBER PRIMARY KEY, content JSON)`);
+      }); // before()
+
+      after(async function() {
+        await testsUtil.dropTable(connection, table);
+
+      }); // after()
+
+      it('244.16.1 fetches scalar roots with UB2 and UB4 tree sizes',
+        async function() {
+          const values = ['new', 'x'.repeat(65536)];
+          for (const [index, value] of values.entries()) {
+            await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+              id: index + 1,
+              content: {
+                dir: oracledb.BIND_IN,
+                type: oracledb.DB_TYPE_JSON,
+                val: value
+              }
+            });
+          }
+          await connection.commit();
+
+          for (const [index, value] of values.entries()) {
+            const result = await connection.execute(`SELECT content FROM ${table}
+              WHERE id = :id`, {id: index + 1});
+            assert.strictEqual(result.rows[0][0], value);
+          }
+        }); // 244.16.1
+
+    }); // 244.16
+
+  describe('244.17 fetches JSON from OSON version 2 inputs', function() {
+
+    async function fetchOson(image, expected) {
+      const result = await connection.execute(`SELECT JSON(HEXTORAW('${image}'))
+        AS content FROM dual`);
+      assert.deepStrictEqual(result.rows[0][0], expected);
+    }
+
+    it('244.17.1 fetches JSON from direct forwarding inputs',
+      async function() {
+        const images = [
+          // Input image contains 0x76 with a UB2 extended-tree offset.
+          'ff4a5a02001600037600000100000000000000000000000000000533036e6577',
+          // Input image contains 0x77 with a UB4 extended-tree offset.
+          'ff4a5a020016000577000000000100000000000000000000000000000533036e6577'
+        ];
+        for (const image of images) {
+          await fetchOson(image, 'new');
+        }
+      }); // 244.17.1
+
+    it('244.17.2 fetches JSON from overflow-map inputs',
+      async function() {
+        const images = [
+          // Input image has 0x75 and two UB2 entries for source 0.
+          'ff4a5a02001600017501000002000000000000000800000006000000050000000033036e657731',
+          // Input image has 0x75 and two UB4 entries for source 0.
+          'ff4a5a020016000175000000020000000000000010000000060000000000000005000000000000000033036e657731'
+        ];
+        for (const image of images) {
+          await fetchOson(image, 'new');
+        }
+      }); // 244.17.2
+
+    it('244.17.3 fetches JSON from non-scalar forwarding inputs',
+      async function() {
+        const expected = {
+          name: 'Rod',
+          location: 'Germany',
+          dept: 'Sales'
+        };
+        const images = [
+          // Input has 0x76 for location and a primary-tree dept sibling.
+          'ff4a5a02210603001300200000a6c6e6000a00050000046e616d650464657074086c6f636174696f6ea4030301020000001100000016000000193303526f64760000330553616c65730100000000000000000000000000000933074765726d616e79',
+          // Input has 0x77 for location and a primary-tree dept sibling.
+          'ff4a5a02210603001300220000a6c6e6000a00050000046e616d650464657074086c6f636174696f6ea40303010200000011000000160000001b3303526f647700000000330553616c65730100000000000000000000000000000933074765726d616e79',
+          // Input has 0x75 for location with two duplicate UB2 mappings.
+          'ff4a5a022106030013001e0000a6c6e6000a00050000046e616d650464657074086c6f636174696f6ea4030301020000001100000016000000173303526f6475330553616c657301000002000000000000000800000009001600000016000033074765726d616e79'
+        ];
+        for (const image of images) {
+          await fetchOson(image, expected);
+        }
+      }); // 244.17.3
+
+  }); // 244.17
+
+  describe('244.18 transforms compressed JSON', function() {
+
+    const table = 'nodb_json_compressed_transform';
+
+    before('create table', async function() {
+      if (!isOracle_23_4) {
+        this.skip();
+      }
+      await testsUtil.createTable(connection, table,
+        `CREATE TABLE ${table} (id NUMBER PRIMARY KEY, content JSON)
+         JSON (content) STORE AS (COMPRESS HIGH)`);
+    }); // before()
+
+    after(async function() {
+      if (!isOracle_23_4) {
+        return;
+      }
+      await testsUtil.dropTable(connection, table);
+    }); // after()
+
+    it('244.18.1 applies partial and full JSON_TRANSFORM updates',
+      async function() {
+        const documents = [
+          {id: 1, content: {name: 'Ada', status: 'new'}},
+          {id: 2, content: {name: 'Grace', status: 'new'}}
+        ];
+
+        for (const document of documents) {
+          await connection.execute(`INSERT INTO ${table}
+            (id, content) VALUES (:id, :content)`, {
+            id: document.id,
+            content: {
+              dir: oracledb.BIND_IN,
+              type: oracledb.DB_TYPE_JSON,
+              val: document.content
+            }
+          });
+        }
+
+        // The first update exercises the normal partial OSON update path.
+        await connection.execute(`UPDATE ${table} SET content =
+          JSON_TRANSFORM(content, SET '$.status' = 'partial') WHERE id = 1`);
+
+        // NO_PARTIAL_OSON_UPDATE exercises the full rewrite path against the
+        // same compressed JSON storage format.
+        await connection.execute(`UPDATE ${table} SET content =
+          JSON_TRANSFORM(content, SET '$.status' = 'full'
+            NO_PARTIAL_OSON_UPDATE) WHERE id = 2`, {}, {autoCommit: true});
+
+        const result = await connection.execute(`SELECT id, content FROM ${table}
+          ORDER BY id`);
+        assert.deepStrictEqual(result.rows, [
+          [1, {name: 'Ada', status: 'partial'}],
+          [2, {name: 'Grace', status: 'full'}]
+        ]);
+      }); // 244.18.1
+
+  }); // 244.18
+
+  describe('244.19 JSON_TRANSFORM array operations', function() {
+
+    const table = 'nodb_json_transform_array';
+
+    before('create table', async function() {
+      await testsUtil.createTable(connection, table,
+        `CREATE TABLE ${table} (id NUMBER PRIMARY KEY, content JSON)`);
+    }); // before()
+
+    after(async function() {
+      await testsUtil.dropTable(connection, table);
+    }); // after()
+
+    it('244.19.1 updates, appends, and removes array elements',
+      async function() {
+        const content = {
+          name: 'Ada',
+          projects: [
+            {name: 'Engine', year: 1843},
+            {name: 'Compiler', year: 1952}
+          ]
+        };
+
+        await connection.execute(`INSERT INTO ${table} VALUES (:id, :content)`, {
+          id: 1,
+          content: {
+            dir: oracledb.BIND_IN,
+            type: oracledb.DB_TYPE_JSON,
+            val: content
+          }
+        });
+        await connection.execute(`UPDATE ${table} SET content =
+          JSON_TRANSFORM(content,
+            SET '$.projects[1].year' = 1953,
+            APPEND '$.projects' = JSON('{"name":"COBOL","year":1959}'),
+            REMOVE '$.projects[0]') WHERE id = 1`, {}, {autoCommit: true});
+
+        const result = await connection.execute(`SELECT content FROM ${table}
+          WHERE id = 1`);
+        assert.deepStrictEqual(result.rows[0][0], {
+          name: 'Ada',
+          projects: [
+            {name: 'Compiler', year: 1953},
+            {name: 'COBOL', year: 1959}
+          ]
+        });
+      }); // 244.19.1
+
+  }); // 244.19
+
+  describe('244.20 public JSON transformation shapes', function() {
+
+    const table = 'nodb_json_transform_shapes';
+
+    before('create table', async function() {
+      await testsUtil.createTable(connection, table,
+        `CREATE TABLE ${table} (id NUMBER PRIMARY KEY, content JSON)`);
+    }); // before()
+
+    after(async function() {
+      await testsUtil.dropTable(connection, table);
+    }); // after()
+
+    it('244.20.1 transforms large JSON values',
+      async function() {
+        // Database OSON representation is intentionally not asserted here.
+        // This test verifies the public JSON result for both value sizes.
+        const documents = [
+          {
+            id: 1,
+            content: {
+              name: 'Rod',
+              location: 'A'.repeat(32000),
+              dept: 'Sales'
+            }
+          },
+          {
+            id: 2,
+            content: {
+              name: 'Rod',
+              location: 'B'.repeat(70000),
+              dept: 'Sales'
+            }
+          }
+        ];
+
+        for (const document of documents) {
+          await connection.execute(`INSERT INTO ${table}
+            (id, content) VALUES (:id, :content)`, {
+            id: document.id,
+            content: {
+              dir: oracledb.BIND_IN,
+              type: oracledb.DB_TYPE_JSON,
+              val: document.content
+            }
+          });
+        }
+
+        await connection.commit();
+
+        for (const document of documents) {
+          // Persist the transform before fetching to exercise the public
+          // read-after-update workflow.
+          await connection.execute(`UPDATE ${table} SET content =
+            JSON_TRANSFORM(content, SET '$.dept' = 'Engineering')
+            WHERE id = :id`, {id: document.id}, {autoCommit: true});
+          const result = await connection.execute(`SELECT content FROM ${table}
+            WHERE id = :id`, {id: document.id});
+          assert.deepStrictEqual(result.rows[0][0], {
+            name: 'Rod',
+            location: document.content.location,
+            dept: 'Engineering'
+          });
+        }
+      }); // 244.20.1
+
+    it('244.20.2 fetches repeated fields and values after JSON_TRANSFORM',
+      async function() {
+        // Repeated scalar and container values retain their JSON shape.
+        const expected = [
+          {b: true},
+          {b: 1},
+          {b: true},
+          {b: 1},
+          {b: 0},
+          {b: false},
+          {b: []},
+          {b: {}},
+          {b: []},
+          {b: {}},
+          {b: 0}
+        ];
+        const content = {a: expected};
+
+        await connection.execute(`INSERT INTO ${table}
+          (id, content) VALUES (:id, :content)`, {
+          id: 3,
+          content: {
+            dir: oracledb.BIND_IN,
+            type: oracledb.DB_TYPE_JSON,
+            val: content
+          }
+        }, {autoCommit: true});
+
+        // Change one repeated value and verify the stored document's JSON.
+        await connection.execute(`UPDATE ${table} SET content =
+          JSON_TRANSFORM(content, SET '$.a[0].b' = '3456abc')
+          WHERE id = 3`, {}, {autoCommit: true});
+        const result = await connection.execute(`SELECT content FROM ${table}
+          WHERE id = 3`);
+        const updated = expected.map((entry, index) =>
+          index === 0 ? {b: '3456abc'} : entry);
+        assert.deepStrictEqual(result.rows[0][0], {a: updated});
+      }); // 244.20.2
+
+  }); // 244.20
 
 });
