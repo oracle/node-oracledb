@@ -20,9 +20,6 @@ Common Changes
 ++++++++++++++
 
 #)  Added support for
-    :ref:`Encryption-only, zero-configuration TLS (ezTLS) <eztls>`.
-
-#)  Added support for
     :ref:`Azure Managed Identity authentication <azuremanagedidentityauth>`
     for system-assigned and user-assigned identities.
 
@@ -54,6 +51,10 @@ Thin Mode Changes
 
 #)  Added automatic single-token :ref:`Deep Data Security <deepdatasecurity>`
     contexts for Azure OBO on Oracle AI Database version 23.26.4 or later.
+
+#)  Added support for
+    :ref:`Encryption-only, zero-configuration TLS (ezTLS) <eztls>` for TCP and
+    TCPS connections.
 
 #)  Fixed OSON decoding in Thin mode for JSON documents updated in place by
     the database, including redirected update values, which previously raised

@@ -67,6 +67,15 @@ The output is::
         }
     ]
 
+JSON columns can be updated using JSON functions such as `JSON_MERGEPATCH
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID
+-80B4DA1C-246F-4AB4-8DF5-D492E5661AA8>`__ or `JSON_TRANSFORM
+<https://www.oracle.com/pls/topic/lookup?ctx=dblatest&id=GUID-7BED994B-EAA3-
+4FF0-824D-C12ADAB862C1>`__. Thin mode supports fetching these
+updated JSON columns from node-oracledb 26.1.0 onwards. For earlier
+node-oracledb versions, Thick mode is required to fetch JSON columns updated
+using these functions.
+
 Using Oracle Client Libraries 19c
 ---------------------------------
 
